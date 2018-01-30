@@ -1,0 +1,7 @@
+repositories:
+  robotx_gazebo   : { type: 'git', url: 'git@github.com:bsb808/robotx_gazebo.git',                      version: 'master' }
+  wamv_description   : { type: 'git', url: 'git@github.com:bsb808/wamv_description.git',                version: 'master' }
+  usv_utils   : { type: 'git', url: 'git@github.com:bsb808/usv_utils.git',                              version: 'master' }
+  usv_msgs   : { type: 'git', url: 'git@github.com:bsb808/usv_msgs.git',                                version: 'master' }
+  usv_gazebo_plugins   : { type: 'git', url: 'git@github.com:bsb808/usv_gazebo_plugins.git',            version: 'usvmsg' }
+  buoyancy_gazebo_plugin   : { type: 'git', url: 'git@github.com:bsb808/buoyancy_gazebo_plugin.git',    version: 'master' }
