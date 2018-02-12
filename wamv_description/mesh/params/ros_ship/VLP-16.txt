@@ -1,0 +1,38 @@
+86-0101 REV B ENVELOPE, VLP-16の質量特性: 
+     ｺﾝﾌｨｷﾞｭﾚｰｼｮﾝ: Default
+     座標系: -- ﾃﾞﾌｫﾙﾄ --
+
+重心(Center Of Mass)と慣性ﾓｰﾒﾝﾄ((Moments of Tensor)の出力に使用される座標系: Assem2^ROS_SHIP
+ｱｾﾝﾌﾞﾘを部品として保存する際にｱｾﾝﾌﾞﾘから質量特性がｺﾋﾟｰされています。
+質量特性を更新するには、ｱｾﾝﾌﾞﾘを開き、もう一度部品として保存してください。
+
+密度 = 0.00 grams per cubic millimeter
+
+質量 = 585.08 grams
+
+体積 = 585082.15 cubic millimeters
+
+表面積 = 47700.40  square millimeters
+
+重心: ( ﾐﾘﾒｰﾀ )
+	X = 0.29
+	Y = 35.77
+	Z = 0.00
+
+慣性主要軸と慣性主ﾓｰﾒﾝﾄ: ( grams *  square millimeters )
+重心： 
+	 Ix = ( 1.00, -0.04,  0.00)   	Px = 630951.22
+	 Iy = ( 0.00,  0.00, -1.00)   	Py = 645613.25
+	 Iz = ( 0.04,  1.00,  0.00)   	Pz = 762716.89
+
+慣性ﾓｰﾒﾝﾄ: ( grams *  square millimeters )
+重心で計算、そして出力座標系と整列します。
+	Lxx = 631138.50	Lxy = -4964.05	Lxz = 0.56
+	Lyx = -4964.05	Lyy = 762529.59	Lyz = 49.87
+	Lzx = 0.56	Lzy = 49.87	Lzz = 645613.27
+
+慣性ﾓｰﾒﾝﾄ: ( grams *  square millimeters )
+（出力座標系で計算）
+	Ixx = 1379936.41	Ixy = 1206.09	Ixz = 0.12
+	Iyx = 1206.09	Iyy = 762580.43	Iyz = -4.14
+	Izx = 0.12	Izy = -4.14	Izz = 1394462.02

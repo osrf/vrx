@@ -1,0 +1,32 @@
+ALLの質量特性:
+     ｺﾝﾌｨｷﾞｭﾚｰｼｮﾝ: ﾃﾞﾌｫﾙﾄ
+     座標系: 座標系1
+
+質量 = 247.07 kilograms
+
+体積 = 0.25 cubic meters
+
+表面積 = 49.69 square meters
+
+重心: ( ﾒｰﾄﾙ )
+	X = -0.11
+	Y = 0.00
+	Z = -0.23
+
+慣性主要軸と慣性主ﾓｰﾒﾝﾄ: ( kilograms * square meters )
+重心：
+	 Ix = ( 1.00,  0.00, -0.08)   	Px = 124.57
+	 Iy = (-0.08,  0.02, -1.00)   	Py = 162.72
+	 Iz = ( 0.00,  1.00,  0.02)   	Pz = 166.25
+
+慣性ﾓｰﾒﾝﾄ: ( kilograms * square meters )
+重心で計算、そして出力座標系と整列します。
+	Lxx = 124.80	Lxy = 0.02	Lxz = -2.93
+	Lyx = 0.02	Lyy = 166.25	Lyz = -0.07
+	Lzx = -2.93	Lzy = -0.07	Lzz = 162.50
+
+慣性ﾓｰﾒﾝﾄ: ( kilograms * square meters )
+（出力座標系で計算）
+	Ixx = 137.35	Ixy = 0.03	Ixz = 3.09
+	Iyx = 0.03	Iyy = 181.69	Iyz = -0.05
+	Izx = 3.09	Izy = -0.05	Izz = 165.39

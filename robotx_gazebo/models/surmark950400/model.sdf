@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="surmark950400">
+    <link name="buoyl">
+      <pose>0 0 0 0 0 0</pose>
+      <velocity_decay>
+        <linear>0.001</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+      <inertial>
+        <pose>0 0 -10 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>10</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>10</iyy>
+          <iyz>0</iyz>
+          <izz>10</izz>
+        </inertia>
+      </inertial>
+      <collision name="buoyc">
+        <geometry>
+	  <mesh><uri>model://surmark950400/mesh/surmark950400.dae</uri></mesh>
+          <cylinder>
+            <radius>0.25</radius>
+            <length>1.0</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="buoyv">
+        <geometry>
+	<mesh><uri>model://surmark950400/mesh/surmark950400.dae</uri></mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Green</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <fluid_drag>5.0</fluid_drag>
+      <link>
+        <name>buoyl</name>
+        <center_of_volume>0 0 0.5</center_of_volume>
+        <area>0.63</area>
+        <height>0.70</height>
+      </link>
+    </plugin>
+  </model>
+</sdf>

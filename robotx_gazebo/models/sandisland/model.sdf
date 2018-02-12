@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <model name="sandisland">
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+    <link name="silink">
+      <collision name="sicoll">
+	    <geometry>
+	      <heightmap>
+	        <!-- This file is in the models directory of the ROS package
+    		 The export tag in the package.xml file tells Gazebo to include
+	    	 This in the path. -->
+	        <uri>file://sandisland/sandisland2.png</uri>
+	        <size>469 469 10</size>
+	        <pos>0 0 -9</pos>
+	      </heightmap>
+	    </geometry>
+      </collision>
+    <visual name="si_is">
+	  <geometry>
+	    <heightmap>
+	      <use_terrain_paging>false</use_terrain_paging>
+	      <texture>
+	        <diffuse>file://media/materials/textures/dirt_diffusespecular.png</diffuse>
+	        <normal>file://media/materials/textures/flat_normal.png</normal>
+	        <size>1</size>
+	      </texture>
+	     <texture>
+	       <diffuse>file://media/materials/textures/fungus_diffusespecular.png</diffuse>
+	       <normal>file://media/materials/textures/flat_normal.png</normal>
+	       <size>1</size>
+	     </texture>
+	     <blend>
+	      <min_height>2</min_height>
+	      <fade_dist>5</fade_dist>
+	    </blend>
+	    <blend>
+	      <min_height>4</min_height>
+	      <fade_dist>5</fade_dist>
+	    </blend>
+	   <!-- This file is in the models directory of the ROS package
+		     The export tag in the package.xml file tells Gazebo to include
+		     This in the path. -->
+	   <uri>file://sandisland/sandisland2.png</uri>
+	   <size>469 469 10</size>
+	   <pos>0 0 -9</pos>
+	  </heightmap>
+	</geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

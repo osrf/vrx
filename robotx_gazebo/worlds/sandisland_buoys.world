@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="SandIsland">
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+    </scene>
+
+    <wind>
+      <linear_velocity>10 0 0</linear_velocity> <!-- Wind linear velocity -->
+    </wind>
+    
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>240.235 110.553 61.4147 0 0.304 -2.78</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+     
+    <!-- The models below should be included in kingfisher_gazebo package -->
+    <include>
+      <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
+      to go into the model file to change the altitutde/height!-->
+      <pose> 50 50 10 0 0 0 </pose>
+      <uri>model://models/sandisland</uri>
+      <!--<uri>model://models/lake</uri>-->
+    </include>
+
+    <!-- Should be at the same height as the water level in USV and buoyancy 
+    plugin configurations -->
+    <include>
+      <pose> 0 0 0 0 0 0 </pose>
+      <uri>model://models/ocean</uri>      
+    </include>
+
+    <!-- Start -->
+    <!-- Red naun -->
+    <include>
+      <pose> -50 0 2 0 0 0 </pose>
+      <uri>model://models/surmark950410</uri>      
+    </include>
+    <!-- Green can -->
+    <include>
+      <pose> -40 0  2 0 0 0 </pose>
+      <uri>model://models/surmark950400</uri>      
+    </include>
+
+    <!-- End -->
+    <!-- Red naun -->
+    <include>
+      <pose> -50 30 2 0 0 0 </pose>
+      <uri>model://models/surmark950410</uri>      
+    </include>
+    <!-- Green can -->
+    <include>
+      <pose> -40 30  2 0 0 0 </pose>
+      <uri>model://models/surmark950400</uri>      
+    </include>
+
+    
+
+  </world>
+</sdf>

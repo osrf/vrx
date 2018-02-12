@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<launch>
+
+<param name="use_sim_time" value="true" />
+<include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!--<arg name="world_name" value="$(find kingfisher_gazebo)/worlds/lake_buoy.world"/>
+    <arg name="world_name" value="$(find kingfisher_gazebo)/worlds/$(arg world)"/>-->
+<arg name="verbose" value="true"/>
+
+</include>
+  
+<arg name="urdf" default="$(find wamv_description)/urdf/wamv_base.xacro"/>
+
+<param name="robot_description" command="$(find xacro)/xacro --inorder $(arg urdf)"/>
+
+<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+    args="-urdf -model wam-v -param robot_description -x 0 -y 0 -z -0.3"/>
+
+  
+</launch>

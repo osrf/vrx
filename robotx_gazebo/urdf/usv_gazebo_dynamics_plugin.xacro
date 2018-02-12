@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="usv_gazebo" params="name">
+    <!--Gazebo Plugin for simulating Kingfisher dynamics-->
+    <gazebo >
+      <!--<plugin name="heron_dynamic" filename="libheron_gazebo_plugins.so">-->
+      <plugin name="usv_dynamics_${name}" filename="libusv_gazebo_dynamics_plugin.so">
+	<bodyName>base_footprint</bodyName>
+	<waterLevel>5.0</waterLevel>
+	<waterDensity>997.8</waterDensity>
+	<cmdTimeout>1.0</cmdTimeout>
+	<xDotU>5.0</xDotU>
+	<yDotV>5.0</yDotV>
+	<nDotR>1.0</nDotR>
+	<xU>20.0</xU>
+	<xUU>0.0</xUU>
+	<yV>20.0</yV>
+	<yVV>0.0</yVV>
+	<zW>50.0</zW> 
+	<kP>10.0</kP>
+	<mQ>10.0</mQ>
+	<nR>20.0</nR>
+	<nRR>0.0</nRR> 
+	<maxCmd>1.0</maxCmd>
+	<maxForceFwd>40.0</maxForceFwd>
+	<maxForceRev>-40.0</maxForceRev>
+	<boatArea>0.48</boatArea>
+	<boatWidth>1.0</boatWidth>
+	<boatLength>1.35</boatLength>
+	<thrustOffsetZ>-0.01</thrustOffsetZ>
+	<metacentricLength>0.4</metacentricLength>
+	<metacentricWidth>0.4</metacentricWidth>
+      </plugin>
+      </gazebo>
+  </xacro:macro>
+</robot>

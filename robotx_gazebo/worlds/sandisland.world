@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="SandIsland">
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+    </scene>
+
+    <wind>
+      <linear_velocity>10 0 0</linear_velocity> <!-- Wind linear velocity -->
+    </wind>
+    
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <!--<pose>240.235 110.553 61.4147 0 0.304 -2.78</pose>-->
+	<pose frame=''>17.5798 4.82061 4.05674 0 0.216 -2.876</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+     
+    <!-- The models below should be included in kingfisher_gazebo package -->
+    <include>
+      <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
+      to go into the model file to change the altitutde/height!-->
+      <pose> 0 0 0 0 0 0 </pose>
+      <uri>model://models/sandisland</uri>
+      <!--<uri>model://models/lake</uri>-->
+    </include>
+
+    <!-- Should be at the same height as the water level in USV and buoyancy 
+    plugin configurations -->
+    <include>
+      <pose> 0 0 0 0 0 0 </pose>
+      <uri>model://models/ocean</uri>      
+    </include>
+
+
+  </world>
+</sdf>

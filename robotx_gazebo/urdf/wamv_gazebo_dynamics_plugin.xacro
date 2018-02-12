@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="usv_dynamics_gazebo" params="name">
+    <!--Gazebo Plugin for simulating WAM-V dynamics-->
+    <gazebo >
+      <plugin name="usv_dynamics_${name}" filename="libusv_gazebo_dynamics_plugin.so">
+	<bodyName>base_link</bodyName>
+	<waterLevel>0</waterLevel> <!-- Must be same as the ocean model!-->
+	<waterDensity>997.8</waterDensity>
+	<cmdTimeout>1.0</cmdTimeout>
+	<!-- Added mass -->
+	<xDotU>0.0</xDotU>
+	<yDotV>0.0</yDotV>
+	<nDotR>0.0</nDotR>
+	<!-- Linear and quadratic drag -->
+	<xU>51.3</xU>
+	<xUU>72.4</xUU>
+	<yV>40.0</yV>
+	<yVV>0.0</yVV>
+	<zW>500.0</zW>
+	<kP>50.0</kP>
+	<mQ>50.0</mQ>
+	<nR>400.0</nR>
+	<nRR>0.0</nRR>
+	<!-- Thrust specification -->
+	<maxCmd>1.0</maxCmd>
+	<maxForceFwd>254.0</maxForceFwd>
+	<maxForceRev>-254.0</maxForceRev>
+	<!-- General dimensions -->
+	<boatArea>1.6</boatArea>
+	<boatWidth>1.83</boatWidth>
+	<boatLength>3.2</boatLength>
+	<thrustOffsetZ>-0.04</thrustOffsetZ>
+	<metacentricLength>0.4</metacentricLength>
+	<metacentricWidth>0.4</metacentricWidth>
+	<!-- Wind -->
+	<wind_velocity_vector>10 0 0 </wind_velocity_vector>
+	<!-- Coefficients from Sarda et al., "Station-keeping control of an unmanned surface vehicle exposed to current and wind disturbances -->
+	<wind_coeff_vector>0.5 0.5 0.33 </wind_coeff_vector>
+      </plugin>
+      </gazebo>
+  </xacro:macro>
+</robot>

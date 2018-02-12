@@ -1,0 +1,299 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v">
+  <xacro:include filename="properties.urdf.xacro"/>
+
+  <link name="base_link">
+    <visual>
+     <geometry>
+       <mesh filename="package://wamv_description/mesh/WAM-V.dae"/>
+     </geometry>
+   </visual>
+   <collision name="base_link_collision">
+     <geometry>
+       <mesh filename="package://wamv_description/mesh/WAM-V.dae"/>
+     </geometry>
+   </collision>
+   <inertial>
+     <mass value="247.07"/>
+     <inertia ixx="200" ixy="0.03" ixz="3.09" iyy="500" iyz="-0.05" izz="165.39"/>
+   </inertial>
+  </link>
+
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="0 0 1.84"/>
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+  </joint>
+
+  <link name="base_footprint"/>
+
+  <link name="front_camera_link"/>
+  <joint name="front_camera_joint" type="fixed">
+    <origin xyz="1.2 0 0"/>
+    <parent link="base_link"/>
+    <child link="front_camera_link"/>
+  </joint>
+  <link name="left_camera_link"/>
+  <joint name="left_camera_joint" type="fixed">
+    <origin xyz="0 0.5 0" rpy="0 0 ${pi/2}"/>
+    <parent link="base_link"/>
+    <child link="left_camera_link"/>
+  </joint>
+  <link name="right_camera_link"/>
+  <joint name="right_camera_joint" type="fixed">
+    <origin xyz="0 -0.5 0" rpy="0 0 ${-pi/2}"/>
+    <parent link="base_link"/>
+    <child link="right_camera_link"/>
+  </joint>
+  <link name="rear_camera_link"/>
+  <joint name="rear_camera_joint" type="fixed">
+    <origin xyz="-0.5 0 0" rpy="0 0 ${pi}"/>
+    <parent link="base_link"/>
+    <child link="rear_camera_link"/>
+  </joint>
+
+  <link name="scan"/>
+  <joint name="scan_joint" type="fixed">
+    <origin xyz="1.5 0 -1" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="scan"/>
+  </joint>
+
+  <link name="right_motor">
+    <visual>
+     <geometry>
+       <mesh filename="package://wamv_description/mesh/PROPELLER.dae"/>
+     </geometry>
+    </visual>
+    <collision name="right_motor_collision">
+      <geometry>
+        <mesh filename="package://wamv_description/mesh/PROPELLER.dae"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.00086" ixy="0.00" ixz="0.00" iyy="0.00086" iyz="0.00" izz="0.0017"/>
+    </inertial>
+  </link>
+
+  <joint name="right_motor_joint" type="continuous">
+    <origin xyz="${motor_position_x} -${motor_position_y} ${motor_position_z}"/>
+    <parent link="base_link"/>
+    <child link="right_motor"/>
+    <limit effort="0.5293" velocity="100${pi}" />
+  </joint>
+
+  <link name="left_motor">
+    <visual>
+     <geometry>
+       <mesh filename="package://wamv_description/mesh/PROPELLER.dae"/>
+     </geometry>
+    </visual>
+    <collision name="left_motor_collision">
+      <geometry>
+        <mesh filename="package://wamv_description/mesh/PROPELLER.dae"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.00086" ixy="0.00" ixz="0.00" iyy="0.00086" iyz="0.00" izz="0.0017"/>
+    </inertial>
+  </link>
+
+  <joint name="left_motor_joint" type="continuous">
+    <origin xyz="${motor_position_x} ${motor_position_y} ${motor_position_z}"/>
+    <parent link="base_link"/>
+    <child link="left_motor"/>
+    <limit effort="0.5293" velocity="100${pi}" />
+  </joint>
+
+  <link name="gps"/>
+
+  <joint name="gps_joint" type="fixed">
+    <origin xyz="0.8 0 0"/>
+    <parent link="base_link"/>
+    <child link="gps"/>
+  </joint>
+
+  <transmission name="right_motor_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_motor_joint">
+      <hardwareInterface>VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_motor_actuator">
+      <hardwareInterface>VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>30</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="left_motor_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="left_motor_joint">
+      <hardwareInterface>VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_motor_actuator">
+      <hardwareInterface>VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>30</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+<!--
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>${robot}</robotNamespace>
+    </plugin>
+
+    <plugin name="simple_buoyancy_base_right" filename="libsimple_buoyancy_plugin.so">
+      <target_link>base_footprint</target_link>
+      <cob_x>${hal_position_x}</cob_x>
+      <cob_y>-${hal_position_y}</cob_y>
+      <cob_z>${hal_position_z}</cob_z>
+      <bbox_x>${hal_size_x}</bbox_x>
+      <bbox_y>${hal_size_y}</bbox_y>
+      <bbox_z>${hal_size_z}</bbox_z>
+      <publish_data>true</publish_data>
+      <bbox_prefix>right_bbox</bbox_prefix>
+      <force_offset_x>0.03</force_offset_x>
+      <force_offset_y>-${hal_position_y}</force_offset_y>
+    </plugin>
+
+    <plugin name="simple_buoyancy_base_left" filename="libsimple_buoyancy_plugin.so">
+      <target_link>base_footprint</target_link>
+      <cob_x>${hal_position_x}</cob_x>
+      <cob_y>${hal_position_y}</cob_y>
+      <cob_z>${hal_position_z}</cob_z>
+      <bbox_x>${hal_size_x}</bbox_x>
+      <bbox_y>${hal_size_y}</bbox_y>
+      <bbox_z>${hal_size_z}</bbox_z>
+      <publish_data>true</publish_data>
+      <bbox_prefix>left_bbox</bbox_prefix>
+      <force_offset_x>0.03</force_offset_x>
+      <force_offset_y>${hal_position_y}</force_offset_y>
+    </plugin>
+
+    <plugin name="simple_buoyancy_motor_right" filename="libsimple_buoyancy_plugin.so">
+      <target_link>right_motor</target_link>
+      <position_reference_link>base_footprint</position_reference_link>
+      <cob_x>-1.5</cob_x>
+      <cob_y>-1</cob_y>
+      <cob_z>0.2</cob_z>
+      <bbox_x>${motor_size_x}</bbox_x>
+      <bbox_y>${motor_size_y}</bbox_y>
+      <bbox_z>${motor_size_z}</bbox_z>
+      <publish_data>true</publish_data>
+    </plugin>
+
+    <plugin name="simple_buoyancy_motor_left" filename="libsimple_buoyancy_plugin.so">
+      <target_link>left_motor</target_link>
+      <position_reference_link>base_footprint</position_reference_link>
+      <cob_x>-1.5</cob_x>
+      <cob_y>1</cob_y>
+      <cob_z>0.2</cob_z>
+      <bbox_x>${motor_size_x}</bbox_x>
+      <bbox_y>${motor_size_y}</bbox_y>
+      <bbox_z>${motor_size_z}</bbox_z>
+      <publish_data>true</publish_data>
+    </plugin>
+
+    <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
+      <alwaysOn>1</alwaysOn>
+      <updateRate>10</updateRate>
+      <bodyName>gps</bodyName>
+      <topicName>fix</topicName>
+      <velocityTopicName>fix_velocity</velocityTopicName>
+      <frameId>gps</frameId>
+      <drift>5.0 5.0 5.0</drift>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+      <referenceLatitude>${start_point_latitude}</referenceLatitude>
+      <referenceLongitude>${start_point_longitude}</referenceLongitude>
+      <referenceHeading>${start_point_heading}</referenceHeading>
+    </plugin>
+
+    <plugin name="nmea_gps_sim" filename="libnmea_gps_sensor_plugin.so">
+      <alwaysOn>1</alwaysOn>
+      <updateRate>10</updateRate>
+      <bodyName>gps</bodyName>
+      <frameId>gps</frameId>
+      <topicName>nmea_sentence</topicName>
+      <drift>5.0 5.0 5.0</drift>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+      <referenceLatitude>${start_point_latitude}</referenceLatitude>
+      <referenceLongitude>${start_point_longitude}</referenceLongitude>
+      <referenceHeading>${start_point_heading}</referenceHeading>
+    </plugin>
+
+    <plugin name="simple_driving_force_left" filename="libsimple_driving_force_plugin.so">
+      <target_link>left_motor</target_link>
+      <target_joint>left_motor_joint</target_joint>
+      <driving_force_controller>/${robot}/right_driving_force_controller</driving_force_controller>
+      <joint_state_topic>${joint_state_topic}</joint_state_topic>
+    </plugin>
+
+    <plugin name="simple_driving_force_right" filename="libsimple_driving_force_plugin.so">
+      <target_link>right_motor</target_link>
+      <target_joint>right_motor_joint</target_joint>
+      <driving_force_controller>/${robot}/left_driving_force_controller</driving_force_controller>
+      <joint_state_topic>${joint_state_topic}</joint_state_topic>
+    </plugin>
+
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <bodyName>base_link</bodyName>
+      <topicName>imu</topicName>
+      <serviceName>imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>20.0</updateRate>
+    </plugin>
+
+    <plugin name="imu_plugin" filename="libwater_surface_friction_plugin.so">
+      <target_link>base_footprint</target_link>
+      <mu_linear>20</mu_linear>
+      <mu_angular>20</mu_angular>
+    </plugin>
+  </gazebo>
+
+  <xacro:include filename="camera.urdf.xacro"/>
+  <xacro:camera prefix="front"/>
+  <xacro:camera prefix="right"/>
+  <xacro:camera prefix="left"/>
+  <xacro:camera prefix="rear"/>
+
+  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+  <VLP-16 parent="base_link" name="velodyne" topic="/velodyne_points">
+    <origin xyz="0.8 0 0.3" rpy="0 0 0" />
+  </VLP-16>
+
+  <gazebo reference="scan">
+    <material>Gazebo/Blue</material>
+    <turnGravityOff>false</turnGravityOff>
+    <sensor type="ray" name="scan_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>1</min>
+          <max>30.0</max>
+          <resolution>0.001</resolution>
+        </range>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/scan</topicName>
+        <frameName>scan</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+-->
+</robot>

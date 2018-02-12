@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v">
+  <xacro:property name="hal_position_x" value="0.5" />
+  <xacro:property name="hal_position_y" value="1.05" />
+  <xacro:property name="hal_position_z" value="0.5" />
+  <xacro:property name="hal_size_x" value="4.0" />
+  <xacro:property name="hal_size_y" value="0.5" />
+  <xacro:property name="hal_size_z" value="0.5" />
+  <xacro:property name="motor_position_x" value="-1.5" />
+  <xacro:property name="motor_position_y" value="1.027" />
+  <xacro:property name="motor_position_z" value="-1.705" />
+
+  <xacro:property name="motor_size_x" value="0.1" />
+  <xacro:property name="motor_size_y" value="0.2" />
+  <xacro:property name="motor_size_z" value="0.2" />
+
+  <xacro:property name="rotational_speed_effort" value="1" />
+  <xacro:property name="joint_state_topic" value="/wam_v/joint_states" />
+
+  <xacro:property name="start_point_latitude" value="135.524910" />
+  <xacro:property name="start_point_longitude" value="34.822634" />
+  <xacro:property name="start_point_heading" value="0" />
+
+  <xacro:property name="robot" value="wam_v" />
+</robot>

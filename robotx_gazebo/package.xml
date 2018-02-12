@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>robotx_gazebo</name>
+  <version>0.0.1</version>
+  <description>
+    The ROS package for the RobotX competition running in Gazebo.
+  </description>
+  <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
+  <maintainer email="briansbngham@gmail.com">bsb</maintainer>
+  <license>Apache 2.0</license>
+  <author email="briansbingham@gmail.com">Brian Bingham</author>
+  <author email="caguero@osrfoundation.org">Carlos Aguero</author>
+  <!-- <url type="website">http://wiki.ros.org/robotx_gazebo</url> -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>cmake_modules</depend>
+  <depend>gazebo_plugins</depend>
+  <depend>gazebo_ros</depend>
+  <depend>geometry_msgs</depend>
+  <depend>hector_gazebo_plugins</depend>
+  <depend>message_generation</depend>
+  <depend>nav_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>wamv_description</depend>
+
+  <exec_depend>message_runtime</exec_depend>
+
+  <export>
+    <!-- This tells gazebo to look in the catkin_package path for resources
+    Particularly important for the models/pondmap.png file for the lake.world-->
+    <gazebo_ros gazebo_model_path="${prefix}:${prefix}/models"/>
+    <gazebo_ros gazebo_media_path="${prefix}"/>
+  </export>
+</package>
