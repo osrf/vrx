@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="usv_wind_gazebo" params="name">
+    <!--Gazebo Plugin for simulating WAM-V dynamics-->
+    <gazebo >
+      <plugin name="usv_wind_${name}" filename="libusv_gazebo_wind_plugin.so">
+	<bodyName>base_link</bodyName>
+	<!-- Wind -->
+	<wind_velocity_vector>0 0 0 </wind_velocity_vector>
+	<!-- Coefficients from Sarda et al., "Station-keeping control of an unmanned surface vehicle exposed to current and wind disturbances
+	Coefficients are x, y and yaw-->
+	<wind_coeff_vector>0.5 0.5 0.33 </wind_coeff_vector>
+
+      </plugin>
+      </gazebo>
+  </xacro:macro>
+</robot>

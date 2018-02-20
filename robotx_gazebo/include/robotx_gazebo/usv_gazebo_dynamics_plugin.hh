@@ -23,6 +23,10 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef USV_GAZEBO_DYNAMICS_H
 #define USV_GAZEBO_DYNAMICS_H
 
+// C++
+#include <vector>
+#include <iostream>     // std::cout, std::ios
+#include <sstream>      // std::ostringstream
 #include <thread>
 
 // Gazebo
@@ -34,7 +38,8 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/TwistWithCovariance.h>
 #include <geometry_msgs/PoseWithCovariance.h>
-#include <robotx_gazebo/UsvDrive.h>
+//#include <usv_msgs/UsvDrive.h>
+//#include <usv_gazebo_plugins/UsvDrive.h>
 
 #include <Eigen/Core>
 				    //#include <tf/transform_broadcaster.h>
@@ -61,11 +66,6 @@ namespace gazebo
     /*! Presumably this would get called when there is a collision,
       but not implemented! */
     void OnContact(const std::string &name, const physics::Contact &contact);
-    /*!
-      Callback for Drive commands
-      \param msg usv_msgs UsvDrive message
-    */
-    void OnCmdDrive( const robotx_gazebo::UsvDriveConstPtr &msg);
 
     /*! ROS spin once */
     void spin();
@@ -74,16 +74,6 @@ namespace gazebo
 
      */
     double getSdfParamDouble(sdf::ElementPtr sdfPtr,const std::string &param_name,double default_val);
-
-    /*! Takes ROS Kingfisher Drive commands and scales them by max thrust
-
-      \param cmd ROS drive command
-      \param max_cmd  Maximum value expected for commands - scaling factor
-      \param max_pos  Maximum positive force value
-      \param max_neg  Maximum negative force value
-      \return Value scaled and saturated
-     */
-    double scaleThrustCmd(double cmd, double max_cmd, double max_pos, double max_neg);
 
     /// Parameters
     std::string node_namespace_;
@@ -94,8 +84,6 @@ namespace gazebo
     ros::Publisher sensor_state_pub_;
     ros::Publisher odom_pub_;
     ros::Publisher joint_state_pub_;
-
-    ros::Subscriber cmd_drive_sub_;
 
     //GazeboRosPtr gazebo_ros_;
     //physics::ModelPtr parent;
@@ -115,15 +103,26 @@ namespace gazebo
     common::Time prev_update_time_;
     math::Vector3 prev_lin_vel_;
     math::Vector3 prev_ang_vel_;
-    common::Time last_cmd_drive_time_;
-    double last_cmd_drive_left_;
-    double last_cmd_drive_right_;
-    math::Pose pose;
-    math::Vector3 euler;
-    math::Vector3 velocity;
+    math::Pose pose_;
+    math::Vector3 euler_;
+    math::Vector3 vel_linear_body_;
+    math::Vector3 vel_angular_body_;
     math::Vector3 acceleration;
     math::Vector3 angular_velocity_;
     math::Vector3 angular_acceleration_;
+    Eigen::VectorXd state_dot_;
+    Eigen::VectorXd state_;
+    Eigen::VectorXd amassVec_;
+    Eigen::MatrixXd Cmat_;
+    Eigen::VectorXd Cvec_;
+    Eigen::MatrixXd Dmat_;
+    Eigen::VectorXd Dvec_;
+
+    // For Buoyancy calculation
+    float buoy_frac_;
+    float dx_;
+    float dy_;
+    std::vector<int> II_;
 
     // Values to set via Plugin Parameters
     /*! Plugin Parameter: Added mass in surge, X_\dot{u} */
@@ -150,21 +149,10 @@ namespace gazebo
     double param_N_r_;
     /*! Plugin Parameter: Quadratic drag in yaw*/
     double param_N_rr_;
-
-
-    /*! Plugin Parameter: Maximum (abs val) of Drive commands. typ. +/-1.0 */
-    double param_max_cmd_;
-    /*! Plugin Parameter: Maximum forward force [N] */
-    double param_max_force_fwd_;
-    /*! Plugin Parameter: Maximum reverse force [N] */
-    double param_max_force_rev_;
-
     /*! Plugin Parameter: Boat width [m] */
     double param_boat_width_;
     /*! Plugin Parameter: Boat length [m] */
     double param_boat_length_;
-    /*! Plugin Parameter: Z offset for applying forward thrust */
-    double param_thrust_z_offset_;
     /*! Plugin Parameter: Horizontal surface area [m^2] */
     double param_boat_area_ ;
     /*! Plugin Parameter: Metacentric length [m] */
@@ -180,10 +168,19 @@ namespace gazebo
     double water_level_;
     /* Water density [kg/m^3] */
     double water_density_;
-    /*! Timeout for recieving Drive commands [s]*/
-    double cmd_timeout_;
     /*! Added mass matrix, 6x6 */
     Eigen::MatrixXd Ma_;
+
+    /* Wave parameters */
+    int param_wave_n_;
+    std::vector<float> param_wave_amps_;
+    std::vector<float> param_wave_periods_;
+    std::vector< std::vector<float> > param_wave_directions_;
+    /* Old - for single wave
+    double param_wave_amp_;
+    math::Vector2d param_wave_dir_;
+    double param_wave_period_;
+    */
 
     /*! Wind velocity in Gazebo coordinates [m/s] */
     math::Vector3 param_wind_velocity_vector_;

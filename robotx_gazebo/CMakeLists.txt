@@ -103,6 +103,36 @@ install(TARGETS usv_gazebo_dynamics_plugin
   RUNTIME DESTINATION bin
 )
 
+## Declare a C++ library
+add_library(usv_gazebo_thrust_plugin
+  src/usv_gazebo_thrust_plugin.cc
+)
+target_link_libraries(usv_gazebo_thrust_plugin
+  ${catkin_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${Eigen_LIBRARIES}
+)
+install(TARGETS usv_gazebo_thrust_plugin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+## Declare a C++ library
+add_library(usv_gazebo_wind_plugin
+  src/usv_gazebo_wind_plugin.cc
+)
+target_link_libraries(usv_gazebo_wind_plugin
+  ${catkin_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${Eigen_LIBRARIES}
+)
+install(TARGETS usv_gazebo_wind_plugin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 #############
 ## Install ##
 #############
