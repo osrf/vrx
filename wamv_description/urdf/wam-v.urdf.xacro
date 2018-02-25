@@ -5,12 +5,12 @@
   <link name="base_link">
     <visual>
      <geometry>
-       <mesh filename="package://wamv_description/mesh/WAM-V.dae"/>
+       <mesh filename="package://wamv_description/mesh/WAM-V-Base.dae"/>
      </geometry>
    </visual>
    <collision name="base_link_collision">
      <geometry>
-       <mesh filename="package://wamv_description/mesh/WAM-V.dae"/>
+       <mesh filename="package://wamv_description/mesh/WAM-V-Base.dae"/>
      </geometry>
    </collision>
    <inertial>
