@@ -8,7 +8,7 @@ to the RobotX venue and description of the WAM-V platform.  It is intended as a 
 
 ## Getting Started
 
-The [VMRC Wiki] (https://bitbucket.org/osrf/vmrc/wiki) provides documentation on how to setup the simulation.  
+The [VMRC Wiki](https://bitbucket.org/osrf/vmrc/wiki) provides documentation on how to setup the simulation.  
 The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
 
 ## Resources
