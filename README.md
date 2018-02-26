@@ -14,7 +14,7 @@ The instructions assume a basic familiarity with the ROS environment and Gazebo.
 
 ## Resources
 
-1. [VMRC Wiki](https://bitbucket.org/osrf/vmrc/wiki)
+1. [VMRC Wiki](https://bitbucket.org/osrf/vmrc/wiki): Documentation, tutorials, etc.
 
 ## Contributing
 
@@ -32,5 +32,5 @@ If you have any questions about these topics, or would like to work on other asp
 
 ## Contacts
 
- * Carlos Agüero <caguero@osrfoundation.org>
+ * Carlos Agï¿½ero <caguero@osrfoundation.org>
  * Brian Bingham <bbingham@nps.edu>
