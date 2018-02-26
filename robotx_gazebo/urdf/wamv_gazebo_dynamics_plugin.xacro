@@ -22,10 +22,6 @@
 	<mQ>50.0</mQ>
 	<nR>400.0</nR>
 	<nRR>0.0</nRR>
-	<!-- Thrust specification -->
-	<maxCmd>1.0</maxCmd>
-	<maxForceFwd>254.0</maxForceFwd>
-	<maxForceRev>-254.0</maxForceRev>
 	<!-- General dimensions -->
 	<boatArea>2.2</boatArea>
 	<boatWidth>2.4</boatWidth>
@@ -34,16 +30,6 @@
 	<metacentricLength>0.4</metacentricLength>
 	<metacentricWidth>0.4</metacentricWidth>
 	
-	<!-- Wind -->
-	<wind_velocity_vector>0 0 0 </wind_velocity_vector>
-	<!-- Coefficients from Sarda et al., "Station-keeping control of an unmanned surface vehicle exposed to current and wind disturbances -->
-	<wind_coeff_vector>0.5 0.5 0.33 </wind_coeff_vector>
-
-	<!-- Waves -->
-	<wave_amp>0</wave_amp>
-	<wave_period>5</wave_period>
-	<wave_direction>1 1</wave_direction>
-
 	<!-- Waves x3 -->
 	<wave_n>3</wave_n>
 

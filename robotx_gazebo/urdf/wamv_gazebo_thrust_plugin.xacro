@@ -7,6 +7,7 @@
 	<bodyName>base_link</bodyName>
 
 	<!-- Which thruster curve to use -->
+	<!-- Use 0 for linear mapping or 1 for nonlinear mapping -->
 	<mappingType>1</mappingType>
 	<!-- General dimensions -->
 	<boatArea>2.2</boatArea>
