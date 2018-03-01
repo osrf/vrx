@@ -4,19 +4,237 @@
 
   <link name="base_link">
     <visual>
-     <geometry>
-       <mesh filename="package://wamv_description/mesh/WAM-V-Base.dae"/>
-     </geometry>
-   </visual>
-   <collision name="base_link_collision">
-     <geometry>
-       <mesh filename="package://wamv_description/mesh/WAM-V-Base.dae"/>
-     </geometry>
-   </collision>
-   <inertial>
-     <mass value="247.07"/>
-     <inertia ixx="200" ixy="0.03" ixz="3.09" iyy="500" iyz="-0.05" izz="165.39"/>
-   </inertial>
+      <geometry>
+        <mesh filename="package://wamv_description/mesh/WAM-V-Base.dae"/>
+      </geometry>
+    </visual>
+
+    <!-- Left float -->
+    <collision name="left_float">
+      <origin xyz="-0.4 1.03 0.2" rpy="0 1.57 0" />
+      <geometry>
+        <cylinder length="4" radius="0.2" />
+      </geometry>
+    </collision>
+    <collision name="left_mid_float">
+      <origin xyz="1.85 1.03 0.3" rpy="0 1.38 0" />
+      <geometry>
+        <cylinder length="0.5" radius="0.17" />
+      </geometry>
+    </collision>
+    <collision name="left_front_float">
+      <origin xyz="2.3 1.03 0.4" rpy="0 1.3 0" />
+      <geometry>
+        <cylinder length="0.45" radius="0.12" />
+      </geometry>
+    </collision>
+
+    <!-- Left engine upper -->
+    <collision name="left_engine_vertical_axis">
+      <origin xyz="-2.55 1.03 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2 0.15 0.83" />
+      </geometry>
+    </collision>
+    <collision name="left_engine_rear_end">
+      <origin xyz="-2.71 1.03 0.45" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.15 0.12" />
+      </geometry>
+    </collision>
+    <collision name="left_propeller">
+      <origin xyz="-2.73 1.03 -0.2" rpy="0 1.57 0" />
+      <geometry>
+        <cylinder length="0.18" radius="0.24" />
+      </geometry>
+    </collision>
+
+    <!-- Right float -->
+    <collision name="left_float">
+      <origin xyz="-0.4 -1.03 0.2" rpy="0 1.57 0" />
+      <geometry>
+        <cylinder length="4" radius="0.2" />
+      </geometry>
+    </collision>
+    <collision name="left_mid_float">
+      <origin xyz="1.85 -1.03 0.3" rpy="0 1.38 0" />
+      <geometry>
+        <cylinder length="0.5" radius="0.17" />
+      </geometry>
+    </collision>
+    <collision name="left_front_float">
+      <origin xyz="2.3 -1.03 0.4" rpy="0 1.3 0" />
+      <geometry>
+        <cylinder length="0.45" radius="0.12" />
+      </geometry>
+    </collision>
+
+    <!-- Right engine upper -->
+    <collision name="left_engine_vertical_axis">
+      <origin xyz="-2.55 -1.03 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2 0.15 0.83" />
+      </geometry>
+    </collision>
+    <collision name="left_engine_rear_end">
+      <origin xyz="-2.71 -1.03 0.45" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.15 0.12" />
+      </geometry>
+    </collision>
+    <collision name="left_propeller">
+      <origin xyz="-2.73 -1.03 -0.2" rpy="0 1.57 0" />
+      <geometry>
+        <cylinder length="0.18" radius="0.24" />
+      </geometry>
+    </collision>
+
+    <!-- Base -->
+    <collision name="top_base">
+      <origin xyz="0 -0 1.25" rpy="0 0 0" />
+      <geometry>
+        <box size="1.85 1 0.1" />
+      </geometry>
+    </collision>
+
+    <!-- Front left beam -->
+    <collision name="front_left_beam_lower">
+      <origin xyz="0.9 0.85 1" rpy="0.78 0 0" />
+      <geometry>
+        <cylinder length="0.5" radius="0.04" />
+      </geometry>
+    </collision>
+
+    <collision name="front_left_beam_upper">
+      <origin xyz="0.9 0.6 1.18" rpy="1.35 0 0" />
+      <geometry>
+        <cylinder length="0.2" radius="0.04" />
+      </geometry>
+    </collision>
+
+    <!-- Front right beam -->
+    <collision name="front_right_beam_lower">
+      <origin xyz="0.9 -0.85 1" rpy="-0.78 0 0" />
+      <geometry>
+        <cylinder length="0.5" radius="0.04" />
+      </geometry>
+    </collision>
+
+    <collision name="front_right_beam_upper">
+      <origin xyz="0.9 -0.6 1.18" rpy="-1.35 0 0" />
+      <geometry>
+        <cylinder length="0.2" radius="0.04" />
+      </geometry>
+    </collision>
+
+    <!-- Mid left beam -->
+    <collision name="mid_left_beam_lower">
+      <origin xyz="-0.65 0.99 0.7" rpy="0.1 0.25 0" />
+      <geometry>
+        <cylinder length="0.45" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="mid_left_beam_medium">
+      <origin xyz="-0.57 0.87 1.05" rpy="0.75 0.25 0" />
+      <geometry>
+        <cylinder length="0.32" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="mid_left_beam_upper">
+      <origin xyz="-0.55 0.65 1.17" rpy="1.35 0.25 0" />
+      <geometry>
+        <cylinder length="0.3" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <!-- Mid right beam -->
+    <collision name="mid_right_beam_lower">
+      <origin xyz="-0.65 -0.99 0.7" rpy="-0.1 0.25 0" />
+      <geometry>
+        <cylinder length="0.45" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="mid_right_beam_medium">
+      <origin xyz="-0.57 -0.87 1.05" rpy="-0.75 0.25 0" />
+      <geometry>
+        <cylinder length="0.32" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="mid_right_beam_upper">
+      <origin xyz="-0.55 -0.65 1.17" rpy="-1.35 0.25 0" />
+      <geometry>
+        <cylinder length="0.3" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <!-- Rear left beam -->
+    <collision name="rear_left_beam_lower">
+      <origin xyz="-0.74 1.03 0.7" rpy="0 -0.15 0" />
+      <geometry>
+        <cylinder length="0.45" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="rear_left_beam_medium">
+      <origin xyz="-0.79 0.91 1.05" rpy="0.75 -0.15 0" />
+      <geometry>
+        <cylinder length="0.32" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="rear_left_beam_upper">
+      <origin xyz="-0.81 0.67 1.18" rpy="1.45 -0.15 0" />
+      <geometry>
+        <cylinder length="0.3" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <!-- Rear right beam -->
+    <collision name="rear_right_beam_lower">
+      <origin xyz="-0.74 -1.03 0.7" rpy="0 -0.15 0" />
+      <geometry>
+        <cylinder length="0.45" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="rear_right_beam_medium">
+      <origin xyz="-0.79 -0.91 1.05" rpy="-0.75 -0.15 0" />
+      <geometry>
+        <cylinder length="0.32" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <collision name="rear_right_beam_upper">
+      <origin xyz="-0.81 -0.67 1.18" rpy="-1.45 -0.15 0" />
+      <geometry>
+        <cylinder length="0.3" radius="0.03" />
+      </geometry>
+    </collision>
+
+    <!-- Left joint -->
+    <collision name="left_joint">
+      <origin xyz="0.58 1.03 0.6" rpy="0 -0.6 0" />
+      <geometry>
+        <box size="0.65 0.2 0.1" />
+      </geometry>
+    </collision>
+
+    <!-- Right joint -->
+    <collision name="right_joint">
+      <origin xyz="0.58 -1.03 0.6" rpy="0 -0.6 0" />
+      <geometry>
+        <box size="0.65 0.2 0.1" />
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="247.07"/>
+      <inertia ixx="200" ixy="0.03" ixz="3.09" iyy="500" iyz="-0.05" izz="165.39"/>
+    </inertial>
   </link>
 
   <joint name="base_link_joint" type="fixed">
