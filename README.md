@@ -32,5 +32,5 @@ If you have any questions about these topics, or would like to work on other asp
 
 ## Contacts
 
- * Carlos Ag�ero <caguero@osrfoundation.org>
+ * Carlos Aguero <caguero@osrfoundation.org>
  * Brian Bingham <bbingham@nps.edu>
