@@ -234,7 +234,7 @@
 
     <inertial>
       <mass value="180.0"/> <!-- From von Ellenrieder, consistent with WAM-V specs-->
-      <!--<inertia ixx="200.0" ixy="0.03" ixz="3.09" iyy="500" iyz="-0.05"  izz="250.0"/>-->
+      <!--<inertia ixx="200.0" ixy="0.03" ixz="3.09" iyy="500" iyz="-0.05" izz="250.0"/>-->
       <inertia ixx="120.0" ixy="0.0" ixz="0.0" iyy="393" iyz="0.0" izz="446.0"/>
     </inertial>
   </link>
