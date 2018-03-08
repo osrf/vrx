@@ -6,6 +6,8 @@ Currently this project includes a basic set of Gazebo simulation elements and ex
 This is an active development project so we are adding and improving things all the time.  The project contains a simulation foundation, including an environment similar 
 to the RobotX venue and description of the WAM-V platform.  It is intended as a first step for teams that would then extend the tools for their specific development needs.
 
+![VMRC](images/vmrc.jpg)
+
 ## Getting Started
 
 The [VMRC Wiki](https://bitbucket.org/osrf/vmrc/wiki) provides documentation on how to setup the simulation.  
