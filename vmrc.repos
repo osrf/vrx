@@ -1,2 +1,2 @@
 repositories:
-  robotx_gazebo   : { type: 'hg', url: 'https://bitbucket.org/osrf/vmrc.git', version: 'default' }
+  robotx_gazebo   : { type: 'hg', url: 'https://bitbucket.org/osrf/vmrc.git', version: 'vmrc_0.1.1' }
