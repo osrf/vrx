@@ -38,7 +38,7 @@
   </include>
 
   <!-- Load robot model -->
-  <arg name="urdf" default="$(find wamv_description)/urdf/wamv_robotx.xacro"/>
+  <arg name="urdf" default="$(find robotx_gazebo)/urdf/wamv_robotx.xacro"/>
   <!--<arg name="urdf" default="$(find nps_robotx)/urdf/nps_wamv.xacro"/> -->
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg urdf)"/>
 

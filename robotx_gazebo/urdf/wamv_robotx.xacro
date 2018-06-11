@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!-- Basic WAM-V with USV gazebo plugins -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
        name="WAM-V">
   <!-- Defines the base vehicle -->
