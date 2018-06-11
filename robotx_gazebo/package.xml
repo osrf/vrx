@@ -30,7 +30,7 @@
   <export>
     <!-- This tells gazebo to look in the catkin_package path for resources
     Particularly important for the models/pondmap.png file for the lake.world-->
-    <gazebo_ros gazebo_model_path="${prefix}:${prefix}/models"/>
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
     <gazebo_ros gazebo_media_path="${prefix}"/>
   </export>
 </package>
