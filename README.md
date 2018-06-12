@@ -25,7 +25,7 @@ but will rely on the community to develop additional functionality around their 
 are working on anything that others may find useful, please share!
 
  * Acoustics: Including some simple models of the pinger-based tasks will require a rudimentary acoustics model.  There is some evidence of past acoustics sources/sinks in Gazebo with the [OpenAL API](http://osrf-distributions.s3.amazonaws.com/gazebo/api/7.1.0/classgazebo_1_1util_1_1OpenAL.html), but does not appear to be frequently used.
- * Course Models:  Currently we have supplied models of the WAM-V platform and some of the simple buoys.  Developing representations of the other course components, such as the dock, totems, etc. would expand number of tasks amenable to simulation. 
+ * Course Models:  Currently we have supplied models of the WAM-V platform and some of the simple buoys.  Developing representations of the other course components, such as the dock, totems, scan the code, etc. would expand number of tasks amenable to simulation. 
  * Sensor Examples: Use of simple sensors such as GPS, IMU, camera, etc. are illustrated tutorial section of the wiki.  There are obviously many more sensors being used by the teasm (Velodyne lidar).  Providing examples or recipes for using these sensors in simulation would be a nice contribution.
  * Wave Field: The current wave field is very simple, based on three element Gerstner waves.  Furthermore, the visual representation of the wave field is independent of the displacement seen by the USV.  Adding the ability to simulate higher fidelity wave spectra would be an improvement.
  * Rviz: We have not tested these tools working with Rviz, which often exposes problems with the tf tree.  
