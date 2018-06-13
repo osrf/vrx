@@ -120,12 +120,22 @@ install(TARGETS usv_gazebo_thrust_plugin
 )
 
 # Generate world files from xacro and install
-file(GLOB ${PROJECT_NAME}_xacro_worlds ${CMAKE_CURRENT_SOURCE_DIR}/worlds/*.world.xacro)
-xacro_add_files(${${PROJECT_NAME}_xacro_worlds} INORDER INSTALL DESTINATION world TARGET worlds)
+file(GLOB ${PROJECT_NAME}_xacro_worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} worlds/*.world.xacro)
+unset(xacro_outputs)
+foreach(f ${${PROJECT_NAME}_xacro_worlds})
+  xacro_add_xacro_file(${f} INORDER)
+  list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
+endforeach(f)
+xacro_install(worlds ${xacro_outputs} DESTINATION worlds)
 
 # Generate urdf files from xacro and install
-file(GLOB ${PROJECT_NAME}_xacro_urdf ${CMAKE_CURRENT_SOURCE_DIR}/urdf/*.urdf.xacro)
-xacro_add_files(${${PROJECT_NAME}_xacro_urdf} INORDER INSTALL DESTINATION urdf TARGET urdf)
+file(GLOB ${PROJECT_NAME}_xacro_urdf RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} urdf/*.urdf.xacro)
+unset(xacro_outputs)
+foreach(f ${${PROJECT_NAME}_xacro_urdf})
+  xacro_add_xacro_file(${f} INORDER)
+  list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
+endforeach(f)
+xacro_install(urdf ${xacro_outputs} DESTINATION urdf)
 
 ## Declare a C++ library
 add_library(usv_gazebo_wind_plugin
