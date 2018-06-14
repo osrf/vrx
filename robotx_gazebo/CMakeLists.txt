@@ -9,12 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
   gazebo_ros
   geometry_msgs
-  hector_gazebo_plugins
   message_generation
   nav_msgs
   roscpp
   std_msgs
   wamv_description
+  xacro
 )
 
 ## Gazebo
@@ -55,7 +55,7 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp message_runtime std_msgs geometry_msgs nav_msgs
+  CATKIN_DEPENDS roscpp message_runtime std_msgs geometry_msgs nav_msgs xacro
   LIBRARIES
 )
 
@@ -117,6 +117,24 @@ install(TARGETS usv_gazebo_thrust_plugin
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
+# Generate world files from xacro and install
+file(GLOB ${PROJECT_NAME}_xacro_worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} worlds/*.world.xacro)
+unset(xacro_outputs)
+foreach(f ${${PROJECT_NAME}_xacro_worlds})
+  xacro_add_xacro_file(${f} INORDER)
+  list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
+endforeach(f)
+xacro_install(worlds ${xacro_outputs} DESTINATION worlds)
+
+# Generate urdf files from xacro and install
+file(GLOB ${PROJECT_NAME}_xacro_urdf RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} urdf/*.urdf.xacro)
+unset(xacro_outputs)
+foreach(f ${${PROJECT_NAME}_xacro_urdf})
+  xacro_add_xacro_file(${f} INORDER)
+  list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
+endforeach(f)
+xacro_install(urdf ${xacro_outputs} DESTINATION urdf)
 
 ## Declare a C++ library
 add_library(usv_gazebo_wind_plugin

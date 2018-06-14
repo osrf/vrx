@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Node to convert from quaternions to rpy
+Node to convert from quaternions to rpy in various ROS messages
 '''
 
 import rospy
@@ -13,12 +13,12 @@ from gazebo_msgs.msg import ModelStates
 from nav_msgs.msg import Odometry
 
 class Node():
-    def __init__(self,pose_index=None,mstates_index=None,
+    def __init__(self,pose_index=None,model_name=None,
                  input_msg_type='Pose'):
         self.pubmsg = None
         self.pub = None
         self.pose_index = pose_index
-        self.mstates_index = mstates_index
+        self.model_name = model_name
         self.input_msg_type = input_msg_type
         
         
@@ -26,12 +26,13 @@ class Node():
         #rospy.loginfo("callback")
         if (not (pose_index==None)):
             data = data[pose_index]
-        elif (not (mstates_index==None)):
+        elif self.model_name is not None:
             try:
-                data = data.pose[mstates_index]
-            except IndexError:
-                rospy.logwarn("Index error with ModelStates index!")
-                return
+              index = data.name.index(model_name)
+            except ValueError:
+              rospy.logwarn_throttle(10.0, 'Model state {} not found'.format(model_name))
+              return
+            data = data.pose[index]
         elif ( (self.input_msg_type == 'Pose') or 
                (self.input_msg_type == 'Imu')):
             pass
@@ -61,20 +62,20 @@ if __name__ == '__main__':
     in_topic = 'in_topic'
     out_topic = 'out_topic'
     pose_index = rospy.get_param('~pose_index',None)
-    mstates_index = rospy.get_param('~modelstates_index',None)
+    model_name = rospy.get_param('~model_name',None)
     inmsgtype = rospy.get_param('~input_msg_type','Pose')
     
 
     # Initiate node object
-    node=Node(pose_index,mstates_index,input_msg_type=inmsgtype)
+    node=Node(pose_index, model_name, input_msg_type=inmsgtype)
     node.pubmsg = Vector3()
 
     # Setup publisher
     node.pub = rospy.Publisher(out_topic,Vector3,queue_size=10)
 
     # Subscriber
-    if (not(mstates_index == None)):
-        inmsgtype = 'ModelStates[%d]'%mstates_index
+    if (not(model_name == None)):
+        inmsgtype = 'ModelStates[%s]'% model_name
         rospy.Subscriber(in_topic,ModelStates,node.callback)
     elif (not (pose_index == None)):
         inmsgtype = 'PoseArray[%d]'%pose_index
@@ -89,7 +90,7 @@ if __name__ == '__main__':
         elif inmsgtype == 'Odometry':
             rospy.Subscriber(in_topic,Odometry,node.callback)
         else:
-            rospy.logerror("I don't know how to deal with message type <%s>"%
+            rospy.logerr("I don't know how to deal with message type <%s>"%
                            inmsgtype)
             sys.exit()
 

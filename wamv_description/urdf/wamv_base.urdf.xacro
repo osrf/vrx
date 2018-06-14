@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!-- Basic model of the 16' WAM-V USV -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v">
   <xacro:include filename="properties.urdf.xacro"/>
 
@@ -216,7 +217,6 @@
       </geometry>
     </collision>
 
-    <!-- Left joint -->
     <collision name="left_joint">
       <origin xyz="0.58 1.03 0.6" rpy="0 -0.6 0" />
       <geometry>
@@ -224,7 +224,6 @@
       </geometry>
     </collision>
 
-    <!-- Right joint -->
     <collision name="right_joint">
       <origin xyz="0.58 -1.03 0.6" rpy="0 -0.6 0" />
       <geometry>
@@ -233,8 +232,7 @@
     </collision>
 
     <inertial>
-      <mass value="180.0"/> <!-- From von Ellenrieder, consistent with WAM-V specs-->
-      <!--<inertia ixx="200.0" ixy="0.03" ixz="3.09" iyy="500" iyz="-0.05" izz="250.0"/>-->
+      <mass value="180.0"/> <!-- From WAM-V spec sheet -->
       <inertia ixx="120.0" ixy="0.0" ixz="0.0" iyy="393" iyz="0.0" izz="446.0"/>
     </inertial>
   </link>
@@ -246,44 +244,4 @@
   </joint>
 
   <link name="base_footprint"/>
-
-  <link name="front_camera_link"/>
-  <joint name="front_camera_joint" type="fixed">
-    <origin xyz="0.5 0 1.5"/>
-    <parent link="base_link"/>
-    <child link="front_camera_link"/>
-  </joint>
-  <link name="left_camera_link"/>
-  <joint name="left_camera_joint" type="fixed">
-    <origin xyz="0 0.5 0" rpy="0 0 ${pi/2}"/>
-    <parent link="base_link"/>
-    <child link="left_camera_link"/>
-  </joint>
-  <link name="right_camera_link"/>
-  <joint name="right_camera_joint" type="fixed">
-    <origin xyz="0 -0.5 0" rpy="0 0 ${-pi/2}"/>
-    <parent link="base_link"/>
-    <child link="right_camera_link"/>
-  </joint>
-  <link name="rear_camera_link"/>
-  <joint name="rear_camera_joint" type="fixed">
-    <origin xyz="-0.5 0 0" rpy="0 0 ${pi}"/>
-    <parent link="base_link"/>
-    <child link="rear_camera_link"/>
-  </joint>
-
-  <link name="scan"/>
-  <joint name="scan_joint" type="fixed">
-    <origin xyz="1.5 0 -1" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="scan"/>
-  </joint>
-
-  <link name="gps"/>
-  <joint name="gps_joint" type="fixed">
-    <origin xyz="0 0 1.5"/>
-    <parent link="base_link"/>
-    <child link="gps"/>
-  </joint>
-
 </robot>

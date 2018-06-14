@@ -3,21 +3,10 @@
 <launch>
 
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find robotx_gazebo)/config/custom_rosconsole.conf"/>
-
-  <!-- For setting debug level to debug -->
-  <!--<env name="ROSCONSOLE_CONFIG_FILE"
-       value="$(find kingfisher_gazebo)/config/custom_rosconsole.conf"/>
-   -->
-  <!-- Command line arguments -->
-
   <arg name="world" default="sandisland_buoys.world" />
 
   <arg name="name" default="WAMV" />
-  <arg name="imu" default="true" />
-  <arg name="gps" default="true" />
-  <arg name="p3d" default="true" />
 
-  <arg name="microstrain" default="false" />
 
   <!-- Initial USV location and attitude-->
   <arg name="x" default="0" />
@@ -38,9 +27,8 @@
   </include>
 
   <!-- Load robot model -->
-  <arg name="urdf" default="$(find wamv_description)/urdf/wamv_robotx.xacro"/>
-  <!--<arg name="urdf" default="$(find nps_robotx)/urdf/nps_wamv.xacro"/> -->
-  <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg urdf)"/>
+  <arg name="urdf" default="$(find robotx_gazebo)/urdf/wamv_robotx.urdf"/>
+  <param name="robot_description" textfile="$(arg urdf)"/>
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
@@ -55,7 +43,7 @@
       <remap from="in_topic" to="/gazebo/model_states" />
       <remap from="out_topic" to="wamv_rpy" />
       <param name="input_msg_type" value="ModelStates" />
-      <param name="modelstates_index" value="6" type="int" />
+      <param name="model_name" value="wamv" />
   </node>
 
 </launch>
