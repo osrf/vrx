@@ -12,7 +12,7 @@
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
   <depend>gazebo_ros</depend>
-  <depend>wamv_description</depend>
+  <depend>wamv_gazebo</depend>
   <depend>xacro</depend>
   <export>
     <gazebo_ros gazebo_model_path="${prefix}/models"/>

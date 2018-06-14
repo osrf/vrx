@@ -1,15 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(robotx_gazebo)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  wamv_description
+  wamv_gazebo
   xacro
 )
 catkin_package(
-  CATKIN_DEPENDS wamv_description xacro
+  CATKIN_DEPENDS wamv_gazebo xacro
 )
 
 # Generate world files from xacro and install
