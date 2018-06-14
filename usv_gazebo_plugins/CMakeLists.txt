@@ -34,21 +34,6 @@ link_directories(
 )
 
 ## Declare a C++ library
-add_library(buoyancy_gazebo_plugin
-  src/buoyancy_gazebo_plugin.cc
- )
-target_link_libraries(buoyancy_gazebo_plugin
-  ${catkin_LIBRARIES}
-  ${GAZEBO_LIBRARIES}
-  ${Eigen_LIBRARIES}
-)
-install(TARGETS buoyancy_gazebo_plugin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
-## Declare a C++ library
 add_library(usv_gazebo_dynamics_plugin
   src/usv_gazebo_dynamics_plugin.cc
 )
