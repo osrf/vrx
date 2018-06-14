@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
   gazebo_ros
   geometry_msgs
-  hector_gazebo_plugins
   message_generation
   nav_msgs
   roscpp

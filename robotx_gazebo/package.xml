@@ -18,7 +18,6 @@
   <depend>gazebo_plugins</depend>
   <depend>gazebo_ros</depend>
   <depend>geometry_msgs</depend>
-  <depend>hector_gazebo_plugins</depend>
   <depend>message_generation</depend>
   <depend>nav_msgs</depend>
   <depend>roscpp</depend>
