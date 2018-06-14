@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <!-- Basic model of the 16' WAM-V USV -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v">
-  <xacro:include filename="properties.urdf.xacro"/>
-
   <link name="base_link">
     <wind>true</wind>
     <visual>
