@@ -19,7 +19,7 @@
 #include "gazebo/common/Assert.hh"
 #include "gazebo/common/Events.hh"
 //#include "plugins/BuoyancyPlugin.hh"
-#include <robotx_gazebo/buoyancy_gazebo_plugin.hh>
+#include <usv_gazebo_plugins/buoyancy_gazebo_plugin.hh>
 
 using namespace gazebo;
 

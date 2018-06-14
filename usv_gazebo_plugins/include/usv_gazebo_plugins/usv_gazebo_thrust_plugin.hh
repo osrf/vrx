@@ -33,7 +33,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 //#include <gazebo_plugins/gazebo_ros_utils.h>
 
 //ROS
-#include <robotx_gazebo/UsvDrive.h>
+#include <usv_gazebo_plugins/UsvDrive.h>
 #include <ros/ros.h>
 
 // Custom Callback Queue
@@ -58,7 +58,7 @@ namespace gazebo
       Callback for Drive commands
       \param msg usv_msgs UsvDrive message
     */
-    void OnCmdDrive( const robotx_gazebo::UsvDriveConstPtr &msg);
+    void OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg);
 
     /*! ROS spin once */
     void spin();
