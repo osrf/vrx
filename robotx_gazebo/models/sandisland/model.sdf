@@ -10,7 +10,7 @@
 	        <!-- This file is in the models directory of the ROS package
     		 The export tag in the package.xml file tells Gazebo to include
 	    	 This in the path. -->
-	        <uri>file://sandisland/sandisland2.png</uri>
+	        <uri>file://sandisland/heightmap.png</uri>
 	        <size>469 469 10</size>
 	        <pos>0 0 -9</pos>
 	      </heightmap>
@@ -41,7 +41,7 @@
 	   <!-- This file is in the models directory of the ROS package
 		     The export tag in the package.xml file tells Gazebo to include
 		     This in the path. -->
-	   <uri>file://sandisland/sandisland2.png</uri>
+	   <uri>file://sandisland/heightmap.png</uri>
 	   <size>469 469 10</size>
 	   <pos>0 0 -9</pos>
 	  </heightmap>
