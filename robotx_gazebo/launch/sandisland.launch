@@ -27,7 +27,7 @@
   </include>
 
   <!-- Load robot model -->
-  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_robotx.urdf"/>
+  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf"/>
   <param name="robot_description" textfile="$(arg urdf)"/>
 
   <!-- Spawn model in Gazebo -->

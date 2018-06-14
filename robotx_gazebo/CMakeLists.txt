@@ -20,3 +20,19 @@ foreach(f ${${PROJECT_NAME}_xacro_worlds})
   list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
 endforeach(f)
 xacro_install(worlds ${xacro_outputs} DESTINATION worlds)
+
+# Install all the config files
+install(DIRECTORY config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
+
+# Install all the world files
+install(DIRECTORY worlds/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
+
+# Install all the model files
+install(DIRECTORY models/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/models)
+
+# Install all the launch files
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)

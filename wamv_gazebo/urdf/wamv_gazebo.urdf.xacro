@@ -6,15 +6,15 @@
   <xacro:include filename="$(find wamv_description)/urdf/wamv_base.urdf.xacro" />
 
   <!-- Attach hydrodynamics plugin -->
-  <xacro:include filename="$(find robotx_gazebo)/urdf/wamv_gazebo_dynamics_plugin.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo_dynamics_plugin.xacro" />
   <xacro:usv_dynamics_gazebo name="wamv_dynamics_plugin"/>
 
   <!-- Attach wind plugin -->
-  <xacro:include filename="$(find robotx_gazebo)/urdf/wamv_gazebo_wind_plugin.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo_wind_plugin.xacro" />
   <xacro:usv_wind_gazebo name="wamv_wind_plugin"/>
 
   <!-- Attach thrust plugin -->
-  <xacro:include filename="$(find robotx_gazebo)/urdf/wamv_gazebo_thrust_plugin.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo_thrust_plugin.xacro" />
   <xacro:usv_thrust_gazebo name="wamv_thrust_plugin"/>
 
 </robot>
