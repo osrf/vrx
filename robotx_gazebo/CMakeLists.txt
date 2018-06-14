@@ -20,12 +20,3 @@ foreach(f ${${PROJECT_NAME}_xacro_worlds})
   list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
 endforeach(f)
 xacro_install(worlds ${xacro_outputs} DESTINATION worlds)
-
-# Generate urdf files from xacro and install
-file(GLOB ${PROJECT_NAME}_xacro_urdf RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} urdf/*.urdf.xacro)
-unset(xacro_outputs)
-foreach(f ${${PROJECT_NAME}_xacro_urdf})
-  xacro_add_xacro_file(${f} INORDER)
-  list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
-endforeach(f)
-xacro_install(urdf ${xacro_outputs} DESTINATION urdf)
