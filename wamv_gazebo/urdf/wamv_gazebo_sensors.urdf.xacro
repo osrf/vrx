@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="WAM-V">
+  <!-- Basic frame of WAM-V -->
+  <xacro:include filename="$(find wamv_description)/urdf/wamv_base.urdf.xacro" />
+
+  <!-- Attach hydrodynamics plugin -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo_dynamics_plugin.xacro" />
+  <xacro:usv_dynamics_gazebo name="wamv_dynamics_plugin"/>
+
+  <!-- Attach wind plugin -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo_wind_plugin.xacro" />
+  <xacro:usv_wind_gazebo name="wamv_wind_plugin"/>
+
+  <!-- Attach thrust plugin -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo_thrust_plugin.xacro" />
+  <xacro:usv_thrust_gazebo name="wamv_thrust_plugin"/>
+
+  <!-- ADD SENSORS -->
+  <!-- Add a front camera -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_camera.xacro" />
+  <xacro:wamv_camera name="front_camera"/>
+
+
+   <!-- Add simulated GPS -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_gps.xacro" />
+  <xacro:wamv_gps name="gps_wamv"/>
+
+  
+  <!-- Add Simulated IMU -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_imu.xacro" />
+  <xacro:wamv_imu name="imu_wamv"/>
+  
+  <!-- Add P3D ground truth -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_p3d.xacro" />
+  <xacro:wamv_p3d name="p3d_wamv"/>
+</robot>
