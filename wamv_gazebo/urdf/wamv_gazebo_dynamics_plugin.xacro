@@ -4,48 +4,49 @@
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <gazebo >
       <plugin name="usv_dynamics_${name}" filename="libusv_gazebo_dynamics_plugin.so">
-	<bodyName>base_link</bodyName>
-	<waterLevel>0</waterLevel> <!-- Must be same as the ocean model!-->
-	<waterDensity>997.8</waterDensity>
-	<cmdTimeout>1.0</cmdTimeout>
-	<!-- Added mass -->
-	<xDotU>0.0</xDotU> 
-	<yDotV>0.0</yDotV>
-	<nDotR>0.0</nDotR>
-	<!-- Linear and quadratic drag -->
-	<xU>51.3</xU>
-	<xUU>72.4</xUU>
-	<yV>40.0</yV>
-	<yVV>0.0</yVV>
-	<zW>500.0</zW> 
-	<kP>50.0</kP>
-	<mQ>50.0</mQ>
-	<nR>400.0</nR>
-	<nRR>0.0</nRR>
-	<!-- General dimensions -->
-	<boatArea>2.2</boatArea>
-	<boatWidth>2.4</boatWidth>
-	<boatLength>4.9</boatLength>
-	<thrustOffsetZ>-0.04</thrustOffsetZ>
-	<metacentricLength>0.4</metacentricLength>
-	<metacentricWidth>0.4</metacentricWidth>
-	
-	<!-- Waves x3 -->
-	<wave_n>3</wave_n>
-
-	<wave_amp0>0.06</wave_amp0>
-	<wave_period0>12.6</wave_period0>
-	<wave_direction0>-1 0</wave_direction0>
-
-	<wave_amp1>0.04</wave_amp1>
-	<wave_period1>3.7</wave_period1>
-	<wave_direction1>-0.7 0.7</wave_direction1>
-
-	<wave_amp2>0.03</wave_amp2>
-	<wave_period2>6.3</wave_period2>
-	<wave_direction2>0.7 0.7</wave_direction2>
+      <bodyName>base_link</bodyName>
+      <!-- Must be same as the ocean model!-->
+      <waterLevel>0</waterLevel>
+      <waterDensity>997.8</waterDensity>
+      <cmdTimeout>1.0</cmdTimeout>
+      <!-- Added mass -->
+      <xDotU>0.0</xDotU> 
+      <yDotV>0.0</yDotV>
+      <nDotR>0.0</nDotR>
+      <!-- Linear and quadratic drag -->
+      <xU>51.3</xU>
+      <xUU>72.4</xUU>
+      <yV>40.0</yV>
+      <yVV>0.0</yVV>
+      <zW>500.0</zW> 
+      <kP>50.0</kP>
+      <mQ>50.0</mQ>
+      <nR>400.0</nR>
+      <nRR>0.0</nRR>
+      <!-- General dimensions -->
+      <boatArea>2.2</boatArea>
+      <boatWidth>2.4</boatWidth>
+      <boatLength>4.9</boatLength>
+      <thrustOffsetZ>-0.04</thrustOffsetZ>
+      <metacentricLength>0.4</metacentricLength>
+      <metacentricWidth>0.4</metacentricWidth>
+      
+      <!-- Waves x3 -->
+      <wave_n>3</wave_n>
+    
+      <wave_amp0>0.06</wave_amp0>
+      <wave_period0>12.6</wave_period0>
+      <wave_direction0>-1 0</wave_direction0>
+    
+      <wave_amp1>0.04</wave_amp1>
+      <wave_period1>3.7</wave_period1>
+      <wave_direction1>-0.7 0.7</wave_direction1>
+    
+      <wave_amp2>0.03</wave_amp2>
+      <wave_period2>6.3</wave_period2>
+      <wave_direction2>0.7 0.7</wave_direction2>
 
       </plugin>
-      </gazebo>
+    </gazebo>
   </xacro:macro>
 </robot>
