@@ -3,7 +3,7 @@
 <launch>
 
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find robotx_gazebo)/config/custom_rosconsole.conf"/>
-  <arg name="world" default="sandisland_buoys.world" />
+  <arg name="world" default="example_course.world" />
 
   <arg name="name" default="WAMV" />
 

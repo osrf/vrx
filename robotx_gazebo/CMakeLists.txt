@@ -4,9 +4,28 @@ project(robotx_gazebo)
 find_package(catkin REQUIRED COMPONENTS
   wamv_gazebo
   xacro
+  gazebo_dev
+  std_msgs
 )
+
 catkin_package(
-  CATKIN_DEPENDS wamv_gazebo xacro
+  INCLUDE_DIRS include
+  LIBRARIES gazebo_ros_color
+  CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev std_msgs
+)
+
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+# Plugin for scan_the_code challenge animation
+add_library(gazebo_ros_color src/gazebo_ros_color.cc)
+target_link_libraries(gazebo_ros_color ${catkin_LIBRARIES})
+add_dependencies(gazebo_ros_color ${catkin_EXPORTED_TARGETS})
+install(TARGETS gazebo_ros_color
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 # Generate world files from xacro and install

@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+  <model name="robotx_light_buoy">
+    <static>true</static>
+    <pose>0 0 -0.0762 0 0 0</pose>
+    <link name="base_link">
+      <visual name="base">
+        <geometry>
+           <mesh>
+            <uri>file://robotx_light_buoy/mesh/robotx_light_buoy.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="panel_1">
+        <pose>-0.0195 0.124 1.601 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>.192 .01 .386</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Black</name>
+          </script>
+        </material>
+        <plugin name="panel1plugin" filename="librobotx_light_buoy.so">
+          <robotNamespace>light_buoy</robotNamespace>
+          <topicName>panel1</topicName>
+        </plugin>
+      </visual>
+      <visual name="panel_2">
+        <pose>-0.11 -0.03262 1.601 0 0 -1.0472</pose>
+        <geometry>
+          <box>
+            <size>.192 .01 .386</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Black</name>
+          </script>
+        </material>
+        <plugin name="panel2plugin" filename="librobotx_light_buoy.so">
+          <robotNamespace>light_buoy</robotNamespace>
+          <topicName>panel2</topicName>
+        </plugin>
+      </visual>
+      <visual name="panel_3">
+        <pose>0.07143 -0.03297 1.601 0 0 1.0472</pose>
+        <geometry>
+          <box>
+            <size>.192 .01 .386</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Black</name>
+          </script>
+        </material>
+        <plugin name="panel3plugin" filename="librobotx_light_buoy.so">
+          <robotNamespace>light_buoy</robotNamespace>
+          <topicName>panel3</topicName>
+        </plugin>
+      </visual>
+      <collision name="collision">
+        <geometry>
+           <mesh>
+            <uri>file://robotx_light_buoy/mesh/robotx_light_buoy.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
