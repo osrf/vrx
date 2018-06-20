@@ -69,8 +69,6 @@ sudo docker run -it \
   -v "/tmp/.X11-unix:/tmp/.X11-unix" \
   -v "/etc/localtime:/etc/localtime:ro" \
   -v "/dev/input:/dev/input" \
-# Share your Sublime settings.
-#  -v "/opt/sublime_text:/opt/sublime_text" \
   --privileged \
   --rm \
   --runtime=nvidia \
