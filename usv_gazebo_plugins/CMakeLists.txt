@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(usv_gazebo_plugins)
-find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp)
+find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation)
 find_package(Eigen3 REQUIRED)
 
 add_message_files(
