@@ -28,7 +28,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <ros/time.h>
 #include <tf2/LinearMath/Transform.h>
 
-#include <robotx_gazebo/usv_gazebo_dynamics_plugin.hh>
+#include <usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh>
 
 #define GRAVITY 9.815
 

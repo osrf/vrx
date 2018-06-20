@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>wamv_gazebo</name>
+  <version>0.0.1</version>
+  <description>
+    Provides templates and examples for integrating the WAM-V model into gazebo with dynamics, sensors, etc.
+  </description>
+  <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
+  <maintainer email="briansbngham@gmail.com">bsb</maintainer>
+  <license>Apache 2.0</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>wamv_description</depend>
+  <depend>xacro</depend>
+  <depend>usv_gazebo_plugins</depend>
+</package>

@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>robotx_gazebo</name>
+  <name>usv_gazebo_plugins</name>
   <version>0.0.1</version>
   <description>
-    The ROS package for the RobotX competition running in Gazebo.
+    Gazebo plugins for simulating Unmanned Surface Vehicles
+    Originaly copied from https://github.com/bsb808/usv_gazebo_plugins
   </description>
   <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
   <maintainer email="briansbngham@gmail.com">bsb</maintainer>
@@ -11,11 +12,8 @@
   <author email="briansbingham@gmail.com">Brian Bingham</author>
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>gazebo_ros</depend>
-  <depend>wamv_gazebo</depend>
-  <depend>xacro</depend>
-  <export>
-    <gazebo_ros gazebo_model_path="${prefix}/models"/>
-    <gazebo_ros gazebo_media_path="${prefix}"/>
-  </export>
+  <depend>gazebo_plugins</depend>
+  <depend>gazebo</depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
 </package>

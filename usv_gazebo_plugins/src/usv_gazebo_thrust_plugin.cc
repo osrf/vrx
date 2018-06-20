@@ -23,7 +23,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/thread.hpp>
 #include <ros/time.h>
 
-#include <robotx_gazebo/usv_gazebo_thrust_plugin.hh>
+#include <usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh>
 
 using namespace gazebo;
 
@@ -255,7 +255,7 @@ void UsvThrust::UpdateChild()
   link_->AddForceAtRelativePosition(inputforce3,relpos);
 }
 
-void UsvThrust::OnCmdDrive( const robotx_gazebo::UsvDriveConstPtr &msg)
+void UsvThrust::OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg)
 {
     last_cmd_drive_time_ = this->world_->GetSimTime();
     last_cmd_drive_left_ = msg->left;
