@@ -5,6 +5,5 @@
     <xacro:include filename="$(find robotx_gazebo)/worlds/macros.xacro" />
     <xacro:sandisland />
     <xacro:navigation_challenge />
-    <xacro:light_buoy />
   </world>
 </sdf>
