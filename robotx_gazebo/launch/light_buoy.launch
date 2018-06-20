@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<!-- Runs the controller for the light buoy (scan the code) challenge, flashing a sequence of 3 colors on the LED panels -->
+<launch>
+  <node pkg="robotx_gazebo" type="light_buoy_controller.py" name="light_buoy_controller" />
+</launch>

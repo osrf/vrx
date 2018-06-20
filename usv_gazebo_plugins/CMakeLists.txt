@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(usv_gazebo_plugins)
-find_package(catkin REQUIRED COMPONENTS
-  gazebo_plugins
-)
-find_package(gazebo REQUIRED)
+find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation)
 find_package(Eigen3 REQUIRED)
 
 add_message_files(
@@ -17,7 +14,7 @@ generate_messages()
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS gazebo_plugins message_runtime
+  CATKIN_DEPENDS message_runtime gazebo_dev roscpp
 )
 
 # Plugins require c++11
@@ -25,12 +22,25 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 include_directories( include
   ${catkin_INCLUDE_DIRS}
-  ${GAZEBO_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
 link_directories(
-  ${GAZEBO_LIBRARY_DIRS}
   ${catkin_LIBRARY_DIRS}
+)
+
+## Declare a C++ library
+add_library(buoyancy_gazebo_plugin
+  src/buoyancy_gazebo_plugin.cc
+ )
+target_link_libraries(buoyancy_gazebo_plugin
+  ${catkin_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${Eigen_LIBRARIES}
+)
+install(TARGETS buoyancy_gazebo_plugin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 ## Declare a C++ library
@@ -39,7 +49,6 @@ add_library(usv_gazebo_dynamics_plugin
 )
 target_link_libraries(usv_gazebo_dynamics_plugin
   ${catkin_LIBRARIES}
-  ${GAZEBO_LIBRARIES}
   ${Eigen_LIBRARIES}
 )
 install(TARGETS usv_gazebo_dynamics_plugin
@@ -54,7 +63,6 @@ add_library(usv_gazebo_thrust_plugin
 )
 target_link_libraries(usv_gazebo_thrust_plugin
   ${catkin_LIBRARIES}
-  ${GAZEBO_LIBRARIES}
   ${Eigen_LIBRARIES}
 )
 install(TARGETS usv_gazebo_thrust_plugin
@@ -69,7 +77,6 @@ add_library(usv_gazebo_wind_plugin
 )
 target_link_libraries(usv_gazebo_wind_plugin
   ${catkin_LIBRARIES}
-  ${GAZEBO_LIBRARIES}
   ${Eigen_LIBRARIES}
 )
 install(TARGETS usv_gazebo_wind_plugin
