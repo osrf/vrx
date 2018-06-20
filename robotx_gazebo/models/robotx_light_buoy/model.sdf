@@ -42,7 +42,7 @@
             <name>Gazebo/Black</name>
           </script>
         </material>
-        <plugin name="panel2plugin" filename="librobotx_light_buoy.so">
+        <plugin name="panel2plugin" filename="libgazebo_ros_color.so">
           <robotNamespace>light_buoy</robotNamespace>
           <topicName>panel2</topicName>
         </plugin>
@@ -60,7 +60,7 @@
             <name>Gazebo/Black</name>
           </script>
         </material>
-        <plugin name="panel3plugin" filename="librobotx_light_buoy.so">
+        <plugin name="panel3plugin" filename="libgazebo_ros_color.so">
           <robotNamespace>light_buoy</robotNamespace>
           <topicName>panel3</topicName>
         </plugin>
