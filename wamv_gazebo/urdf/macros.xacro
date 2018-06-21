@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- Includes all macros in this package so they don't need to be included individualy -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="WAM-V">
+  <!-- Include dynamics macros -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_dynamics_plugin.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_wind_plugin.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_thrust_plugin.xacro" />
+
+  <!-- Include sensor macros -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_camera.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_gps.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_imu.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_p3d.xacro" />
+</robot>
