@@ -15,7 +15,7 @@
         <cylinder length="0.5" radius="0.17" />
       </geometry>
     </collision>
-    <collision name="l${prefix}_front_float">
+    <collision name="${prefix}_front_float">
       <origin xyz="2.3 ${1.03*reflect} 0.4" rpy="${0*reflect} 1.3 0" />
       <geometry>
         <cylinder length="0.45" radius="0.12" />
@@ -38,7 +38,7 @@
     </collision>
 
     <!-- Mid beam -->
-    <collision name="mid_l${prefix}_beam_lower">
+    <collision name="mid_${prefix}_beam_lower">
       <origin xyz="-0.65 ${0.99*reflect} 0.7" rpy="${0.1*reflect} 0.25 0" />
       <geometry>
         <cylinder length="0.45" radius="0.03" />
@@ -52,7 +52,7 @@
       </geometry>
     </collision>
 
-    <collision name="mid_l${prefix}_beam_upper">
+    <collision name="mid_${prefix}_beam_upper">
       <origin xyz="-0.55 ${0.65*reflect} 1.17" rpy="${1.35*reflect} 0.25 0" />
       <geometry>
         <cylinder length="0.3" radius="0.03" />
@@ -90,66 +90,6 @@
     </collision>
   </xacro:macro>
 
-  <!-- Macro for inserting an engine with its propeller. -->
-  <xacro:macro name="engine" params="prefix position:='0 0 0' orientation:='0 0 0'">
-    <link name="${prefix}_engine_link">
-      <visual>
-        <geometry>
-          <mesh filename="package://wamv_description/mesh/engine.dae"/>
-        </geometry>
-      </visual>
-      <collision name="${prefix}_engine_vertical_axis_collision">
-        <origin xyz="-0.16 0 -0.24" rpy="0 0 0" />
-        <geometry>
-          <box size="0.2 0.15 0.83" />
-        </geometry>
-      </collision>
-      <collision name="${prefix}_engine_rear_end_collision">
-        <origin xyz="-0.34 0 0.12" rpy="0 0 0" />
-        <geometry>
-          <box size="0.12 0.15 0.12" />
-        </geometry>
-      </collision>
-      <inertial>
-        <mass value="15"/>
-        <inertia ixx="0.889245" ixy="0.0" ixz="0.0" iyy="0.911125" iyz="0.0" izz="0.078125"/>
-      </inertial>
-    </link>
-
-    <link name="${prefix}_propeller_link">
-      <visual>
-        <geometry>
-          <mesh filename="package://wamv_description/mesh/propeller.dae"/>
-        </geometry>
-      </visual>
-      <collision name="${prefix}_propeller_collision">
-        <origin xyz="-0.08 0 0" rpy="0 1.57 0" />
-        <geometry>
-          <cylinder length="0.18" radius="0.24" />
-        </geometry>
-      </collision>
-      <inertial>
-        <mass value="0.5"/>
-        <inertia ixx="0.008545" ixy="0.0" ixz="0.0" iyy="0.008545" iyz="0.0" izz="0.0144"/>
-      </inertial>
-    </link>
-
-    <joint name="${prefix}_chasis_engine_joint" type="fixed">
-      <origin xyz="${position}" rpy="${orientation}"/>
-      <parent link="base_link"/>
-      <child link="${prefix}_engine_link"/>
-    </joint>
-
-    <joint name="${prefix}_engine_propeller_joint" type="continuous">
-      <axis rpy="0 0 0" xyz="1 0 0"/>
-      <parent link="${prefix}_engine_link"/>
-      <child link="${prefix}_propeller_link"/>
-      <origin rpy="0 0 0" xyz="-0.278156 0 -0.509371"/>
-      <limit effort="100" velocity="100" />
-      <dynamics friction="0.05" damping="0.05" />
-    </joint>
-  </xacro:macro>
-
   <!-- Basic model of the 16' WAM-V USV -->
   <link name="base_link">
     <visual>
@@ -178,11 +118,5 @@
       <inertia ixx="120.0" ixy="0.0" ixz="0.0" iyy="393" iyz="0.0" izz="446.0"/>
     </inertial>
   </link>
-
-  <!-- Left engine-->
-  <xacro:engine prefix="left" position="-2.373776 1.027135 0.318237" />
-
-  <!-- Right engine-->
-  <xacro:engine prefix="right" position="-2.373776 -1.027135 0.318237" />
 
 </robot>

@@ -282,7 +282,7 @@ void UsvThrust::ParsePropeller(const sdf::ElementPtr sdf,
   if (sdf->HasElement(sdf_name))
   {
     std::string propeller_name;
-    propeller_name = _sdf->GetElement(sdf_name)->Get<std::string>();
+    propeller_name = sdf->GetElement(sdf_name)->Get<std::string>();
     propeller_joint = model_->GetJoint(propeller_name);
 
     if (!propeller_joint)
