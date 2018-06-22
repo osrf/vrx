@@ -12,8 +12,8 @@
   <author email="briansbingham@gmail.com">Brian Bingham</author>
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>gazebo_plugins</depend>
-  <depend>gazebo</depend>
+  <depend>gazebo_dev</depend>
+  <depend>roscpp</depend>
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
 </package>
