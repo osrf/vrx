@@ -138,6 +138,10 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   param_thrust_z_offset_ = getSdfParamDouble(_sdf,"thrustOffsetZ",
 					 param_thrust_z_offset_);
 
+  // Get the names of the propeller joints.
+  ParsePropeller(_sdf, "left_propeller_joint", left_propeller_joint_);
+  ParsePropeller(_sdf, "right_propeller_joint", right_propeller_joint_);
+
   //initialize time and odometry position
   prev_update_time_ = last_cmd_drive_time_ = this->world_->GetSimTime();
 
@@ -253,6 +257,10 @@ void UsvThrust::UpdateChild()
   inputforce3 = pose_.rot.RotateVector(inputforce3);
   //link_->AddRelativeForce(inputforce3);
   link_->AddForceAtRelativePosition(inputforce3,relpos);
+
+  // Spin the propellers
+  SpinPropeller(left_propeller_joint_, last_cmd_drive_left_);
+  SpinPropeller(right_propeller_joint_, last_cmd_drive_right_);
 }
 
 void UsvThrust::OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg)
@@ -266,6 +274,37 @@ void UsvThrust::OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg)
 void UsvThrust::spin()
 {
     while(ros::ok()) ros::spinOnce();
+}
+
+void UsvThrust::ParsePropeller(const sdf::ElementPtr sdf,
+    const std::string &sdf_name, physics::JointPtr &propeller_joint)
+{
+  if (sdf->HasElement(sdf_name))
+  {
+    std::string propeller_name;
+    propeller_name = _sdf->GetElement(sdf_name)->Get<std::string>();
+    propeller_joint = model_->GetJoint(propeller_name);
+
+    if (!propeller_joint)
+      ROS_WARN_STREAM("Unable to find propeller joint <"<<propeller_name<<">");
+  }
+}
+
+void UsvThrust::SpinPropeller(const physics::JointPtr &propeller,
+    const double input)
+{
+  const double min_input = 0.1;
+  const double max_input = 1.0;
+  const double max_effort = 2.0;
+  double effort = 0.0;
+  
+  if (!propeller)
+    return;
+
+  if (std::abs(input) > min_input)
+    effort = (input / max_input) * max_effort;
+
+  propeller->SetForce(0, effort);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvThrust);
