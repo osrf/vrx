@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!-- Spawns the light buoy challenge and the controller node, flashing a sequence of 3 colors on the LED panels -->
+<launch>
+  <!-- Allows customizing location and name of challenge -->
+  <arg name="name" default="light_buoy_challenge" />
+  <arg name="x" default="-45" />
+  <arg name="y" default="60" />
+  <arg name="z" default="0" />
+  <arg name="P" default="0" />
+  <arg name="R" default="0" />
+  <arg name="Y" default="0" />
+
+  <!-- Controller to flash random sequence on LED panels -->
+  <node pkg="robotx_gazebo" type="light_buoy_controller.py" name="light_buoy_controller" />
+
+  <!-- Spawn the challenge model into the world -->
+  <node name="spawn_model_$(arg name)" pkg="gazebo_ros" type="spawn_model"
+  args="-x $(arg x) -y $(arg y) -z $(arg z)
+        -R $(arg R) -P $(arg P) -Y $(arg Y)
+        -sdf -database robotx_light_buoy -model $(arg name)"/>
+</launch>
