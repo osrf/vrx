@@ -19,6 +19,8 @@
       <maxForceFwd>250.0</maxForceFwd>
       <maxForceRev>-100.0</maxForceRev>
       <cmdTimeout>1.0</cmdTimeout>
+      <left_propeller_joint>left_engine_propeller_joint</left_propeller_joint>
+      <right_propeller_joint>right_engine_propeller_joint</right_propeller_joint>
       </plugin>
     </gazebo>
   </xacro:macro>
