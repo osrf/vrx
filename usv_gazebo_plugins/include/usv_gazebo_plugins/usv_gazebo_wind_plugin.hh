@@ -32,7 +32,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace gazebo
 {
-  /// \brief A plugin that simulates a simple wind model. It accepts the 
+  /// \brief A plugin that simulates a simple wind model. It accepts the
   /// following parameters:
   ///
   /// <bodyName>: The link that will receive the effect of the wind.
@@ -51,7 +51,7 @@ namespace gazebo
     // Documentation inherited.
     public: virtual void Load(physics::ModelPtr _parent,
                               sdf::ElementPtr _sdf);
-  
+
     // \brief Callback executed at every physics update.
     protected: virtual void Update();
 

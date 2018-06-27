@@ -63,7 +63,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
           << " not exist" << std::endl;
     return;
   }
-  
+
   gzmsg << "USV Model Link Name = " << linkName << std::endl;
 
   if (_sdf->HasElement("wind_velocity_vector"))
@@ -71,7 +71,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->windVelocity =
       _sdf->GetElement("wind_velocity_vector")->Get<math::Vector3>();
   }
-  
+
   gzmsg << "Wind velocity vector = " << this->windVelocity.x << " , "
         << this->windVelocity.y << " , " << this->windVelocity.z << std::endl;
 
@@ -83,7 +83,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   gzmsg << "Wind coefficient vector = " << windCoeff.x << " , " << windCoeff.y
         << " , " << windCoeff.z << std::endl;
 
-  // Listen to the update event. This event is broadcast every 
+  // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
     std::bind(&UsvWindPlugin::Update, this));
@@ -96,7 +96,7 @@ void UsvWindPlugin::Update()
   math::Vector3 relativeWind = this->link->GetWorldPose().rot.GetInverse().
     RotateVector(this->windVelocity);
   // Calculate apparent wind
-  math::Vector3 apparentWind = 
+  math::Vector3 apparentWind =
     relativeWind - this->link->GetRelativeLinearVel();
 
   // gzdbg << "Relative wind: " << relativeWind << std::endl;
@@ -104,9 +104,9 @@ void UsvWindPlugin::Update()
 
   // Calculate wind force - body coordinates
   math::Vector3 windForce(
-		windCoeff.x * relativeWind.x * abs(relativeWind.x),
-		windCoeff.y * relativeWind.y * abs(relativeWind.y),
-		-2.0 * windCoeff.z * relativeWind.x * relativeWind.y);
+    windCoeff.x * relativeWind.x * abs(relativeWind.x),
+    windCoeff.y * relativeWind.y * abs(relativeWind.y),
+    -2.0 * windCoeff.z * relativeWind.x * relativeWind.y);
 
   // Add forces/torques to link at CG
   this->link->AddRelativeForce(math::Vector3(windForce.x, windForce.y, 0.0));
