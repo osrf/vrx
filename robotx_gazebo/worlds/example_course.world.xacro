@@ -4,6 +4,9 @@
   <world name="robotx_example_course">
     <xacro:include filename="$(find robotx_gazebo)/worlds/macros.xacro" />
     <xacro:sandisland />
-    <xacro:navigation_challenge />
+    <include>
+      <uri>model://robotx_navigation_challenge</uri>
+      <pose>15 0 2 0 0 0</pose>
+    </include>
   </world>
 </sdf>
