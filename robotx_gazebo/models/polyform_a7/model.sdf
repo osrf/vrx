@@ -6,7 +6,7 @@
     <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
         <!-- Reference: https://www.sailrite.com/PDF/Polyform-Buoys-Fenders-Accessories.pdf, page 8 -->
-        <mass>16.23</mass>
+        <mass>24.49</mass>
       </inertia>
       <visual name="visual">
         <geometry>
