@@ -152,6 +152,16 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 	    ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
   rosnode_ = new ros::NodeHandle( node_namespace_ );
 
+  // Advertise joint state publisher to view propellers in rviz
+  // TODO: consider throttleing joint_state pub for performance (every OnUpdate may be too frequent)
+  joint_state_pub_ = rosnode_->advertise<sensor_msgs::JointState>("joint_states", 1);
+  joint_state_msg_.name.resize(2);
+  joint_state_msg_.position.resize(2);
+  joint_state_msg_.velocity.resize(2);
+  joint_state_msg_.effort.resize(2);
+  joint_state_msg_.name[0] = left_propeller_joint_->GetName();
+  joint_state_msg_.name[1] = right_propeller_joint_->GetName();
+
   cmd_drive_sub_ = rosnode_->subscribe("cmd_drive", 1, &UsvThrust::OnCmdDrive, this );
 
   // Listen to the update event. This event is broadcast every
@@ -261,6 +271,9 @@ void UsvThrust::UpdateChild()
   // Spin the propellers
   SpinPropeller(left_propeller_joint_, last_cmd_drive_left_);
   SpinPropeller(right_propeller_joint_, last_cmd_drive_right_);
+
+  joint_state_msg_.header.stamp = ros::Time::now();
+  joint_state_pub_.publish(joint_state_msg_);
 }
 
 void UsvThrust::OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg)
@@ -305,6 +318,23 @@ void UsvThrust::SpinPropeller(const physics::JointPtr &propeller,
     effort = (input / max_input) * max_effort;
 
   propeller->SetForce(0, effort);
+
+
+  // Get index in joint state message for this propeller
+  uint8_t index;
+  if (propeller->GetName() == joint_state_msg_.name[0]) index = 0;
+  else if (propeller->GetName() == joint_state_msg_.name[1]) index = 1;
+  else {
+    ROS_WARN("Propeller %s cannot be associated with a joint, skipping message.", propeller->GetName().c_str());
+    return;
+  }
+
+  // Set position, velocity, and effort of joint from gazebo
+  gazebo::math::Angle position = propeller->GetAngle(0);
+  position.Normalize();
+  joint_state_msg_.position[index] = position.Radian();
+  joint_state_msg_.velocity[index] = propeller->GetVelocity(0);
+  joint_state_msg_.effort[index] = effort;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvThrust);
