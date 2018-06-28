@@ -28,6 +28,16 @@ install(TARGETS gazebo_ros_color
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for scan_the_code challenge animation
+add_library(light_buoy_controller src/light_buoy_controller.cc)
+target_link_libraries(light_buoy_controller ${catkin_LIBRARIES})
+add_dependencies(light_buoy_controller ${catkin_EXPORTED_TARGETS})
+install(TARGETS light_buoy_controller
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Generate world files from xacro and install
 xacro_add_files(
   worlds/sandisland.world.xacro
