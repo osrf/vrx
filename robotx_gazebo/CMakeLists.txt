@@ -29,13 +29,11 @@ install(TARGETS gazebo_ros_color
 )
 
 # Generate world files from xacro and install
-file(GLOB ${PROJECT_NAME}_xacro_worlds RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} worlds/*.world.xacro)
-unset(xacro_outputs)
-foreach(f ${${PROJECT_NAME}_xacro_worlds})
-  xacro_add_xacro_file(${f} INORDER)
-  list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
-endforeach(f)
-xacro_install(worlds ${xacro_outputs} DESTINATION worlds)
+xacro_add_files(
+  worlds/sandisland.world.xacro
+  worlds/example_course.world.xacro
+  INORDER INSTALL DESTINATION worlds
+)
 
 # Install all the config files
 install(DIRECTORY config/

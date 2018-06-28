@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+  <!-- Reference: https://www.polyformus.com/buoys/a-series -->
+  <model name="polyform_a5">
+    <static>true</static>
+    <pose>0 0 0 0 0 0</pose>
+    <link name="base_link">
+      <inertia>
+        <!-- Reference: https://www.sailrite.com/PDF/Polyform-Buoys-Fenders-Accessories.pdf, page 8 -->
+        <mass>8.98</mass>
+      </inertia>
+      <visual name="visual">
+        <geometry>
+          <sphere><radius>0.343</radius></sphere>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Black</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <sphere><radius>0.343</radius></sphere>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

@@ -9,13 +9,9 @@ catkin_package(
   CATKIN_DEPENDS wamv_description usv_gazebo_plugins xacro
 )
 
-set(${PROJECT_NAME}_xacro_urdf
-  urdf/wamv_gazebo_sensors.urdf.xacro
+# Generate urdf files from xacro and install
+xacro_add_files(
   urdf/wamv_gazebo.urdf.xacro
+  urdf/wamv_gazebo_sensors.urdf.xacro
+  INORDER INSTALL DESTINATION urdf
 )
-unset(xacro_outputs)
-foreach(f ${${PROJECT_NAME}_xacro_urdf})
-  xacro_add_xacro_file(${f} INORDER)
-  list(APPEND xacro_outputs ${XACRO_OUTPUT_FILE})
-endforeach(f)
-xacro_install(urdf ${xacro_outputs} DESTINATION urdf)

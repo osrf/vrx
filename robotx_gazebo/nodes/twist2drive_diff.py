@@ -3,7 +3,7 @@
 
 import rospy
 from geometry_msgs.msg import Twist
-from robotx_gazebo.msg import UsvDrive
+from usv_gazebo_plugins.msg import UsvDrive
 
 class Node():
     def __init__(self,linear_scaling,angular_scaling):
