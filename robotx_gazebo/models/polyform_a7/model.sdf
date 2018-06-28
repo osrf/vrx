@@ -5,6 +5,7 @@
     <static>true</static>
     <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
+      <inertia>
         <!-- Reference: https://www.sailrite.com/PDF/Polyform-Buoys-Fenders-Accessories.pdf, page 8 -->
         <mass>24.49</mass>
       </inertia>
