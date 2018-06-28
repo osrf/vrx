@@ -18,7 +18,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-# Plugin for scan_the_code challenge animation
+# Plugin for setting color of a gazebo visual through ROS
 add_library(gazebo_ros_color src/gazebo_ros_color.cc)
 target_link_libraries(gazebo_ros_color ${catkin_LIBRARIES})
 add_dependencies(gazebo_ros_color ${catkin_EXPORTED_TARGETS})
@@ -28,7 +28,7 @@ install(TARGETS gazebo_ros_color
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Plugin for scan_the_code challenge animation
+# Plugin for light buoy color sequence
 add_library(light_buoy_controller src/light_buoy_controller.cc)
 target_link_libraries(light_buoy_controller ${catkin_LIBRARIES})
 add_dependencies(light_buoy_controller ${catkin_EXPORTED_TARGETS})

@@ -1,8 +1,5 @@
 #include <robotx_gazebo/light_buoy_controller.hh>
 
-namespace light_buoy_controller
-{
-
 // Register plugin with gazebo
 GZ_REGISTER_MODEL_PLUGIN(LightBuoyController)
 
@@ -44,11 +41,13 @@ void LightBuoyController::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPt
     ROS_INFO_NAMED("light_bouy_controller", "missing <robotNamespace>, defaulting to %s", ns.c_str());
 
   nh_ = ros::NodeHandle(ns);
-  
+
+  // Create publisher to set color on each panel 
   panel_pubs_[0] = nh_.advertise<std_msgs::ColorRGBA>("panel1", 1);
   panel_pubs_[1] = nh_.advertise<std_msgs::ColorRGBA>("panel2", 1);
   panel_pubs_[2] = nh_.advertise<std_msgs::ColorRGBA>("panel3", 1);
 
+  // Generate random initial pattern
   std::string initial;
   changePattern(initial);
 
@@ -65,17 +64,21 @@ void LightBuoyController::incrementState(const ros::TimerEvent& _event)
 void LightBuoyController::incrementState()
 {
   std::lock_guard<std::mutex> lock(mutex_);
+  // Start over if at end of pattern
   if (state_ > 3)
       state_ = 0;
   auto msg = pattern_[state_];
+  // Publish current color to each panel
   for (size_t i = 0; i < 3; ++i)
     panel_pubs_[i].publish(msg);
+  // Increment index for next timer callback
   ++state_;
 }
 
 bool LightBuoyController::changePattern(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
 {
   changePattern(res.message);
+  res.message = "New pattern: " + res.message;
   res.success = true;
   return true;
 }
@@ -83,12 +86,15 @@ bool LightBuoyController::changePattern(std_srvs::Trigger::Request& req, std_srv
 void LightBuoyController::changePattern(std::string& new_pattern)
 {
   uint8_t indicies[3];
+  // Generate random sequence of 3 colors among RED, GREEN, BLUE, and YELLOW
   for (size_t i = 0; i < 3; ++i)
       indicies[i] = ignition::math::Rand::IntUniform(0, 3);
+  // Ensure second color is different from first and third
   while(indicies[0] == indicies[1] || indicies[1] == indicies[2])
       indicies[1] = ignition::math::Rand::IntUniform(0, 3);
 
   std::lock_guard<std::mutex> lock(mutex_);
+  // Assign actual color messages to pattern from random indicies
   for (size_t i = 0; i < 3; ++i)
   {
       colors_t pair = colors[indicies[i]];
@@ -100,5 +106,3 @@ void LightBuoyController::changePattern(std::string& new_pattern)
 
   ROS_INFO("Initial pattern is %s", new_pattern.c_str());
 }
-
-} // namespace light_buoy_controller
