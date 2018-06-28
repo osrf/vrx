@@ -15,3 +15,15 @@ xacro_add_files(
   urdf/wamv_gazebo_sensors.urdf.xacro
   INORDER INSTALL DESTINATION urdf
 )
+
+# Install xacro files / macros
+install(DIRECTORY urdf/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf)
+
+# Install config files
+install(DIRECTORY config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
+
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
