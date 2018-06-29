@@ -92,7 +92,6 @@
 
   <!-- Basic model of the 16' WAM-V USV -->
   <link name="base_link">
-    <wind>true</wind>
     <visual>
       <geometry>
         <mesh filename="package://wamv_description/mesh/WAM-V-Base.dae"/>
