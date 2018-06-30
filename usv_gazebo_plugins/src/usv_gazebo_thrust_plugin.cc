@@ -34,7 +34,7 @@ UsvThrust::UsvThrust()
 
 //////////////////////////////////////////////////
 double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
-  const std::string &_paramName, double _defaultVal)
+  const std::string &_paramName, const double _defaultVal) const
 {
   if (!_sdfPtr->HasElement(_paramName))
   {
@@ -142,51 +142,51 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   char** argv = NULL;
   ros::init(argc, argv, "usv_thrust_gazebo",
 	    ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
-  this->rosnode = new ros::NodeHandle( this->nodeNamespace );
+  this->rosnode.reset(new ros::NodeHandle(this->nodeNamespace));
 
   this->cmdDriveSub = this->rosnode->subscribe("cmd_drive", 1, 
-      &UsvThrust::OnCmdDrive, this );
+      &UsvThrust::OnCmdDrive, this);
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-    std::bind(&UsvThrust::UpdateChild, this));
+    std::bind(&UsvThrust::Update, this));
 }
 
 //////////////////////////////////////////////////
-double UsvThrust::scaleThrustCmd(double cmd)
+double UsvThrust::ScaleThrustCmd(const double _cmd) const
 {
   double val = 0.0;
-  if (cmd >= 0.0)
+  if (_cmd >= 0.0)
   {
-    val = cmd / this->paramMaxCmd * this->paramMaxForceFwd;
-    val = std::min(val,this->paramMaxForceFwd);
+    val = _cmd / this->paramMaxCmd * this->paramMaxForceFwd;
+    val = std::min(val, this->paramMaxForceFwd);
   }
-  else  // cmd is less than zero
+  else
   {
-    val = -1.0 * std::abs(cmd)/this->paramMaxCmd *
-          std::abs(this->paramMaxForceRev);
-    val = std::max(val,this->paramMaxForceRev);
+    val = _cmd / this->paramMaxCmd * std::abs(this->paramMaxForceRev);
+    val = std::max(val, this->paramMaxForceRev);
   }
   return val;
 }
 
 //////////////////////////////////////////////////
-double UsvThrust::glf(double x, float A, float K, float B,
-		      float v, float C, float M){
-  return A + (K-A) / (pow(C + exp(-B * (x-M)), 1.0 / v));
+double UsvThrust::Glf(const double _x, const float _A, const float _K,
+    const float _B, const float _v, const float _C, const float _M) const
+{
+  return _A + (_K - _A) / (pow(_C + exp(-_B * (_x - _M)), 1.0 / _v));
 }
 
 //////////////////////////////////////////////////
-double UsvThrust::glfThrustCmd(double cmd)
+double UsvThrust::GlfThrustCmd(const double _cmd) const
 {
   double val = 0.0;
-  if (cmd > 0.01)
+  if (_cmd > 0.01)
   {
-    val = glf(cmd,0.01, 59.82, 5.0, 0.38, 0.56, 0.28);
+    val = this->Glf(_cmd, 0.01f, 59.82f, 5.0f, 0.38f, 0.56f, 0.28f);
     val = std::min(val, this->paramMaxForceFwd);
   }
-  else if (cmd < 0.01)
+  else if (_cmd < 0.01)
   {
-    val = glf(cmd, -199.13, -0.09, 8.84, 5.34, 0.99, -0.57);
+    val = this->Glf(_cmd, -199.13f, -0.09f, 8.84f, 5.34f, 0.99f, -0.57f);
     val = std::max(val, this->paramMaxForceRev);
   }
   else
@@ -194,13 +194,12 @@ double UsvThrust::glfThrustCmd(double cmd)
     val = 0.0;
   }
   ROS_INFO_STREAM_THROTTLE(0.5,
-      cmd << ": " << val << " / " << val / this->paramMaxForceFwd);
+      _cmd << ": " << val << " / " << val / this->paramMaxForceFwd);
   return val;
-
 }
 
 //////////////////////////////////////////////////
-void UsvThrust::UpdateChild()
+void UsvThrust::Update()
 {
   common::Time time_now = this->world->GetSimTime();
   this->prevUpdateTime = time_now;
@@ -221,12 +220,12 @@ void UsvThrust::UpdateChild()
   switch(this->paramMappingType)
   {
   case 0: // Simplest, linear
-    thrust_left = scaleThrustCmd(this->lastCmdDriveLeft);
-    thrust_right = scaleThrustCmd(this->lastCmdDriveRight);
+    thrust_left = this->ScaleThrustCmd(this->lastCmdDriveLeft);
+    thrust_right = this->ScaleThrustCmd(this->lastCmdDriveRight);
     break;
   case 1: // GLF
-    thrust_left = glfThrustCmd(this->lastCmdDriveLeft);
-    thrust_right = glfThrustCmd(this->lastCmdDriveRight);
+    thrust_left = this->GlfThrustCmd(this->lastCmdDriveLeft);
+    thrust_right = this->GlfThrustCmd(this->lastCmdDriveRight);
     break;
   default:
     ROS_FATAL_STREAM("Cannot use mappingType=" << this->paramMappingType);
@@ -253,49 +252,48 @@ void UsvThrust::UpdateChild()
   this->link->AddForceAtRelativePosition(inputforce3,relpos);
 
   // Spin the propellers
-  SpinPropeller(this->leftPropellerJoint, this->lastCmdDriveLeft);
-  SpinPropeller(this->rightPropellerJoint, this->lastCmdDriveRight);
+  this->SpinPropeller(this->leftPropellerJoint, this->lastCmdDriveLeft);
+  this->SpinPropeller(this->rightPropellerJoint, this->lastCmdDriveRight);
 }
 
 //////////////////////////////////////////////////
-void UsvThrust::OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg)
+void UsvThrust::OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg)
 {
   this->lastCmdDriveTime = this->world->GetSimTime();
-  this->lastCmdDriveLeft = msg->left;
-  this->lastCmdDriveRight = msg->right;
+  this->lastCmdDriveLeft = _msg->left;
+  this->lastCmdDriveRight = _msg->right;
 }
 
 //////////////////////////////////////////////////
-void UsvThrust::ParsePropeller(const sdf::ElementPtr sdf,
-    const std::string &sdf_name, physics::JointPtr &propeller_joint)
+void UsvThrust::ParsePropeller(const sdf::ElementPtr _sdf,
+    const std::string &_sdfName, physics::JointPtr &_propellerJoint) const
 {
-  if (sdf->HasElement(sdf_name))
+  if (_sdf->HasElement(_sdfName))
   {
-    std::string propeller_name;
-    propeller_name = sdf->GetElement(sdf_name)->Get<std::string>();
-    propeller_joint = this->model->GetJoint(propeller_name);
+    std::string propellerName = _sdf->GetElement(_sdfName)->Get<std::string>();
+    _propellerJoint = this->model->GetJoint(propellerName);
 
-    if (!propeller_joint)
-      ROS_WARN_STREAM("Unable to find propeller joint <"<<propeller_name<<">");
+    if (!_propellerJoint)
+      ROS_WARN_STREAM("Unable to find propeller joint <" << propellerName<<">");
   }
 }
 
 //////////////////////////////////////////////////
-void UsvThrust::SpinPropeller(const physics::JointPtr &propeller,
-    const double input)
-{
-  const double min_input = 0.1;
-  const double max_input = 1.0;
-  const double max_effort = 2.0;
-  double effort = 0.0;
-  
-  if (!propeller)
+void UsvThrust::SpinPropeller(physics::JointPtr &_propeller, 
+    const double _input) const
+{ 
+  if (!_propeller)
     return;
 
-  if (std::abs(input) > min_input)
-    effort = (input / max_input) * max_effort;
+  const double kMinInput = 0.1;
+  const double kMaxInput = 1.0;
+  const double kMaxEffort = 2.0;
+  double effort = 0.0;
 
-  propeller->SetForce(0, effort);
+  if (std::abs(_input) > kMinInput)
+    effort = (_input / kMaxInput) * kMaxEffort;
+
+  _propeller->SetForce(0, effort);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvThrust);

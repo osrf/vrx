@@ -25,13 +25,15 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #define USV_GAZEBO_PLUGINS_THRUST_HH
 
 #include <ros/ros.h>
+#include <memory>
 #include <string>
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/physics.hh>
-#include <usv_gazebo_plugins/UsvDrive.h>
 #include <sdf/sdf.hh>
+
+#include "usv_gazebo_plugins/UsvDrive.h"
 
 namespace gazebo
 {
@@ -49,31 +51,36 @@ namespace gazebo
                               sdf::ElementPtr _sdf);
   
     /// \brief Callback executed at every physics update.
-    protected: virtual void UpdateChild();
+    protected: virtual void Update();
 
     /// \brief Callback for Drive commands.
     /// \param msg usv_msgs UsvDrive message
-    private:void OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg);
+    private: void OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg);
 
     /// \brief Convenience function for getting SDF parameters.
     private: double SdfParamDouble(sdf::ElementPtr _sdfPtr,
                                    const std::string &_paramName,
-                                   double defaultVal);
+                                   const double _defaultVal) const;
 
-    /// \brief Takes ROS Kingfisher Drive commands and scales them by max thrust
+    /// \brief Takes ROS Drive commands and scales them by max thrust
     /// \param cmd ROS drive command
     /// \param max_cmd  Maximum value expected for commands - scaling factor
     /// \param max_pos  Maximum positive force value
     /// \param max_neg  Maximum negative force value
     /// \return Value scaled and saturated
-    private: double scaleThrustCmd(double _cmd);
+    private: double ScaleThrustCmd(const double _cmd) const;
 
     /// \brief ToDo.
-    private: double glf(double _x, float _A, float _K, float _B,
-                        float _v, float _C, float _M);
+    private: double Glf(const double _x,
+                        const float  _A,
+                        const float  _K,
+                        const float  _B,
+                        const float  _v,
+                        const float  _C,
+                        const float  _M) const;
 
     /// \brief ToDo.
-    private: double glfThrustCmd(double _cmd);
+    private: double GlfThrustCmd(const double _cmd) const;
 
     /// \brief Parse the propeller name from SDF.
     /// \param sdf The entire model SDF
@@ -81,13 +88,13 @@ namespace gazebo
     /// \param propellerJoint The joint pointer to initialize
     private: void ParsePropeller(const sdf::ElementPtr _sdf,
                                  const std::string &_sdfName,
-                                 physics::JointPtr &_propellerHoint);
+                                 physics::JointPtr &_propellerJoint) const;
 
     /// \brief Spin a propeller based on its input
     /// \param propeller Pointer to the propeller joint to spin
     /// \param input Last input received for this propeller
-    private: void SpinPropeller(const physics::JointPtr &_propeller,
-                                const double _input);
+    private: void SpinPropeller(physics::JointPtr &_propeller,
+                                const double _input) const;
 
     /// \brief ToDo.
     private: std::string nodeNamespace;
@@ -96,7 +103,7 @@ namespace gazebo
     private: std::string linkName;
 
     /// \brief ToDo.
-    private: ros::NodeHandle *rosnode;
+    private: std::unique_ptr<ros::NodeHandle> rosnode;
 
     /// \brief ToDo.
     private: ros::Subscriber cmdDriveSub;
