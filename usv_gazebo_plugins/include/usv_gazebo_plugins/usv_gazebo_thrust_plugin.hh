@@ -3,7 +3,8 @@
 Copyright (c) 2017, Brian Bingham
 All rights reserved
 
-This file is part of the usv_gazebo_dynamics_plugin package, known as this Package.
+This file is part of the usv_gazebo_dynamics_plugin package,
+known as this Package.
 
 This Package free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -55,9 +56,9 @@ namespace gazebo
     private:void OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg);
 
     /// \brief Convenience function for getting SDF parameters.
-    private: double getSdfParamDouble(sdf::ElementPtr _sdfPtr,
-                                      const std::string &_paramName,
-                                      double defaultVal);
+    private: double SdfParamDouble(sdf::ElementPtr _sdfPtr,
+                                   const std::string &_paramName,
+                                   double defaultVal);
 
     /// \brief Takes ROS Kingfisher Drive commands and scales them by max thrust
     /// \param cmd ROS drive command
