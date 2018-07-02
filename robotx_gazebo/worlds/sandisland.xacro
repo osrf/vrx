@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!-- Macro to insert the sandisland into the world -->
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="sandisland" params="wind_velocity:='10 0 0'">
+  <xacro:macro name="sandisland">
     <scene>
       <sky>
         <clouds>
@@ -9,10 +9,6 @@
         </clouds>
       </sky>
     </scene>
-
-    <wind>
-      <linear_velocity>${wind_velocity}</linear_velocity> <!-- Wind linear velocity -->
-    </wind>
     
     <!-- A global light source -->
     <include>
