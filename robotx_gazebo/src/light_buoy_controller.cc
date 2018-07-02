@@ -18,10 +18,11 @@ const std_msgs::ColorRGBA LightBuoyController::GREEN  = color(0.0, 1.0, 0.0, 1.0
 const std_msgs::ColorRGBA LightBuoyController::BLUE   = color(0.0, 0.0, 1.0, 1.0);
 const std_msgs::ColorRGBA LightBuoyController::YELLOW = color(1.0, 1.0, 0.0, 1.0);
 const std_msgs::ColorRGBA LightBuoyController::OFF    = color(0.0, 0.0, 0.0, 1.0);
-const LightBuoyController::colors_t LightBuoyController::colors[4] = {LightBuoyController::colors_t(RED,   "RED"),
-                                                                      LightBuoyController::colors_t(GREEN, "GREEN"),
-                                                                      LightBuoyController::colors_t(BLUE,  "BLUE"),
-                                                                      LightBuoyController::colors_t(YELLOW,"YELLOW")};
+const LightBuoyController::colors_t LightBuoyController::COLORS[5] = {LightBuoyController::colors_t(RED,    "RED"),
+                                                                      LightBuoyController::colors_t(GREEN,  "GREEN"),
+                                                                      LightBuoyController::colors_t(BLUE,   "BLUE"),
+                                                                      LightBuoyController::colors_t(YELLOW, "YELLOW"),
+                                                                      LightBuoyController::colors_t(OFF,    "OFF")};
 
 void LightBuoyController::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
@@ -58,16 +59,11 @@ void LightBuoyController::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPt
 
 void LightBuoyController::incrementState(const ros::TimerEvent& _event)
 {
-  incrementState();
-}
-
-void LightBuoyController::incrementState()
-{
   std::lock_guard<std::mutex> lock(mutex_);
   // Start over if at end of pattern
   if (state_ > 3)
       state_ = 0;
-  auto msg = pattern_[state_];
+  auto msg = COLORS[pattern_[state_]].first;
   // Publish current color to each panel
   for (size_t i = 0; i < 3; ++i)
     panel_pubs_[i].publish(msg);
@@ -83,26 +79,28 @@ bool LightBuoyController::changePattern(std_srvs::Trigger::Request& req, std_srv
   return true;
 }
 
-void LightBuoyController::changePattern(std::string& new_pattern)
+void LightBuoyController::changePattern(std::string& message)
 {
-  uint8_t indicies[3];
-  // Generate random sequence of 3 colors among RED, GREEN, BLUE, and YELLOW
-  for (size_t i = 0; i < 3; ++i)
-      indicies[i] = ignition::math::Rand::IntUniform(0, 3);
-  // Ensure second color is different from first and third
-  while(indicies[0] == indicies[1] || indicies[1] == indicies[2])
-      indicies[1] = ignition::math::Rand::IntUniform(0, 3);
+  pattern_t new_pattern;
+  // Last phase in pattern is always off
+  new_pattern[3] = 4;
+  do {
+    // Generate random sequence of 3 colors among RED, GREEN, BLUE, and YELLOW
+    for (size_t i = 0; i < 3; ++i)
+        new_pattern[i] = ignition::math::Rand::IntUniform(0, 3);
+    // Ensure there is no CONSECUTIVE repeats
+    while(new_pattern[0] == new_pattern[1] || new_pattern[1] == new_pattern[2])
+        new_pattern[1] = ignition::math::Rand::IntUniform(0, 3);
+  } while(new_pattern == pattern_);
 
   std::lock_guard<std::mutex> lock(mutex_);
-  // Assign actual color messages to pattern from random indicies
-  for (size_t i = 0; i < 3; ++i)
-  {
-      colors_t pair = colors[indicies[i]];
-      pattern_[i] = pair.first;
-      new_pattern += pair.second[0];
-  }
-  pattern_[3] = OFF;
+  // Copy newly generated pattern to pattern
+  pattern_ = new_pattern;
+  // Start in OFF state so pattern restarts at beginning
   state_ = 3;
-
-  ROS_INFO("Initial pattern is %s", new_pattern.c_str());
+  // Generate string representing pattern, ex: "RGB"
+  for (size_t i = 0; i < 3; ++i)
+    message += COLORS[i].second[0];
+  // Log the new pattern
+  ROS_INFO_NAMED("light_bouy_controller", "Pattern is %s", message.c_str());
 }

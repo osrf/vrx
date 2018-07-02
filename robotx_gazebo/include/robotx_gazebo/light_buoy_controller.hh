@@ -27,9 +27,9 @@ private:
   static const std_msgs::ColorRGBA YELLOW;
   static const std_msgs::ColorRGBA OFF;
 
-  typedef std::pair<std_msgs::ColorRGBA, std::string> colors_t;
+  using colors_t = std::pair<std_msgs::ColorRGBA, std::string>;
   // List of the color options with their string name for logging
-  static const colors_t colors[4];
+  static const colors_t COLORS[5];
 
   // Publisher to set color to each of the 3 panels using the gazebo_ros_color plugin
   ros::Publisher panel_pubs_[3];
@@ -43,9 +43,9 @@ private:
   uint8_t state_ = 0;
   // Display the next color in the sequence, or start over if at the end
   void incrementState(const ros::TimerEvent& _event);
-  void incrementState();
   // The current pattern to display, pattern_[3] is always OFF
-  std_msgs::ColorRGBA pattern_[4];
+  using pattern_t = std::array<uint8_t, 4>;
+  pattern_t pattern_;
   // Generate a new pattern and reset state to OFF
   bool changePattern(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
   void changePattern(std::string& new_pattern);
