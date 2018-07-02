@@ -7,6 +7,12 @@
       <parent link="base_link"/>
       <child link="${name}_link"/>
     </joint>       
+    <link name="${name}_link_optical" />
+    <joint name="${name}_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${name}_link"/>
+      <child link="${name}_link_optical"/>
+    </joint>       
     <gazebo reference="${name}_link">
       <sensor type="camera" name="${name}_sensor">
         <update_rate>30.0</update_rate>
@@ -36,7 +42,7 @@
           <cameraName>${name}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>${name}_link</frameName>
+          <frameName>${name}_link_optical</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
