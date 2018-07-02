@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <!-- Example of ROS localization using the example wamv with sensors -->
 <launch>
-  <!-- Sets robot_description to contents of URDF, used in visualizing mesh in rviz and by robot state publisher -->
-  <param name="robot_description" textfile="$(find wamv_gazebo)/urdf/wamv_gazebo_sensors.urdf" />
-
   <!-- Publishes static transforms (gps, imu, cameras, etc) to /tf -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
 
