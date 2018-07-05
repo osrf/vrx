@@ -73,5 +73,8 @@
         </geometry>
       </collision>
     </link>
+    <plugin name="controller" filename="liblight_buoy_controller.so">
+      <robotNamespace>light_buoy</robotNamespace>
+    </plugin>
   </model>
 </sdf>
