@@ -6,11 +6,13 @@
 
   <!-- ADD SENSORS -->
   <!-- Add a front camera -->
-  <xacro:wamv_camera name="front_camera"/>
+  <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}" />
   <!-- Add simulated GPS -->
-  <xacro:wamv_gps name="gps_wamv"/>
+  <xacro:wamv_gps name="gps_wamv" y="0.2" />
   <!-- Add Simulated IMU -->
-  <xacro:wamv_imu name="imu_wamv"/>
+  <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+  <!-- Add LIDAR -->
+  <xacro:wamv_multibeam_laser name="lidar_wamv" y="-0.3" />
   <!-- Add P3D ground truth -->
   <xacro:wamv_p3d name="p3d_wamv"/>
 </robot>
