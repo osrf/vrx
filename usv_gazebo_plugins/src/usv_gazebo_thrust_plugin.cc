@@ -23,7 +23,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <ros/time.h>
 
-#include <usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh>
+#include "usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh"
 
 using namespace gazebo;
 
@@ -44,7 +44,7 @@ double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
   }
 
   double val = _sdfPtr->Get<double>(_paramName);
-  ROS_INFO_STREAM("Parameter found - setting <" << _paramName << 
+  ROS_INFO_STREAM("Parameter found - setting <" << _paramName <<
                   "> to <" << val << ">.");
   return val;
 }
@@ -58,46 +58,47 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   // Retrieve model parameters from SDF
   // Set default values
-  this->nodeNamespace = "";
-  // how long to allow no input on cmd_drive
-  this->cmdTimeout = 1.0; 
-  this->paramMappingType = 0;
-  this->paramMaxCmd = 1.0;
-  this->paramMaxForceFwd = 100.0;
-  this->paramMaxForceRev = -100.0;
-  this->paramBoatWidth = 1.0;
-  this->paramBoatLength = 1.35;
+  // How long to allow no input on cmd_drive
+  this->cmdTimeout         = 1.0;
+  this->paramMappingType   = 0;
+  this->paramMaxCmd        = 1.0;
+  this->paramMaxForceFwd   = 100.0;
+  this->paramMaxForceRev   = -100.0;
+  this->paramBoatWidth     = 1.0;
+  this->paramBoatLength    = 1.35;
   this->paramThrustZoffset = -0.01;
 
   // Get parameters from SDF
+  std::string nodeNamespace = "";
   if (_sdf->HasElement("robotNamespace"))
   {
-    this->nodeNamespace = _sdf->Get<std::string>("robotNamespace") + "/";
+    nodeNamespace = _sdf->Get<std::string>("robotNamespace") + "/";
   }
 
+  std::string linkName;
   if (_sdf->HasElement("bodyName"))
   {
-    this->linkName = _sdf->Get<std::string>("bodyName");
-    this->link = this->model->GetLink(this->linkName);
-    ROS_INFO_STREAM("Found SDF parameter bodyName as <"<<this->linkName<<">");
+    linkName = _sdf->Get<std::string>("bodyName");
+    this->link = this->model->GetLink(linkName);
+    ROS_INFO_STREAM("Found SDF parameter bodyName as <" << linkName << ">");
   }
   else
   {
     this->link = this->model->GetLink();
-    this->linkName = this->link->GetName();
+    linkName = this->link->GetName();
     ROS_INFO_STREAM("Did not find SDF parameter bodyName");
   }
 
   if (!this->link)
   {
     ROS_FATAL("usv_gazebo_thrust_plugin error: bodyName: %s does not exist\n",
-      this->linkName.c_str());
+      linkName.c_str());
     return;
   }
 
-  ROS_INFO_STREAM("USV Model Link Name = " << this->linkName);
+  ROS_INFO_STREAM("USV Model Link Name = " << linkName);
 
-  this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout",this->cmdTimeout);
+  this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", this->cmdTimeout);
   if (_sdf->HasElement("mappingType"))
   {
     this->paramMappingType = _sdf->Get<int>("mappingType");
@@ -118,21 +119,23 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   this->paramMaxCmd = this->SdfParamDouble(_sdf, "maxCmd", this->paramMaxCmd);
   this->paramMaxForceFwd = this->SdfParamDouble(_sdf, "maxForceFwd",
-			this->paramMaxForceFwd);
+      this->paramMaxForceFwd);
   this->paramMaxForceRev = this->SdfParamDouble(_sdf, "maxForceRev",
-			this->paramMaxForceRev);
+      this->paramMaxForceRev);
   // make negative
-  this->paramMaxForceRev = -1.0 * std::abs(this->paramMaxForceRev);  
+  this->paramMaxForceRev = -1.0 * std::abs(this->paramMaxForceRev);
   this->paramBoatWidth = this->SdfParamDouble(_sdf, "boatWidth",
       this->paramBoatWidth);
   this->paramBoatLength = this->SdfParamDouble(_sdf, "boatLength",
       this->paramBoatLength);
   this->paramThrustZoffset = this->SdfParamDouble(_sdf, "thrustOffsetZ",
-			this->paramThrustZoffset);
+      this->paramThrustZoffset);
 
   // Get the names of the propeller joints.
-  ParsePropeller(_sdf, "left_propeller_joint", this->leftPropellerJoint);
-  ParsePropeller(_sdf, "right_propeller_joint", this->rightPropellerJoint);
+  this->ParsePropeller(
+    _sdf, "left_propeller_joint", this->leftPropellerJoint);
+  this->ParsePropeller(
+    _sdf, "right_propeller_joint", this->rightPropellerJoint);
 
   // Initialize time and odometry position
   this->prevUpdateTime = this->lastCmdDriveTime = this->world->GetSimTime();
@@ -141,10 +144,10 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   int argc = 0;
   char** argv = NULL;
   ros::init(argc, argv, "usv_thrust_gazebo",
-	    ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
-  this->rosnode.reset(new ros::NodeHandle(this->nodeNamespace));
+      ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
+  this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
 
-  this->cmdDriveSub = this->rosnode->subscribe("cmd_drive", 1, 
+  this->cmdDriveSub = this->rosnode->subscribe("cmd_drive", 1,
       &UsvThrust::OnCmdDrive, this);
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -208,22 +211,24 @@ void UsvThrust::Update()
   double dcmd = (time_now - this->lastCmdDriveTime).Double();
   if (dcmd > this->cmdTimeout && this->cmdTimeout > 0.0)
   {
-    ROS_INFO_STREAM_THROTTLE(1.0,"Command timeout!");
+    ROS_INFO_STREAM_THROTTLE(1.0, "Command timeout!");
     this->lastCmdDriveLeft = 0.0;
     this->lastCmdDriveRight = 0.0;
   }
   // Scale commands to thrust and torque forces
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"Last cmd: left:" << this->lastCmdDriveLeft
-		   << " right: " << this->lastCmdDriveRight);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Last cmd: left:" << this->lastCmdDriveLeft
+       << " right: " << this->lastCmdDriveRight);
   double thrust_left = 0.0;
   double thrust_right = 0.0;
-  switch(this->paramMappingType)
+  switch (this->paramMappingType)
   {
-  case 0: // Simplest, linear
+  // Simplest, linear
+  case 0:
     thrust_left = this->ScaleThrustCmd(this->lastCmdDriveLeft);
     thrust_right = this->ScaleThrustCmd(this->lastCmdDriveRight);
     break;
-  case 1: // GLF
+  // GLF
+  case 1:
     thrust_left = this->GlfThrustCmd(this->lastCmdDriveLeft);
     thrust_right = this->GlfThrustCmd(this->lastCmdDriveRight);
     break;
@@ -235,21 +240,21 @@ void UsvThrust::Update()
   double thrust = thrust_right + thrust_left;
   double torque = (thrust_right - thrust_left) * this->paramBoatWidth;
   ROS_DEBUG_STREAM_THROTTLE(1.0, "Thrust: left:" << thrust_left
-			<< " right: " << thrust_right);
+      << " right: " << thrust_right);
 
   // Add torque
-  this->link->AddRelativeTorque(math::Vector3(0,0,torque));
+  this->link->AddRelativeTorque(math::Vector3(0, 0, torque));
 
   // Add input force with offset below vessel
   math::Vector3 relpos(-1.0 * this->paramBoatLength / 2.0, 0.0,
-		  this->paramThrustZoffset);  // relative pos of thrusters
-  math::Vector3 inputforce3(thrust, 0,0);
+      this->paramThrustZoffset);  // relative pos of thrusters
+  math::Vector3 inputforce3(thrust, 0, 0);
 
   // Get Pose
   math::Pose pose = this->link->GetWorldPose();
 
   inputforce3 = pose.rot.RotateVector(inputforce3);
-  this->link->AddForceAtRelativePosition(inputforce3,relpos);
+  this->link->AddForceAtRelativePosition(inputforce3, relpos);
 
   // Spin the propellers
   this->SpinPropeller(this->leftPropellerJoint, this->lastCmdDriveLeft);
@@ -274,14 +279,17 @@ void UsvThrust::ParsePropeller(const sdf::ElementPtr _sdf,
     _propellerJoint = this->model->GetJoint(propellerName);
 
     if (!_propellerJoint)
-      ROS_WARN_STREAM("Unable to find propeller joint <" << propellerName<<">");
+    {
+      ROS_WARN_STREAM("Unable to find propeller joint <" <<
+         propellerName << ">");
+    }
   }
 }
 
 //////////////////////////////////////////////////
-void UsvThrust::SpinPropeller(physics::JointPtr &_propeller, 
+void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
     const double _input) const
-{ 
+{
   if (!_propeller)
     return;
 

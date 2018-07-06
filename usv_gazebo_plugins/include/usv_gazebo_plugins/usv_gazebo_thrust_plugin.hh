@@ -37,7 +37,21 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace gazebo
 {
-  /// \brief ToDo.
+  /// \brief A plugin to simulate a propulsion system under water.
+  /// This plugin accepts the following SDF parameters:
+  ///
+  ///   <robotNamespace>:
+  ///   <bodyName>:
+  ///   <cmdTimeout>:
+  ///   <mappingType>:
+  ///   <maxCmd>:
+  ///   <maxForceFwd>:
+  ///   <maxForceRev>:
+  ///   <boatWidth>:
+  ///   <boatLength>:
+  ///   <thrustOffsetZ>:
+  ///   <left_propeller_joint>: The left's propeller joint.
+  ///   <right_propeller_joint>: The right's propeller joint.
   class UsvThrust : public ModelPlugin
   {
     /// \brief Constructor.
@@ -49,28 +63,37 @@ namespace gazebo
     // Documentation inherited.
     public: virtual void Load(physics::ModelPtr _parent,
                               sdf::ElementPtr _sdf);
-  
+
     /// \brief Callback executed at every physics update.
     protected: virtual void Update();
 
     /// \brief Callback for Drive commands.
-    /// \param msg usv_msgs UsvDrive message
+    /// \param[in] _msg usv_msgs UsvDrive message
     private: void OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg);
 
     /// \brief Convenience function for getting SDF parameters.
+    /// \param[in] _sdfPtr Pointer to an SDF element to parse.
+    /// \param[in] _paramName The name of the element to parse.
+    /// \param[in] _defaultVal The default value returned if the element
+    /// does not exist.
+    /// \return The value parsed.
     private: double SdfParamDouble(sdf::ElementPtr _sdfPtr,
                                    const std::string &_paramName,
                                    const double _defaultVal) const;
 
-    /// \brief Takes ROS Drive commands and scales them by max thrust
-    /// \param cmd ROS drive command
-    /// \param max_cmd  Maximum value expected for commands - scaling factor
-    /// \param max_pos  Maximum positive force value
-    /// \param max_neg  Maximum negative force value
-    /// \return Value scaled and saturated
+    /// \brief Takes ROS Drive commands and scales them by max thrust.
+    /// \param[in] _cmd ROS drive command.
+    /// \return Value scaled and saturated.
     private: double ScaleThrustCmd(const double _cmd) const;
 
     /// \brief ToDo.
+    /// \param[in] _x ToDo.
+    /// \param[in] _A ToDo.
+    /// \param[in] _K ToDo.
+    /// \param[in] _B ToDo.
+    /// \param[in] _v ToDo.
+    /// \param[in] _C ToDo.
+    /// \param[in] _M ToDo.
     private: double Glf(const double _x,
                         const float  _A,
                         const float  _K,
@@ -80,29 +103,25 @@ namespace gazebo
                         const float  _M) const;
 
     /// \brief ToDo.
+    /// \param[in] _cmd ToDo.
+    /// \return ToDo.
     private: double GlfThrustCmd(const double _cmd) const;
 
     /// \brief Parse the propeller name from SDF.
-    /// \param sdf The entire model SDF
-    /// \param sdfName The SDF element to parse
-    /// \param propellerJoint The joint pointer to initialize
+    /// \param[in] _sdf The entire model SDF.
+    /// \param[in] _sdfName The SDF element to parse.
+    /// \param[out] _propellerJoint The joint pointer to initialize.
     private: void ParsePropeller(const sdf::ElementPtr _sdf,
                                  const std::string &_sdfName,
                                  physics::JointPtr &_propellerJoint) const;
 
     /// \brief Spin a propeller based on its input
-    /// \param propeller Pointer to the propeller joint to spin
-    /// \param input Last input received for this propeller
+    /// \param[in] _propeller Pointer to the propeller joint to spin
+    /// \param[in] _input Last input received for this propeller
     private: void SpinPropeller(physics::JointPtr &_propeller,
                                 const double _input) const;
 
-    /// \brief ToDo.
-    private: std::string nodeNamespace;
-
-    /// \brief ToDo.
-    private: std::string linkName;
-
-    /// \brief ToDo.
+    /// \brief The ROS node handler used for communications.
     private: std::unique_ptr<ros::NodeHandle> rosnode;
 
     /// \brief ToDo.
