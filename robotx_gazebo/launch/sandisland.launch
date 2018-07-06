@@ -1,11 +1,9 @@
 <?xml version="1.0"?>
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find robotx_gazebo)/config/custom_rosconsole.conf"/>
-  <arg name="light_buoy" default="true" />
-  <arg name="world" default="example_course.world" />
+  <arg name="world" default="$(find robotx_gazebo)/worlds/example_course.world" />
 
   <arg name="name" default="WAMV" />
-
 
   <!-- Initial USV location and attitude-->
   <arg name="x" default="0" />
@@ -19,7 +17,7 @@
   <param name="use_sim_time" value="true" />
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find robotx_gazebo)/worlds/$(arg world)"/>
+    <arg name="world_name" value="$(arg world)"/>
     <arg name="verbose" value="true"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
@@ -44,8 +42,4 @@
     <param name="input_msg_type" value="ModelStates" />
     <param name="model_name" value="wamv" />
   </node>
-
-  <!-- Spawn light buoy (scan the code challenge) if enabled -->
-  <include if="$(arg light_buoy)" file="$(find robotx_gazebo)/launch/light_buoy.launch" /> 
-
 </launch>
