@@ -60,3 +60,11 @@ install(DIRECTORY models/
 # Install all the launch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(sandisland
+                    test/sandisland.test
+                    test/sandisland.cpp)
+  target_link_libraries(sandisland ${catkin_LIBRARIES})
+endif()
