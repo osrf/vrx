@@ -63,8 +63,8 @@ install(DIRECTORY launch/
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
-  add_rostest_gtest(sandisland
+  add_rostest_gtest(sandisland_test
                     test/sandisland.test
                     test/sandisland.cpp)
-  target_link_libraries(sandisland ${catkin_LIBRARIES})
+  target_link_libraries(sandisland_test ${catkin_LIBRARIES})
 endif()
