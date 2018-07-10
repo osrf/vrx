@@ -7,3 +7,9 @@ xacro_add_files(
   urdf/wamv_two_engines.urdf.xacro
     INORDER INSTALL DESTINATION urdf
 )
+
+install(DIRECTORY mesh/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/mesh)
+
+install(DIRECTORY urdf/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf)

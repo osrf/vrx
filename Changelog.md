@@ -1,7 +1,6 @@
 ## VMRC 0
 
 ### VMRC 0.X.X
-
 1. Various cleanups/refactors.
   * [Pull request 3](https://bitbucket.org/osrf/vmrc/pull-requests/3)
 
@@ -25,4 +24,7 @@
 
 1. Add buoys for the obstacle challenge.
   * [Pull request 11](https://bitbucket.org/osrf/vmrc/pull-requests/11)
- 
+
+1. Add xacro macros and example for a WAM-V with sensors
+  * [Pull request 12](https://bitbucket.org/osrf/vmrc/pull-requests/12)
+

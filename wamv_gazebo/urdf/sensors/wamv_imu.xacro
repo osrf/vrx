@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="wamv_imu" params="name:=imu x:=0 y:=0 z:=1.3 R:=0 P:=0 Y:=0">
+    <link name="${name}_link">
+      <visual name="${name}_visual">>
+        <geometry>
+          <box size="0.05 0.025 0.005" />
+        </geometry>
+        <material name="${name}_visual_material">
+          <color rgba="1.0 0.0 00 1.0" />
+        </material>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}"/>
+      <parent link="base_link"/>
+      <child link="${name}_link"/>
+    </joint>
+    <gazebo>
+      <plugin name="imu_plugin_${name}" filename="libhector_gazebo_ros_imu.so">
+        <updateRate>15.0</updateRate>
+        <bodyName>${name}_link</bodyName>
+        <topicName>imu/data</topicName>
+        <serviceName>imu_service</serviceName>
+        <frameId>${name}_link</frameId>
+        <alwaysOn>true</alwaysOn>
+
+        <accelOffset>0.0 0.0 0.0</accelOffset>
+        <accelDrift>0.0 0.0 0.0</accelDrift>
+        <accelDriftFrequency>0.00027 0.00027 0.000027</accelDriftFrequency>
+        <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
+
+        <rateOffset>0.0 0.0 0.0</rateOffset>
+        <rateDrift>0.0 0.0 0.0</rateDrift>
+        <rateDriftFrequency>0.00027 0.00027 0.000027</rateDriftFrequency>
+        <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+
+        <yawOffset>0.0</yawOffset>
+        <yawDrift>0.0</yawDrift>
+        <yawDriftFrequency>0.00027</yawDriftFrequency>
+        <yawGaussianNoise>0.0</yawGaussianNoise>
+
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

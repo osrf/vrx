@@ -30,7 +30,6 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 // Gazebo
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
-//#include <gazebo_plugins/gazebo_ros_utils.h>
 
 //ROS
 #include <usv_gazebo_plugins/UsvDrive.h>
@@ -39,6 +38,9 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 // Custom Callback Queue
 #include <ros/callback_queue.h>
 #include <ros/advertise_options.h>
+
+// Messages
+#include <sensor_msgs/JointState.h>
 
 namespace gazebo
 {
@@ -106,6 +108,10 @@ namespace gazebo
     ros::NodeHandle *rosnode_;
 
     ros::Subscriber cmd_drive_sub_;
+
+    // For publishing to /joint_state with propeller state
+    ros::Publisher joint_state_pub_;
+    sensor_msgs::JointState joint_state_msg_;
 
     //GazeboRosPtr gazebo_ros_;
     //physics::ModelPtr parent;
