@@ -141,10 +141,6 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->prevUpdateTime = this->lastCmdDriveTime = this->world->GetSimTime();
 
   // Initialize the ROS node and subscribe to cmd_drive
-  int argc = 0;
-  char** argv = NULL;
-  ros::init(argc, argv, "usv_thrust_gazebo",
-      ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
   this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
 
   this->cmdDriveSub = this->rosnode->subscribe("cmd_drive", 1,
@@ -196,7 +192,7 @@ double UsvThrust::GlfThrustCmd(const double _cmd) const
   {
     val = 0.0;
   }
-  ROS_INFO_STREAM_THROTTLE(0.5,
+  ROS_DEBUG_STREAM_THROTTLE(0.5,
       _cmd << ": " << val << " / " << val / this->paramMaxForceFwd);
   return val;
 }
@@ -211,7 +207,7 @@ void UsvThrust::Update()
   double dcmd = (time_now - this->lastCmdDriveTime).Double();
   if (dcmd > this->cmdTimeout && this->cmdTimeout > 0.0)
   {
-    ROS_INFO_STREAM_THROTTLE(1.0, "Command timeout!");
+    ROS_DEBUG_STREAM_THROTTLE(1.0, "Command timeout!");
     this->lastCmdDriveLeft = 0.0;
     this->lastCmdDriveRight = 0.0;
   }
