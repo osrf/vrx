@@ -24,6 +24,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <ros/ros.h>
 #include <tf2/LinearMath/Transform.h>
 
+#include <cmath>
 #include <functional>
 #include <sstream>
 
@@ -132,14 +133,15 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   // Get inertia and mass of vessel
-  math::Vector3 inertia = this->link->GetInertial()->GetPrincipalMoments();
-  double mass = this->link->GetInertial()->GetMass();
+  const math::Vector3 kInertia =
+    this->link->GetInertial()->GetPrincipalMoments();
+  const double kMass = this->link->GetInertial()->GetMass();
 
   // Report some of the pertinent parameters for verification
   ROS_INFO("USV Dynamics Parameters: From URDF XACRO model definition");
-  ROS_INFO_STREAM("Vessel Mass (rigid-body): " << mass);
-  ROS_INFO_STREAM("Vessel Inertia Vector (rigid-body): X:" << inertia[0] <<
-                  " Y:" << inertia[1] << " Z:" << inertia[2]);
+  ROS_INFO_STREAM("Vessel Mass (rigid-body): " << kMass);
+  ROS_INFO_STREAM("Vessel Inertia Vector (rigid-body): X:" << kInertia[0] <<
+                  " Y:" << kInertia[1] << " Z:" << kInertia[2]);
 
   // Initialize time and odometry position
   this->prevUpdateTime = this->world->GetSimTime();
@@ -160,9 +162,11 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   // must be factor of 2! - only 2 for now!!
   const int kNN = 2;
+  
   // x,y grid step increments
   this->dx = paramBoatLength / kNN;
   this->dy = paramBoatWidth / kNN;
+
   // Vector for interating through grid points on boat
   for (int i = -kNN / 2; i < 0; ++i)
     this->II.push_back(i);
@@ -190,6 +194,7 @@ void UsvDynamicsPlugin::Update()
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
   const math::Vector3 kVelAngularBody = this->link->GetRelativeAngularVel();
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
+
   // Estimate the linear and angular accelerations.
   // Note the the GetRelativeLinearAccel() and AngularAccel() functions
   // appear to be unreliable
@@ -245,6 +250,7 @@ void UsvDynamicsPlugin::Update()
 
   // Sum all forces - in body frame
   const Eigen::VectorXd kForceSum = kAmassVec + kDvec;
+
   // Forces in fixed frame
   ROS_DEBUG_STREAM_THROTTLE(1.0, "forceSum :\n" << kForceSum);
 
@@ -255,8 +261,7 @@ void UsvDynamicsPlugin::Update()
     math::Vector3(kForceSum(3), kForceSum(4), kForceSum(5)));
 
   // Loop over boat grid points
-  for (std::vector<int>::iterator it = this->II.begin();
-        it != this->II.end(); ++it)
+  for (const int i : this->II)
   {
     // grid points on boat
     tf2::Vector3 bpnt(0, 0, 0);
@@ -265,17 +270,16 @@ void UsvDynamicsPlugin::Update()
     tf2::Vector3 bpntW(0, 0, 0);
 
     // grid point in boat fram
-    bpnt.setX((*it) * this->dx);
-    for (std::vector<int>::iterator jt = this->II.begin();
-          jt != this->II.end(); ++jt)
+    bpnt.setX(i * this->dx);
+    for (const int j : this->II)
     {
-      bpnt.setY((*jt) * this->dy);
+      bpnt.setY(j * this->dy);
 
       // Transform from vessel to water/world frame
       bpntW = xformV * bpnt;
 
       // Debug
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << (*it) << "," << (*jt) <<
+      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "," << j <<
           "] grid points" << bpnt.x() << "," << bpnt.y() << "," << bpnt.z());
       ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << kEuler);
       ROS_DEBUG_STREAM_THROTTLE(1.0, "in water frame" << bpntW.x() << "," <<
@@ -294,20 +298,21 @@ void UsvDynamicsPlugin::Update()
 
       // sum vertical dsplacement over all waves
       double dz = 0.0;
-      for (int i = 0; i < this->paramWaveN; ++i)
+      for (int k = 0; k < this->paramWaveN; ++k)
       {
-        const double kDdotx = this->paramWaveDirections[i][0] * X.x +
-          this->paramWaveDirections[i][1] * X.y;
-        const double kW = 2.0 * 3.14159 / this->paramWavePeriods[i];
+        const double kDdotx = this->paramWaveDirections[k][0] * X.x +
+          this->paramWaveDirections[k][1] * X.y;
+        const double kW = 2.0 * M_PI / this->paramWavePeriods[k];
         const double kK = kW * kW / GRAVITY;
-        dz += this->paramWaveAmps[i] * cos(kK * kDdotx - kW * kTimeNow.Float());
+        dz += this->paramWaveAmps[k] * cos(kK * kDdotx - kW * kTimeNow.Float());
       }
       ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
 
       // Buoyancy force at grid point
       const float kBuoyForce =
-        (((this->waterLevel + dz) - kDdz) * this->buoyFrac);
+        ((this->waterLevel + dz) - kDdz) * this->buoyFrac;
       ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
+
       // Apply force at grid point
       // From web, Appears that position is in the link frame
       // and force is in world frame
