@@ -29,6 +29,7 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <gazebo/common/common.hh>
+#include <gazebo/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
 #include <sdf/sdf.hh>
 
@@ -39,11 +40,28 @@ namespace gazebo
   {
     /// \brief Constructor.
     ///
-    /// <boat_area>: Horizontal surface area [m^2]. Default value is 0.48.
-    /// <boat_length>: Boat length [m]. Default value is 1.35.
-    /// <boat_width>: Boat width [m]. Default value is 1.
+    /// <bodyName>: ToDo.
+    /// <boatArea>: Horizontal surface area [m^2]. Default value is 0.48.
+    /// <boatLength>: Boat length [m]. Default value is 1.35.
+    /// <boatWidth>: Boat width [m]. Default value is 1.
     /// <waterDensity>: Water density [kg/m^3]. Default value is 997.7735.
     /// <waterLevel>: Water height [m]. Default value is 0.5.
+    /// <xDotU>: ToDo.
+    /// <yDotV>: ToDo.
+    /// <nDotR>: ToDo.
+    /// <xU>: ToDo.
+    /// <xUU>: ToDo.
+    /// <yV>: ToDo.
+    /// <yVV>: ToDo.
+    /// <zW>: ToDo.
+    /// <kP>: ToDo.
+    /// <mQ>: ToDo.
+    /// <nR>: ToDo.
+    /// <nRR>: ToDo.
+    /// <wave_n>: ToDo.
+    /// <wave_amp<N>>: ToDo.
+    /// <wave_period<N>>: ToDo.
+    /// <wave_direction<N>>: ToDo.
     public: UsvDynamicsPlugin();
 
     /// \brief Destructor.
@@ -70,11 +88,11 @@ namespace gazebo
     private: physics::WorldPtr world;
 
     /// \brief Pointer to model link in gazebo,
-    /// optionally specified by the bodyName parameter,
+    /// optionally specified by the bodyName parameter.
     /// The states are taken from this link and forces applied to this link.
     private: physics::LinkPtr link;
 
-    /// \brief Simulation time of the last update
+    /// \brief Simulation time of the last update.
     private: common::Time prevUpdateTime;
 
     /// \brief ToDo.
@@ -83,7 +101,7 @@ namespace gazebo
     /// \brief ToDo.
     private: math::Vector3 prevAngVel;
 
-    /// \brief For Buoyancy calculation
+    /// \brief For Buoyancy calculation.
     private: float buoyFrac;
 
     /// \brief ToDo.
@@ -95,26 +113,26 @@ namespace gazebo
     /// \brief ToDo.
     private: std::vector<int> II;
 
-    /// \brief Values to set via Plugin Parameters
-    /// Plugin Parameter: Added mass in surge, X_\dot{u}
+    /// \brief Values to set via Plugin Parameters.
+    /// Plugin Parameter: Added mass in surge, X_\dot{u}.
     private: double paramXdotU;
 
-    /// \brief Plugin Parameter: Added mass in sway, Y_\dot{v}
+    /// \brief Plugin Parameter: Added mass in sway, Y_\dot{v}.
     private: double paramYdotV;
 
-    /// \brief Plugin Parameter: Added mass in yaw, N_\dot{r}
+    /// \brief Plugin Parameter: Added mass in yaw, N_\dot{r}.
     private: double paramNdotR;
 
-    /// \brief Plugin Parameter: Linear drag in surge
+    /// \brief Plugin Parameter: Linear drag in surge.
     private: double paramXu;
 
-    /// \brief Plugin Parameter: Quadratic drag in surge
+    /// \brief Plugin Parameter: Quadratic drag in surge.
     private: double paramXuu;
 
-    /// \brief Plugin Parameter: Linear drag in sway
+    /// \brief Plugin Parameter: Linear drag in sway.
     private: double paramYv;
 
-    /// \brief Plugin Parameter: Quadratic drag in sway
+    /// \brief Plugin Parameter: Quadratic drag in sway.
     private: double paramYvv;
 
     /// \brief ToDo.
@@ -126,18 +144,18 @@ namespace gazebo
     /// \brief ToDo.
     private: double paramMq;
 
-    /// \brief Plugin Parameter: Linear drag in yaw
+    /// \brief Plugin Parameter: Linear drag in yaw.
     private: double paramNr;
-    /// \brief Plugin Parameter: Quadratic drag in yaw
+    /// \brief Plugin Parameter: Quadratic drag in yaw.
     private: double paramNrr;
 
-    /// \brief Water height [m]
+    /// \brief Water height [m].
     private: double waterLevel;
 
-    /// \brief Added mass matrix, 6x6
+    /// \brief Added mass matrix, 6x6.
     private: Eigen::MatrixXd Ma;
 
-    /// \brief Wave parameters
+    /// \brief Wave parameters.
     private: int paramWaveN;
 
     /// \brief ToDo.
@@ -149,7 +167,7 @@ namespace gazebo
     /// \brief ToDo.
     private: std::vector<std::vector<float>> paramWaveDirections;
 
-    /// \brief Pointer to the update event connection
+    /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
   };
 }

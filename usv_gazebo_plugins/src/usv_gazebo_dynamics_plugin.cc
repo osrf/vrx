@@ -21,14 +21,13 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
 #include <tf2/LinearMath/Transform.h>
 
 #include <functional>
-#include <thread>
 #include <sstream>
 
+#include <gazebo/math/Pose.hh>
 #include "usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh"
 
 #define GRAVITY 9.815
@@ -141,13 +140,11 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   ROS_INFO_STREAM("Vessel Mass (rigid-body): " << mass);
   ROS_INFO_STREAM("Vessel Inertia Vector (rigid-body): X:" << inertia[0] <<
                   " Y:" << inertia[1] << " Z:" << inertia[2]);
-  ROS_INFO("USV Dynamics Parameters: Plugin Parameters");
 
   // Initialize time and odometry position
   this->prevUpdateTime = this->world->GetSimTime();
 
-  // Listen to the update event. This event is broadcast every
-  // simulation iteration.
+  // Listen to the update event broadcastes every physics iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
     std::bind(&UsvDynamicsPlugin::Update, this));
 
@@ -166,7 +163,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // x,y grid step increments
   this->dx = paramBoatLength / kNN;
   this->dy = paramBoatWidth / kNN;
-  // Vector for interating throug grid points on boat
+  // Vector for interating through grid points on boat
   for (int i = -kNN / 2; i < 0; ++i)
     this->II.push_back(i);
 
@@ -180,28 +177,30 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvDynamicsPlugin::Update()
 {
-  common::Time time_now = this->world->GetSimTime();
-  double dt = (time_now - this->prevUpdateTime).Double();
-  this->prevUpdateTime = time_now;
+  const common::Time kTimeNow = this->world->GetSimTime();
+  double dt = (kTimeNow - this->prevUpdateTime).Double();
+  this->prevUpdateTime = kTimeNow;
 
   // Get Pose/Orientation from Gazebo (if no state subscriber is active)
-  math::Pose pose = this->link->GetWorldPose();
-  math::Vector3 euler = pose.rot.GetAsEuler();
+  const math::Pose kPose = this->link->GetWorldPose();
+  const math::Vector3 kEuler = kPose.rot.GetAsEuler();
 
   // Get body-centered linear and angular rates
-  math::Vector3 velLinearBody = this->link->GetRelativeLinearVel();
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << velLinearBody);
-  math::Vector3 velAngularBody = this->link->GetRelativeAngularVel();
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << velAngularBody);
+  const math::Vector3 kVelLinearBody = this->link->GetRelativeLinearVel();
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
+  const math::Vector3 kVelAngularBody = this->link->GetRelativeAngularVel();
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
   // Estimate the linear and angular accelerations.
   // Note the the GetRelativeLinearAccel() and AngularAccel() functions
   // appear to be unreliable
-  math::Vector3 accelLinearBody = (velLinearBody - this->prevLinVel) / dt;
-  this->prevLinVel = velLinearBody;
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel linear: " << accelLinearBody);
-  math::Vector3 accel_angular_body = (velAngularBody - this->prevAngVel) / dt;
-  this->prevAngVel = velAngularBody;
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel angular: " << accel_angular_body);
+  const math::Vector3 kAccelLinearBody =
+    (kVelLinearBody - this->prevLinVel) / dt;
+  this->prevLinVel = kVelLinearBody;
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel linear: " << kAccelLinearBody);
+  const math::Vector3 kAccelAngularBody =
+    (kVelAngularBody - this->prevAngVel) / dt;
+  this->prevAngVel = kVelAngularBody;
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel angular: " << kAccelAngularBody);
 
   // Create state and derivative of state (accelerations)
   Eigen::VectorXd stateDot = Eigen::VectorXd(6);
@@ -209,51 +208,51 @@ void UsvDynamicsPlugin::Update()
   Eigen::MatrixXd Cmat     = Eigen::MatrixXd::Zero(6, 6);
   Eigen::MatrixXd Dmat     = Eigen::MatrixXd::Zero(6, 6);
 
-  stateDot << accelLinearBody.x, accelLinearBody.y, accelLinearBody.z,
-    accel_angular_body.x, accel_angular_body.y, accel_angular_body.z;
+  stateDot << kAccelLinearBody.x, kAccelLinearBody.y, kAccelLinearBody.z,
+    kAccelAngularBody.x, kAccelAngularBody.y, kAccelAngularBody.z;
 
-  state << velLinearBody.x, velLinearBody.y, velLinearBody.z,
-    velAngularBody.x, velAngularBody.y, velAngularBody.z;
+  state << kVelLinearBody.x, kVelLinearBody.y, kVelLinearBody.z,
+    kVelAngularBody.x, kVelAngularBody.y, kVelAngularBody.z;
 
   // Added Mass
-  Eigen::VectorXd amassVec = -1.0 * this->Ma * stateDot;
+  const Eigen::VectorXd kAmassVec = -1.0 * this->Ma * stateDot;
   ROS_DEBUG_STREAM_THROTTLE(1.0, "stateDot: \n" << stateDot);
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "amassVec :\n" << amassVec);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "amassVec :\n" << kAmassVec);
 
   // Coriolis - added mass components
-  Cmat(0, 5) = this->paramYdotV * velLinearBody.y;
-  Cmat(1, 5) = this->paramXdotU * velLinearBody.x;
-  Cmat(5, 0) = this->paramYdotV * velLinearBody.y;
-  Cmat(5, 1) = this->paramXdotU * velLinearBody.x;
+  Cmat(0, 5) = this->paramYdotV * kVelLinearBody.y;
+  Cmat(1, 5) = this->paramXdotU * kVelLinearBody.x;
+  Cmat(5, 0) = this->paramYdotV * kVelLinearBody.y;
+  Cmat(5, 1) = this->paramXdotU * kVelLinearBody.x;
 
   // Drag
-  Dmat(0, 0) = this->paramXu + this->paramXuu * std::abs(velLinearBody.x);
-  Dmat(1, 1) = this->paramYv + this->paramYvv * std::abs(velLinearBody.y);
+  Dmat(0, 0) = this->paramXu + this->paramXuu * std::abs(kVelLinearBody.x);
+  Dmat(1, 1) = this->paramYv + this->paramYvv * std::abs(kVelLinearBody.y);
   Dmat(2, 2) = this->paramZw;
   Dmat(3, 3) = this->paramKp;
   Dmat(4, 4) = this->paramMq;
-  Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(velAngularBody.z);
+  Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(kVelAngularBody.z);
   ROS_DEBUG_STREAM_THROTTLE(1.0, "Dmat :\n" << Dmat);
-  Eigen::VectorXd Dvec = -1.0 * Dmat * state;
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "Dvec :\n" << Dvec);
+  const Eigen::VectorXd kDvec = -1.0 * Dmat * state;
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Dvec :\n" << kDvec);
 
   // Vehicle frame transform
   tf2::Quaternion vq = tf2::Quaternion();
   tf2::Matrix3x3 m;
-  m.setEulerYPR(euler.z, euler.y, euler.x);
+  m.setEulerYPR(kEuler.z, kEuler.y, kEuler.x);
   m.getRotation(vq);
   tf2::Transform xformV = tf2::Transform(vq);
 
   // Sum all forces - in body frame
-  Eigen::VectorXd forceSum = amassVec + Dvec;
+  const Eigen::VectorXd kForceSum = kAmassVec + kDvec;
   // Forces in fixed frame
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "forceSum :\n" << forceSum);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "forceSum :\n" << kForceSum);
 
   // Add dynamic forces/torques to link at CG
   this->link->AddRelativeForce(
-    math::Vector3(forceSum(0), forceSum(1), forceSum(2)));
+    math::Vector3(kForceSum(0), kForceSum(1), kForceSum(2)));
   this->link->AddRelativeTorque(
-    math::Vector3(forceSum(3), forceSum(4), forceSum(5)));
+    math::Vector3(kForceSum(3), kForceSum(4), kForceSum(5)));
 
   // Loop over boat grid points
   for (std::vector<int>::iterator it = this->II.begin();
@@ -278,41 +277,42 @@ void UsvDynamicsPlugin::Update()
       // Debug
       ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << (*it) << "," << (*jt) <<
           "] grid points" << bpnt.x() << "," << bpnt.y() << "," << bpnt.z());
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << euler);
+      ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << kEuler);
       ROS_DEBUG_STREAM_THROTTLE(1.0, "in water frame" << bpntW.x() << "," <<
           bpntW.y() << "," << bpntW.z());
 
       // Vertical location of boat grid point in world frame
-      float ddz = pose.pos.z + bpntW.z();
-      ROS_DEBUG_STREAM("Z, pose: " << pose.pos.z << ", bpnt: " << bpntW.z() <<
-        ", dd: " << ddz);
+      const float kDdz = kPose.pos.z + bpntW.z();
+      ROS_DEBUG_STREAM("Z, pose: " << kPose.pos.z << ", bpnt: " << bpntW.z() <<
+        ", dd: " << kDdz);
 
       // Find vertical displacement of wave field
       // World location of grid point
       math::Vector3 X;
-      X.x = pose.pos.x + bpntW.x();
-      X.y = pose.pos.y + bpntW.y();
+      X.x = kPose.pos.x + bpntW.x();
+      X.y = kPose.pos.y + bpntW.y();
 
       // sum vertical dsplacement over all waves
       double dz = 0.0;
       for (int i = 0; i < this->paramWaveN; ++i)
       {
-        double Ddotx = this->paramWaveDirections[i][0] * X.x +
+        const double kDdotx = this->paramWaveDirections[i][0] * X.x +
           this->paramWaveDirections[i][1] * X.y;
-        double w = 2.0 * 3.14159 / this->paramWavePeriods[i];
-        double k = w * w / 9.81;
-        dz += this->paramWaveAmps[i] * cos(k * Ddotx - w * time_now.Float());
+        const double kW = 2.0 * 3.14159 / this->paramWavePeriods[i];
+        const double kK = kW * kW / GRAVITY;
+        dz += this->paramWaveAmps[i] * cos(kK * kDdotx - kW * kTimeNow.Float());
       }
       ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
 
       // Buoyancy force at grid point
-      float buoyForce = (((this->waterLevel + dz) - ddz) * this->buoyFrac);
-      ROS_DEBUG_STREAM("buoyForce: " << buoyForce);
+      const float kBuoyForce =
+        (((this->waterLevel + dz) - kDdz) * this->buoyFrac);
+      ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
       // Apply force at grid point
       // From web, Appears that position is in the link frame
       // and force is in world frame
-      this->link->AddForceAtRelativePosition(math::Vector3(0, 0, buoyForce),
-          math::Vector3(bpnt.x(), bpnt.y(), bpnt.z()));
+      this->link->AddForceAtRelativePosition(math::Vector3(0, 0, kBuoyForce),
+        math::Vector3(bpnt.x(), bpnt.y(), bpnt.z()));
     }
   }
 }
