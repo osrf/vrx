@@ -143,6 +143,17 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Initialize the ROS node and subscribe to cmd_drive
   this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
 
+  // Advertise joint state publisher to view propellers in rviz
+  // TODO: consider throttling joint_state pub for performance (every OnUpdate may be too frequent)
+  this->jointStatePub =
+    this->rosnode->advertise<sensor_msgs::JointState>("joint_states", 1);
+  this->jointStateMsg.name.resize(2);
+  this->jointStateMsg.position.resize(2);
+  this->jointStateMsg.velocity.resize(2);
+  this->jointStateMsg.effort.resize(2);
+  this->jointStateMsg.name[0] = this->leftPropellerJoint->GetName();
+  this->jointStateMsg.name[1] = this->rightPropellerJoint->GetName();
+
   this->cmdDriveSub = this->rosnode->subscribe("cmd_drive", 1,
       &UsvThrust::OnCmdDrive, this);
 
@@ -255,6 +266,10 @@ void UsvThrust::Update()
   // Spin the propellers
   this->SpinPropeller(this->leftPropellerJoint, this->lastCmdDriveLeft);
   this->SpinPropeller(this->rightPropellerJoint, this->lastCmdDriveRight);
+ 
+  // Publish the propeller joint state
+  this->jointStateMsg.header.stamp = ros::Time::now();
+  this->jointStatePub.publish(this->jointStateMsg);
 }
 
 //////////////////////////////////////////////////
@@ -284,7 +299,7 @@ void UsvThrust::ParsePropeller(const sdf::ElementPtr _sdf,
 
 //////////////////////////////////////////////////
 void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
-    const double _input) const
+    const double _input)
 {
   if (!_propeller)
     return;
@@ -298,6 +313,26 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
     effort = (_input / kMaxInput) * kMaxEffort;
 
   _propeller->SetForce(0, effort);
+
+  // Get index in joint state message for this propeller
+  uint8_t index;
+  if (_propeller->GetName() == this->jointStateMsg.name[0])
+    index = 0;
+  else if (_propeller->GetName() == this->jointStateMsg.name[1])
+    index = 1;
+  else
+  {
+    ROS_WARN("Propeller %s cannot be associated with a joint, "
+             "skipping message.", _propeller->GetName().c_str());
+    return;
+  }
+
+  // Set position, velocity, and effort of joint from gazebo
+  gazebo::math::Angle position = _propeller->GetAngle(0);
+  position.Normalize();
+  this->jointStateMsg.position[index] = position.Radian();
+  this->jointStateMsg.velocity[index] = _propeller->GetVelocity(0);
+  this->jointStateMsg.effort[index] = effort;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvThrust);

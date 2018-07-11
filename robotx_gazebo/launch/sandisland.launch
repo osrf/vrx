@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find robotx_gazebo)/config/custom_rosconsole.conf"/>
-  <arg name="light_buoy" default="true" />
-  <arg name="world" default="example_course.world" />
-
-  <arg name="name" default="WAMV" />
-
+  <!-- Gazebo world to load -->
+  <arg name="world" default="$(find robotx_gazebo)/worlds/example_course.world" />
+  <!-- If true, run gazebo GUI -->
+  <arg name="gui" default="true" />
+  <!-- If true, run gazebo in verbose mode -->
+  <arg name="verbose" default="false"/>
 
   <!-- Initial USV location and attitude-->
   <arg name="x" default="0" />
@@ -15,14 +16,13 @@
   <arg name="R" default="0" />
   <arg name="Y" default="0" />
 
-
-  <param name="use_sim_time" value="true" />
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find robotx_gazebo)/worlds/$(arg world)"/>
-    <arg name="verbose" value="true"/>
+    <arg name="world_name" value="$(arg world)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="$(arg gui)" />
   </include>
 
   <!-- Load robot model -->
@@ -35,8 +35,6 @@
         -R $(arg R) -P $(arg P) -Y $(arg Y)
         -urdf -param robot_description -model wamv"/>
 
-  <!-- <include file="$(find robotx_gazebo)/launch/usv_diffdrive.launch"/> -->
-
   <!-- Utility for publishing rpy for plotting -->
   <node pkg="robotx_gazebo" type="quat2rpy.py" name="quat2rpy" output="screen">
     <remap from="in_topic" to="/gazebo/model_states" />
@@ -44,8 +42,4 @@
     <param name="input_msg_type" value="ModelStates" />
     <param name="model_name" value="wamv" />
   </node>
-
-  <!-- Spawn light buoy (scan the code challenge) if enabled -->
-  <include if="$(arg light_buoy)" file="$(find robotx_gazebo)/launch/light_buoy.launch" /> 
-
 </launch>

@@ -25,6 +25,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #define USV_GAZEBO_PLUGINS_THRUST_HH
 
 #include <ros/ros.h>
+#include <sensor_msgs/JointState.h>
 #include <memory>
 #include <string>
 #include <gazebo/common/CommonTypes.hh>
@@ -119,7 +120,7 @@ namespace gazebo
     /// \param[in] _propeller Pointer to the propeller joint to spin
     /// \param[in] _input Last input received for this propeller
     private: void SpinPropeller(physics::JointPtr &_propeller,
-                                const double _input) const;
+                                const double _input);
 
     /// \brief The ROS node handler used for communications.
     private: std::unique_ptr<ros::NodeHandle> rosnode;
@@ -184,6 +185,12 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    /// \brief For publishing to /joint_state with propeller state.
+    private: ros::Publisher jointStatePub;
+
+    /// \brief The propeller message state.
+    private: sensor_msgs::JointState jointStateMsg;
   };
 }
 

@@ -5,7 +5,7 @@
   <node pkg="robotx_gazebo" type="twist2drive_keyboard.py" name="twist2drive_keyboard" />
 
   <!-- Keyboard teleop -->
-  <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="  teleop_twisst_keyboard" output="screen">
+  <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen">
   </node>
 
 </launch>
