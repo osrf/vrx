@@ -35,6 +35,8 @@
         -R $(arg R) -P $(arg P) -Y $(arg Y)
         -urdf -param robot_description -model wamv"/>
 
+  <include file="$(find robotx_gazebo)/launch/usv_diffdrive.launch"/>
+
   <!-- Utility for publishing rpy for plotting -->
   <node pkg="robotx_gazebo" type="quat2rpy.py" name="quat2rpy" output="screen">
     <remap from="in_topic" to="/gazebo/model_states" />

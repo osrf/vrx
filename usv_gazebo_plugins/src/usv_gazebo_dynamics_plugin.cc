@@ -3,7 +3,8 @@
 Copyright (c) 2017, Brian Bingham
 All rights reserved
 
-This file is part of the usv_gazebo_dynamics_plugin package, known as this Package.
+This file is part of the usv_gazebo_dynamics_plugin package,
+known as this Package.
 
 This Package free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,366 +21,300 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <functional>
-#include <thread>
-
 #include <nav_msgs/Odometry.h>
-#include <sensor_msgs/JointState.h>
-#include <ros/time.h>
+#include <ros/ros.h>
 #include <tf2/LinearMath/Transform.h>
 
-#include <usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh>
+#include <functional>
+#include <thread>
+#include <sstream>
+
+#include "usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh"
 
 #define GRAVITY 9.815
 
 using namespace gazebo;
 
-UsvPlugin::UsvPlugin()
+//////////////////////////////////////////////////
+UsvDynamicsPlugin::UsvDynamicsPlugin()
 {
 }
 
-UsvPlugin::~UsvPlugin()
+//////////////////////////////////////////////////
+double UsvDynamicsPlugin::SdfParamDouble(sdf::ElementPtr _sdfPtr,
+  const std::string &_paramName, const double _defaultVal) const
 {
-  rosnode_->shutdown();
-  spinner_thread_->join();
-  delete rosnode_;
-  delete spinner_thread_;
-}
-
-void UsvPlugin::FiniChild()
-{
-}
-
-
-double UsvPlugin::getSdfParamDouble(sdf::ElementPtr sdfPtr, const std::string &param_name, double default_val)
-{
-  double val = default_val;
-  if (sdfPtr->HasElement(param_name) && sdfPtr->GetElement(param_name)->GetValue())
+  if (!_sdfPtr->HasElement(_paramName))
   {
-    val = sdfPtr->GetElement(param_name)->Get<double>();
-    ROS_INFO_STREAM("Parameter found - setting <" << param_name << "> to <" << val << ">.");
+    ROS_INFO_STREAM("Parameter <" << _paramName << "> not found: "
+                    "Using default value of <" << _defaultVal << ">.");
+    return _defaultVal;
+  }
 
-  }
-  else{
-    ROS_INFO_STREAM("Parameter <" << param_name << "> not found: Using default value of <" << val << ">.");
-  }
+  double val = _sdfPtr->Get<double>(_paramName);
+  ROS_INFO_STREAM("Parameter found - setting <" << _paramName <<
+                  "> to <" << val << ">.");
   return val;
 }
 
-void UsvPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
+//////////////////////////////////////////////////
+void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   ROS_INFO("Loading usv_gazebo_dynamics_plugin");
-  model_ = _parent;
-  world_ = model_->GetWorld();
-
-  // Retrieve model paramters from SDF
-  // Set default values
-  node_namespace_ = "";
-
-  water_level_ = 0.5;
-  water_density_ = 997.7735;
-
-  param_X_dot_u_ = 5;  // Added mass
-  param_Y_dot_v_ = 5;
-  param_N_dot_r_ = 1;
-  param_X_u_ = 20;  // linear drag
-  param_X_uu_ = 0.0;
-  param_Y_v_ = 20;
-  param_Y_vv_ = 0.0;
-  param_Z_w_ = 20;
-  param_K_p_ = 20.0;
-  param_M_q_ = 20.0;
-  param_N_r_ = 20;
-  param_N_rr_ = 0.0;
-
-  param_boat_width_ = 1.0;
-  param_boat_length_ = 1.35;
-
-  param_metacentric_length_ = 0.4 ; // From clearpath
-  param_metacentric_width_ = 0.4;  // ditto
-  param_boat_area_ = 0.48;  // Clearpath: 1.2m in length, 0.2m in width, 2 pontoons.
-
-  //  Enumerating model
-  ROS_INFO_STREAM("Enumerating Model...");
-  ROS_INFO_STREAM("Model name = "<< model_->GetName());
-  physics::Link_V links = model_->GetLinks();
-  for (auto ii=0u; ii<links.size(); ii++){
-    ROS_INFO_STREAM("Link: "<<links[ii]->GetName());
-  }
+  this->world = _model->GetWorld();
 
   // Get parameters from SDF
-  if (_sdf->HasElement("robotNamespace"))
+  std::string linkName;
+  if (!_sdf->HasElement("bodyName") ||
+      !_sdf->GetElement("bodyName")->GetValue())
   {
-    node_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
-  }
-
-  if (!_sdf->HasElement("bodyName") || !_sdf->GetElement("bodyName")->GetValue())
-  {
-    link_ = model_->GetLink();
-    link_name_ = link_->GetName();
+    this->link = _model->GetLink();
+    linkName = this->link->GetName();
     ROS_INFO_STREAM("Did not find SDF parameter bodyName");
   }
-  else {
-    link_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
-    //link_name_ = "thrust_link";
-    link_ = model_->GetLink(link_name_);
-
-    ROS_INFO_STREAM("Found SDF parameter bodyName as <"<<link_name_<<">");
-  }
-  if (!link_)
+  else
   {
-    ROS_FATAL("usv_gazebo_dynamics_plugin error: bodyName: %s does not exist\n", link_name_.c_str());
+    linkName = _sdf->GetElement("bodyName")->Get<std::string>();
+    this->link = _model->GetLink(linkName);
+
+    ROS_INFO_STREAM("Found SDF parameter bodyName as <" << linkName<< ">");
+  }
+  if (!this->link)
+  {
+    ROS_FATAL("usv_gazebo_dynamics_plugin error: bodyName: %s does not exist\n",
+      linkName.c_str());
     return;
   }
   else
   {
-    ROS_INFO_STREAM("USV Model Link Name = " << link_name_);
+    ROS_INFO_STREAM("USV Dynamics Model Link Name = " << linkName);
   }
 
-  water_level_ = getSdfParamDouble(_sdf,"waterLevel",water_level_);
-  water_density_ = getSdfParamDouble(_sdf,"waterDensity",water_density_);
-
-  param_X_dot_u_ = getSdfParamDouble(_sdf,"xDotU",param_X_dot_u_);
-  param_Y_dot_v_ = getSdfParamDouble(_sdf,"yDotV",param_Y_dot_v_);
-  param_N_dot_r_ = getSdfParamDouble(_sdf,"nDotR",param_N_dot_r_);
-
-  param_X_u_ = getSdfParamDouble(_sdf,"xU",param_X_u_);
-  param_X_uu_ = getSdfParamDouble(_sdf,"xUU",param_X_uu_);
-  param_Y_v_ = getSdfParamDouble(_sdf,"yV",param_Y_v_);
-  param_Y_vv_ = getSdfParamDouble(_sdf,"yVV",param_Y_vv_);
-  param_Z_w_ = getSdfParamDouble(_sdf,"zW",param_Z_w_);
-  param_K_p_ = getSdfParamDouble(_sdf,"kP",param_K_p_);
-  param_M_q_ = getSdfParamDouble(_sdf,"mQ",param_M_q_);
-  param_N_r_ = getSdfParamDouble(_sdf,"nR",param_N_r_);
-  param_N_rr_ = getSdfParamDouble(_sdf,"nRR",param_N_rr_);
-
-
-  param_boat_area_ = getSdfParamDouble(_sdf,"boatArea",param_boat_area_);
-  param_boat_width_ = getSdfParamDouble(_sdf,"boatWidth",param_boat_width_);
-  param_boat_length_ = getSdfParamDouble(_sdf,"boatLength",param_boat_length_);
-
-  param_metacentric_length_ = getSdfParamDouble(_sdf,"metacentricLength",
-						param_metacentric_length_);
-  param_metacentric_width_ = getSdfParamDouble(_sdf,"metacentricWidth",
-						param_metacentric_width_);
+  this->waterLevel       = this->SdfParamDouble(_sdf, "waterLevel"  , 0.5);
+  double waterDensity    = this->SdfParamDouble(_sdf, "waterDensity", 997.7735);
+  this->paramXdotU       = this->SdfParamDouble(_sdf, "xDotU"       , 5);
+  this->paramYdotV       = this->SdfParamDouble(_sdf, "yDotV"       , 5);
+  this->paramNdotR       = this->SdfParamDouble(_sdf, "nDotR"       , 1);
+  this->paramXu          = this->SdfParamDouble(_sdf, "xU"          , 20);
+  this->paramXuu         = this->SdfParamDouble(_sdf, "xUU"         , 0);
+  this->paramYv          = this->SdfParamDouble(_sdf, "yV"          , 20);
+  this->paramYvv         = this->SdfParamDouble(_sdf, "yVV"         , 0);
+  this->paramZw          = this->SdfParamDouble(_sdf, "zW"          , 20);
+  this->paramKp          = this->SdfParamDouble(_sdf, "kP"          , 20);
+  this->paramMq          = this->SdfParamDouble(_sdf, "mQ"          , 20);
+  this->paramNr          = this->SdfParamDouble(_sdf, "nR"          , 20);
+  this->paramNrr         = this->SdfParamDouble(_sdf, "nRR"         , 0);
+  double paramBoatArea   = this->SdfParamDouble(_sdf, "boatArea"    , 0.48);
+  double paramBoatWidth  = this->SdfParamDouble(_sdf, "boatWidth"   , 1.0);
+  double paramBoatLength = this->SdfParamDouble(_sdf, "boatLength"  , 1.35);
 
   // Wave parameters
   std::ostringstream buf;
-  math::Vector2d tmpm;
-  std::vector<float> tmpv(2,0);
-  param_wave_n_ = _sdf->GetElement("wave_n")->Get<int>();
-  for (int ii=0; ii < param_wave_n_; ii++){
+  std::vector<float> tmpv(2, 0);
+  this->paramWaveN = _sdf->GetElement("wave_n")->Get<int>();
+  for (int i = 0; i < this->paramWaveN; ++i)
+  {
     buf.str("");
-    buf<<"wave_amp"<<ii;
-    param_wave_amps_.push_back(_sdf->GetElement(buf.str())->Get<float>());
-    ROS_INFO_STREAM("Wave Amplitude "<<ii<<": "<<param_wave_amps_[ii]);
+    buf << "wave_amp" << i;
+    this->paramWaveAmps.push_back(_sdf->GetElement(buf.str())->Get<float>());
+    ROS_INFO_STREAM("Wave Amplitude " << i << ": " << this->paramWaveAmps[i]);
     buf.str("");
-    buf<<"wave_period"<<ii;
-    param_wave_periods_.push_back(_sdf->GetElement(buf.str())->Get<float>());
+    buf << "wave_period" << i;
+    this->paramWavePeriods.push_back(_sdf->GetElement(buf.str())->Get<float>());
     buf.str("");
-    buf<<"wave_direction"<<ii;
-    tmpm=_sdf->GetElement(buf.str())->Get<math::Vector2d>();
+    buf << "wave_direction" << i;
+    math::Vector2d tmpm = _sdf->GetElement(buf.str())->Get<math::Vector2d>();
     tmpv[0] = tmpm.x;
     tmpv[1] = tmpm.y;
-    param_wave_directions_.push_back(tmpv);
-    ROS_INFO_STREAM("Wave Direction "<<ii<<": "<<param_wave_directions_[ii][0]
-		    << ", " << param_wave_directions_[ii][1]);
-
+    this->paramWaveDirections.push_back(tmpv);
+    ROS_INFO_STREAM("Wave Direction " << i << ": " <<
+      this->paramWaveDirections[i][0] << ", " <<
+      this->paramWaveDirections[i][1]);
   }
 
-
   // Get inertia and mass of vessel
-  math::Vector3 inertia = link_->GetInertial()->GetPrincipalMoments();
-  double mass = link_->GetInertial()->GetMass();
+  math::Vector3 inertia = this->link->GetInertial()->GetPrincipalMoments();
+  double mass = this->link->GetInertial()->GetMass();
 
   // Report some of the pertinent parameters for verification
   ROS_INFO("USV Dynamics Parameters: From URDF XACRO model definition");
   ROS_INFO_STREAM("Vessel Mass (rigid-body): " << mass);
   ROS_INFO_STREAM("Vessel Inertia Vector (rigid-body): X:" << inertia[0] <<
-		  " Y:"<<inertia[1] <<
-		  " Z:"<<inertia[2]);
+                  " Y:" << inertia[1] << " Z:" << inertia[2]);
   ROS_INFO("USV Dynamics Parameters: Plugin Parameters");
 
-  //initialize time and odometry position
-  prev_update_time_ = this->world_->GetSimTime();
-
-  // Initialize the ROS node
-  int argc = 0;
-  char** argv = NULL;
-  ros::init(argc, argv, "usv_dynamics_gazebo",
-	    ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
-  rosnode_ = new ros::NodeHandle( node_namespace_ );
+  // Initialize time and odometry position
+  this->prevUpdateTime = this->world->GetSimTime();
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
-  this->spinner_thread_ = new std::thread( std::bind( &UsvPlugin::spin, this) );
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-    std::bind(&UsvPlugin::UpdateChild, this));
+    std::bind(&UsvDynamicsPlugin::Update, this));
 
   // Initialize Added Mass Matrix
-  Ma_ = Eigen::MatrixXd(6,6);
-  Ma_ << param_X_dot_u_ ,   0,   0, 0, 0, 0,
-        0,   param_Y_dot_v_,   0, 0, 0, 0,
-        0,   0,   0.1, 0, 0, 0,
-        0,   0,   0, 0.1, 0, 0,
-        0,   0,   0, 0, 0.1, 0,
-        0,   0,   0, 0, 0, param_N_dot_r_ ;
+  this->Ma = Eigen::MatrixXd(6, 6);
+  this->Ma <<
+    this->paramXdotU, 0,                0,   0,   0,   0,
+    0,                this->paramYdotV, 0,   0,   0,   0,
+    0,                0,                0.1, 0,   0,   0,
+    0,                0,                0,   0.1, 0,   0,
+    0,                0,                0,   0,   0.1, 0,
+    0,                0,                0,   0,   0,   this->paramNdotR;
 
-  Cmat_ =  Eigen::MatrixXd::Zero(6,6);
-  Dmat_ =  Eigen::MatrixXd::Zero(6,6);
-  state_dot_ = Eigen::VectorXd(6);
-  state_ = Eigen::VectorXd(6);
-  amassVec_ = Eigen::VectorXd(6);
-
-  int NN = 2; // must be factor of 2! - only 2 for now!!
+  // must be factor of 2! - only 2 for now!!
+  const int kNN = 2;
   // x,y grid step increments
-  dx_ = param_boat_length_/NN;
-  dy_ = param_boat_width_/NN;
+  this->dx = paramBoatLength / kNN;
+  this->dy = paramBoatWidth / kNN;
   // Vector for interating throug grid points on boat
-  for (int ii=-NN/2; ii<0; ii++){
-    II_.push_back(ii);
-  }
-  for (int ii=1; ii<=NN/2; ii++){
-    II_.push_back(ii);
-  }
-  // Precalculate this to save some time.
-  buoy_frac_ = (param_boat_area_/(NN*NN))*GRAVITY*water_density_;
+  for (int i = -kNN / 2; i < 0; ++i)
+    this->II.push_back(i);
 
+  for (int i = 1; i <= kNN / 2; ++i)
+    this->II.push_back(i);
+
+  // Precalculate this to save some time.
+  this->buoyFrac = (paramBoatArea / (kNN * kNN)) * GRAVITY * waterDensity;
 }
 
-
-void UsvPlugin::UpdateChild()
+//////////////////////////////////////////////////
+void UsvDynamicsPlugin::Update()
 {
-  common::Time time_now = this->world_->GetSimTime();
-  //common::Time step_time = time_now - prev_update_time_;
-  double dt = (time_now - prev_update_time_).Double();
-  prev_update_time_ = time_now;
+  common::Time time_now = this->world->GetSimTime();
+  double dt = (time_now - this->prevUpdateTime).Double();
+  this->prevUpdateTime = time_now;
 
   // Get Pose/Orientation from Gazebo (if no state subscriber is active)
-  pose_ = link_->GetWorldPose();
-  euler_ = pose_.rot.GetAsEuler();
+  math::Pose pose = this->link->GetWorldPose();
+  math::Vector3 euler = pose.rot.GetAsEuler();
 
   // Get body-centered linear and angular rates
-  vel_linear_body_ = link_->GetRelativeLinearVel();
-  ROS_DEBUG_STREAM_THROTTLE(0.5,"Vel linear: " << vel_linear_body_);
-  vel_angular_body_ = link_->GetRelativeAngularVel();
-  ROS_DEBUG_STREAM_THROTTLE(0.5,"Vel angular: " << vel_angular_body_);
+  math::Vector3 velLinearBody = this->link->GetRelativeLinearVel();
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << velLinearBody);
+  math::Vector3 velAngularBody = this->link->GetRelativeAngularVel();
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << velAngularBody);
   // Estimate the linear and angular accelerations.
   // Note the the GetRelativeLinearAccel() and AngularAccel() functions
   // appear to be unreliable
-  math::Vector3 accel_linear_body = (vel_linear_body_ - prev_lin_vel_) /dt;
-  prev_lin_vel_ = vel_linear_body_;
-  ROS_DEBUG_STREAM_THROTTLE(0.5,"Accel linear: " << accel_linear_body);
-  math::Vector3 accel_angular_body = (vel_angular_body_ - prev_ang_vel_) /dt;
-  prev_ang_vel_ = vel_angular_body_;
-  ROS_DEBUG_STREAM_THROTTLE(0.5,"Accel angular: " << accel_angular_body);
+  math::Vector3 accelLinearBody = (velLinearBody - this->prevLinVel) / dt;
+  this->prevLinVel = velLinearBody;
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel linear: " << accelLinearBody);
+  math::Vector3 accel_angular_body = (velAngularBody - this->prevAngVel) / dt;
+  this->prevAngVel = velAngularBody;
+  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel angular: " << accel_angular_body);
 
   // Create state and derivative of state (accelerations)
-  state_dot_ << accel_linear_body.x, accel_linear_body.y, accel_linear_body.z,
+  Eigen::VectorXd stateDot = Eigen::VectorXd(6);
+  Eigen::VectorXd state    = Eigen::VectorXd(6);
+  Eigen::MatrixXd Cmat     = Eigen::MatrixXd::Zero(6, 6);
+  Eigen::MatrixXd Dmat     = Eigen::MatrixXd::Zero(6, 6);
+
+  stateDot << accelLinearBody.x, accelLinearBody.y, accelLinearBody.z,
     accel_angular_body.x, accel_angular_body.y, accel_angular_body.z;
 
-  state_ << vel_linear_body_.x, vel_linear_body_.y, vel_linear_body_.z,
-    vel_angular_body_.x, vel_angular_body_.y, vel_angular_body_.z;
+  state << velLinearBody.x, velLinearBody.y, velLinearBody.z,
+    velAngularBody.x, velAngularBody.y, velAngularBody.z;
 
   // Added Mass
-  amassVec_ = -1.0*Ma_*state_dot_;
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"state_dot_: \n" << state_dot_);
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"amassVec :\n" << amassVec_);
+  Eigen::VectorXd amassVec = -1.0 * this->Ma * stateDot;
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "stateDot: \n" << stateDot);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "amassVec :\n" << amassVec);
 
   // Coriolis - added mass components
-  Cmat_(0,5) = param_Y_dot_v_ * vel_linear_body_.y;
-  Cmat_(1,5) = param_X_dot_u_ * vel_linear_body_.x;
-  Cmat_(5,0) = param_Y_dot_v_ * vel_linear_body_.y;
-  Cmat_(5,1) = param_X_dot_u_ * vel_linear_body_.x;
-  Cvec_ = -1.0*Cmat_*state_;
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"Cvec :\n" << Cvec_);
+  Cmat(0, 5) = this->paramYdotV * velLinearBody.y;
+  Cmat(1, 5) = this->paramXdotU * velLinearBody.x;
+  Cmat(5, 0) = this->paramYdotV * velLinearBody.y;
+  Cmat(5, 1) = this->paramXdotU * velLinearBody.x;
 
   // Drag
-  //Eigen::MatrixXd Dmat = Eigen::MatrixXd(6,6);
-  Dmat_(0,0) = param_X_u_ + param_X_uu_*std::abs(vel_linear_body_.x);
-  Dmat_(1,1) = param_Y_v_ + param_Y_vv_*std::abs(vel_linear_body_.y);
-  Dmat_(2,2) = param_Z_w_;
-  Dmat_(3,3) = param_K_p_;
-  Dmat_(4,4) = param_M_q_;
-  Dmat_(5,5) = param_N_r_ + param_N_rr_*std::abs(vel_angular_body_.z);
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"Dmat :\n" << Dmat_);
-  Dvec_ = -1.0*Dmat_*state_;
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"Dvec :\n" << Dvec_);
+  Dmat(0, 0) = this->paramXu + this->paramXuu * std::abs(velLinearBody.x);
+  Dmat(1, 1) = this->paramYv + this->paramYvv * std::abs(velLinearBody.y);
+  Dmat(2, 2) = this->paramZw;
+  Dmat(3, 3) = this->paramKp;
+  Dmat(4, 4) = this->paramMq;
+  Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(velAngularBody.z);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Dmat :\n" << Dmat);
+  Eigen::VectorXd Dvec = -1.0 * Dmat * state;
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Dvec :\n" << Dvec);
 
   // Vehicle frame transform
   tf2::Quaternion vq = tf2::Quaternion();
   tf2::Matrix3x3 m;
-  m.setEulerYPR(euler_.z,euler_.y,euler_.x);
+  m.setEulerYPR(euler.z, euler.y, euler.x);
   m.getRotation(vq);
-  tf2::Transform xform_v = tf2::Transform(vq);
+  tf2::Transform xformV = tf2::Transform(vq);
 
   // Sum all forces - in body frame
-  Eigen::VectorXd forceSum = amassVec_ + Dvec_;// + buoyVec;
+  Eigen::VectorXd forceSum = amassVec + Dvec;
   // Forces in fixed frame
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"forceSum :\n" << forceSum);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "forceSum :\n" << forceSum);
 
   // Add dynamic forces/torques to link at CG
-  link_->AddRelativeForce(math::Vector3(forceSum(0),forceSum(1),forceSum(2)));
-  link_->AddRelativeTorque(math::Vector3(forceSum(3),forceSum(4),forceSum(5)));
-
-  // Distribute upward buoyancy force
-
-  float ddz, buoy_force;
-  double w, k, dz, Ddotx;
-  math::Vector3 X;  // location of vehicle base link
-  tf2::Vector3 bpnt(0,0,0);     // grid points on boat
-  tf2::Vector3 bpnt_w(0,0,0);   // in world coordinates
+  this->link->AddRelativeForce(
+    math::Vector3(forceSum(0), forceSum(1), forceSum(2)));
+  this->link->AddRelativeTorque(
+    math::Vector3(forceSum(3), forceSum(4), forceSum(5)));
 
   // Loop over boat grid points
-  //for (std::list<int>::iterator ii=Ilist.begin();ii != Ilist.end(); ii++){
-  for (std::vector<int>::iterator it=II_.begin(); it != II_.end(); ++it){
-    bpnt.setX((*it)*dx_);  // grid point in boat fram
-    for (std::vector<int>::iterator jt=II_.begin(); jt != II_.end(); ++jt){
-      //for (std::list<int>::iterator jj=Jlist.begin(); jj != Jlist.end(); jj++)
-      bpnt.setY((*jt)*dy_);
+  for (std::vector<int>::iterator it = this->II.begin();
+        it != this->II.end(); ++it)
+  {
+    // grid points on boat
+    tf2::Vector3 bpnt(0, 0, 0);
+
+    // in world coordinates
+    tf2::Vector3 bpntW(0, 0, 0);
+
+    // grid point in boat fram
+    bpnt.setX((*it) * this->dx);
+    for (std::vector<int>::iterator jt = this->II.begin();
+          jt != this->II.end(); ++jt)
+    {
+      bpnt.setY((*jt) * this->dy);
 
       // Transform from vessel to water/world frame
-      bpnt_w = xform_v*bpnt;
+      bpntW = xformV * bpnt;
 
       // Debug
-      ROS_DEBUG_STREAM_THROTTLE(1.0,"[" << (*it) <<","<<(*jt)<< "] grid points"<<bpnt.x() <<","<<bpnt.y() <<","<<bpnt.z());
-      ROS_DEBUG_STREAM_THROTTLE(1.0,"v frame euler "<<euler_);
-      ROS_DEBUG_STREAM_THROTTLE(1.0,"in water frame"<<bpnt_w.x() <<","<<bpnt_w.y() <<","<<bpnt_w.z());
+      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << (*it) << "," << (*jt) <<
+          "] grid points" << bpnt.x() << "," << bpnt.y() << "," << bpnt.z());
+      ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << euler);
+      ROS_DEBUG_STREAM_THROTTLE(1.0, "in water frame" << bpntW.x() << "," <<
+          bpntW.y() << "," << bpntW.z());
 
       // Vertical location of boat grid point in world frame
-      ddz = pose_.pos.z+bpnt_w.z();
-      ROS_DEBUG_STREAM("Z, pose: " << pose_.pos.z <<", bpnt: "<<bpnt_w.z() << ", dd: " << ddz);
+      float ddz = pose.pos.z + bpntW.z();
+      ROS_DEBUG_STREAM("Z, pose: " << pose.pos.z << ", bpnt: " << bpntW.z() <<
+        ", dd: " << ddz);
 
       // Find vertical displacement of wave field
-      X.x = pose_.pos.x+bpnt_w.x();  // World location of grid point
-      X.y = pose_.pos.y+bpnt_w.y();
+      // World location of grid point
+      math::Vector3 X;
+      X.x = pose.pos.x + bpntW.x();
+      X.y = pose.pos.y + bpntW.y();
+
       // sum vertical dsplacement over all waves
-      dz = 0.0;
-      for (int ii=0; ii < param_wave_n_; ii++){
-	Ddotx=param_wave_directions_[ii][0]*X.x
-	  +param_wave_directions_[ii][1]*X.y;
-	w = 2.0*3.14159 / param_wave_periods_[ii];
-	k = w*w/9.81;
-	dz += param_wave_amps_[ii]*cos(k*Ddotx-w*time_now.Float());;
+      double dz = 0.0;
+      for (int i = 0; i < this->paramWaveN; ++i)
+      {
+        double Ddotx = this->paramWaveDirections[i][0] * X.x +
+          this->paramWaveDirections[i][1] * X.y;
+        double w = 2.0 * 3.14159 / this->paramWavePeriods[i];
+        double k = w * w / 9.81;
+        dz += this->paramWaveAmps[i] * cos(k * Ddotx - w * time_now.Float());
       }
-      ROS_DEBUG_STREAM_THROTTLE(1.0,"wave disp: " << dz);
+      ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
 
       // Buoyancy force at grid point
-      buoy_force = (((water_level_+dz)-(ddz))*(buoy_frac_));
-      ROS_DEBUG_STREAM("buoy_force: " << buoy_force);
+      float buoyForce = (((this->waterLevel + dz) - ddz) * this->buoyFrac);
+      ROS_DEBUG_STREAM("buoyForce: " << buoyForce);
       // Apply force at grid point
       // From web, Appears that position is in the link frame
       // and force is in world frame
-      link_->AddForceAtRelativePosition(math::Vector3(0,0,buoy_force),
-					math::Vector3(bpnt.x(),bpnt.y(),bpnt.z()));
+      this->link->AddForceAtRelativePosition(math::Vector3(0, 0, buoyForce),
+          math::Vector3(bpnt.x(), bpnt.y(), bpnt.z()));
     }
   }
 }
 
-void UsvPlugin::spin()
-{
-    while(ros::ok()) ros::spinOnce();
-}
-
-GZ_REGISTER_MODEL_PLUGIN(UsvPlugin);
-
+GZ_REGISTER_MODEL_PLUGIN(UsvDynamicsPlugin);
