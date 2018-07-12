@@ -37,9 +37,6 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   GZ_ASSERT(_model != NULL, "Received NULL model pointer");
   GZ_ASSERT(_sdf != NULL, "Received NULL SDF pointer");
 
-  // Print the SDF document to the screen - helpful for debugging SDF
-  _sdf->PrintValues("PluginSDF: ");
-
   if (_sdf->HasElement("fluid_density"))
   {
     this->fluidDensity = _sdf->Get<double>("fluid_density");
@@ -81,7 +78,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         }
         id = link->GetId();
         // Add this link to our list for applying buoy forces
-        this->buoyLinks.push_back(link);
+        this->buoyancyLinks.push_back(link);
       }
       else
       {
@@ -164,7 +161,7 @@ void BuoyancyPlugin::Init()
 /////////////////////////////////////////////////
 void BuoyancyPlugin::OnUpdate()
 {
-  for (auto &link : this->buoyLinks)
+  for (auto &link : this->buoyancyLinks)
   {
     VolumeProperties volumeProperties = this->volPropsMap[link->GetId()];
     double height = volumeProperties.height;

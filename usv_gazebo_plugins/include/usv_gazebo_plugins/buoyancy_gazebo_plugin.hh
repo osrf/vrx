@@ -111,7 +111,7 @@ namespace gazebo
 
     /// \brief Vector of links in the model for which we will apply buoyancy
     /// forces.
-    protected: physics::Link_V buoyLinks;
+    protected: physics::Link_V buoyancyLinks;
   };
 }
 
