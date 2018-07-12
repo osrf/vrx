@@ -138,7 +138,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     _sdf, "right_propeller_joint", this->rightPropellerJoint);
 
   // Initialize time and odometry position
-  this->prevUpdateTime = this->lastCmdDriveTime = this->world->GetSimTime();
+  this->lastCmdDriveTime = this->world->GetSimTime();
 
   // Initialize the ROS node and subscribe to cmd_drive
   this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
@@ -212,7 +212,6 @@ double UsvThrust::GlfThrustCmd(const double _cmd) const
 void UsvThrust::Update()
 {
   common::Time time_now = this->world->GetSimTime();
-  this->prevUpdateTime = time_now;
 
   // Enforce command timeout
   double dcmd = (time_now - this->lastCmdDriveTime).Double();

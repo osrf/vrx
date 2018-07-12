@@ -87,14 +87,15 @@ namespace gazebo
     /// \return Value scaled and saturated.
     private: double ScaleThrustCmd(const double _cmd) const;
 
-    /// \brief ToDo.
-    /// \param[in] _x ToDo.
-    /// \param[in] _A ToDo.
-    /// \param[in] _K ToDo.
-    /// \param[in] _B ToDo.
-    /// \param[in] _v ToDo.
-    /// \param[in] _C ToDo.
-    /// \param[in] _M ToDo.
+    /// \brief Generalized logistic function (GLF) used for non-linear thruster model.
+    /// \param[in] _x Independent variable (input) of GLF.
+    /// \param[in] _A Lower asymptote.
+    /// \param[in] _K Upper asymptote.
+    /// \param[in] _B Growth rate
+    /// \param[in] _v Affects near which asymptote max. growth occurs.
+    /// \param[in] _C Typically near 1.0.
+    /// \param[in] _M Offset to input.
+    /// \return 
     private: double Glf(const double _x,
                         const float  _A,
                         const float  _K,
@@ -103,9 +104,9 @@ namespace gazebo
                         const float  _C,
                         const float  _M) const;
 
-    /// \brief ToDo.
-    /// \param[in] _cmd ToDo.
-    /// \return ToDo.
+    /// \brief Uses GLF function to map thrust command to thruster force in Newtons.
+    /// \param[in] _cmd Thrust command {-1.0,1.0}.
+    /// \return Thrust force [N].
     private: double GlfThrustCmd(const double _cmd) const;
 
     /// \brief Parse the propeller name from SDF.
@@ -125,7 +126,7 @@ namespace gazebo
     /// \brief The ROS node handler used for communications.
     private: std::unique_ptr<ros::NodeHandle> rosnode;
 
-    /// \brief ToDo.
+    /// \brief Subscription to custom cmdDrive ROS command.
     private: ros::Subscriber cmdDriveSub;
 
     /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
@@ -143,19 +144,16 @@ namespace gazebo
     /// \brief Timeout for receiving Drive commands [s].
     private: double cmdTimeout;
 
-    /// \brief ToDo.
-    private: common::Time prevUpdateTime;
-
-    /// \brief ToDo.
+    /// \brief Time of last command input (cmdDrive).
     private: common::Time lastCmdDriveTime;
 
-    /// \brief ToDo.
+    /// \brief Most recent left thruster command.
     private: double lastCmdDriveLeft;
 
-    /// \brief ToDo.
+    /// \brief Most recent right thruster command.
     private: double lastCmdDriveRight;
 
-    /// \brief ToDo.
+    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear)
     private: int paramMappingType;
 
     /// \brief Plugin Parameter: Maximum (abs val) of Drive commands.
