@@ -144,7 +144,8 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
 
   // Advertise joint state publisher to view propellers in rviz
-  // TODO: consider throttling joint_state pub for performance (every OnUpdate may be too frequent)
+  // TODO: consider throttling joint_state pub for performance
+  // (every OnUpdate may be too frequent).
   this->jointStatePub =
     this->rosnode->advertise<sensor_msgs::JointState>("joint_states", 1);
   this->jointStateMsg.name.resize(2);
