@@ -52,7 +52,7 @@ namespace gazebo
     public: virtual void Load(physics::ModelPtr _parent,
                               sdf::ElementPtr _sdf);
 
-    // \brief Callback executed at every physics update.
+    /// \brief Callback executed at every physics update.
     protected: virtual void Update();
 
     /// \brief Pointer to model link in gazebo,

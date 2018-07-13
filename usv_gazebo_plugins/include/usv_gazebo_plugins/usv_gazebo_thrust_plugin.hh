@@ -3,7 +3,8 @@
 Copyright (c) 2017, Brian Bingham
 All rights reserved
 
-This file is part of the usv_gazebo_dynamics_plugin package, known as this Package.
+This file is part of the usv_gazebo_dynamics_plugin package,
+known as this Package.
 
 This Package free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,142 +21,175 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef USV_GAZEBO_THRUST_H
-#define USV_GAZEBO_THRUST_H
+#ifndef USV_GAZEBO_PLUGINS_THRUST_HH
+#define USV_GAZEBO_PLUGINS_THRUST_HH
 
-// C++
-#include <algorithm>  // min/mzx
-#include <math.h>
-
-// Gazebo
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
-
-//ROS
-#include <usv_gazebo_plugins/UsvDrive.h>
 #include <ros/ros.h>
-
-// Custom Callback Queue
-#include <ros/callback_queue.h>
-#include <ros/advertise_options.h>
-
-// Messages
 #include <sensor_msgs/JointState.h>
+#include <memory>
+#include <string>
+#include <gazebo/common/CommonTypes.hh>
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/physics/physics.hh>
+#include <sdf/sdf.hh>
+
+#include "usv_gazebo_plugins/UsvDrive.h"
 
 namespace gazebo
 {
+  /// \brief A plugin to simulate a propulsion system under water.
+  /// This plugin accepts the following SDF parameters - see https://github.com/bsb808/robotx_docs/blob/master/theoryofoperation/theory_of_operation.pdf for more information.
+  ///
+  ///   <robotNamespace>: Namespace prefix for USV.
+  ///   <bodyName>: Name of the link on which to apply thrust forces.
+  ///   <cmdTimeout>:  Timeout, after which thrust is set to zero [s].
+  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear)
+  ///   <maxCmd>:Maximum (abs val) of thrust commands, typ. 1.0.
+  ///   <maxForceFwd>: Maximum forward force [N].
+  ///   <maxForceRev>: Maximum reverse force [N].
+  ///   <boatWidth>: Distance between the two thrust forces - for purpose of computing torque [m].
+  ///   <boatLength>: Hull length - for the purpose of computing thrust application location.
+  ///   <thrustOffsetZ>: Distance in z direction (+ up), in link coordinates, for application of thrust force [m].
+  ///   <left_propeller_joint>: The left's propeller joint.
+  ///   <right_propeller_joint>: The right's propeller joint.
   class UsvThrust : public ModelPlugin
   {
-  public:
-    UsvThrust();
-    virtual ~UsvThrust();
-    /*! Loads the model in gets dynamic parameters from SDF. */
-    virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
-  protected:
-    /*! Callback for Gazebo simulation engine */
-    virtual void UpdateChild();
-    virtual void FiniChild();
-  private:
-    /*!
-      Callback for Drive commands
-      \param msg usv_msgs UsvDrive message
-    */
-    void OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg);
+    /// \brief Constructor.
+    public: UsvThrust();
 
-    /*! ROS spin once */
-    void spin();
+    /// \brief Destructor.
+    public: virtual ~UsvThrust() = default;
 
-    /*! Convenience function for getting SDF parameters
+    // Documentation inherited.
+    public: virtual void Load(physics::ModelPtr _parent,
+                              sdf::ElementPtr _sdf);
 
-     */
-    double getSdfParamDouble(sdf::ElementPtr sdfPtr,const std::string &param_name,double default_val);
+    /// \brief Callback executed at every physics update.
+    protected: virtual void Update();
 
-    /*! Takes ROS Kingfisher Drive commands and scales them by max thrust
+    /// \brief Callback for Drive commands.
+    /// \param[in] _msg usv_msgs UsvDrive message
+    private: void OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg);
 
-      \param cmd ROS drive command
-      \param max_cmd  Maximum value expected for commands - scaling factor
-      \param max_pos  Maximum positive force value
-      \param max_neg  Maximum negative force value
-      \return Value scaled and saturated
-     */
-    double scaleThrustCmd(double cmd);
+    /// \brief Convenience function for getting SDF parameters.
+    /// \param[in] _sdfPtr Pointer to an SDF element to parse.
+    /// \param[in] _paramName The name of the element to parse.
+    /// \param[in] _defaultVal The default value returned if the element
+    /// does not exist.
+    /// \return The value parsed.
+    private: double SdfParamDouble(sdf::ElementPtr _sdfPtr,
+                                   const std::string &_paramName,
+                                   const double _defaultVal) const;
 
-    double glf(double x, float A, float K, float B,
-	       float v, float C, float M);
+    /// \brief Takes ROS Drive commands and scales them by max thrust.
+    /// \param[in] _cmd ROS drive command.
+    /// \return Value scaled and saturated.
+    private: double ScaleThrustCmd(const double _cmd) const;
 
-    double glfThrustCmd(double cmd);
+    /// \brief Generalized logistic function (GLF) used for non-linear thruster model.
+    /// \param[in] _x Independent variable (input) of GLF.
+    /// \param[in] _A Lower asymptote.
+    /// \param[in] _K Upper asymptote.
+    /// \param[in] _B Growth rate
+    /// \param[in] _v Affects near which asymptote max. growth occurs.
+    /// \param[in] _C Typically near 1.0.
+    /// \param[in] _M Offset to input.
+    /// \return 
+    private: double Glf(const double _x,
+                        const float  _A,
+                        const float  _K,
+                        const float  _B,
+                        const float  _v,
+                        const float  _C,
+                        const float  _M) const;
 
-    /*! Parse the propeller name from SDF.
-      \param sdf The entire model SDF
-      \param sdf_name The SDF element to parse
-      \param propeller_joint The joint pointer to initialize
-    */
-    void ParsePropeller(const sdf::ElementPtr sdf,
-                        const std::string &sdf_name,
-                        physics::JointPtr &propeller_joint);
+    /// \brief Uses GLF function to map thrust command to thruster force in Newtons.
+    /// \param[in] _cmd Thrust command {-1.0,1.0}.
+    /// \return Thrust force [N].
+    private: double GlfThrustCmd(const double _cmd) const;
 
-    /*! Spin a propeller based on its input
-      \param propeller Pointer to the propeller joint to spin
-      \param input Last input received for this propeller
-    */
-    void SpinPropeller(const physics::JointPtr &propeller,
-                       const double input);
+    /// \brief Parse the propeller name from SDF.
+    /// \param[in] _sdf The entire model SDF.
+    /// \param[in] _sdfName The SDF element to parse.
+    /// \param[out] _propellerJoint The joint pointer to initialize.
+    private: void ParsePropeller(const sdf::ElementPtr _sdf,
+                                 const std::string &_sdfName,
+                                 physics::JointPtr &_propellerJoint) const;
 
-    /// Parameters
-    std::string node_namespace_;
-    std::string link_name_;
+    /// \brief Spin a propeller based on its input
+    /// \param[in] _propeller Pointer to the propeller joint to spin
+    /// \param[in] _input Last input received for this propeller
+    private: void SpinPropeller(physics::JointPtr &_propeller,
+                                const double _input);
 
-    ros::NodeHandle *rosnode_;
+    /// \brief The ROS node handler used for communications.
+    private: std::unique_ptr<ros::NodeHandle> rosnode;
 
-    ros::Subscriber cmd_drive_sub_;
+    /// \brief Subscription to custom cmdDrive ROS command.
+    private: ros::Subscriber cmdDriveSub;
 
-    // For publishing to /joint_state with propeller state
-    ros::Publisher joint_state_pub_;
-    sensor_msgs::JointState joint_state_msg_;
+    /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
+    private: physics::WorldPtr world;
 
-    //GazeboRosPtr gazebo_ros_;
-    //physics::ModelPtr parent;
-    event::ConnectionPtr update_connection_;
-    boost::thread *spinner_thread_;
+    /// \brief Pointer to Gazebo parent model, retrieved when the model is
+    /// loaded.
+    private: physics::ModelPtr model;
 
-    /*! Pointer to the Gazebo world, retrieved when the model is loaded */
-    physics::WorldPtr world_;
-    /*! Pointer to Gazebo parent model, retrieved when the model is loaded */
-    physics::ModelPtr model_;
-    /*! Pointer to model link in gazebo,
-      optionally specified by the bodyName parameter,
-      The states are taken from this link and forces applied to this link.*/
-    physics::LinkPtr link_;
-    math::Pose pose_;
-    /*! Timeout for recieving Drive commands [s]*/
-    double cmd_timeout_;
-    common::Time prev_update_time_;
-    common::Time last_cmd_drive_time_;
-    double last_cmd_drive_left_;
-    double last_cmd_drive_right_;
+    /// \brief Pointer to model link in gazebo.
+    ///  optionally specified by the bodyName parameter,
+    ///  The states are taken from this link and forces applied to this link.
+    private: physics::LinkPtr link;
 
+    /// \brief Timeout for receiving Drive commands [s].
+    private: double cmdTimeout;
 
-    int param_mapping_type_;
-    /*! Plugin Parameter: Maximum (abs val) of Drive commands. typ. +/-1.0 */
-    double param_max_cmd_;
-    /*! Plugin Parameter: Maximum forward force [N] */
-    double param_max_force_fwd_;
-    /*! Plugin Parameter: Maximum reverse force [N] */
-    double param_max_force_rev_;
+    /// \brief Time of last command input (cmdDrive).
+    private: common::Time lastCmdDriveTime;
 
-    /*! Plugin Parameter: Boat width [m] */
-    double param_boat_width_;
-    /*! Plugin Parameter: Boat length [m] */
-    double param_boat_length_;
-    /*! Plugin Parameter: Z offset for applying forward thrust */
-    double param_thrust_z_offset_;
-    /* Joint controlling the left propeller */
-    physics::JointPtr left_propeller_joint_;
-    /* Joint controlling the right propeller */
-    physics::JointPtr right_propeller_joint_;
-    // Pointer to the update event connection
-    event::ConnectionPtr updateConnection;
-  };  // class UsvThrust
-} // namespace gazebo
+    /// \brief Most recent left thruster command.
+    private: double lastCmdDriveLeft;
 
-#endif //USV_GAZEBO_THRUST_H
+    /// \brief Most recent right thruster command.
+    private: double lastCmdDriveRight;
+
+    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear)
+    private: int paramMappingType;
+
+    /// \brief Plugin Parameter: Maximum (abs val) of Drive commands.
+    /// typ. +/-1.0
+    private: double paramMaxCmd;
+
+    /// \brief Plugin Parameter: Maximum forward force [N].
+    private: double paramMaxForceFwd;
+
+    /// \brief Plugin Parameter: Maximum reverse force [N].
+    private: double paramMaxForceRev;
+
+    /// \brief Plugin Parameter: Boat width [m].
+    private: double paramBoatWidth;
+
+    /// \brief Plugin Parameter: Boat length [m].
+    private: double paramBoatLength;
+
+    ///  \brief Plugin Parameter: Z offset for applying forward thrust.
+    private: double paramThrustZoffset;
+
+    /// \brief Joint controlling the left propeller.
+    private: physics::JointPtr leftPropellerJoint;
+
+    /// \brief Joint controlling the right propeller.
+    private: physics::JointPtr rightPropellerJoint;
+
+    /// \brief Pointer to the update event connection.
+    private: event::ConnectionPtr updateConnection;
+
+    /// \brief For publishing to /joint_state with propeller state.
+    private: ros::Publisher jointStatePub;
+
+    /// \brief The propeller message state.
+    private: sensor_msgs::JointState jointStateMsg;
+  };
+}
+
+#endif

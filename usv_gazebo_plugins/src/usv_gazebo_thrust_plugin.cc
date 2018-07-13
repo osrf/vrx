@@ -3,7 +3,8 @@
 Copyright (c) 2017, Brian Bingham
 All rights reserved
 
-This file is part of the usv_gazebo_dynamics_plugin package, known as this Package.
+This file is part of the usv_gazebo_dynamics_plugin package,
+known as this Package.
 
 This Package free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,322 +21,318 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <boost/thread.hpp>
 #include <ros/time.h>
 
-#include <usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh>
+#include "usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh"
 
 using namespace gazebo;
 
+//////////////////////////////////////////////////
 UsvThrust::UsvThrust()
 {
 }
 
-UsvThrust::~UsvThrust()
+//////////////////////////////////////////////////
+double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
+  const std::string &_paramName, const double _defaultVal) const
 {
-  rosnode_->shutdown();
-  spinner_thread_->join();
-  delete rosnode_;
-  delete spinner_thread_;
-}
-
-void UsvThrust::FiniChild()
-{
-}
-
-
-double UsvThrust::getSdfParamDouble(sdf::ElementPtr sdfPtr, const std::string &param_name, double default_val)
-{
-  double val = default_val;
-  if (sdfPtr->HasElement(param_name) && sdfPtr->GetElement(param_name)->GetValue())
+  if (!_sdfPtr->HasElement(_paramName))
   {
-    val = sdfPtr->GetElement(param_name)->Get<double>();
-    ROS_INFO_STREAM("Parameter found - setting <" << param_name << "> to <" << val << ">.");
+    ROS_INFO_STREAM("Parameter <" << _paramName << "> not found: "
+                    "Using default value of <" << _defaultVal << ">.");
+    return _defaultVal;
+  }
 
-  }
-  else{
-    ROS_INFO_STREAM("Parameter <" << param_name << "> not found: Using default value of <" << val << ">.");
-  }
+  double val = _sdfPtr->Get<double>(_paramName);
+  ROS_DEBUG_STREAM("Parameter found - setting <" << _paramName <<
+                   "> to <" << val << ">.");
   return val;
 }
 
-void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
+//////////////////////////////////////////////////
+void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
   ROS_INFO("Loading usv_gazebo_thrust_plugin");
-  model_ = _parent;
-  world_ = model_->GetWorld();
+  this->model = _parent;
+  this->world = this->model->GetWorld();
 
-  // Retrieve model paramters from SDF
+  // Retrieve model parameters from SDF
   // Set default values
-  node_namespace_ = "";
-  cmd_timeout_ = 1.0; // how long to allow no input on cmd_drive
-  param_mapping_type_ = 0;
-  param_max_cmd_ = 1.0;
-  param_max_force_fwd_ = 100.0;
-  param_max_force_rev_ = -100.0;
-  param_boat_width_ = 1.0;
-  param_boat_length_ = 1.35;
-  param_thrust_z_offset_ = -0.01;
-
-  //  Enumerating model
-  ROS_INFO_STREAM("Enumerating Model...");
-  ROS_INFO_STREAM("Model name = "<< model_->GetName());
-  physics::Link_V links = model_->GetLinks();
-  for (unsigned int ii=0; ii<links.size(); ii++){
-    ROS_INFO_STREAM("Link: "<<links[ii]->GetName());
-  }
+  // How long to allow no input on cmd_drive
+  this->cmdTimeout         = 1.0;
+  this->paramMappingType   = 0;
+  this->paramMaxCmd        = 1.0;
+  this->paramMaxForceFwd   = 100.0;
+  this->paramMaxForceRev   = -100.0;
+  this->paramBoatWidth     = 1.0;
+  this->paramBoatLength    = 1.35;
+  this->paramThrustZoffset = -0.01;
 
   // Get parameters from SDF
+  std::string nodeNamespace = "";
   if (_sdf->HasElement("robotNamespace"))
   {
-    node_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
+    nodeNamespace = _sdf->Get<std::string>("robotNamespace") + "/";
   }
 
-  if (!_sdf->HasElement("bodyName") || !_sdf->GetElement("bodyName")->GetValue())
+  std::string linkName;
+  if (_sdf->HasElement("bodyName"))
   {
-    link_ = model_->GetLink();
-    link_name_ = link_->GetName();
-    ROS_INFO_STREAM("Did not find SDF parameter bodyName");
-  }
-  else {
-    link_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
-    //link_name_ = "thrust_link";
-    link_ = model_->GetLink(link_name_);
-
-    ROS_INFO_STREAM("Found SDF parameter bodyName as <"<<link_name_<<">");
-  }
-  if (!link_)
-  {
-    ROS_FATAL("usv_gazebo_thrust_plugin error: bodyName: %s does not exist\n", link_name_.c_str());
-    return;
+    linkName = _sdf->Get<std::string>("bodyName");
+    this->link = this->model->GetLink(linkName);
+    ROS_INFO_STREAM("Found SDF parameter bodyName as <" << linkName << ">");
   }
   else
   {
-    ROS_INFO_STREAM("USV Model Link Name = " << link_name_);
+    this->link = this->model->GetLink();
+    linkName = this->link->GetName();
+    ROS_INFO_STREAM("Did not find SDF parameter bodyName");
   }
 
-  cmd_timeout_ = getSdfParamDouble(_sdf,"cmdTimeout",cmd_timeout_);
-  if (_sdf->HasElement("mappingType") && _sdf->GetElement("mappingType")->GetValue()) {
-    param_mapping_type_ = _sdf->GetElement("mappingType")->Get<int>();
-    ROS_INFO_STREAM("Parameter found - setting <mappingType> to <" << param_mapping_type_ <<">.");
+  if (!this->link)
+  {
+    ROS_FATAL("usv_gazebo_thrust_plugin error: bodyName: %s does not exist\n",
+      linkName.c_str());
+    return;
   }
-  else{
-    ROS_INFO_STREAM("Parameter <mappingType> not found: Using default value of <" << param_mapping_type_ << ">.");
+
+  ROS_INFO_STREAM("USV Model Link Name = " << linkName);
+
+  this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", this->cmdTimeout);
+  if (_sdf->HasElement("mappingType"))
+  {
+    this->paramMappingType = _sdf->Get<int>("mappingType");
+    ROS_INFO_STREAM("Parameter found - setting <mappingType> to <" <<
+                    this->paramMappingType << ">.");
   }
-  // verify
-  if ( (param_mapping_type_ > 1) || (param_mapping_type_ < 0) ){
-    ROS_FATAL_STREAM("Cannot use a mappingType of " << param_mapping_type_);
-    param_mapping_type_ = 0;
+  else
+  {
+    ROS_INFO_STREAM("Parameter <mappingType> not found: Using default value of "
+                    "<" << this->paramMappingType << ">.");
   }
-  param_max_cmd_ = getSdfParamDouble(_sdf,"maxCmd",param_max_cmd_);
-  param_max_force_fwd_ = getSdfParamDouble(_sdf,"maxForceFwd",
-					   param_max_force_fwd_);
-  param_max_force_rev_ = getSdfParamDouble(_sdf,"maxForceRev",
-					   param_max_force_rev_);
-  param_max_force_rev_ = -1.0*std::abs(param_max_force_rev_);  // make negative
-  param_boat_width_ = getSdfParamDouble(_sdf,"boatWidth",param_boat_width_);
-  param_boat_length_ = getSdfParamDouble(_sdf,"boatLength",param_boat_length_);
-  param_thrust_z_offset_ = getSdfParamDouble(_sdf,"thrustOffsetZ",
-					 param_thrust_z_offset_);
+  // Verify
+  if (this->paramMappingType > 1 || this->paramMappingType < 0)
+  {
+    ROS_FATAL_STREAM("Cannot use a mappingType of " << this->paramMappingType);
+    this->paramMappingType = 0;
+  }
+
+  this->paramMaxCmd = this->SdfParamDouble(_sdf, "maxCmd", this->paramMaxCmd);
+  this->paramMaxForceFwd = this->SdfParamDouble(_sdf, "maxForceFwd",
+      this->paramMaxForceFwd);
+  this->paramMaxForceRev = this->SdfParamDouble(_sdf, "maxForceRev",
+      this->paramMaxForceRev);
+  // make negative
+  this->paramMaxForceRev = -1.0 * std::abs(this->paramMaxForceRev);
+  this->paramBoatWidth = this->SdfParamDouble(_sdf, "boatWidth",
+      this->paramBoatWidth);
+  this->paramBoatLength = this->SdfParamDouble(_sdf, "boatLength",
+      this->paramBoatLength);
+  this->paramThrustZoffset = this->SdfParamDouble(_sdf, "thrustOffsetZ",
+      this->paramThrustZoffset);
 
   // Get the names of the propeller joints.
-  ParsePropeller(_sdf, "left_propeller_joint", left_propeller_joint_);
-  ParsePropeller(_sdf, "right_propeller_joint", right_propeller_joint_);
+  this->ParsePropeller(
+    _sdf, "left_propeller_joint", this->leftPropellerJoint);
+  this->ParsePropeller(
+    _sdf, "right_propeller_joint", this->rightPropellerJoint);
 
-  //initialize time and odometry position
-  prev_update_time_ = last_cmd_drive_time_ = this->world_->GetSimTime();
+  // Initialize time and odometry position
+  this->lastCmdDriveTime = this->world->GetSimTime();
 
   // Initialize the ROS node and subscribe to cmd_drive
-  int argc = 0;
-  char** argv = NULL;
-  ros::init(argc, argv, "usv_thrust_gazebo",
-	    ros::init_options::NoSigintHandler|ros::init_options::AnonymousName);
-  rosnode_ = new ros::NodeHandle( node_namespace_ );
+  this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
 
   // Advertise joint state publisher to view propellers in rviz
-  // TODO: consider throttleing joint_state pub for performance (every OnUpdate may be too frequent)
-  joint_state_pub_ = rosnode_->advertise<sensor_msgs::JointState>("joint_states", 1);
-  joint_state_msg_.name.resize(2);
-  joint_state_msg_.position.resize(2);
-  joint_state_msg_.velocity.resize(2);
-  joint_state_msg_.effort.resize(2);
-  joint_state_msg_.name[0] = left_propeller_joint_->GetName();
-  joint_state_msg_.name[1] = right_propeller_joint_->GetName();
+  // TODO: consider throttling joint_state pub for performance
+  // (every OnUpdate may be too frequent).
+  this->jointStatePub =
+    this->rosnode->advertise<sensor_msgs::JointState>("joint_states", 1);
+  this->jointStateMsg.name.resize(2);
+  this->jointStateMsg.position.resize(2);
+  this->jointStateMsg.velocity.resize(2);
+  this->jointStateMsg.effort.resize(2);
+  this->jointStateMsg.name[0] = this->leftPropellerJoint->GetName();
+  this->jointStateMsg.name[1] = this->rightPropellerJoint->GetName();
 
-  cmd_drive_sub_ = rosnode_->subscribe("cmd_drive", 1, &UsvThrust::OnCmdDrive, this );
+  this->cmdDriveSub = this->rosnode->subscribe("cmd_drive", 1,
+      &UsvThrust::OnCmdDrive, this);
 
-  // Listen to the update event. This event is broadcast every
-  // simulation iteration.
-  this->spinner_thread_ = new boost::thread( boost::bind( &UsvThrust::spin, this) );
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-    boost::bind(&UsvThrust::UpdateChild, this));
-
+    std::bind(&UsvThrust::Update, this));
 }
 
-double UsvThrust::scaleThrustCmd(double cmd)
+//////////////////////////////////////////////////
+double UsvThrust::ScaleThrustCmd(const double _cmd) const
 {
   double val = 0.0;
-  if (cmd >= 0.0){
-    val = cmd/param_max_cmd_*param_max_force_fwd_;
-    val = std::min(val,param_max_force_fwd_);
-  }
-  else  // cmd is less than zero
+  if (_cmd >= 0.0)
   {
-    val = -1.0*std::abs(cmd)/param_max_cmd_*std::abs(param_max_force_rev_);
-    val = std::max(val,param_max_force_rev_);
+    val = _cmd / this->paramMaxCmd * this->paramMaxForceFwd;
+    val = std::min(val, this->paramMaxForceFwd);
+  }
+  else
+  {
+    val = _cmd / this->paramMaxCmd * std::abs(this->paramMaxForceRev);
+    val = std::max(val, this->paramMaxForceRev);
   }
   return val;
 }
 
-
-double UsvThrust::glf(double x, float A, float K, float B,
-		      float v, float C, float M){
-  return A+ (K-A) / (pow(C+exp(-B*(x-M)),1.0/v));
+//////////////////////////////////////////////////
+double UsvThrust::Glf(const double _x, const float _A, const float _K,
+    const float _B, const float _v, const float _C, const float _M) const
+{
+  return _A + (_K - _A) / (pow(_C + exp(-_B * (_x - _M)), 1.0 / _v));
 }
 
-double UsvThrust::glfThrustCmd(double cmd)
+//////////////////////////////////////////////////
+double UsvThrust::GlfThrustCmd(const double _cmd) const
 {
   double val = 0.0;
-  if (cmd > 0.01){
-    val = glf(cmd,0.01,59.82,5.0,0.38,0.56,0.28);
-    val = std::min(val,param_max_force_fwd_);
+  if (_cmd > 0.01)
+  {
+    val = this->Glf(_cmd, 0.01f, 59.82f, 5.0f, 0.38f, 0.56f, 0.28f);
+    val = std::min(val, this->paramMaxForceFwd);
   }
-  else if (cmd < 0.01){
-    val = glf(cmd,-199.13,-0.09,8.84,5.34,0.99,-0.57);
-    val = std::max(val,param_max_force_rev_);
+  else if (_cmd < 0.01)
+  {
+    val = this->Glf(_cmd, -199.13f, -0.09f, 8.84f, 5.34f, 0.99f, -0.57f);
+    val = std::max(val, this->paramMaxForceRev);
   }
-  else{
+  else
+  {
     val = 0.0;
   }
-  ROS_INFO_STREAM_THROTTLE(0.5,cmd << ": " << val << " / " << val/param_max_force_fwd_);
+  ROS_DEBUG_STREAM_THROTTLE(0.5,
+      _cmd << ": " << val << " / " << val / this->paramMaxForceFwd);
   return val;
-
 }
 
-
-void UsvThrust::UpdateChild()
+//////////////////////////////////////////////////
+void UsvThrust::Update()
 {
-  common::Time time_now = this->world_->GetSimTime();
-  prev_update_time_ = time_now;
+  common::Time time_now = this->world->GetSimTime();
 
   // Enforce command timeout
-  double dcmd = (time_now - last_cmd_drive_time_).Double();
-  if ( (dcmd > cmd_timeout_) && (cmd_timeout_ > 0.0) )
+  double dcmd = (time_now - this->lastCmdDriveTime).Double();
+  if (dcmd > this->cmdTimeout && this->cmdTimeout > 0.0)
   {
-    ROS_INFO_STREAM_THROTTLE(1.0,"Command timeout!");
-    last_cmd_drive_left_ = 0.0;
-    last_cmd_drive_right_ = 0.0;
+    ROS_DEBUG_STREAM_THROTTLE(1.0, "Command timeout!");
+    this->lastCmdDriveLeft = 0.0;
+    this->lastCmdDriveRight = 0.0;
   }
   // Scale commands to thrust and torque forces
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"Last cmd: left:" << last_cmd_drive_left_
-		   << " right: " << last_cmd_drive_right_);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Last cmd: left:" << this->lastCmdDriveLeft
+       << " right: " << this->lastCmdDriveRight);
   double thrust_left = 0.0;
   double thrust_right = 0.0;
-  switch(param_mapping_type_){
-  case 0: // Simplest, linear
-    thrust_left = scaleThrustCmd(last_cmd_drive_left_);
-    thrust_right = scaleThrustCmd(last_cmd_drive_right_);
+  switch (this->paramMappingType)
+  {
+  // Simplest, linear
+  case 0:
+    thrust_left = this->ScaleThrustCmd(this->lastCmdDriveLeft);
+    thrust_right = this->ScaleThrustCmd(this->lastCmdDriveRight);
     break;
-  case 1: // GLF
-    thrust_left = glfThrustCmd(last_cmd_drive_left_);
-    thrust_right = glfThrustCmd(last_cmd_drive_right_);
+  // GLF
+  case 1:
+    thrust_left = this->GlfThrustCmd(this->lastCmdDriveLeft);
+    thrust_right = this->GlfThrustCmd(this->lastCmdDriveRight);
     break;
   default:
-    ROS_FATAL_STREAM("Cannot use mappingType="<<param_mapping_type_);
+    ROS_FATAL_STREAM("Cannot use mappingType=" << this->paramMappingType);
     break;
-
-
-  } // eo switch
+  }
 
   double thrust = thrust_right + thrust_left;
-  double torque = (thrust_right - thrust_left)*param_boat_width_;
-  ROS_DEBUG_STREAM_THROTTLE(1.0,"Thrust: left:" << thrust_left
-			    << " right: " << thrust_right);
+  double torque = (thrust_right - thrust_left) * this->paramBoatWidth;
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Thrust: left:" << thrust_left
+      << " right: " << thrust_right);
 
   // Add torque
-  link_->AddRelativeTorque(math::Vector3(0,0,torque));
+  this->link->AddRelativeTorque(math::Vector3(0, 0, torque));
 
   // Add input force with offset below vessel
-  math::Vector3 relpos(-1.0*param_boat_length_/2.0, 0.0 ,
-		       param_thrust_z_offset_);  // relative pos of thrusters
-  math::Vector3 inputforce3(thrust, 0,0);
+  math::Vector3 relpos(-1.0 * this->paramBoatLength / 2.0, 0.0,
+      this->paramThrustZoffset);  // relative pos of thrusters
+  math::Vector3 inputforce3(thrust, 0, 0);
 
   // Get Pose
-  pose_ = link_->GetWorldPose();
+  math::Pose pose = this->link->GetWorldPose();
 
-  //link_->AddLinkForce(inputforce3,relpos);
-  inputforce3 = pose_.rot.RotateVector(inputforce3);
-  //link_->AddRelativeForce(inputforce3);
-  link_->AddForceAtRelativePosition(inputforce3,relpos);
+  inputforce3 = pose.rot.RotateVector(inputforce3);
+  this->link->AddForceAtRelativePosition(inputforce3, relpos);
 
   // Spin the propellers
-  SpinPropeller(left_propeller_joint_, last_cmd_drive_left_);
-  SpinPropeller(right_propeller_joint_, last_cmd_drive_right_);
-
-  joint_state_msg_.header.stamp = ros::Time::now();
-  joint_state_pub_.publish(joint_state_msg_);
+  this->SpinPropeller(this->leftPropellerJoint, this->lastCmdDriveLeft);
+  this->SpinPropeller(this->rightPropellerJoint, this->lastCmdDriveRight);
+ 
+  // Publish the propeller joint state
+  this->jointStateMsg.header.stamp = ros::Time::now();
+  this->jointStatePub.publish(this->jointStateMsg);
 }
 
-void UsvThrust::OnCmdDrive( const usv_gazebo_plugins::UsvDriveConstPtr &msg)
+//////////////////////////////////////////////////
+void UsvThrust::OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg)
 {
-    last_cmd_drive_time_ = this->world_->GetSimTime();
-    last_cmd_drive_left_ = msg->left;
-    last_cmd_drive_right_ = msg->right;
+  this->lastCmdDriveTime = this->world->GetSimTime();
+  this->lastCmdDriveLeft = _msg->left;
+  this->lastCmdDriveRight = _msg->right;
 }
 
-
-void UsvThrust::spin()
+//////////////////////////////////////////////////
+void UsvThrust::ParsePropeller(const sdf::ElementPtr _sdf,
+    const std::string &_sdfName, physics::JointPtr &_propellerJoint) const
 {
-    while(ros::ok()) ros::spinOnce();
-}
-
-void UsvThrust::ParsePropeller(const sdf::ElementPtr sdf,
-    const std::string &sdf_name, physics::JointPtr &propeller_joint)
-{
-  if (sdf->HasElement(sdf_name))
+  if (_sdf->HasElement(_sdfName))
   {
-    std::string propeller_name;
-    propeller_name = sdf->GetElement(sdf_name)->Get<std::string>();
-    propeller_joint = model_->GetJoint(propeller_name);
+    std::string propellerName = _sdf->GetElement(_sdfName)->Get<std::string>();
+    _propellerJoint = this->model->GetJoint(propellerName);
 
-    if (!propeller_joint)
-      ROS_WARN_STREAM("Unable to find propeller joint <"<<propeller_name<<">");
+    if (!_propellerJoint)
+    {
+      ROS_WARN_STREAM("Unable to find propeller joint <" <<
+         propellerName << ">");
+    }
   }
 }
 
-void UsvThrust::SpinPropeller(const physics::JointPtr &propeller,
-    const double input)
+//////////////////////////////////////////////////
+void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
+    const double _input)
 {
-  const double min_input = 0.1;
-  const double max_input = 1.0;
-  const double max_effort = 2.0;
-  double effort = 0.0;
-  
-  if (!propeller)
+  if (!_propeller)
     return;
 
-  if (std::abs(input) > min_input)
-    effort = (input / max_input) * max_effort;
+  const double kMinInput = 0.1;
+  const double kMaxInput = 1.0;
+  const double kMaxEffort = 2.0;
+  double effort = 0.0;
 
-  propeller->SetForce(0, effort);
+  if (std::abs(_input) > kMinInput)
+    effort = (_input / kMaxInput) * kMaxEffort;
 
+  _propeller->SetForce(0, effort);
 
   // Get index in joint state message for this propeller
   uint8_t index;
-  if (propeller->GetName() == joint_state_msg_.name[0]) index = 0;
-  else if (propeller->GetName() == joint_state_msg_.name[1]) index = 1;
-  else {
-    ROS_WARN("Propeller %s cannot be associated with a joint, skipping message.", propeller->GetName().c_str());
+  if (_propeller->GetName() == this->jointStateMsg.name[0])
+    index = 0;
+  else if (_propeller->GetName() == this->jointStateMsg.name[1])
+    index = 1;
+  else
+  {
+    ROS_WARN("Propeller %s cannot be associated with a joint, "
+             "skipping message.", _propeller->GetName().c_str());
     return;
   }
 
   // Set position, velocity, and effort of joint from gazebo
-  gazebo::math::Angle position = propeller->GetAngle(0);
+  gazebo::math::Angle position = _propeller->GetAngle(0);
   position.Normalize();
-  joint_state_msg_.position[index] = position.Radian();
-  joint_state_msg_.velocity[index] = propeller->GetVelocity(0);
-  joint_state_msg_.effort[index] = effort;
+  this->jointStateMsg.position[index] = position.Radian();
+  this->jointStateMsg.velocity[index] = _propeller->GetVelocity(0);
+  this->jointStateMsg.effort[index] = effort;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvThrust);
-
