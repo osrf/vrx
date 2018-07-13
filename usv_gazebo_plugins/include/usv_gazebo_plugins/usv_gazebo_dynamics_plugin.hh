@@ -36,32 +36,33 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 namespace gazebo
 {
   /// \brief Plugin class to implement hydrodynamics and wave response.
+  /// This plugin accepts the following SDF parameters:
+  ///
+  /// <bodyName>: Name of base link for receiving pose and and applying forces.
+  /// <boatArea>: Horizontal surface area [m^2]. Default value is 0.48.
+  /// <boatLength>: Boat length [m]. Default value is 1.35.
+  /// <boatWidth>: Boat width [m]. Default value is 1.
+  /// <waterDensity>: Water density [kg/m^3]. Default value is 997.7735.
+  /// <waterLevel>: Water height [m]. Default value is 0.5.
+  /// <xDotU>: Added mass coeff, surge.
+  /// <yDotV>: Added mass coeff, sway.
+  /// <nDotR>: Added mass coeff, yaw
+  /// <xU>: Linear drag coeff surge.
+  /// <xUU>: Quadratic drag coeff surge.
+  /// <yV>: Linear drag coeff sway.
+  /// <yVV>: Quadratic drag coeff sway
+  /// <zW>: Linear drag coeff heave.
+  /// <kP>: Linear drag coeff pitch.
+  /// <mQ>: Linear drag coeff roll.
+  /// <nR>: Linear drag coeff yaw.
+  /// <nRR>: Quadratic drag coeff yaw.
+  /// <wave_n>: Number of waves to generate wave field.
+  /// <wave_amp<N>>: Amplitude for each component [m].
+  /// <wave_period<N>>: Period for each compenent [s]. 
+  /// <wave_direction<N>>: Direction of motion for each component ENU [rad].  
   class UsvDynamicsPlugin : public ModelPlugin
   {
     /// \brief Constructor.
-    ///
-    /// <bodyName>: Name of base link for receiving pose and and applying forces
-    /// <boatArea>: Horizontal surface area [m^2]. Default value is 0.48.
-    /// <boatLength>: Boat length [m]. Default value is 1.35.
-    /// <boatWidth>: Boat width [m]. Default value is 1.
-    /// <waterDensity>: Water density [kg/m^3]. Default value is 997.7735.
-    /// <waterLevel>: Water height [m]. Default value is 0.5.
-    /// <xDotU>: Added mass coeff, surge.
-    /// <yDotV>: Added mass coeff, sway.
-    /// <nDotR>: Added mass coeff, yaw
-    /// <xU>: Linear drag coeff surge.
-    /// <xUU>: Quadratic drag coeff surge.
-    /// <yV>: Linear drag coeff sway.
-    /// <yVV>: Quadratic drag coeff sway
-    /// <zW>: Linear drag coeff heave.
-    /// <kP>: Linear drag coeff pitch.
-    /// <mQ>: Linear drag coeff roll.
-    /// <nR>: Linear drag coeff yaw.
-    /// <nRR>: Quadratic drag coeff yaw.
-    /// <wave_n>: Number of waves to generate wave field.
-    /// <wave_amp<N>>: Amplitude for each component [m].
-    /// <wave_period<N>>: Period for each compenent [s]. 
-    /// <wave_direction<N>>: Direction of motion for each component ENU [rad].
     public: UsvDynamicsPlugin();
 
     /// \brief Destructor.
@@ -95,10 +96,12 @@ namespace gazebo
     /// \brief Simulation time of the last update.
     private: common::Time prevUpdateTime;
 
-    /// \brief Linear velocity from previous time step, for estimating acceleration.
+    /// \brief Linear velocity from previous time step,
+    /// for estimating acceleration.
     private: math::Vector3 prevLinVel;
 
-    /// \brief Angular velocity from previous time step, for estimating acceleration.
+    /// \brief Angular velocity from previous time step,
+    /// for estimating acceleration.
     private: math::Vector3 prevAngVel;
 
     /// \brief For Buoyancy fraction for each discrete element.
@@ -135,13 +138,13 @@ namespace gazebo
     /// \brief Plugin Parameter: Quadratic drag in sway.
     private: double paramYvv;
 
-    /// \brief Plugin Parameter: Linear drag in heave
+    /// \brief Plugin Parameter: Linear drag in heave.
     private: double paramZw;
 
-    /// \brief Plugin Parameter: Linear drag in roll
+    /// \brief Plugin Parameter: Linear drag in roll.
     private: double paramKp;
 
-    /// \brief Plugin Parameter: Linear drag in pitch
+    /// \brief Plugin Parameter: Linear drag in pitch.
     private: double paramMq;
 
     /// \brief Plugin Parameter: Linear drag in yaw.
