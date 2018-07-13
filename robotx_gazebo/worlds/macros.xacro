@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-<!-- World containing only sandisland model -->
-<sdf version="1.4" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find robotx_gazebo)/worlds/sandisland.xacro" />
-  <xacro:include filename="$(find robotx_gazebo)/worlds/light_buoy.xacro" />
-</sdf>
