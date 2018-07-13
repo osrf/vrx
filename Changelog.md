@@ -3,6 +3,11 @@
 ### VMRC 0.X.X
 1. Various cleanups/refactors.
   * [Pull request 3](https://bitbucket.org/osrf/vmrc/pull-requests/3)
+  * [Pull request 9](https://bitbucket.org/osrf/vmrc/pull-requests/9)
+  * [Pull request 14](https://bitbucket.org/osrf/vmrc/pull-requests/14)
+  * [Pull request 17](https://bitbucket.org/osrf/vmrc/pull-requests/17)
+  * [Pull request 18](https://bitbucket.org/osrf/vmrc/pull-requests/18)
+  * [Pull request 21](https://bitbucket.org/osrf/vmrc/pull-requests/21)
 
 1. Create wamv_gazebo ROS package.
   * [Pull request 4](https://bitbucket.org/osrf/vmrc/pull-requests/4)
