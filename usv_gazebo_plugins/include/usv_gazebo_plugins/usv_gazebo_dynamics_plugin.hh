@@ -3,7 +3,8 @@
 Copyright (c) 2017, Brian Bingham
 All rights reserved
 
-This file is part of the usv_gazebo_dynamics_plugin package, known as this Package.
+This file is part of the usv_gazebo_dynamics_plugin package,
+known as this Package.
 
 This Package free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,182 +21,159 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef USV_GAZEBO_DYNAMICS_H
-#define USV_GAZEBO_DYNAMICS_H
-
-// C++
-#include <vector>
-#include <iostream>     // std::cout, std::ios
-#include <sstream>      // std::ostringstream
-#include <thread>
-
-// Gazebo
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
-//#include <gazebo_plugins/gazebo_ros_utils.h>
-
-//ROS
-#include <nav_msgs/Odometry.h>
-#include <geometry_msgs/TwistWithCovariance.h>
-#include <geometry_msgs/PoseWithCovariance.h>
-//#include <usv_msgs/UsvDrive.h>
-//#include <usv_gazebo_plugins/UsvDrive.h>
+#ifndef USV_GAZEBO_PLUGINS_DYNAMICS_PLUGIN_HH_
+#define USV_GAZEBO_PLUGINS_DYNAMICS_PLUGIN_HH_
 
 #include <Eigen/Core>
-				    //#include <tf/transform_broadcaster.h>
-#include <ros/ros.h>
+#include <string>
+#include <vector>
 
-// Custom Callback Queue
-#include <ros/callback_queue.h>
-#include <ros/advertise_options.h>
+#include <gazebo/common/common.hh>
+#include <gazebo/math/Vector3.hh>
+#include <gazebo/physics/physics.hh>
+#include <sdf/sdf.hh>
 
 namespace gazebo
 {
-  class UsvPlugin : public ModelPlugin
+  /// \brief Plugin class to implement hydrodynamics and wave response.
+  /// This plugin accepts the following SDF parameters:
+  ///
+  /// <bodyName>: Name of base link for receiving pose and and applying forces.
+  /// <boatArea>: Horizontal surface area [m^2]. Default value is 0.48.
+  /// <boatLength>: Boat length [m]. Default value is 1.35.
+  /// <boatWidth>: Boat width [m]. Default value is 1.
+  /// <waterDensity>: Water density [kg/m^3]. Default value is 997.7735.
+  /// <waterLevel>: Water height [m]. Default value is 0.5.
+  /// <xDotU>: Added mass coeff, surge.
+  /// <yDotV>: Added mass coeff, sway.
+  /// <nDotR>: Added mass coeff, yaw
+  /// <xU>: Linear drag coeff surge.
+  /// <xUU>: Quadratic drag coeff surge.
+  /// <yV>: Linear drag coeff sway.
+  /// <yVV>: Quadratic drag coeff sway
+  /// <zW>: Linear drag coeff heave.
+  /// <kP>: Linear drag coeff pitch.
+  /// <mQ>: Linear drag coeff roll.
+  /// <nR>: Linear drag coeff yaw.
+  /// <nRR>: Quadratic drag coeff yaw.
+  /// <wave_n>: Number of waves to generate wave field.
+  /// <wave_amp<N>>: Amplitude for each component [m].
+  /// <wave_period<N>>: Period for each compenent [s]. 
+  /// <wave_direction<N>>: Direction of motion for each component ENU [rad].  
+  class UsvDynamicsPlugin : public ModelPlugin
   {
-  public:
-    UsvPlugin();
-    virtual ~UsvPlugin();
-    /*! Loads the model in gets dynamic parameters from SDF. */
-    virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
-  protected:
-    /*! Callback for Gazebo simulation engine */
-    virtual void UpdateChild();
-    virtual void FiniChild();
-  private:
-    /*! Presumably this would get called when there is a collision,
-      but not implemented! */
-    void OnContact(const std::string &name, const physics::Contact &contact);
+    /// \brief Constructor.
+    public: UsvDynamicsPlugin();
 
-    /*! ROS spin once */
-    void spin();
+    /// \brief Destructor.
+    public: virtual ~UsvDynamicsPlugin() = default;
 
-    /*! Convenience function for getting SDF parameters
+    // Documentation inherited.
+    public: virtual void Load(physics::ModelPtr _model,
+                              sdf::ElementPtr _sdf);
 
-     */
-    double getSdfParamDouble(sdf::ElementPtr sdfPtr,const std::string &param_name,double default_val);
+    /// \brief Callback for Gazebo simulation engine.
+    protected: virtual void Update();
 
-    /// Parameters
-    std::string node_namespace_;
-    std::string link_name_;
+    /// \brief Convenience function for getting SDF parameters.
+    /// \param[in] _sdfPtr Pointer to an SDF element to parse.
+    /// \param[in] _paramName The name of the element to parse.
+    /// \param[in] _defaultVal The default value returned if the element
+    /// does not exist.
+    /// \return The value parsed.
+    private: double SdfParamDouble(sdf::ElementPtr _sdfPtr,
+                                   const std::string &_paramName,
+                                   const double _defaultVal) const;
 
-    ros::NodeHandle *rosnode_;
+    /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
+    private: physics::WorldPtr world;
 
-    ros::Publisher sensor_state_pub_;
-    ros::Publisher odom_pub_;
-    ros::Publisher joint_state_pub_;
+    /// \brief Pointer to model link in gazebo,
+    /// optionally specified by the bodyName parameter.
+    /// The states are taken from this link and forces applied to this link.
+    private: physics::LinkPtr link;
 
-    //GazeboRosPtr gazebo_ros_;
-    //physics::ModelPtr parent;
-    event::ConnectionPtr update_connection_;
+    /// \brief Simulation time of the last update.
+    private: common::Time prevUpdateTime;
 
-    /*! Pointer to the Gazebo world, retrieved when the model is loaded */
-    physics::WorldPtr world_;
-    /*! Pointer to Gazebo parent model, retrieved when the model is loaded */
-    physics::ModelPtr model_;
-    /*! Pointer to model link in gazebo,
-      optionally specified by the bodyName parameter,
-      The states are taken from this link and forces applied to this link.*/
-    physics::LinkPtr link_;
+    /// \brief Linear velocity from previous time step,
+    /// for estimating acceleration.
+    private: math::Vector3 prevLinVel;
 
+    /// \brief Angular velocity from previous time step,
+    /// for estimating acceleration.
+    private: math::Vector3 prevAngVel;
 
-    // Simulation time of the last update
-    common::Time prev_update_time_;
-    math::Vector3 prev_lin_vel_;
-    math::Vector3 prev_ang_vel_;
-    math::Pose pose_;
-    math::Vector3 euler_;
-    math::Vector3 vel_linear_body_;
-    math::Vector3 vel_angular_body_;
-    math::Vector3 acceleration;
-    math::Vector3 angular_velocity_;
-    math::Vector3 angular_acceleration_;
-    Eigen::VectorXd state_dot_;
-    Eigen::VectorXd state_;
-    Eigen::VectorXd amassVec_;
-    Eigen::MatrixXd Cmat_;
-    Eigen::VectorXd Cvec_;
-    Eigen::MatrixXd Dmat_;
-    Eigen::VectorXd Dvec_;
+    /// \brief For Buoyancy fraction for each discrete element.
+    private: float buoyFrac;
 
-    // For Buoyancy calculation
-    float buoy_frac_;
-    float dx_;
-    float dy_;
-    std::vector<int> II_;
+    /// \brief Grid size in x direction for buoyancy discretization.
+    private: float dx;
 
-    // Values to set via Plugin Parameters
-    /*! Plugin Parameter: Added mass in surge, X_\dot{u} */
-    double param_X_dot_u_;
-    /*! Plugin Parameter: Added mass in sway, Y_\dot{v} */
-    double param_Y_dot_v_;
-    /*! Plugin Parameter: Added mass in yaw, N_\dot{r}*/
-    double param_N_dot_r_;
+    /// \brief Grid size in y direction for buoyancy discretization.
+    private: float dy;
 
-    /*! Plugin Parameter: Linear drag in surge */
-    double param_X_u_;
-    /*! Plugin Parameter: Quadratic drag in surge */
-    double param_X_uu_;
-    /*! Plugin Parameter: Linear drag in sway */
-    double param_Y_v_;
-    /*! Plugin Parameter: Quadratic drag in sway */
-    double param_Y_vv_;
+    /// \brief Grid indicies for buoyancy discretization.
+    private: std::vector<int> II;
 
-    double param_Z_w_;
-    double param_K_p_;
-    double param_M_q_;
+    /// \brief Values to set via Plugin Parameters.
+    /// Plugin Parameter: Added mass in surge, X_\dot{u}.
+    private: double paramXdotU;
 
-    /*! Plugin Parameter: Linear drag in yaw */
-    double param_N_r_;
-    /*! Plugin Parameter: Quadratic drag in yaw*/
-    double param_N_rr_;
-    /*! Plugin Parameter: Boat width [m] */
-    double param_boat_width_;
-    /*! Plugin Parameter: Boat length [m] */
-    double param_boat_length_;
-    /*! Plugin Parameter: Horizontal surface area [m^2] */
-    double param_boat_area_ ;
-    /*! Plugin Parameter: Metacentric length [m] */
-    double param_metacentric_length_;
-    /*! Plugin Parameter: Metacentric width[m] */
-    double param_metacentric_width_;
+    /// \brief Plugin Parameter: Added mass in sway, Y_\dot{v}.
+    private: double paramYdotV;
 
+    /// \brief Plugin Parameter: Added mass in yaw, N_\dot{r}.
+    private: double paramNdotR;
 
-    double xyz_damping_;
-    double yaw_damping_;
-    double rp_damping_;
-    /* Water height [m]*/
-    double water_level_;
-    /* Water density [kg/m^3] */
-    double water_density_;
-    /*! Added mass matrix, 6x6 */
-    Eigen::MatrixXd Ma_;
+    /// \brief Plugin Parameter: Linear drag in surge.
+    private: double paramXu;
 
-    /* Wave parameters */
-    int param_wave_n_;
-    std::vector<float> param_wave_amps_;
-    std::vector<float> param_wave_periods_;
-    std::vector< std::vector<float> > param_wave_directions_;
-    /* Old - for single wave
-    double param_wave_amp_;
-    math::Vector2d param_wave_dir_;
-    double param_wave_period_;
-    */
+    /// \brief Plugin Parameter: Quadratic drag in surge.
+    private: double paramXuu;
 
-    /*! Wind velocity in Gazebo coordinates [m/s] */
-    math::Vector3 param_wind_velocity_vector_;
+    /// \brief Plugin Parameter: Linear drag in sway.
+    private: double paramYv;
 
-    /*! Wind force coefficients */
-    math::Vector3 param_wind_coeff_vector_;
+    /// \brief Plugin Parameter: Quadratic drag in sway.
+    private: double paramYvv;
 
-    std::thread *spinner_thread_;
+    /// \brief Plugin Parameter: Linear drag in heave.
+    private: double paramZw;
 
-    event::ConnectionPtr contact_event_;
+    /// \brief Plugin Parameter: Linear drag in roll.
+    private: double paramKp;
 
-    // Pointer to the update event connection
-    event::ConnectionPtr updateConnection;
+    /// \brief Plugin Parameter: Linear drag in pitch.
+    private: double paramMq;
 
-  };  // class UsvPlugin
-} // namespace gazebo
+    /// \brief Plugin Parameter: Linear drag in yaw.
+    private: double paramNr;
+    
+    /// \brief Plugin Parameter: Quadratic drag in yaw.
+    private: double paramNrr;
 
-#endif //USV_GAZEBO_DYNAMICS_H
+    /// \brief Water height [m].
+    private: double waterLevel;
+
+    /// \brief Added mass matrix, 6x6.
+    private: Eigen::MatrixXd Ma;
+
+    /// \brief Wave parameters.
+    private: int paramWaveN;
+
+    /// \brief Wave amplitude values for N components.
+    private: std::vector<float> paramWaveAmps;
+
+    /// \brief Wave period values for N components.
+    private: std::vector<float> paramWavePeriods;
+
+    /// \brief Wave direction values for N components.
+    private: std::vector<std::vector<float>> paramWaveDirections;
+
+    /// \brief Pointer to the update event connection.
+    private: event::ConnectionPtr updateConnection;
+  };
+}
+
+#endif
