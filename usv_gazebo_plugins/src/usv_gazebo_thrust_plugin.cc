@@ -44,8 +44,8 @@ double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
   }
 
   double val = _sdfPtr->Get<double>(_paramName);
-  ROS_INFO_STREAM("Parameter found - setting <" << _paramName <<
-                  "> to <" << val << ">.");
+  ROS_DEBUG_STREAM("Parameter found - setting <" << _paramName <<
+                   "> to <" << val << ">.");
   return val;
 }
 
