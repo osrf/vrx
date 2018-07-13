@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="usv_thrust_gazebo" params="name">
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
-    <gazebo >
+    <gazebo>
       <plugin name="usv_thrust_${name}" filename="libusv_gazebo_thrust_plugin.so">
       <bodyName>base_link</bodyName>
     

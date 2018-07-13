@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="usv_wind_gazebo" params="name">
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
-    <gazebo >
+    <gazebo>
       <plugin name="usv_wind_${name}" filename="libusv_gazebo_wind_plugin.so">
         <bodyName>base_link</bodyName>
         <!-- Wind -->
