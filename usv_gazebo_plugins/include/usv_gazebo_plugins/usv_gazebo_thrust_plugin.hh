@@ -39,7 +39,9 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 namespace gazebo
 {
   /// \brief A plugin to simulate a propulsion system under water.
-  /// This plugin accepts the following SDF parameters - see https://github.com/bsb808/robotx_docs/blob/master/theoryofoperation/theory_of_operation.pdf for more information.
+  /// This plugin accepts the following SDF parameters.
+  /// See https://github.com/bsb808/robotx_docs/blob/master/theoryofoperation/theory_of_operation.pdf
+  /// for more information.
   ///
   ///   <robotNamespace>: Namespace prefix for USV.
   ///   <bodyName>: Name of the link on which to apply thrust forces.
@@ -48,9 +50,12 @@ namespace gazebo
   ///   <maxCmd>:Maximum (abs val) of thrust commands, typ. 1.0.
   ///   <maxForceFwd>: Maximum forward force [N].
   ///   <maxForceRev>: Maximum reverse force [N].
-  ///   <boatWidth>: Distance between the two thrust forces - for purpose of computing torque [m].
-  ///   <boatLength>: Hull length - for the purpose of computing thrust application location.
-  ///   <thrustOffsetZ>: Distance in z direction (+ up), in link coordinates, for application of thrust force [m].
+  ///   <boatWidth>: Distance between the two thrust forces -
+  ///                for purpose of computing torque [m].
+  ///   <boatLength>: Hull length -
+  ///                 for the purpose of computing thrust application location.
+  ///   <thrustOffsetZ>: Distance in z direction (+ up), in link coordinates,
+  ///                    for application of thrust force [m].
   ///   <left_propeller_joint>: The left's propeller joint.
   ///   <right_propeller_joint>: The right's propeller joint.
   class UsvThrust : public ModelPlugin
@@ -87,7 +92,8 @@ namespace gazebo
     /// \return Value scaled and saturated.
     private: double ScaleThrustCmd(const double _cmd) const;
 
-    /// \brief Generalized logistic function (GLF) used for non-linear thruster model.
+    /// \brief Generalized logistic function (GLF) used for non-linear
+    /// thruster model.
     /// \param[in] _x Independent variable (input) of GLF.
     /// \param[in] _A Lower asymptote.
     /// \param[in] _K Upper asymptote.
@@ -104,7 +110,8 @@ namespace gazebo
                         const float  _C,
                         const float  _M) const;
 
-    /// \brief Uses GLF function to map thrust command to thruster force in Newtons.
+    /// \brief Uses GLF function to map thrust command to thruster force
+    /// in Newtons.
     /// \param[in] _cmd Thrust command {-1.0,1.0}.
     /// \return Thrust force [N].
     private: double GlfThrustCmd(const double _cmd) const;

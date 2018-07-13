@@ -1,48 +1,77 @@
-#include <robotx_gazebo/gazebo_ros_color.hh>
+/*
+ * Copyright (C) 2018 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
 
-// Register plugin with gazebo
-GZ_REGISTER_VISUAL_PLUGIN(GazeboRosColor)
+#include <string>
+#include "robotx_gazebo/gazebo_ros_color.hh"
 
-void GazeboRosColor::Load(gazebo::rendering::VisualPtr _parent, sdf::ElementPtr _sdf)
+//////////////////////////////////////////////////
+void GazeboRosColor::Load(gazebo::rendering::VisualPtr _parent,
+  sdf::ElementPtr _sdf)
 {
   GZ_ASSERT(_parent != nullptr, "Received NULL model pointer");
 
-  // Quit if ros plugin was not loaded
+  // Quit if ROS plugin was not loaded
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM_NAMED("camera", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
-      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    ROS_FATAL_STREAM_NAMED("gazebo_ros_color_plugin", "A ROS node for Gazebo "
+      "has not been initialized, unable to load plugin. " << "Load the Gazebo "
+      "system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
 
-  // Load namespace from sdf if available
+  // Load namespace from SDF if available.
   std::string ns = "";
   if (_sdf->HasElement("robotNamespace"))
     ns = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
-    ROS_INFO_NAMED("gazebo_ros_color_plugin", "missing <robotNamespace>, defaulting to %s", ns.c_str());
+  {
+    ROS_INFO_NAMED("gazebo_ros_color_plugin",
+      "missing <robotNamespace>, defaulting to %s", ns.c_str());
+  }
 
   // Load topic from sdf if available
-  std::string topic_name = "color";
+  std::string topicName = "color";
   if (_sdf->HasElement("topicName"))
-    topic_name = _sdf->GetElement("topicName")->Get<std::string>();
+    topicName = _sdf->GetElement("topicName")->Get<std::string>();
   else
-    ROS_INFO_NAMED("gazebo_ros_color_plugin", "missing <topicName>, defaulting to %s", topic_name.c_str());
+  {
+    ROS_INFO_NAMED("gazebo_ros_color_plugin",
+      "missing <topicName>, defaulting to %s", topicName.c_str());
+  }
 
   // Copy parent into class for use in callback
-  visual_ = _parent;
+  this->visual = _parent;
 
   // Setup node handle and subscriber
-  nh_ = ros::NodeHandle(ns);
-  color_sub_ = nh_.subscribe(topic_name, 1, &GazeboRosColor::colorCallback, this);
+  this->nh = ros::NodeHandle(ns);
+  this->colorSub = this->nh.subscribe(topicName, 1,
+    &GazeboRosColor::ColorCallback, this);
 }
 
-void GazeboRosColor::colorCallback(const std_msgs::ColorRGBAConstPtr& msg)
+//////////////////////////////////////////////////
+void GazeboRosColor::ColorCallback(const std_msgs::ColorRGBAConstPtr &_msg)
 {
   // Convert ROS color to gazebo color
-  gazebo::common::Color gazebo_color(msg->r, msg->g, msg->b, msg->a);
+  gazebo::common::Color gazebo_color(_msg->r, _msg->g, _msg->b, _msg->a);
 
   // Set parent's color to message color
-  visual_->SetAmbient(gazebo_color);
-  visual_->SetDiffuse(gazebo_color);
+  this->visual->SetAmbient(gazebo_color);
+  this->visual->SetDiffuse(gazebo_color);
 }
+
+// Register plugin with gazebo
+GZ_REGISTER_VISUAL_PLUGIN(GazeboRosColor)
