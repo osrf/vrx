@@ -39,18 +39,18 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 namespace gazebo
 {
   /// \brief A plugin to simulate a propulsion system under water.
-  /// This plugin accepts the following SDF parameters:
+  /// This plugin accepts the following SDF parameters - see https://github.com/bsb808/robotx_docs/blob/master/theoryofoperation/theory_of_operation.pdf for more information.
   ///
-  ///   <robotNamespace>:
-  ///   <bodyName>:
-  ///   <cmdTimeout>:
-  ///   <mappingType>:
-  ///   <maxCmd>:
-  ///   <maxForceFwd>:
-  ///   <maxForceRev>:
-  ///   <boatWidth>:
-  ///   <boatLength>:
-  ///   <thrustOffsetZ>:
+  ///   <robotNamespace>: Namespace prefix for USV.
+  ///   <bodyName>: Name of the link on which to apply thrust forces.
+  ///   <cmdTimeout>:  Timeout, after which thrust is set to zero [s].
+  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear)
+  ///   <maxCmd>:Maximum (abs val) of thrust commands, typ. 1.0.
+  ///   <maxForceFwd>: Maximum forward force [N].
+  ///   <maxForceRev>: Maximum reverse force [N].
+  ///   <boatWidth>: Distance between the two thrust forces - for purpose of computing torque [m].
+  ///   <boatLength>: Hull length - for the purpose of computing thrust application location.
+  ///   <thrustOffsetZ>: Distance in z direction (+ up), in link coordinates, for application of thrust force [m].
   ///   <left_propeller_joint>: The left's propeller joint.
   ///   <right_propeller_joint>: The right's propeller joint.
   class UsvThrust : public ModelPlugin
