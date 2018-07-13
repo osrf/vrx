@@ -35,33 +35,33 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace gazebo
 {
-  /// \brief ToDo.
+  /// \brief Plugin class to implement hydrodynamics and wave response.
   class UsvDynamicsPlugin : public ModelPlugin
   {
     /// \brief Constructor.
     ///
-    /// <bodyName>: ToDo.
+    /// <bodyName>: Name of base link for receiving pose and and applying forces
     /// <boatArea>: Horizontal surface area [m^2]. Default value is 0.48.
     /// <boatLength>: Boat length [m]. Default value is 1.35.
     /// <boatWidth>: Boat width [m]. Default value is 1.
     /// <waterDensity>: Water density [kg/m^3]. Default value is 997.7735.
     /// <waterLevel>: Water height [m]. Default value is 0.5.
-    /// <xDotU>: ToDo.
-    /// <yDotV>: ToDo.
-    /// <nDotR>: ToDo.
-    /// <xU>: ToDo.
-    /// <xUU>: ToDo.
-    /// <yV>: ToDo.
-    /// <yVV>: ToDo.
-    /// <zW>: ToDo.
-    /// <kP>: ToDo.
-    /// <mQ>: ToDo.
-    /// <nR>: ToDo.
-    /// <nRR>: ToDo.
-    /// <wave_n>: ToDo.
-    /// <wave_amp<N>>: ToDo.
-    /// <wave_period<N>>: ToDo.
-    /// <wave_direction<N>>: ToDo.
+    /// <xDotU>: Added mass coeff, surge.
+    /// <yDotV>: Added mass coeff, sway.
+    /// <nDotR>: Added mass coeff, yaw
+    /// <xU>: Linear drag coeff surge.
+    /// <xUU>: Quadratic drag coeff surge.
+    /// <yV>: Linear drag coeff sway.
+    /// <yVV>: Quadratic drag coeff sway
+    /// <zW>: Linear drag coeff heave.
+    /// <kP>: Linear drag coeff pitch.
+    /// <mQ>: Linear drag coeff roll.
+    /// <nR>: Linear drag coeff yaw.
+    /// <nRR>: Quadratic drag coeff yaw.
+    /// <wave_n>: Number of waves to generate wave field.
+    /// <wave_amp<N>>: Amplitude for each component [m].
+    /// <wave_period<N>>: Period for each compenent [s]. 
+    /// <wave_direction<N>>: Direction of motion for each component ENU [rad].
     public: UsvDynamicsPlugin();
 
     /// \brief Destructor.
@@ -95,22 +95,22 @@ namespace gazebo
     /// \brief Simulation time of the last update.
     private: common::Time prevUpdateTime;
 
-    /// \brief ToDo.
+    /// \brief Linear velocity from previous time step, for estimating acceleration.
     private: math::Vector3 prevLinVel;
 
-    /// \brief ToDo.
+    /// \brief Angular velocity from previous time step, for estimating acceleration.
     private: math::Vector3 prevAngVel;
 
-    /// \brief For Buoyancy calculation.
+    /// \brief For Buoyancy fraction for each discrete element.
     private: float buoyFrac;
 
-    /// \brief ToDo.
+    /// \brief Grid size in x direction for buoyancy discretization.
     private: float dx;
 
-    /// \brief ToDo.
+    /// \brief Grid size in y direction for buoyancy discretization.
     private: float dy;
 
-    /// \brief ToDo.
+    /// \brief Grid indicies for buoyancy discretization.
     private: std::vector<int> II;
 
     /// \brief Values to set via Plugin Parameters.
@@ -135,17 +135,18 @@ namespace gazebo
     /// \brief Plugin Parameter: Quadratic drag in sway.
     private: double paramYvv;
 
-    /// \brief ToDo.
+    /// \brief Plugin Parameter: Linear drag in heave
     private: double paramZw;
 
-    /// \brief ToDo.
+    /// \brief Plugin Parameter: Linear drag in roll
     private: double paramKp;
 
-    /// \brief ToDo.
+    /// \brief Plugin Parameter: Linear drag in pitch
     private: double paramMq;
 
     /// \brief Plugin Parameter: Linear drag in yaw.
     private: double paramNr;
+    
     /// \brief Plugin Parameter: Quadratic drag in yaw.
     private: double paramNrr;
 
@@ -158,13 +159,13 @@ namespace gazebo
     /// \brief Wave parameters.
     private: int paramWaveN;
 
-    /// \brief ToDo.
+    /// \brief Wave amplitude values for N components.
     private: std::vector<float> paramWaveAmps;
 
-    /// \brief ToDo.
+    /// \brief Wave period values for N components.
     private: std::vector<float> paramWavePeriods;
 
-    /// \brief ToDo.
+    /// \brief Wave direction values for N components.
     private: std::vector<std::vector<float>> paramWaveDirections;
 
     /// \brief Pointer to the update event connection.
