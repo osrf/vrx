@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="surmark46104">
+    <link name="link">
+      <velocity_decay>
+        <linear>0.001</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+      <inertial>
+        <pose>0 0 -10 0 0 0</pose>
+        <mass>17.2365</mass>
+        <inertia>
+          <ixx>2.5137</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.5137</iyy>
+          <iyz>0</iyz>
+          <izz>0.5386</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision_inner">
+        <pose>0 0 0.367 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.13</radius>
+            <length>1.25</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="collision_outer">
+        <pose>0 0 -0.075 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.23</radius>
+            <length>0.16</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+	        <mesh><uri>model://surmark46104/mesh/surmark46104.dae</uri></mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/White</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <fluid_drag>5.0</fluid_drag>
+      <link>
+        <name>link</name>
+        <center_of_volume>0 0 0.5</center_of_volume>
+        <area>0.63</area>
+        <height>0.2</height>
+      </link>
+    </plugin>
+  </model>
+</sdf>
