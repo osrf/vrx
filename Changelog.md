@@ -2,6 +2,9 @@
 
 ### VMRC 0.X.X
 
+1. Improve colors, collisions and inertia properties of the 9504X0 buoys.
+  * [Pull request 25](https://bitbucket.org/osrf/vmrc/pull-requests/25)
+
 1. Simplify the collision model for Sandisland.
   * [Pull request 22](https://bitbucket.org/osrf/vmrc/pull-requests/22)
 
