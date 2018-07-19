@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sdf version="1.5">
+<sdf version="1.6">
   <!-- Reference: https://www.polyformus.com/buoys/a-series -->
   <model name="polyform_a7">
     <static>true</static>
