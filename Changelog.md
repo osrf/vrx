@@ -1,6 +1,10 @@
 ## VMRC 0
 
 ### VMRC 0.X.X
+
+1. Simplify the collision model for Sandisland.
+  * [Pull request 22](https://bitbucket.org/osrf/vmrc/pull-requests/22)
+
 1. Various cleanups/refactors.
   * [Pull request 3](https://bitbucket.org/osrf/vmrc/pull-requests/3)
   * [Pull request 9](https://bitbucket.org/osrf/vmrc/pull-requests/9)
