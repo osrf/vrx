@@ -2,6 +2,9 @@
 
 ### VMRC 0.X.X
 
+1. Add colored totem buoys.
+  * [Pull request 26](https://bitbucket.org/osrf/vmrc/pull-requests/26)
+
 1. Simplify the collision model for Sandisland.
   * [Pull request 22](https://bitbucket.org/osrf/vmrc/pull-requests/22)
 
