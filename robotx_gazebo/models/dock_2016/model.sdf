@@ -1,0 +1,839 @@
+
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="robotx_dock_2016">
+
+    <!--
+    XXXX      XXXX      XXXX
+    XXXX      XXXX      XXXX
+    XXXX      XXXX      XXXX
+    XXXX      XXXX      XXXX
+    XXXX      XXXX      XXXX
+    XXXX      XXXX      XXXX
+    XXXX      XXXX      XXXX
+    XXXX      XXXX      XXXX
+    XXXXXXXXXXXXXXXXXXXXXXXX
+    XXXXXXXXXXXXXXXXXXXXXXXX
+    XXXXXXXXXXXXXXXXXXXXXXXX
+    XXXXXXXXXXXXXXXXXXXXXXXX
+
+    0                    
+    -->
+
+    <!-- Column 0 -->
+    <include>
+      <pose>0 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 0 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 1 -->
+    <include>
+      <pose>0 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 0.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 2 -->
+    <include>
+      <pose>0 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 1 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 3 -->
+    <include>
+      <pose>0 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 1.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 4 -->
+    <include>
+      <pose>4 2 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 2 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 2 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 2 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 5 -->
+    <include>
+      <pose>4 2.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 2.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 2.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 2.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 6 -->
+    <include>
+      <pose>4 3 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 3 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 3 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 3 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 7 -->
+    <include>
+      <pose>4 3.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 3.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 3.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 3.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 8 -->
+    <include>
+      <pose>4 4 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 4 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 4 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 4 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 9 -->
+    <include>
+      <pose>4 4.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 4.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 4.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 4.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 10 -->
+    <include>
+      <pose>0 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 11 -->
+    <include>
+      <pose>0 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 5.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 12 -->
+    <include>
+      <pose>0 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 6 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 13 -->
+    <include>
+      <pose>0 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 6.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 14 -->
+    <include>
+      <pose>4 7 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 7 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 7 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 7 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 15 -->
+    <include>
+      <pose>4 7.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 7.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 7.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 7.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 16 -->
+    <include>
+      <pose>4 8 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 8 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 8 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 8 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 17 -->
+    <include>
+      <pose>4 8.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 8.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 8.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 8.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 18 -->
+    <include>
+      <pose>4 9 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 9 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 9 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 9 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 19 -->
+    <include>
+      <pose>4 9.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 9.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 9.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 9.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 20 -->
+    <include>
+      <pose>0 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 10 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 19 -->
+    <include>
+      <pose>0 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 10.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 20 -->
+    <include>
+      <pose>0 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 11 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+
+    <!-- Column 21 -->
+    <include>
+      <pose>0 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>0.5 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>1.5 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>2.5 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>3.5 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>4.5 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+    <include>
+      <pose>5.5 11.5 0.25 0 0 0</pose>
+      <uri>model://dock_block</uri>
+    </include>
+  </model>
+</sdf>

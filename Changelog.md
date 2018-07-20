@@ -2,6 +2,9 @@
 
 ### VMRC 0.X.X
 
+1. Add a dock block for creating docks.
+  * [Pull request XX](https://bitbucket.org/osrf/vmrc/pull-requests/XX)
+
 1. Simplify the collision model for Sandisland.
   * [Pull request 22](https://bitbucket.org/osrf/vmrc/pull-requests/22)
 
