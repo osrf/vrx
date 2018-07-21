@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(robotx_gazebo)
 
+# We need erb to process the .world.erb files.
+find_program(ERB_EXE_PATH erb)
+if(NOT ERB_EXE_PATH)
+  message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
   wamv_gazebo
   xacro
@@ -37,6 +43,24 @@ install(TARGETS light_buoy_controller
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+# Model files that need to be processed with erb
+set (dock_erb_files
+  models/dock_2016/model.sdf.erb
+  models/dock_2018/model.sdf.erb
+)
+
+# Process the erb files
+foreach(_erb ${dock_erb_files})
+  string(REGEX REPLACE ".sdf.erb" ".sdf" _model ${_erb})
+  set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
+  add_custom_command(OUTPUT ${_model}
+                     COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+  list(APPEND model_files ${_model})
+endforeach()
+add_custom_target(erb_generation ALL DEPENDS ${model_files})
 
 # Generate world files from xacro and install
 xacro_add_files(
