@@ -38,23 +38,6 @@ install(TARGETS light_buoy_controller
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Models that need to be processed with erb
-set (model_erb_files
-  models/dock_2016/dock_2016.erb
-)
-
-# Process the erb files
-foreach(_erb ${model_erb_files})
-  string(REGEX REPLACE ".erb" ".sdf" _model ${_erb})
-  set(_model ${CMAKE_CURRENT_BINARY_DIR}/${_model})
-  add_custom_command(OUTPUT ${_model}
-                     COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-  list(APPEND model_files ${_model})
-endforeach()
-add_custom_target(erb_generation ALL DEPENDS ${model_files})
-
 # Generate world files from xacro and install
 xacro_add_files(
   worlds/sandisland.world.xacro
