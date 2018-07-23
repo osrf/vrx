@@ -27,6 +27,18 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace gazebo;
 
+Thruster::Thruster()
+{
+  // Set defaults
+  //this->maxCmd = 1.0;
+  //this->maxForceFwd = 250.0;
+  //this->maxForceRev = -100.0;
+  
+  // 
+  //private: physics::LinkPtr link;
+}
+    
+
 //////////////////////////////////////////////////
 UsvThrust::UsvThrust()
 {
@@ -75,6 +87,35 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     nodeNamespace = _sdf->Get<std::string>("robotNamespace") + "/";
   }
 
+  ROS_INFO_STREAM("Loading thrusters from SDF");
+
+  // For each thruster
+  int tcnt = 0;
+  if (_sdf->HasElement("thruster"))
+  {
+    sdf::ElementPtr thrusterSDF = _sdf->GetElement("thruster");
+    while (thrusterSDF){
+      Thruster thruster;  // new instance
+      if (thrusterSDF->HasElement("linkName")){
+      }
+      else{
+	ROS_ERROR_STREAM("Please specify a link name for each theruster");
+      }
+      tcnt++;
+
+      this->thrusters.push_back(thruster);
+      thrusterSDF = thrusterSDF->GetNextElement("thruster");
+    } // end of while
+  }
+  else
+  {
+    ROS_WARN_STREAM("No 'thruster' tags in description - how will you move?");
+  }
+  ROS_INFO_STREAM("Found " << tcnt << " thrusters");
+  
+      
+
+  
   std::string linkName;
   if (_sdf->HasElement("bodyName"))
   {

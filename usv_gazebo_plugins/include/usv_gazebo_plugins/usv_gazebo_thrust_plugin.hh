@@ -38,6 +38,28 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace gazebo
 {
+  /// \brief Thruster class
+  class Thruster
+  {
+
+    /// \brief Constructor
+    public: Thruster();
+    
+    /// \brief Maximum abs val of incoming command
+    private: double maxCmd;
+
+    /// \brief Max forward force in Newtons
+    private: double maxForceFwd;
+
+    /// \brief Max reverse force in Newtons
+    private: double maxForceRev;
+
+    /// \brief Link where thrust force is applied
+    private: physics::LinkPtr link;
+
+    
+  };
+  
   /// \brief A plugin to simulate a propulsion system under water.
   /// This plugin accepts the following SDF parameters.
   /// See https://github.com/bsb808/robotx_docs/blob/master/theoryofoperation/theory_of_operation.pdf
@@ -151,6 +173,9 @@ namespace gazebo
     /// \brief Timeout for receiving Drive commands [s].
     private: double cmdTimeout;
 
+    /// \brief Vector of thruster instances
+    private: std::vector<Thruster> thrusters;
+
     /// \brief Time of last command input (cmdDrive).
     private: common::Time lastCmdDriveTime;
 
@@ -197,6 +222,9 @@ namespace gazebo
     /// \brief The propeller message state.
     private: sensor_msgs::JointState jointStateMsg;
   };
+
+  
+
 }
 
 #endif
