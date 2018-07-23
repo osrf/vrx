@@ -56,6 +56,7 @@ foreach(_erb ${dock_erb_files})
   set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
   add_custom_command(OUTPUT ${_model}
                      COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_erb}
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
   list(APPEND model_files ${_model})

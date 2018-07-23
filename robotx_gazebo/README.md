@@ -40,4 +40,3 @@ The following models are used in the RobotX challenge and will be included in th
 | Red Triangle Symbol    | Custom                   | TODO   | |
 
 *= More detailed model needed
-
