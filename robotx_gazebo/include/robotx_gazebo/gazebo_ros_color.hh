@@ -34,7 +34,7 @@ class GazeboRosColor : public gazebo::VisualPlugin
 {
   // Documentation inherited.
   public: void Load(gazebo::rendering::VisualPtr _parent,
-                    sdf::ElementPtr /*_sdf*/);
+                    sdf::ElementPtr _sdf);
 
   /// \brief Pointer to the visual element to modify.
   private: gazebo::rendering::VisualPtr visual = nullptr;
