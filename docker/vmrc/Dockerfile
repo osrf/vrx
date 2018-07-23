@@ -13,6 +13,7 @@ RUN apt-get update \
         python3-dbg \
         python3-pip \
         python3-venv \
+        ruby \
         software-properties-common \
         sudo \
         vim \
