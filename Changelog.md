@@ -5,6 +5,9 @@
 1. Add a dock block and a templated mechanism (erb) for creating docks.
   * [Pull request 27](https://bitbucket.org/osrf/vmrc/pull-requests/27)
 
+1. Add colored totem buoys.
+  * [Pull request 26](https://bitbucket.org/osrf/vmrc/pull-requests/26)
+
 1. Improve colors, collisions and inertia properties of the 9504X0 buoys.
   * [Pull request 25](https://bitbucket.org/osrf/vmrc/pull-requests/25)
 
