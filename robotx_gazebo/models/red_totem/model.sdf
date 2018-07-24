@@ -6,12 +6,12 @@
     </include>
     <link name="cover">
       <visual name="cover_visual">
-        <pose>0 0 0.001 0 0 0</pose>
+        <pose>0 0 0.492 0 0 0</pose>
         <geometry>
-	        <mesh>
-            <scale>1.01 1.01 1.01</scale>
-            <uri>model://surmark46104/mesh/surmark46104.dae</uri>
-          </mesh>
+          <cylinder>
+            <radius>0.131</radius>
+            <length>1</length>
+          </cylinder>
         </geometry>
         <material>
           <script>
