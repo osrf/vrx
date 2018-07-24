@@ -13,5 +13,30 @@
       <uri>model://robotx_light_buoy</uri>
       <pose>60 0 0 0 0 0</pose>
     </include>
+
+    <model name="placard1">
+     
+      <include>
+        <uri>model://placard</uri>
+        <pose>5 0 1 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="placard2">
+      <!-- The white placard -->
+      <include>
+        <uri>model://placard</uri>
+        <pose>10 0 1 0 0 0</pose>
+      </include>
+    </model>
+
+    <model name="placard3">
+      <!-- The white placard -->
+      <include>
+        <uri>model://placard</uri>
+        <pose>15 0 1 0 0 0</pose>
+      </include>
+    </model>
+      
   </world>
 </sdf>

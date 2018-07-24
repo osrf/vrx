@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="placard">
+    <static>true</static>
+    <pose>0 0 1 0 0 0</pose>
+    
+     <!-- The white placard -->
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>2 0.1 3</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>2 0.1 3</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- Cross symbol -->
+    <include>
+      <pose>0 0.06 0.5 1.5708 0 0</pose>
+      <uri>model://symbol_cross</uri>
+    </include>
+    <joint name="placard_cross_joint" type="fixed">
+      <parent>placard::link</parent>
+      <child>symbol_cross::link</child>
+    </joint>
+
+    <!-- Circle symbol -->
+    <include>
+      <pose>0 0.06 0.5 1.5708 0 0</pose>
+      <uri>model://symbol_circle</uri>
+    </include>
+    <joint name="placard_circle_joint" type="fixed">
+      <parent>placard::link</parent>
+      <child>symbol_circle::link</child>
+    </joint>
+
+    <!-- Triangle symbol -->
+    <include>
+      <pose>-0.5 0.06 0.1 1.5708 0 0</pose>
+      <uri>model://symbol_triangle</uri>
+    </include>
+    <joint name="placard_triangle_joint" type="fixed">
+      <parent>placard::link</parent>
+      <child>symbol_triangle::link</child>
+    </joint>
+  </model>
+</sdf>
