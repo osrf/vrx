@@ -29,13 +29,6 @@ using namespace gazebo;
 
 Thruster::Thruster()
 {
-  // Set defaults
-  //this->maxCmd = 1.0;
-  //this->maxForceFwd = 250.0;
-  //this->maxForceRev = -100.0;
-  
-  // 
-  //private: physics::LinkPtr link;
 }
     
 
@@ -89,22 +82,52 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   ROS_INFO_STREAM("Loading thrusters from SDF");
 
+  // Temporary storage
+  std::string linkName;
+
   // For each thruster
   int tcnt = 0;
   if (_sdf->HasElement("thruster"))
   {
     sdf::ElementPtr thrusterSDF = _sdf->GetElement("thruster");
     while (thrusterSDF){
-      Thruster thruster;  // new instance
+      // Instatiate
+      Thruster thruster;  
+
+      // Find link by name in SDF
       if (thrusterSDF->HasElement("linkName")){
+	linkName = thrusterSDF->Get<std::string>("linkName");
+	thruster.link = this->model->GetLink(linkName);
+	if (thruster.link == nullptr){
+	  ROS_ERROR_STREAM("Could not find a link by the name <" << linkName <<"> in the model!");
+	}
       }
       else{
-	ROS_ERROR_STREAM("Please specify a link name for each theruster");
+	ROS_ERROR_STREAM("Please specify a link name for each thruster!");
       }
-      tcnt++;
 
+      // Parse individual thruster SDF parameters
+      thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd",1.0);
+      thruster.maxForceFwd = this->SdfParamDouble(thrusterSDF, "maxForceFwd",250.0);
+      thruster.maxForceRev = this->SdfParamDouble(thrusterSDF, "maxForceRev",-100.0);
+      if (thrusterSDF->HasElement("mappingType")){
+	thruster.mappingType = thrusterSDF->Get<int>("mappingType");
+	ROS_INFO_STREAM("Parameter found - setting <mappingType> to <" <<
+			thruster->paramMappingType << ">.");
+      }
+      else
+	{
+	  thruster.mappingType = 0;
+	  ROS_INFO_STREAM("Parameter <mappingType> not found: Using default value of "
+			  "<" << thruster->mappingType << ">.");
+	}
+      
+      
+      // Push to vector and increment
       this->thrusters.push_back(thruster);
       thrusterSDF = thrusterSDF->GetNextElement("thruster");
+      tcnt++;
+      
     } // end of while
   }
   else
@@ -116,7 +139,6 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       
 
   
-  std::string linkName;
   if (_sdf->HasElement("bodyName"))
   {
     linkName = _sdf->Get<std::string>("bodyName");

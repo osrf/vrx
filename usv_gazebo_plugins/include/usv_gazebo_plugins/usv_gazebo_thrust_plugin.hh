@@ -46,16 +46,19 @@ namespace gazebo
     public: Thruster();
     
     /// \brief Maximum abs val of incoming command
-    private: double maxCmd;
+    public: double maxCmd;
 
     /// \brief Max forward force in Newtons
-    private: double maxForceFwd;
+    public: double maxForceFwd;
 
     /// \brief Max reverse force in Newtons
-    private: double maxForceRev;
+    public: double maxForceRev;
 
     /// \brief Link where thrust force is applied
-    private: physics::LinkPtr link;
+    public: physics::LinkPtr link;
+
+    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear)
+    public: int mappingType;
 
     
   };
