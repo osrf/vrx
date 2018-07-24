@@ -11,7 +11,7 @@
     </include>
     <include>
       <uri>model://robotx_light_buoy</uri>
-      <pose>60 0 0 0 0 0</pose>
+      <pose>60 0 0.25 0 0 0</pose>
     </include>
   </world>
 </sdf>

@@ -12,7 +12,7 @@
         </geometry>
       </visual>
       <visual name="panel_1">
-        <pose>-0.0195 0.124 1.601 0 0 0</pose>
+        <pose>-0.05 0.09 1.3 0 0 0.5</pose>
         <geometry>
           <box>
             <size>.192 .01 .386</size>
@@ -30,7 +30,7 @@
         </plugin>
       </visual>
       <visual name="panel_2">
-        <pose>-0.11 -0.03262 1.601 0 0 -1.0472</pose>
+        <pose>-0.06 -0.085 1.3 0 0 -0.54719</pose>
         <geometry>
           <box>
             <size>.192 .01 .386</size>
@@ -48,7 +48,7 @@
         </plugin>
       </visual>
       <visual name="panel_3">
-        <pose>0.07143 -0.03297 1.601 0 0 1.0472</pose>
+        <pose>0.11 -0.003 1.3 0 0 1.5472</pose>
         <geometry>
           <box>
             <size>.192 .01 .386</size>
