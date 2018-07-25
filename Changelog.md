@@ -2,6 +2,9 @@
 
 ### VMRC 0.X.X
 
+1. Update the mesh of the light buoy.
+  * [Pull request 28](https://bitbucket.org/osrf/vmrc/pull-requests/28)
+
 1. Add colored totem buoys.
   * [Pull request 26](https://bitbucket.org/osrf/vmrc/pull-requests/26)
 
