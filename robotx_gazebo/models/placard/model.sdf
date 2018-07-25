@@ -52,4 +52,5 @@
       <child>symbol_triangle::link</child>
     </joint>
   </model>
+  
 </sdf>
