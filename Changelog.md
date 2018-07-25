@@ -5,6 +5,9 @@
 1. Add a dock block and a templated mechanism (erb) for creating docks.
   * [Pull request 27](https://bitbucket.org/osrf/vmrc/pull-requests/27)
 
+1. Update the mesh of the light buoy.
+  * [Pull request 28](https://bitbucket.org/osrf/vmrc/pull-requests/28)
+
 1. Add colored totem buoys.
   * [Pull request 26](https://bitbucket.org/osrf/vmrc/pull-requests/26)
 
