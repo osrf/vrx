@@ -52,7 +52,7 @@ double UsvDynamicsPlugin::SdfParamDouble(sdf::ElementPtr _sdfPtr,
   }
 
   double val = _sdfPtr->Get<double>(_paramName);
-  ROS_INFO_STREAM("Parameter found - setting <" << _paramName <<
+  ROS_DEBUG_STREAM("Parameter found - setting <" << _paramName <<
                   "> to <" << val << ">.");
   return val;
 }
@@ -60,7 +60,7 @@ double UsvDynamicsPlugin::SdfParamDouble(sdf::ElementPtr _sdfPtr,
 //////////////////////////////////////////////////
 void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  ROS_INFO("Loading usv_gazebo_dynamics_plugin");
+  ROS_DEBUG("Loading usv_gazebo_dynamics_plugin");
   this->world = _model->GetWorld();
 
   // Get parameters from SDF
@@ -77,7 +77,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     linkName = _sdf->GetElement("bodyName")->Get<std::string>();
     this->link = _model->GetLink(linkName);
 
-    ROS_INFO_STREAM("Found SDF parameter bodyName as <" << linkName<< ">");
+    ROS_DEBUG_STREAM("Found SDF parameter bodyName as <" << linkName<< ">");
   }
   if (!this->link)
   {
@@ -87,7 +87,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
   else
   {
-    ROS_INFO_STREAM("USV Dynamics Model Link Name = " << linkName);
+    ROS_DEBUG_STREAM("USV Dynamics Model Link Name = " << linkName);
   }
 
   this->waterLevel       = this->SdfParamDouble(_sdf, "waterLevel"  , 0.5);
@@ -117,7 +117,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     buf.str("");
     buf << "wave_amp" << i;
     this->paramWaveAmps.push_back(_sdf->GetElement(buf.str())->Get<float>());
-    ROS_INFO_STREAM("Wave Amplitude " << i << ": " << this->paramWaveAmps[i]);
+    ROS_DEBUG_STREAM("Wave Amplitude " << i << ": " << this->paramWaveAmps[i]);
     buf.str("");
     buf << "wave_period" << i;
     this->paramWavePeriods.push_back(_sdf->GetElement(buf.str())->Get<float>());
@@ -127,7 +127,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     tmpv[0] = tmpm.x;
     tmpv[1] = tmpm.y;
     this->paramWaveDirections.push_back(tmpv);
-    ROS_INFO_STREAM("Wave Direction " << i << ": " <<
+    ROS_DEBUG_STREAM("Wave Direction " << i << ": " <<
       this->paramWaveDirections[i][0] << ", " <<
       this->paramWaveDirections[i][1]);
   }
@@ -138,9 +138,9 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   const double kMass = this->link->GetInertial()->GetMass();
 
   // Report some of the pertinent parameters for verification
-  ROS_INFO("USV Dynamics Parameters: From URDF XACRO model definition");
-  ROS_INFO_STREAM("Vessel Mass (rigid-body): " << kMass);
-  ROS_INFO_STREAM("Vessel Inertia Vector (rigid-body): X:" << kInertia[0] <<
+  ROS_DEBUG("USV Dynamics Parameters: From URDF XACRO model definition");
+  ROS_DEBUG_STREAM("Vessel Mass (rigid-body): " << kMass);
+  ROS_DEBUG_STREAM("Vessel Inertia Vector (rigid-body): X:" << kInertia[0] <<
                   " Y:" << kInertia[1] << " Z:" << kInertia[2]);
 
   // Initialize time and odometry position
