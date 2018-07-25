@@ -15,18 +15,20 @@
  *
 */
 
+#include <algorithm>
+#include <gazebo/physics/Model.hh>
 #include <ignition/math/Rand.hh>
 
 #include "robotx_gazebo/symbol_controller.hh"
 
-const std::array<LightBuoyController::Colors_t, 4> LightBuoyController::kColors
-  = {LightBuoyController::Colors_t(CreateColor(1.0, 0.0, 0.0, 1.0), "RED"),
-     LightBuoyController::Colors_t(CreateColor(0.0, 1.0, 0.0, 1.0), "GREEN"),
-     LightBuoyController::Colors_t(CreateColor(0.0, 0.0, 1.0, 1.0), "BLUE"),
-     LightBuoyController::Colors_t(CreateColor(0.0, 0.0, 0.0, 1.0), "OFF")};
-
 //////////////////////////////////////////////////
-std_msgs::ColorRGBA LightBuoyController::CreateColor(const double _r,
+/// \brief Creates a std_msgs::ColorRGBA message from 4 doubles.
+/// \param[in] _r Red.
+/// \param[in] _g Green.
+/// \param[in] _b Blue.
+/// \param[in] _a Alpha.
+/// \return The ColorRGBA message.
+static std_msgs::ColorRGBA createColor(const double _r,
   const double _g, const double _b, const double _a)
 {
   static std_msgs::ColorRGBA color;
@@ -36,6 +38,16 @@ std_msgs::ColorRGBA LightBuoyController::CreateColor(const double _r,
   color.a = _a;
   return color;
 }
+
+// Static initialization.
+std::map<std::string, std_msgs::ColorRGBA> SymbolController::kColors =
+  {
+    {"red",   createColor(1.0, 0.0, 0.0, 1.0)},
+    {"green", createColor(0.0, 1.0, 0.0, 1.0)},
+    {"blue",  createColor(0.0, 0.0, 1.0, 1.0)},
+  };
+std::vector<std::string> SymbolController::kShapes =
+  {"circle", "cross", "triangle"};
 
 //////////////////////////////////////////////////
 void SymbolController::Load(gazebo::physics::ModelPtr _parent,
@@ -50,94 +62,150 @@ void SymbolController::Load(gazebo::physics::ModelPtr _parent,
     return;
   }
 
-  std::string ns = "";
+  // Load namespace from SDF if available. Otherwise, use the model name.
+  std::string modelName = _parent->GetName();
+  auto delim = modelName.find(":");
+  if (delim != std::string::npos)
+    modelName = modelName.substr(0, delim);
+
+
+  std::string ns = modelName;
   if (_sdf->HasElement("robotNamespace"))
     ns = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
   {
-    ROS_INFO_NAMED("symbolController",
-                   "missing <robotNamespace>, defaulting to %s", ns.c_str());
+    ROS_DEBUG_NAMED("symbolController",
+                    "missing <robotNamespace>, defaulting to %s", ns.c_str());
   }
 
-  std::string sdfShape = "";
+  // Parse the shape. We initialize it with a random shape.
+  this->ShuffleShape();
   if (_sdf->HasElement("shape"))
-    sdfShape = _sdf->GetElement("shape")->Get<std::string>();
-  else
   {
-    ROS_INFO_NAMED("symbolController",
-                   "missing <robotNamespace>, defaulting to %s", ns.c_str());
+    std::string aShape = _sdf->GetElement("shape")->Get<std::string>();
+    std::transform(aShape.begin(), aShape.end(), aShape.begin(), ::tolower);
+    // Sanity check: Make sure the shape is allowed.
+    if (std::find(this->kShapes.begin(), this->kShapes.end(), aShape) !=
+          this->kShapes.end())
+    {
+      this->shape = aShape;
+    }
+    else
+    {
+      ROS_INFO_NAMED("symbolController",
+                  "incorrect [%s] <shape>, using random shape", aShape.c_str());
+    }
+  }
+
+  // Parse the color. We initialize it with a random color.
+  this->ShuffleColor();
+  if (_sdf->HasElement("color"))
+  {
+    std::string aColor = _sdf->GetElement("color")->Get<std::string>();
+    std::transform(aColor.begin(), aColor.end(), aColor.begin(), ::tolower);
+    // Sanity check: Make sure the color is allowed.
+    if (this->kColors.find(aColor) != this->kColors.end())
+    {
+      this->color = aColor;
+    }
+    else
+    {
+      ROS_INFO_NAMED("symbolController",
+                  "incorrect [%s] <color>, using random color", aColor.c_str());
+    }
   }
 
   this->nh = ros::NodeHandle(ns);
 
-  // Create publisher to set color on each panel
-  this->panelPubs[0] = this->nh.advertise<std_msgs::ColorRGBA>("panel1", 1u);
-  this->panelPubs[1] = this->nh.advertise<std_msgs::ColorRGBA>("panel2", 1u);
-  this->panelPubs[2] = this->nh.advertise<std_msgs::ColorRGBA>("panel3", 1u);
+  // Create publisher to set symbols
+  auto iterShapes = this->kShapes.begin();
+  for (auto i = 0; i < this->kShapes.size(); ++i)
+  {
+    std::string topic = *iterShapes;
+    std::advance(iterShapes, 1);
+    this->symbolPubs.push_back(
+      this->nh.advertise<std_msgs::ColorRGBA>(topic, 1u, true));
+  }
 
-  // Generate random initial pattern
-  std::string initial;
-  this->ChangePattern(initial);
-
-  this->changePatternServer = this->nh.advertiseService(
-    "new_pattern", &LightBuoyController::ChangePattern, this);
-
+  // This timer is used to defer the symbol publication a few seconds to make
+  // sure that all subscribers receive the message.
   this->timer = this->nh.createTimer(
-    ros::Duration(1.0), &LightBuoyController::IncrementState, this);
+    ros::Duration(2.0), &SymbolController::Publish, this, true);
+
+  // Advertise the service to shuffle shape and color.
+  this->changePatternServer = this->nh.advertiseService(
+    "shuffle", &SymbolController::Shuffle, this);
 }
 
 //////////////////////////////////////////////////
-void LightBuoyController::IncrementState(const ros::TimerEvent &/*_event*/)
-{
-  std::lock_guard<std::mutex> lock(this->mutex);
-  // Start over if at end of pattern
-  if (this->state > 3)
-      this->state = 0;
-  auto msg = this->kColors[this->pattern[this->state]].first;
-  // Publish current color to each panel
-  for (size_t i = 0; i < 3; ++i)
-    this->panelPubs[i].publish(msg);
-  // Increment index for next timer callback
-  ++this->state;
-}
-
-//////////////////////////////////////////////////
-bool LightBuoyController::ChangePattern(std_srvs::Trigger::Request &_req,
+bool SymbolController::Shuffle(std_srvs::Trigger::Request &/*_req*/,
   std_srvs::Trigger::Response &_res)
 {
-  this->ChangePattern(_res.message);
-  _res.message = "New pattern: " + _res.message;
+  this->Shuffle();
   _res.success = true;
   return _res.success;
 }
 
 //////////////////////////////////////////////////
-void LightBuoyController::ChangePattern(std::string &_message)
+void SymbolController::Shuffle()
 {
-  Pattern_t newPattern;
-  // Last phase in pattern is always off
-  newPattern[3] = 4;
-  // Loop until random pattern is different from current one
-  do {
-    // Generate random sequence of 3 colors among RED, GREEN, BLUE, and YELLOW
-    for (size_t i = 0; i < 3; ++i)
-      newPattern[i] = ignition::math::Rand::IntUniform(0, 3);
-    // Ensure there is no CONSECUTIVE repeats
-    while (newPattern[0] == newPattern[1] || newPattern[1] == newPattern[2])
-      newPattern[1] = ignition::math::Rand::IntUniform(0, 3);
-  } while (newPattern == this->pattern);
+  this->ShuffleShape();
+  this->ShuffleColor();
+  this->Publish();
+}
 
-  std::lock_guard<std::mutex> lock(this->mutex);
-  // Copy newly generated pattern to pattern
-  this->pattern = newPattern;
-  // Start in OFF state so pattern restarts at beginning
-  this->state = 3;
-  // Generate string representing pattern, ex: "RGB"
-  for (size_t i = 0; i < 3; ++i)
-    _message += this->kColors[newPattern[i]].second[0];
-  // Log the new pattern
-  ROS_INFO_NAMED("light_bouy_controller", "Pattern is %s", _message.c_str());
+//////////////////////////////////////////////////
+void SymbolController::ShuffleShape()
+{
+  std::string newShape;
+  do
+  {
+    newShape =
+      this->kShapes[ignition::math::Rand::IntUniform(0,
+        this->kShapes.size() - 1)];
+  }
+  while (newShape == this->shape);
+  this->shape = newShape;
+}
+
+//////////////////////////////////////////////////
+void SymbolController::ShuffleColor()
+{
+  std::string newColor;
+  do
+  {
+    auto iterColor = this->kColors.begin();
+    std::advance(iterColor,
+               ignition::math::Rand::IntUniform(0, this->kColors.size() - 1));
+    newColor = (*iterColor).first;
+  }
+  while (newColor == this->color);
+  this->color = newColor;
+}
+
+//////////////////////////////////////////////////
+void SymbolController::Publish(const ros::TimerEvent &/*_event*/)
+{
+  this->Publish();
+}
+
+//////////////////////////////////////////////////
+void SymbolController::Publish()
+{
+  for (auto i = 0; i < this->kShapes.size(); ++i)
+  {
+    std_msgs::ColorRGBA msg;
+    msg.a = 0.0;
+
+    auto topic = this->symbolPubs[i].getTopic();
+    auto delim = topic.rfind("/");
+    auto aShape = topic.substr(delim + 1);
+    if (aShape == this->shape)
+      msg = this->kColors[this->color];
+
+    this->symbolPubs[i].publish(msg);
+  }
 }
 
 // Register plugin with gazebo
-GZ_REGISTER_MODEL_PLUGIN(LightBuoyController)
+GZ_REGISTER_MODEL_PLUGIN(SymbolController)

@@ -44,6 +44,16 @@ install(TARGETS light_buoy_controller
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for controlling symbols
+add_library(symbol_controller src/symbol_controller.cc)
+target_link_libraries(symbol_controller ${catkin_LIBRARIES})
+add_dependencies(symbol_controller ${catkin_EXPORTED_TARGETS})
+install(TARGETS symbol_controller
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Model files that need to be processed with erb
 set (dock_erb_files
   models/dock_2016/model.sdf.erb

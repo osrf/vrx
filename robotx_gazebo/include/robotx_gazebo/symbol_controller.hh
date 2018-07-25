@@ -22,12 +22,12 @@
 #include <std_msgs/ColorRGBA.h>
 #include <std_srvs/Trigger.h>
 
-#include <array>
-#include <cstdint>
-#include <mutex>
+#include <map>
 #include <string>
-#include <utility>
+#include <vector>
 #include <gazebo/gazebo.hh>
+#include <sdf/sdf.hh>
+
 
 /// \brief Controls the shape and color of a symbol.
 ///
@@ -47,38 +47,60 @@ class SymbolController : public gazebo::ModelPlugin
   public: SymbolController() = default;
 
   // Documentation inherited.
-  public: void Load(gazebo::physics::ModelPtr _parent,
-                    sdf::ElementPtr _sdf);
+  public: virtual void Load(gazebo::physics::ModelPtr _parent,
+                            sdf::ElementPtr _sdf);
 
-  /// \brief Creates a std_msgs::ColorRGBA message from 4 doubles.
-  /// \param[in] _r Red.
-  /// \param[in] _g Green.
-  /// \param[in] _b Blue.
-  /// \param[in] _a Alpha.
-  /// \return The ColorRGBA message.
-  private: static std_msgs::ColorRGBA CreateColor(const double _r,
-                                                  const double _g,
-                                                  const double _b,
-                                                  const double _a);
+  /// \brief Create a new combination of shape/color.
+  public: void Shuffle();
 
-  /// \def Colors_t
-  /// \brief A pair of RGBA color and its name as a string.
-  private: using Colors_t = std::pair<std_msgs::ColorRGBA, std::string>;
+  /// \brief ROS service callback for creating a new shape/color combination.
+  /// \param[in] _req Unused.
+  /// \param[out] _res Service result.
+  /// \return True on success or false otherwise.
+  private: bool Shuffle(std_srvs::Trigger::Request &_req,
+                        std_srvs::Trigger::Response &_res);
 
-  /// \brief The current shape to display.
+  /// \brief Choose a new random shape.
+  private: void ShuffleShape();
+
+  /// \brief Choose a new random color.
+  private: void ShuffleColor();
+
+  /// \brief Publish the current shape/color combination.
+  /// This callback is used for publishing the current combination after some
+  /// time to make sure that all subscribers are up and runnig.
+  /// \param[in] _event Unused.
+  private: void Publish(const ros::TimerEvent &_event);
+
+  /// \brief Publish the current shape/color combination.
+  private: void Publish();
+
+  /// \brief List of the color options (red, green, blue, and no color)
+  /// with their string name for logging.
+  private: static std::map<std::string, std_msgs::ColorRGBA> kColors;
+
+  /// \brief List of the shape options (circle, cross, triangle)
+  /// with their string name for logging.
+  private: static std::vector<std::string> kShapes;
+
+  /// \brief The current color.
+  private: std::string color;
+
+  /// \brief The current shape.
   private: std::string shape;
 
-  /// \brief The current color to display.
-  private: Colors_t color;
-
   /// \brief Publisher to set the color to each of the 3 potential shapes.
-  private: std::array<ros::Publisher, 3> symbolPubs;
+  private: std::vector<ros::Publisher> symbolPubs;
+
+  /// \brief Service to generate a new random shape/color.
+  private: ros::ServiceServer changePatternServer;
 
   /// \brief Node handle.
   private: ros::NodeHandle nh;
 
-  /// \brief Locks state and pattern member variables.
-  private: std::mutex mutex;
+  /// \brief Timer triggered in simulated time to update the shape/color for
+  // the first time.
+  private: ros::Timer timer;
 };
 
 #endif

@@ -22,7 +22,7 @@
     <model name="placard1">
       <include>
         <uri>model://placard</uri>
-        <pose>86 -5 1.5 0 0 1.5708</pose>
+        <pose>86.5 -5 1.5 0 0 1.5708</pose>
       </include>
       <plugin name="controller1" filename="libsymbol_controller.so">
       </plugin>
@@ -30,7 +30,7 @@
     <model name="placard2">
       <include>
         <uri>model://placard</uri>
-        <pose>86 0 1.5 0 0 1.5708</pose>
+        <pose>86.5 0 1.5 0 0 1.5708</pose>
       </include>
       <plugin name="controller2" filename="libsymbol_controller.so">
       </plugin>
@@ -38,7 +38,7 @@
     <model name="placard3">
       <include>
         <uri>model://placard</uri>
-        <pose>86 5 1.5 0 0 1.5708</pose>
+        <pose>86.5 5 1.5 0 0 1.5708</pose>
       </include>
       <plugin name="controller3" filename="libsymbol_controller.so">
       </plugin>
