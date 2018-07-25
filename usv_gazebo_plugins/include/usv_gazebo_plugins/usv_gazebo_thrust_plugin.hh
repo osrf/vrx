@@ -25,6 +25,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #define USV_GAZEBO_PLUGINS_THRUST_HH
 
 #include <ros/ros.h>
+#include <std_msgs/Float32.h>
 #include <sensor_msgs/JointState.h>
 #include <memory>
 #include <string>
@@ -44,6 +45,9 @@ namespace gazebo
 
     /// \brief Constructor
     public: Thruster();
+
+    /// \brief Callback for new thrust commands
+    public: void OnThrustCmd(const std_msgs::Float32::ConstPtr & msg);
     
     /// \brief Maximum abs val of incoming command
     public: double maxCmd;
@@ -60,7 +64,11 @@ namespace gazebo
     /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear)
     public: int mappingType;
 
-    
+    /// \brief Topic name for incoming ROS thruster commands
+    public: std::string cmdTopic;
+
+    /// \brief Subscription to thruster commands
+    public: ros::Subscriber cmdSub;
   };
   
   /// \brief A plugin to simulate a propulsion system under water.

@@ -30,7 +30,10 @@ using namespace gazebo;
 Thruster::Thruster()
 {
 }
-    
+void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr & msg)
+{
+  // When we get a new thrust command
+}
 
 //////////////////////////////////////////////////
 UsvThrust::UsvThrust()
@@ -113,15 +116,22 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       if (thrusterSDF->HasElement("mappingType")){
 	thruster.mappingType = thrusterSDF->Get<int>("mappingType");
 	ROS_INFO_STREAM("Parameter found - setting <mappingType> to <" <<
-			thruster->paramMappingType << ">.");
+			thruster.mappingType << ">.");
       }
       else
 	{
 	  thruster.mappingType = 0;
 	  ROS_INFO_STREAM("Parameter <mappingType> not found: Using default value of "
-			  "<" << thruster->mappingType << ">.");
+			  "<" << thruster.mappingType << ">.");
 	}
-      
+
+      // Parse for subscription topic 
+      if (thrusterSDF->HasElement("cmdTopic")){
+	thruster.cmdTopic = thrusterSDF->Get<std::string>("cmdTopic");
+      }
+      else{
+	ROS_ERROR_STREAM("Please specify a cmdTopic (for ROS subscription) for each thruster!");
+      }
       
       // Push to vector and increment
       this->thrusters.push_back(thruster);
@@ -221,6 +231,12 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->cmdDriveSub = this->rosnode->subscribe("cmd_drive", 1,
       &UsvThrust::OnCmdDrive, this);
 
+  // Subscribe to commands for each thruster
+  for (size_t i = 0; i < this->thrusters.size(); ++i){
+    this->thrusters[i].cmdSub = this->rosnode->subscribe(this->thrusters[i].cmdTopic,1,&Thruster::OnThrustCmd,&this->thrusters[i]);
+    //this->thrusters[i].cmdSub = this->rosnode->subscribe(this->thrusters[i].cmdTopic,1,&UsvThrust::OnCmdDrive, this);
+  }
+  
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
     std::bind(&UsvThrust::Update, this));
 }
