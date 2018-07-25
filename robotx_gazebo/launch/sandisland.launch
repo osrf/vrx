@@ -34,12 +34,4 @@
   args="-x $(arg x) -y $(arg y) -z $(arg z)
         -R $(arg R) -P $(arg P) -Y $(arg Y)
         -urdf -param robot_description -model wamv"/>
-
-  <!-- Utility for publishing rpy for plotting -->
-  <node pkg="robotx_gazebo" type="quat2rpy.py" name="quat2rpy" output="screen">
-    <remap from="in_topic" to="/gazebo/model_states" />
-    <remap from="out_topic" to="wamv_rpy" />
-    <param name="input_msg_type" value="ModelStates" />
-    <param name="model_name" value="wamv" />
-  </node>
 </launch>
