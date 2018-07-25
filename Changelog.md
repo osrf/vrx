@@ -3,7 +3,7 @@
 ### VMRC 0.X.X
 
 1. Add placards and the ability to change shape and color.
-  * [Pull request XX](https://bitbucket.org/osrf/vmrc/pull-requests/XX)
+  * [Pull request 31](https://bitbucket.org/osrf/vmrc/pull-requests/31)
 
 1. Add a dock block and a templated mechanism (erb) for creating docks.
   * [Pull request 27](https://bitbucket.org/osrf/vmrc/pull-requests/27)
