@@ -39,8 +39,6 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   std::string linkName;
   physics::ModelPtr model = _parent;
 
-  gzmsg << "Loading usv_gazebo_wind_plugin" << std::endl;
-
   // Retrieve model parameters from SDF
   if (!_sdf->HasElement("bodyName") ||
       !_sdf->GetElement("bodyName")->GetValue())
