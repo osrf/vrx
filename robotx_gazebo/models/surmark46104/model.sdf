@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <model name="surmark950400">
+  <model name="surmark46104">
     <link name="link">
       <velocity_decay>
         <linear>0.001</linear>
@@ -8,42 +8,42 @@
       </velocity_decay>
       <inertial>
         <pose>0 0 -10 0 0 0</pose>
-        <mass>20.86</mass>
+        <mass>17.2365</mass>
         <inertia>
-          <ixx>3.042</ixx>
+          <ixx>2.5137</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>3.042</iyy>
+          <iyy>2.5137</iyy>
           <iyz>0</iyz>
-          <izz>0.651875</izz>
+          <izz>0.5386</izz>
         </inertia>
       </inertial>
       <collision name="collision_inner">
-        <pose>0 0 -0.02 0 0 0</pose>
+        <pose>0 0 0.367 0 0 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>1.18</length>
+            <radius>0.13</radius>
+            <length>1.25</length>
           </cylinder>
         </geometry>
       </collision>
       <collision name="collision_outer">
-        <pose>0 0 -0.31 0 0 0</pose>
+        <pose>0 0 -0.075 0 0 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.24</radius>
-            <length>0.2</length>
+            <radius>0.23</radius>
+            <length>0.16</length>
           </cylinder>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
-	        <mesh><uri>model://surmark950400/mesh/surmark950400.dae</uri></mesh>
+	        <mesh><uri>model://surmark46104/mesh/surmark46104.dae</uri></mesh>
         </geometry>
         <material>
           <script>
-            <uri>model://surmark950400/materials/scripts/surmark950400.material</uri>
-            <name>surmark950400/Green</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/White</name>
           </script>
         </material>
       </visual>
@@ -56,7 +56,7 @@
         <name>link</name>
         <center_of_volume>0 0 0.5</center_of_volume>
         <area>0.63</area>
-        <height>0.70</height>
+        <height>0.2</height>
       </link>
     </plugin>
   </model>

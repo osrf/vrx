@@ -1,41 +1,49 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
   <model name="surmark950410">
-    <link name="buoyl">
-      <pose>0 0 0 0 0 0</pose>
+    <link name="link">
       <velocity_decay>
         <linear>0.001</linear>
         <angular>0.001</angular>
       </velocity_decay>
       <inertial>
         <pose>0 0 -10 0 0 0</pose>
-        <mass>10</mass>
+        <mass>20.86</mass>
         <inertia>
-          <ixx>10</ixx>
+          <ixx>3.042</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>10</iyy>
+          <iyy>3.042</iyy>
           <iyz>0</iyz>
-          <izz>10</izz>
+          <izz>0.651875</izz>
         </inertia>
       </inertial>
-      <collision name="buoyc">
+      <collision name="collision_inner">
+        <pose>0 0 -0.01 0 0 0</pose>
         <geometry>
-	  <mesh><uri>model://surmark950410/mesh/surmark950410.dae</uri></mesh>
           <cylinder>
-            <radius>0.25</radius>
-            <length>1.0</length>
+            <radius>0.15</radius>
+            <length>1.26</length>
           </cylinder>
         </geometry>
       </collision>
-      <visual name="buoyv">
+      <collision name="collision_outer">
+        <pose>0 0 -0.48 0 0 0</pose>
         <geometry>
-	<mesh><uri>model://surmark950410/mesh/surmark950410.dae</uri></mesh>
+          <cylinder>
+            <radius>0.24</radius>
+            <length>0.15</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+	        <mesh><uri>model://surmark950410/mesh/surmark950410.dae</uri></mesh>
         </geometry>
         <material>
           <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Red</name>
+            <uri>model://surmark950410/materials/scripts/surmark950410.material</uri>
+            <name>surmark950410/Red</name>
           </script>
         </material>
       </visual>
@@ -45,7 +53,7 @@
       <fluid_level>0.0</fluid_level>
       <fluid_drag>5.0</fluid_drag>
       <link>
-        <name>buoyl</name>
+        <name>link</name>
         <center_of_volume>0 0 0.5</center_of_volume>
         <area>0.63</area>
         <height>1.05</height>

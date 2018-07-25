@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="yellow_totem">
+    <include>
+      <uri>model://surmark46104</uri>
+    </include>
+    <link name="cover">
+      <visual name="cover_visual">
+        <pose>0 0 0.492 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.131</radius>
+            <length>1</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Yellow</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <joint name="totem_joint" type="fixed">
+      <parent>surmark46104::link</parent>
+      <child>yellow_totem::cover</child>
+    </joint>
+  </model>
+</sdf>
