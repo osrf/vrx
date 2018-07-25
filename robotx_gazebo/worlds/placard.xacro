@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<!-- Macro to insert the sandisland into the world -->
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="placard" params="name position:='0 0 0' orientation:='0 0 0'">
+    <model name="${name}">
+      <include>
+        <uri>model://placard</uri>
+        <pose>${position} ${orientation}</pose>
+      </include>
+      <plugin name="${name}" filename="libsymbol_controller.so">
+      </plugin>
+    </model>
+  </xacro:macro>
+</world>

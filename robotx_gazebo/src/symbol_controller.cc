@@ -130,7 +130,7 @@ void SymbolController::Load(gazebo::physics::ModelPtr _parent,
   // This timer is used to defer the symbol publication a few seconds to make
   // sure that all subscribers receive the message.
   this->timer = this->nh.createTimer(
-    ros::Duration(2.0), &SymbolController::Publish, this, true);
+    ros::Duration(5.0), &SymbolController::Publish, this, true);
 
   // Advertise the service to shuffle shape and color.
   this->changePatternServer = this->nh.advertiseService(

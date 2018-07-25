@@ -28,7 +28,6 @@
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
 
-
 /// \brief Controls the shape and color of a symbol.
 ///
 /// It selects a shape (triangle, cross, circle) and a color (red, green, blue)
