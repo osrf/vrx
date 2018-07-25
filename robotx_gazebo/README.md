@@ -29,14 +29,15 @@ The following models are used in the RobotX challenge and will be included in th
 | Dock Material          | JetDock C000000008       | ADDED  | dock_block |
 | 2016 Dock              | Custom Assembly          | ADDED  | dock_2016 |
 | 2018 Dock              | Custom Assembly          | ADDED  | dock_2018 |
-| Blue Circle Symbol     | Custom                   | TODO   | |
-| Blue Cruciform Symbol  | Custom                   | TODO   | |
-| Blue Triangle Symbol   | Custom                   | TODO   | |
-| Green Circle Symbol    | Custom                   | TODO   | |
-| Green Cruciform Symbol | Custom                   | TODO   | |
-| Green Triangle Symbol  | Custom                   | TODO   | |
-| Red Circle Symbol      | Custom                   | TODO   | |
-| Red Cruciform Symbol   | Custom                   | TODO   | |
-| Red Triangle Symbol    | Custom                   | TODO   | |
+| Blue Circle Symbol     | Custom                   | ADDED  | symbol_circle |
+| Blue Cruciform Symbol  | Custom                   | ADDED  | symbol_cross |
+| Blue Triangle Symbol   | Custom                   | ADDED  | symbol_triangle |
+| Green Circle Symbol    | Custom                   | ADDED  | symbol_circle |
+| Green Cruciform Symbol | Custom                   | ADDED  | symbol_cross |
+| Green Triangle Symbol  | Custom                   | ADDED  | symbol_triangle |
+| Red Circle Symbol      | Custom                   | ADDED  | symbol_circle |
+| Red Cruciform Symbol   | Custom                   | ADDED  | symbol_cross |
+| Red Triangle Symbol    | Custom                   | ADDED  | symbol_triangle |
+| White placard          | Custom                   | ADDED  | placard |
 
 *= More detailed model needed
