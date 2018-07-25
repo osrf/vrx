@@ -1,9 +1,25 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
   <model name="robotx_light_buoy">
-    <static>true</static>
     <pose>0 0 -0.0762 0 0 0</pose>
     <link name="base_link">
+      <velocity_decay>
+        <linear>0.001</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+      <inertial>
+        <pose>0 0 -10 0 0 0</pose>
+        <!-- 6.35 Kg. (dock block) x 9 (num blocks) + 10 Kg (estimated). -->
+        <mass>67.15</mass>
+        <inertia>
+          <ixx>13.486</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>13.486</iyy>
+          <iyz>0</iyz>
+          <izz>25.1813</izz>
+        </inertia>
+      </inertial>
       <visual name="base">
         <geometry>
            <mesh>
@@ -65,14 +81,35 @@
           <topicName>panel3</topicName>
         </plugin>
       </visual>
-      <collision name="collision">
+      <collision name="collision_base">
+        <pose>0 0 -0.2 0 0 0</pose>
         <geometry>
-           <mesh>
-            <uri>file://robotx_light_buoy/mesh/robotx_light_buoy.dae</uri>
-          </mesh>
+           <box>
+            <size>1.5 1.5 0.4</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_body">
+        <pose>0 0 0.85 0 0 0</pose>
+        <geometry>
+           <cylinder>
+            <radius>0.4</radius>
+            <length>1.75</length>
+          </cylinder>
         </geometry>
       </collision>
     </link>
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <fluid_drag>5.0</fluid_drag>
+      <link>
+        <name>base_link</name>
+        <center_of_volume>0 0 0.5</center_of_volume>
+        <area>2.25</area>
+        <height>0.70</height>
+      </link>
+    </plugin>
     <plugin name="controller" filename="liblight_buoy_controller.so">
       <robotNamespace>light_buoy</robotNamespace>
     </plugin>
