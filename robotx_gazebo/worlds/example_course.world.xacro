@@ -4,7 +4,7 @@
   <world name="robotx_example_course">
     <xacro:include filename="$(find robotx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
-    
+
     <include>
       <uri>model://robotx_navigation_challenge</uri>
       <pose>15 0 2 0 0 0</pose>
@@ -23,7 +23,7 @@
       <uri>model://dock_2016</uri>
       <pose>80 -9 0 0 0 0</pose>
     </include>
-    <model name="placard1">
+    <model name="dock_2016_placard1">
       <include>
         <uri>model://placard</uri>
         <pose>84.5 -6 1.5 0 0 1.5708</pose>
@@ -31,7 +31,7 @@
       <plugin name="controller1" filename="libsymbol_controller.so">
       </plugin>
     </model>
-    <model name="placard2">
+    <model name="dock_2016_placard2">
       <include>
         <uri>model://placard</uri>
         <pose>84.5 0 1.5 0 0 1.5708</pose>
@@ -39,7 +39,7 @@
       <plugin name="controller2" filename="libsymbol_controller.so">
       </plugin>
     </model>
-    <model name="placard3">
+    <model name="dock_2016_placard3">
       <include>
         <uri>model://placard</uri>
         <pose>84.5 6 1.5 0 0 1.5708</pose>
@@ -47,6 +47,28 @@
       <plugin name="controller3" filename="libsymbol_controller.so">
       </plugin>
     </model>
-      
+
+    <!-- The 2018 dock with the two placards -->
+    <include>
+      <uri>model://dock_2018</uri>
+      <pose>120 -3 0 0 0 0</pose>
+    </include>
+    <model name="dock_2018_placard1">
+      <include>
+        <uri>model://placard</uri>
+        <pose>126.5 0 1.5 0 0 1.5708</pose>
+      </include>
+      <plugin name="controller1" filename="libsymbol_controller.so">
+      </plugin>
+    </model>
+    <model name="dock_2018_placard2">
+      <include>
+        <uri>model://placard</uri>
+        <pose>127.5 0 1.5 0 0 -1.5708</pose>
+      </include>
+      <plugin name="controller2" filename="libsymbol_controller.so">
+      </plugin>
+    </model>
+
   </world>
 </sdf>
