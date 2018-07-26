@@ -4,6 +4,7 @@
       <%= row -%>
     <% end %>
     -->
+    <%- link_counter = 0 -%>
     <%- row_counter = 0 -%>
     <%- x_counter = 0 -%>
     <%- layout.each do |row| %>
@@ -13,9 +14,11 @@
         <%- c = row[j] -%>
         <%- if c == 'X' -%>
     <include>
+      <name>dock_block_<%= link_counter %></name>
       <pose><%= x_counter %> <%= y_counter %> 0.25 0 0 0</pose>
       <uri>model://dock_block</uri>
     </include>
+          <%- link_counter += 1 -%>
         <%- end -%>
         <%- y_counter += 0.5 -%>
       <%- end -%>
