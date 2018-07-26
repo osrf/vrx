@@ -29,15 +29,30 @@ using namespace gazebo;
 
 Thruster::Thruster()
 {
+  // Set some defaults
+  this->cmdTopic = "thruster_default_cmdTopic";
+  this->maxCmd = 1.0;
+  this->maxForceFwd = 100.0;
+  this->maxForceRev = -100.0;
+  this->mappingType = 0;
+    
+  // Initialize some things
+  this->currCmd = 0.0;
 }
+
 void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr & msg)
 {
-  // When we get a new thrust command
+  // When we get a new thrust command!
+  ROS_INFO_STREAM("New command! " << msg->data );
+  //this->lastCmdTime = this->world->GetSimTime();
+  this->currCmd = msg->data;
+  
 }
 
 //////////////////////////////////////////////////
 UsvThrust::UsvThrust()
 {
+ 
 }
 
 //////////////////////////////////////////////////
@@ -234,7 +249,6 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Subscribe to commands for each thruster
   for (size_t i = 0; i < this->thrusters.size(); ++i){
     this->thrusters[i].cmdSub = this->rosnode->subscribe(this->thrusters[i].cmdTopic,1,&Thruster::OnThrustCmd,&this->thrusters[i]);
-    //this->thrusters[i].cmdSub = this->rosnode->subscribe(this->thrusters[i].cmdTopic,1,&UsvThrust::OnCmdDrive, this);
   }
   
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -341,6 +355,34 @@ void UsvThrust::Update()
 
   inputforce3 = pose.rot.RotateVector(inputforce3);
   this->link->AddForceAtRelativePosition(inputforce3, relpos);
+
+  // Apply force for each thruster
+  math::Vector3 tforcev(0, 0, 0);
+  //double dcmd = 0.0;
+  for (size_t i = 0; i < this->thrusters.size(); ++i){
+    // Enforce command timeout
+    /*
+    dcmd = (time_now - this->thrusters[i].lastCmdTime).Double();
+    if (dcmd > this->cmdTimeout && this->cmdTimeout > 0.0){
+      this->thrusters[i].currCmd = 0.0;
+    }
+    */
+    // Apply the thrust mapping
+    switch(this->thrusters[i].mappingType)
+      {
+      case 0:
+	tforcev.x = this->ScaleThrustCmd(this->thrusters[i].currCmd);
+	break;
+      case 1:
+	tforcev.x = this->GlfThrustCmd(this->thrusters[i].currCmd);
+	break;
+      default:
+	ROS_FATAL_STREAM("Cannot use mappingType=" << this->thrusters[i].mappingType);
+	break;
+      }
+    this->thrusters[i].link->AddForce(tforcev);
+
+  }
 
   // Spin the propellers
   this->SpinPropeller(this->leftPropellerJoint, this->lastCmdDriveLeft);

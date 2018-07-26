@@ -69,6 +69,13 @@ namespace gazebo
 
     /// \brief Subscription to thruster commands
     public: ros::Subscriber cmdSub;
+
+    /// \brief Current, most recent command
+    public: double currCmd;
+
+    /// \brief Plugin parent - for accessing world, etc.
+    private: ModelPlugin plugin;
+    
   };
   
   /// \brief A plugin to simulate a propulsion system under water.
