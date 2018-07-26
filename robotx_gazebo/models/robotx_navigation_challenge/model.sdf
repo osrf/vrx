@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- Model for the RobotX navigation challenge, containing 4 buoys -->
-<sdf version="1.5">
+<sdf version="1.6">
   <model name="robotx_navigation_challenge">
       <!-- Start -->
       <!-- Red naun -->
