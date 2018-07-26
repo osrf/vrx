@@ -1,6 +1,8 @@
 ## VMRC 0
 
 ### VMRC 0.X.X
+1. Add 2016 and 2018 acoustic transit / Entrance gate challenges
+  * [Pull request 30](https://bitbucket.org/osrf/vmrc/pull-requests/30)
 
 1. Add a dock block and a templated mechanism (erb) for creating docks.
   * [Pull request 27](https://bitbucket.org/osrf/vmrc/pull-requests/27)

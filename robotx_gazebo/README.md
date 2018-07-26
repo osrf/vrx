@@ -12,31 +12,34 @@ To launch gazebo with an example course layout and WAM-V platform, run:
 ## Course models
 The following models are used in the RobotX challenge and will be included in this package.
 
-| Task Element           | Product                  | Status | Model  |
-|:-----------------------|:-------------------------|:------|:-----|
-| Light Buoy             | Custom                   | ADDED* | robotx_light_buoy |
-| Obstacle - Small       | PolyForm A-3 black       | ADDED  | polyform_a3 |
-| Obstacle - Medium      | PolyForm A-5 black       | ADDED  | polyform_a5 |
-| Obstacle - Large       | PolyForm A-7 black       | ADDED  | polyform_a7 |
-| Red Can buoy           | Sur-Mark Can Buoy 950410 | ADDED  | surmark950410 |
-| Green Can buoy         | Sur-Mark Can Buoy 950400 | ADDED  | surmark950400 |
-| White Can buoy         | Sur-Mark Can Buoy 46104  | ADDED  | surmark46104 |
-| Green Totem            | 46104 w/ Green Cover     | ADDED  | green_totem |
-| Yellow Totem           | 46104 w/ Yellow Cover    | ADDED  | yellow_totem |
-| Blue Totem             | 46104 w/ Blue Cover      | ADDED  | blue_totem |
-| Red Totem              | 46104 w/ Red Cover       | ADDED  | red_totem |
-| Black Totem            | 46104 w/ Black Cover     | ADDED  | black_totem |
-| Dock Material          | JetDock C000000008       | ADDED  | dock_block |
-| 2016 Dock              | Custom Assembly          | ADDED  | dock_2016 |
-| 2018 Dock              | Custom Assembly          | ADDED  | dock_2018 |
-| Blue Circle Symbol     | Custom                   | TODO   | |
-| Blue Cruciform Symbol  | Custom                   | TODO   | |
-| Blue Triangle Symbol   | Custom                   | TODO   | |
-| Green Circle Symbol    | Custom                   | TODO   | |
-| Green Cruciform Symbol | Custom                   | TODO   | |
-| Green Triangle Symbol  | Custom                   | TODO   | |
-| Red Circle Symbol      | Custom                   | TODO   | |
-| Red Cruciform Symbol   | Custom                   | TODO   | |
-| Red Triangle Symbol    | Custom                   | TODO   | |
+| Task Element                 | Product                  | Status | Model  |
+|:-----------------------------|:-------------------------|:-------|:-------|
+| Light Buoy                   | Custom                   | ADDED  | robotx_light_buoy |
+| Obstacle - Small             | PolyForm A-3 black       | ADDED  | polyform_a3 |
+| Obstacle - Medium            | PolyForm A-5 black       | ADDED  | polyform_a5 |
+| Obstacle - Large             | PolyForm A-7 black       | ADDED  | polyform_a7 |
+| Red Can buoy                 | Sur-Mark Can Buoy 950410 | ADDED  | surmark950410 |
+| Green Can buoy               | Sur-Mark Can Buoy 950400 | ADDED  | surmark950400 |
+| White Can buoy               | Sur-Mark Can Buoy 46104  | ADDED  | surmark46104 |
+| Green Totem                  | 46104 w/ Green Cover     | ADDED  | green_totem |
+| Yellow Totem                 | 46104 w/ Yellow Cover    | ADDED  | yellow_totem |
+| Blue Totem                   | 46104 w/ Blue Cover      | ADDED  | blue_totem |
+| Red Totem                    | 46104 w/ Red Cover       | ADDED  | red_totem |
+| Black Totem                  | 46104 w/ Black Cover     | ADDED  | black_totem |
+| Dock Material                | JetDock C000000008       | ADDED  | dock_block |
+| 2016 Dock                    | Custom Assembly          | ADDED  | robotx_dock_2016 |
+| 2018 Dock                    | Custom Assembly          | ADDED  | robotx_dock_2018 |
+| Blue Circle Symbol           | Custom                   | TODO   | |
+| Blue Cruciform Symbol        | Custom                   | TODO   | |
+| Blue Triangle Symbol         | Custom                   | TODO   | |
+| Green Circle Symbol          | Custom                   | TODO   | |
+| Green Cruciform Symbol       | Custom                   | TODO   | |
+| Green Triangle Symbol        | Custom                   | TODO   | |
+| Red Circle Symbol            | Custom                   | TODO   | |
+| Red Cruciform Symbol         | Custom                   | TODO   | |
+| Red Triangle Symbol          | Custom                   | TODO   | |
+| 2016 Pinger Transit (quals)  | Custom Group of objects  | ADDED  | robotx_2016_qualifying_pinger_transit |
+| 2016 Pinger Transit (finals) | Custom Group of objects  | ADDED  | robotx_2016_finals_pinger_transit |
+| 2018 Entrance/Exit Gate      | Custom Group of objects  | ADDED  | robotx_2018_entrance_gate |
 
 *= More detailed model needed
