@@ -52,7 +52,7 @@ double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
 //////////////////////////////////////////////////
 void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
-  ROS_INFO("Loading usv_gazebo_thrust_plugin");
+  ROS_DEBUG("Loading usv_gazebo_thrust_plugin");
   this->model = _parent;
   this->world = this->model->GetWorld();
 
@@ -80,7 +80,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   {
     linkName = _sdf->Get<std::string>("bodyName");
     this->link = this->model->GetLink(linkName);
-    ROS_INFO_STREAM("Found SDF parameter bodyName as <" << linkName << ">");
+    ROS_DEBUG_STREAM("Found SDF parameter bodyName as <" << linkName << ">");
   }
   else
   {
@@ -96,13 +96,13 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     return;
   }
 
-  ROS_INFO_STREAM("USV Model Link Name = " << linkName);
+  ROS_DEBUG_STREAM("USV Model Link Name = " << linkName);
 
   this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", this->cmdTimeout);
   if (_sdf->HasElement("mappingType"))
   {
     this->paramMappingType = _sdf->Get<int>("mappingType");
-    ROS_INFO_STREAM("Parameter found - setting <mappingType> to <" <<
+    ROS_DEBUG_STREAM("Parameter found - setting <mappingType> to <" <<
                     this->paramMappingType << ">.");
   }
   else
