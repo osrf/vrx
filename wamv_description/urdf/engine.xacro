@@ -25,7 +25,7 @@
         <inertia ixx="0.889245" ixy="0.0" ixz="0.0" iyy="0.911125" iyz="0.0" izz="0.078125"/>
       </inertial>
     </link>
-  
+
     <link name="${prefix}_propeller_link">
       <visual>
         <geometry>
@@ -43,13 +43,13 @@
         <inertia ixx="0.008545" ixy="0.0" ixz="0.0" iyy="0.008545" iyz="0.0" izz="0.0144"/>
       </inertial>
     </link>
-  
+
     <joint name="${prefix}_chasis_engine_joint" type="fixed">
       <origin xyz="${position}" rpy="${orientation}"/>
       <parent link="base_link"/>
       <child link="${prefix}_engine_link"/>
     </joint>
-  
+
     <joint name="${prefix}_engine_propeller_joint" type="continuous">
       <axis rpy="0 0 0" xyz="1 0 0"/>
       <parent link="${prefix}_engine_link"/>

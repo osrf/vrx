@@ -56,8 +56,8 @@ install(TARGETS symbol_controller
 
 # Model files that need to be processed with erb
 set (dock_erb_files
-  models/dock_2016/model.sdf.erb
-  models/dock_2018/model.sdf.erb
+  models/dock_2016_base/model.sdf.erb
+  models/dock_2018_base/model.sdf.erb
 )
 
 # Process the erb files
@@ -66,7 +66,7 @@ foreach(_erb ${dock_erb_files})
   set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
   add_custom_command(OUTPUT ${_model}
                      COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
-                     DEPENDS 
+                     DEPENDS
                        ${CMAKE_CURRENT_SOURCE_DIR}/${_erb}
                        ${CMAKE_CURRENT_SOURCE_DIR}/dock_generator.erb
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
