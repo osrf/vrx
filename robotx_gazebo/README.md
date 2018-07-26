@@ -14,7 +14,7 @@ The following models are used in the RobotX challenge and will be included in th
 
 | Task Element                 | Product                  | Status | Model  |
 |:-----------------------------|:-------------------------|:-------|:-------|
-| Light Buoy                   | Custom                   | ADDED* | robotx_light_buoy |
+| Light Buoy                   | Custom                   | ADDED  | robotx_light_buoy |
 | Obstacle - Small             | PolyForm A-3 black       | ADDED  | polyform_a3 |
 | Obstacle - Medium            | PolyForm A-5 black       | ADDED  | polyform_a5 |
 | Obstacle - Large             | PolyForm A-7 black       | ADDED  | polyform_a7 |
@@ -27,8 +27,8 @@ The following models are used in the RobotX challenge and will be included in th
 | Red Totem                    | 46104 w/ Red Cover       | ADDED  | red_totem |
 | Black Totem                  | 46104 w/ Black Cover     | ADDED  | black_totem |
 | Dock Material                | JetDock C000000008       | ADDED  | dock_block |
-| 2016 Dock                    | Custom Assembly          | ADDED  | dock_2016 |
-| 2018 Dock                    | Custom Assembly          | ADDED  | dock_2018 |
+| 2016 Dock                    | Custom Assembly          | ADDED  | robotx_dock_2016 |
+| 2018 Dock                    | Custom Assembly          | ADDED  | robotx_dock_2018 |
 | Blue Circle Symbol           | Custom                   | TODO   | |
 | Blue Cruciform Symbol        | Custom                   | TODO   | |
 | Blue Triangle Symbol         | Custom                   | TODO   | |

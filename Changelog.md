@@ -4,6 +4,9 @@
 1. Add 2016 and 2018 acoustic transit / Entrance gate challenges
   * [Pull request 30](https://bitbucket.org/osrf/vmrc/pull-requests/30)
 
+1. Add a dock block and a templated mechanism (erb) for creating docks.
+  * [Pull request 27](https://bitbucket.org/osrf/vmrc/pull-requests/27)
+
 1. Update the mesh of the light buoy.
   * [Pull request 28](https://bitbucket.org/osrf/vmrc/pull-requests/28)
 
