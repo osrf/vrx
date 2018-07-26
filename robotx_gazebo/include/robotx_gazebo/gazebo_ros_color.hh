@@ -27,7 +27,11 @@
 /// \brief Visual plugin for changing the color of some visual elements using
 /// ROS messages. This plugin accepts the following SDF parameters:
 ///
-/// <robotNamespace>: The ROS namespace for this node.
+/// <robotNamespace>: The ROS namespace for this node. If not present,
+///                   the model name without any "::"" will be used.
+///                   E.g.: The plugin under a visual named
+///                   "model1::my_submodel::link::visual" will use "model1"
+///                   as namespace unless a value is specified.
 /// <topicName>: The topic used to request color changes. The default topic
 ///              name is /color
 class GazeboRosColor : public gazebo::VisualPlugin

@@ -23,7 +23,7 @@
     </link>
     <joint name="totem_joint" type="fixed">
       <parent>surmark46104::link</parent>
-      <child>black_totem::cover</child>
+      <child>cover</child>
     </joint>
   </model>
 </sdf>
