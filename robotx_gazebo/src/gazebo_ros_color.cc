@@ -33,13 +33,18 @@ void GazeboRosColor::Load(gazebo::rendering::VisualPtr _parent,
     return;
   }
 
-  // Load namespace from SDF if available.
-  std::string ns = "";
+  // Load namespace from SDF if available. Otherwise, use the model name.
+  std::string modelName = _parent->GetName();
+  auto delim = modelName.find(":");
+  if (delim != std::string::npos)
+    modelName = modelName.substr(0, delim);
+
+  std::string ns = modelName;
   if (_sdf->HasElement("robotNamespace"))
     ns = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
   {
-    ROS_INFO_NAMED("gazebo_ros_color_plugin",
+    ROS_DEBUG_NAMED("gazebo_ros_color_plugin",
       "missing <robotNamespace>, defaulting to %s", ns.c_str());
   }
 

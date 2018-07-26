@@ -1,0 +1,9 @@
+syntax: glob
+
+robotx_gazebo/models/dock_2016_base/model.sdf
+robotx_gazebo/models/dock_2018_base/model.sdf
+build
+build_*
+.DS_Store
+*.swp
+*.orig

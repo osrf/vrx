@@ -29,17 +29,18 @@ The following models are used in the RobotX challenge and will be included in th
 | Dock Material                | JetDock C000000008       | ADDED  | dock_block |
 | 2016 Dock                    | Custom Assembly          | ADDED  | robotx_dock_2016 |
 | 2018 Dock                    | Custom Assembly          | ADDED  | robotx_dock_2018 |
-| Blue Circle Symbol           | Custom                   | TODO   | |
-| Blue Cruciform Symbol        | Custom                   | TODO   | |
-| Blue Triangle Symbol         | Custom                   | TODO   | |
-| Green Circle Symbol          | Custom                   | TODO   | |
-| Green Cruciform Symbol       | Custom                   | TODO   | |
-| Green Triangle Symbol        | Custom                   | TODO   | |
-| Red Circle Symbol            | Custom                   | TODO   | |
-| Red Cruciform Symbol         | Custom                   | TODO   | |
-| Red Triangle Symbol          | Custom                   | TODO   | |
+| Blue Circle Symbol           | Custom                   | ADDED  | symbol_circle |
+| Blue Cruciform Symbol        | Custom                   | ADDED  | symbol_cross |
+| Blue Triangle Symbol         | Custom                   | ADDED  | symbol_triangle |
+| Green Circle Symbol          | Custom                   | ADDED  | symbol_circle |
+| Green Cruciform Symbol       | Custom                   | ADDED  | symbol_cross |
+| Green Triangle Symbol        | Custom                   | ADDED  | symbol_triangle |
+| Red Circle Symbol            | Custom                   | ADDED  | symbol_circle |
+| Red Cruciform Symbol         | Custom                   | ADDED  | symbol_cross |
+| Red Triangle Symbol          | Custom                   | ADDED  | symbol_triangle |
 | 2016 Pinger Transit (quals)  | Custom Group of objects  | ADDED  | robotx_2016_qualifying_pinger_transit |
 | 2016 Pinger Transit (finals) | Custom Group of objects  | ADDED  | robotx_2016_finals_pinger_transit |
 | 2018 Entrance/Exit Gate      | Custom Group of objects  | ADDED  | robotx_2018_entrance_gate |
+| White placard                | Custom                   | ADDED  | placard |
 
 *= More detailed model needed
