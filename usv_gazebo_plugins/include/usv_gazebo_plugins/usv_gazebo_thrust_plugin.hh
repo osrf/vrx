@@ -39,12 +39,17 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace gazebo
 {
+
+  // Foward declaration of UsvThrust class
+  class UsvThrust;
+  
   /// \brief Thruster class
   class Thruster
   {
 
     /// \brief Constructor
-    public: Thruster();
+    /// \param[in] _sdfPtr Pointer to an SDF element to parse.
+    public: Thruster(UsvThrust* parent);
 
     /// \brief Callback for new thrust commands
     public: void OnThrustCmd(const std_msgs::Float32::ConstPtr & msg);
@@ -73,9 +78,12 @@ namespace gazebo
     /// \brief Current, most recent command
     public: double currCmd;
 
-    /// \brief Plugin parent - for accessing world, etc.
-    private: ModelPlugin plugin;
-    
+    /// \brief Plugin parent pointer - for accessing world, etc.
+    protected: UsvThrust* plugin;
+
+    /// \brief Last time received a command via ROS topic
+    public: common::Time lastCmdTime;
+
   };
   
   /// \brief A plugin to simulate a propulsion system under water.
@@ -177,7 +185,7 @@ namespace gazebo
     private: ros::Subscriber cmdDriveSub;
 
     /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
-    private: physics::WorldPtr world;
+    public: physics::WorldPtr world;
 
     /// \brief Pointer to Gazebo parent model, retrieved when the model is
     /// loaded.

@@ -27,7 +27,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace gazebo;
 
-Thruster::Thruster()
+Thruster::Thruster(UsvThrust* parent)
 {
   // Set some defaults
   this->cmdTopic = "thruster_default_cmdTopic";
@@ -35,16 +35,18 @@ Thruster::Thruster()
   this->maxForceFwd = 100.0;
   this->maxForceRev = -100.0;
   this->mappingType = 0;
+  this->plugin = parent;
     
   // Initialize some things
   this->currCmd = 0.0;
+  this->lastCmdTime = this->plugin->world->GetSimTime();
 }
 
 void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr & msg)
 {
   // When we get a new thrust command!
-  ROS_INFO_STREAM("New command! " << msg->data );
-  //this->lastCmdTime = this->world->GetSimTime();
+  ROS_DEBUG_STREAM("New thrust command! " << msg->data );
+  this->lastCmdTime = this->plugin->world->GetSimTime();
   this->currCmd = msg->data;
   
 }
@@ -109,8 +111,8 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   {
     sdf::ElementPtr thrusterSDF = _sdf->GetElement("thruster");
     while (thrusterSDF){
-      // Instatiate
-      Thruster thruster;  
+      // Instatiate 
+      Thruster thruster(this);  
 
       // Find link by name in SDF
       if (thrusterSDF->HasElement("linkName")){
@@ -118,6 +120,9 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 	thruster.link = this->model->GetLink(linkName);
 	if (thruster.link == nullptr){
 	  ROS_ERROR_STREAM("Could not find a link by the name <" << linkName <<"> in the model!");
+	}
+	else{
+	  ROS_INFO_STREAM("Thruster added to link <" << linkName << ">");
 	}
       }
       else{
@@ -358,15 +363,15 @@ void UsvThrust::Update()
 
   // Apply force for each thruster
   math::Vector3 tforcev(0, 0, 0);
-  //double dcmd = 0.0;
+  double dtc = 0.0;
   for (size_t i = 0; i < this->thrusters.size(); ++i){
     // Enforce command timeout
-    /*
-    dcmd = (time_now - this->thrusters[i].lastCmdTime).Double();
-    if (dcmd > this->cmdTimeout && this->cmdTimeout > 0.0){
+    dtc = (time_now - this->thrusters[i].lastCmdTime).Double();
+    if (dtc > this->cmdTimeout && this->cmdTimeout > 0.0){
       this->thrusters[i].currCmd = 0.0;
+      ROS_DEBUG_STREAM_THROTTLE(1.0,"[" << i << "] Cmd Timeout");
     }
-    */
+
     // Apply the thrust mapping
     switch(this->thrusters[i].mappingType)
       {
@@ -380,7 +385,7 @@ void UsvThrust::Update()
 	ROS_FATAL_STREAM("Cannot use mappingType=" << this->thrusters[i].mappingType);
 	break;
       }
-    this->thrusters[i].link->AddForce(tforcev);
+    this->thrusters[i].link->AddLinkForce(tforcev);
 
   }
 

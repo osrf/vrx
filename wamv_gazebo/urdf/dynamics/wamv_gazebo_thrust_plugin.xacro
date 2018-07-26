@@ -6,7 +6,7 @@
       <plugin name="usv_thrust_${name}" filename="libusv_gazebo_thrust_plugin.so">
 
 	<thruster>
-	  <linkName>base_link</linkName>
+	  <linkName>left_propeller_link</linkName>
 	  <mappingType>1</mappingType>
 	  <maxCmd>1.0</maxCmd>
           <maxForceFwd>250.0</maxForceFwd>
@@ -15,7 +15,7 @@
 	</thruster>
 
 	<thruster>
-	  <linkName>base_link</linkName>
+	  <linkName>right_propeller_link</linkName>
 	  <mappingType>1</mappingType>
 	  <maxCmd>1.0</maxCmd>
           <maxForceFwd>250.0</maxForceFwd>
