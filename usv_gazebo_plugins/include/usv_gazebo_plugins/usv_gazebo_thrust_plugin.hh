@@ -35,8 +35,6 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <gazebo/physics/physics.hh>
 #include <sdf/sdf.hh>
 
-#include "usv_gazebo_plugins/UsvDrive.h"
-
 namespace gazebo
 {
 
@@ -84,6 +82,9 @@ namespace gazebo
     /// \brief Last time received a command via ROS topic
     public: common::Time lastCmdTime;
 
+    /// \brief Joint controlling the propeller.
+    public: physics::JointPtr propJoint;
+    
   };
   
   /// \brief A plugin to simulate a propulsion system under water.
@@ -92,20 +93,19 @@ namespace gazebo
   /// for more information.
   ///
   ///   <robotNamespace>: Namespace prefix for USV.
-  ///   <bodyName>: Name of the link on which to apply thrust forces.
   ///   <cmdTimeout>:  Timeout, after which thrust is set to zero [s].
+  ///   <left_propeller_joint>: The left's propeller joint.
+  ///   <right_propeller_joint>: The right's propeller joint.
+  ///
+  ///   Multiple thrusters are declared by including <thruster> SDF elements,
+  ///   where each thruster includes the following SDF parameters specific to
+  ///   the individual thruster
+  ///   <linkName>: Name of the link on which to apply thrust forces.
   ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear)
   ///   <maxCmd>:Maximum (abs val) of thrust commands, typ. 1.0.
   ///   <maxForceFwd>: Maximum forward force [N].
   ///   <maxForceRev>: Maximum reverse force [N].
-  ///   <boatWidth>: Distance between the two thrust forces -
-  ///                for purpose of computing torque [m].
-  ///   <boatLength>: Hull length -
-  ///                 for the purpose of computing thrust application location.
-  ///   <thrustOffsetZ>: Distance in z direction (+ up), in link coordinates,
-  ///                    for application of thrust force [m].
-  ///   <left_propeller_joint>: The left's propeller joint.
-  ///   <right_propeller_joint>: The right's propeller joint.
+
   class UsvThrust : public ModelPlugin
   {
     /// \brief Constructor.
@@ -121,10 +121,6 @@ namespace gazebo
     /// \brief Callback executed at every physics update.
     protected: virtual void Update();
 
-    /// \brief Callback for Drive commands.
-    /// \param[in] _msg usv_msgs UsvDrive message
-    private: void OnCmdDrive(const usv_gazebo_plugins::UsvDriveConstPtr &_msg);
-
     /// \brief Convenience function for getting SDF parameters.
     /// \param[in] _sdfPtr Pointer to an SDF element to parse.
     /// \param[in] _paramName The name of the element to parse.
@@ -138,7 +134,7 @@ namespace gazebo
     /// \brief Takes ROS Drive commands and scales them by max thrust.
     /// \param[in] _cmd ROS drive command.
     /// \return Value scaled and saturated.
-    private: double ScaleThrustCmd(const double _cmd) const;
+  private: double ScaleThrustCmd(const double _cmd, double max_cmd, double max_pos, double max_neg) const;
 
     /// \brief Generalized logistic function (GLF) used for non-linear
     /// thruster model.
@@ -162,15 +158,7 @@ namespace gazebo
     /// in Newtons.
     /// \param[in] _cmd Thrust command {-1.0,1.0}.
     /// \return Thrust force [N].
-    private: double GlfThrustCmd(const double _cmd) const;
-
-    /// \brief Parse the propeller name from SDF.
-    /// \param[in] _sdf The entire model SDF.
-    /// \param[in] _sdfName The SDF element to parse.
-    /// \param[out] _propellerJoint The joint pointer to initialize.
-    private: void ParsePropeller(const sdf::ElementPtr _sdf,
-                                 const std::string &_sdfName,
-                                 physics::JointPtr &_propellerJoint) const;
+  private: double GlfThrustCmd(const double _cmd, double max_pos, double max_neg) const;
 
     /// \brief Spin a propeller based on its input
     /// \param[in] _propeller Pointer to the propeller joint to spin
@@ -181,9 +169,6 @@ namespace gazebo
     /// \brief The ROS node handler used for communications.
     private: std::unique_ptr<ros::NodeHandle> rosnode;
 
-    /// \brief Subscription to custom cmdDrive ROS command.
-    private: ros::Subscriber cmdDriveSub;
-
     /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
     public: physics::WorldPtr world;
 
@@ -191,55 +176,13 @@ namespace gazebo
     /// loaded.
     private: physics::ModelPtr model;
 
-    /// \brief Pointer to model link in gazebo.
-    ///  optionally specified by the bodyName parameter,
-    ///  The states are taken from this link and forces applied to this link.
-    private: physics::LinkPtr link;
-
     /// \brief Timeout for receiving Drive commands [s].
     private: double cmdTimeout;
 
     /// \brief Vector of thruster instances
     private: std::vector<Thruster> thrusters;
 
-    /// \brief Time of last command input (cmdDrive).
-    private: common::Time lastCmdDriveTime;
-
-    /// \brief Most recent left thruster command.
-    private: double lastCmdDriveLeft;
-
-    /// \brief Most recent right thruster command.
-    private: double lastCmdDriveRight;
-
-    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear)
-    private: int paramMappingType;
-
-    /// \brief Plugin Parameter: Maximum (abs val) of Drive commands.
-    /// typ. +/-1.0
-    private: double paramMaxCmd;
-
-    /// \brief Plugin Parameter: Maximum forward force [N].
-    private: double paramMaxForceFwd;
-
-    /// \brief Plugin Parameter: Maximum reverse force [N].
-    private: double paramMaxForceRev;
-
-    /// \brief Plugin Parameter: Boat width [m].
-    private: double paramBoatWidth;
-
-    /// \brief Plugin Parameter: Boat length [m].
-    private: double paramBoatLength;
-
-    ///  \brief Plugin Parameter: Z offset for applying forward thrust.
-    private: double paramThrustZoffset;
-
-    /// \brief Joint controlling the left propeller.
-    private: physics::JointPtr leftPropellerJoint;
-
-    /// \brief Joint controlling the right propeller.
-    private: physics::JointPtr rightPropellerJoint;
-
-    /// \brief Pointer to the update event connection.
+       /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
 
     /// \brief For publishing to /joint_state with propeller state.

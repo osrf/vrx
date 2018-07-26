@@ -3,11 +3,6 @@ project(usv_gazebo_plugins)
 find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation)
 find_package(Eigen3 REQUIRED)
 
-add_message_files(
-  FILES
-  UsvDrive.msg
-)
-generate_messages()
 ###################################
 ## catkin specific configuration ##
 ###################################
