@@ -44,6 +44,7 @@ RUN sudo /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release 
  && sudo apt-get install -y \
     ros-kinetic-desktop-full \
     ros-kinetic-joy-teleop \
+    ros-kinetic-robot-localization \
     gazebo7 \
     libgazebo7-dev \
  && sudo rosdep init \
