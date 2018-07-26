@@ -7,18 +7,11 @@
       <visual name="visual">
         <geometry>
           <mesh>
+            <scale>4 4 1</scale>
             <uri>file://dock_block/mesh/dock_block.dae</uri>
           </mesh>
         </geometry>
       </visual>
-      <collision name="collision">
-        <pose>0 0 -0.2 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.5 0.5 0.4</size>
-          </box>
-        </geometry>
-      </collision>
     </link>
   </model>
 </sdf>

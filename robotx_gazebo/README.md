@@ -14,7 +14,7 @@ The following models are used in the RobotX challenge and will be included in th
 
 | Task Element                 | Product                  | Status | Model  |
 |:-----------------------------|:-------------------------|:-------|:-------|
-| Light Buoy                   | Custom                   | ADDED* | robotx_light_buoy |
+| Light Buoy                   | Custom                   | ADDED  | robotx_light_buoy |
 | Obstacle - Small             | PolyForm A-3 black       | ADDED  | polyform_a3 |
 | Obstacle - Medium            | PolyForm A-5 black       | ADDED  | polyform_a5 |
 | Obstacle - Large             | PolyForm A-7 black       | ADDED  | polyform_a7 |
