@@ -28,7 +28,7 @@
       <uri>model://symbol_cross</uri>
     </include>
     <joint name="placard_cross_joint" type="fixed">
-      <parent>placard::link</parent>
+      <parent>link</parent>
       <child>symbol_cross::link</child>
     </joint>
 
@@ -38,7 +38,7 @@
       <uri>model://symbol_circle</uri>
     </include>
     <joint name="placard_circle_joint" type="fixed">
-      <parent>placard::link</parent>
+      <parent>link</parent>
       <child>symbol_circle::link</child>
     </joint>
 
@@ -48,7 +48,7 @@
       <uri>model://symbol_triangle</uri>
     </include>
     <joint name="placard_triangle_joint" type="fixed">
-      <parent>placard::link</parent>
+      <parent>link</parent>
       <child>symbol_triangle::link</child>
     </joint>
   </model>
