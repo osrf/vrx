@@ -23,6 +23,8 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <ros/time.h>
 
+#include <functional>
+
 #include "usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh"
 
 using namespace gazebo;
@@ -47,14 +49,10 @@ Thruster::Thruster(UsvThrust *_parent)
 void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
 {
   // When we get a new thrust command!
-  ROS_DEBUG_STREAM("New thrust command! " << _msg->data );
+  ROS_DEBUG_STREAM("New thrust command! " << _msg->data);
+  std::lock_guard<std::mutex> lock(this->plugin->mutex);
   this->lastCmdTime = this->plugin->world->GetSimTime();
   this->currCmd = _msg->data;
-}
-
-//////////////////////////////////////////////////
-UsvThrust::UsvThrust()
-{
 }
 
 //////////////////////////////////////////////////
@@ -81,11 +79,6 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->model = _parent;
   this->world = this->model->GetWorld();
 
-  // Retrieve model parameters from SDF
-  // Set default values
-  // How long to allow no input on cmd_drive
-  this->cmdTimeout = 1.0;
-
   // Get parameters from SDF
   std::string nodeNamespace = "";
   if (_sdf->HasElement("robotNamespace"))
@@ -93,13 +86,12 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     nodeNamespace = _sdf->Get<std::string>("robotNamespace") + "/";
   }
 
-  ROS_INFO_STREAM("Loading thrusters from SDF");
+  this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", 1.0);
 
-  // Temporary storage
-  std::string linkName;
-  std::string propName;
+  ROS_DEBUG_STREAM("Loading thrusters from SDF");
+
   // For each thruster
-  int tcnt = 0;
+  int thrusterCounter = 0;
   if (_sdf->HasElement("thruster"))
   {
     sdf::ElementPtr thrusterSDF = _sdf->GetElement("thruster");
@@ -108,10 +100,12 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       // Instatiate
       Thruster thruster(this);
 
+      ROS_DEBUG_STREAM("Thruster #" << thrusterCounter);
+
       // Find link by name in SDF
       if (thrusterSDF->HasElement("linkName"))
       {
-        linkName = thrusterSDF->Get<std::string>("linkName");
+        std::string linkName = thrusterSDF->Get<std::string>("linkName");
         thruster.link = this->model->GetLink(linkName);
         if (thruster.link == nullptr)
         {
@@ -131,7 +125,8 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       // Parse out propellor joint name
       if (thrusterSDF->HasElement("propJointName"))
       {
-        propName = thrusterSDF->GetElement("propJointName")->Get<std::string>();
+        std::string propName =
+          thrusterSDF->GetElement("propJointName")->Get<std::string>();
         thruster.propJoint = this->model->GetJoint(propName);
         if (thruster.propJoint == nullptr)
         {
@@ -146,11 +141,12 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
       else
       {
-        ROS_WARN_STREAM("No propJoinName SDF parameter for thruster #" << tcnt);
+        ROS_WARN_STREAM("No propJointName SDF parameter for thruster #"
+          << thrusterCounter);
       }
 
       // Parse individual thruster SDF parameters
-      thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd",1.0);
+      thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd", 1.0);
       thruster.maxForceFwd =
         this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
       thruster.maxForceRev =
@@ -158,7 +154,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       if (thrusterSDF->HasElement("mappingType"))
       {
         thruster.mappingType = thrusterSDF->Get<int>("mappingType");
-        ROS_INFO_STREAM("Parameter found - setting <mappingType> to <" <<
+        ROS_DEBUG_STREAM("Parameter found - setting <mappingType> to <" <<
           thruster.mappingType << ">.");
       }
       else
@@ -182,17 +178,14 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       // Push to vector and increment
       this->thrusters.push_back(thruster);
       thrusterSDF = thrusterSDF->GetNextElement("thruster");
-      tcnt++;
+      thrusterCounter++;
     }
   }
   else
   {
     ROS_WARN_STREAM("No 'thruster' tags in description - how will you move?");
   }
-  ROS_DEBUG_STREAM("Found " << tcnt << " thrusters");
-
-
-  this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", this->cmdTimeout);
+  ROS_DEBUG_STREAM("Found " << thrusterCounter << " thrusters");
 
   // Initialize the ROS node and subscribe to cmd_drive
   this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
@@ -206,14 +199,13 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->jointStateMsg.position.resize(thrusters.size());
   this->jointStateMsg.velocity.resize(thrusters.size());
   this->jointStateMsg.effort.resize(thrusters.size());
-  for (size_t i = 0; i < this->thrusters.size(); ++i)
-  {
-    this->jointStateMsg.name[i] = this->thrusters[i].propJoint->GetName();
-  }
 
-  // Subscribe to commands for each thruster
   for (size_t i = 0; i < this->thrusters.size(); ++i)
   {
+    // Prefill the joint state message with the propeller joint.
+    this->jointStateMsg.name[i] = this->thrusters[i].propJoint->GetName();
+
+    // Subscribe to commands for each thruster.
     this->thrusters[i].cmdSub = this->rosnode->subscribe(
       this->thrusters[i].cmdTopic, 1, &Thruster::OnThrustCmd,
       &this->thrusters[i]);
@@ -265,10 +257,6 @@ double UsvThrust::GlfThrustCmd(const double _cmd,
     val = this->Glf(_cmd, -199.13f, -0.09f, 8.84f, 5.34f, 0.99f, -0.57f);
     val = std::max(val, _maxNeg);
   }
-  else
-  {
-    val = 0.0;
-  }
   return val;
 }
 
@@ -277,50 +265,53 @@ void UsvThrust::Update()
 {
   common::Time now = this->world->GetSimTime();
 
-  // Apply force for each thruster
-  math::Vector3 tforcev(0, 0, 0);
-  double dtc = 0.0;
-  for (size_t i = 0; i < this->thrusters.size(); ++i) {
-    // Enforce command timeout
-    dtc = (now - this->thrusters[i].lastCmdTime).Double();
-    if (dtc > this->cmdTimeout && this->cmdTimeout > 0.0){
-      this->thrusters[i].currCmd = 0.0;
-      ROS_DEBUG_STREAM_THROTTLE(1.0,"[" << i << "] Cmd Timeout");
-    }
-
-    // Apply the thrust mapping
-    switch(this->thrusters[i].mappingType)
-    {
-      case 0:
-        tforcev.x = this->ScaleThrustCmd(this->thrusters[i].currCmd,
-                 this->thrusters[i].maxCmd,
-                 this->thrusters[i].maxForceFwd,
-                 this->thrusters[i].maxForceRev);
-        break;
-      case 1:
-        tforcev.x = this->GlfThrustCmd(this->thrusters[i].currCmd,
-                     this->thrusters[i].maxForceFwd,
-                     this->thrusters[i].maxForceRev);
-        break;
-      default:
-          ROS_FATAL_STREAM("Cannot use mappingType=" << this->thrusters[i].mappingType);
-          break;
-    }
-    this->thrusters[i].link->AddLinkForce(tforcev);
-  }
-
-  // Spin the propellers
   for (size_t i = 0; i < this->thrusters.size(); ++i)
   {
-    this->SpinPropeller(this->thrusters[i].propJoint,
-      this->thrusters[i].currCmd);
+    {
+      std::lock_guard<std::mutex> lock(this->mutex);
+      // Enforce command timeout
+      double dtc = (now - this->thrusters[i].lastCmdTime).Double();
+      if (dtc > this->cmdTimeout && this->cmdTimeout > 0.0)
+      {
+        this->thrusters[i].currCmd = 0.0;
+        ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "] Cmd Timeout");
+      }
+
+      // Apply the thrust mapping
+      math::Vector3 tforcev(0, 0, 0);
+      switch (this->thrusters[i].mappingType)
+      {
+        case 0:
+          tforcev.x = this->ScaleThrustCmd(this->thrusters[i].currCmd,
+                                           this->thrusters[i].maxCmd,
+                                           this->thrusters[i].maxForceFwd,
+                                           this->thrusters[i].maxForceRev);
+          break;
+        case 1:
+          tforcev.x = this->GlfThrustCmd(this->thrusters[i].currCmd,
+                                         this->thrusters[i].maxForceFwd,
+                                         this->thrusters[i].maxForceRev);
+          break;
+        default:
+            ROS_FATAL_STREAM("Cannot use mappingType=" <<
+              this->thrusters[i].mappingType);
+            break;
+      }
+
+      // Apply force for each thruster
+      this->thrusters[i].link->AddLinkForce(tforcev);
+
+      // Spin the propellers
+      this->SpinPropeller(this->thrusters[i].propJoint,
+        this->thrusters[i].currCmd);
+    }
   }
 
   // Publish the propeller joint state
   this->jointStateMsg.header.stamp = ros::Time::now();
   this->jointStatePub.publish(this->jointStateMsg);
 }
- 
+
 //////////////////////////////////////////////////
 void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
     const double _input)
