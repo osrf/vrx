@@ -54,13 +54,34 @@ install(TARGETS symbol_controller
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Model files that need to be processed with erb
-set (dock_erb_files
+# Dock base files that need to be processed with erb
+set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
   models/dock_2018_base/model.sdf.erb
 )
 
-# Process the erb files
+# Dock files that need to be processed with erb
+set (dock_erb_files
+  models/dock_2016/model.sdf.erb
+  models/dock_2018/model.sdf.erb
+)
+
+# Process the dock base erb files
+foreach(_erb ${dock_base_erb_files})
+  string(REGEX REPLACE ".sdf.erb" ".sdf" _model ${_erb})
+  set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
+  add_custom_command(OUTPUT ${_model}
+                     COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
+                     DEPENDS
+                       ${CMAKE_CURRENT_SOURCE_DIR}/${_erb}
+                       ${CMAKE_CURRENT_SOURCE_DIR}/dock_generator.erb
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+  list(APPEND dock_base_files ${_model})
+endforeach()
+add_custom_target(dock_base_erb_generation ALL DEPENDS ${dock_base_files})
+
+# Process the dock erb files
 foreach(_erb ${dock_erb_files})
   string(REGEX REPLACE ".sdf.erb" ".sdf" _model ${_erb})
   set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
@@ -71,9 +92,13 @@ foreach(_erb ${dock_erb_files})
                        ${CMAKE_CURRENT_SOURCE_DIR}/dock_generator.erb
                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-  list(APPEND model_files ${_model})
+  list(APPEND dock_files ${_model})
 endforeach()
-add_custom_target(erb_generation ALL DEPENDS ${model_files})
+add_custom_target(dock_erb_generation ALL
+  DEPENDS
+    ${dock_files}
+    dock_base_erb_generation
+)
 
 # Generate world files from xacro and install
 xacro_add_files(
