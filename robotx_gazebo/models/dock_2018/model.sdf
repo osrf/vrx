@@ -11,12 +11,12 @@
     <!-- Placard #1 -->
     <model name="dock_2018_placard1">
       <include>
-        <pose>7.5 3 1.5 0 0 1.5708</pose>
+        <pose>7.75 2.75 1.5 0 0 1.5708</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
         <visual name="visual_circle">
-          <pose>7.56 3 2.1 0 1.5708 0</pose>
+          <pose>7.81 2.75 2.1 0 1.5708 0</pose>
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -30,7 +30,7 @@
           </plugin>
         </visual>
         <visual name="visual_h_cross">
-          <pose>7.56 3 2.1 0 1.5708 0</pose>
+          <pose>7.81 2.75 2.1 0 1.5708 0</pose>
           <geometry>
             <box>
               <size>0.99 0.33 0.001</size>
@@ -43,7 +43,7 @@
           </plugin>
         </visual>
         <visual name="visual_v_cross">
-          <pose>7.56 3 2.1 0 1.5708 0</pose>
+          <pose>7.81 2.75 2.1 0 1.5708 0</pose>
           <geometry>
             <box>
               <size>0.33 0.99 0.001</size>
@@ -56,7 +56,7 @@
           </plugin>
         </visual>
         <visual name="visual_triangle">
-          <pose>7.56 2.5 1.7 1.5708 0 1.5708</pose>
+          <pose>7.81 2.25 1.7 1.5708 0 1.5708</pose>
           <geometry>
             <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
           </geometry>
@@ -75,11 +75,11 @@
     <model name="dock_2018_placard2">
       <include>
         <uri>model://placard</uri>
-        <pose>6.5 3 1.5 0 0 1.5708</pose>
+        <pose>6.75 2.75 1.5 0 0 1.5708</pose>
       </include>
       <link name="link_symbols">
         <visual name="visual_circle">
-          <pose>6.44 3 2.1 0 1.5708 0</pose>
+          <pose>6.69 2.75 2.1 0 1.5708 0</pose>
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -93,7 +93,7 @@
           </plugin>
         </visual>
         <visual name="visual_h_cross">
-          <pose>6.44 3 2.1 0 1.5708 0</pose>
+          <pose>6.69 2.75 2.1 0 1.5708 0</pose>
           <geometry>
             <box>
               <size>0.99 0.33 0.001</size>
@@ -106,7 +106,7 @@
           </plugin>
         </visual>
         <visual name="visual_v_cross">
-          <pose>6.44 3 2.1 0 1.5708 0</pose>
+          <pose>6.69 2.75 2.1 0 1.5708 0</pose>
           <geometry>
             <box>
               <size>0.33 0.99 0.001</size>
@@ -119,7 +119,7 @@
           </plugin>
         </visual>
         <visual name="visual_triangle">
-          <pose>6.44 2.5 1.7 1.5708 0 1.5708</pose>
+          <pose>6.69 2.25 1.7 1.5708 0 1.5708</pose>
           <geometry>
             <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
           </geometry>

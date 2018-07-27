@@ -1,6 +1,6 @@
-    <!-- 
+    <!--
       This is how this dock should look like:
-    <% layout.each do |row| -%>  
+    <% layout.each do |row| -%>
       <%= row -%>
     <% end %>
     -->
@@ -16,7 +16,7 @@
     <include>
       <name>dock_block_<%= link_counter %></name>
       <pose><%= x_counter %> <%= y_counter %> 0.25 0 0 0</pose>
-      <uri>model://dock_block</uri>
+      <uri>model://dock_block_4x4</uri>
     </include>
           <%- link_counter += 1 -%>
         <%- end -%>

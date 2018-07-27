@@ -21,13 +21,13 @@
     <!-- The 2016 dock with the three placards -->
     <include>
       <uri>model://dock_2016</uri>
-      <pose>80 -9 0 0 0 0</pose>
+      <pose>80 -8.75 0 0 0 0</pose>
     </include>
 
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://dock_2018</uri>
-      <pose>120 -3 0 0 0 0</pose>
+      <pose>120 -2.75 0 0 0 0</pose>
     </include>
 
   </world>
