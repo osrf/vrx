@@ -37,56 +37,54 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace gazebo
 {
-
   // Foward declaration of UsvThrust class
   class UsvThrust;
-  
+
   /// \brief Thruster class
   class Thruster
   {
-
     /// \brief Constructor
-    /// \param[in] _sdfPtr Pointer to an SDF element to parse.
-    public: Thruster(UsvThrust* parent);
+    /// \param[in] _parent Pointer to an SDF element to parse.
+    public: Thruster(UsvThrust *_parent);
 
-    /// \brief Callback for new thrust commands
-    public: void OnThrustCmd(const std_msgs::Float32::ConstPtr & msg);
-    
-    /// \brief Maximum abs val of incoming command
+    /// \brief Callback for new thrust commands.
+    /// \param[in] _msg The thrust message to process.
+    public: void OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg);
+
+    /// \brief Maximum abs val of incoming command.
     public: double maxCmd;
 
-    /// \brief Max forward force in Newtons
+    /// \brief Max forward force in Newtons.
     public: double maxForceFwd;
 
-    /// \brief Max reverse force in Newtons
+    /// \brief Max reverse force in Newtons.
     public: double maxForceRev;
 
-    /// \brief Link where thrust force is applied
+    /// \brief Link where thrust force is applied.
     public: physics::LinkPtr link;
 
-    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear)
+    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear).
     public: int mappingType;
 
-    /// \brief Topic name for incoming ROS thruster commands
+    /// \brief Topic name for incoming ROS thruster commands.
     public: std::string cmdTopic;
 
-    /// \brief Subscription to thruster commands
+    /// \brief Subscription to thruster commands.
     public: ros::Subscriber cmdSub;
 
-    /// \brief Current, most recent command
+    /// \brief Current, most recent command.
     public: double currCmd;
 
     /// \brief Plugin parent pointer - for accessing world, etc.
-    protected: UsvThrust* plugin;
+    protected: UsvThrust *plugin;
 
-    /// \brief Last time received a command via ROS topic
+    /// \brief Last time received a command via ROS topic.
     public: common::Time lastCmdTime;
 
     /// \brief Joint controlling the propeller.
     public: physics::JointPtr propJoint;
-    
   };
-  
+
   /// \brief A plugin to simulate a propulsion system under water.
   /// This plugin accepts the following SDF parameters.
   /// See https://github.com/bsb808/robotx_docs/blob/master/theoryofoperation/theory_of_operation.pdf
@@ -94,18 +92,18 @@ namespace gazebo
   ///
   ///   <robotNamespace>: Namespace prefix for USV.
   ///   <cmdTimeout>:  Timeout, after which thrust is set to zero [s].
-  ///   <left_propeller_joint>: The left's propeller joint.
   ///   <right_propeller_joint>: The right's propeller joint.
   ///
   ///   Multiple thrusters are declared by including <thruster> SDF elements,
   ///   where each thruster includes the following SDF parameters specific to
   ///   the individual thruster
   ///   <linkName>: Name of the link on which to apply thrust forces.
+  ///   <propJointName>: The name of the propeller joint.
+  ///   <cmdTopic>: The ROS topic to control this thruster.
   ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear)
   ///   <maxCmd>:Maximum (abs val) of thrust commands, typ. 1.0.
   ///   <maxForceFwd>: Maximum forward force [N].
   ///   <maxForceRev>: Maximum reverse force [N].
-
   class UsvThrust : public ModelPlugin
   {
     /// \brief Constructor.
@@ -134,7 +132,10 @@ namespace gazebo
     /// \brief Takes ROS Drive commands and scales them by max thrust.
     /// \param[in] _cmd ROS drive command.
     /// \return Value scaled and saturated.
-  private: double ScaleThrustCmd(const double _cmd, double max_cmd, double max_pos, double max_neg) const;
+  private: double ScaleThrustCmd(const double _cmd,
+                                 const double _max_cmd,
+                                 const double _max_pos,
+                                 const double _max_neg) const;
 
     /// \brief Generalized logistic function (GLF) used for non-linear
     /// thruster model.
@@ -145,7 +146,7 @@ namespace gazebo
     /// \param[in] _v Affects near which asymptote max. growth occurs.
     /// \param[in] _C Typically near 1.0.
     /// \param[in] _M Offset to input.
-    /// \return 
+    /// \return
     private: double Glf(const double _x,
                         const float  _A,
                         const float  _K,
@@ -158,7 +159,9 @@ namespace gazebo
     /// in Newtons.
     /// \param[in] _cmd Thrust command {-1.0,1.0}.
     /// \return Thrust force [N].
-  private: double GlfThrustCmd(const double _cmd, double max_pos, double max_neg) const;
+  private: double GlfThrustCmd(const double _cmd,
+                               const double _maxPos,
+                               const double _maxNeg) const;
 
     /// \brief Spin a propeller based on its input
     /// \param[in] _propeller Pointer to the propeller joint to spin
@@ -191,9 +194,6 @@ namespace gazebo
     /// \brief The propeller message state.
     private: sensor_msgs::JointState jointStateMsg;
   };
-
-  
-
 }
 
 #endif
