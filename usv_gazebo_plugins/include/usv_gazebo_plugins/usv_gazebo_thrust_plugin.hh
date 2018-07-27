@@ -132,10 +132,10 @@ namespace gazebo
     /// \brief Takes ROS Drive commands and scales them by max thrust.
     /// \param[in] _cmd ROS drive command.
     /// \return Value scaled and saturated.
-  private: double ScaleThrustCmd(const double _cmd,
-                                 const double _max_cmd,
-                                 const double _max_pos,
-                                 const double _max_neg) const;
+    private: double ScaleThrustCmd(const double _cmd,
+                                   const double _max_cmd,
+                                   const double _max_pos,
+                                   const double _max_neg) const;
 
     /// \brief Generalized logistic function (GLF) used for non-linear
     /// thruster model.
@@ -159,9 +159,9 @@ namespace gazebo
     /// in Newtons.
     /// \param[in] _cmd Thrust command {-1.0,1.0}.
     /// \return Thrust force [N].
-  private: double GlfThrustCmd(const double _cmd,
-                               const double _maxPos,
-                               const double _maxNeg) const;
+    private: double GlfThrustCmd(const double _cmd,
+                                 const double _maxPos,
+                                 const double _maxNeg) const;
 
     /// \brief Spin a propeller based on its input
     /// \param[in] _propeller Pointer to the propeller joint to spin
