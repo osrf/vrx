@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- Basic WAM-V with gazebo plugins for dynamics -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="WAM-V">
+  <!-- Defines the base vehicle -->
+  <xacro:include filename="$(find wamv_description)/urdf/wamv_t_thrusters.urdf.xacro" />
+  <!-- Include macros for dynamics plugins -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/macros_t.xacro" />
+  <!-- Attach hydrodynamics plugin -->
+  <xacro:usv_dynamics_gazebo name="wamv_dynamics_plugin"/>
+  <!-- Attach wind plugin -->
+  <xacro:usv_wind_gazebo name="wamv_wind_plugin"/>
+  <!-- Attach thrust plugin -->
+  <xacro:usv_thrust_gazebo name="wamv_thrust_plugin"/>
+</robot>
