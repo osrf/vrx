@@ -97,13 +97,19 @@ namespace gazebo
   ///   Multiple thrusters are declared by including <thruster> SDF elements,
   ///   where each thruster includes the following SDF parameters specific to
   ///   the individual thruster
-  ///   <linkName>: Name of the link on which to apply thrust forces.
+  ///   Required elements:
+  ///   <linkName>: Name of the link on which to apply thrust forces. 
   ///   <propJointName>: The name of the propeller joint.
   ///   <cmdTopic>: The ROS topic to control this thruster.
-  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear)
-  ///   <maxCmd>:Maximum (abs val) of thrust commands, typ. 1.0.
+  ///   Optional eleents:
+  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear),
+  ///   default is 0
+  ///   <maxCmd>:Maximum (abs val) of thrust commands,
+  ///   defualt is 1.0
   ///   <maxForceFwd>: Maximum forward force [N].
+  ///   default is 100.0 N
   ///   <maxForceRev>: Maximum reverse force [N].
+  ///   default is 100.0 N
   class UsvThrust : public ModelPlugin
   {
     /// \brief Constructor.
