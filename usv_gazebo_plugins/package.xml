@@ -14,5 +14,6 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>gazebo_dev</depend>
   <depend>roscpp</depend>
+  <depend>std_msgs</depend>
   <exec_depend>message_runtime</exec_depend>
 </package>

@@ -28,7 +28,9 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <std_msgs/Float32.h>
 #include <sensor_msgs/JointState.h>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <vector>
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Time.hh>
@@ -45,7 +47,7 @@ namespace gazebo
   {
     /// \brief Constructor
     /// \param[in] _parent Pointer to an SDF element to parse.
-    public: Thruster(UsvThrust *_parent);
+    public: explicit Thruster(UsvThrust *_parent);
 
     /// \brief Callback for new thrust commands.
     /// \param[in] _msg The thrust message to process.
@@ -75,14 +77,14 @@ namespace gazebo
     /// \brief Current, most recent command.
     public: double currCmd;
 
-    /// \brief Plugin parent pointer - for accessing world, etc.
-    protected: UsvThrust *plugin;
-
     /// \brief Last time received a command via ROS topic.
     public: common::Time lastCmdTime;
 
     /// \brief Joint controlling the propeller.
     public: physics::JointPtr propJoint;
+
+    /// \brief Plugin parent pointer - for accessing world, etc.
+    protected: UsvThrust *plugin;
   };
 
   /// \brief A plugin to simulate a propulsion system under water.
@@ -92,22 +94,55 @@ namespace gazebo
   ///
   ///   <robotNamespace>: Namespace prefix for USV.
   ///   <cmdTimeout>:  Timeout, after which thrust is set to zero [s].
-  ///   <right_propeller_joint>: The right's propeller joint.
   ///
   ///   Multiple thrusters are declared by including <thruster> SDF elements,
   ///   where each thruster includes the following SDF parameters specific to
   ///   the individual thruster
-  ///   <linkName>: Name of the link on which to apply thrust forces.
+  ///   Required elements:
+  ///   <linkName>: Name of the link on which to apply thrust forces. 
   ///   <propJointName>: The name of the propeller joint.
   ///   <cmdTopic>: The ROS topic to control this thruster.
-  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear)
-  ///   <maxCmd>:Maximum (abs val) of thrust commands, typ. 1.0.
+  ///   Optional eleents:
+  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear),
+  ///   default is 0
+  ///   <maxCmd>:Maximum (abs val) of thrust commands,
+  ///   defualt is 1.0
   ///   <maxForceFwd>: Maximum forward force [N].
+  ///   default is 100.0 N
   ///   <maxForceRev>: Maximum reverse force [N].
+  ///   default is 100.0 N
+  ///
+  /// Here is an example:
+  ///
+  ///    <plugin name="example" filename="libusv_gazebo_thrust_plugin.so">
+  ///      <!-- General plugin parameters -->
+  ///      <cmdTimeout>1.0</cmdTimeout>
+  ///
+  ///      <!-- Two thrusters -->
+  ///      <thruster>
+  ///        <linkName>left_propeller_link</linkName>
+  ///        <propJointName>left_engine_propeller_joint</propJointName>
+  ///        <cmdTopic>left_thrust_cmd</cmdTopic>
+  ///        <mappingType>1</mappingType>
+  ///        <maxCmd>1.0</maxCmd>
+  ///        <maxForceFwd>250.0</maxForceFwd>
+  ///        <maxForceRev>-100.0</maxForceRev>
+  ///      </thruster>
+  ///      <thruster>
+  ///        <linkName>right_propeller_link</linkName>
+  ///        <propJointName>right_engine_propeller_joint</propJointName>
+  ///        <cmdTopic>right_thrust_cmd</cmdTopic>
+  ///        <mappingType>1</mappingType>
+  ///        <maxCmd>1.0</maxCmd>
+  ///        <maxForceFwd>250.0</maxForceFwd>
+  ///        <maxForceRev>-100.0</maxForceRev>
+  ///      </thruster>
+  ///    </plugin>
+
   class UsvThrust : public ModelPlugin
   {
     /// \brief Constructor.
-    public: UsvThrust();
+    public: UsvThrust() = default;
 
     /// \brief Destructor.
     public: virtual ~UsvThrust() = default;
@@ -168,6 +203,10 @@ namespace gazebo
     /// \param[in] _input Last input received for this propeller
     private: void SpinPropeller(physics::JointPtr &_propeller,
                                 const double _input);
+
+    /// \brief A mutex to protect member variables accessed during
+    /// OnThustCmd() and Update().
+    public: std::mutex mutex;
 
     /// \brief The ROS node handler used for communications.
     private: std::unique_ptr<ros::NodeHandle> rosnode;
