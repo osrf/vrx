@@ -54,3 +54,6 @@
 
 1. Add xacro macros and example for a WAM-V with sensors
   * [Pull request 12](https://bitbucket.org/osrf/vmrc/pull-requests/12)
+  
+1. Refactor thruster plugin to generalize propulsion configuration and enable more flesible use cases.
+  * [Pull request 34](https://bitbucket.org/osrf/vmrc/pull-requests/34)
