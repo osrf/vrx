@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 # license removed for brevity
 
+import sys
 import rospy
 from geometry_msgs.msg import Twist
-from usv_gazebo_plugins.msg import UsvDrive
+from std_msgs.msg import Float32
 
 class Node():
-    def __init__(self,linear_scaling,angular_scaling):
+    def __init__(self,linear_scaling,angular_scaling,keyboard=False):
         self.linear_scaling = linear_scaling
         self.angular_scaling = angular_scaling
-        self.pub = None
-        self.driveMsg =None
+        self.left_pub = None
+        self.right_pub = None
+        self.left_msg =None
+        self.right_msg =None
+        self.keyboard = keyboard
 
     def callback(self,data):
         rospy.logdebug("RX: Twist "+rospy.get_caller_id())
@@ -25,14 +29,21 @@ class Node():
         # scaling factors
         linfac = self.linear_scaling
         angfac = self.angular_scaling
-        self.driveMsg.left = data.linear.x
-        self.driveMsg.right = data.angular.z
 
-        rospy.logdebug("TX: Drive ")
-        rospy.logdebug("\tleft:%f, right:%f"%(self.driveMsg.left,
-                                             self.driveMsg.right))
-        #print("left: %f, right: %f"%(self.driveMsg.left,self.driveMsg.right))
-        self.pub.publish(self.driveMsg)
+        if self.keyboard:
+            self.left_msg.data = data.linear.x
+            self.right_msg.data = data.linear.x
+            self.left_msg.data += -1*data.angular.z
+            self.right_msg.data += data.angular.z
+        else:
+            self.left_msg.data = data.linear.x
+            self.right_msg.data = data.angular.z
+
+        rospy.logdebug("TX ")
+        rospy.logdebug("\tleft:%f, right:%f"%(self.left_msg.data,
+                                              self.right_msg.data))
+        self.left_pub.publish(self.left_msg)
+        self.right_pub.publish(self.right_msg)
 
 
 if __name__ == '__main__':
@@ -40,24 +51,25 @@ if __name__ == '__main__':
     rospy.init_node('twist2drive', anonymous=True)
 
     # ROS Parameters
-    in_topic = rospy.get_param('~input_topic','cmd_vel')
-    out_topic = rospy.get_param('~output_topic','cmd_drive')
     # Scaling from Twist.linear.x to (left+right)
     linear_scaling = rospy.get_param('~linear_scaling',0.2)
     # Scaling from Twist.angular.z to (right-left)
     angular_scaling = rospy.get_param('~angular_scaling',0.05)
 
-    rospy.loginfo("Subscribing to <%s>, Publishing to <%s>"%(in_topic,out_topic))
     rospy.loginfo("Linear scaling=%f, Angular scaling=%f"%(linear_scaling,angular_scaling))
 
-    node=Node(linear_scaling,angular_scaling)
+    
+    key = '--keyboard' in sys.argv
+    node=Node(linear_scaling,angular_scaling,keyboard=key)
 
     # Publisher
-    node.pub = rospy.Publisher(out_topic,UsvDrive,queue_size=10)
-    node.driveMsg = UsvDrive()
+    node.left_pub = rospy.Publisher("left_cmd",Float32,queue_size=10)
+    node.right_pub = rospy.Publisher("right_cmd",Float32,queue_size=10)
+    node.left_msg = Float32()
+    node.right_msg = Float32()
 
     # Subscriber
-    rospy.Subscriber(in_topic,Twist,node.callback)
+    rospy.Subscriber("cmd_vel",Twist,node.callback)
 
     try:
         rospy.spin()

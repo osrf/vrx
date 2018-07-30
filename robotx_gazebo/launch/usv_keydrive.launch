@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-
-  <!-- Convert Twist messages to Drive messages -->
-  <node pkg="robotx_gazebo" type="twist2drive_keyboard.py" name="twist2drive_keyboard" />
-
   <!-- Keyboard teleop -->
   <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen">
   </node>
+
+    <!-- Convert Twist messages to Drive messages -->
+    <node pkg="robotx_gazebo" type="twist2thrust.py" name="twist2thrust" output="screen" args="--keyboard">
+    <remap from="left_cmd" to="left_thrust_cmd"/>
+    <remap from="right_cmd" to="right_thrust_cmd"/>
+  </node>
+
 
 </launch>
