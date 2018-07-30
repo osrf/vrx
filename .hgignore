@@ -7,3 +7,4 @@ build_*
 .DS_Store
 *.swp
 *.orig
+*.*~
