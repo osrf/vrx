@@ -1,5 +1,5 @@
-# Ubuntu 16.04 
-FROM ubuntu:xenial 
+# Ubuntu 16.04 with nvidia-docker2 beta opengl support.
+FROM nvidia/opengl:1.0-glvnd-devel-ubuntu16.04
 
 # Tools useful during development.
 RUN apt-get update \
@@ -13,6 +13,7 @@ RUN apt-get update \
         python3-dbg \
         python3-pip \
         python3-venv \
+        ruby \
         software-properties-common \
         sudo \
         vim \
@@ -42,7 +43,9 @@ RUN sudo /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release 
  && sudo apt-get update \
  && sudo apt-get install -y \
     ros-kinetic-desktop-full \
+    ros-kinetic-joy \
     ros-kinetic-joy-teleop \
+    ros-kinetic-robot-localization \
     gazebo7 \
     libgazebo7-dev \
  && sudo rosdep init \
