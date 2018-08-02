@@ -25,11 +25,33 @@
 # Recommended:
 #   A joystick mounted to /dev/input/js0 or /dev/input/js1
 
+RUNTIME="runc"
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -n|--nvidia)
+    RUNTIME="nvidia"
+    shift 
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") 
+    shift 
+    ;;
+esac
+done
+
+set -- "${POSITIONAL[@]}" 
+
 if [ $# -lt 1 ]
 then
-    echo "Usage: $0 <docker image> [<dir with workspace> ...]"
+    echo "Usage: $0 [-n --nvidia] <docker image> [<dir with workspace> ...]"
     exit 1
 fi
+
 
 
 IMG=$(basename $1)
@@ -71,7 +93,7 @@ sudo docker run -it \
   -v "/dev/input:/dev/input" \
   --privileged \
   --rm \
-  --runtime=nvidia \
+  --runtime=$RUNTIME \
   --security-opt seccomp=unconfined \
   $DOCKER_OPTS \
   $IMG
