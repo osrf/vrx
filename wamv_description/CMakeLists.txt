@@ -4,8 +4,6 @@ find_package(catkin REQUIRED COMPONENTS xacro)
 catkin_package(CATKIN_DEPENDS xacro)
 xacro_add_files(
   urdf/wamv_base.urdf.xacro
-  urdf/wamv_two_engines.urdf.xacro
-  urdf/wamv_t_thrusters.urdf.xacro
     INORDER INSTALL DESTINATION urdf
 )
 

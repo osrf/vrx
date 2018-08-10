@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<plugin xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro  name="wamv_gazebo_thruster_config" params="name">
+    <thruster>
+      <linkName>${name}_propeller_link</linkName>
+      <propJointName>${name}_engine_propeller_joint</propJointName>
+      <cmdTopic>${name}_thrust_cmd</cmdTopic>
+      <mappingType>1</mappingType>
+      <maxCmd>1.0</maxCmd>
+      <maxForceFwd>250.0</maxForceFwd>
+      <maxForceRev>-100.0</maxForceRev>
+    </thruster>
+  </xacro:macro>
+</plugin>
