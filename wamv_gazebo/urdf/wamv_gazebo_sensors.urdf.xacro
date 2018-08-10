@@ -11,8 +11,8 @@
   <xacro:wamv_gps name="gps_wamv" y="0.2" />
   <!-- Add Simulated IMU -->
   <xacro:wamv_imu name="imu_wamv" y="-0.2" />
-  <!-- Add LIDAR -->
-  <xacro:wamv_multibeam_laser name="lidar_wamv" y="-0.3" />
+  <!-- Add 3D LIDAR -->
+  <xacro:wamv_3d_lidar name="lidar" />
   <!-- Add P3D ground truth -->
   <xacro:wamv_p3d name="p3d_wamv"/>
 </robot>
