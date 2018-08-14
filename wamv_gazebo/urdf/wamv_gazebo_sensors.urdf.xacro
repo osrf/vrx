@@ -1,18 +1,38 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
        name="WAM-V">
+  <xacro:arg name="camera_enabled" default="true" />
+  <xacro:arg name="gps_enabled" default="true" />
+  <xacro:arg name="imu_enabled" default="true" />
+  <xacro:arg name="lidar_enabled" default="true" />
+  <xacro:arg name="ground_truth_enabled" default="true" />
+
   <!-- Basic frame of WAM-V -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro" />
 
   <!-- ADD SENSORS -->
   <!-- Add a front camera -->
-  <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}" />
+  <xacro:if value="$(arg camera_enabled)">
+    <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}" />
+  </xacro:if>
+
   <!-- Add simulated GPS -->
-  <xacro:wamv_gps name="gps_wamv" y="0.2" />
+  <xacro:if value="$(arg gps_enabled)">
+    <xacro:wamv_gps name="gps_wamv" y="0.2" />
+  </xacro:if>
+
   <!-- Add Simulated IMU -->
-  <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+  <xacro:if value="$(arg imu_enabled)">
+    <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+  </xacro:if>
+
   <!-- Add LIDAR -->
-  <xacro:wamv_multibeam_laser name="lidar_wamv" y="-0.3" />
+  <xacro:if value="$(arg lidar_enabled)">
+    <xacro:wamv_multibeam_laser name="lidar_wamv" y="-0.3" />
+  </xacro:if>
+
   <!-- Add P3D ground truth -->
-  <xacro:wamv_p3d name="p3d_wamv"/>
+  <xacro:if value="$(arg ground_truth_enabled)">
+    <xacro:wamv_p3d name="p3d_wamv"/>
+  </xacro:if>
 </robot>
