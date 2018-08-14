@@ -330,12 +330,16 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
   _propeller->SetForce(0, effort);
 
   // Get index in joint state message for this propeller
-  uint8_t index;
-  if (_propeller->GetName() == this->jointStateMsg.name[0])
-    index = 0;
-  else if (_propeller->GetName() == this->jointStateMsg.name[1])
-    index = 1;
-  else
+  uint8_t index = -1;
+  for (int i = 0; i < this->thrusters.size(); ++i)
+  {
+    if (_propeller->GetName() == this->jointStateMsg.name[i])
+    {
+      index = i;
+      break;
+    }
+  }
+  if (index < 0)
   {
     ROS_WARN("Propeller %s cannot be associated with a joint, "
              "skipping message.", _propeller->GetName().c_str());

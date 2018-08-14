@@ -2,7 +2,7 @@
 <!-- Basic WAM-V with gazebo plugins for dynamics -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
        name="WAM-V">
-  <!-- Default WAM-V with two aft thrusters -->
+  <!-- WAMV with "T" thruster configuration -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
-  <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"/>
+  <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"/>
 </robot>

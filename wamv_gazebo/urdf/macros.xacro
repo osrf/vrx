@@ -5,7 +5,6 @@
   <!-- Include dynamics macros -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_dynamics_plugin.xacro" />
   <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_wind_plugin.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_thrust_plugin.xacro" />
 
   <!-- Include sensor macros -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_camera.xacro" />

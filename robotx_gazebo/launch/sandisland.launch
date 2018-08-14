@@ -16,6 +16,13 @@
   <arg name="R" default="0" />
   <arg name="Y" default="0" />
 
+  <!-- Allow user specified thruster configurations
+       H = stern trusters on each hull
+       T = H with a lateral thruster
+       X = "holonomic" configuration -->
+      
+  <arg name="thrust_config" default="H" />
+  
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(arg world)"/>
@@ -26,7 +33,15 @@
   </include>
 
   <!-- Load robot model -->
-  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf"/>
+  <!-- Determine which model -->
+  <arg name="h_config" value="$(eval int((thrust_config)=='H'))"/>
+  <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
+  <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
+  
+  <arg if="$(arg h_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf"/>
+  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_t.urdf"/>
+  <arg if="$(arg x_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_x.urdf"/>
+  
   <param name="robot_description" textfile="$(arg urdf)"/>
 
   <!-- Spawn model in Gazebo -->
