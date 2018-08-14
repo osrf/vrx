@@ -330,7 +330,7 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
   _propeller->SetForce(0, effort);
 
   // Get index in joint state message for this propeller
-  bool found = -1;
+  uint8_t index = -1;
   for (int i = 0; i < this->thrusters.size(); ++i)
   {
     if (_propeller->GetName() == this->jointStateMsg.name[i])
