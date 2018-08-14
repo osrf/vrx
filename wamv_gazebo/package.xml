@@ -12,4 +12,5 @@
   <depend>wamv_description</depend>
   <depend>xacro</depend>
   <depend>usv_gazebo_plugins</depend>
+  <depend>velodyne_gazebo_plugins</depend>
 </package>

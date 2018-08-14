@@ -2,6 +2,9 @@
 
 ### VMRC 0.X.X
 
+1. Add 3D laser to the WAM-V.
+  * [Pull request 41](https://bitbucket.org/osrf/vmrc/pull-requests/41)
+
 1. Add multiple WAM-V propulsion configurations.
   * [Pull request 40](https://bitbucket.org/osrf/vmrc/pull-requests/40)
 
