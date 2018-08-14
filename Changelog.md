@@ -2,6 +2,9 @@
 
 ### VMRC 0.X.X
 
+1. Add multiple WAM-V propulsion configurations.
+  * [Pull request 40](https://bitbucket.org/osrf/vmrc/pull-requests/40)
+
 1. Add placards and the ability to change shape and color.
   * [Pull request 31](https://bitbucket.org/osrf/vmrc/pull-requests/31)
 
