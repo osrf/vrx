@@ -28,6 +28,9 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+#include <ros/ros.h>
+#include <std_msgs/Float32.h>
+
 #include <gazebo/common/common.hh>
 #include <gazebo/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
@@ -173,6 +176,15 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    // \brief Topic name for publishing wave height
+    private: std::string topic_name;
+
+    /// \brief The ROS node handler used for communications.
+    private: std::unique_ptr<ros::NodeHandle> rosnode;
+
+    /// \brief For publishing to /joint_state with propeller state.
+    private: ros::Publisher waveheightPub;
   };
 }
 

@@ -176,6 +176,16 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   // Precalculate this to save some time.
   this->buoyFrac = (paramBoatArea / (kNN * kNN)) * GRAVITY * waterDensity;
+
+  // Hardcode the topic name for wave height publication
+  this->topic_name = "wave_height";
+
+  // Initialize the ROS node 
+  this->rosnode.reset(new ros::NodeHandle(""));
+
+  // Init publisher
+  this->waveheightPub =
+    this->rosnode->advertise<std_msgs::Float32>("wave_height", 1);
 }
 
 //////////////////////////////////////////////////
@@ -269,7 +279,7 @@ void UsvDynamicsPlugin::Update()
     // in world coordinates
     tf2::Vector3 bpntW(0, 0, 0);
 
-    // grid point in boat fram
+    // grid point in boat frame
     bpnt.setX(i * this->dx);
     for (const int j : this->II)
     {
@@ -307,7 +317,7 @@ void UsvDynamicsPlugin::Update()
         dz += this->paramWaveAmps[k] * cos(kK * kDdotx - kW * kTimeNow.Float());
       }
       ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
-
+      
       // Buoyancy force at grid point
       const float kBuoyForce =
         ((this->waterLevel + dz) - kDdz) * this->buoyFrac;
@@ -320,6 +330,26 @@ void UsvDynamicsPlugin::Update()
         math::Vector3(bpnt.x(), bpnt.y(), bpnt.z()));
     }
   }
+
+  // Determine wave displacement at COG
+  math::Vector3 X;	
+  X.x = kPose.pos.x;
+  X.y = kPose.pos.y;
+  double dz = 0.0;
+  for (int k = 0; k < this->paramWaveN; ++k)
+  {
+    const double kDdotx = this->paramWaveDirections[k][0] * X.x +
+      this->paramWaveDirections[k][1] * X.y;
+    const double kW = 2.0 * M_PI / this->paramWavePeriods[k];
+    const double kK = kW * kW / GRAVITY;
+    dz += this->paramWaveAmps[k] * cos(kK * kDdotx - kW * kTimeNow.Float());
+  }
+  // Publish wave height
+  std_msgs::Float32 msg;
+  msg.data = dz;
+  this->waveheightPub.publish(msg);
+
+  
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvDynamicsPlugin);
