@@ -44,7 +44,7 @@ RUN sudo /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release 
  && sudo apt-get install -y \
     ros-kinetic-desktop-full \
     ros-kinetic-hector-gazebo-plugins \
-    os-kinetic-joy \
+    ros-kinetic-joy \
     ros-kinetic-joy-teleop \
     ros-kinetic-robot-localization \
     ros-kinetic-velodyne-simulator \
