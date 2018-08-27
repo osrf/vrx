@@ -1,22 +1,15 @@
 # Virtual Maritime RobotX Challenge (VMRC)
 
-This is the entry point for teams participating in the current [RobotX Maritime Challenge](http://robotx.org/) or the upcoming Virtual Maritime RobotX Challenge (VMRC) in 2019.
+This is the entry point for teams participating in the current [RobotX Maritime Challenge](http://robotx.org/) or the upcoming Virtual Maritime RobotX Challenge (VMRC) in 2019.  The repository includes a set of Gazebo simulation elements and examples to support development of RobotX systems.
 
-Currently this project includes a set of Gazebo simulation elements and examples to support development of RobotX systems.  
-This is an active development project.  We are adding and improving things all the time.  The project contains a simulation foundation, including an environment similar 
-to the RobotX venue and description of the WAM-V platform.  It is intended as a first step for teams that would then extend the tools for their specific development needs.
+This is an active development project.  We are adding and improving things all the time.  The project contains a simulation foundation, including an environment similar to the RobotX venue and description of the WAM-V platform.  It is intended as a first step for teams that would then extend the tools for their specific development needs.
 
 ![VMRC](images/vmrc.jpg)
 
 ## Getting Started
 
-The [VMRC Wiki](https://bitbucket.org/osrf/vmrc/wiki) provides documentation on how to setup the simulation and examples to illustrate some of the functionality.  
-The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
-
-
-## Resources
-
-1. [VMRC Wiki](https://bitbucket.org/osrf/vmrc/wiki): Documentation, tutorials, etc.
+ * The [VMRC Wiki](https://bitbucket.org/osrf/vmrc/wiki) provides documentation and tutorials.
+ * The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
 
 ## Contributing
 
