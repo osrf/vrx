@@ -54,7 +54,7 @@ fi
 
 
 
-IMG=$(basename $1)
+IMG=$1
 
 ARGS=("$@")
 WORKSPACES=("${ARGS[@]:1}")

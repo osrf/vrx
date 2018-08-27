@@ -1,5 +1,6 @@
 # Ubuntu 16.04 
 FROM ubuntu:xenial 
+
 # Tools useful during development.
 RUN apt-get update \
  && apt-get install -y \
@@ -12,6 +13,7 @@ RUN apt-get update \
         python3-dbg \
         python3-pip \
         python3-venv \
+        ruby \
         software-properties-common \
         sudo \
         vim \
@@ -41,6 +43,8 @@ RUN sudo /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release 
  && sudo apt-get update \
  && sudo apt-get install -y \
     ros-kinetic-desktop-full \
+    ros-kinetic-hector-gazebo-plugins \
+    ros-kinetic-joy \
     ros-kinetic-joy-teleop \
     ros-kinetic-robot-localization \
     ros-kinetic-velodyne-simulator \

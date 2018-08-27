@@ -21,6 +21,6 @@
   <xacro:wamv_imu name="imu_wamv" y="-0.2" />
 
   <!-- Add 3D LIDAR -->
-  <xacro:wamv_3d_lidar name="lidar_wamv" y="-0.3" />
+  <xacro:wamv_3d_lidar name="lidar_wamv" P="${radians(8)}" />
 
 </robot>
