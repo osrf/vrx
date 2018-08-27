@@ -2,6 +2,9 @@
 
 ### VMRC 0.X.X
 
+1. Add a standard WAM-V configuration for VMRC.
+  * [Pull request 44](https://bitbucket.org/osrf/vmrc/pull-requests/44)
+
 1. Add 3D laser to the WAM-V.
   * [Pull request 41](https://bitbucket.org/osrf/vmrc/pull-requests/41)
 

@@ -7,7 +7,7 @@ Panels:
         - /Global Options1
         - /Camera1/Visibility1
       Splitter Ratio: 0.5
-    Tree Height: 571
+    Tree Height: 265
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -58,10 +58,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         base_link:
           Alpha: 1
           Show Axes: false
@@ -71,14 +67,46 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+          Value: true
+        front_camera_link_optical:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         gps_wamv_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+          Value: true
         imu_wamv_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+          Value: true
+        left_engine_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_propeller_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lidar_wamv_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_engine_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_propeller_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -90,17 +118,27 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_footprint:
-          Value: true
         base_link:
           Value: true
         front_camera_link:
+          Value: true
+        front_camera_link_optical:
           Value: true
         gps_wamv_link:
           Value: true
         imu_wamv_link:
           Value: true
+        left_engine_link:
+          Value: true
+        left_propeller_link:
+          Value: true
+        lidar_wamv_link:
+          Value: true
         odom:
+          Value: true
+        right_engine_link:
+          Value: true
+        right_propeller_link:
           Value: true
         utm:
           Value: true
@@ -113,11 +151,20 @@ Visualization Manager:
         odom:
           base_link:
             front_camera_link:
-              {}
+              front_camera_link_optical:
+                {}
             gps_wamv_link:
               {}
             imu_wamv_link:
               {}
+            left_engine_link:
+              left_propeller_link:
+                {}
+            lidar_wamv_link:
+              {}
+            right_engine_link:
+              right_propeller_link:
+                {}
           utm:
             {}
       Update Interval: 0
@@ -188,10 +235,10 @@ Window Geometry:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1053
+  Height: 1016
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000016a00000393fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000028000002ca000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d00650072006101000002f8000000c30000001600ffffff000000010000010f0000046dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000046d000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000006720000003efc0100000002fb0000000800540069006d00650100000000000006720000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000005020000039300000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000016a00000360fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003a00000191000000c600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d00650072006101000001d1000001c90000001600ffffff000000010000010f0000046dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000046d0000009e00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d00650100000000000007800000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000006100000036000000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -200,6 +247,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1650
-  X: 215
-  Y: 88
+  Width: 1920
+  X: 0
+  Y: 27
