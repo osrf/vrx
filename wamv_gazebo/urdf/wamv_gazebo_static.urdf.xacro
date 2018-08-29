@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- Basic WAM-V with gazebo plugins for dynamics -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="WAM-V">
+  <gazebo>
+	<static>true</static>
+  </gazebo>
+  <!-- Default WAM-V with two aft thrusters -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
+  <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"/>
+  <joint name='staticrobot' type='fixed'>
+	<parent link="world"/>
+	<child link="base_link"/>
+	<origin xyz=" 0 0 2" rpy="0 0 0" />
+  </joint>
+</robot>

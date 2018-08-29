@@ -24,6 +24,8 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <ros/ros.h>
 #include <tf2/LinearMath/Transform.h>
 
+#include <std_msgs/Float32MultiArray.h>
+
 #include <cmath>
 #include <functional>
 #include <sstream>
@@ -186,6 +188,12 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // Init publisher
   this->waveheightPub =
     this->rosnode->advertise<std_msgs::Float32>("wave_height", 1);
+
+  this->forcePub =
+	  this->rosnode->advertise<std_msgs::Float32MultiArray>("wave_force", 1);
+
+    this->momentPub =
+	  this->rosnode->advertise<std_msgs::Float32MultiArray>("wave_moment", 1);
 }
 
 //////////////////////////////////////////////////
@@ -270,6 +278,10 @@ void UsvDynamicsPlugin::Update()
   this->link->AddRelativeTorque(
     math::Vector3(kForceSum(3), kForceSum(4), kForceSum(5)));
 
+  // Keep track of wave forces and moments
+  math::Vector3 wf(0,0,0);
+  math::Vector3 wm(0,0,0);
+  
   // Loop over boat grid points
   for (const int i : this->II)
   {

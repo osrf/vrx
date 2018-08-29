@@ -183,8 +183,14 @@ namespace gazebo
     /// \brief The ROS node handler used for communications.
     private: std::unique_ptr<ros::NodeHandle> rosnode;
 
-    /// \brief For publishing to /joint_state with propeller state.
+    /// \brief For publishing wave height
     private: ros::Publisher waveheightPub;
+
+    /// \brief For publishing forces
+    private: ros::Publisher forcePub;
+
+	/// \brief For publishing forces
+    private: ros::Publisher momentPub;
   };
 }
 
