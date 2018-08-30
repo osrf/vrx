@@ -24,11 +24,14 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <ros/ros.h>
 #include <tf2/LinearMath/Transform.h>
 
+#include "std_msgs/MultiArrayDimension.h"
+#include "std_msgs/MultiArrayLayout.h"
 #include <std_msgs/Float32MultiArray.h>
 
 #include <cmath>
 #include <functional>
 #include <sstream>
+#include <algorithm>    // std::min
 
 #include <gazebo/math/Pose.hh>
 #include "usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh"
@@ -190,10 +193,10 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->rosnode->advertise<std_msgs::Float32>("wave_height", 1);
 
   this->forcePub =
-	  this->rosnode->advertise<std_msgs::Float32MultiArray>("wave_force", 1);
+    this->rosnode->advertise<std_msgs::Float32MultiArray>("wave_force", 1);
 
-    this->momentPub =
-	  this->rosnode->advertise<std_msgs::Float32MultiArray>("wave_moment", 1);
+  this->momentPub =
+    this->rosnode->advertise<std_msgs::Float32MultiArray>("wave_moment", 1);
 }
 
 //////////////////////////////////////////////////
@@ -281,7 +284,7 @@ void UsvDynamicsPlugin::Update()
   // Keep track of wave forces and moments
   math::Vector3 wf(0,0,0);
   math::Vector3 wm(0,0,0);
-  
+    
   // Loop over boat grid points
   for (const int i : this->II)
   {
@@ -329,10 +332,13 @@ void UsvDynamicsPlugin::Update()
         dz += this->paramWaveAmps[k] * cos(kK * kDdotx - kW * kTimeNow.Float());
       }
       ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
-      
+
+
+      // Total z location of boat grid point relative to water surface
+      double  deltaZ = (this->waterLevel + dz) - kDdz;
+      deltaZ = std::max(deltaZ,0.0);  // enforce only upward buoy force
       // Buoyancy force at grid point
-      const float kBuoyForce =
-        ((this->waterLevel + dz) - kDdz) * this->buoyFrac;
+      const float kBuoyForce = deltaZ * this->buoyFrac;
       ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
 
       // Apply force at grid point
@@ -340,8 +346,30 @@ void UsvDynamicsPlugin::Update()
       // and force is in world frame
       this->link->AddForceAtRelativePosition(math::Vector3(0, 0, kBuoyForce),
         math::Vector3(bpnt.x(), bpnt.y(), bpnt.z()));
+
+      // Add forces
+      wf.z += kBuoyForce;
+      wm.x += kBuoyForce*bpnt.y();
+      wm.y -= kBuoyForce*bpnt.x();
+      //ROS_INFO_STREAM("bpnt " << bpnt.x() << " " << bpnt.y() << " " << bpnt.z());
     }
+    
   }
+
+  // Publish wave forces and moments
+  std_msgs::Float32MultiArray wfmsg;
+  wfmsg.data.clear();
+  wfmsg.data.push_back(wf.x);
+  wfmsg.data.push_back(wf.y);
+  wfmsg.data.push_back(wf.z);
+  this->forcePub.publish(wfmsg);
+
+  std_msgs::Float32MultiArray wmmsg;
+  wmmsg.data.clear();
+  wmmsg.data.push_back(wm.x);
+  wmmsg.data.push_back(wm.y);
+  wmmsg.data.push_back(wm.z);
+  this->momentPub.publish(wmmsg);
 
   // Determine wave displacement at COG
   math::Vector3 X;	
