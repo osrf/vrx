@@ -41,6 +41,8 @@
         <yawGaussianNoise>0.0</yawGaussianNoise>
 
       </plugin>
+
+      <static>true</static>
     </gazebo>
   </xacro:macro>
 </robot>

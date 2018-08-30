@@ -14,5 +14,7 @@
       <xacro:wamv_gazebo_thruster_config name="left_front" />
       <xacro:wamv_gazebo_thruster_config name="right_front" />
     </plugin>
+
+    <static>true</static>
   </gazebo>
 </robot>

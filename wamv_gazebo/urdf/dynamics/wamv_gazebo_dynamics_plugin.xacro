@@ -42,6 +42,8 @@
         <wave_period2>6.3</wave_period2>
         <wave_direction2>0.7 0.7</wave_direction2>
       </plugin>
+
+      <static>true</static>
     </gazebo>
   </xacro:macro>
 </robot>

@@ -11,6 +11,8 @@
         <rpyOffset>0 0 0</rpyOffset>
         <gaussianNoise>0</gaussianNoise>
       </plugin>
+
+      <static>true</static>
     </gazebo>
   </xacro:macro>
 </robot>

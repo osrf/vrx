@@ -8,6 +8,13 @@
           <speed>12</speed>
         </clouds>
       </sky>
+      <fog>
+        <color>0.8 0.8 0.8 1</color>
+        <type>linear</type>
+        <density>50.0</density>
+        <start>0.0</start>
+        <end>100.0</end>
+      </fog>
     </scene>
     
     <!-- A global light source -->
