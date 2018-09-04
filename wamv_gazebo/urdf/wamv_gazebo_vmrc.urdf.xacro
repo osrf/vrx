@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="WAM-V">
+
+  <!-- WAMV with "T" thruster configuration -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo_t.urdf.xacro" />
+
+  <!-- ==== VMRC sensor configuration ==== -->
+
+  <!-- Add a stereo camera pair -->
+  <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}" />
+  <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75" P="${radians(15)}" />
+
+  <!-- Add a camera facing right -->
+  <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" />
+
+  <!-- Add simulated GPS -->
+  <xacro:wamv_gps name="gps_wamv" y="0.2" />
+
+  <!-- Add Simulated IMU -->
+  <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+
+  <!-- Add 3D LIDAR -->
+  <xacro:wamv_3d_lidar name="lidar_wamv" P="${radians(8)}" />
+
+</robot>

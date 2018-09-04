@@ -12,9 +12,10 @@ catkin_package(
 # Generate urdf files from xacro and install
 xacro_add_files(
   urdf/wamv_gazebo.urdf.xacro
-  urdf/wamv_gazebo_t.urdf.xacro
-  urdf/wamv_gazebo_x.urdf.xacro
   urdf/wamv_gazebo_sensors.urdf.xacro
+  urdf/wamv_gazebo_t.urdf.xacro
+  urdf/wamv_gazebo_vmrc.urdf.xacro
+  urdf/wamv_gazebo_x.urdf.xacro
   INORDER INSTALL DESTINATION urdf
 )
 
