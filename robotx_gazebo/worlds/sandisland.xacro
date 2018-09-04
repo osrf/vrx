@@ -14,8 +14,8 @@
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <world_frame_orientation>ENU</world_frame_orientation>
-      <latitude_deg>21.306856</latitude_deg>
-      <longitude_deg>-157.888513</longitude_deg>
+      <latitude_deg>21.30996</latitude_deg>
+      <longitude_deg>-157.8901</longitude_deg>
       <elevation>0</elevation>
       <!-- For legacy gazebo reasons, need to rotate -->
       <heading_deg>180</heading_deg>
