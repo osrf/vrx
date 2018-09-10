@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <link name='box_link'>
+    <inertial>
+      <mass>1</mass>
+      <inertia>
+        <ixx>0.166667</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.166667</iyy>
+        <iyz>0</iyz>
+        <izz>0.166667</izz>
+      </inertia>
+    </inertial>
+    <collision name='collision'>
+      <geometry>
+        <box>
+          <size>1 1 1</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name='visual'>
+      <geometry>
+        <box>
+          <size>1 1 1</size>
+        </box>
+      </geometry>
+      <material>
+        <script>
+          <name>Gazebo/Red</name>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+        </script>
+      </material>
+    </visual>
+  </link>
+
+  <xacro:macro name="rangebearingmacro" params="name:=rangebearing x:=0 y:=0 z:=1.3 R:=0 P:=0 Y:=0">
+    <link name="${name}_link">
+      <visual name="${name}_visual_base">
+        <geometry>
+          <box size="0.1 0.1 0.025" />
+        </geometry>
+        <material name="${name}_visual_base_material">
+          <color rgba="1.0 1.0 1.0 1.0" />
+        </material>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}" />
+      <parent link="box_link" />
+      <child link="${name}_link" />
+    </joint>
+    <gazebo>
+      <plugin name="rangebearing_plugin_${name}" filename="libgazebo_rangebearing_plugin.so">
+	<updateRate>15.0</updateRate>
+        <alwaysOn>true</alwaysOn>
+        <bodyName>${name}_link</bodyName>
+        <frameId>${name}_link</frameId>
+        <topicName>gps/fix</topicName>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:rangebearingmacro name="rangebearing"/>
+
+</robot>
+

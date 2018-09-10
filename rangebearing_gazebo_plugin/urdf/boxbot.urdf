@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<robot name="boxbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Link1 -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+
+  <!-- Base Link -->
+  <link name="base_link">
+	<static>true</static>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.1 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.1 0.01"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3"/>
+    </inertial>
+  </link>
+
+  <gazebo>
+    <plugin name="rangebearing_plugin" filename="libgazebo_rangebearing_plugin.so">
+      <bodyName>base_link</bodyName>
+      <topicName>range_bearing</topicName>
+      <beaconPoint>0 0 0</beaconPoint>
+      <updateRate>1.0</updateRate>
+      <rangeNoise>
+	<noise>
+	  <type>gaussian</type>
+	  <mean>0.0</mean>
+	  <stddev>1.0</stddev>
+	  <bias_mean>0.0</bias_mean>
+	  <bias_stddev>0.0</bias_stddev>
+	</noise>
+      </rangeNoise>
+      <bearingNoise>
+	<noise>
+	  <type>gaussian</type>
+	  <mean>0.0</mean>
+	  <stddev>0.1</stddev>
+	  <bias_mean>0.0</bias_mean>
+	  <bias_stddev>0.0</bias_stddev>
+	</noise>
+      </bearingNoise>
+      <elevationNoise>
+	<noise>
+	  <type>gaussian</type>
+	  <mean>0.0</mean>
+	  <stddev>0.1</stddev>
+	  <bias_mean>0.0</bias_mean>
+	  <bias_stddev>0.0</bias_stddev>
+	</noise>
+      </elevationNoise>
+
+    </plugin>
+  </gazebo>
+ 
+</robot>

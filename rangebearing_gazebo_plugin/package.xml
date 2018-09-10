@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rangebearing_gazebo_plugin</name>
+  <version>0.0.1</version>
+  <description>The gazebo_rangebearing_plugin package</description>
+
+  <maintainer email="briansbngham@gmail.com">bsb</maintainer>
+  <license>Apache 2.0</license>
+  <author email="briansbingham@gmail.com">Brian Bingham</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>gazebo_dev</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>xacro</depend>
+  <exec_depend>message_runtime</exec_depend>
+
+</package>
