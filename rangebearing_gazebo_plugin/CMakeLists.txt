@@ -44,16 +44,16 @@ install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 
 ## Declare a C++ library
-add_library(gazebo_rangebearing_plugin
+add_library(rangebearing_gazebo_plugin
   src/RangeBearing.cc
   )
 
-target_link_libraries(gazebo_rangebearing_plugin
+target_link_libraries(rangebearing_gazebo_plugin
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${Eigen_LIBRARIES}
 )
-install(TARGETS gazebo_rangebearing_plugin
+install(TARGETS rangebearing_gazebo_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

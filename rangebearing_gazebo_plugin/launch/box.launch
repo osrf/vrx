@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+  <!-- Standalone example for the rangebearing plugin -->
+  
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <!--<arg name="world_name" value="$(find gazebo_rangebearing_plugin)/worlds/box.world"/> -->
@@ -19,7 +21,7 @@
   <arg name="Y" default="0.57" />
 
   <!-- Load robot model -->
-  <arg name="urdf" default="$(find gazebo_rangebearing_plugin)/urdf/boxbot.urdf"/>
+  <arg name="urdf" default="$(find rangebearing_gazebo_plugin)/urdf/boxbot.urdf"/>
   <param name="robot_description" textfile="$(arg urdf)"/>
 
   <!-- Spawn model in Gazebo -->
