@@ -12,10 +12,18 @@ Independent Gaussian noise is added to each measurment.  The noise is generated 
 
 ## Working Example
 
-The repository contains a working example...
+The repository contains a simple, standalone working example...
 
 ```
-roslaunch gazebo_rangebearing_plugin box.launch
+roslaunch rangebearing_gazebo_plugin box.launch
 ```
 
-which demonstrates the configuration of the plugin.  The [boxbot.urdf](https://github.com/bsb808/gazebo_rangebearing_plugin/blob/master/urdf/boxbot.urdf) defines an example robot (just a small box) and configures the plugin to be associated with the robot model.
+which demonstrates the configuration of the plugin.  The [boxbot.urdf](https://bitbucket.org/osrf/vmrc/src/acoustic-pinger/rangebearing_gazebo_plugin/urdf/boxbot.urdf) defines an example robot (just a small box) and configures the plugin to be associated with the robot model.
+
+In a separate terminal run
+
+```
+rostopic echo /range_bearing 
+```
+
+to view the published range, bearing, elevation simulated measurements.
