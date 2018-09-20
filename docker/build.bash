@@ -34,7 +34,9 @@ then
   exit 2
 fi
 
-user_id=$(id -u)
+#user_id=$(id -u)
+# Setting default user ID; override at runtime.
+user_id=1000
 image_name=$1
 image_plus_tag=$image_name:$(date +%Y_%b_%d_%H%M)
 

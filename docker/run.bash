@@ -83,6 +83,8 @@ DOCKER_OPTS=
 #   DOCKER_OPTS="$DOCKER_OPTS -v $VIMRC:/home/developer/.vimrc:ro"
 # fi
 
+user_id=$(id -u)
+
 sudo docker run -it \
   -e DISPLAY \
   -e QT_X11_NO_MITSHM=1 \
@@ -91,6 +93,7 @@ sudo docker run -it \
   -v "/tmp/.X11-unix:/tmp/.X11-unix" \
   -v "/etc/localtime:/etc/localtime:ro" \
   -v "/dev/input:/dev/input" \
+  --user $user_id \
   --privileged \
   --rm \
   --runtime=$RUNTIME \
