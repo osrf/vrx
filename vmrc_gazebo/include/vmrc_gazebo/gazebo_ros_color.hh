@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef ROBOTX_GAZEBO_GAZEBO_ROS_COLOR_HH_
-#define ROBOTX_GAZEBO_GAZEBO_ROS_COLOR_HH_
+#ifndef VMRC_GAZEBO_GAZEBO_ROS_COLOR_HH_
+#define VMRC_GAZEBO_GAZEBO_ROS_COLOR_HH_
 
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
