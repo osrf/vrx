@@ -19,7 +19,7 @@
 #include <gazebo/physics/Model.hh>
 #include <ignition/math/Rand.hh>
 
-#include "robotx_gazebo/symbol_controller.hh"
+#include "vmrc_gazebo/symbol_controller.hh"
 
 //////////////////////////////////////////////////
 /// \brief Creates a std_msgs::ColorRGBA message from 4 doubles.

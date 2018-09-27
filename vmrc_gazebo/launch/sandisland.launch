@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find robotx_gazebo)/config/custom_rosconsole.conf"/>
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vmrc_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find robotx_gazebo)/worlds/example_course.world" />
+  <arg name="world" default="$(find vmrc_gazebo)/worlds/example_course.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
@@ -21,7 +21,7 @@
        T = H with a lateral thruster
        X = "holonomic" configuration -->
 
-  <arg name="thrust_config" default="T" />
+  <arg name="thrust_config" default="H" />
 
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -38,8 +38,9 @@
   <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
   <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
 
-  <!-- For now - can only use the T configuration! -->
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_vmrc.urdf"/>
+  <arg if="$(arg h_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf"/>
+  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_t.urdf"/>
+  <arg if="$(arg x_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_x.urdf"/>
 
   <param name="robot_description" textfile="$(arg urdf)"/>
 

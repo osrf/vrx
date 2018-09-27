@@ -16,7 +16,8 @@
 */
 
 #include <string>
-#include "robotx_gazebo/gazebo_ros_color.hh"
+
+#include "vmrc_gazebo/gazebo_ros_color.hh"
 
 //////////////////////////////////////////////////
 void GazeboRosColor::Load(gazebo::rendering::VisualPtr _parent,

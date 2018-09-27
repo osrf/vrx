@@ -17,7 +17,7 @@
 
 #include <ignition/math/Rand.hh>
 
-#include "robotx_gazebo/light_buoy_controller.hh"
+#include "vmrc_gazebo/light_buoy_controller.hh"
 
 const std::array<LightBuoyController::Colors_t, 5> LightBuoyController::kColors
   = {LightBuoyController::Colors_t(CreateColor(1.0, 0.0, 0.0, 1.0), "RED"),

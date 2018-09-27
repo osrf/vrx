@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(robotx_gazebo)
+project(vmrc_gazebo)
 
 # We need erb to process the .world.erb files.
 find_program(ERB_EXE_PATH erb)

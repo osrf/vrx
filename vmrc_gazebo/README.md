@@ -1,4 +1,4 @@
-# robotx_gazebo
+# vmrc_gazebo
 
 ## Description
 This package provides gazebo models, plugins, and examples for simulating the [RobotX challenge](https://www.robotx.org/index.php/2014-01-05-21-55-32/2016-rules-requirements) within Gazebo using ROS.
@@ -6,7 +6,7 @@ This package provides gazebo models, plugins, and examples for simulating the [R
 ## Usage
 To launch gazebo with an example course layout and WAM-V platform, run:
 
-```roslaunch robotx_gazebo sandisland.launch```
+```roslaunch vmrc_gazebo sandisland.launch```
 
 
 ## Course models
