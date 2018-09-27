@@ -2,6 +2,9 @@
 
 ### VMRC 0.3.X
 
+1. robotx_gazebo ROS package renamed to vmrc_gazebo.
+  * [Pull request 44](https://bitbucket.org/osrf/vmrc/pull-requests/49)
+
 ### VMRC 0.2.0
 
 1. Add a standard WAM-V configuration for VMRC.
