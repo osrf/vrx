@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>wamv_description</name>
-  <version>0.0.0</version>
-  <description>The wamv_description package</description>
-  <maintainer email="bsb@todo.todo">bsb</maintainer>
-  <license>TODO</license>
+  <version>0.2.0</version>
+  <description>This package provides a URDF model of WAM-V</description>
+  <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
+  <license>Apache 2.0</license>
+  <url type="website">http://wiki.ros.org/wamv_description</url>
+  <url type="bugtracker">http://bitbucket.org/osrf/vmrc/issues</url>
+  <author email="briansbingham@gmail.com">Brian Bingham</author>
+  <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>xacro</build_depend>
-  <exec_depend>xacro</exec_depend>
-  <export>
-    <!-- Other tools can request additional information be placed here -->
-
-  </export>
+  <depend>xacro</depend>
 </package>

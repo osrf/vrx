@@ -15,8 +15,8 @@
  *
 */
 
-#include "helpers.hh"
 #include <gtest/gtest.h>
+#include "helpers.hh"
 
 /////////////////////////////////////////////////
 /// \brief Tests that the basic sandisland world with the wamv was loaded.

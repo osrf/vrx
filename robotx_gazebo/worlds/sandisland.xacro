@@ -40,11 +40,11 @@
       <uri>model://sandisland</uri>
     </include>
 
-    <!-- Should be at the same height as the water level in USV and buoyancy 
+    <!-- Should be at the same height as the water level in USV and buoyancy
     plugin configurations -->
     <include>
       <pose> 0 0 0 0 0 0 </pose>
-      <uri>model://ocean</uri>      
+      <uri>model://ocean</uri>
     </include>
   </xacro:macro>
 </world>

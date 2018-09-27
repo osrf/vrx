@@ -20,8 +20,8 @@ class Node():
         self.pose_index = pose_index
         self.model_name = model_name
         self.input_msg_type = input_msg_type
-        
-        
+
+
     def callback(self,data):
         #rospy.loginfo("callback")
         if (not (pose_index==None)):
@@ -33,7 +33,7 @@ class Node():
               rospy.logwarn_throttle(10.0, 'Model state {} not found'.format(model_name))
               return
             data = data.pose[index]
-        elif ( (self.input_msg_type == 'Pose') or 
+        elif ( (self.input_msg_type == 'Pose') or
                (self.input_msg_type == 'Imu')):
             pass
         elif self.input_msg_type == 'Odometry':
@@ -55,16 +55,16 @@ class Node():
         self.pub.publish(self.pubmsg)
 
 if __name__ == '__main__':
-    
+
     rospy.init_node('quat2rpy', anonymous=True)
-    
+
     # ROS Parameters
     in_topic = 'in_topic'
     out_topic = 'out_topic'
     pose_index = rospy.get_param('~pose_index',None)
     model_name = rospy.get_param('~model_name',None)
     inmsgtype = rospy.get_param('~input_msg_type','Pose')
-    
+
 
     # Initiate node object
     node=Node(pose_index, model_name, input_msg_type=inmsgtype)
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                            inmsgtype)
             sys.exit()
 
-    
+
     rospy.loginfo("Subscribing to %s, looking for %s messages."%
                   (in_topic,inmsgtype))
 

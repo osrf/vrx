@@ -162,7 +162,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   // must be factor of 2! - only 2 for now!!
   const int kNN = 2;
-  
+
   // x,y grid step increments
   this->dx = paramBoatLength / kNN;
   this->dy = paramBoatWidth / kNN;

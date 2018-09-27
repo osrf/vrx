@@ -1,6 +1,8 @@
 ## VMRC 0
 
-### VMRC 0.X.X
+### VMRC 0.3.X
+
+### VMRC 0.2.0
 
 1. Add a standard WAM-V configuration for VMRC.
   * [Pull request 44](https://bitbucket.org/osrf/vmrc/pull-requests/44)
@@ -17,7 +19,7 @@
 1. Add a dock block and a templated mechanism (erb) for creating docks.
   * [Pull request 27](https://bitbucket.org/osrf/vmrc/pull-requests/27)
 
-1. Add 2016 and 2018 acoustic transit / Entrance gate challenges
+1. Add 2016 and 2018 acoustic transit / Entrance gate challenges.
   * [Pull request 30](https://bitbucket.org/osrf/vmrc/pull-requests/30)
 
 1. Update the mesh of the light buoy.
@@ -61,8 +63,8 @@
 1. Add buoys for the obstacle challenge.
   * [Pull request 11](https://bitbucket.org/osrf/vmrc/pull-requests/11)
 
-1. Add xacro macros and example for a WAM-V with sensors
+1. Add xacro macros and example for a WAM-V with sensors.
   * [Pull request 12](https://bitbucket.org/osrf/vmrc/pull-requests/12)
-  
+
 1. Refactor thruster plugin to generalize propulsion configuration and enable more flesible use cases.
   * [Pull request 34](https://bitbucket.org/osrf/vmrc/pull-requests/34)

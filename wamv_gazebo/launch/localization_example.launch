@@ -37,7 +37,7 @@
     <param name="smooth_lagged_data" value="true"/>
   </node>
 
-  <!-- Produces local odometry from GPS to be used in Kalman filter --> 
+  <!-- Produces local odometry from GPS to be used in Kalman filter -->
   <node pkg="robot_localization" type="navsat_transform_node"
       name="navsat_transform_node" respawn="true" output="screen">
     <param name="frequency" value="60"/>

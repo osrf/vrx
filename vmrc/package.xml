@@ -1,24 +1,17 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>robotx_gazebo</name>
+  <name>vmrc</name>
   <version>0.2.0</version>
   <description>
-    The ROS package for the RobotX competition running in Gazebo.
+    Metapackage of software to install the Virtual Maritime RobotX Challenge
+    (VMRC) environment.
   </description>
   <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
   <license>Apache 2.0</license>
-  <url type="website">http://wiki.ros.org/robotx_gazebo</url>
+  <url type="website">http://wiki.ros.org/vmrc</url>
   <url type="bugtracker">http://bitbucket.org/osrf/vmrc/issues</url>
   <author email="briansbingham@gmail.com">Brian Bingham</author>
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
-  <depend version_gte="2.5.17">gazebo_ros</depend>
-  <depend>wamv_gazebo</depend>
-  <depend>xacro</depend>
-  <depend>gazebo_dev</depend>
-  <depend>std_msgs</depend>
-  <export>
-    <gazebo_ros gazebo_model_path="${prefix}/models"/>
-    <gazebo_ros gazebo_media_path="${prefix}"/>
-  </export>
+  <run_depend>robotx_gazebo</depend>
 </package>

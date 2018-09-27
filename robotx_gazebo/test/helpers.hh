@@ -18,9 +18,9 @@
 #ifndef ROBOTX_GAZEBO_TEST_HELPERS_HH_
 #define ROBOTX_GAZEBO_TEST_HELPERS_HH_
 
-#include <string>
-#include <ros/ros.h>
 #include <gazebo_msgs/ModelStates.h>
+#include <ros/ros.h>
+#include <string>
 
 /// \brief Check whether a model exists on simulation.
 /// \param[in] _name The model name.
@@ -35,14 +35,14 @@ bool ModelExists(const std::string &_name,
     gazebo_msgs::ModelStatesConstPtr modelStates =
       ros::topic::waitForMessage<gazebo_msgs::ModelStates>(
         std::string("/gazebo/model_states"), ros::Duration(0.1));
-    
+
     if (!modelStates) continue;
-    for (auto model: modelStates->name)
+    for (auto model : modelStates->name)
     {
       if (model == _name)
         return true;
     }
-  } 
+  }
   return false;
 }
 #endif

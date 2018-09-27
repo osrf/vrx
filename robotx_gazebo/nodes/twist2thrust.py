@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     rospy.loginfo("Linear scaling=%f, Angular scaling=%f"%(linear_scaling,angular_scaling))
 
-    
+
     key = '--keyboard' in sys.argv
     node=Node(linear_scaling,angular_scaling,keyboard=key)
 
