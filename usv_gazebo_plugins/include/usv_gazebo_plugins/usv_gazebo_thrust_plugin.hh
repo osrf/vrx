@@ -99,7 +99,7 @@ namespace gazebo
   ///   where each thruster includes the following SDF parameters specific to
   ///   the individual thruster
   ///   Required elements:
-  ///   <linkName>: Name of the link on which to apply thrust forces. 
+  ///   <linkName>: Name of the link on which to apply thrust forces.
   ///   <propJointName>: The name of the propeller joint.
   ///   <cmdTopic>: The ROS topic to control this thruster.
   ///   Optional eleents:

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Keyboard teleop -->
+  <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen">
+  </node>
+
+    <!-- Convert Twist messages to Drive messages -->
+    <node pkg="vmrc_gazebo" type="twist2thrust.py" name="twist2thrust" output="screen" args="--keyboard">
+    <remap from="left_cmd" to="left_thrust_cmd"/>
+    <remap from="right_cmd" to="right_thrust_cmd"/>
+  </node>
+
+
+</launch>

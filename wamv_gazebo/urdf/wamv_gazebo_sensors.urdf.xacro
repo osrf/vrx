@@ -15,7 +15,7 @@
        one of the following -->
   <!--<xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"/>-->
   <!--<xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_x_thrusters.xacro"/>-->
-  
+
   <!-- ADD SENSORS -->
   <!-- Add a front camera -->
   <xacro:if value="$(arg camera_enabled)">

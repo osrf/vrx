@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <!-- Macro to insert a 3D scanning LIDAR with ROS integration 
+  <!-- Macro to insert a 3D scanning LIDAR with ROS integration
     update_rate: frequency to publish output, hz
     vertical_lasers: number of vertical lasers which spin about Z to generate output
     samples: number of samples during spin, higher is more dense but slows down simulation

@@ -58,8 +58,8 @@ namespace gazebo
   /// <nRR>: Quadratic drag coeff yaw.
   /// <wave_n>: Number of waves to generate wave field.
   /// <wave_amp<N>>: Amplitude for each component [m].
-  /// <wave_period<N>>: Period for each compenent [s]. 
-  /// <wave_direction<N>>: Direction of motion for each component ENU [rad].  
+  /// <wave_period<N>>: Period for each compenent [s].
+  /// <wave_direction<N>>: Direction of motion for each component ENU [rad].
   class UsvDynamicsPlugin : public ModelPlugin
   {
     /// \brief Constructor.
@@ -149,7 +149,7 @@ namespace gazebo
 
     /// \brief Plugin Parameter: Linear drag in yaw.
     private: double paramNr;
-    
+
     /// \brief Plugin Parameter: Quadratic drag in yaw.
     private: double paramNrr;
 

@@ -15,7 +15,7 @@ This is an active development project.  We are adding and improving things all t
 
 ## Contributing
 
-The simulation tools under active development to support the RobotX teams.  We are starting simple with the important fundamental aspects of the robot and environment, 
+The simulation tools under active development to support the RobotX teams.  We are starting simple with the important fundamental aspects of the robot and environment,
 but will rely on the community to develop additional functionality around their particular use cases.
 
 If you have any questions about these topics, or would like to work on other aspects, please contribute.  You can contact us directly (see below), submit an [issue](https://bitbucket.org/osrf/vmrc/issues) or, better yet, submit a [pull request](https://bitbucket.org/osrf/vmrc/pull-requests/)!
