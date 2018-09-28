@@ -3,7 +3,7 @@ Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0.3.0 (2018-09-28)
------------
+------------------
 * Tweak
 * vmrc metapackage and spring cleaning.
 * Static model and fog.

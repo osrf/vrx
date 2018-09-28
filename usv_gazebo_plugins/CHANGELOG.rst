@@ -3,7 +3,7 @@ Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 0.3.0 (2018-09-28)
------------
+------------------
 * vmrc metapackage and spring cleaning.
 * adding publication of forces/moments
 * trying to get wamv to be static using a fixed joint
