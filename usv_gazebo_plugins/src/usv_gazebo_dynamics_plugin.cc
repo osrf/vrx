@@ -169,8 +169,9 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   const int kNN = 2;
   
   // x,y grid step increments
-  this->dx = paramBoatLength / kNN;
-  this->dy = paramBoatWidth / kNN;
+  //this->dx = paramBoatLength / kNN;
+  this->dx = paramBoatLength / (kNN*2.0);
+  this->dy = paramBoatWidth  / (kNN*2.0);
 
   // Vector for interating through grid points on boat
   for (int i = -kNN / 2; i < 0; ++i)
