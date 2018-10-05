@@ -2,6 +2,9 @@
 Changelog for package vmrc_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.0 (2018-09-28)
 ------------------
 * Tweak

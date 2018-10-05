@@ -2,6 +2,12 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Decleare eigen as dependency for usv_gazebo_plugins
+* modifying grid spacing
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Jose Luis Rivero <jrivero@osrfoundation.org>
+
 0.3.0 (2018-09-28)
 ------------------
 * vmrc metapackage and spring cleaning.
