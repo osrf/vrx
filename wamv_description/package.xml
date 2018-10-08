@@ -4,6 +4,7 @@
   <version>0.3.1</version>
   <description>This package provides a URDF model of WAM-V</description>
   <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
+  <maintainer email="jriveroo@osrfoundation.org">Jose Luis Rivero</maintainer>
   <license>Apache 2.0</license>
   <url type="website">http://wiki.ros.org/wamv_description</url>
   <url type="bugtracker">http://bitbucket.org/osrf/vmrc/issues</url>
