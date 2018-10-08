@@ -2,8 +2,8 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.2 (2018-10-08)
+------------------
 * Include jrivero as maintainer of the ROS packages
 * Contributors: Jose Luis Rivero <jrivero@osrfoundation.org>
 

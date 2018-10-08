@@ -2,8 +2,8 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.2 (2018-10-08)
+------------------
 * Include jrivero as maintainer of the ROS packages
 * Include headers in the installation of usv_gazebo_plugins
 * Contributors: Jose Luis Rivero <jrivero@osrfoundation.org>

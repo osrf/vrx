@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>wamv_gazebo</name>
-  <version>0.3.1</version>
+  <version>0.3.2</version>
   <description>
     Provides templates and examples for integrating the WAM-V model into gazebo with dynamics, sensors, etc.
   </description>
