@@ -7,6 +7,7 @@
     Originaly copied from https://github.com/bsb808/usv_gazebo_plugins
   </description>
   <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
+  <maintainer email="jriveroo@osrfoundation.org">Jose Luis Rivero</maintainer>
   <license>Apache 2.0</license>
   <url type="website">http://wiki.ros.org/usv_gazebo_plugins</url>
   <url type="bugtracker">http://bitbucket.org/osrf/vmrc/issues</url>
