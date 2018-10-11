@@ -1,10 +1,11 @@
-# Ubuntu 16.04 
-FROM ubuntu:xenial 
+# Ubuntu 16.04 with nvidia-docker2 beta opengl support.
+FROM nvidia/opengl:1.0-glvnd-devel-ubuntu16.04
 
 # Tools useful during development.
 RUN apt-get update \
  && apt-get install -y \
         build-essential \
+        curl \
         cmake \
         lsb-release \
         gdb \
@@ -22,18 +23,33 @@ RUN apt-get update \
 
 # Add a user with the same user_id as the user outside the container
 # Requires a docker build argument `user_id`.
-ARG user_id
-ENV USERNAME developer
-RUN useradd -U --uid ${user_id} -ms /bin/bash $USERNAME \
- && echo "$USERNAME:$USERNAME" | chpasswd \
- && adduser $USERNAME sudo \
- && echo "$USERNAME ALL=NOPASSWD: ALL" >> /etc/sudoers.d/$USERNAME
+
+RUN USER=developer && \
+    GROUP=developer && \
+    curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.4/fixuid-0.4-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf - && \
+    chown root:root /usr/local/bin/fixuid && \
+    chmod 4755 /usr/local/bin/fixuid && \
+    mkdir -p /etc/fixuid && \
+    printf "user: $USER\ngroup: $GROUP\n" > /etc/fixuid/config.yml
+
+
+ARG USER=developer
+
+RUN addgroup --gid 1000 $USER && \
+    adduser --uid 1000 --ingroup $USER --home /home/$USER --shell /bin/sh --disabled-password --gecos "" $USER
+
+#ARG user_id
+#ARG USERNAME=developer
+#RUN useradd -U --uid ${user_id} -ms /bin/bash $USERNAME \
+# && echo "$USERNAME:$USERNAME" | chpasswd \
+RUN adduser $USER sudo \
+ && echo "$USER ALL=NOPASSWD: ALL" >> /etc/sudoers.d/$USER
 
 # Commands below run as the developer user.
-USER $USERNAME
+USER $USER:$GROUP
 
 # When running a container start in the developer's home folder.
-WORKDIR /home/$USERNAME
+WORKDIR /home/$USER
 
 # Get ROS kinetic and Gazebo 7.
 RUN sudo /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' \
@@ -68,5 +84,8 @@ RUN /bin/sh -c 'echo ". /opt/ros/kinetic/setup.bash" >> ~/.bashrc' \
  && /bin/sh -c 'echo ". /usr/share/gazebo/setup.sh" >> ~/.bashrc' \
  && /bin/sh -c 'echo ". ~/vmrc_ws/devel/setup.sh" >> ~/.bashrc'
 
+ENTRYPOINT ["fixuid"]
+
+CMD ["/bin/bash"]
 # Customize your image here.
 # ...
