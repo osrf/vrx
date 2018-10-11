@@ -32,16 +32,9 @@ RUN USER=developer && \
     mkdir -p /etc/fixuid && \
     printf "user: $USER\ngroup: $GROUP\n" > /etc/fixuid/config.yml
 
-
-ARG USER=developer
-
 RUN addgroup --gid 1000 $USER && \
     adduser --uid 1000 --ingroup $USER --home /home/$USER --shell /bin/sh --disabled-password --gecos "" $USER
 
-#ARG user_id
-#ARG USERNAME=developer
-#RUN useradd -U --uid ${user_id} -ms /bin/bash $USERNAME \
-# && echo "$USERNAME:$USERNAME" | chpasswd \
 RUN adduser $USER sudo \
  && echo "$USER ALL=NOPASSWD: ALL" >> /etc/sudoers.d/$USER
 
