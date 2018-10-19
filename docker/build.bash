@@ -36,7 +36,7 @@ fi
 
 user_id=$(id -u)
 image_name=$1
-image_plus_tag=$image_name:$(date +%Y_%b_%d_%H%M)
+image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
 
 docker build --rm -t $image_plus_tag --build-arg user_id=$user_id $DIR/$image_name
 docker tag $image_plus_tag $image_name:latest
