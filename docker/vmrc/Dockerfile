@@ -21,12 +21,34 @@ RUN apt-get update \
         wget \
  && apt-get clean
 
+# Get ROS kinetic and Gazebo 7.
+RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' \
+ && apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
+ && /bin/sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
+ && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -' \
+ && apt-get update \
+ && apt-get install -y \
+    ros-kinetic-desktop-full \
+    ros-kinetic-hector-gazebo-plugins \
+    ros-kinetic-joy \
+    ros-kinetic-joy-teleop \
+    ros-kinetic-robot-localization \
+    ros-kinetic-velodyne-simulator \
+    gazebo7 \
+    libgazebo7-dev \
+ && rosdep init \
+ && apt-get clean
+
+RUN rosdep update
+
+# Set USER and GROUP 
+ARG USER=developer
+ARG GROUP=developer
+
 # Add a user with the same user_id as the user outside the container
 # Requires a docker build argument `user_id`.
 
-RUN USER=developer && \
-    GROUP=developer && \
-    curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.4/fixuid-0.4-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf - && \
+RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.4/fixuid-0.4-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf - && \
     chown root:root /usr/local/bin/fixuid && \
     chmod 4755 /usr/local/bin/fixuid && \
     mkdir -p /etc/fixuid && \
@@ -43,26 +65,6 @@ USER $USER:$GROUP
 
 # When running a container start in the developer's home folder.
 WORKDIR /home/$USER
-
-# Get ROS kinetic and Gazebo 7.
-RUN sudo /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' \
- && sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
- && sudo /bin/sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
- && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -' \
- && sudo apt-get update \
- && sudo apt-get install -y \
-    ros-kinetic-desktop-full \
-    ros-kinetic-hector-gazebo-plugins \
-    ros-kinetic-joy \
-    ros-kinetic-joy-teleop \
-    ros-kinetic-robot-localization \
-    ros-kinetic-velodyne-simulator \
-    gazebo7 \
-    libgazebo7-dev \
- && sudo rosdep init \
- && sudo apt-get clean
-
-RUN rosdep update
 
 # Clone the VMRC repository.
 RUN mkdir -p vmrc_ws/src \
