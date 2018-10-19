@@ -34,11 +34,12 @@ then
   exit 2
 fi
 
-user_id=$(id -u)
+#user_id=$(id -u)
 image_name=$1
 image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
 
-docker build --rm -t $image_plus_tag --build-arg user_id=$user_id $DIR/$image_name
+#docker build --rm -t $image_plus_tag --build-arg user_id=$user_id $DIR/$image_name
+docker build --rm -t $image_plus_tag $DIR/$image_name
 docker tag $image_plus_tag $image_name:latest
 
 echo "Built $image_plus_tag and tagged as $image_name:latest"

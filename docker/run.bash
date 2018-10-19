@@ -83,6 +83,8 @@ DOCKER_OPTS=
 #   DOCKER_OPTS="$DOCKER_OPTS -v $VIMRC:/home/developer/.vimrc:ro"
 # fi
 
+USERID=$(id -u)
+GROUPID=$(id -g)
 sudo docker run -it \
   -e DISPLAY \
   -e QT_X11_NO_MITSHM=1 \
@@ -95,5 +97,6 @@ sudo docker run -it \
   --rm \
   --runtime=$RUNTIME \
   --security-opt seccomp=unconfined \
+  -u $USERID:$GROUPID \
   $DOCKER_OPTS \
   $IMG
