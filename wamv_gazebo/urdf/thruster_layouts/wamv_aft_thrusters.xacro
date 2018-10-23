@@ -11,6 +11,6 @@
       <xacro:wamv_gazebo_thruster_config name="right" />
     </plugin>
 
-    <static>true</static>
+    <!--<static>true</static>-->
   </gazebo>
 </robot>

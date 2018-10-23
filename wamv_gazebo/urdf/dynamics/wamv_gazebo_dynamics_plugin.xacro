@@ -28,22 +28,15 @@
         <boatLength>4.9</boatLength>
         
         <!-- Waves x3 -->
-        <wave_n>3</wave_n>
+        <wave_n>1</wave_n>
       
-        <wave_amp0>0.06</wave_amp0>
-        <wave_period0>12.6</wave_period0>
-        <wave_direction0>-1 0</wave_direction0>
-      
-        <wave_amp1>0.04</wave_amp1>
-        <wave_period1>3.7</wave_period1>
-        <wave_direction1>-0.7 0.7</wave_direction1>
-      
-        <wave_amp2>0.03</wave_amp2>
-        <wave_period2>6.3</wave_period2>
-        <wave_direction2>0.7 0.7</wave_direction2>
+        <wave_amp0>0.2</wave_amp0>
+        <wave_period0>5.0</wave_period0>
+        <wave_direction0>0 1</wave_direction0>
+
       </plugin>
 
-      <static>true</static>
+	  <!--<static>true</static>-->
     </gazebo>
   </xacro:macro>
 </robot>

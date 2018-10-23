@@ -213,9 +213,9 @@ void UsvDynamicsPlugin::Update()
 
   // Get body-centered linear and angular rates
   const math::Vector3 kVelLinearBody = this->link->GetRelativeLinearVel();
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Vel linear: " << kVelLinearBody);
   const math::Vector3 kVelAngularBody = this->link->GetRelativeAngularVel();
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Vel angular: " << kVelAngularBody);
 
   // Estimate the linear and angular accelerations.
   // Note the the GetRelativeLinearAccel() and AngularAccel() functions
@@ -223,11 +223,11 @@ void UsvDynamicsPlugin::Update()
   const math::Vector3 kAccelLinearBody =
     (kVelLinearBody - this->prevLinVel) / dt;
   this->prevLinVel = kVelLinearBody;
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel linear: " << kAccelLinearBody);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Accel linear: " << kAccelLinearBody);
   const math::Vector3 kAccelAngularBody =
     (kVelAngularBody - this->prevAngVel) / dt;
   this->prevAngVel = kVelAngularBody;
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel angular: " << kAccelAngularBody);
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Accel angular: " << kAccelAngularBody);
 
   // Create state and derivative of state (accelerations)
   Eigen::VectorXd stateDot = Eigen::VectorXd(6);
@@ -305,10 +305,10 @@ void UsvDynamicsPlugin::Update()
       bpntW = xformV * bpnt;
 
       // Debug
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "," << j <<
+      ROS_DEBUG_STREAM( "[" << i << "," << j <<
           "] grid points" << bpnt.x() << "," << bpnt.y() << "," << bpnt.z());
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << kEuler);
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "in water frame" << bpntW.x() << "," <<
+      ROS_DEBUG_STREAM( "v frame euler " << kEuler);
+      ROS_DEBUG_STREAM( "in water frame" << bpntW.x() << "," <<
           bpntW.y() << "," << bpntW.z());
 
       // Vertical location of boat grid point in world frame
@@ -332,7 +332,7 @@ void UsvDynamicsPlugin::Update()
         const double kK = kW * kW / GRAVITY;
         dz += this->paramWaveAmps[k] * cos(kK * kDdotx - kW * kTimeNow.Float());
       }
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
+      ROS_DEBUG_STREAM( "wave disp: " << dz);
 
 
       // Total z location of boat grid point relative to water surface

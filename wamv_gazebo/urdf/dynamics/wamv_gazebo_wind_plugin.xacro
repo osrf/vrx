@@ -11,7 +11,7 @@
 
       </plugin>
 
-      <static>true</static>
+      <!--<static>true</static>-->
     </gazebo>
   </xacro:macro>
 </robot>

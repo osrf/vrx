@@ -46,7 +46,7 @@
         <velocityGaussianNoise>0.0 0.0 0.0</velocityGaussianNoise>
       </plugin>
 
-      <static>true</static>
+      <!--<static>true</static>-->
     </gazebo>
   </xacro:macro>
 </robot>

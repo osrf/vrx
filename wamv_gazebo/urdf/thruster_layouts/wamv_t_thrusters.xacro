@@ -13,6 +13,6 @@
       <xacro:wamv_gazebo_thruster_config name="lateral" />
     </plugin>
 
-    <static>true</static>
+    <!--<static>true</static>-->
   </gazebo>
 </robot>
