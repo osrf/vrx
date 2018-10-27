@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(usv_gazebo_plugins)
-find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation)
+find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation usv_msgs)
 find_package(Eigen3 REQUIRED)
 
 ###################################
@@ -75,6 +75,19 @@ target_link_libraries(usv_gazebo_wind_plugin
   ${Eigen_LIBRARIES}
 )
 install(TARGETS usv_gazebo_wind_plugin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+add_library(usv_gazebo_pinger_plugin
+  src/usv_gazebo_pinger_plugin.cc
+)
+target_link_libraries(usv_gazebo_wind_plugin
+  ${catkin_LIBRARIES}
+  ${Eigen_LIBRARIES}
+)
+install(TARGETS usv_gazebo_pinger_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

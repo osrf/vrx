@@ -6,6 +6,7 @@
   <xacro:arg name="imu_enabled" default="true" />
   <xacro:arg name="lidar_enabled" default="true" />
   <xacro:arg name="ground_truth_enabled" default="true" />
+  <xacro:arg name="pinger_enabled" default="true" />  
 
   <!-- Basic frame of WAM-V -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
@@ -40,5 +41,10 @@
   <!-- Add P3D ground truth -->
   <xacro:if value="$(arg ground_truth_enabled)">
     <xacro:wamv_p3d name="p3d_wamv"/>
+  </xacro:if>
+  
+  <!-- Add pinger -->
+  <xacro:if value="$(arg pinger_enabled)">
+    <xacro:wamv_pinger name="pinger_wamv" position="1.0 0 -1.0" />
   </xacro:if>
 </robot>
