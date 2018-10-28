@@ -61,7 +61,7 @@ namespace gazebo
   
     /// \brief Callback function called when receiving a new pinger position \
     ///   via the pinger subscription callback .
-    public: void pingerPositionCallback(const geometry_msgs::Vector3ConstPtr &);
+    public: void PingerPositionCallback(const geometry_msgs::Vector3ConstPtr &);
 
     // ROS integration
     /// \brief Nodehandle used to integrate with the ROS system.

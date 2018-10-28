@@ -91,7 +91,7 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     modelName = modelName.substr(0, delim);
   }
 
-  //Initialise the namespace
+  // Initialise the namespace
   std::string ns = modelName;
   if (_sdf->HasElement("robotNamespace"))
     ns = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -219,7 +219,7 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   ->advertise<usv_msgs::RangeBearing>(std::string(topicName), 1);
 
   this->setPositionSub = this->rosNodeHandle \
-  ->subscribe(setPostionTopicName,1,&USVGazeboPinger::pingerPositionCallback,this);
+  ->subscribe(setPostionTopicName,1,&USVGazeboPinger::PingerPositionCallback,this);
 
   // intialise the time with world time
   this->lastUpdateTime = this->model->GetWorld()->GetSimTime();
@@ -243,26 +243,26 @@ void USVGazeboPinger::UpdateChild()
     this->lastUpdateTime = this->model->GetWorld()->GetSimTime();
 
     // Find the pose of the model.
-    math::Pose model_pose = this->model->GetWorldPose();
+    math::Pose modelPose = this->model->GetWorldPose();
     
     // Direction vector to the pinger from the USV
-    math::Vector3 direction = this->position - model_pose.pos;
+    math::Vector3 direction = this->position - modelPose.pos;
     
     // Sensor reading is in the sensor frame.  Rotate the direction vector into
     // the frame of reference of the sensor.
-    math::Vector3 direction_sensor_frame = \
-      model_pose.rot.RotateVectorReverse(direction);
+    math::Vector3 directionSensorFrame = \
+      modelPose.rot.RotateVectorReverse(direction);
     
     // Generate a 2d vector for elevation calculation.
-    math::Vector3 direction_sensor_frame_2d = \
-        math::Vector3(direction_sensor_frame.x,direction_sensor_frame.y,0);
+    math::Vector3 directionSensorFrame2d = \
+        math::Vector3(directionSensorFrame.x,directionSensorFrame.y,0);
 
     // bearing is calculated by finding the world frame direction vector
     // and subtracting the pose of the vehicle.  A noise value is added.
-    double bearing = atan2(direction_sensor_frame.y,direction_sensor_frame.x);
-    double range = direction_sensor_frame.GetLength(); 
-    double elevation = atan2(direction_sensor_frame.z, \
-      direction_sensor_frame_2d.GetLength());
+    double bearing = atan2(directionSensorFrame.y,directionSensorFrame.x);
+    double range = directionSensorFrame.GetLength(); 
+    double elevation = atan2(directionSensorFrame.z, \
+      directionSensorFrame2d.GetLength());
         
     // Apply noise to each measurement.  
     // From Brian Binghams rangebearing_gazebo_plugin.
@@ -290,7 +290,7 @@ void USVGazeboPinger::UpdateChild()
   }  
 }
 
-void USVGazeboPinger::pingerPositionCallback(const geometry_msgs::Vector3ConstPtr &msg)
+void USVGazeboPinger::PingerPositionCallback(const geometry_msgs::Vector3ConstPtr &msg)
 {
   // Mutex added to prevent simulataneous reads and writes of mutex.
   // May not be neccesary, as this thread will only write, while the UpdateChild 

@@ -13,45 +13,64 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
-
-import rospy
 import random
+import rospy
 
-from usv_msgs.msg import RangeBearing
 from geometry_msgs.msg import Vector3
+from usv_msgs.msg import RangeBearing
 from visualization_msgs.msg import Marker
 
-class pinger_position:
+"""@package set_pinger_position.py
+Automatically generate a position for a simulated USV pinger.  This 
+position is published both as a Vector3 to the plugin, and as a Marker that 
+can be visualised.  This visualisation can be used as a ground truth to 
+compare with the estimated pinger position.
+Possible positions are stored as ROS parameters.  The node assumes that 
+positions will be three element vectors each stored in the nodes parameter 
+space in the format position_n starting with position_1.  If no positions
+are available, the node will default to the origin.   
+"""
+
+class PingerPosition:
+    """Class used to store the parameters and variables for the script.
+    """
     def __init__(self):
+        """Initialise and run the class."""
         rospy.init_node("set_pinger_position")
+        
         #Load the positions of the pingers.
-        self.pinger_positions=list()
-        i=1
-        while rospy.has_param('~position_'+str(i)):
-            self.pinger_positions.append(rospy.get_param('~position_'+str(i)))
-            i=i+1
+        self.pingerPositions = list()
+        i = 1
+        while rospy.has_param('~position_' + str(i)):
+            self.pingerPositions.append(rospy.get_param('~position_' + str(i)))
+            i = i + 1
+            
         #If there are no matching positions, initialise to the origin.
         if i==1:            
-            self.pinger_positions.append([0,0,0])
-        self.pinger_pub = rospy.Publisher("/pinger/set_pinger_position",Vector3,queue_size=10,latch=True)
-        self.marker_pub = rospy.Publisher("/pinger/marker/ground_truth",Marker,queue_size=10,latch=True)
+            self.pingerPositions.append([0,0,0])
+        self.pingerPub = rospy.Publisher("/pinger/set_pinger_position", Vector3,
+          queue_size = 10, latch = True)
+        self.markerPub = rospy.Publisher("/pinger/marker/ground_truth", Marker,
+          queue_size = 10, latch = True)
         
         while not rospy.is_shutdown():
+        
             #Choose a position for the pinger.
-            position = random.choice(self.pinger_positions)
+            position = random.choice(self.pingerPositions)
+            
             #Create a vector message.
             msg = Vector3()
-            msg.x=position[0]
-            msg.y=position[1]
-            msg.z=position[2]
-            self.pinger_pub.publish(msg)
+            msg.x = position[0]
+            msg.y = position[1]
+            msg.z = position[2]
+            self.pingerPub.publish(msg)
 
-            msg=Marker()
-            msg.header.frame_id="/map"
+            msg = Marker()
+            msg.header.frame_id = "/map"
             msg.header.stamp = rospy.get_rostime()
-            msg.ns=""
-            msg.id=0
-            msg.type=Marker.SPHERE
+            msg.ns = ""
+            msg.id = 0
+            msg.type = Marker.SPHERE
             msg.action = Marker.ADD
             
             msg.pose.position.x = position[0]
@@ -71,13 +90,11 @@ class pinger_position:
             msg.color.b = 0.0
             msg.color.a = 1.0
             
-            self.marker_pub.publish(msg)
+            self.markerPub.publish(msg)
 
-            rospy.sleep(10.)#change position every 10 seconds.
+            #change position every 10 seconds.
+            rospy.sleep(10.)
             
 if __name__ == '__main__':
-  pinger = pinger_position()
-            
-            
-
-            
+  pinger = PingerPosition()
+           
