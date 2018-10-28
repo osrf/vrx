@@ -34,14 +34,14 @@
           <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
-            <stddev>0.3</stddev>
+            <stddev>0.01</stddev>
           </noise>
         </bearingNoise>        
         <elevationNoise>
           <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
-            <stddev>0.1</stddev>
+            <stddev>0.01</stddev>
           </noise>
         </elevationNoise>        
       </plugin>
