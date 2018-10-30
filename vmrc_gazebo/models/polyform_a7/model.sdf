@@ -5,10 +5,10 @@
     <static>true</static>
     <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
-      <inertia>
+      <inertial>
         <!-- Reference: https://www.sailrite.com/PDF/Polyform-Buoys-Fenders-Accessories.pdf, page 8 -->
         <mass>24.49</mass>
-      </inertia>
+      </inertial>
       <visual name="visual">
         <geometry>
           <sphere><radius>.4955</radius></sphere>
