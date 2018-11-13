@@ -102,7 +102,7 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   }
 
   // Set the frame_id.  Defaults to "pinger".
-  this->frameId="pinger";
+  this->frameId = "pinger";
   if (_sdf->HasElement("frameId"))
   {
     this->frameId = _sdf->GetElement("frameId")->Get<std::string>();
@@ -114,7 +114,7 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     topicName = _sdf->GetElement("topicName")->Get<std::string>();
   else
   {
-    ROS_INFO_NAMED("gazebo_pinger_plugin",
+    ROS_INFO_NAMED("usv_gazebo_pinger_plugin",
       "missing <topicName>, defaulting to %s", topicName.c_str());
   }
   
@@ -127,7 +127,7 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   }
   else
   {
-    ROS_INFO_NAMED("gazebo_pinger_plugin",
+    ROS_INFO_NAMED("usv_gazebo_pinger_plugin",
       "missing <setPositionTopicName>, defaulting to %s", topicName.c_str());
   }
   
@@ -159,13 +159,13 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     }
     else{
       this->rangeNoise = nullptr;
-      ROS_WARN("RangeBearing Plugin: The rangeNoise SDF element must contain noise tag");
+      ROS_WARN("usv_gazebo_pinger_plugin: The rangeNoise SDF element must contain noise tag");
     }
   }
   else
   {
     this->rangeNoise = nullptr;
-    ROS_INFO("RangeBearing Plugin: No rangeNoise tag found, no noise added to measurements");
+    ROS_INFO("usv_gazebo_pinger_plugin: No rangeNoise tag found, no noise added to measurements");
   }
   
   // Load the noise model from the SDF file.
@@ -181,13 +181,13 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     }
     else{
       this->bearingNoise = nullptr;
-      ROS_WARN("The bearingNoise SDF element must contain noise tag");
+      ROS_WARN("usv_gazebo_pinger_plugin: The bearingNoise SDF element must contain noise tag");
     }
   }
   else
   {
     this->bearingNoise = nullptr;
-    ROS_INFO("RangeBearing Plugin: No bearingNoise tag found, no noise added to measurements");
+    ROS_INFO("usv_gazebo_pinger_plugin: No bearingNoise tag found, no noise added to measurements");
   }
 
   if (_sdf->HasElement("elevationNoise"))
@@ -202,13 +202,13 @@ void USVGazeboPinger::Load( physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     }
     else{
       this->elevationNoise = nullptr;
-      ROS_WARN("The elevationNoise SDF element must contain noise tag");
+      ROS_WARN("usv_gazebo_pinger_plugin: The elevationNoise SDF element must contain noise tag");
     }
   }
   else
   {
     this->elevationNoise = nullptr;
-    ROS_INFO("RangeBearing Plugin: No elevationNoise tag found, no noise added to measurements");
+    ROS_INFO("usv_gazebo_pinger_plugin: No elevationNoise tag found, no noise added to measurements");
   }
 
   // initialise the ros handle
@@ -258,7 +258,10 @@ void USVGazeboPinger::UpdateChild()
         math::Vector3(directionSensorFrame.x,directionSensorFrame.y,0);
 
     // bearing is calculated by finding the world frame direction vector
-    // and subtracting the pose of the vehicle.  A noise value is added.
+    // and transforming into the pose of the sensor.  Bearing is calculated 
+    // using the atan2 function of the x and y components of the transformed 
+    // vector.  The elevation is calculated from the length of the 2D only 
+    // and the z component of the sensor frame vector.
     double bearing = atan2(directionSensorFrame.y,directionSensorFrame.x);
     double range = directionSensorFrame.GetLength(); 
     double elevation = atan2(directionSensorFrame.z, \

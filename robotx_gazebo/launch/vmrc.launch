@@ -39,7 +39,7 @@
   <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
 
   <!-- For now - can only use the T configuration! -->
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_vmrc.urdf"/>
+  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_sensors.urdf"/>
   
   <param name="robot_description" textfile="$(arg urdf)"/>
 
