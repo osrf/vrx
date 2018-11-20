@@ -15,6 +15,8 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend version_gte="2.5.17">gazebo_ros</depend>
   <depend>gazebo_dev</depend>
+  <depend>joy</depend>
+  <depend>joy_teleop</depend>
   <depend>std_msgs</depend>
   <depend>wamv_gazebo</depend>
   <depend>xacro</depend>

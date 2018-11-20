@@ -13,6 +13,9 @@
   <author email="briansbingham@gmail.com">Brian Bingham</author>
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>gazebo_plugins</depend>
+  <depend>hector_gazebo_plugins</depend>
+  <depend>robot_localization</depend>
   <depend>usv_gazebo_plugins</depend>
   <depend>velodyne_gazebo_plugins</depend>
   <depend>wamv_description</depend>
