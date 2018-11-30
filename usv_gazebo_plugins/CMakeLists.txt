@@ -83,6 +83,7 @@ install(TARGETS usv_gazebo_wind_plugin
 add_library(usv_gazebo_pinger_plugin
   src/usv_gazebo_pinger_plugin.cc
 )
+add_dependencies(usv_gazebo_pinger_plugin usv_msgs_generate_messages_cpp)
 target_link_libraries(usv_gazebo_wind_plugin
   ${catkin_LIBRARIES}
   ${Eigen_LIBRARIES}
