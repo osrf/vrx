@@ -6,7 +6,7 @@
     <xacro:sandisland />
     <include>
       <uri>model://navigation_task</uri>
-      <pose>15 0 2 0 0 0</pose>
+      <pose>15 0 0.5 0 0 0</pose>
     </include>
 
   </world>
