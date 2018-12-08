@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<!-- World containing sandisland model and some course challenges -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="robotx_example_course">
+    <xacro:include filename="$(find vmrc_gazebo)/worlds/sandisland.xacro" />
+    <xacro:sandisland />
+    <include>
+      <uri>model://navigation_task</uri>
+      <pose>15 0 2 0 0 0</pose>
+    </include>
+
+  </world>
+</sdf>
