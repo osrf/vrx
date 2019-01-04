@@ -27,6 +27,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <functional>
 #include <sstream>
+#include <algorithm>    // std::min
 
 #include <gazebo/math/Pose.hh>
 #include "usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh"
@@ -308,9 +309,13 @@ void UsvDynamicsPlugin::Update()
       }
       ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
 
+	  // Total z location of boat grid point relative to water surface
+	  double  deltaZ = (this->waterLevel + dz) - kDdz;
+	  deltaZ = std::max(deltaZ,0.0);  // enforce only upward buoy force
+
       // Buoyancy force at grid point
-      const float kBuoyForce =
-        ((this->waterLevel + dz) - kDdz) * this->buoyFrac;
+      const float kBuoyForce = deltaZ * this->buoyFrac;
+	  
       ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
 
       // Apply force at grid point
