@@ -85,6 +85,12 @@ namespace gazebo
                                    const std::string &_paramName,
                                    const double _defaultVal) const;
 
+	/// \brief Convenience function for calculating the area of circle segment
+	/// \param[in] R Radius of circle
+	/// \param[in] h Height of the chord line
+    /// \return The area
+    private: double CircleSegment(double R, double h);
+
     /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
     private: physics::WorldPtr world;
 
@@ -103,18 +109,6 @@ namespace gazebo
     /// \brief Angular velocity from previous time step,
     /// for estimating acceleration.
     private: math::Vector3 prevAngVel;
-
-    /// \brief For Buoyancy fraction for each discrete element.
-    private: float buoyFrac;
-
-    /// \brief Grid size in x direction for buoyancy discretization.
-    private: float dx;
-
-    /// \brief Grid size in y direction for buoyancy discretization.
-    private: float dy;
-
-    /// \brief Grid indicies for buoyancy discretization.
-    private: std::vector<int> II;
 
     /// \brief Values to set via Plugin Parameters.
     /// Plugin Parameter: Added mass in surge, X_\dot{u}.
@@ -156,6 +150,21 @@ namespace gazebo
     /// \brief Water height [m].
     private: double waterLevel;
 
+	/// \brief Water density [kg/m^3].
+    private: double waterDensity;
+
+	/// \brief Vessel length [m].
+    private: double paramBoatLength;
+
+	/// \brief Vessel width [m].
+    private: double paramBoatWidth;
+
+	/// \brief Demi-hull radius [m].
+    private: double paramHullRadius;
+	  
+    /// \brief Length discretization, i.e., "N"
+    private: int paramLengthN;
+	  
     /// \brief Added mass matrix, 6x6.
     private: Eigen::MatrixXd Ma;
 

@@ -92,7 +92,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   this->waterLevel       = this->SdfParamDouble(_sdf, "waterLevel"  , 0.5);
-  double waterDensity    = this->SdfParamDouble(_sdf, "waterDensity", 997.7735);
+  this->waterDensity    = this->SdfParamDouble(_sdf, "waterDensity", 997.7735);
   this->paramXdotU       = this->SdfParamDouble(_sdf, "xDotU"       , 5);
   this->paramYdotV       = this->SdfParamDouble(_sdf, "yDotV"       , 5);
   this->paramNdotR       = this->SdfParamDouble(_sdf, "nDotR"       , 1);
@@ -105,9 +105,10 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->paramMq          = this->SdfParamDouble(_sdf, "mQ"          , 20);
   this->paramNr          = this->SdfParamDouble(_sdf, "nR"          , 20);
   this->paramNrr         = this->SdfParamDouble(_sdf, "nRR"         , 0);
-  double paramBoatArea   = this->SdfParamDouble(_sdf, "boatArea"    , 0.48);
-  double paramBoatWidth  = this->SdfParamDouble(_sdf, "boatWidth"   , 1.0);
-  double paramBoatLength = this->SdfParamDouble(_sdf, "boatLength"  , 1.35);
+  this->paramHullRadius  = this->SdfParamDouble(_sdf, "hullRadius"    , 0.213);
+  this->paramBoatWidth   = this->SdfParamDouble(_sdf, "boatWidth"   , 1.0);
+  this->paramBoatLength  = this->SdfParamDouble(_sdf, "boatLength"  , 1.35);
+  this->paramLengthN = _sdf->GetElement("length_n")->Get<int>();
 
   // Wave parameters
   std::ostringstream buf;
@@ -161,22 +162,11 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     0,                0,                0,   0,   0.1, 0,
     0,                0,                0,   0,   0,   this->paramNdotR;
 
-  // must be factor of 2! - only 2 for now!!
-  const int kNN = 2;
+}
 
-  // x,y grid step increments
-  this->dx = paramBoatLength / kNN;
-  this->dy = paramBoatWidth / kNN;
-
-  // Vector for interating through grid points on boat
-  for (int i = -kNN / 2; i < 0; ++i)
-    this->II.push_back(i);
-
-  for (int i = 1; i <= kNN / 2; ++i)
-    this->II.push_back(i);
-
-  // Precalculate this to save some time.
-  this->buoyFrac = (paramBoatArea / (kNN * kNN)) * GRAVITY * waterDensity;
+double UsvDynamicsPlugin::CircleSegment(double R, double h)
+{
+	return R*R*acos( (R-h)/R ) - (R-h)*sqrt(2*R*h-h*h) ;
 }
 
 //////////////////////////////////////////////////
@@ -262,25 +252,25 @@ void UsvDynamicsPlugin::Update()
     math::Vector3(kForceSum(3), kForceSum(4), kForceSum(5)));
 
   // Loop over boat grid points
-  for (const int i : this->II)
+  // Grid point location in boat frame - might be able to precalculate these?
+  tf2::Vector3 bpnt(0, 0, 0);
+  // Grid point location in world frame
+  tf2::Vector3 bpntW(0, 0, 0);
+  // For each hull
+  for (int ii = 0; ii < 2; ii++)
   {
-    // grid points on boat
-    tf2::Vector3 bpnt(0, 0, 0);
-
-    // in world coordinates
-    tf2::Vector3 bpntW(0, 0, 0);
-
-    // grid point in boat fram
-    bpnt.setX(i * this->dx);
-    for (const int j : this->II)
+	// Grid point in boat frame
+	bpnt.setY((ii*2.0-1.0)*this->paramBoatWidth/2.0);
+	// For each length segment
+    for (int jj = 1; jj <= this->paramLengthN; jj++)
     {
-      bpnt.setY(j * this->dy);
+	  bpnt.setX( ((jj-0.5)/((float)this->paramLengthN) - 0.5 )*this->paramBoatLength);
 
       // Transform from vessel to water/world frame
       bpntW = xformV * bpnt;
 
       // Debug
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "," << j <<
+      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << ii << "," << jj <<
           "] grid points" << bpnt.x() << "," << bpnt.y() << "," << bpnt.z());
       ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << kEuler);
       ROS_DEBUG_STREAM_THROTTLE(1.0, "in water frame" << bpntW.x() << "," <<
@@ -312,9 +302,9 @@ void UsvDynamicsPlugin::Update()
 	  // Total z location of boat grid point relative to water surface
 	  double  deltaZ = (this->waterLevel + dz) - kDdz;
 	  deltaZ = std::max(deltaZ,0.0);  // enforce only upward buoy force
-
+	  deltaZ = std::min(deltaZ,this->paramHullRadius);
       // Buoyancy force at grid point
-      const float kBuoyForce = deltaZ * this->buoyFrac;
+	  const float kBuoyForce = CircleSegment(this->paramHullRadius,deltaZ)*this->paramBoatLength/((float)this->paramLengthN)*GRAVITY*this->waterDensity;
 	  
       ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
 
