@@ -61,6 +61,28 @@ void NavigationScoringPlugin::Gate::Update()
 }
 
 /////////////////////////////////////////////////
+NavigationScoringPlugin::GateState NavigationScoringPlugin::Gate::IsPoseInGate(
+    const gazebo::math::Pose &_robotWorldPose) const
+{
+  // Transform to gate frame.
+  gazebo::math::Vector3 robotLocalPosition =
+    this->pose.rot.GetInverse().RotateVector(_robotWorldPose.pos -
+    this->pose.pos);
+
+  // Are we within the width?
+  if (fabs(robotLocalPosition.y) <= this->width / 2.0)
+  {
+    if (robotLocalPosition.x >= 0.0)
+      return GateState::VEHICLE_AFTER;
+    else
+      return GateState::VEHICLE_BEFORE;
+  }
+  else
+    return GateState::VEHICLE_OUTSIDE;
+}
+
+
+/////////////////////////////////////////////////
 NavigationScoringPlugin::NavigationScoringPlugin()
 {
   gzmsg << "Navigation scoring plugin loaded" << std::endl;
@@ -76,9 +98,17 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->world = _world;
 
   // This is a required element.
+  if (!_sdf->HasElement("vehicle"))
+  {
+    gzerr << "Unable to find <vehicle> element in SDF." << std::endl;
+    return;
+  }
+  this->vehicleName = _sdf->Get<std::string>("vehicle");
+
+  // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
-    gzerr << "Unable to find any gates" << std::endl;
+    gzerr << "Unable to find <gates> element in SDF." << std::endl;
     return;
   }
 
@@ -86,7 +116,7 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   auto const &gatesElem = _sdf->GetElement("gates");
   if (!this->ParseGates(gatesElem))
   {
-    gzerr << "Score disabled" << std::endl;
+    gzerr << "Score has been disabled" << std::endl;
     return;
   }
 
@@ -102,7 +132,7 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
   // We need at least one gate.
   if (!_sdf->HasElement("gate"))
   {
-    gzerr << "Unable to find any gate" << std::endl;
+    gzerr << "Unable to find <gate> element in SDF." << std::endl;
     return false;
   }
 
@@ -114,7 +144,7 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
     // The red buoy's name.
     if (!gateElem->HasElement("red"))
     {
-      gzerr << "Unable to find red element" << std::endl;
+      gzerr << "Unable to find <red> element in SDF." << std::endl;
       return false;
     }
 
@@ -123,7 +153,7 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
     // The green buoy's name.
     if (!gateElem->HasElement("green"))
     {
-      gzerr << "Unable to find green element" << std::endl;
+      gzerr << "Unable to find <green> element in SDF." << std::endl;
       return false;
     }
 
@@ -166,7 +196,7 @@ bool NavigationScoringPlugin::AddGate(const std::string &_redBuoyName,
   this->gates.push_back(Gate(redBuoyModel, greenBuoyModel));
 
   // Initialize the state of the gate.
-  this->gateStates.push_back(0);
+  this->gateStates.push_back(GateState::VEHICLE_OUTSIDE);
 
   return true;
 }
@@ -174,17 +204,22 @@ bool NavigationScoringPlugin::AddGate(const std::string &_redBuoyName,
 //////////////////////////////////////////////////
 void NavigationScoringPlugin::Update()
 {
-  auto robotModel = this->world->GetModel("wamv");
-  if (!robotModel)
-    return;
+  // The vehicle might not be ready yet, let's try to get it.
+  if (!this->vehicleModel)
+  {
+    this->vehicleModel = this->world->GetModel(this->vehicleName);
+    if (!this->vehicleModel)
+      return;
+  }
 
-  auto robotPose = robotModel->GetWorldPose();
+  auto robotPose = this->vehicleModel->GetWorldPose();
 
   // Update the state of all gates.
   for (auto i = 0; i < this->gates.size(); ++i)
   {
-    // Ignore all gates that have been crossed.
-    if (this->gateStates[i] == 2)
+    // Ignore all gates that have been crossed or are invalid.
+    if (this->gateStates[i] == GateState::CROSSED ||
+        this->gateStates[i] == GateState::INVALID)
       continue;
 
     // Get the next gate.
@@ -194,31 +229,23 @@ void NavigationScoringPlugin::Update()
     gate.Update();
 
     // Check if we have crossed this gate.
-    auto currentState = this->IsPoseInGate(robotPose, gate);
-    if (currentState == 1 && gateStates[i] == -1)
+    auto currentState = gate.IsPoseInGate(robotPose);
+    if (currentState == GateState::VEHICLE_AFTER &&
+        gateStates[i] == GateState::VEHICLE_BEFORE)
     {
-      currentState = 2;
+      currentState = GateState::CROSSED;
       gzmsg << "Gate " << i << " crossed!" << std::endl;
+    }
+    // Just checking: did we go backward through the gate?
+    else if (currentState == GateState::VEHICLE_BEFORE &&
+             gateStates[i] == GateState::VEHICLE_AFTER)
+    {
+      currentState = GateState::INVALID;
+      gzmsg << "Gate " << i << " invalid!" << std::endl;
     }
 
     gateStates[i] = currentState;
   }
-}
-
-/////////////////////////////////////////////////
-uint8_t NavigationScoringPlugin::IsPoseInGate(
-    const gazebo::math::Pose &_robotWorldPose, const Gate &_gate) const
-{
-  // Transform to gate frame.
-  gazebo::math::Vector3 robotLocalPosition =
-    _gate.pose.rot.GetInverse().RotateVector(_robotWorldPose.pos -
-    _gate.pose.pos);
-
-  // Are we within the width?
-  if (fabs(robotLocalPosition.y) <= _gate.width / 2.0)
-    return (robotLocalPosition.x >= 0.0) ? 1 : -1;
-  else
-    return 0;
 }
 
 // Register plugin with gazebo

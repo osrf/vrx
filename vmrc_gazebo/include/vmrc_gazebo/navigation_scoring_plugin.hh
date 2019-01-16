@@ -19,7 +19,6 @@
 #define VMRC_GAZEBO_NAVIGATION_SCORING_PLUGIN_HH_
 
 #include <ros/ros.h>
-#include <cstdint>
 #include <string>
 #include <vector>
 #include <gazebo/common/Events.hh>
@@ -30,10 +29,76 @@
 #include <sdf/sdf.hh>
 
 /// \brief A plugin for computing the score of the navigation task.
+/// This plugin requires the following SDF parameters:
+///
+/// <vehicle>: The name of the vehicle that should cross the gates. 
+/// <gates>: Specifies the collection of gates delimiting the course.
+///
+///   Each gate accepts the following elements:
+///
+///   <gate>: A gate is delimited by a red and green buoy:
+///
+///      <red>: The name of the red buoy.
+///      <green> The name of the green buoy,
+///
+/// Here's an example:
+/// <plugin name="navigation_scoring_plugin"
+///         filename="libnavigation_scoring_plugin.so">
+///   <vehicle>wamv</vehicle>
+///   <gates>
+///     <gate>
+///       <red>red_bound_0</red>
+///       <green>green_bound_0</green>
+///     </gate>
+///     <gate>
+///       <red>red_bound_1</red>
+///       <green>green_bound_1</green>
+///     </gate>
+///     <gate>
+///       <red>red_bound_2</red>
+///       <green>green_bound_2</green>
+///     </gate>
+///     <gate>
+///       <red>red_bound_3</red>
+///       <green>green_bound_3</green>
+///     </gate>
+///     <gate>
+///       <red>red_bound_4</red>
+///       <green>green_bound_4</green>
+///     </gate>
+///     <gate>
+///       <red>red_bound_5</red>
+///       <green>green_bound_5</green>
+///     </gate>
+///     <gate>
+///       <red>red_bound_6</red>
+///       <green>green_bound_6</green>
+///     </gate>
+///   </gates>
+/// </plugin>
 class NavigationScoringPlugin : public gazebo::WorldPlugin
 {
+  /// \brief All gate states.
+  private: enum class GateState
+  {
+    /// Not "in" the gate.
+    VEHICLE_OUTSIDE,
+
+    /// Before the gate.
+    VEHICLE_BEFORE,
+
+    /// After the gate.
+    VEHICLE_AFTER,
+
+    /// Gate crossed!
+    CROSSED,
+
+    /// Gate invalid. E.g.: if crossed in the wrong direction.
+    INVALID,
+  };
+
   /// \brief A gate that is part of the navigation challenge.
-  class Gate
+  private: class Gate
   {
     /// \brief Constructor.
     /// \param[in] _redBuoyName The red buoy's model.
@@ -41,19 +106,27 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
     public: Gate(const gazebo::physics::ModelPtr _redBuoyModel,
                  const gazebo::physics::ModelPtr _greenBuoyModel);
 
-    // Recalculate the pose and width of the gate.
+    /// \brief Where is the given robot pose with respect to the gate?
+    /// \param _robotWorldPose Pose of the robot, in the world frame.
+    /// \return The gate state given the current robot pose.
+    public: GateState IsPoseInGate(const gazebo::math::Pose &_robotWorldPose)
+        const;
+
+    /// \brief Recalculate the pose and width of the gate.
     public: void Update();
 
-    // The red buoy.
+    /// \brief The red buoy model.
     public: gazebo::physics::ModelPtr redBuoyModel;
 
-    // The green buoy.
+    /// \brief The green buoy model.
     public: gazebo::physics::ModelPtr greenBuoyModel;
 
-    // The center of the gate.
+    /// \brief The center of the gate in the world frame. Note that the roll and
+    /// pitch are ignored. Only yaw is relevant and it points into the direction
+    /// in which the gate should be crossed.
     public: gazebo::math::Pose pose;
 
-    // The width of the gate.
+    // The width of the gate in meters.
     public: double width;
   };
 
@@ -79,14 +152,6 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
-  /// \brief Is the given robot pose "in" the given gate pose?
-  /// \param _robotWorldPose Pose of the robot, in the world frame
-  /// \param _gateWorldPose Pose of the gate, in the world frame
-  /// \param _gateWorldPose Width of the gate
-  /// \return If not "in" the gate, return 0; else return -1 if "before" the
-  ///         gate, 1 if "after" the gate.
-  private: uint8_t IsPoseInGate(const gazebo::math::Pose &_robotWorldPose,
-                                const Gate &_gate) const;
   /// \brief All the gates.
   private: std::vector<Gate> gates;
 
@@ -97,11 +162,13 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
   private: gazebo::physics::WorldPtr world;
 
   /// \brief Gate states.
-  ///  0: Not "in" the gate.
-  /// -1: Before the gate.
-  ///  1: After the gate.
-  ///  2: Gate crossed!
-  private: std::vector<int8_t> gateStates;
+  private: std::vector<GateState> gateStates;
+
+  /// \brief The name of the vehicle that should cross the gates.
+  private: std::string vehicleName;
+
+  /// \brief Pointer to the vehicle that should cross the gates.
+  private: gazebo::physics::ModelPtr vehicleModel;
 };
 
 #endif
