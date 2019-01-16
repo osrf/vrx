@@ -81,19 +81,19 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
   /// \brief All gate states.
   private: enum class GateState
   {
-    /// Not "in" the gate.
+    /// \brief Not "in" the gate.
     VEHICLE_OUTSIDE,
 
-    /// Before the gate.
+    /// \brief Before the gate.
     VEHICLE_BEFORE,
 
-    /// After the gate.
+    /// \brief After the gate.
     VEHICLE_AFTER,
 
-    /// Gate crossed!
+    /// \brief Gate crossed!
     CROSSED,
 
-    /// Gate invalid. E.g.: if crossed in the wrong direction.
+    /// \brief Gate invalid. E.g.: if crossed in the wrong direction.
     INVALID,
   };
 
@@ -126,8 +126,11 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
     /// in which the gate should be crossed.
     public: gazebo::math::Pose pose;
 
-    // The width of the gate in meters.
+    /// \brief The width of the gate in meters.
     public: double width;
+
+    /// \brief The state of this gate.
+    public: GateState state = GateState::VEHICLE_OUTSIDE;
   };
 
   // Constructor.
@@ -160,9 +163,6 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief A world pointer.
   private: gazebo::physics::WorldPtr world;
-
-  /// \brief Gate states.
-  private: std::vector<GateState> gateStates;
 
   /// \brief The name of the vehicle that should cross the gates.
   private: std::string vehicleName;

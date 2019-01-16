@@ -37,21 +37,21 @@ void NavigationScoringPlugin::Gate::Update()
     return;
 
   // The pose of the buoys delimiting the gate.
-  auto redPose = this->redBuoyModel->GetWorldPose();
-  auto greenPose = this->greenBuoyModel->GetWorldPose();
+  const auto redPose = this->redBuoyModel->GetWorldPose();
+  const auto greenPose = this->greenBuoyModel->GetWorldPose();
 
   // Unit vector from the green buoy to the red one.
   auto v1 = redPose.pos - greenPose.pos;
   v1.Normalize();
 
   // Unit vector perpendicular to v1 in the direction we like to cross gates.
-  auto v2 = gazebo::math::Vector3::UnitZ.Cross(v1);
+  const auto v2 = gazebo::math::Vector3::UnitZ.Cross(v1);
 
   // This is the center point of the gate.
-  auto middle = (redPose.pos + greenPose.pos) / 2.0;
+  const auto middle = (redPose.pos + greenPose.pos) / 2.0;
 
   // Yaw of the gate in world coordinates.
-  auto yaw = atan2(v2.y, v2.x);
+  const auto yaw = atan2(v2.y, v2.x);
 
   // The updated pose.
   this->pose.Set(middle, gazebo::math::Vector3(0, 0, yaw));
@@ -65,7 +65,7 @@ NavigationScoringPlugin::GateState NavigationScoringPlugin::Gate::IsPoseInGate(
     const gazebo::math::Pose &_robotWorldPose) const
 {
   // Transform to gate frame.
-  gazebo::math::Vector3 robotLocalPosition =
+  const gazebo::math::Vector3 robotLocalPosition =
     this->pose.rot.GetInverse().RotateVector(_robotWorldPose.pos -
     this->pose.pos);
 
@@ -148,7 +148,7 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
       return false;
     }
 
-    std::string redBuoyName = gateElem->Get<std::string>("red");
+    const std::string redBuoyName = gateElem->Get<std::string>("red");
 
     // The green buoy's name.
     if (!gateElem->HasElement("green"))
@@ -157,7 +157,7 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
       return false;
     }
 
-    std::string greenBuoyName = gateElem->Get<std::string>("green");
+    const std::string greenBuoyName = gateElem->Get<std::string>("green");
 
     if (!this->AddGate(redBuoyName, greenBuoyName))
       return false;
@@ -195,9 +195,6 @@ bool NavigationScoringPlugin::AddGate(const std::string &_redBuoyName,
   // Save the new gate.
   this->gates.push_back(Gate(redBuoyModel, greenBuoyModel));
 
-  // Initialize the state of the gate.
-  this->gateStates.push_back(GateState::VEHICLE_OUTSIDE);
-
   return true;
 }
 
@@ -212,18 +209,14 @@ void NavigationScoringPlugin::Update()
       return;
   }
 
-  auto robotPose = this->vehicleModel->GetWorldPose();
+  const auto robotPose = this->vehicleModel->GetWorldPose();
 
   // Update the state of all gates.
-  for (auto i = 0; i < this->gates.size(); ++i)
+  for (auto &gate : this->gates)
   {
     // Ignore all gates that have been crossed or are invalid.
-    if (this->gateStates[i] == GateState::CROSSED ||
-        this->gateStates[i] == GateState::INVALID)
+    if (gate.state == GateState::CROSSED || gate.state == GateState::INVALID)
       continue;
-
-    // Get the next gate.
-    auto &gate = this->gates[i];
 
     // Update this gate (in case it moved).
     gate.Update();
@@ -231,20 +224,20 @@ void NavigationScoringPlugin::Update()
     // Check if we have crossed this gate.
     auto currentState = gate.IsPoseInGate(robotPose);
     if (currentState == GateState::VEHICLE_AFTER &&
-        gateStates[i] == GateState::VEHICLE_BEFORE)
+        gate.state   == GateState::VEHICLE_BEFORE)
     {
       currentState = GateState::CROSSED;
-      gzmsg << "Gate " << i << " crossed!" << std::endl;
+      gzmsg << "New gate crossed!" << std::endl;
     }
     // Just checking: did we go backward through the gate?
     else if (currentState == GateState::VEHICLE_BEFORE &&
-             gateStates[i] == GateState::VEHICLE_AFTER)
+             gate.state   == GateState::VEHICLE_AFTER)
     {
       currentState = GateState::INVALID;
-      gzmsg << "Gate " << i << " invalid!" << std::endl;
+      gzmsg << "Went backward through gate. Invalidated!" << std::endl;
     }
 
-    gateStates[i] = currentState;
+    gate.state = currentState;
   }
 }
 
