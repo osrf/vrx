@@ -54,6 +54,16 @@ install(TARGETS symbol_controller
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# A generic scoring plugin.
+add_library(scoring_plugin src/scoring_plugin.cc)
+target_link_libraries(scoring_plugin ${catkin_LIBRARIES})
+add_dependencies(scoring_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS scoring_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Plugin for scoring the navigation challenge task.
 add_library(navigation_scoring_plugin src/navigation_scoring_plugin.cc)
 target_link_libraries(navigation_scoring_plugin ${catkin_LIBRARIES})
