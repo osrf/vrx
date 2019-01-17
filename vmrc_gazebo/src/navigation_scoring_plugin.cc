@@ -238,6 +238,21 @@ void NavigationScoringPlugin::Update()
 
     gate.state = currentState;
   }
+
+  // gzmsg << "Elapsed: " << this->ElapsedTime() << std::endl;
+  // gzmsg << "Remaining: " << this->RemainingTime() << std::endl;
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::OnRunning()
+{
+  gzmsg << "OnRunning" << std::endl;
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::OnFinished()
+{
+  gzmsg << "OnFinished" << std::endl;
 }
 
 // Register plugin with gazebo

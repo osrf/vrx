@@ -154,6 +154,12 @@ class NavigationScoringPlugin : public ScoringPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
+  /// TESTING.
+  private: void OnRunning() override;
+
+  /// TESTING.
+  private: void OnFinished() override;
+
   /// \brief All the gates.
   private: std::vector<Gate> gates;
 

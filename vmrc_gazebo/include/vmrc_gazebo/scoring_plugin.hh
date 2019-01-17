@@ -69,6 +69,12 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// * Finished: The task has been completed or reached the maximum time.
   private: void UpdateTaskState();
 
+  /// \brief ToDo.
+  private: virtual void OnRunning();
+
+  /// \brief ToDo.
+  private: virtual void OnFinished();
+
   /// \brief A world pointer.
   protected: gazebo::physics::WorldPtr world;
 

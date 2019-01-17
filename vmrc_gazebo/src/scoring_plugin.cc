@@ -103,9 +103,10 @@ void ScoringPlugin::Update()
 {
   // Update time.
   this->currentTime = this->world->GetSimTime();
-  this->elapsedTime = this->currentTime - this->startTime;
-  this->remainingTime = std::max(this->endTime - this->currentTime,
-      gazebo::common::Time::Zero);
+  this->elapsedTime = std::min(std::max(this->currentTime - this->startTime,
+      gazebo::common::Time::Zero), this->endTime - this->startTime);
+  this->remainingTime = std::min(std::max(this->endTime - this->currentTime,
+      gazebo::common::Time::Zero), this->endTime - this->startTime);
 
   this->UpdateTaskState();
 
@@ -119,6 +120,7 @@ void ScoringPlugin::UpdateTaskState()
       this->currentTime >= this->startTime)
   {
     this->taskState = "running";
+    this->OnRunning();
     return;
   }
 
@@ -126,6 +128,17 @@ void ScoringPlugin::UpdateTaskState()
       this->currentTime >= this->endTime)
   {
     this->taskState = "finished";
+    this->OnFinished();
     return;
   }  
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::OnRunning()
+{
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::OnFinished()
+{
 }

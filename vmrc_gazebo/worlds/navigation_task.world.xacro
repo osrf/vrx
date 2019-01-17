@@ -150,7 +150,7 @@
     <plugin name="navigation_scoring_plugin"
             filename="libnavigation_scoring_plugin.so">
       <task_name>navigation_course</task_name>
-      <max_time>3000</max_time>
+      <max_time>10</max_time>
       <vehicle>wamv</vehicle>
       <gates>
         <gate>
