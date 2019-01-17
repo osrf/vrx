@@ -92,10 +92,7 @@ NavigationScoringPlugin::NavigationScoringPlugin()
 void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
-  GZ_ASSERT(_world, "NavigationScoringPlugin::Load(): NULL world pointer");
-  GZ_ASSERT(_sdf,   "NavigationScoringPlugin::Load(): NULL _sdf pointer");
-
-  this->world = _world;
+  ScoringPlugin::Load(_world, _sdf);
 
   // This is a required element.
   if (!_sdf->HasElement("vehicle"))
@@ -119,6 +116,8 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     gzerr << "Score has been disabled" << std::endl;
     return;
   }
+
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&NavigationScoringPlugin::Update, this));

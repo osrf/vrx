@@ -49,12 +49,83 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   }
   this->maxTime = _sdf->Get<uint32_t>("max_time");
 
+  // Set the end time of the task.
+  this->endTime = this->startTime + gazebo::common::Time(this->maxTime, 0);
+
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScoringPlugin::Update, this));
 }
 
 //////////////////////////////////////////////////
+double ScoringPlugin::Score() const
+{
+  return this->score;
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::SetScore(double newScore)
+{
+  this->score = newScore;
+}
+
+//////////////////////////////////////////////////
+std::string ScoringPlugin::TaskName() const
+{
+  return this->taskName;
+}
+
+//////////////////////////////////////////////////
+std::string ScoringPlugin::TaskState() const
+{
+  return this->taskState;
+}
+
+//////////////////////////////////////////////////
+uint32_t ScoringPlugin::MaxTime() const
+{
+  return this->maxTime;
+}
+
+//////////////////////////////////////////////////
+gazebo::common::Time ScoringPlugin::ElapsedTime() const
+{
+  return this->elapsedTime;
+}
+
+//////////////////////////////////////////////////
+gazebo::common::Time ScoringPlugin::RemainingTime() const
+{
+  return this->remainingTime;
+}
+
+//////////////////////////////////////////////////
 void ScoringPlugin::Update()
 {
+  // Update time.
+  this->currentTime = this->world->GetSimTime();
+  this->elapsedTime = this->currentTime - this->startTime;
+  this->remainingTime = std::max(this->endTime - this->currentTime,
+      gazebo::common::Time::Zero);
 
+  this->UpdateTaskState();
+
+  // Publish stats.
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::UpdateTaskState()
+{
+  if (this->taskState == "initial" &&
+      this->currentTime >= this->startTime)
+  {
+    this->taskState = "running";
+    return;
+  }
+
+  if (this->taskState == "running" &&
+      this->currentTime >= this->endTime)
+  {
+    this->taskState = "finished";
+    return;
+  }  
 }

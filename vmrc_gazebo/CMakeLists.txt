@@ -66,7 +66,9 @@ install(TARGETS scoring_plugin
 
 # Plugin for scoring the navigation challenge task.
 add_library(navigation_scoring_plugin src/navigation_scoring_plugin.cc)
-target_link_libraries(navigation_scoring_plugin ${catkin_LIBRARIES})
+target_link_libraries(navigation_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin)
 add_dependencies(navigation_scoring_plugin ${catkin_EXPORTED_TARGETS})
 install(TARGETS navigation_scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
