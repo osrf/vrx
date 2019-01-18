@@ -27,6 +27,7 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
+#include "vmrc_gazebo/Task.h"
 
 /// \brief A plugin for ...
 class ScoringPlugin : public gazebo::WorldPlugin
@@ -59,21 +60,43 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Remaining time since the start of the task.
   protected: gazebo::common::Time RemainingTime() const;
 
+  /// \brief Finish the current task.
+  protected: void Finish();
+
   /// \brief Callback executed at every world update.
   private: void Update();
 
   /// \brief Update the state of the current task.
   /// A task can be in any of the following states:
-  /// * Initial: The vehicle is lock during 5 seconds.
+  /// * Initial: The vehicle is locked.
+  /// * Ready: The vehicle is released but the task hasn't started yet.
   /// * Running: The task is actually running.
   /// * Finished: The task has been completed or reached the maximum time.
   private: void UpdateTaskState();
 
   /// \brief ToDo.
-  private: virtual void OnRunning();
+  private: void UpdateTaskMessage();
 
   /// \brief ToDo.
+  private: void PublishStats();
+
+  /// \brief ToDo.
+  private: void LockVehicle();
+
+  /// \brief ToDo.
+  private: void ReleaseVehicle();
+
+  /// \brief Callback executed when the task state transition into "ready".
+  private: virtual void OnReady();
+
+  /// \brief Callback executed when the task state transition into "running".
+  private: virtual void OnRunning();
+
+  /// \brief Callback executed when the task state transition into "finished".
   private: virtual void OnFinished();
+
+  /// \brief ToDo.
+  private: sdf::ElementPtr sdf;
 
   /// \brief A world pointer.
   protected: gazebo::physics::WorldPtr world;
@@ -91,13 +114,19 @@ class ScoringPlugin : public gazebo::WorldPlugin
   protected: std::unique_ptr<ros::NodeHandle> rosNode;
 
   /// \brief Publisher for the task state.
-  protected: ros::Publisher taskStatePub;
+  protected: ros::Publisher taskPub;
+
+  /// \brief Topic where the stats are published.
+  protected: std::string topic = "/vmrc/task/info";
 
   /// \brief The score.
   protected: double score = 0.0;
 
+  /// \brief Time to transition into "ready" state.
+  gazebo::common::Time readyTime{10, 0};
+
   /// \brief Task start time (simulation).
-  gazebo::common::Time startTime{5, 0};
+  gazebo::common::Time runningTime{20, 0};
 
   /// \brief Task finish time (simulation).
   gazebo::common::Time endTime;
@@ -111,8 +140,31 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Remaining time since the start of the task.
   gazebo::common::Time remainingTime;
 
+  /// \brief Whether the current task has timed out or not.
+  bool timedOut = false;
+
+  /// \brief Time at which the last message was sent.
+  gazebo::common::Time lastStatsSent = gazebo::common::Time::Zero;
+
   /// \brief The task state ("initial", "running" or "finished").
   std::string taskState = "initial";
+
+  /// \brief The next task message to be published.
+  vmrc_gazebo::Task taskMsg;
+
+  /// \brief ToDo.
+  std::map<std::string, sdf::ElementPtr> lockJointNames;
+
+  /// \brief ToDo.
+  std::vector<gazebo::physics::JointPtr> lockJoints;
+
+  /// \brief The name of the vehicle to score.
+  protected: std::string vehicleName;
+
+  /// \brief Pointer to the vehicle to score.
+  protected: gazebo::physics::ModelPtr vehicleModel;
+
+
 };
 
 #endif

@@ -152,6 +152,7 @@
       <task_name>navigation_course</task_name>
       <max_time>10</max_time>
       <vehicle>wamv</vehicle>
+
       <gates>
         <gate>
           <red>red_bound_0</red>

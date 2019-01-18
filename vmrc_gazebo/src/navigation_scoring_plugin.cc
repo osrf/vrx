@@ -244,6 +244,12 @@ void NavigationScoringPlugin::Update()
 }
 
 //////////////////////////////////////////////////
+void NavigationScoringPlugin::OnReady()
+{
+  gzmsg << "OnReady" << std::endl;
+}
+
+//////////////////////////////////////////////////
 void NavigationScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;

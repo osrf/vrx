@@ -21,7 +21,7 @@
        T = H with a lateral thruster
        X = "holonomic" configuration -->
 
-  <arg name="thrust_config" default="H" />
+  <arg name="thrust_config" default="T" />
 
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -39,7 +39,7 @@
   <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
 
   <arg if="$(arg h_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf"/>
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_t.urdf"/>
+  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_t_locked.urdf"/>
   <arg if="$(arg x_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_x.urdf"/>
 
   <param name="robot_description" textfile="$(arg urdf)"/>

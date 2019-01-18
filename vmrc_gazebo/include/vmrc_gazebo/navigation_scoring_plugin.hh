@@ -155,6 +155,9 @@ class NavigationScoringPlugin : public ScoringPlugin
   private: void Update();
 
   /// TESTING.
+  private: void OnReady() override;
+
+  /// TESTING.
   private: void OnRunning() override;
 
   /// TESTING.

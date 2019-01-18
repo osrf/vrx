@@ -8,16 +8,28 @@ if(NOT ERB_EXE_PATH)
 endif()
 
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
   wamv_gazebo
   xacro
   gazebo_dev
   std_msgs
 )
 
+########################
+## Message generation ##
+########################
+
+add_message_files(
+  FILES
+  Task.msg
+)
+
+generate_messages()
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gazebo_ros_color
-  CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev std_msgs
+  CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev std_msgs message_runtime
 )
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -57,7 +69,10 @@ install(TARGETS symbol_controller
 # A generic scoring plugin.
 add_library(scoring_plugin src/scoring_plugin.cc)
 target_link_libraries(scoring_plugin ${catkin_LIBRARIES})
-add_dependencies(scoring_plugin ${catkin_EXPORTED_TARGETS})
+add_dependencies(scoring_plugin
+  ${catkin_EXPORTED_TARGETS}
+  vmrc_gazebo_generate_messages_cpp
+)
 install(TARGETS scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
