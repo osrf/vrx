@@ -23,9 +23,13 @@
         <nR>400.0</nR>
         <nRR>0.0</nRR>
         <!-- General dimensions -->
-        <boatArea>2.2</boatArea>
+        <!--<boatArea>2.2</boatArea>-->
+		<hullRadius>0.213</hullRadius> 
         <boatWidth>2.4</boatWidth>
         <boatLength>4.9</boatLength>
+		<!-- Length discretization, AKA, "N" -->
+		<length_n>2</length_n>
+
 
         <!-- Waves x3 -->
         <wave_n>3</wave_n>
