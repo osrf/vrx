@@ -81,9 +81,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: void PublishStats();
 
   /// \brief ToDo.
-  private: void LockVehicle();
-
-  /// \brief ToDo.
   private: void ReleaseVehicle();
 
   /// \brief Callback executed when the task state transition into "ready".
@@ -153,10 +150,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   vmrc_gazebo::Task taskMsg;
 
   /// \brief ToDo.
-  std::map<std::string, sdf::ElementPtr> lockJointNames;
-
-  /// \brief ToDo.
-  std::vector<gazebo::physics::JointPtr> lockJoints;
+  std::vector<std::string> lockJointNames;
 
   /// \brief The name of the vehicle to score.
   protected: std::string vehicleName;

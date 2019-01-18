@@ -65,12 +65,35 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     this->topic = _sdf->Get<std::string>("topic");
 
   // These are optional elements.
-  sdf::ElementPtr jointElem = this->sdf->GetElement("joint");
-  while (jointElem)
+  if (_sdf->HasElement("release_joints"))
   {
-    std::string jointName = jointElem->Get<std::string>("name");
-    this->lockJointNames[jointName] = jointElem;
-    jointElem = jointElem->GetNextElement("joint");
+    auto releaseJointsElem = _sdf->GetElement("release_joints");
+
+    // We need at least one joint.
+    if (!releaseJointsElem->HasElement("joint"))
+    {
+      gzerr << "Unable to find <joint> element in SDF." << std::endl;
+      return;
+    }
+
+    auto jointElem = releaseJointsElem->GetElement("joint");
+
+    // Parse a new joint to be released.
+    while (jointElem)
+    {
+      // The joint's name.
+      if (!jointElem->HasElement("name"))
+      {
+        gzerr << "Unable to find <name> element in SDF." << std::endl;
+        return;
+      }
+
+      const std::string jointName = jointElem->Get<std::string>("name");
+      this->lockJointNames.push_back(jointName);
+
+      // Parse the next gate.
+      jointElem = jointElem->GetNextElement("joint");
+    }
   }
 
   // Set the end time of the task.
@@ -151,12 +174,6 @@ void ScoringPlugin::Update()
   // Update time.
   this->currentTime = this->world->GetSimTime();
 
-  // if (this->taskState == "initial")
-  //   this->LockVehicle();
-
-  // if (this->taskState == "ready")
-  //   this->ReleaseVehicle();
-
   if (this->taskState == "running")
   {
     this->elapsedTime = std::min(std::max(this->currentTime - this->runningTime,
@@ -225,46 +242,21 @@ void ScoringPlugin::PublishStats()
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::LockVehicle()
-{
-  // Vehicle not found yet.
-  if (!this->vehicleModel)
-    return;
-
-  // Already locked.
-  if (!this->lockJoints.empty())
-    return;
-
-  //this->vehicleModel->CreateLink("wamv_external_link");
-
-  // Load all the harness joints
-  for (auto &joint : this->lockJointNames)
-  {
-    try
-    {
-      auto jointPtr = this->vehicleModel->CreateJoint(joint.second);
-      this->lockJoints.push_back(jointPtr);
-    }
-    catch(gazebo::common::Exception &_e)
-    {
-      gzerr << "Unable to load joint [" << joint.first << "]: "
-            << _e.GetErrorStr() << std::endl;
-    }
-  }
-}
-
-//////////////////////////////////////////////////
 void ScoringPlugin::ReleaseVehicle()
 {
-  // if (!this->vehicleModel || this->lockJoints.empty())
-  //   return;
+  if (!this->vehicleModel || this->lockJointsNames.empty())
+    return;
 
-  for (auto jointName : {"wamv_external_pivot_joint", "wamv_external_riser"})
+  for (auto jointName : this->lockJointNames)
   {
     auto joint = this->vehicleModel->GetJoint(jointName);
     if (joint)
       joint->Detach();
+    else
+      gzerr << "Unable to release [" << jointName << "]" << std::endl;
   }
+
+  this->lockJointNames.clear();
 
   gzmsg << "Vehicle released" << std::endl;
 }
