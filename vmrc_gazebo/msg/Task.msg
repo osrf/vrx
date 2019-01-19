@@ -4,8 +4,11 @@ string name
 # Task state.
 string state
 
-# Absolute sim time when this task started (ROS time).
-time start_time
+# Absolute sim time when this task will be in "ready" state (ROS time).
+time ready_time
+
+# Absolute sim time when this task will be in "running" state (ROS time).
+time running_time
 
 # Time elapsed since task started (ROS time). This is the current sim time
 # minus start time.
@@ -17,9 +20,6 @@ duration remaining_time
 
 # True if task timed out.
 bool timed_out
-
-# True if task has finished.
-bool finished
 
 # The score.
 float64 score

@@ -28,9 +28,10 @@
 #include "vmrc_gazebo/scoring_plugin.hh"
 
 /// \brief A plugin for computing the score of the navigation task.
+/// This plugin derives from the generic ScoringPlugin class. Check out that
+/// plugin for other required SDF elements.
 /// This plugin requires the following SDF parameters:
 ///
-/// <vehicle>: The name of the vehicle that should cross the gates. 
 /// <gates>: Specifies the collection of gates delimiting the course.
 ///
 ///   Each gate accepts the following elements:
@@ -44,6 +45,7 @@
 /// <plugin name="navigation_scoring_plugin"
 ///         filename="libnavigation_scoring_plugin.so">
 ///   <vehicle>wamv</vehicle>
+///   <task_name>navigation_scoring_plugin</task_name>
 ///   <gates>
 ///     <gate>
 ///       <red>red_bound_0</red>
@@ -154,13 +156,13 @@ class NavigationScoringPlugin : public ScoringPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
-  /// TESTING.
+  // Documentation inherited.
   private: void OnReady() override;
 
-  /// TESTING.
+  // Documentation inherited.
   private: void OnRunning() override;
 
-  /// TESTING.
+  // Documentation inherited.
   private: void OnFinished() override;
 
   /// \brief All the gates.
@@ -168,12 +170,6 @@ class NavigationScoringPlugin : public ScoringPlugin
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
-
-  /// \brief The name of the vehicle that should cross the gates.
-  private: std::string vehicleName;
-
-  /// \brief Pointer to the vehicle that should cross the gates.
-  private: gazebo::physics::ModelPtr vehicleModel;
 };
 
 #endif

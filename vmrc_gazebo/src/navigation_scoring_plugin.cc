@@ -95,14 +95,6 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   ScoringPlugin::Load(_world, _sdf);
 
   // This is a required element.
-  if (!_sdf->HasElement("vehicle"))
-  {
-    gzerr << "Unable to find <vehicle> element in SDF." << std::endl;
-    return;
-  }
-  this->vehicleName = _sdf->Get<std::string>("vehicle");
-
-  // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
     gzerr << "Unable to find <gates> element in SDF." << std::endl;

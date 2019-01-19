@@ -22,11 +22,6 @@
 #include "vmrc_gazebo/scoring_plugin.hh"
 
 /////////////////////////////////////////////////
-ScoringPlugin::ScoringPlugin()
-{
-}
-
-/////////////////////////////////////////////////
 void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
@@ -36,72 +31,21 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->world = _world;
   this->sdf = _sdf;
 
-  // This is a required element.
-  if (!_sdf->HasElement("vehicle"))
+  // SDF.
+  if (!this->ParseSDFParameters())
   {
-    gzerr << "Unable to find <vehicle> element in SDF." << std::endl;
+    gzerr << "Scoring disabled" << std::endl;
     return;
   }
-  this->vehicleName = _sdf->Get<std::string>("vehicle");
 
-  // This is a required element.
-  if (!_sdf->HasElement("task_name"))
-  {
-    gzerr << "Unable to find <task_name> element in SDF." << std::endl;
-    return;
-  }
-  this->taskName = _sdf->Get<std::string>("task_name");
-
-  // This is a required element.
-  if (!_sdf->HasElement("max_time"))
-  {
-    gzerr << "Unable to find <max_time> element in SDF." << std::endl;
-    return;
-  }
-  this->maxTime = _sdf->Get<uint32_t>("max_time");
-
-  // This is an optional element.
-  if (_sdf->HasElement("topic"))
-    this->topic = _sdf->Get<std::string>("topic");
-
-  // These are optional elements.
-  if (_sdf->HasElement("release_joints"))
-  {
-    auto releaseJointsElem = _sdf->GetElement("release_joints");
-
-    // We need at least one joint.
-    if (!releaseJointsElem->HasElement("joint"))
-    {
-      gzerr << "Unable to find <joint> element in SDF." << std::endl;
-      return;
-    }
-
-    auto jointElem = releaseJointsElem->GetElement("joint");
-
-    // Parse a new joint to be released.
-    while (jointElem)
-    {
-      // The joint's name.
-      if (!jointElem->HasElement("name"))
-      {
-        gzerr << "Unable to find <name> element in SDF." << std::endl;
-        return;
-      }
-
-      const std::string jointName = jointElem->Get<std::string>("name");
-      this->lockJointNames.push_back(jointName);
-
-      // Parse the next gate.
-      jointElem = jointElem->GetNextElement("joint");
-    }
-  }
-
-  // Set the end time of the task.
-  this->endTime = this->runningTime + gazebo::common::Time(this->maxTime, 0);
+  this->readyTime.Set(this->initialStateDuration);
+  this->runningTime = this->readyTime + this->readyStateDuration;
+  this->finishTime = this->runningTime + this->runningStateDuration;
 
   // Prepopulate the task msg.
   this->taskMsg.name = this->taskName;
-  this->taskMsg.start_time.fromSec(this->runningTime.Double());
+  this->taskMsg.ready_time.fromSec(this->readyTime.Double());
+  this->taskMsg.running_time.fromSec(this->runningTime.Double());
   this->UpdateTaskMessage();
 
   // Initialize ROS transport.
@@ -119,9 +63,9 @@ double ScoringPlugin::Score() const
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::SetScore(double newScore)
+void ScoringPlugin::SetScore(double _newScore)
 {
-  this->score = newScore;
+  this->score = _newScore;
 }
 
 //////////////////////////////////////////////////
@@ -137,9 +81,9 @@ std::string ScoringPlugin::TaskState() const
 }
 
 //////////////////////////////////////////////////
-uint32_t ScoringPlugin::MaxTime() const
+uint32_t ScoringPlugin::MaxTaskTime() const
 {
-  return this->maxTime;
+  return this->maxTaskTime;
 }
 
 //////////////////////////////////////////////////
@@ -171,22 +115,22 @@ void ScoringPlugin::Update()
   if (!this->vehicleModel)
     this->vehicleModel = this->world->GetModel(this->vehicleName);
 
-  // Update time.
+  this->UpdateTime();
+  this->UpdateTaskState();
+  this->PublishStats();
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::UpdateTime()
+{
   this->currentTime = this->world->GetSimTime();
 
   if (this->taskState == "running")
   {
-    this->elapsedTime = std::min(std::max(this->currentTime - this->runningTime,
-        gazebo::common::Time::Zero), this->endTime - this->runningTime);
-    this->remainingTime = std::min(std::max(this->endTime - this->currentTime,
-        gazebo::common::Time::Zero), this->endTime - this->runningTime);
+    this->elapsedTime = this->currentTime - this->runningTime;
+    this->remainingTime = this->finishTime - this->currentTime;
     this->timedOut = this->remainingTime <= gazebo::common::Time::Zero;
   }
-
-  this->UpdateTaskState();
-
-  // Publish stats.
-  this->PublishStats();
 }
 
 //////////////////////////////////////////////////
@@ -198,7 +142,6 @@ void ScoringPlugin::UpdateTaskState()
     this->taskState = "ready";
     this->ReleaseVehicle();
     this->OnReady();
-
     return;
   }
 
@@ -215,7 +158,7 @@ void ScoringPlugin::UpdateTaskState()
     this->taskState = "finished";
     this->OnFinished();
     return;
-  }  
+  }
 }
 
 //////////////////////////////////////////////////
@@ -225,7 +168,6 @@ void ScoringPlugin::UpdateTaskMessage()
   this->taskMsg.elapsed_time.fromSec(this->elapsedTime.Double());
   this->taskMsg.remaining_time.fromSec(this->remainingTime.Double());
   this->taskMsg.timed_out = this->timedOut;
-  this->taskMsg.finished = this->taskState == "finished";
 }
 
 //////////////////////////////////////////////////
@@ -244,7 +186,7 @@ void ScoringPlugin::PublishStats()
 //////////////////////////////////////////////////
 void ScoringPlugin::ReleaseVehicle()
 {
-  if (!this->vehicleModel || this->lockJointsNames.empty())
+  if (!this->vehicleModel || this->lockJointNames.empty())
     return;
 
   for (auto jointName : this->lockJointNames)
@@ -274,4 +216,108 @@ void ScoringPlugin::OnRunning()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
+}
+
+//////////////////////////////////////////////////
+bool ScoringPlugin::ParseSDFParameters()
+{
+  // This is a required element.
+  if (!this->sdf->HasElement("vehicle"))
+  {
+    gzerr << "Unable to find <vehicle> element in SDF." << std::endl;
+    return false;
+  }
+  this->vehicleName = this->sdf->Get<std::string>("vehicle");
+
+  // This is a required element.
+  if (!this->sdf->HasElement("task_name"))
+  {
+    gzerr << "Unable to find <task_name> element in SDF." << std::endl;
+    return false;
+  }
+  this->taskName = this->sdf->Get<std::string>("task_name");
+
+  // This is an optional element.
+  if (this->sdf->HasElement("topic"))
+    this->topic = this->sdf->Get<std::string>("topic");
+
+  // This is an optional element.
+  if (this->sdf->HasElement("initial_state_duration"))
+  {
+    double value = this->sdf->Get<double>("initial_state_duration");
+    if (value < 0)
+    {
+      gzerr << "<initial_state_duration> value should not be negative."
+            << std::endl;
+      return false;
+    }
+    this->initialStateDuration = value;
+  }
+
+  // This is an optional element.
+  if (this->sdf->HasElement("ready_state_duration"))
+  {
+    double value = this->sdf->Get<double>("ready_state_duration");
+    if (value < 0)
+    {
+      gzerr << "<ready_state_duration> value should not be negative."
+            << std::endl;
+      return false;
+    }
+
+    this->readyStateDuration = value;
+  }
+
+  // This is an optional element.
+  if (this->sdf->HasElement("running_state_duration"))
+  {
+    double value = this->sdf->Get<double>("running_state_duration");
+    if (value < 0)
+    {
+      gzerr << "<running_state_duration> value should not be negative."
+            << std::endl;
+      return false;
+    }
+    this->runningStateDuration = value;
+  }
+
+  return this->ParseJoints();
+}
+
+//////////////////////////////////////////////////
+bool ScoringPlugin::ParseJoints()
+{
+  // Optional element.
+  if (this->sdf->HasElement("release_joints"))
+  {
+    auto releaseJointsElem = this->sdf->GetElement("release_joints");
+
+    // We need at least one joint.
+    if (!releaseJointsElem->HasElement("joint"))
+    {
+      gzerr << "Unable to find <joint> element in SDF." << std::endl;
+      return false;
+    }
+
+    auto jointElem = releaseJointsElem->GetElement("joint");
+
+    // Parse a new joint to be released.
+    while (jointElem)
+    {
+      // The joint's name.
+      if (!jointElem->HasElement("name"))
+      {
+        gzerr << "Unable to find <name> element in SDF." << std::endl;
+        return false;
+      }
+
+      const std::string jointName = jointElem->Get<std::string>("name");
+      this->lockJointNames.push_back(jointName);
+
+      // Parse the next gate.
+      jointElem = jointElem->GetNextElement("joint");
+    }
+  }
+
+  return true;
 }
