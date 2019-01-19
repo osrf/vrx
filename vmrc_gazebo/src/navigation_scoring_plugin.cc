@@ -230,9 +230,6 @@ void NavigationScoringPlugin::Update()
 
     gate.state = currentState;
   }
-
-  // gzmsg << "Elapsed: " << this->ElapsedTime() << std::endl;
-  // gzmsg << "Remaining: " << this->RemainingTime() << std::endl;
 }
 
 //////////////////////////////////////////////////

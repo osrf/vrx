@@ -83,7 +83,8 @@ std::string ScoringPlugin::TaskState() const
 //////////////////////////////////////////////////
 uint32_t ScoringPlugin::MaxTaskTime() const
 {
-  return this->maxTaskTime;
+  return 0;
+  //return this->maxTaskTime;
 }
 
 //////////////////////////////////////////////////

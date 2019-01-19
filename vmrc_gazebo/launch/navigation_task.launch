@@ -22,6 +22,7 @@
        X = "holonomic" configuration -->
 
   <arg name="thrust_config" default="T" />
+  <arg name="wamv_locked" default="true" />
 
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -38,11 +39,14 @@
   <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
   <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
 
-  <arg if="$(arg h_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf"/>
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_t_locked.urdf"/>
-  <arg if="$(arg x_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_x.urdf"/>
+  <arg if="$(arg h_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
+  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_t.urdf.xacro"/>
+  <arg if="$(arg x_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_x.urdf.xacro"/>
 
-  <param name="robot_description" textfile="$(arg urdf)"/>
+  <!-- <param name="robot_description" textfile="$(arg urdf)"/> -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
+         locked:=$(arg wamv_locked)" />
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"

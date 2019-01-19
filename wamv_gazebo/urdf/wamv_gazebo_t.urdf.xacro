@@ -2,7 +2,35 @@
 <!-- Basic WAM-V with gazebo plugins for dynamics -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
        name="WAM-V">
+  <xacro:arg name="locked" default="false" />
   <!-- WAMV with "T" thruster configuration -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
   <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"/>
+
+  <xacro:if value="$(arg locked)">
+    <gazebo>
+      <link name="wamv_external_link"/>
+      <joint name="wamv_external_pivot_joint" type="universal">
+        <parent>wamv::base_link</parent>
+        <child>wamv_external_link</child>
+        <axis>
+          <xyz>1 0 0</xyz>
+        </axis>
+        <axis2>
+          <xyz>0 1 0</xyz>
+        </axis2>
+      </joint>
+      <joint name="wamv_external_riser" type="prismatic">
+        <parent>world</parent>
+        <child>wamv_external_link</child>
+        <axis>
+          <limit>
+            <lower>-3</lower>
+            <upper>3</upper>
+          </limit>
+          <xyz>0 0 1</xyz>
+        </axis>
+      </joint>
+    </gazebo>
+  </xacro:if>
 </robot>
