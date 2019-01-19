@@ -241,10 +241,10 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::vector<std::string> lockJointNames;
 
   /// \brief ROS node handle.
-  protected: std::unique_ptr<ros::NodeHandle> rosNode;
+  private: std::unique_ptr<ros::NodeHandle> rosNode;
 
   /// \brief Publisher for the task state.
-  protected: ros::Publisher taskPub;
+  private: ros::Publisher taskPub;
 };
 
 #endif

@@ -21,7 +21,7 @@
        T = H with a lateral thruster
        X = "holonomic" configuration -->
 
-  <arg name="thrust_config" default="T" />
+  <arg name="thrust_config" default="H" />
   <arg name="wamv_locked" default="true" />
 
   <!-- Start Gazebo with the world file -->

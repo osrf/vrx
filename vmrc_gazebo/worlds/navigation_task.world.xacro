@@ -146,7 +146,6 @@
       <uri>model://polyform_a7</uri>      
     </include>
 
-
     <!-- The scoring plugin -->
     <plugin name="navigation_scoring_plugin"
             filename="libnavigation_scoring_plugin.so">
