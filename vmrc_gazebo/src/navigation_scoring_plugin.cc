@@ -22,10 +22,10 @@
 
 /////////////////////////////////////////////////
 NavigationScoringPlugin::Gate::Gate(
-    const gazebo::physics::ModelPtr _redBuoyModel,
-    const gazebo::physics::ModelPtr _greenBuoyModel)
-  : redBuoyModel(_redBuoyModel),
-    greenBuoyModel(_greenBuoyModel)
+    const gazebo::physics::ModelPtr _leftMarkerModel,
+    const gazebo::physics::ModelPtr _rightMarkerModel)
+  : leftMarkerModel(_leftMarkerModel),
+    rightMarkerModel(_rightMarkerModel)
 {
   this->Update();
 }
@@ -33,22 +33,22 @@ NavigationScoringPlugin::Gate::Gate(
 /////////////////////////////////////////////////
 void NavigationScoringPlugin::Gate::Update()
 {
-  if (!this->redBuoyModel || !this->greenBuoyModel)
+  if (!this->leftMarkerModel || !this->rightMarkerModel)
     return;
 
-  // The pose of the buoys delimiting the gate.
-  const auto redPose = this->redBuoyModel->GetWorldPose();
-  const auto greenPose = this->greenBuoyModel->GetWorldPose();
+  // The pose of the markers delimiting the gate.
+  const auto leftMarkerPose = this->leftMarkerModel->GetWorldPose();
+  const auto rightMarkerPose = this->rightMarkerModel->GetWorldPose();
 
-  // Unit vector from the green buoy to the red one.
-  auto v1 = redPose.pos - greenPose.pos;
+  // Unit vector from the left marker to the right one.
+  auto v1 = leftMarkerPose.pos - rightMarkerPose.pos;
   v1.Normalize();
 
   // Unit vector perpendicular to v1 in the direction we like to cross gates.
   const auto v2 = gazebo::math::Vector3::UnitZ.Cross(v1);
 
   // This is the center point of the gate.
-  const auto middle = (redPose.pos + greenPose.pos) / 2.0;
+  const auto middle = (leftMarkerPose.pos + rightMarkerPose.pos) / 2.0;
 
   // Yaw of the gate in world coordinates.
   const auto yaw = atan2(v2.y, v2.x);
@@ -57,7 +57,7 @@ void NavigationScoringPlugin::Gate::Update()
   this->pose.Set(middle, gazebo::math::Vector3(0, 0, yaw));
 
   // The updated width.
-  this->width = redPose.pos.Distance(greenPose.pos);
+  this->width = leftMarkerPose.pos.Distance(rightMarkerPose.pos);
 }
 
 /////////////////////////////////////////////////
@@ -132,25 +132,27 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
   // Parse a new gate.
   while (gateElem)
   {
-    // The red buoy's name.
-    if (!gateElem->HasElement("red"))
+    // The left marker's name.
+    if (!gateElem->HasElement("left_marker"))
     {
-      gzerr << "Unable to find <red> element in SDF." << std::endl;
+      gzerr << "Unable to find <left_marker> element in SDF." << std::endl;
       return false;
     }
 
-    const std::string redBuoyName = gateElem->Get<std::string>("red");
+    const std::string leftMarkerName =
+      gateElem->Get<std::string>("left_marker");
 
-    // The green buoy's name.
-    if (!gateElem->HasElement("green"))
+    // The right marker's name.
+    if (!gateElem->HasElement("right_marker"))
     {
-      gzerr << "Unable to find <green> element in SDF." << std::endl;
+      gzerr << "Unable to find <right_marker> element in SDF." << std::endl;
       return false;
     }
 
-    const std::string greenBuoyName = gateElem->Get<std::string>("green");
+    const std::string rightMarkerName =
+      gateElem->Get<std::string>("right_marker");
 
-    if (!this->AddGate(redBuoyName, greenBuoyName))
+    if (!this->AddGate(leftMarkerName, rightMarkerName))
       return false;
 
     // Parse the next gate.
@@ -161,30 +163,31 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool NavigationScoringPlugin::AddGate(const std::string &_redBuoyName,
-    const std::string &_greenBuoyName)
+bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
+    const std::string &_rightMarkerName)
 {
-  gazebo::physics::ModelPtr redBuoyModel = this->world->GetModel(_redBuoyName);
+  gazebo::physics::ModelPtr leftMarkerModel =
+    this->world->GetModel(_leftMarkerName);
 
   // Sanity check: Make sure that the model exists.
-  if (!redBuoyModel)
+  if (!leftMarkerModel)
   {
-    gzerr << "Unable to find model [" << _redBuoyName << "]" << std::endl;
+    gzerr << "Unable to find model [" << _leftMarkerName << "]" << std::endl;
     return false;
   }
 
-  gazebo::physics::ModelPtr greenBuoyModel =
-    this->world->GetModel(_greenBuoyName);
+  gazebo::physics::ModelPtr rightMarkerModel =
+    this->world->GetModel(_rightMarkerName);
 
   // Sanity check: Make sure that the model exists.
-  if (!greenBuoyModel)
+  if (!rightMarkerModel)
   {
-    gzerr << "Unable to find model [" << _greenBuoyName << "]" << std::endl;
+    gzerr << "Unable to find model [" << _rightMarkerName << "]" << std::endl;
     return false;
   }
 
   // Save the new gate.
-  this->gates.push_back(Gate(redBuoyModel, greenBuoyModel));
+  this->gates.push_back(Gate(leftMarkerModel, rightMarkerModel));
 
   return true;
 }
@@ -225,7 +228,8 @@ void NavigationScoringPlugin::Update()
              gate.state   == GateState::VEHICLE_AFTER)
     {
       currentState = GateState::INVALID;
-      gzmsg << "Went backward through gate. Invalidated!" << std::endl;
+      gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
+            << std::endl;
     }
 
     gate.state = currentState;
