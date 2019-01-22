@@ -152,32 +152,32 @@
       <vehicle>wamv</vehicle>
       <gates>
         <gate>
-          <red>red_bound_0</red>
-          <green>green_bound_0</green>
+          <left_marker>red_bound_0</left_marker>
+          <right_marker>green_bound_0</right_marker>
         </gate>
         <gate>
-          <red>red_bound_1</red>
-          <green>green_bound_1</green>
+          <left_marker>red_bound_1</left_marker>
+          <right_marker>green_bound_1</right_marker>
         </gate>
         <gate>
-          <red>red_bound_2</red>
-          <green>green_bound_2</green>
+          <left_marker>red_bound_2</left_marker>
+          <right_marker>green_bound_2</right_marker>
         </gate>
         <gate>
-          <red>red_bound_3</red>
-          <green>green_bound_3</green>
+          <left_marker>red_bound_3</left_marker>
+          <right_marker>green_bound_3</right_marker>
         </gate>
         <gate>
-          <red>red_bound_4</red>
-          <green>green_bound_4</green>
+          <left_marker>red_bound_4</left_marker>
+          <right_marker>green_bound_4</right_marker>
         </gate>
         <gate>
-          <red>red_bound_5</red>
-          <green>green_bound_5</green>
+          <left_marker>red_bound_5</left_marker>
+          <right_marker>green_bound_5</right_marker>
         </gate>
         <gate>
-          <red>red_bound_6</red>
-          <green>green_bound_6</green>
+          <left_marker>red_bound_6</left_marker>
+          <right_marker>green_bound_6</right_marker>
         </gate>
       </gates>
 

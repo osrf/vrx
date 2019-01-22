@@ -31,15 +31,19 @@
 /// \brief A plugin for computing the score of the navigation task.
 /// This plugin requires the following SDF parameters:
 ///
-/// <vehicle>: The name of the vehicle that should cross the gates. 
+/// <vehicle>: The name of the vehicle that should cross the gates.
 /// <gates>: Specifies the collection of gates delimiting the course.
 ///
 ///   Each gate accepts the following elements:
 ///
-///   <gate>: A gate is delimited by a red and green buoy:
+///   <gate>: A gate is delimited by two markers (left and right).
+///   The vessel should pass through the gate with the markers on the defined
+///   right and left sides. E.g.:
 ///
-///      <red>: The name of the red buoy.
-///      <green> The name of the green buoy,
+///      <left_marker>: The name of the marker that should stay on the left
+///      side of the vessel.
+///      <right_marker> The name of the marker that should stay on the right
+///      side of the vessel.
 ///
 /// Here's an example:
 /// <plugin name="navigation_scoring_plugin"
@@ -47,32 +51,32 @@
 ///   <vehicle>wamv</vehicle>
 ///   <gates>
 ///     <gate>
-///       <red>red_bound_0</red>
-///       <green>green_bound_0</green>
+///       <left_marker>red_bound_0</left_marker>
+///       <right_marker>green_bound_0</right_marker>
 ///     </gate>
 ///     <gate>
-///       <red>red_bound_1</red>
-///       <green>green_bound_1</green>
+///       <left_marker>red_bound_1</left_marker>
+///       <right_marker>green_bound_1</right_marker>
 ///     </gate>
 ///     <gate>
-///       <red>red_bound_2</red>
-///       <green>green_bound_2</green>
+///       <left_marker>red_bound_2</left_marker>
+///       <right_marker>green_bound_2</right_marker>
 ///     </gate>
 ///     <gate>
-///       <red>red_bound_3</red>
-///       <green>green_bound_3</green>
+///       <left_marker>red_bound_3</left_marker>
+///       <right_marker>green_bound_3</right_marker>
 ///     </gate>
 ///     <gate>
-///       <red>red_bound_4</red>
-///       <green>green_bound_4</green>
+///       <left_marker>red_bound_4</left_marker>
+///       <right_marker>green_bound_4</right_marker>
 ///     </gate>
 ///     <gate>
-///       <red>red_bound_5</red>
-///       <green>green_bound_5</green>
+///       <left_marker>red_bound_5</left_marker>
+///       <right_marker>green_bound_5</right_marker>
 ///     </gate>
 ///     <gate>
-///       <red>red_bound_6</red>
-///       <green>green_bound_6</green>
+///       <left_marker>red_bound_6</left_marker>
+///       <right_marker>green_bound_6</right_marker>
 ///     </gate>
 ///   </gates>
 /// </plugin>
@@ -101,10 +105,10 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
   private: class Gate
   {
     /// \brief Constructor.
-    /// \param[in] _redBuoyName The red buoy's model.
-    /// \param[in] _greenBuoyName The green buoy's model.
-    public: Gate(const gazebo::physics::ModelPtr _redBuoyModel,
-                 const gazebo::physics::ModelPtr _greenBuoyModel);
+    /// \param[in] _leftMarkerName The left marker's model.
+    /// \param[in] _rightMarkerName The right marker's model.
+    public: Gate(const gazebo::physics::ModelPtr _leftMarkerModel,
+                 const gazebo::physics::ModelPtr _rightMarkerModel);
 
     /// \brief Where is the given robot pose with respect to the gate?
     /// \param _robotWorldPose Pose of the robot, in the world frame.
@@ -115,11 +119,11 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
     /// \brief Recalculate the pose and width of the gate.
     public: void Update();
 
-    /// \brief The red buoy model.
-    public: gazebo::physics::ModelPtr redBuoyModel;
+    /// \brief The left marker model.
+    public: gazebo::physics::ModelPtr leftMarkerModel;
 
-    /// \brief The green buoy model.
-    public: gazebo::physics::ModelPtr greenBuoyModel;
+    /// \brief The right marker model.
+    public: gazebo::physics::ModelPtr rightMarkerModel;
 
     /// \brief The center of the gate in the world frame. Note that the roll and
     /// pitch are ignored. Only yaw is relevant and it points into the direction
@@ -146,11 +150,11 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
   private: bool ParseGates(sdf::ElementPtr _sdf);
 
   /// \brief Register a new gate.
-  /// \param[in] _redBuoyName The name of the red buoy.
-  /// \param[in] _greenBuoyName The name of the green buoy.
+  /// \param[in] _leftMarkerName The name of the left marker.
+  /// \param[in] _rightMarkerName The name of the right marker.
   /// \return True when the gate has been registered or false otherwise.
-  private: bool AddGate(const std::string &_redBuoyName,
-                        const std::string &_greenBuoyName);
+  private: bool AddGate(const std::string &_leftMarkerName,
+                        const std::string &_rightMarkerName);
 
   /// \brief Callback executed at every world update.
   private: void Update();
