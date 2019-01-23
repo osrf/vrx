@@ -92,18 +92,7 @@ NavigationScoringPlugin::NavigationScoringPlugin()
 void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
-  GZ_ASSERT(_world, "NavigationScoringPlugin::Load(): NULL world pointer");
-  GZ_ASSERT(_sdf,   "NavigationScoringPlugin::Load(): NULL _sdf pointer");
-
-  this->world = _world;
-
-  // This is a required element.
-  if (!_sdf->HasElement("vehicle"))
-  {
-    gzerr << "Unable to find <vehicle> element in SDF." << std::endl;
-    return;
-  }
-  this->vehicleName = _sdf->Get<std::string>("vehicle");
+  ScoringPlugin::Load(_world, _sdf);
 
   // This is a required element.
   if (!_sdf->HasElement("gates"))
@@ -119,6 +108,8 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     gzerr << "Score has been disabled" << std::endl;
     return;
   }
+
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&NavigationScoringPlugin::Update, this));
@@ -243,6 +234,24 @@ void NavigationScoringPlugin::Update()
 
     gate.state = currentState;
   }
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::OnReady()
+{
+  gzmsg << "OnReady" << std::endl;
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::OnRunning()
+{
+  gzmsg << "OnRunning" << std::endl;
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::OnFinished()
+{
+  gzmsg << "OnFinished" << std::endl;
 }
 
 // Register plugin with gazebo

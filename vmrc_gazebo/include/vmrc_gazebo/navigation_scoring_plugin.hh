@@ -18,20 +18,20 @@
 #ifndef VMRC_GAZEBO_NAVIGATION_SCORING_PLUGIN_HH_
 #define VMRC_GAZEBO_NAVIGATION_SCORING_PLUGIN_HH_
 
-#include <ros/ros.h>
 #include <string>
 #include <vector>
 #include <gazebo/common/Events.hh>
-#include <gazebo/common/Plugin.hh>
 #include <gazebo/math/Pose.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
+#include "vmrc_gazebo/scoring_plugin.hh"
 
 /// \brief A plugin for computing the score of the navigation task.
+/// This plugin derives from the generic ScoringPlugin class. Check out that
+/// plugin for other required SDF elements.
 /// This plugin requires the following SDF parameters:
 ///
-/// <vehicle>: The name of the vehicle that should cross the gates.
 /// <gates>: Specifies the collection of gates delimiting the course.
 ///
 ///   Each gate accepts the following elements:
@@ -49,6 +49,7 @@
 /// <plugin name="navigation_scoring_plugin"
 ///         filename="libnavigation_scoring_plugin.so">
 ///   <vehicle>wamv</vehicle>
+///   <task_name>navigation_scoring_plugin</task_name>
 ///   <gates>
 ///     <gate>
 ///       <left_marker>red_bound_0</left_marker>
@@ -80,7 +81,7 @@
 ///     </gate>
 ///   </gates>
 /// </plugin>
-class NavigationScoringPlugin : public gazebo::WorldPlugin
+class NavigationScoringPlugin : public ScoringPlugin
 {
   /// \brief All gate states.
   private: enum class GateState
@@ -159,20 +160,20 @@ class NavigationScoringPlugin : public gazebo::WorldPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
+  // Documentation inherited.
+  private: void OnReady() override;
+
+  // Documentation inherited.
+  private: void OnRunning() override;
+
+  // Documentation inherited.
+  private: void OnFinished() override;
+
   /// \brief All the gates.
   private: std::vector<Gate> gates;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
-
-  /// \brief A world pointer.
-  private: gazebo::physics::WorldPtr world;
-
-  /// \brief The name of the vehicle that should cross the gates.
-  private: std::string vehicleName;
-
-  /// \brief Pointer to the vehicle that should cross the gates.
-  private: gazebo::physics::ModelPtr vehicleModel;
 };
 
 #endif

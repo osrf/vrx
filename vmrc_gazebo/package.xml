@@ -17,6 +17,7 @@
   <depend>gazebo_dev</depend>
   <depend>joy</depend>
   <depend>joy_teleop</depend>
+  <depend>message_runtime</depend>
   <depend>std_msgs</depend>
   <depend>wamv_gazebo</depend>
   <depend>xacro</depend>
