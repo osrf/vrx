@@ -224,7 +224,7 @@ namespace gazebo
     /// \brief Vector of thruster instances
     private: std::vector<Thruster> thrusters;
 
-       /// \brief Pointer to the update event connection.
+    /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
 
     /// \brief For publishing to /joint_state with propeller state.

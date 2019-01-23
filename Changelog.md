@@ -1,5 +1,11 @@
 ## VMRC 0
 
+
+### VMRC 0.4.X
+
+1. Scoring plugin for the navigation course task.
+  * [Pull request 60](https://bitbucket.org/osrf/vmrc/pull-requests/60)
+
 ### VMRC 0.3.X
 
 1. robotx_gazebo ROS package renamed to vmrc_gazebo.

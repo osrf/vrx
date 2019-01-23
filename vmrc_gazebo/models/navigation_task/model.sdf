@@ -6,13 +6,13 @@
       <!-- Starboard_border -->
       <include>
         <name>red_bound_0</name>
-        <pose>-51.4227 1.0515 0 0 -0 0</pose>
+        <pose>-29.8874 7.80274 0 0 -0 0</pose>
         <uri>model://surmark950410</uri>      
       </include>
 
       <include>
         <name>red_bound_1</name>
-        <pose>-29.8874 7.80274 0 0 -0 0</pose>
+        <pose>-51.4227 1.0515 0 0 -0 0</pose>
         <uri>model://surmark950410</uri>      
       </include>
 
