@@ -20,29 +20,34 @@
        H = stern trusters on each hull
        T = H with a lateral thruster
        X = "holonomic" configuration -->
-
   <arg name="thrust_config" default="H" />
+
+  <!-- Do you want to enable sensors? -->
+  <arg name="camera_enabled"       default="false" />
+  <arg name="gps_enabled"          default="false" />
+  <arg name="imu_enabled"          default="false" />
+  <arg name="lidar_enabled"        default="false" />
+  <arg name="ground_truth_enabled" default="false" />
 
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(arg world)"/>
-    <arg name="verbose" value="$(arg verbose)"/>
-    <arg name="paused" value="false"/>
+    <arg name="world_name"   value="$(arg world)"/>
+    <arg name="verbose"      value="$(arg verbose)"/>
+    <arg name="paused"       value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="$(arg gui)" />
+    <arg name="gui"          value="$(arg gui)" />
   </include>
 
   <!-- Load robot model -->
-  <!-- Determine which model -->
-  <arg name="h_config" value="$(eval int((thrust_config)=='H'))"/>
-  <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
-  <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
-
-  <arg if="$(arg h_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf"/>
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_t.urdf"/>
-  <arg if="$(arg x_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo_x.urdf"/>
-
-  <param name="robot_description" textfile="$(arg urdf)"/>
+  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
+  <param name="robot_description"
+         command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
+         thruster_config:=$(arg thrust_config)
+         camera_enabled:=$(arg camera_enabled)
+         gps_enabled:=$(arg gps_enabled)
+         imu_enabled:=$(arg imu_enabled)
+         lidar_enabled:=$(arg lidar_enabled)
+         ground_truth_enabled:=$(arg ground_truth_enabled) "/>
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"

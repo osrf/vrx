@@ -3,10 +3,36 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
        name="WAM-V">
   <xacro:arg name="locked" default="false" />
-  <!-- Default WAM-V with two aft thrusters -->
-  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
-  <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"/>
+  <xacro:arg name="thruster_config" default="H" />
+  <xacro:arg name="camera_enabled" default="false" />
+  <xacro:arg name="gps_enabled" default="false" />
+  <xacro:arg name="imu_enabled" default="false" />
+  <xacro:arg name="lidar_enabled" default="false" />
+  <xacro:arg name="ground_truth_enabled" default="false" />
+  <xacro:arg name="vmrc_sensors_enabled" default="false" />
 
+  <!-- === The WAM-V platform === -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
+
+  <!-- === Thrusters === -->
+  <xacro:property name="thruster_conf" value="$(arg thruster_config)"/> -->
+
+  <!-- Default WAM-V with two aft thrusters -->
+  <xacro:if value="${thruster_conf == 'H'}">
+     <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"/>
+  </xacro:if>
+
+  <!-- WAMV with "T" thruster configuration -->
+  <xacro:if value="${thruster_conf == 'T'}">
+    <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"/>
+  </xacro:if>
+
+  <!-- WAMV with "X" thruster configuration -->
+  <xacro:if value="${thruster_conf == 'X'}">
+    <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_x_thrusters.xacro"/>
+  </xacro:if>
+
+  <!-- Decide if we lock the robot to the world -->
   <xacro:if value="$(arg locked)">
     <gazebo>
       <link name="wamv_external_link"/>
@@ -33,4 +59,50 @@
       </joint>
     </gazebo>
   </xacro:if>
+
+  <!-- Add a front camera -->
+  <xacro:if value="$(arg camera_enabled)">
+    <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}" />
+  </xacro:if>
+
+  <!-- Add simulated GPS -->
+  <xacro:if value="$(arg gps_enabled)">
+    <xacro:wamv_gps name="gps_wamv" y="0.2" />
+  </xacro:if>
+
+  <!-- Add Simulated IMU -->
+  <xacro:if value="$(arg imu_enabled)">
+    <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+  </xacro:if>
+
+  <!-- Add 3D LIDAR -->
+  <xacro:if value="$(arg lidar_enabled)">
+    <xacro:wamv_3d_lidar name="lidar_wamv" y="-0.3" />
+  </xacro:if>
+
+  <!-- Add P3D ground truth -->
+  <xacro:if value="$(arg ground_truth_enabled)">
+    <xacro:wamv_p3d name="p3d_wamv"/>
+  </xacro:if>
+
+  <!-- ==== VMRC sensor configuration ==== -->
+  <xacro:if value="$(arg vmrc_sensors_enabled)">
+
+    <!-- Add a stereo camera pair -->
+    <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}" />
+    <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75" P="${radians(15)}" />
+
+    <!-- Add a camera facing right -->
+    <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" />
+
+    <!-- Add simulated GPS -->
+    <xacro:wamv_gps name="gps_wamv" y="0.2" />
+
+    <!-- Add Simulated IMU -->
+    <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+
+    <!-- Add 3D LIDAR -->
+    <xacro:wamv_3d_lidar name="lidar_wamv" P="${radians(8)}" />
+  </xacro:if>
+
 </robot>
