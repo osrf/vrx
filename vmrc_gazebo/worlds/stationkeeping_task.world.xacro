@@ -5,7 +5,7 @@
     <xacro:include filename="$(find vmrc_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
 	<plugin name="stationkeeping_scoring_plugin"
-            filename="stationkeeping_scoring_plugin.so">
+            filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>
       <task_name>navigation_course</task_name>
       <initial_state_duration>10</initial_state_duration>
