@@ -18,6 +18,8 @@
 #include <cmath>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
+#include "std_msgs/String.h"
+#include <sstream>
 #include "vmrc_gazebo/stationkeeping_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
@@ -33,6 +35,9 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   ScoringPlugin::Load(_world, _sdf);
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
+
+  this->rosNode.reset(new ros::NodeHandle());
+  this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->topic, 10);
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&StationkeepingScoringPlugin::Update, this));
@@ -56,12 +61,23 @@ void StationkeepingScoringPlugin::Update()
 void StationkeepingScoringPlugin::OnReady()
 {
   gzmsg << "OnReady" << std::endl;
+
 }
 
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
+  this->goal.header.stamp = ros::Time::now();
+  this->goal.pose.position.latitude  = 0; 
+  this->goal.pose.position.longitude = 0; 
+  this->goal.pose.position.altitude  = 0;
+  this->goal.pose.orientation.x      = 0; 
+  this->goal.pose.orientation.y      = 0; 
+  this->goal.pose.orientation.z      = 0; 
+  this->goal.pose.orientation.w      = 0; 
+
+  this->goalPub.publish(this->goal);
 }
 
 //////////////////////////////////////////////////

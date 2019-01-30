@@ -25,6 +25,7 @@
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
+#include "geographic_msgs/GeoPoseStamped.h"
 #include "vmrc_gazebo/scoring_plugin.hh"
 
 /// \brief A plugin for computing the score of the station keeping task.
@@ -56,6 +57,21 @@ class StationkeepingScoringPlugin : public ScoringPlugin
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
+
+ /// \brief The next task message to be published.
+  private: vmrc_gazebo::Task taskMsg;
+
+ /// \brief Topic where the task stats are published.
+  protected: std::string topic = "/vmrc/task/goal";
+
+  /// \brief ROS node handle.
+  private: std::unique_ptr<ros::NodeHandle> rosNode;
+
+ /// \brief Publisher for the task state.
+  private: ros::Publisher goalPub;
+
+  private: geographic_msgs::GeoPoseStamped goal;
+
 };
 
 #endif
