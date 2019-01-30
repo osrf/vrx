@@ -2,7 +2,7 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vmrc_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find vmrc_gazebo)/worlds/example_course.world" />
+  <arg name="world" default="$(find vmrc_gazebo)/worlds/stationkeeping_task.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
@@ -22,6 +22,9 @@
        X = "holonomic" configuration -->
   <arg name="thrust_config" default="T" />
 
+  <!-- Do we lock the vessel to the world? -->
+  <arg name="wamv_locked" default="true" />
+  
   <!-- Do we load the VMRC sensor suite? -->
   <arg name="vmrc_sensors_enabled" default="true" />
 
@@ -34,23 +37,16 @@
     <arg name="gui" value="$(arg gui)" />
   </include>
 
-  <!-- Set the name of the task -->
-  <param name="/vmrc/task" value="2019/perception" />
-
-  <!-- Load robot model -->
-  <!-- Determine which model -->
-  <arg name="h_config" value="$(eval int((thrust_config)=='H'))"/>
-  <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
-  <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
-
-  <!-- For now - can only use the T configuration! -->
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
-
+  <!-- Set the name of the task 
+  <param name="/vmrc/task" value="2019/perception" />-->
+  
+   <!-- Load robot model -->
+  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
   <param name="robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
+         locked:=$(arg wamv_locked)
          thruster_config:=$(arg thrust_config)
          vmrc_sensors_enabled:=$(arg vmrc_sensors_enabled) "/>
-
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"

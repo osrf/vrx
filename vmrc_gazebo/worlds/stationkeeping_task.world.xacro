@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<!-- World containing sandisland model and some course challenges -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="robotx_stationkeeping">
+    <xacro:include filename="$(find vmrc_gazebo)/worlds/sandisland.xacro" />
+    <xacro:sandisland />
+
+
+
+  </world>
+</sdf>
