@@ -20,6 +20,8 @@
 #include <gazebo/common/Console.hh>
 #include "std_msgs/String.h"
 #include <sstream>
+#include <ignition/math/Pose3.hh>
+#include <gazebo/common/common.hh>
 #include "vmrc_gazebo/stationkeeping_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
@@ -36,6 +38,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
+  this->sdf = _sdf;
   this->rosNode.reset(new ros::NodeHandle());
   this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->topic, 10);
 
@@ -65,19 +68,48 @@ void StationkeepingScoringPlugin::OnReady()
 }
 
 //////////////////////////////////////////////////
+geographic_msgs::GeoPoseStamped StationkeepingScoringPlugin::GetGoalFromSDF()
+{
+  gzmsg << "Getting Goal coordinates" << std::endl;
+  geographic_msgs::GeoPoseStamped goal;
+  ignition::math::Pose3<double> pose(0,0,0,0,0,0);
+
+if (!this->sdf->HasElement("goal_pose"))
+{
+  gzerr << "Unable to find <goal_pose> element in SDF." << std::endl;
+  gzerr << "Using default pose: 0 0 0 0 0 0" << std::endl;
+} else {
+  pose = this->sdf->Get<ignition::math::Pose3<double>>("goal_pose");
+}
+
+  // convert local position to lat/lon/alt
+  ignition::math::SphericalCoordinates::SurfaceType st =
+  ignition::math::SphericalCoordinates::EARTH_WGS84;
+  ignition::math::SphericalCoordinates sc(st);
+
+  ignition::math::Vector3d coordinates = sc.SphericalFromLocalPosition(pose.Pos());
+
+  // populating GeoPoseStamped... must be a better way?
+  goal.pose.position.latitude  = coordinates[0];
+  goal.pose.position.longitude = coordinates[1];
+  goal.pose.position.altitude  = coordinates[2];
+
+  const ignition::math::Quaternion<double> orientation = pose.Rot();
+
+  goal.pose.orientation.x = orientation.X();
+  goal.pose.orientation.y = orientation.Y();
+  goal.pose.orientation.z = orientation.Z();
+  goal.pose.orientation.w = orientation.W();
+
+  goal.header.stamp = ros::Time::now();
+  return goal;
+}
+//////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
-  this->goal.header.stamp = ros::Time::now();
-  this->goal.pose.position.latitude  = 0; 
-  this->goal.pose.position.longitude = 0; 
-  this->goal.pose.position.altitude  = 0;
-  this->goal.pose.orientation.x      = 0; 
-  this->goal.pose.orientation.y      = 0; 
-  this->goal.pose.orientation.z      = 0; 
-  this->goal.pose.orientation.w      = 0; 
 
-  this->goalPub.publish(this->goal);
+  this->goalPub.publish(this->GetGoalFromSDF());
 }
 
 //////////////////////////////////////////////////

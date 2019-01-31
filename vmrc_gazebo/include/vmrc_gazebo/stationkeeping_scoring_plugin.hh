@@ -55,11 +55,16 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnFinished() override;
 
+  private: geographic_msgs::GeoPoseStamped GetGoalFromSDF();
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
  /// \brief The next task message to be published.
   private: vmrc_gazebo::Task taskMsg;
+
+ /// \brief Pointer to the sdf plugin element.
+  private: sdf::ElementPtr sdf;
 
  /// \brief Topic where the task stats are published.
   protected: std::string topic = "/vmrc/task/goal";
@@ -69,8 +74,6 @@ class StationkeepingScoringPlugin : public ScoringPlugin
 
  /// \brief Publisher for the task state.
   private: ros::Publisher goalPub;
-
-  private: geographic_msgs::GeoPoseStamped goal;
 
 };
 

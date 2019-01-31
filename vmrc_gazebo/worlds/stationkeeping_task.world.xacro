@@ -7,7 +7,8 @@
 	<plugin name="stationkeeping_scoring_plugin"
             filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>
-      <task_name>navigation_course</task_name>
+      <task_name>stationkeeping_task</task_name>
+      <goal_pose> 1 2 3 4 5 6 </goal_pose>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
