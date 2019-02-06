@@ -55,7 +55,8 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnFinished() override;
 
-  private: geographic_msgs::GeoPoseStamped GetGoalFromSDF();
+  /// \brief Publish the goal pose
+  private: void PublishGoal();
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -75,6 +76,21 @@ class StationkeepingScoringPlugin : public ScoringPlugin
  /// \brief Publisher for the task state.
   private: ros::Publisher goalPub;
 
+  /// \brief Goal pose in local (Gazebo) coordiates
+  private: double goalX;
+
+  /// \brief Goal pose in local (Gazebo) coordiates
+  private: double goalY;
+
+  /// \brief Goal pose in local (Gazebo) coordiates
+private: double goalYaw;
+	
+  /// \brief Goal pose in spherical (WGS84) coordinates
+  private: double goalLat;
+
+  /// \brief Goal pose in spherical (WGS84) coordinates
+  private: double goalLon;
+	
 };
 
 #endif

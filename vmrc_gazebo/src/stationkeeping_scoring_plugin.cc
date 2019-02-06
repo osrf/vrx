@@ -21,8 +21,11 @@
 #include "std_msgs/String.h"
 #include <sstream>
 #include <ignition/math/Pose3.hh>
+#include <ignition/math/Quaternion.hh>
 #include <gazebo/common/common.hh>
 #include "vmrc_gazebo/stationkeeping_scoring_plugin.hh"
+#include "gazebo/common/SphericalCoordinates.hh"
+
 
 /////////////////////////////////////////////////
 StationkeepingScoringPlugin::StationkeepingScoringPlugin()
@@ -35,10 +38,46 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
   ScoringPlugin::Load(_world, _sdf);
-
+  this->sdf = _sdf;
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
-  this->sdf = _sdf;
+  // Get Lat, lon and yaw from SDF
+  ignition::math::Vector3d latlonyaw(0,0,0);
+  if (!this->sdf->HasElement("goal_pose"))
+  {
+	  gzerr << "Unable to find <goal_pose> element in SDF." << std::endl;
+	  gzerr << "Using default pose: 0 0 0" << std::endl;
+  }
+  else
+  {
+	  latlonyaw = this->sdf->Get<ignition::math::Vector3d>("goal_pose");
+  }
+  // Store spherical 2D location
+  this->goalLat = latlonyaw.X();
+  this->goalLon = latlonyaw.Y();
+  
+  // Convert lat/lon to local
+  //  snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
+  ignition::math::Vector3d scVec(this->goalLat, this->goalLon, 0.0);
+
+  #if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Vector3d cartVec =
+		_world->SphericalCoords()->LocalFromSpherical(scVec);
+  #else
+    ignition::math::Vector3d cartVec =
+		_world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+  #endif
+
+  // Store local 2D location and yaw
+  this->goalX = cartVec.X();
+  this->goalY = cartVec.Y();
+  this->goalYaw = latlonyaw.Z();
+
+  // Print some debugging messages
+  gzmsg << "StationKeeping Goal, Spherical: Lat = " << this->goalLat << " Lon = " << this->goalLon << std::endl;
+  gzmsg << "StationKeeping Goal, Local: X = " << this->goalX << " Y = " << this->goalY << " Yaw = " << this->goalYaw << std::endl;
+  
+  // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
   this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->topic, 10);
 
@@ -60,41 +99,19 @@ void StationkeepingScoringPlugin::Update()
   const auto robotPose = this->vehicleModel->GetWorldPose();
 }
 
-//////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnReady()
-{
-  gzmsg << "OnReady" << std::endl;
-
-}
 
 //////////////////////////////////////////////////
-geographic_msgs::GeoPoseStamped StationkeepingScoringPlugin::GetGoalFromSDF()
+void StationkeepingScoringPlugin::PublishGoal()
 {
-  gzmsg << "Getting Goal coordinates" << std::endl;
+  gzmsg << "Publishing Goal coordinates" << std::endl;
   geographic_msgs::GeoPoseStamped goal;
-  ignition::math::Pose3<double> pose(0,0,0,0,0,0);
-
-if (!this->sdf->HasElement("goal_pose"))
-{
-  gzerr << "Unable to find <goal_pose> element in SDF." << std::endl;
-  gzerr << "Using default pose: 0 0 0 0 0 0" << std::endl;
-} else {
-  pose = this->sdf->Get<ignition::math::Pose3<double>>("goal_pose");
-}
-
-  // convert local position to lat/lon/alt
-  ignition::math::SphericalCoordinates::SurfaceType st =
-  ignition::math::SphericalCoordinates::EARTH_WGS84;
-  ignition::math::SphericalCoordinates sc(st);
-
-  ignition::math::Vector3d coordinates = sc.SphericalFromLocalPosition(pose.Pos());
 
   // populating GeoPoseStamped... must be a better way?
-  goal.pose.position.latitude  = coordinates[0];
-  goal.pose.position.longitude = coordinates[1];
-  goal.pose.position.altitude  = coordinates[2];
+  goal.pose.position.latitude  = this->goalLat;
+  goal.pose.position.longitude = this->goalLon;
+  goal.pose.position.altitude  = 0.0;
 
-  const ignition::math::Quaternion<double> orientation = pose.Rot();
+  const ignition::math::Quaternion<double> orientation(0.0,0.0,this->goalYaw);
 
   goal.pose.orientation.x = orientation.X();
   goal.pose.orientation.y = orientation.Y();
@@ -102,14 +119,24 @@ if (!this->sdf->HasElement("goal_pose"))
   goal.pose.orientation.w = orientation.W();
 
   goal.header.stamp = ros::Time::now();
-  return goal;
+
+  this->goalPub.publish(goal);
 }
+
+//////////////////////////////////////////////////
+void StationkeepingScoringPlugin::OnReady()
+{
+  gzmsg << "OnReady" << std::endl;
+
+  this->PublishGoal();
+}
+
+
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
 
-  this->goalPub.publish(this->GetGoalFromSDF());
 }
 
 //////////////////////////////////////////////////
