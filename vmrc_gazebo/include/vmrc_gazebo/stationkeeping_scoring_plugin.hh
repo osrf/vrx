@@ -58,6 +58,10 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Publish the goal pose
   private: void PublishGoal();
 
+  /// \brief Calculate instantaneous error 
+  private: double InstantaneousError();
+
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
@@ -68,13 +72,31 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   private: sdf::ElementPtr sdf;
 
  /// \brief Topic where the task stats are published.
-  protected: std::string topic = "/vmrc/task/goal";
+  protected: std::string goalTopic = "/vmrc/task/goal";
+
+ /// \brief Topic where the current translation error is published.
+  protected: std::string transErrorTopic = "/vmrc/task/trans_error";
+
+ /// \brief Topic where 2D pose error is published 
+  protected: std::string poseErrorTopic = "/vmrc/task/pose_error";
+
+ /// \brief Topic where total RMS pose error is published.
+  protected: std::string rmsErrorTopic = "/vmrc/task/rms_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
 
- /// \brief Publisher for the task state.
+ /// \brief Publisher for the goal.
   private: ros::Publisher goalPub;
+
+ /// \brief Publisher for the current translation error in Euclidean distance.
+  private: ros::Publisher transErrorPub;
+
+ /// \brief Publisher for the combined 2D pose error.
+  private: ros::Publisher poseErrorPub;
+
+ /// \brief Publisher for the current rms error.
+  private: ros::Publisher rmsErrorPub;
 
   /// \brief Goal pose in local (Gazebo) coordiates
   private: double goalX;
@@ -90,6 +112,22 @@ private: double goalYaw;
 
   /// \brief Goal pose in spherical (WGS84) coordinates
   private: double goalLon;
+
+  /// \brief current translation error in Euclidean distance 
+  private: double transError;
+
+  /// \brief combined 2D pose error (distance and yaw)
+  private: double poseError;
+
+  /// \brief number of instant pose error scores calculated so far 
+  private: double sampleCount;
+
+  /// \brief sum of squared error scores calculated so far 
+  private: double totalSquaredError;
+
+
+  /// \brief Cumulative 2D RMS error in meters  
+  private: double rmsError;
 	
 };
 

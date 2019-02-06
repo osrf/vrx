@@ -18,6 +18,7 @@
 #include <cmath>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
+#include <std_msgs/Float64.h>
 #include "std_msgs/String.h"
 #include <sstream>
 #include <ignition/math/Pose3.hh>
@@ -79,7 +80,11 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   
   // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
-  this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->topic, 10);
+  this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->goalTopic, 10);
+
+  this->transErrorPub = this->rosNode->advertise<std_msgs::Float64>(this->transErrorTopic, 100);
+  this->poseErrorPub  = this->rosNode->advertise<std_msgs::Float64>(this->poseErrorTopic, 100);
+  this->rmsErrorPub   = this->rosNode->advertise<std_msgs::Float64>(this->rmsErrorTopic, 100);
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&StationkeepingScoringPlugin::Update, this));
@@ -96,7 +101,34 @@ void StationkeepingScoringPlugin::Update()
       return;
   }
 
+  std_msgs::Float64 transErrorMsg;
+  std_msgs::Float64 poseErrorMsg;
+  std_msgs::Float64 rmsErrorMsg;
+
   const auto robotPose = this->vehicleModel->GetWorldPose();
+
+  double currentHeading = robotPose.rot.GetAsEuler().z;
+  double dx   =  this->goalX - robotPose.pos.x;
+  double dy   =  this->goalY - robotPose.pos.y;
+  double dhdg =  this->goalYaw - currentHeading; 
+
+  double sqError =  pow(dx,2) + pow(dy,2) + pow(dhdg,2);
+
+  this->transError = sqrt(pow(dx,2) + pow(dy,2));
+  this->poseError  = sqrt(sqError);
+  this->totalSquaredError += sqError;
+  this->sampleCount       += 1;
+
+  this->rmsError = sqrt(this->totalSquaredError/this->sampleCount);
+
+  transErrorMsg.data = this->transError;
+  poseErrorMsg.data = this->poseError;
+  rmsErrorMsg.data = this->rmsError;
+
+
+  this->transErrorPub.publish(transErrorMsg);
+  this->poseErrorPub.publish(poseErrorMsg);
+  this->rmsErrorPub.publish(rmsErrorMsg);
 }
 
 
