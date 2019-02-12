@@ -81,13 +81,6 @@ std::string ScoringPlugin::TaskState() const
 }
 
 //////////////////////////////////////////////////
-uint32_t ScoringPlugin::MaxTaskTime() const
-{
-  return 0;
-  //return this->maxTaskTime;
-}
-
-//////////////////////////////////////////////////
 gazebo::common::Time ScoringPlugin::ElapsedTime() const
 {
   return this->elapsedTime;
@@ -169,6 +162,7 @@ void ScoringPlugin::UpdateTaskMessage()
   this->taskMsg.elapsed_time.fromSec(this->elapsedTime.Double());
   this->taskMsg.remaining_time.fromSec(this->remainingTime.Double());
   this->taskMsg.timed_out = this->timedOut;
+  this->taskMsg.score = this->score;
 }
 
 //////////////////////////////////////////////////
