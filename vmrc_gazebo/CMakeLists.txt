@@ -46,6 +46,16 @@ install(TARGETS gazebo_ros_color
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for setting color of light buoy.
+add_library(light_buoy_plugin src/light_buoy_plugin.cc)
+target_link_libraries(gazebo_ros_color ${catkin_LIBRARIES})
+add_dependencies(light_buoy_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS light_buoy_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Plugin for light buoy color sequence
 add_library(light_buoy_controller src/light_buoy_controller.cc)
 target_link_libraries(light_buoy_controller ${catkin_LIBRARIES})
