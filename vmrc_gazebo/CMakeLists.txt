@@ -56,16 +56,6 @@ install(TARGETS light_buoy_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Plugin for light buoy color sequence
-add_library(light_buoy_controller src/light_buoy_controller.cc)
-target_link_libraries(light_buoy_controller ${catkin_LIBRARIES})
-add_dependencies(light_buoy_controller ${catkin_EXPORTED_TARGETS})
-install(TARGETS light_buoy_controller
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 # Plugin for controlling symbols
 add_library(symbol_controller src/symbol_controller.cc)
 target_link_libraries(symbol_controller ${catkin_LIBRARIES})
