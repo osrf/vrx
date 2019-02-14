@@ -197,7 +197,7 @@ void PlacardPlugin::Update()
 
     if (shortName.find(this->shape) != std::string::npos)
       color = this->kColors[this->color];
-  
+
     gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
 
     visual->SetAmbient(gazeboColor);
