@@ -17,17 +17,21 @@
 
 #include <gazebo/rendering/Scene.hh>
 #include <ignition/math/Rand.hh>
-#include "vmrc_gazebo/light_buoy_plugin.hh"
+#include "vmrc_gazebo/placard_plugin.hh"
 
-const std::array<LightBuoyPlugin::Colors_t, 5> LightBuoyPlugin::kColors
-  = {LightBuoyPlugin::Colors_t(CreateColor(1.0, 0.0, 0.0, 1.0), "RED"),
-     LightBuoyPlugin::Colors_t(CreateColor(0.0, 1.0, 0.0, 1.0), "GREEN"),
-     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 1.0, 1.0), "BLUE"),
-     LightBuoyPlugin::Colors_t(CreateColor(1.0, 1.0, 0.0, 1.0), "YELLOW"),
-     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 0.0, 1.0), "OFF")};
+// Static initialization.
+std::map<std::string, std_msgs::ColorRGBA> PlacardPlugin::kColors =
+  {
+    {"red",   CreateColor(1.0, 0.0, 0.0, 1.0)},
+    {"green", CreateColor(0.0, 1.0, 0.0, 1.0)},
+    {"blue",  CreateColor(0.0, 0.0, 1.0, 1.0)},
+  };
+
+std::vector<std::string> PlacardPlugin::kShapes =
+  {"circle", "cross", "triangle"};
 
 //////////////////////////////////////////////////
-std_msgs::ColorRGBA LightBuoyPlugin::CreateColor(const double _r,
+std_msgs::ColorRGBA PlacardPlugin::CreateColor(const double _r,
   const double _g, const double _b, const double _a)
 {
   static std_msgs::ColorRGBA color;
@@ -39,28 +43,17 @@ std_msgs::ColorRGBA LightBuoyPlugin::CreateColor(const double _r,
 }
 
 //////////////////////////////////////////////////
-uint8_t LightBuoyPlugin::IndexFromColor(const std::string &_color)
-{
-  uint8_t index = 0u;
-  for (auto color : kColors)
-  {
-    if (_color == color.second)
-      return index;
-
-    ++index;
-  }
-
-  return std::numeric_limits<uint8_t>::max();
-}
-
-//////////////////////////////////////////////////
-void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
+void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
   sdf::ElementPtr _sdf)
 {
   GZ_ASSERT(_parent != nullptr, "Received NULL model pointer");
 
   this->scene = _parent->GetScene();
   GZ_ASSERT(this->scene != nullptr, "NULL scene");
+
+  // This is important to disable the visual plugin running inside the GUI.
+  if (!this->scene->EnableVisualizations())
+    return;
 
   if (!this->ParseSDF(_sdf))
     return;
@@ -75,44 +68,55 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   if (this->shuffleEnabled)
   {
     this->nh = ros::NodeHandle(this->ns);
-    this->changePatternServer = this->nh.advertiseService(
-      this->topic, &LightBuoyPlugin::ChangePattern, this);
+    this->changeSymbolServer = this->nh.advertiseService(
+      this->topic, &PlacardPlugin::ChangeSymbol, this);
   }
 
   this->timer.Start();
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
-    std::bind(&LightBuoyPlugin::Update, this));
+    std::bind(&PlacardPlugin::Update, this));
 }
 
 //////////////////////////////////////////////////
-bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
+bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
 {
-  // Required: Sequence of colors.
-  uint8_t i = 0u;
-  for (auto colorIndex : {"color_1", "color_2", "color_3"})
+  // Parse the shape. We initialize it with a random shape.
+  this->ShuffleShape();
+  if (_sdf->HasElement("shape"))
   {
-    if (!_sdf->HasElement(colorIndex))
+    std::string aShape = _sdf->GetElement("shape")->Get<std::string>();
+    std::transform(aShape.begin(), aShape.end(), aShape.begin(), ::tolower);
+    // Sanity check: Make sure the shape is allowed.
+    if (std::find(this->kShapes.begin(), this->kShapes.end(), aShape) !=
+          this->kShapes.end())
     {
-      ROS_ERROR("<%s> missing", colorIndex);
-      return false;
+      this->shape = aShape;
     }
-
-    auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
-
-    // Sanity check: color should be red, green, blue or yellow.
-    if (color != "RED"  && color != "GREEN" &&
-        color != "BLUE" && color != "YELLOW")
+    else
     {
-      ROS_ERROR("Invalid color [%s]", color.c_str());
-      return false;
+      ROS_INFO_NAMED("PlacardPlugin",
+                  "incorrect [%s] <shape>, using random shape", aShape.c_str());
     }
-
-    this->pattern[i++] = IndexFromColor(color);
   }
 
-  // The last color of the pattern is always black.
-  this->pattern[3] = IndexFromColor("OFF");
+  // Parse the color. We initialize it with a random color.
+  this->ShuffleColor();
+  if (_sdf->HasElement("color"))
+  {
+    std::string aColor = _sdf->GetElement("color")->Get<std::string>();
+    std::transform(aColor.begin(), aColor.end(), aColor.begin(), ::tolower);
+    // Sanity check: Make sure the color is allowed.
+    if (this->kColors.find(aColor) != this->kColors.end())
+    {
+      this->color = aColor;
+    }
+    else
+    {
+      ROS_INFO_NAMED("PlacardPlugin",
+                  "incorrect [%s] <color>, using random color", aColor.c_str());
+    }
+  }
 
   // Required: visuals.
   if (!_sdf->HasElement("visuals"))
@@ -157,7 +161,7 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-void LightBuoyPlugin::Update()
+void PlacardPlugin::Update()
 {
   // Get the visuals if needed.
   if (this->visuals.empty())
@@ -181,62 +185,69 @@ void LightBuoyPlugin::Update()
 
   std::lock_guard<std::mutex> lock(this->mutex);
 
-  // Start over if at end of pattern
-  if (this->state > 3)
-    this->state = 0;
-
-  auto color = this->kColors[this->pattern[this->state]].first;
-  gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
-
   // Update the visuals.
   for (auto visual : this->visuals)
   {
+    std_msgs::ColorRGBA color;
+    color.a = 0.0;
+
+    auto name = visual->GetName();
+    auto delim = name.rfind("/");
+    auto shortName = name.substr(delim + 1);
+
+    if (shortName.find(this->shape) != std::string::npos)
+      color = this->kColors[this->color];
+  
+    gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
+
     visual->SetAmbient(gazeboColor);
     visual->SetDiffuse(gazeboColor);
   }
-
-  // Increment index for next timer callback
-  ++this->state;
 }
 
 //////////////////////////////////////////////////
-bool LightBuoyPlugin::ChangePattern(std_srvs::Trigger::Request &_req,
+bool PlacardPlugin::ChangeSymbol(std_srvs::Trigger::Request &_req,
   std_srvs::Trigger::Response &_res)
 {
-  this->ChangePattern(_res.message);
-  _res.message = "New pattern: " + _res.message;
+  {
+    std::lock_guard<std::mutex> lock(this->mutex);
+    this->ShuffleShape();
+    this->ShuffleColor();
+  }
+
+  _res.message = "New symbol: " + this->color + " " + this->shape;
   _res.success = true;
   return _res.success;
 }
 
 //////////////////////////////////////////////////
-void LightBuoyPlugin::ChangePattern(std::string &_message)
+void PlacardPlugin::ShuffleColor()
 {
-  Pattern_t newPattern;
-  // Last phase in pattern is always off
-  newPattern[3] = IndexFromColor("OFF");;
+  std::string newColor;
+  do
+  {
+    auto iterColor = this->kColors.begin();
+    std::advance(iterColor,
+               ignition::math::Rand::IntUniform(0, this->kColors.size() - 1));
+    newColor = (*iterColor).first;
+  }
+  while (newColor == this->color);
+  this->color = newColor;
+}
 
-  // Loop until random pattern is different from current one
-  do {
-    // Generate random sequence of 3 colors among RED, GREEN, BLUE, and YELLOW
-    for (size_t i = 0; i < 3; ++i)
-      newPattern[i] = ignition::math::Rand::IntUniform(0, 3);
-    // Ensure there is no consecutive repeats
-    while (newPattern[0] == newPattern[1] || newPattern[1] == newPattern[2])
-      newPattern[1] = ignition::math::Rand::IntUniform(0, 3);
-  } while (newPattern == this->pattern);
-
-  std::lock_guard<std::mutex> lock(this->mutex);
-  // Copy newly generated pattern to pattern
-  this->pattern = newPattern;
-  // Start in OFF state so pattern restarts at beginning
-  this->state = 3;
-  // Generate string representing pattern, ex: "RGB"
-  for (size_t i = 0; i < 3; ++i)
-    _message += this->kColors[newPattern[i]].second[0];
-  // Log the new pattern
-  ROS_INFO_NAMED("LightBuoyPlugin", "Pattern is %s", _message.c_str());
+//////////////////////////////////////////////////
+void PlacardPlugin::ShuffleShape()
+{
+  std::string newShape;
+  do
+  {
+    newShape =
+      this->kShapes[ignition::math::Rand::IntUniform(0,
+        this->kShapes.size() - 1)];
+  }
+  while (newShape == this->shape);
+  this->shape = newShape;
 }
 
 // Register plugin with gazebo
-GZ_REGISTER_VISUAL_PLUGIN(LightBuoyPlugin)
+GZ_REGISTER_VISUAL_PLUGIN(PlacardPlugin)

@@ -48,7 +48,7 @@
 ///            elements of <visual> elements.
 ///
 /// Here's an example:
-///   <plugin name="panel1plugin" filename="libgazebo_ros_color.so">
+///   <plugin name="lightBuoyPlugin" filename="liblight_buoy_plugin.so">
 ///     <color_1>RED</color_1>
 ///     <color_2>GREEN</color_2>
 ///     <color_3>BLUE</color_3>
@@ -58,7 +58,7 @@
 ///       <visual>robotx_light_buoy::base_link::panel_3</visual>
 ///     </visuals>
 ///     <shuffle>true</shuffle>
-///     <robot_namespace>light_buoy</robot_namespace>
+///     <robot_namespace>vrx</robot_namespace>
 ///     <topic>light_buoy/shuffle</topic>
 ///   </plugin>
 class LightBuoyPlugin : public gazebo::VisualPlugin
@@ -102,7 +102,6 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: void ChangePattern(std::string &_message);
 
   /// \brief Display the next color in the sequence, or start over if at the end
-  /// \param[in] _event Not used.
   private: void Update();
 
   /// \def Colors_t
