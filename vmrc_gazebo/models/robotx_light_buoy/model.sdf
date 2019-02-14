@@ -40,9 +40,18 @@
             <name>Gazebo/Black</name>
           </script>
         </material>
-        <plugin name="panel1plugin" filename="libgazebo_ros_color.so">
-          <robotNamespace>light_buoy</robotNamespace>
-          <topicName>panel1</topicName>
+        <plugin name="lightplugin" filename="liblight_buoy_plugin.so">
+          <color_1>RED</color_1>
+          <color_2>GREEN</color_2>
+          <color_3>BLUE</color_3>
+          <visuals>
+            <visual>robotx_light_buoy::base_link::panel_1</visual>
+            <visual>robotx_light_buoy::base_link::panel_2</visual>
+            <visual>robotx_light_buoy::base_link::panel_3</visual>
+          </visuals>
+          <shuffle>true</shuffle>
+          <robot_namespace>vrx</robot_namespace>
+          <topic>light_buoy/shuffle</topic>
         </plugin>
       </visual>
       <visual name="panel_2">
@@ -58,10 +67,6 @@
             <name>Gazebo/Black</name>
           </script>
         </material>
-        <plugin name="panel2plugin" filename="libgazebo_ros_color.so">
-          <robotNamespace>light_buoy</robotNamespace>
-          <topicName>panel2</topicName>
-        </plugin>
       </visual>
       <visual name="panel_3">
         <pose>0.11 -0.003 1.3 0 0 1.5472</pose>
@@ -76,10 +81,6 @@
             <name>Gazebo/Black</name>
           </script>
         </material>
-        <plugin name="panel3plugin" filename="libgazebo_ros_color.so">
-          <robotNamespace>light_buoy</robotNamespace>
-          <topicName>panel3</topicName>
-        </plugin>
       </visual>
       <collision name="collision_base">
         <pose>0 0 -0.2 0 0 0</pose>
@@ -109,9 +110,6 @@
         <area>2.25</area>
         <height>0.70</height>
       </link>
-    </plugin>
-    <plugin name="controller" filename="liblight_buoy_controller.so">
-      <robotNamespace>light_buoy</robotNamespace>
     </plugin>
   </model>
 </sdf>

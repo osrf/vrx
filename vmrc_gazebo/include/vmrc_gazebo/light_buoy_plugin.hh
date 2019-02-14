@@ -20,11 +20,15 @@
 
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
+#include <std_srvs/Trigger.h>
+
 #include <array>
-#include <map>
+#include <cstdint>
+#include <mutex>
+#include <string>
+#include <utility>
 #include <vector>
-#include <gazebo/common/Plugin.hh>
-#include <gazebo/rendering/Visual.hh>
+#include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
 
 /// \brief Visual plugin for changing the color of some visual elements using
@@ -33,13 +37,13 @@
 /// <color_1>: The first color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_2>: The second color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_3>: The third color of the sequence (RED, GREEN, BLUE, YELLOW).
-/// <shuffle>: True if the topic for shuffling the sequence is enabled. 
-/// <robotNamespace>: The ROS namespace for this node. If not present,
+/// <shuffle>: True if the topic for shuffling the sequence is enabled.
+/// <robot_namespace>: The ROS namespace for this node. If not present,
 ///                   the model name without any "::"" will be used.
 ///                   E.g.: The plugin under a visual named
 ///                   "model1::my_submodel::link::visual" will use "model1"
 ///                   as namespace unless a value is specified.
-/// <topicName>: The ROS topic used to request color changes.
+/// <topic>: The ROS topic used to request color changes.
 /// <visuals>: The collection of visuals that change in color. It accepts N
 ///            elements of <visual> elements.
 ///
@@ -49,13 +53,13 @@
 ///     <color_2>GREEN</color_2>
 ///     <color_3>BLUE</color_3>
 ///     <visuals>
-///       <visual>panel_1</visual>
-///       <visual>panel_2</visual>
-///       <visual>panel_3</visual>
+///       <visual>robotx_light_buoy::base_link::panel_1</visual>
+///       <visual>robotx_light_buoy::base_link::panel_2</visual>
+///       <visual>robotx_light_buoy::base_link::panel_3</visual>
 ///     </visuals>
 ///     <shuffle>true</shuffle>
-///     <robotNamespace>light_buoy</robotNamespace>
-///     <topicName>light_buoy/shuffle</topicName>
+///     <robot_namespace>light_buoy</robot_namespace>
+///     <topic>light_buoy/shuffle</topic>
 ///   </plugin>
 class LightBuoyPlugin : public gazebo::VisualPlugin
 {
@@ -74,25 +78,47 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
                                                   const double _b,
                                                   const double _a);
 
+  /// \brief Return the index of the color from its string.
+  /// \param[in] _color The color
+  /// \return The index in kColors.
+  private: static uint8_t IndexFromColor(const std::string &_color);
+
   /// \brief Parse all SDF parameters.
   /// \param[in] _sdf SDF elements.
   private: bool ParseSDF(sdf::ElementPtr _sdf);
 
-  /// Callback for processing color change requests.
-  /// \param[in] _msg The message containing the color request.
-  private: void ShuffleCallback(const std_msgs::ColorRGBAConstPtr &_msg);
+  /// \brief Callback for change pattern service, calls other changePattern
+  /// internaly.
+  /// \param[in] _req Not used.
+  /// \param[out] _res The Response containing a message with the new pattern.
+  /// \return True when the operation succeed or false otherwise.
+  private: bool ChangePattern(std_srvs::Trigger::Request &_req,
+                              std_srvs::Trigger::Response &_res);
+
+  /// \brief Generate a new pattern and reset state to OFF.
+  /// \param[in, out] _message The current pattern in string format, where
+  /// each color is represented with its initial letter.
+  /// E.g.: "RYG".
+  private: void ChangePattern(std::string &_message);
+
+  /// \brief Display the next color in the sequence, or start over if at the end
+  /// \param[in] _event Not used.
+  private: void Update();
 
   /// \def Colors_t
   /// \brief A pair of RGBA color and its name as a string.
-  private: using Colors_t = std::map<std::string, std_msgs::ColorRGBA>;
+  private: using Colors_t = std::pair<std_msgs::ColorRGBA, std::string>;
 
   /// \def Pattern_t
   /// \brief The current pattern to display, pattern_[3] is always OFF.
-  private: using Pattern_t = std::array<std_msgs::ColorRGBA, 4>;
+  private: using Pattern_t = std::array<uint8_t, 4>;
 
   /// \brief List of the color options (red, green, blue, yellow and no color)
   /// with their string name for logging.
-  private: static Colors_t kColors;
+  private: static const std::array<Colors_t, 5> kColors;
+
+  /// \brief Collection of visual names.
+  private: std::vector<std::string> visualNames;
 
   /// \brief Pointer to the visual elements to modify.
   private: std::vector<gazebo::rendering::VisualPtr> visuals;
@@ -100,8 +126,8 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \brief Whether shuffle is enabled via a ROS topic or not.
   private: bool shuffleEnabled = true;
 
-  /// \brief Subscriber to accept color change requests.
-  private: ros::Subscriber shuffleSub;
+  /// \brief Service to generate and display a new color sequence.
+  private: ros::ServiceServer changePatternServer;
 
   /// \brief ROS Node handle.
   private: ros::NodeHandle nh;
@@ -109,8 +135,27 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \brief The color pattern.
   private: Pattern_t pattern;
 
+  /// \brief Track current index in pattern.
+  /// \sa IncrementState(const ros::TimerEvent &_event)
+  private: uint8_t state = 0u;
+
+  /// \brief ROS namespace.
+  private: std::string ns;
+
+  /// \brief ROS topic.
+  private: std::string topic;
+
   /// Pointer to the scene node.
   private: gazebo::rendering::ScenePtr scene;
+
+  /// \brief Connects to rendering update event.
+  private: gazebo::event::ConnectionPtr updateConnection;
+
+  /// \brief Timer used to switch colors every second
+  private: gazebo::common::Timer timer;
+
+  /// \brief Locks state and pattern member variables.
+  private: std::mutex mutex;
 };
 
 #endif

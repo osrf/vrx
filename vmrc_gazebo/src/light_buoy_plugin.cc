@@ -17,17 +17,14 @@
 
 #include <gazebo/rendering/Scene.hh>
 #include <ignition/math/Rand.hh>
-
 #include "vmrc_gazebo/light_buoy_plugin.hh"
 
-LightBuoyPlugin::Colors_t LightBuoyPlugin::kColors =
-{
-  {"RED",    CreateColor(1.0, 0.0, 0.0, 1.0)},
-  {"GREEN",  CreateColor(0.0, 1.0, 0.0, 1.0)},
-  {"BLUE",   CreateColor(0.0, 0.0, 1.0, 1.0)},
-  {"YELLOW", CreateColor(1.0, 1.0, 0.0, 1.0)},
-  {"OFF",    CreateColor(0.0, 0.0, 0.0, 1.0)},
-};
+const std::array<LightBuoyPlugin::Colors_t, 5> LightBuoyPlugin::kColors
+  = {LightBuoyPlugin::Colors_t(CreateColor(1.0, 0.0, 0.0, 1.0), "RED"),
+     LightBuoyPlugin::Colors_t(CreateColor(0.0, 1.0, 0.0, 1.0), "GREEN"),
+     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 1.0, 1.0), "BLUE"),
+     LightBuoyPlugin::Colors_t(CreateColor(1.0, 1.0, 0.0, 1.0), "YELLOW"),
+     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 0.0, 1.0), "OFF")};
 
 //////////////////////////////////////////////////
 std_msgs::ColorRGBA LightBuoyPlugin::CreateColor(const double _r,
@@ -42,55 +39,56 @@ std_msgs::ColorRGBA LightBuoyPlugin::CreateColor(const double _r,
 }
 
 //////////////////////////////////////////////////
+uint8_t LightBuoyPlugin::IndexFromColor(const std::string &_color)
+{
+  uint8_t index = 0u;
+  for (auto color : kColors)
+  {
+    if (_color == color.second)
+      return index;
+
+    ++index;
+  }
+
+  return std::numeric_limits<uint8_t>::max();
+}
+
+//////////////////////////////////////////////////
 void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   sdf::ElementPtr _sdf)
 {
   GZ_ASSERT(_parent != nullptr, "Received NULL model pointer");
-  
+
   this->scene = _parent->GetScene();
   GZ_ASSERT(this->scene != nullptr, "NULL scene");
 
   if (!this->ParseSDF(_sdf))
     return;
 
-  // // Quit if ros plugin was not loaded
-  // if (!ros::isInitialized())
-  // {
-  //   ROS_ERROR("ROS was not initialized.");
-  //   return;
-  // }
+  // Quit if ros plugin was not loaded
+  if (!ros::isInitialized())
+  {
+    ROS_ERROR("ROS was not initialized.");
+    return;
+  }
 
-  // std::string ns = "";
-  // if (_sdf->HasElement("robotNamespace"))
-  //   ns = _sdf->GetElement("robotNamespace")->Get<std::string>();
-  // else
-  // {
-  //   ROS_INFO_NAMED("light_bouy_plugin",
-  //                  "missing <robotNamespace>, defaulting to %s", ns.c_str());
-  // }
+  if (this->shuffleEnabled)
+  {
+    this->nh = ros::NodeHandle(this->ns);
+    this->changePatternServer = this->nh.advertiseService(
+      this->topic, &LightBuoyPlugin::ChangePattern, this);
+  }
 
-  // this->nh = ros::NodeHandle(ns);
+  this->timer.Start();
 
-  // // Create publisher to set color on each panel
-  // this->panelPubs[0] = this->nh.advertise<std_msgs::ColorRGBA>("panel1", 1u);
-  // this->panelPubs[1] = this->nh.advertise<std_msgs::ColorRGBA>("panel2", 1u);
-  // this->panelPubs[2] = this->nh.advertise<std_msgs::ColorRGBA>("panel3", 1u);
-
-  // // Generate random initial pattern
-  // std::string initial;
-  // this->ChangePattern(initial);
-
-  // this->changePatternServer = this->nh.advertiseService(
-  //   "new_pattern", &LightBuoyController::ChangePattern, this);
-
-  // this->timer = this->nh.createTimer(
-  //   ros::Duration(1.0), &LightBuoyController::IncrementState, this);
+  this->updateConnection = gazebo::event::Events::ConnectPreRender(
+    std::bind(&LightBuoyPlugin::Update, this));
 }
 
 //////////////////////////////////////////////////
 bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
 {
-  // Parse the sequence of colors.
+  // Required: Sequence of colors.
   uint8_t i = 0u;
   for (auto colorIndex : {"color_1", "color_2", "color_3"})
   {
@@ -103,17 +101,20 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
 
     // Sanity check: color should be red, green, blue or yellow.
-    if (color != "RED" && color != "GREEN" &&
+    if (color != "RED"  && color != "GREEN" &&
         color != "BLUE" && color != "YELLOW")
     {
       ROS_ERROR("Invalid color [%s]", color.c_str());
       return false;
     }
 
-    this->pattern[i] = kColors[color];
+    this->pattern[i++] = IndexFromColor(color);
   }
 
-  // Parse visuals.
+  // The last color of the pattern is always black.
+  this->pattern[3] = IndexFromColor("OFF");
+
+  // Required: visuals.
   if (!_sdf->HasElement("visuals"))
   {
     ROS_ERROR("<visuals> missing");
@@ -124,21 +125,117 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
   if (!visualsElem->HasElement("visual"))
   {
     ROS_ERROR("<visual> missing");
-    return false; 
+    return false;
   }
 
   auto visualElem = visualsElem->GetElement("visual");
   while (visualElem)
   {
     std::string visualName = visualElem->Get<std::string>();
-    auto visualPtr = this->scene->GetVisual(visualName);
-    if (visualPtr)
-      this->visuals.push_back(visualPtr);      
-    else
-      ROS_ERROR("Unable to find [%s] visual", visualName.c_str());
-
+    this->visualNames.push_back(visualName);
     visualElem = visualElem->GetNextElement();
   }
+
+  // Optional: Is shuffle enabled?
+  if (_sdf->HasElement("shuffle"))
+  {
+    this->shuffleEnabled = _sdf->GetElement("shuffle")->Get<bool>();
+
+    // Required if shuffle enabled: ROS topic.
+    if (!_sdf->HasElement("topic"))
+    {
+      ROS_ERROR("<topic> missing");
+    }
+    this->topic = _sdf->GetElement("topic")->Get<std::string>();
+  }
+
+  // Optional: ROS namespace.
+  if (_sdf->HasElement("robot_namespace"))
+    this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
+
+  return true;
+}
+
+//////////////////////////////////////////////////
+void LightBuoyPlugin::Update()
+{
+  // Get the visuals if needed.
+  if (this->visuals.empty())
+  {
+    for (auto visualName : this->visualNames)
+    {
+      auto visualPtr = this->scene->GetVisual(visualName);
+      if (visualPtr)
+        this->visuals.push_back(visualPtr);
+      else
+        ROS_ERROR("Unable to find [%s] visual", visualName.c_str());
+    }
+  }
+
+  if (this->timer.GetElapsed() < gazebo::common::Time(1.0))
+    return;
+
+  // Restart the timer.
+  this->timer.Reset();
+  this->timer.Start();
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  // Start over if at end of pattern
+  if (this->state > 3)
+    this->state = 0;
+
+  auto color = this->kColors[this->pattern[this->state]].first;
+  gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
+
+  // Update the visuals.
+  for (auto visual : this->visuals)
+  {
+    visual->SetAmbient(gazeboColor);
+    visual->SetDiffuse(gazeboColor);
+  }
+
+  // Increment index for next timer callback
+  ++this->state;
+}
+
+//////////////////////////////////////////////////
+bool LightBuoyPlugin::ChangePattern(std_srvs::Trigger::Request &_req,
+  std_srvs::Trigger::Response &_res)
+{
+  this->ChangePattern(_res.message);
+  _res.message = "New pattern: " + _res.message;
+  _res.success = true;
+  return _res.success;
+}
+
+//////////////////////////////////////////////////
+void LightBuoyPlugin::ChangePattern(std::string &_message)
+{
+  Pattern_t newPattern;
+  // Last phase in pattern is always off
+  newPattern[3] = IndexFromColor("OFF");;
+
+  // Loop until random pattern is different from current one
+  do {
+    // Generate random sequence of 3 colors among RED, GREEN, BLUE, and YELLOW
+    for (size_t i = 0; i < 3; ++i)
+      newPattern[i] = ignition::math::Rand::IntUniform(0, 3);
+    // Ensure there is no consecutive repeats
+    while (newPattern[0] == newPattern[1] || newPattern[1] == newPattern[2])
+      newPattern[1] = ignition::math::Rand::IntUniform(0, 3);
+  } while (newPattern == this->pattern);
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  // Copy newly generated pattern to pattern
+  this->pattern = newPattern;
+  // Start in OFF state so pattern restarts at beginning
+  this->state = 3;
+  // Generate string representing pattern, ex: "RGB"
+  for (size_t i = 0; i < 3; ++i)
+    _message += this->kColors[newPattern[i]].second[0];
+  // Log the new pattern
+  ROS_INFO_NAMED("LightBuoyPlugin", "Pattern is %s", _message.c_str());
 }
 
 // Register plugin with gazebo
