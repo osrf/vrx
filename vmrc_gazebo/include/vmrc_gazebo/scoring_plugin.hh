@@ -113,10 +113,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \param[in] _newScore The new score.
   protected: void SetScore(double _newScore);
 
-  /// \brief Get the maximum allowed task time(seconds).
-  /// \return The maximum allowed task time(seconds).
-  protected: uint32_t MaxTaskTime() const;
-
   /// \brief Get the task name.
   /// \return Task name.
   protected: std::string TaskName() const;
