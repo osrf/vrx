@@ -48,7 +48,7 @@
 ///            elements of <visual> elements.
 ///
 /// Here's an example:
-///   <plugin name="panel1plugin" filename="libgazebo_ros_color.so">
+///   <plugin name="light_buoy_plugin" filename="liblight_buoy_plugin.so">
 ///     <color_1>RED</color_1>
 ///     <color_2>GREEN</color_2>
 ///     <color_3>BLUE</color_3>
