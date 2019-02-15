@@ -62,6 +62,10 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   this->scene = _parent->GetScene();
   GZ_ASSERT(this->scene != nullptr, "NULL scene");
 
+  // This is important to disable the visual plugin running inside the GUI.
+  if (!this->scene->EnableVisualizations())
+    return;
+
   if (!this->ParseSDF(_sdf))
     return;
 
