@@ -34,6 +34,20 @@ void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
+  if (!this->ParseSDF(_sdf))
+    return;
+
+  // Quit if ros plugin was not loaded
+  if (!ros::isInitialized())
+  {
+    ROS_ERROR("ROS was not initialized.");
+    return;
+  }
+
+  this->nh = ros::NodeHandle(this->ns);
+  this->colorSequenceServer = this->nh.advertiseService(
+    this->topic, &ScanDockScoringPlugin::OnColorSequence, this);
+
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScanDockScoringPlugin::Update, this));
 }
@@ -43,3 +57,55 @@ void ScanDockScoringPlugin::Update()
 {
 
 }
+
+//////////////////////////////////////////////////
+bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
+{
+  // Required: The expected color pattern.
+  for (auto colorIndex : {"color_1", "color_2", "color_3"})
+  {
+    if (!_sdf->HasElement(colorIndex))
+    {
+      ROS_ERROR("<%s> missing", colorIndex);
+      return false;
+    }
+
+    auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
+
+    // Sanity check: color should be red, green, blue or yellow.
+    if (color != "RED"  && color != "GREEN" &&
+        color != "BLUE" && color != "YELLOW")
+    {
+      ROS_ERROR("Invalid color [%s]", color.c_str());
+      return false;
+    }
+
+    this->expectedSequence.push_back(color);
+  }
+
+  // Optional: ROS namespace.
+  if (_sdf->HasElement("robot_namespace"))
+    this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
+
+  // Required if shuffle enabled: ROS topic.
+  if (_sdf->HasElement("topic"))
+  {
+    this->topic = _sdf->GetElement("topic")->Get<std::string>();
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////
+bool ScanDockScoringPlugin::OnColorSequence(std_srvs::Trigger::Request &_req,
+  std_srvs::Trigger::Response &_res)
+{
+  ROS_INFO_NAMED("ScanDockScoringPlugin", "Color sequence submitted");
+
+  // _res.message = "New pattern: " + _res.message;
+  _res.success = true;
+  return _res.success;
+}
+
+// Register plugin with gazebo
+GZ_REGISTER_WORLD_PLUGIN(ScanDockScoringPlugin)

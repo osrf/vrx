@@ -18,10 +18,10 @@
     </include>
 
     <!-- The scoring plugin -->
-    <plugin name="navigation_scoring_plugin"
-            filename="libnavigation_scoring_plugin.so">
+    <plugin name="scan_dock_scoring_plugin"
+            filename="libscan_dock_scoring_plugin.so">
       <vehicle>wamv</vehicle>
-      <task_name>find_symbols_and_dock</task_name>
+      <task_name>scan_dock</task_name>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
@@ -33,37 +33,11 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <gates>
-        <gate>
-          <left_marker>red_bound_0</left_marker>
-          <right_marker>green_bound_0</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_1</left_marker>
-          <right_marker>green_bound_1</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_2</left_marker>
-          <right_marker>green_bound_2</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_3</left_marker>
-          <right_marker>green_bound_3</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_4</left_marker>
-          <right_marker>green_bound_4</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_5</left_marker>
-          <right_marker>green_bound_5</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_6</left_marker>
-          <right_marker>green_bound_6</right_marker>
-        </gate>
-      </gates>
-
+      <color_1>RED</color_1>
+      <color_2>GREEN</color_2>
+      <color_3>BLUE</color_3>
+      <robot_namespace>vrx</robot_namespace>
+      <topic>scan_dock/color_sequence</topic>
     </plugin>
 
   </world>
