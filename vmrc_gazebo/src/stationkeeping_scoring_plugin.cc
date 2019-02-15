@@ -124,6 +124,8 @@ void StationkeepingScoringPlugin::Update()
 
   this->poseErrorPub.publish(poseErrorMsg);
   this->rmsErrorPub.publish(rmsErrorMsg);
+
+  this->ScoringPlugin::SetScore(this->rmsError);
 }
 
 
