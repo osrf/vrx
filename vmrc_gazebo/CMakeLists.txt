@@ -80,6 +80,18 @@ install(TARGETS navigation_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for scoring the scan and dock task.
+add_library(scan_dock_scoring_plugin src/scan_dock_scoring_plugin.cc)
+target_link_libraries(scan_dock_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin)
+add_dependencies(scan_dock_scoring_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS scan_dock_scoring_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Dock base files that need to be processed with erb
 set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
