@@ -74,9 +74,6 @@ class StationkeepingScoringPlugin : public ScoringPlugin
  /// \brief Topic where the task stats are published.
   protected: std::string goalTopic = "/vmrc/task/goal";
 
- /// \brief Topic where the current translation error is published.
-  protected: std::string transErrorTopic = "/vmrc/task/trans_error";
-
  /// \brief Topic where 2D pose error is published 
   protected: std::string poseErrorTopic = "/vmrc/task/pose_error";
 
@@ -88,9 +85,6 @@ class StationkeepingScoringPlugin : public ScoringPlugin
 
  /// \brief Publisher for the goal.
   private: ros::Publisher goalPub;
-
- /// \brief Publisher for the current translation error in Euclidean distance.
-  private: ros::Publisher transErrorPub;
 
  /// \brief Publisher for the combined 2D pose error.
   private: ros::Publisher poseErrorPub;
@@ -112,9 +106,6 @@ private: double goalYaw;
 
   /// \brief Goal pose in spherical (WGS84) coordinates
   private: double goalLon;
-
-  /// \brief current translation error in Euclidean distance 
-  private: double transError;
 
   /// \brief combined 2D pose error (distance and yaw)
   private: double poseError;

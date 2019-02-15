@@ -82,7 +82,6 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->rosNode.reset(new ros::NodeHandle());
   this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->goalTopic, 10);
 
-  this->transErrorPub = this->rosNode->advertise<std_msgs::Float64>(this->transErrorTopic, 100);
   this->poseErrorPub  = this->rosNode->advertise<std_msgs::Float64>(this->poseErrorTopic, 100);
   this->rmsErrorPub   = this->rosNode->advertise<std_msgs::Float64>(this->rmsErrorTopic, 100);
 
@@ -101,7 +100,6 @@ void StationkeepingScoringPlugin::Update()
       return;
   }
 
-  std_msgs::Float64 transErrorMsg;
   std_msgs::Float64 poseErrorMsg;
   std_msgs::Float64 rmsErrorMsg;
 
@@ -114,19 +112,16 @@ void StationkeepingScoringPlugin::Update()
 
   double sqError =  pow(dx,2) + pow(dy,2) + pow(dhdg,2);
 
-  this->transError = sqrt(pow(dx,2) + pow(dy,2));
   this->poseError  = sqrt(sqError);
   this->totalSquaredError += sqError;
   this->sampleCount       += 1;
 
   this->rmsError = sqrt(this->totalSquaredError/this->sampleCount);
 
-  transErrorMsg.data = this->transError;
   poseErrorMsg.data = this->poseError;
   rmsErrorMsg.data = this->rmsError;
 
 
-  this->transErrorPub.publish(transErrorMsg);
   this->poseErrorPub.publish(poseErrorMsg);
   this->rmsErrorPub.publish(rmsErrorMsg);
 }
