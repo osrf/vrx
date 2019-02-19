@@ -24,6 +24,11 @@ add_message_files(
   Task.msg
 )
 
+add_service_files(
+  FILES
+  ColorSequence.srv
+)
+
 generate_messages()
 
 catkin_package(
@@ -61,6 +66,7 @@ target_link_libraries(scoring_plugin ${catkin_LIBRARIES})
 add_dependencies(scoring_plugin
   ${catkin_EXPORTED_TARGETS}
   vmrc_gazebo_generate_messages_cpp
+  vmrc_gazebo_generate_services_cpp
 )
 install(TARGETS scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

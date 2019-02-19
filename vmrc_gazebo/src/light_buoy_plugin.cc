@@ -15,16 +15,17 @@
  *
 */
 
+#include <algorithm>
 #include <gazebo/rendering/Scene.hh>
 #include <ignition/math/Rand.hh>
 #include "vmrc_gazebo/light_buoy_plugin.hh"
 
 const std::array<LightBuoyPlugin::Colors_t, 5> LightBuoyPlugin::kColors
-  = {LightBuoyPlugin::Colors_t(CreateColor(1.0, 0.0, 0.0, 1.0), "RED"),
-     LightBuoyPlugin::Colors_t(CreateColor(0.0, 1.0, 0.0, 1.0), "GREEN"),
-     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 1.0, 1.0), "BLUE"),
-     LightBuoyPlugin::Colors_t(CreateColor(1.0, 1.0, 0.0, 1.0), "YELLOW"),
-     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 0.0, 1.0), "OFF")};
+  = {LightBuoyPlugin::Colors_t(CreateColor(1.0, 0.0, 0.0, 1.0), "red"),
+     LightBuoyPlugin::Colors_t(CreateColor(0.0, 1.0, 0.0, 1.0), "green"),
+     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 1.0, 1.0), "blue"),
+     LightBuoyPlugin::Colors_t(CreateColor(1.0, 1.0, 0.0, 1.0), "yellow"),
+     LightBuoyPlugin::Colors_t(CreateColor(0.0, 0.0, 0.0, 1.0), "off")};
 
 //////////////////////////////////////////////////
 std_msgs::ColorRGBA LightBuoyPlugin::CreateColor(const double _r,
@@ -99,10 +100,11 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     }
 
     auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
+    std::transform(color.begin(), color.end(), color.begin(), ::tolower);
 
     // Sanity check: color should be red, green, blue or yellow.
-    if (color != "RED"  && color != "GREEN" &&
-        color != "BLUE" && color != "YELLOW")
+    if (color != "red"  && color != "green" &&
+        color != "blue" && color != "yellow")
     {
       ROS_ERROR("Invalid color [%s]", color.c_str());
       return false;
@@ -112,7 +114,7 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
   }
 
   // The last color of the pattern is always black.
-  this->pattern[3] = IndexFromColor("OFF");
+  this->pattern[3] = IndexFromColor("off");
 
   // Required: visuals.
   if (!_sdf->HasElement("visuals"))
@@ -214,7 +216,7 @@ void LightBuoyPlugin::ChangePattern(std::string &_message)
 {
   Pattern_t newPattern;
   // Last phase in pattern is always off
-  newPattern[3] = IndexFromColor("OFF");;
+  newPattern[3] = IndexFromColor("off");
 
   // Loop until random pattern is different from current one
   do {

@@ -22,6 +22,7 @@
 #include <std_srvs/Trigger.h>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
+#include "vmrc_gazebo/ColorSequence.h"
 #include "vmrc_gazebo/scoring_plugin.hh"
 
 /// \brief A plugin for computing the score of the scan and dock task.
@@ -33,7 +34,7 @@
 /// <color_2>: Expected second color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_3>: Expected third color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <robot_namespace>: The ROS namespace for this plugin.
-/// <topic>: The ROS topic used to send the color pattern.
+/// <color_sequence_service>: The ROS topic used to send the color pattern.
 ///
 /// Here's an example:
 /// <plugin name="scan_dock_scoring_plugin"
@@ -55,13 +56,20 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
+  // Documentation inherited.
+  private: void OnRunning() override;
+
   /// \brief Callback for change pattern service, calls other changePattern
   /// internaly.
   /// \param[in] _req Not used.
   /// \param[out] _res The Response containing a message with the new pattern.
   /// \return True when the operation succeed or false otherwise.
-  private: bool OnColorSequence(std_srvs::Trigger::Request &_req,
-                                std_srvs::Trigger::Response &_res);
+  private: bool OnColorSequence(
+  	ros::ServiceEvent<vmrc_gazebo::ColorSequence::Request,
+  	  vmrc_gazebo::ColorSequence::Response> &_event);
+
+  /// \brief Pointer to the update event connection.
+  private: gazebo::event::ConnectionPtr updateConnection;
 
   /// \brief The expected color sequence.
   private: std::vector<std::string> expectedSequence;
@@ -76,7 +84,13 @@ class ScanDockScoringPlugin : public ScoringPlugin
   private: std::string ns;
 
   /// \brief ROS topic where the color sequence should be sent.
-  private: std::string topic = "/scan_dock/color_sequence";
+  private: std::string colorSequenceService = "/scan_dock/color_sequence";
+
+  /// \brief Whether the color sequence has been received or not.
+  private: bool colorSequenceReceived = false;
+
+  /// \brief Protect from race conditions.
+  private: std::mutex mutex;
 };
 
 #endif
