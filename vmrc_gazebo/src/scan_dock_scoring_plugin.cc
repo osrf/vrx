@@ -47,19 +47,22 @@ void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->nh = ros::NodeHandle(this->ns);
 
+  // Subscriber to receive world updates (e.g.: a notification after a cloning).
+  this->node.reset(new gazebo::transport::Node());
+  this->node->Init(this->world->GetName());
+
+  this->timer1.Stop();
+  this->timer1.Reset();
+  this->timer2.Stop();
+  this->timer2.Reset();
+
+  this->containSub1 = this->node->Subscribe(this->bay1Topic,
+    &ScanDockScoringPlugin::OnActivationZoneBay1, this);
+  this->containSub2 = this->node->Subscribe(this->bay2Topic,
+    &ScanDockScoringPlugin::OnActivationZoneBay2, this);
+
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScanDockScoringPlugin::Update, this));
-}
-
-//////////////////////////////////////////////////
-void ScanDockScoringPlugin::Update()
-{
-  {
-    // We only allow one color sequence submission.
-    std::lock_guard<std::mutex> lock(this->mutex);
-    if (this->colorSequenceReceived)
-      this->colorSequenceServer.shutdown();
-  }
 }
 
 //////////////////////////////////////////////////
@@ -88,6 +91,40 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     this->expectedSequence.push_back(color);
   }
 
+  // Required parameter.
+  if (!_sdf->HasElement("bay1_topic"))
+  {
+    ROS_ERROR("<bay1_topic> missing");
+    return false;
+  }
+  this->bay1Topic = _sdf->GetElement("bay1_topic")->Get<std::string>();
+
+  // Required parameter.
+  if (!_sdf->HasElement("bay2_topic"))
+  {
+    ROS_ERROR("<bay2_topic> missing");
+    return false;
+  }
+  this->bay2Topic = _sdf->GetElement("bay2_topic")->Get<std::string>();
+
+  // Required parameter..
+  if (!_sdf->HasElement("correct_bay_topic"))
+  {
+    ROS_ERROR("<correct_bay_topic> missing");
+    return false;
+  }
+  this->correctBayTopic =
+    _sdf->GetElement("correct_bay_topic")->Get<std::string>();
+
+  // Sanity check: Make sure that the correct bay topic matches an existing
+  // bay topic.
+  if (this->correctBayTopic != this->bay1Topic &&
+      this->correctBayTopic != this->bay2Topic)
+  {
+    ROS_ERROR("<correct_bay_topic> should match <bay1_topic> or <bay2_topic>");
+    return false;
+  }
+
   // Optional: ROS namespace.
   if (_sdf->HasElement("robot_namespace"))
     this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
@@ -103,10 +140,66 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
+void ScanDockScoringPlugin::Update()
+{
+  // We only allow one color sequence submission.
+  std::lock_guard<std::mutex> lock(this->mutex);
+  if (this->colorSequenceReceived)
+    this->colorSequenceServer.shutdown();
+
+  // Check whether the vehicle docked.
+  if (this->timer1.GetElapsed() >= gazebo::common::Time(10.0))
+  {
+    if (this->correctBayTopic == this->bay1Topic)
+      this->SetScore(this->Score() + 10);
+
+    this->Finish();
+  }
+
+  if (this->timer2.GetElapsed() >= gazebo::common::Time(10.0))
+  {
+    if (this->correctBayTopic == this->bay2Topic)
+      this->SetScore(this->Score() + 10);
+
+    this->Finish();
+  }
+}
+
+//////////////////////////////////////////////////
 void ScanDockScoringPlugin::OnRunning()
 {
   this->colorSequenceServer = this->nh.advertiseService(
     this->colorSequenceService, &ScanDockScoringPlugin::OnColorSequence, this);
+}
+
+/////////////////////////////////////////////////
+void ScanDockScoringPlugin::OnActivationZoneBay1(ConstIntPtr &_msg)
+{
+  if (_msg->data() == 1)
+    this->timer1.Start();
+
+  if (_msg->data() == 0)
+  {
+    this->timer1.Stop();
+    this->timer1.Reset();
+  }
+
+  gzmsg << "OnActivationZoneBay1(): " << _msg->data() << std::endl;
+}
+
+/////////////////////////////////////////////////
+void ScanDockScoringPlugin::OnActivationZoneBay2(ConstIntPtr &_msg)
+{
+  if (_msg->data() == 1)
+    this->timer2.Start();
+
+  if (_msg->data() == 0)
+  {
+    this->timer2.Stop();
+    this->timer2.Reset();
+  }
+
+  gzmsg << "OnActivationZoneBay2(): " << _msg->data() << std::endl;
 }
 
 //////////////////////////////////////////////////

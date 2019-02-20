@@ -86,7 +86,7 @@ class PlacardPlugin : public gazebo::VisualPlugin
   private: void Update();
 
   /// \brief Callback for change symbol service, calls other ChangeSymbol
-  /// internaly.
+  /// internally.
   /// \param[in] _req Not used.
   /// \param[out] _res The Response containing a message with the new symbol.
   /// \return True when the operation succeed or false otherwise.

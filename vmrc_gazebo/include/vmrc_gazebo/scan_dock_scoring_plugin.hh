@@ -42,6 +42,8 @@
 /// </plugin>
 class ScanDockScoringPlugin : public ScoringPlugin
 {
+  typedef boost::weak_ptr<gazebo::physics::Entity> EntityWeakPtr;
+
   // Constructor.
   public: ScanDockScoringPlugin();
 
@@ -59,8 +61,18 @@ class ScanDockScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
+  /// \brief Callback triggered when the vehicle enters or exits the activation
+  /// zone.
+  /// \param[in] _msg The current state (0: exiting, 1: entering).
+  private: void OnActivationZoneBay1(ConstIntPtr &_msg);
+
+  /// \brief Callback triggered when the vehicle enters or exits the activation
+  /// zone.
+  /// \param[in] _msg The current state (0: exiting, 1: entering).
+  private: void OnActivationZoneBay2(ConstIntPtr &_msg);
+
   /// \brief Callback for change pattern service, calls other changePattern
-  /// internaly.
+  /// internally.
   /// \param[in] _req Not used.
   /// \param[out] _res The Response containing a message with the new pattern.
   /// \return True when the operation succeed or false otherwise.
@@ -86,8 +98,32 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// \brief ROS topic where the color sequence should be sent.
   private: std::string colorSequenceService = "/scan_dock/color_sequence";
 
+  /// \brief Gazebo topic used to receive notifications about the bay #1.
+  private: std::string bay1Topic;
+
+  /// \brief Gazebo topic used to receive notifications about the bay #2.
+  private: std::string bay2Topic;
+
+  /// \brief Gazebo topic associated to the correct bay to dock.
+  private: std::string correctBayTopic;
+
   /// \brief Whether the color sequence has been received or not.
   private: bool colorSequenceReceived = false;
+
+  /// \brief Create a node for communication.
+  private: gazebo::transport::NodePtr node;
+
+  /// \brief Subscriber to receive notifications from the contain plugin.
+  private: gazebo::transport::SubscriberPtr containSub1;
+
+  /// \brief Subscriber to receive notifications from the contain plugin.
+  private: gazebo::transport::SubscriberPtr containSub2;
+
+  /// \brief Timer used to calculate the elapsed time docked in bay1.
+  private: gazebo::common::Timer timer1;
+
+  /// \brief Timer used to calculate the elapsed time docked in bay2.
+  private: gazebo::common::Timer timer2;
 
   /// \brief Protect from race conditions.
   private: std::mutex mutex;
