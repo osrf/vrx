@@ -46,6 +46,8 @@
 ///   <robot_namespace> ROS namespace of Node, can be used to have multiple
 ///                    plugins.
 ///   <topic>: The ROS topic used to request color changes.
+///   <visuals>: The set of visual symbols. It contains at least one visual:
+///     <visual>: A visual displaying a shape.
 ///
 /// Here's an example:
 ///   <plugin name="placard1plugin" filename="libplacard_plugin.so">

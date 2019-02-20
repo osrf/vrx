@@ -17,27 +17,17 @@
 
 #include <algorithm>
 #include <cmath>
-#include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include "vmrc_gazebo/scan_dock_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
-ScanDockScoringPlugin::ScanDockScoringPlugin()
+ColorSequenceChecker::ColorSequenceChecker(
+  const std::vector<std::string> &_expectedColors,
+  const std::string &_rosNameSpace, const std::string &_rosColorSequenceService)
+  : expectedSequence(_expectedColors),
+    ns(_rosNameSpace),
+    colorSequenceService(_rosColorSequenceService)
 {
-  gzmsg << "scan and dock scoring plugin loaded" << std::endl;
-}
-
-/////////////////////////////////////////////////
-void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
-    sdf::ElementPtr _sdf)
-{
-  ScoringPlugin::Load(_world, _sdf);
-
-  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
-
-  if (!this->ParseSDF(_sdf))
-    return;
-
   // Quit if ros plugin was not loaded
   if (!ros::isInitialized())
   {
@@ -46,182 +36,52 @@ void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   }
 
   this->nh = ros::NodeHandle(this->ns);
-
-  // Subscriber to receive world updates (e.g.: a notification after a cloning).
-  this->node.reset(new gazebo::transport::Node());
-  this->node->Init(this->world->GetName());
-
-  this->timer1.Stop();
-  this->timer1.Reset();
-  this->timer2.Stop();
-  this->timer2.Reset();
-
-  this->containSub1 = this->node->Subscribe(this->bay1Topic,
-    &ScanDockScoringPlugin::OnActivationZoneBay1, this);
-  this->containSub2 = this->node->Subscribe(this->bay2Topic,
-    &ScanDockScoringPlugin::OnActivationZoneBay2, this);
-
-  this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&ScanDockScoringPlugin::Update, this));
 }
 
-//////////////////////////////////////////////////
-bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
-{
-  // Required: The expected color pattern.
-  for (auto colorIndex : {"color_1", "color_2", "color_3"})
-  {
-    if (!_sdf->HasElement(colorIndex))
-    {
-      ROS_ERROR("<%s> missing", colorIndex);
-      return false;
-    }
-
-    auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
-    std::transform(color.begin(), color.end(), color.begin(), ::tolower);
-
-    // Sanity check: color should be red, green, blue or yellow.
-    if (color != "red"  && color != "green" &&
-        color != "blue" && color != "yellow")
-    {
-      ROS_ERROR("Invalid color [%s]", color.c_str());
-      return false;
-    }
-
-    this->expectedSequence.push_back(color);
-  }
-
-  // Required parameter.
-  if (!_sdf->HasElement("bay1_topic"))
-  {
-    ROS_ERROR("<bay1_topic> missing");
-    return false;
-  }
-  this->bay1Topic = _sdf->GetElement("bay1_topic")->Get<std::string>();
-
-  // Required parameter.
-  if (!_sdf->HasElement("bay2_topic"))
-  {
-    ROS_ERROR("<bay2_topic> missing");
-    return false;
-  }
-  this->bay2Topic = _sdf->GetElement("bay2_topic")->Get<std::string>();
-
-  // Required parameter..
-  if (!_sdf->HasElement("correct_bay_topic"))
-  {
-    ROS_ERROR("<correct_bay_topic> missing");
-    return false;
-  }
-  this->correctBayTopic =
-    _sdf->GetElement("correct_bay_topic")->Get<std::string>();
-
-  // Sanity check: Make sure that the correct bay topic matches an existing
-  // bay topic.
-  if (this->correctBayTopic != this->bay1Topic &&
-      this->correctBayTopic != this->bay2Topic)
-  {
-    ROS_ERROR("<correct_bay_topic> should match <bay1_topic> or <bay2_topic>");
-    return false;
-  }
-
-  // Optional: ROS namespace.
-  if (_sdf->HasElement("robot_namespace"))
-    this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
-
-  // Required if shuffle enabled: ROS topic.
-  if (_sdf->HasElement("color_sequence_service"))
-  {
-    this->colorSequenceService =
-      _sdf->GetElement("color_sequence_service")->Get<std::string>();
-  }
-
-  return true;
-}
-
-//////////////////////////////////////////////////
-void ScanDockScoringPlugin::Update()
-{
-  // We only allow one color sequence submission.
-  std::lock_guard<std::mutex> lock(this->mutex);
-  if (this->colorSequenceReceived)
-    this->colorSequenceServer.shutdown();
-
-  // Check whether the vehicle docked.
-  if (this->timer1.GetElapsed() >= gazebo::common::Time(10.0))
-  {
-    if (this->correctBayTopic == this->bay1Topic)
-      this->SetScore(this->Score() + 10);
-
-    this->Finish();
-  }
-
-  if (this->timer2.GetElapsed() >= gazebo::common::Time(10.0))
-  {
-    if (this->correctBayTopic == this->bay2Topic)
-      this->SetScore(this->Score() + 10);
-
-    this->Finish();
-  }
-}
-
-//////////////////////////////////////////////////
-void ScanDockScoringPlugin::OnRunning()
+/////////////////////////////////////////////////
+void ColorSequenceChecker::Enable()
 {
   this->colorSequenceServer = this->nh.advertiseService(
-    this->colorSequenceService, &ScanDockScoringPlugin::OnColorSequence, this);
+    this->colorSequenceService, &ColorSequenceChecker::OnColorSequence, this);
 }
 
 /////////////////////////////////////////////////
-void ScanDockScoringPlugin::OnActivationZoneBay1(ConstIntPtr &_msg)
+void ColorSequenceChecker::Disable()
 {
-  if (_msg->data() == 1)
-    this->timer1.Start();
-
-  if (_msg->data() == 0)
-  {
-    this->timer1.Stop();
-    this->timer1.Reset();
-  }
-
-  gzmsg << "OnActivationZoneBay1(): " << _msg->data() << std::endl;
+  this->colorSequenceServer.shutdown();
 }
 
 /////////////////////////////////////////////////
-void ScanDockScoringPlugin::OnActivationZoneBay2(ConstIntPtr &_msg)
+bool ColorSequenceChecker::SubmissionReceived() const
 {
-  if (_msg->data() == 1)
-    this->timer2.Start();
-
-  if (_msg->data() == 0)
-  {
-    this->timer2.Stop();
-    this->timer2.Reset();
-  }
-
-  gzmsg << "OnActivationZoneBay2(): " << _msg->data() << std::endl;
+  return this->colorSequenceReceived;
 }
 
-//////////////////////////////////////////////////
-bool ScanDockScoringPlugin::OnColorSequence(
+/////////////////////////////////////////////////
+bool ColorSequenceChecker::Correct() const
+{
+  return this->correctSequence;
+}
+
+/////////////////////////////////////////////////
+bool ColorSequenceChecker::OnColorSequence(
   ros::ServiceEvent<vmrc_gazebo::ColorSequence::Request,
-  vmrc_gazebo::ColorSequence::Response> &_event)
+    vmrc_gazebo::ColorSequence::Response> &_event)
 {
-  ROS_INFO_NAMED("ScanDockScoringPlugin", "Color sequence submission received");
+  ROS_INFO_NAMED("ColorSequenceChecker", "Color sequence submission received");
 
   const vmrc_gazebo::ColorSequence::Request &req = _event.getRequest();
   vmrc_gazebo::ColorSequence::Response &res = _event.getResponse();
 
   {
     // Sanity check: Only one color sequence submission is allowed.
-    std::lock_guard<std::mutex> lock(this->mutex);
     if (this->colorSequenceReceived)
     {
       ROS_ERROR("The color sequence has already been submitted");
       res.success = false;
       return false;
     }
-  
+
     this->colorSequenceReceived = true;
   }
 
@@ -241,17 +101,245 @@ bool ScanDockScoringPlugin::OnColorSequence(
   std::transform(color3.begin(), color3.end(), color3.begin(), ::tolower);
 
   // Incorrect color sequence.
-  if (color1 == this->expectedSequence[0] &&
+  this->correctSequence =
+      color1 == this->expectedSequence[0] &&
       color2 == this->expectedSequence[1] &&
-      color3 == this->expectedSequence[2])
-  {
-    // Add points for a correct color sequence.
-    this->SetScore(this->Score() + 10);
-  }
+      color3 == this->expectedSequence[2];
 
   // The submission is considered correct even if the sequence is wrong.
   res.success = true;
   return true;
+}
+
+/////////////////////////////////////////////////
+DockChecker::DockChecker(const std::string &_name,
+  const std::string &_activationTopic, const double _minDockTime,
+  const bool _dockAllowed, const std::string &_worldName)
+  : name(_name),
+    activationTopic(_activationTopic),
+    minDockTime(_minDockTime),
+    dockAllowed(_dockAllowed)
+{
+  this->timer.Stop();
+  this->timer.Reset();
+
+  // Subscriber to receive world updates (e.g.: a notification after a cloning).
+  this->node.reset(new gazebo::transport::Node());
+  this->node->Init(_worldName);
+
+  this->containSub = this->node->Subscribe(this->activationTopic,
+    &DockChecker::OnActivationEvent, this);
+}
+
+/////////////////////////////////////////////////
+bool DockChecker::Docked() const
+{
+  return this->docked;
+}
+
+/////////////////////////////////////////////////
+bool DockChecker::Allowed() const
+{
+  return this->dockAllowed;
+}
+
+/////////////////////////////////////////////////
+void DockChecker::Update()
+{
+  if (this->docked)
+    return;
+
+  this->docked =
+    this->timer.GetElapsed() >= gazebo::common::Time(this->minDockTime);
+}
+
+/////////////////////////////////////////////////
+void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
+{
+  if (_msg->data() == 1)
+    this->timer.Start();
+
+  if (_msg->data() == 0)
+  {
+    this->timer.Stop();
+    this->timer.Reset();
+  }
+
+  gzdbg << "[" << this->name << "] OnActivationEvent(): "
+        << _msg->data() << std::endl;
+}
+
+/////////////////////////////////////////////////
+ScanDockScoringPlugin::ScanDockScoringPlugin()
+{
+  gzmsg << "scan and dock scoring plugin loaded" << std::endl;
+}
+
+/////////////////////////////////////////////////
+void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
+    sdf::ElementPtr _sdf)
+{
+  ScoringPlugin::Load(_world, _sdf);
+
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
+
+  if (!this->ParseSDF(_sdf))
+    return;
+
+  this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&ScanDockScoringPlugin::Update, this));
+}
+
+//////////////////////////////////////////////////
+bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
+{
+  // Optional: ROS namespace.
+  std::string ns;
+  if (_sdf->HasElement("robot_namespace"))
+    ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
+
+  // Optional: ROS service.
+  std::string colorSequenceService = "/vrx/scan_dock/color_sequence";
+  if (_sdf->HasElement("color_sequence_service"))
+  {
+    colorSequenceService =
+      _sdf->GetElement("color_sequence_service")->Get<std::string>();
+  }
+
+  // Required: The expected color pattern.
+  std::vector<std::string> expectedSequence;
+  for (auto colorIndex : {"color_1", "color_2", "color_3"})
+  {
+    if (!_sdf->HasElement(colorIndex))
+    {
+      ROS_ERROR("<%s> missing", colorIndex);
+      return false;
+    }
+
+    auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
+    std::transform(color.begin(), color.end(), color.begin(), ::tolower);
+
+    // Sanity check: color should be red, green, blue or yellow.
+    if (color != "red"  && color != "green" &&
+        color != "blue" && color != "yellow")
+    {
+      ROS_ERROR("Invalid color [%s]", color.c_str());
+      return false;
+    }
+
+    expectedSequence.push_back(color);
+  }
+
+  // Instantiate the color checker.
+  this->colorChecker.reset(
+    new ColorSequenceChecker(expectedSequence, ns, colorSequenceService));
+
+  // Required: Parse the bays.
+  if (!_sdf->HasElement("bays"))
+  {
+    ROS_ERROR("<bays> missing");
+    return false;
+  }
+
+  auto baysElem = _sdf->GetElement("bays");
+  if (!baysElem->HasElement("bay"))
+  {
+    ROS_ERROR("<bay> missing");
+    return false;
+  }
+
+  auto bayElem = baysElem->GetElement("bay");
+  while (bayElem)
+  {
+    // Required: bay name.
+    if (!bayElem->GetElement("name"))
+    {
+      ROS_ERROR("<gates::gate::name> missing");
+      return false;
+    }
+    std::string bayName = bayElem->Get<std::string>("name");
+
+    // Required: bay name.
+    if (!bayElem->GetElement("activation_topic"))
+    {
+      ROS_ERROR("<gates::gate::activation_topic> missing");
+      return false;
+    }
+    std::string activationTopic = bayElem->Get<std::string>("activation_topic");
+
+    // Required: minimum time to be considered "docked".
+    if (!bayElem->GetElement("min_dock_time"))
+    {
+      ROS_ERROR("<gates::gate::min_dock_time> missing");
+      return false;
+    }
+    double minDockTime = bayElem->Get<double>("min_dock_time");
+
+    // Required: dock allowed.
+    if (!bayElem->GetElement("dock_allowed"))
+    {
+      ROS_ERROR("<gates::gate::dock_allowed> missing");
+      return false;
+    }
+    bool dockAllowed = bayElem->Get<bool>("dock_allowed");
+
+    // Create a new dock checker.
+    std::unique_ptr<DockChecker> dockChecker(
+      new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
+        this->world->GetName()));
+
+    // Add the dock checker.
+    this->dockCheckers.push_back(std::move(dockChecker));
+
+    // Process the next checker.
+    bayElem = bayElem->GetNextElement();
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////
+void ScanDockScoringPlugin::Update()
+{
+  // Verify the color checker.
+  if (!this->colorSubmissionProcessed && 
+      this->colorChecker->SubmissionReceived())
+  {
+    // We need to decide if we grant extra points.
+    if (this->colorChecker->Correct())
+      this->SetScore(this->Score() + 10);
+
+    // We only allow one color sequence submission.
+    this->colorChecker->Disable();
+    this->colorSubmissionProcessed = true;
+  }
+
+  // Verify the dock checkers.
+  for (auto &dockChecker : this->dockCheckers)
+  {
+    // We always need to update the checkers.
+    dockChecker->Update();
+
+    // Nothing to do if nobody docked.
+    if (!dockChecker->Docked())
+      continue;
+
+    // We need to decide if we grant extra points.
+    if (dockChecker->Allowed())
+      this->SetScore(this->Score() + 10);
+
+    // Time to finish the task as the vehicle docked.
+    // Note that we only allow to dock one time. This is to prevent teams
+    // docking in all possible bays.
+    this->Finish();
+    break;
+  }
+}
+
+//////////////////////////////////////////////////
+void ScanDockScoringPlugin::OnRunning()
+{
+  this->colorChecker->Enable();
 }
 
 // Register plugin with gazebo

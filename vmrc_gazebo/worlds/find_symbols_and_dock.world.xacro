@@ -17,7 +17,8 @@
       <pose>60 -2.75 0 0 0 0</pose>
     </include>
 
-    <model name="activation_placard1">
+    <!-- Uncomment to visualize the bay #1 activation zone -->
+    <!-- <model name="activation_placard1">
       <static>true</static>
       <link name="link">
         <visual name="visual">
@@ -30,9 +31,10 @@
           <transparency>0.8</transparency>
         </visual>
       </link>
-    </model>
+    </model> -->
 
-    <model name="activation_placard2">
+    <!-- Uncomment to visualize the bay #2 activation zone -->
+    <!-- <model name="activation_placard2">
       <static>true</static>
       <link name="link">
         <visual name="visual">
@@ -45,11 +47,12 @@
           <transparency>0.8</transparency>
         </visual>
       </link>
-    </model>
+    </model> -->
 
     <!-- The scoring plugin -->
     <plugin name="scan_dock_scoring_plugin"
             filename="libscan_dock_scoring_plugin.so">
+      <!-- Parameters for scoring_plugin -->
       <vehicle>wamv</vehicle>
       <task_name>scan_dock</task_name>
       <initial_state_duration>3</initial_state_duration>
@@ -63,16 +66,33 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
+
+      <!-- Color sequence checker -->
+      <robot_namespace>vrx</robot_namespace>
+      <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
       <color_1>red</color_1>
       <color_2>green</color_2>
       <color_3>blue</color_3>
-      <robot_namespace>vrx</robot_namespace>
-      <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
-      <bay1_topic>/vrx/dock_2018/bay_1/contain</bay1_topic>
-      <bay2_topic>/vrx/dock_2018/bay_2/contain</bay2_topic>
-      <correct_bay_topic>/vrx/dock_2018/bay_2/contain</correct_bay_topic>
+      
+      <!-- Dock checkers -->
+      <bays>
+        <bay>
+          <name>bay1</name>
+          <activation_topic>/vrx/dock_2018/bay_1/contain</activation_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <dock_allowed>false</dock_allowed>
+        </bay>
+
+        <bay>
+          <name>bay2</name>
+          <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <dock_allowed>true</dock_allowed>
+        </bay>
+      </bays>
     </plugin>
 
+    <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
     <plugin name="vehicle_docked_bay1" filename="libContainPlugin.so">
       <entity>wamv::base_link</entity>
       <namespace>vrx/dock_2018/bay_1</namespace>
@@ -84,6 +104,7 @@
       </geometry>
     </plugin>
 
+    <!-- Triggers a message when the vehicle enters and exits the bay #2 -->
     <plugin name="vehicle_docked_bay2" filename="libContainPlugin.so">
       <entity>wamv::base_link</entity>
       <namespace>vrx/dock_2018/bay_2</namespace>
