@@ -15,23 +15,22 @@
  *
 */
 
-#include <cmath>
-#include <gazebo/common/Assert.hh>
-#include <gazebo/common/Console.hh>
 #include <std_msgs/Float64.h>
-#include "std_msgs/String.h"
-#include <sstream>
-#include <ignition/math/Pose3.hh>
+#include <cmath>
+#include <gazebo/common/Console.hh>
+#include <gazebo/common/SphericalCoordinates.hh>
+#include <gazebo/physics/Model.hh>
 #include <ignition/math/Quaternion.hh>
-#include <gazebo/common/common.hh>
+#include <ignition/math/Vector3.hh>
 #include "vmrc_gazebo/stationkeeping_scoring_plugin.hh"
-#include "gazebo/common/SphericalCoordinates.hh"
-
 
 /////////////////////////////////////////////////
 StationkeepingScoringPlugin::StationkeepingScoringPlugin()
 {
   gzmsg << "Stationkeeping scoring plugin loaded" << std::endl;
+
+  this->timer.Stop();
+  this->timer.Reset();
 }
 
 /////////////////////////////////////////////////
@@ -39,35 +38,34 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
   ScoringPlugin::Load(_world, _sdf);
-  this->sdf = _sdf;
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
-  // Get Lat, lon and yaw from SDF
-  ignition::math::Vector3d latlonyaw(0,0,0);
-  if (!this->sdf->HasElement("goal_pose"))
+  // Get lat, lon and yaw from SDF
+  ignition::math::Vector3d latlonyaw(0, 0, 0);
+  if (!_sdf->HasElement("goal_pose"))
   {
-	  gzerr << "Unable to find <goal_pose> element in SDF." << std::endl;
-	  gzerr << "Using default pose: 0 0 0" << std::endl;
+    ROS_ERROR("Unable to find <goal_pose> element in SDF.");
+    ROS_ERROR("Using default pose: 0 0 0");
   }
   else
   {
-	  latlonyaw = this->sdf->Get<ignition::math::Vector3d>("goal_pose");
+    latlonyaw = _sdf->Get<ignition::math::Vector3d>("goal_pose");
   }
   // Store spherical 2D location
   this->goalLat = latlonyaw.X();
   this->goalLon = latlonyaw.Y();
-  
+
   // Convert lat/lon to local
-  //  snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
+  // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
   ignition::math::Vector3d scVec(this->goalLat, this->goalLon, 0.0);
 
-  #if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Vector3d cartVec =
-		_world->SphericalCoords()->LocalFromSpherical(scVec);
-  #else
-    ignition::math::Vector3d cartVec =
-		_world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
-  #endif
+#if GAZEBO_MAJOR_VERSION >= 8
+  ignition::math::Vector3d cartVec =
+  _world->SphericalCoords()->LocalFromSpherical(scVec);
+#else
+  ignition::math::Vector3d cartVec =
+  _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+#endif
 
   // Store local 2D location and yaw
   this->goalX = cartVec.X();
@@ -75,15 +73,20 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->goalYaw = latlonyaw.Z();
 
   // Print some debugging messages
-  gzmsg << "StationKeeping Goal, Spherical: Lat = " << this->goalLat << " Lon = " << this->goalLon << std::endl;
-  gzmsg << "StationKeeping Goal, Local: X = " << this->goalX << " Y = " << this->goalY << " Yaw = " << this->goalYaw << std::endl;
-  
+  gzmsg << "StationKeeping Goal, Spherical: Lat = " << this->goalLat
+        << " Lon = " << this->goalLon << std::endl;
+  gzmsg << "StationKeeping Goal, Local: X = " << this->goalX
+        << " Y = " << this->goalY << " Yaw = " << this->goalYaw << std::endl;
+
   // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
-  this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->goalTopic, 10);
+  this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(
+    this->goalTopic, 10, true);
 
-  this->poseErrorPub  = this->rosNode->advertise<std_msgs::Float64>(this->poseErrorTopic, 100);
-  this->rmsErrorPub   = this->rosNode->advertise<std_msgs::Float64>(this->rmsErrorTopic, 100);
+  this->poseErrorPub = this->rosNode->advertise<std_msgs::Float64>(
+    this->poseErrorTopic, 100);
+  this->rmsErrorPub  = this->rosNode->advertise<std_msgs::Float64>(
+    this->rmsErrorTopic, 100);
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&StationkeepingScoringPlugin::Update, this));
@@ -100,6 +103,10 @@ void StationkeepingScoringPlugin::Update()
       return;
   }
 
+  // Nothing to do if the task is not in "running" state.
+  if (this->ScoringPlugin::TaskState() != "running")
+    return;
+
   std_msgs::Float64 poseErrorMsg;
   std_msgs::Float64 rmsErrorMsg;
 
@@ -108,26 +115,30 @@ void StationkeepingScoringPlugin::Update()
   double currentHeading = robotPose.rot.GetAsEuler().z;
   double dx   =  this->goalX - robotPose.pos.x;
   double dy   =  this->goalY - robotPose.pos.y;
-  double dhdg =  this->goalYaw - currentHeading; 
+  double dhdg =  this->goalYaw - currentHeading;
 
-  double sqError =  pow(dx,2) + pow(dy,2) + pow(dhdg,2);
+  double sqError =  pow(dx, 2) + pow(dy, 2) + pow(dhdg, 2);
 
   this->poseError  = sqrt(sqError);
   this->totalSquaredError += sqError;
-  this->sampleCount       += 1;
+  this->sampleCount++;
 
-  this->rmsError = sqrt(this->totalSquaredError/this->sampleCount);
+  this->rmsError = sqrt(this->totalSquaredError / this->sampleCount);
 
   poseErrorMsg.data = this->poseError;
   rmsErrorMsg.data = this->rmsError;
 
-
-  this->poseErrorPub.publish(poseErrorMsg);
-  this->rmsErrorPub.publish(rmsErrorMsg);
+  // Publish at 1 Hz.
+  if (this->timer.GetElapsed() >= gazebo::common::Time(1.0))
+  {
+    this->poseErrorPub.publish(poseErrorMsg);
+    this->rmsErrorPub.publish(rmsErrorMsg);
+    this->timer.Reset();
+    this->timer.Start();
+  }
 
   this->ScoringPlugin::SetScore(this->rmsError);
 }
-
 
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::PublishGoal()
@@ -140,7 +151,7 @@ void StationkeepingScoringPlugin::PublishGoal()
   goal.pose.position.longitude = this->goalLon;
   goal.pose.position.altitude  = 0.0;
 
-  const ignition::math::Quaternion<double> orientation(0.0,0.0,this->goalYaw);
+  const ignition::math::Quaternion<double> orientation(0.0, 0.0, this->goalYaw);
 
   goal.pose.orientation.x = orientation.X();
   goal.pose.orientation.y = orientation.Y();
@@ -160,12 +171,12 @@ void StationkeepingScoringPlugin::OnReady()
   this->PublishGoal();
 }
 
-
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
 
+  this->timer.Start();
 }
 
 //////////////////////////////////////////////////
