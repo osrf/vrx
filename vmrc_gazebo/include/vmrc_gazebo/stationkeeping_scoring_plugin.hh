@@ -34,7 +34,7 @@
 /// Running and Finished) as well as other required SDF elements.
 ///
 /// This plugin publishes a goal pose to a topic when it enters the Ready
-/// states.
+/// state.
 ///
 /// In the running state it calculates a 2D pose error distance between the
 /// vehicle and the goal as well as a running RMS error of all 2D pose errors
