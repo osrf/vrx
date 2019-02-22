@@ -15,6 +15,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend version_gte="2.5.17">gazebo_ros</depend>
   <depend>gazebo_dev</depend>
+  <depend>geographic_msgs</depend>
   <depend>joy</depend>
   <depend>joy_teleop</depend>
   <depend>message_runtime</depend>
