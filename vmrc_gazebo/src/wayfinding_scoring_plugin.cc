@@ -61,13 +61,32 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   while (waypointElem)
   {
+    ignition::math::Vector3d latlonyaw = waypointElem->Get<ignition::math::Vector3d>("pose");
+    this->sphericalWaypoints.push_back(latlonyaw);
     
-    this->sphericalWaypoints.push_back(waypointElem->Get<ignition::math::Vector3d>("pose"));
+    // Convert lat/lon to local
+    //  snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
+    ignition::math::Vector3d scVec(latlonyaw.X(), latlonyaw.Y(), 0.0);
+  
+    #if GAZEBO_MAJOR_VERSION >= 8
+      ignition::math::Vector3d cartVec =
+          	_world->SphericalCoords()->LocalFromSpherical(scVec);
+    #else
+      ignition::math::Vector3d cartVec =
+          	_world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+    #endif
+
+    // Store local 2D location and yaw
+    cartVec.Z() = latlonyaw.Z();
+
+    this->localWaypoints.push_back(cartVec);
+    // Print some debugging messages
+    gzmsg << "Waypoint, Spherical: Lat = " << latlonyaw.X() << " Lon = " << latlonyaw.Y() << std::endl;
+    gzmsg << "Waypoint, Local: X = " << cartVec.X() << " Y = " << cartVec.Y() << " Yaw = " << cartVec.Z() << std::endl;
 
     waypointElem = waypointElem->GetNextElement("waypoint"); 
   }
 
-  
 }
 
 //////////////////////////////////////////////////

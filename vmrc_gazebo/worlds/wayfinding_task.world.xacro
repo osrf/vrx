@@ -12,34 +12,25 @@
 	  <!-- Goal as Latitude, Longitude, Yaw -->
       <waypoints>
           <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
+            <pose>21.31 -157.89 -3.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 -2.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 -1.0</pose>
           </waypoint>
           <waypoint>
             <pose>21.31 -157.89 0.0</pose>
           </waypoint>
           <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
+            <pose>21.31 -157.89 1.0</pose>
           </waypoint>
           <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
+            <pose>21.31 -157.89 2.0</pose>
           </waypoint>
           <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
+            <pose>21.31 -157.89 3.0</pose>
           </waypoint>
        </waypoints>
       <initial_state_duration>10</initial_state_duration>
