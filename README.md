@@ -6,7 +6,7 @@ This is an active development project.  We are adding and improving things all t
 
  * Watch the [Release 0.2 Highlight Video](https://youtu.be/QvottL9P75M)
 
-![VRX](images/vmrc.jpg)
+![VRX](images/vrx.jpg)
 
 ## Getting Started
 
