@@ -66,18 +66,18 @@ USER $USER:$GROUP
 # When running a container start in the developer's home folder.
 WORKDIR /home/$USER
 
-# Clone the VMRC repository.
-RUN mkdir -p vmrc_ws/src \
- && cd vmrc_ws \
- && hg clone https://bitbucket.org/osrf/vmrc src/vmrc
+# Clone the VRX repository.
+RUN mkdir -p vrx_ws/src \
+ && cd vrx_ws \
+ && hg clone https://bitbucket.org/osrf/vrx src/vrx
 
-# Compile the VMRC project.
-RUN /bin/bash -c ". /opt/ros/kinetic/setup.bash && cd vmrc_ws && catkin_make"
+# Compile the VRX project.
+RUN /bin/bash -c ". /opt/ros/kinetic/setup.bash && cd vrx_ws && catkin_make"
 
 # Source all the needed environment files.
 RUN /bin/sh -c 'echo ". /opt/ros/kinetic/setup.bash" >> ~/.bashrc' \
  && /bin/sh -c 'echo ". /usr/share/gazebo/setup.sh" >> ~/.bashrc' \
- && /bin/sh -c 'echo ". ~/vmrc_ws/devel/setup.sh" >> ~/.bashrc'
+ && /bin/sh -c 'echo ". ~/vrx_ws/devel/setup.sh" >> ~/.bashrc'
 
 ENTRYPOINT ["fixuid"]
 
