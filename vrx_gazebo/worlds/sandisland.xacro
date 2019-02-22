@@ -16,9 +16,9 @@
       <world_frame_orientation>ENU</world_frame_orientation>
       <latitude_deg>21.30996</latitude_deg>
       <longitude_deg>-157.8901</longitude_deg>
-      <elevation>0</elevation>
+      <elevation>0.0</elevation>
       <!-- For legacy gazebo reasons, need to rotate -->
-      <heading_deg>180</heading_deg>
+      <!--<heading_deg>180</heading_deg>-->
     </spherical_coordinates>
 
     <!-- A global light source -->
