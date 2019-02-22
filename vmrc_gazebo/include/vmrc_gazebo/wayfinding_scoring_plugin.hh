@@ -52,11 +52,11 @@
 ///    This block should contain at least one of these blocks:
 ///     <waypoint>: A parameter (vector type) specifying the lattitude,
 ///     longitude and yaw of a waypoint. 
-class StationkeepingScoringPlugin : public ScoringPlugin
+class WayfindingScoringPlugin : public ScoringPlugin
 {
 
   // Constructor.
-  public: StationkeepingScoringPlugin();
+  public: WayfindingScoringPlugin();
 
   // Documentation inherited.
   public: void Load(gazebo::physics::WorldPtr _world,

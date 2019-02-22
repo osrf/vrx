@@ -24,18 +24,18 @@
 #include <ignition/math/Pose3.hh>
 #include <ignition/math/Quaternion.hh>
 #include <gazebo/common/common.hh>
-#include "vmrc_gazebo/stationkeeping_scoring_plugin.hh"
+#include "vmrc_gazebo/wayfinding_scoring_plugin.hh"
 #include "gazebo/common/SphericalCoordinates.hh"
 
 
 /////////////////////////////////////////////////
-StationkeepingScoringPlugin::StationkeepingScoringPlugin()
+WayfindingScoringPlugin::WayfindingScoringPlugin()
 {
-  gzmsg << "Stationkeeping scoring plugin loaded" << std::endl;
+  gzmsg << "Wayfinding scoring plugin loaded" << std::endl;
 }
 
 /////////////////////////////////////////////////
-void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
+void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
   ScoringPlugin::Load(_world, _sdf);
@@ -47,7 +47,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   if (!this->sdf->HasElement("waypoints"))
   {
 	  gzerr << "Unable to find <waypoints> element in SDF." << std::endl;
-          return false;
+          return;
   }
   auto waypointsElem = this->sdf->GetElement("waypoints");
 
@@ -55,7 +55,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   if (!this->sdf->HasElement("waypoint"))
   {
       gzerr << "Unable to find <waypoint> element in SDF." << std::endl;
-      return false;
+      return;
   }
   auto waypointElem = this->sdf->GetElement("waypoint");
 
@@ -71,7 +71,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 }
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::Update()
+void WayfindingScoringPlugin::Update()
 {
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->vehicleModel)
@@ -85,13 +85,13 @@ void StationkeepingScoringPlugin::Update()
 
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::PublishGoal()
+void WayfindingScoringPlugin::PublishGoal()
 {
   gzmsg << "Publishing Goal coordinates" << std::endl;
 }
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnReady()
+void WayfindingScoringPlugin::OnReady()
 {
   gzmsg << "OnReady" << std::endl;
 
@@ -100,17 +100,17 @@ void StationkeepingScoringPlugin::OnReady()
 
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnRunning()
+void WayfindingScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
 
 }
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnFinished()
+void WayfindingScoringPlugin::OnFinished()
 {
   gzmsg << "OnFinished" << std::endl;
 }
 
 // Register plugin with gazebo
-GZ_REGISTER_WORLD_PLUGIN(StationkeepingScoringPlugin)
+GZ_REGISTER_WORLD_PLUGIN(WayfindingScoringPlugin)
