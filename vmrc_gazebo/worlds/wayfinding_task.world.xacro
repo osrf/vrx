@@ -11,17 +11,37 @@
       <task_name>wayfinding_task</task_name>
 	  <!-- Goal as Latitude, Longitude, Yaw -->
       <waypoints>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-          <waypoint>21.31 -157.89 0.0</waypoint>
-      </waypoints>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+       </waypoints>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>

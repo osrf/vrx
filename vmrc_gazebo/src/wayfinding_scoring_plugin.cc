@@ -52,17 +52,17 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   auto waypointsElem = this->sdf->GetElement("waypoints");
 
   // We need at least one waypoint
-  if (!this->sdf->HasElement("waypoint"))
+  if (!waypointsElem->HasElement("waypoint"))
   {
       gzerr << "Unable to find <waypoint> element in SDF." << std::endl;
       return;
   }
-  auto waypointElem = this->sdf->GetElement("waypoint");
+  auto waypointElem = waypointsElem->GetElement("waypoint");
 
   while (waypointElem)
   {
     
-    this->sphericalWaypoints.push_back(this->sdf->Get<ignition::math::Vector3d>("waypoint"));
+    this->sphericalWaypoints.push_back(waypointElem->Get<ignition::math::Vector3d>("pose"));
 
     waypointElem = waypointElem->GetNextElement("waypoint"); 
   }
