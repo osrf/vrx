@@ -61,9 +61,12 @@
   </xacro:if>
 
   <!-- Add a front camera -->
-  <xacro:if value="$(arg camera_enabled)">
+  <!-- <xacro:if value="$(arg camera_enabled)"> -->
     <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}" />
-  </xacro:if>
+  <!-- </xacro:if> -->
+
+  <!-- Add 2D LIDAR -->
+  <xacro:wamv_multibeam_laser name="planar_lidar" />
 
   <!-- Add simulated GPS -->
   <xacro:if value="$(arg gps_enabled)">
@@ -86,23 +89,23 @@
   </xacro:if>
 
   <!-- ==== VRX sensor configuration ==== -->
-  <xacro:if value="$(arg vrx_sensors_enabled)">
+ <!--  <xacro:if value="$(arg vrx_sensors_enabled)"> -->
 
     <!-- Add a stereo camera pair -->
-    <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}" />
-    <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75" P="${radians(15)}" />
+    <!-- <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}" />
+    <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75" P="${radians(15)}" /> -->
 
     <!-- Add a camera facing right -->
-    <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" />
+    <!-- <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" /> -->
 
     <!-- Add simulated GPS -->
-    <xacro:wamv_gps name="gps_wamv" y="0.2" />
+    <!-- <xacro:wamv_gps name="gps_wamv" y="0.2" /> -->
 
     <!-- Add Simulated IMU -->
-    <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+    <!-- <xacro:wamv_imu name="imu_wamv" y="-0.2" /> -->
 
     <!-- Add 3D LIDAR -->
-    <xacro:wamv_3d_lidar name="lidar_wamv" P="${radians(8)}" />
-  </xacro:if>
+    <!-- <xacro:wamv_3d_lidar name="lidar_wamv" P="${radians(8)}" /> -->
+  <!-- </xacro:if> -->
 
 </robot>
