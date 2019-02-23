@@ -35,16 +35,16 @@ key="$1"
 case $key in
     -n|--nvidia)
     RUNTIME="nvidia"
-    shift 
+    shift
     ;;
     *)    # unknown option
-    POSITIONAL+=("$1") 
-    shift 
+    POSITIONAL+=("$1")
+    shift
     ;;
 esac
 done
 
-set -- "${POSITIONAL[@]}" 
+set -- "${POSITIONAL[@]}"
 
 if [ $# -lt 1 ]
 then
@@ -93,6 +93,7 @@ sudo docker run -it \
   -v "/tmp/.X11-unix:/tmp/.X11-unix" \
   -v "/etc/localtime:/etc/localtime:ro" \
   -v "/dev/input:/dev/input" \
+  -v "/opt/sublime_text_3:/opt/sublime_text_3" \
   --privileged \
   --rm \
   --runtime=$RUNTIME \
