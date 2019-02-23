@@ -19,6 +19,7 @@
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
 #include "std_msgs/String.h"
 #include <sstream>
 #include <ignition/math/Pose3.hh>
@@ -62,7 +63,6 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   while (waypointElem)
   {
     ignition::math::Vector3d latlonyaw = waypointElem->Get<ignition::math::Vector3d>("pose");
-    this->sphericalWaypoints.push_back(latlonyaw);
     
     // Convert lat/lon to local
     //  snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
@@ -76,10 +76,12 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
           	_world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
     #endif
 
-    // Store local 2D location and yaw
     cartVec.Z() = latlonyaw.Z();
 
+    // Set up relevant vectors 
+    this->sphericalWaypoints.push_back(latlonyaw);
     this->localWaypoints.push_back(cartVec);
+
     // Print some debugging messages
     gzmsg << "Waypoint, Spherical: Lat = " << latlonyaw.X() << " Lon = " << latlonyaw.Y() << std::endl;
     gzmsg << "Waypoint, Local: X = " << cartVec.X() << " Y = " << cartVec.Y() << " Yaw = " << cartVec.Z() << std::endl;
@@ -87,6 +89,15 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     waypointElem = waypointElem->GetNextElement("waypoint"); 
   }
 
+  // Setup ROS node and publisher
+  this->rosNode.reset(new ros::NodeHandle());
+  this->waypointsPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(this->waypointsTopic, 10);
+
+  this->minErrorsPub = this->rosNode->advertise<std_msgs::Float64MultiArray>(this->minErrorsTopic, 100);
+  this->meanErrorPub = this->rosNode->advertise<std_msgs::Float64>(this->meanErrorTopic, 100);
+
+  this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&WayfindingScoringPlugin::Update, this));
 }
 
 //////////////////////////////////////////////////
@@ -100,13 +111,52 @@ void WayfindingScoringPlugin::Update()
       return;
   }
 
+std_msgs::Float64MultiArray minErrorsMsg;
+std_msgs::Float64 meanErrorMsg;
+
+const auto robotPose = this->vehicleModel->GetWorldPose();
+double currentHeading = robotPose.rot.GetAsEuler().z;
+
+double currentTotalError = 0;
+
+for (unsigned i = 0; i < this->localWaypoints.size(); i++) {
+  const ignition::math::Vector3d wp = this->localWaypoints[i]; 
+  double dx   =  wp.X() - robotPose.pos.x;
+  double dy   =  wp.Y() - robotPose.pos.y;
+  double dhdg =  wp.Z() - currentHeading; 
+  double poseError =  sqrt(pow(dx,2) + pow(dy,2) + pow(dhdg,2));
+
+  // If this is the first time through, minError == poseError
+  if (i == this->minErrors.size()) {
+    this->minErrors.push_back(poseError);
+  } 
+
+  // If poseError is smaller than the minimum, update the minimum 
+  if (poseError < this->minErrors.at(i)) {
+    this->minErrors.at(i) = poseError;
+  }
+  
+  // add current minimum to current total error
+  currentTotalError += this->minErrors.at(i);
+}
+
+this->meanError = currentTotalError / this->localWaypoints.size();
+
+// TODO figure out how to publish the min error vector
+//minErrorsMsg = this->minErrors;
+meanErrorMsg.data = this->meanError;
+
+//this->minErrorsPub.publish(minErrorsMsg);
+this->meanErrorPub.publish(meanErrorMsg);
+
+this->ScoringPlugin::SetScore(this->meanError);
 }
 
 
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::PublishGoal()
 {
-  gzmsg << "Publishing Goal coordinates" << std::endl;
+  gzmsg << "Publishing Waypoints" << std::endl;
 }
 
 //////////////////////////////////////////////////
