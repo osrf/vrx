@@ -50,8 +50,8 @@
 /// the vehicle should navigate through.
 ///
 ///    This block should contain at least one of these blocks:
-///     <waypoint>: A parameter (vector type) specifying the lattitude,
-///     longitude and yaw of a waypoint. 
+///     <waypoint>: This block should contain a <pose> element specifying the
+///     lattitude, longitude and yaw of a waypoint. 
 class WayfindingScoringPlugin : public ScoringPlugin
 {
 
