@@ -23,7 +23,7 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
-#include <ignition/math/Pose.hh>
+#include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
 
@@ -114,8 +114,8 @@ class NavigationScoringPlugin : public ScoringPlugin
     /// \brief Where is the given robot pose with respect to the gate?
     /// \param _robotWorldPose Pose of the robot, in the world frame.
     /// \return The gate state given the current robot pose.
-    public: GateState IsPoseInGate(const gazebo::math::Pose &_robotWorldPose)
-        const;
+    public: GateState IsPoseInGate(
+      const ignition::math::Pose3d &_robotWorldPose) const;
 
     /// \brief Recalculate the pose and width of the gate.
     public: void Update();
@@ -129,7 +129,7 @@ class NavigationScoringPlugin : public ScoringPlugin
     /// \brief The center of the gate in the world frame. Note that the roll and
     /// pitch are ignored. Only yaw is relevant and it points into the direction
     /// in which the gate should be crossed.
-    public: ignition::math::Pose pose;
+    public: ignition::math::Pose3d pose;
 
     /// \brief The width of the gate in meters.
     public: double width;

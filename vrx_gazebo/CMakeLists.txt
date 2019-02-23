@@ -156,7 +156,7 @@ xacro_add_files(
   worlds/sandisland.world.xacro
   worlds/example_course.world.xacro
   worlds/navigation_task.world.xacro
-  #worlds/stationkeeping_task.world.xacro
+  worlds/stationkeeping_task.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 

@@ -22,7 +22,7 @@
 #include <gazebo/physics/Model.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
-#include "vmrc_gazebo/stationkeeping_scoring_plugin.hh"
+#include "vrx_gazebo/stationkeeping_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
 StationkeepingScoringPlugin::StationkeepingScoringPlugin()
@@ -98,7 +98,7 @@ void StationkeepingScoringPlugin::Update()
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->vehicleModel)
   {
-    this->vehicleModel = this->world->GetModel(this->vehicleName);
+    this->vehicleModel = this->world->ModelByName(this->vehicleName);
     if (!this->vehicleModel)
       return;
   }
@@ -110,11 +110,11 @@ void StationkeepingScoringPlugin::Update()
   std_msgs::Float64 poseErrorMsg;
   std_msgs::Float64 rmsErrorMsg;
 
-  const auto robotPose = this->vehicleModel->GetWorldPose();
+  const auto robotPose = this->vehicleModel->WorldPose();
 
-  double currentHeading = robotPose.rot.GetAsEuler().z;
-  double dx   =  this->goalX - robotPose.pos.x;
-  double dy   =  this->goalY - robotPose.pos.y;
+  double currentHeading = robotPose.Rot().Euler().Z();
+  double dx   =  this->goalX - robotPose.Pos().X();
+  double dy   =  this->goalY - robotPose.Pos().Y();
   double dhdg =  this->goalYaw - currentHeading;
 
   double sqError =  pow(dx, 2) + pow(dy, 2) + pow(dhdg, 2);
