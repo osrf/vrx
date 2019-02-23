@@ -157,6 +157,24 @@ this->ScoringPlugin::SetScore(this->meanError);
 void WayfindingScoringPlugin::PublishGoal()
 {
   gzmsg << "Publishing Waypoints" << std::endl;
+  geographic_msgs::GeoPoseStamped wp_msg;
+
+  for (auto wp : this->sphericalWaypoints) {
+    wp_msg.pose.position.latitude  = wp.X();
+    wp_msg.pose.position.longitude = wp.Y(); 
+    wp_msg.pose.position.altitude  = 0.0;
+
+    const ignition::math::Quaternion<double> orientation(0.0,0.0,wp.Z());
+
+    wp_msg.pose.orientation.x = orientation.X();
+    wp_msg.pose.orientation.y = orientation.Y();
+    wp_msg.pose.orientation.z = orientation.Z();
+    wp_msg.pose.orientation.w = orientation.W();
+
+    wp_msg.header.stamp = ros::Time::now();
+
+    this->waypointsPub.publish(wp_msg);
+  }
 }
 
 //////////////////////////////////////////////////
