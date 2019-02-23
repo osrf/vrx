@@ -142,11 +142,16 @@ for (unsigned i = 0; i < this->localWaypoints.size(); i++) {
 
 this->meanError = currentTotalError / this->localWaypoints.size();
 
-// TODO figure out how to publish the min error vector
-//minErrorsMsg = this->minErrors;
+// Set up multi array dimensions  
+minErrorsMsg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+minErrorsMsg.layout.dim[0].label = "minimum errors";
+minErrorsMsg.layout.dim[0].size = this->localWaypoints.size();
+minErrorsMsg.layout.dim[0].stride = this->localWaypoints.size();
+
+minErrorsMsg.data = this->minErrors; 
 meanErrorMsg.data = this->meanError;
 
-//this->minErrorsPub.publish(minErrorsMsg);
+this->minErrorsPub.publish(minErrorsMsg);
 this->meanErrorPub.publish(meanErrorMsg);
 
 this->ScoringPlugin::SetScore(this->meanError);
