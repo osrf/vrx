@@ -67,19 +67,21 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("wind_velocity_vector"))
   {
     this->windVelocity =
-      _sdf->GetElement("wind_velocity_vector")->Get<math::Vector3>();
+      _sdf->GetElement("wind_velocity_vector")->Get<ignition::math::Vector3d>();
   }
 
-  gzmsg << "Wind velocity vector = " << this->windVelocity.x << " , "
-        << this->windVelocity.y << " , " << this->windVelocity.z << std::endl;
+  gzmsg << "Wind velocity vector = " << this->windVelocity.X() << " , "
+        << this->windVelocity.Y() << " , " << this->windVelocity.Z()
+        << std::endl;
 
   if (_sdf->HasElement("wind_coeff_vector"))
   {
-    windCoeff = _sdf->GetElement("wind_coeff_vector")->Get<math::Vector3>();
+    windCoeff =
+      _sdf->GetElement("wind_coeff_vector")->Get<ignition::math::Vector3d>();
   }
 
-  gzmsg << "Wind coefficient vector = " << windCoeff.x << " , " << windCoeff.y
-        << " , " << windCoeff.z << std::endl;
+  gzmsg << "Wind coefficient vector = " << windCoeff.X() << " , "
+        << windCoeff.Y() << " , " << windCoeff.Z() << std::endl;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -91,24 +93,26 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 void UsvWindPlugin::Update()
 {
   // Transform wind from world coordinates to body coordinates
-  math::Vector3 relativeWind = this->link->GetWorldPose().rot.GetInverse().
-    RotateVector(this->windVelocity);
+  ignition::math::Vector3d relativeWind =
+    this->link->WorldPose().Rot().Inverse().RotateVector(this->windVelocity);
   // Calculate apparent wind
-  math::Vector3 apparentWind =
-    relativeWind - this->link->GetRelativeLinearVel();
+  ignition::math::Vector3d apparentWind =
+    relativeWind - this->link->RelativeLinearVel();
 
   // gzdbg << "Relative wind: " << relativeWind << std::endl;
   // gzdbg << "Apparent wind: " << apparentWind << std::endl;
 
   // Calculate wind force - body coordinates
-  math::Vector3 windForce(
-    windCoeff.x * relativeWind.x * abs(relativeWind.x),
-    windCoeff.y * relativeWind.y * abs(relativeWind.y),
-    -2.0 * windCoeff.z * relativeWind.x * relativeWind.y);
+  ignition::math::Vector3d windForce(
+    windCoeff.X() * relativeWind.X() * abs(relativeWind.X()),
+    windCoeff.Y() * relativeWind.Y() * abs(relativeWind.Y()),
+    -2.0 * windCoeff.Z() * relativeWind.X() * relativeWind.Y());
 
   // Add forces/torques to link at CG
-  this->link->AddRelativeForce(math::Vector3(windForce.x, windForce.y, 0.0));
-  this->link->AddRelativeTorque(math::Vector3(0.0, 0.0, windForce.z));
+  this->link->AddRelativeForce(
+    ignition::math::Vector3d(windForce.X(), windForce.Y(), 0.0));
+  this->link->AddRelativeTorque(
+    ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvWindPlugin);

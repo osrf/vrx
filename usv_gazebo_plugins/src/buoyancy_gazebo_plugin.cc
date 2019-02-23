@@ -19,6 +19,7 @@
 #include <string>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Events.hh>
+#include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
 using namespace gazebo;
@@ -97,8 +98,8 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
       if (linkElem->HasElement("center_of_volume"))
       {
-        math::Vector3 cov = linkElem->GetElement("center_of_volume")
-            ->Get<math::Vector3>();
+        ignition::math::Vector3d cov = linkElem->GetElement("center_of_volume")
+            ->Get<ignition::math::Vector3d>();
         this->volPropsMap[id].cov = cov;
       }
       else
@@ -167,11 +168,12 @@ void BuoyancyPlugin::OnUpdate()
     double height = volumeProperties.height;
     double area = volumeProperties.area;
     double volume = height * area;
-    math::Pose linkFrame = link->GetWorldPose();
+    ignition::math::Pose3d linkFrame = link->WorldPose();
 
     // Location of bottom of object relative to the fluid surface - assumes
     // origin is at cog of the object.
-    double bottomRelSurf = this->fluidLevel - (linkFrame.pos.z - height / 2.0);
+    double bottomRelSurf =
+      this->fluidLevel - (linkFrame.Pos().Z() - height / 2.0);
 
     // out of water
     if (bottomRelSurf <= 0)
@@ -196,25 +198,25 @@ void BuoyancyPlugin::OnUpdate()
     // Therefore,
     //    math::Vector3 buoyancy =
     //    -this->fluidDensity * volume * this->model->GetWorld()->Gravity();
-    const math::Vector3 kGravity(0, 0, -9.81);
-    math::Vector3 buoyancy = -this->fluidDensity * volume * kGravity;
+    const ignition::math::Vector3d kGravity(0, 0, -9.81);
+    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume * kGravity;
 
     // Add some drag
     if (volume > 1e-6)
     {
-      math::Vector3 vel = link->GetWorldLinearVel();
-      double dz = -1.0 * this->fluidDrag * vel.z * std::abs(vel.z);
-      math::Vector3 drag(0, 0, dz);
+      ignition::math::Vector3d vel = link->WorldLinearVel();
+      double dz = -1.0 * this->fluidDrag * vel.Z() * std::abs(vel.Z());
+      ignition::math::Vector3d drag(0, 0, dz);
       buoyancy += drag;
-      if (buoyancy.z < 0.0)
+      if (buoyancy.Z() < 0.0)
       {
-        buoyancy.z = 0.0;
+        buoyancy.Z() = 0.0;
       }
     }
 
     // rotate buoyancy into the link frame before applying the force.
-    math::Vector3 buoyancyLinkFrame =
-      linkFrame.rot.GetInverse().RotateVector(buoyancy);
+    ignition::math::Vector3d buoyancyLinkFrame =
+      linkFrame.Rot().Inverse().RotateVector(buoyancy);
 
     link->AddForceAtRelativePosition(buoyancy, volumeProperties.cov);
   }

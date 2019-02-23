@@ -35,7 +35,7 @@ void GazeboRosColor::Load(gazebo::rendering::VisualPtr _parent,
   }
 
   // Load namespace from SDF if available. Otherwise, use the model name.
-  std::string modelName = _parent->GetName();
+  std::string modelName = _parent->Name();
   auto delim = modelName.find(":");
   if (delim != std::string::npos)
     modelName = modelName.substr(0, delim);
@@ -72,7 +72,7 @@ void GazeboRosColor::Load(gazebo::rendering::VisualPtr _parent,
 void GazeboRosColor::ColorCallback(const std_msgs::ColorRGBAConstPtr &_msg)
 {
   // Convert ROS color to gazebo color
-  gazebo::common::Color gazebo_color(_msg->r, _msg->g, _msg->b, _msg->a);
+  ignition::math::Color gazebo_color(_msg->r, _msg->g, _msg->b, _msg->a);
 
   // Set parent's color to message color
   this->visual->SetAmbient(gazebo_color);

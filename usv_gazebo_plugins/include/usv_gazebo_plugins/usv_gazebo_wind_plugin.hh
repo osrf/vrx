@@ -26,8 +26,8 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
-#include <gazebo/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
+#include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
 
 namespace gazebo
@@ -61,10 +61,10 @@ namespace gazebo
     private: physics::LinkPtr link;
 
     /// \brief Wind velocity in Gazebo coordinates [m/s].
-    private: math::Vector3 windVelocity;
+    private: ignition::math::Vector3d windVelocity;
 
     /// \brief Wind force coefficients.
-    private: math::Vector3 windCoeff;
+    private: ignition::math::Vector3d windCoeff;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;

@@ -21,9 +21,9 @@
 #include <string>
 #include <vector>
 #include <gazebo/common/Events.hh>
-#include <gazebo/math/Pose.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
+#include <ignition/math/Pose.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
 
@@ -129,7 +129,7 @@ class NavigationScoringPlugin : public ScoringPlugin
     /// \brief The center of the gate in the world frame. Note that the roll and
     /// pitch are ignored. Only yaw is relevant and it points into the direction
     /// in which the gate should be crossed.
-    public: gazebo::math::Pose pose;
+    public: ignition::math::Pose pose;
 
     /// \brief The width of the gate in meters.
     public: double width;
