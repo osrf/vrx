@@ -94,7 +94,7 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->rosNode.reset(new ros::NodeHandle());
   this->waypointsPub =
     this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(
-      this->waypointsTopic, 10, true);
+      this->waypointsTopic, 10);
 
   this->minErrorsPub =
     this->rosNode->advertise<std_msgs::Float64MultiArray>(
