@@ -13,14 +13,14 @@ Changelog for package wamv_gazebo
 0.3.0 (2018-09-28)
 ------------------
 * Tweak
-* vmrc metapackage and spring cleaning.
+* vrx metapackage and spring cleaning.
 * Static model and fog.
 * trying to get wamv to be static using a fixed joint
 * Merge from default.
 * reverting example rviz config back to original to be consistent with existing tutorial
 * adding launch/config files for running the example
 * adding examples to the sensors tutorial for the T and X propulsion configuration
-* Create a standard sensor configuration for VMRC.
+* Create a standard sensor configuration for VRX.
 * Merged in 3dlaser (pull request #41)
   Add 3D laser xacro
   Approved-by: Carlos Agüero <cen.aguero@gmail.com>

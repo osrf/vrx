@@ -16,7 +16,7 @@ Changelog for package usv_gazebo_plugins
 
 0.3.0 (2018-09-28)
 ------------------
-* vmrc metapackage and spring cleaning.
+* vrx metapackage and spring cleaning.
 * adding publication of forces/moments
 * trying to get wamv to be static using a fixed joint
 * Adding publication from dynamics plugin for wave height at USV CG for Josh's thesis work
