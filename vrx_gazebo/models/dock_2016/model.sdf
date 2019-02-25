@@ -1,0 +1,205 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+
+  <model name="robotx_dock_2016">
+
+    <!-- The 2016 dock base -->
+    <include>
+      <uri>model://dock_2016_base</uri>
+    </include>
+    
+    
+    <!-- Placard #1 -->
+    <model name="dock_2016_placard1">
+      <include>
+        <pose>5 2.75 1.5 0 0 1.5707963267948966</pose>
+        <uri>model://placard</uri>
+      </include>
+      <link name="link_symbols">
+        <visual name="visual_circle">
+          <pose>4.94 2.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.001</length>
+            </cylinder>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_circle_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard1</robotNamespace>
+            <topicName>circle</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_h_cross">
+          <pose>4.94 2.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <box>
+              <size>0.99 0.33 0.001</size>
+            </box>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_cross_h_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard1</robotNamespace>
+            <topicName>cross</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_v_cross">
+          <pose>4.94 2.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <box>
+              <size>0.33 0.99 0.001</size>
+            </box>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_cross_v_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard1</robotNamespace>
+            <topicName>cross</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_triangle">
+          <pose>4.94 2.25 1.7 1.5707963267948966 0 1.5707963267948966</pose>
+          <geometry>
+            <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_triangle_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard1</robotNamespace>
+            <topicName>triangle</topicName>
+          </plugin>
+        </visual>
+      </link>
+      <plugin name="controller_plugin" filename="libsymbol_controller.so">
+      </plugin>
+    </model>
+    
+    
+    <!-- Placard #2 -->
+    <model name="dock_2016_placard2">
+      <include>
+        <pose>5 8.75 1.5 0 0 1.5707963267948966</pose>
+        <uri>model://placard</uri>
+      </include>
+      <link name="link_symbols">
+        <visual name="visual_circle">
+          <pose>4.94 8.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.001</length>
+            </cylinder>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_circle_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard2</robotNamespace>
+            <topicName>circle</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_h_cross">
+          <pose>4.94 8.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <box>
+              <size>0.99 0.33 0.001</size>
+            </box>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_cross_h_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard2</robotNamespace>
+            <topicName>cross</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_v_cross">
+          <pose>4.94 8.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <box>
+              <size>0.33 0.99 0.001</size>
+            </box>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_cross_v_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard2</robotNamespace>
+            <topicName>cross</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_triangle">
+          <pose>4.94 8.25 1.7 1.5707963267948966 0 1.5707963267948966</pose>
+          <geometry>
+            <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_triangle_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard2</robotNamespace>
+            <topicName>triangle</topicName>
+          </plugin>
+        </visual>
+      </link>
+      <plugin name="controller_plugin" filename="libsymbol_controller.so">
+      </plugin>
+    </model>
+    
+    
+    <!-- Placard #3 -->
+    <model name="dock_2016_placard3">
+      <include>
+        <pose>5 14.75 1.5 0 0 1.5707963267948966</pose>
+        <uri>model://placard</uri>
+      </include>
+      <link name="link_symbols">
+        <visual name="visual_circle">
+          <pose>4.94 14.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.001</length>
+            </cylinder>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_circle_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard3</robotNamespace>
+            <topicName>circle</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_h_cross">
+          <pose>4.94 14.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <box>
+              <size>0.99 0.33 0.001</size>
+            </box>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_cross_h_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard3</robotNamespace>
+            <topicName>cross</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_v_cross">
+          <pose>4.94 14.75 2.1 0 1.5707963267948966 0.0</pose>
+          <geometry>
+            <box>
+              <size>0.33 0.99 0.001</size>
+            </box>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_cross_v_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard3</robotNamespace>
+            <topicName>cross</topicName>
+          </plugin>
+        </visual>
+        <visual name="visual_triangle">
+          <pose>4.94 14.25 1.7 1.5707963267948966 0 1.5707963267948966</pose>
+          <geometry>
+            <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
+          </geometry>
+          <transparency>1</transparency>
+          <plugin name="symbol_triangle_plugin" filename="libgazebo_ros_color.so">
+            <robotNamespace>dock_2016_placard3</robotNamespace>
+            <topicName>triangle</topicName>
+          </plugin>
+        </visual>
+      </link>
+      <plugin name="controller_plugin" filename="libsymbol_controller.so">
+      </plugin>
+    </model>
+    
+    
+  </model>
+</sdf>

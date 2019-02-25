@@ -12,7 +12,7 @@ Changelog for package wamv_description
 
 0.3.0 (2018-09-28)
 ------------------
-* vmrc metapackage and spring cleaning.
+* vrx metapackage and spring cleaning.
 * Static model and fog.
 * Merge from default.
 * Merged in holonomic-example-refactored (pull request #40)
