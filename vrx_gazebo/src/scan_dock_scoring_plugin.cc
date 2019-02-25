@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include <gazebo/common/Console.hh>
-#include "vmrc_gazebo/scan_dock_scoring_plugin.hh"
+#include "vrx_gazebo/scan_dock_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
 ColorSequenceChecker::ColorSequenceChecker(
@@ -65,13 +65,13 @@ bool ColorSequenceChecker::Correct() const
 
 /////////////////////////////////////////////////
 bool ColorSequenceChecker::OnColorSequence(
-  ros::ServiceEvent<vmrc_gazebo::ColorSequence::Request,
-    vmrc_gazebo::ColorSequence::Response> &_event)
+  ros::ServiceEvent<vrx_gazebo::ColorSequence::Request,
+    vrx_gazebo::ColorSequence::Response> &_event)
 {
   ROS_INFO_NAMED("ColorSequenceChecker", "Color sequence submission received");
 
-  const vmrc_gazebo::ColorSequence::Request &req = _event.getRequest();
-  vmrc_gazebo::ColorSequence::Response &res = _event.getResponse();
+  const vrx_gazebo::ColorSequence::Request &req = _event.getRequest();
+  vrx_gazebo::ColorSequence::Response &res = _event.getResponse();
 
   {
     // Sanity check: Only one color sequence submission is allowed.

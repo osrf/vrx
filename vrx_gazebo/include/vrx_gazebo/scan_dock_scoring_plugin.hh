@@ -15,16 +15,16 @@
  *
 */
 
-#ifndef VMRC_GAZEBO_SCAN_DOCK_SCORING_PLUGIN_HH_
-#define VMRC_GAZEBO_SCAN_DOCK_SCORING_PLUGIN_HH_
+#ifndef VRX_GAZEBO_SCAN_DOCK_SCORING_PLUGIN_HH_
+#define VRX_GAZEBO_SCAN_DOCK_SCORING_PLUGIN_HH_
 
 #include <ros/ros.h>
 #include <string>
 #include <vector>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
-#include "vmrc_gazebo/ColorSequence.h"
-#include "vmrc_gazebo/scoring_plugin.hh"
+#include "vrx_gazebo/ColorSequence.h"
+#include "vrx_gazebo/scoring_plugin.hh"
 
 /// \brief A class to monitor if the color sequence reported matches the color
 /// displayed in the light buoy.
@@ -59,8 +59,8 @@ class ColorSequenceChecker
   /// \param[out] _res The Response. Note that this will be true even if the
   /// reported sequence is incorrect.
   private: bool OnColorSequence(
-    ros::ServiceEvent<vmrc_gazebo::ColorSequence::Request,
-      vmrc_gazebo::ColorSequence::Response> &_event);
+    ros::ServiceEvent<vrx_gazebo::ColorSequence::Request,
+      vrx_gazebo::ColorSequence::Response> &_event);
 
   /// \brief The expected color sequence.
   private: std::vector<std::string> expectedSequence;
