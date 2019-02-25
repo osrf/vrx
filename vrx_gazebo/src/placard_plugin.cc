@@ -17,7 +17,7 @@
 
 #include <gazebo/rendering/Scene.hh>
 #include <ignition/math/Rand.hh>
-#include "vmrc_gazebo/placard_plugin.hh"
+#include "vrx_gazebo/placard_plugin.hh"
 
 // Static initialization.
 std::map<std::string, std_msgs::ColorRGBA> PlacardPlugin::kColors =

@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef VMRC_GAZEBO_PLACARD_PLUGIN_HH_
-#define VMRC_GAZEBO_PLACARD_PLUGIN_HH_
+#ifndef VRX_GAZEBO_PLACARD_PLUGIN_HH_
+#define VRX_GAZEBO_PLACARD_PLUGIN_HH_
 
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
