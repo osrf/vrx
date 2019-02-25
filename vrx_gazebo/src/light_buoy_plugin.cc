@@ -190,7 +190,7 @@ void LightBuoyPlugin::Update()
     this->state = 0;
 
   auto color = this->kColors[this->pattern[this->state]].first;
-  gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
+  ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
 
   // Update the visuals.
   for (auto visual : this->visuals)
