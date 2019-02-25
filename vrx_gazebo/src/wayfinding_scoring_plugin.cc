@@ -92,7 +92,7 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->rosNode.reset(new ros::NodeHandle());
   this->waypointsPub =
     this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(
-      this->waypointsTopic, 10);
+      this->waypointsTopic, 10, true);
 
   this->minErrorsPub =
     this->rosNode->advertise<std_msgs::Float64MultiArray>(
@@ -160,8 +160,15 @@ void WayfindingScoringPlugin::Update()
   minErrorsMsg.data = this->minErrors;
   meanErrorMsg.data = this->meanError;
 
-  this->minErrorsPub.publish(minErrorsMsg);
-  this->meanErrorPub.publish(meanErrorMsg);
+  // Publish at 1 Hz.
+  if (this->timer.GetElapsed() >= gazebo::common::Time(1.0))
+  {
+    this->minErrorsPub.publish(minErrorsMsg);
+    this->meanErrorPub.publish(meanErrorMsg);
+    this->timer.Reset();
+    this->timer.Start();
+  }
+
 
   this->ScoringPlugin::SetScore(this->meanError);
 }

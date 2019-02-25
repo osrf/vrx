@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <gazebo/common/Events.hh>
+#include <gazebo/common/Timer.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
@@ -79,9 +80,6 @@ class WayfindingScoringPlugin : public ScoringPlugin
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief The next task message to be published.
-  private: vrx_gazebo::Task taskMsg;
-
   /// \brief Pointer to the sdf plugin element.
   private: sdf::ElementPtr sdf;
 
@@ -122,6 +120,9 @@ class WayfindingScoringPlugin : public ScoringPlugin
 
   /// \brief Current average minimum error for all waypoints.
   private: double meanError;
+
+  /// \brief Timer used to calculate the elapsed time docked in the bay.
+  private: gazebo::common::Timer timer;
 };
 
 #endif
