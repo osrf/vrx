@@ -30,6 +30,8 @@
 WayfindingScoringPlugin::WayfindingScoringPlugin()
 {
   gzmsg << "Wayfinding scoring plugin loaded" << std::endl;
+  this->timer.Stop();
+  this->timer.Reset();
 }
 
 /////////////////////////////////////////////////
@@ -211,6 +213,7 @@ void WayfindingScoringPlugin::OnReady()
 void WayfindingScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
+  this->timer.Start();
 }
 
 //////////////////////////////////////////////////
