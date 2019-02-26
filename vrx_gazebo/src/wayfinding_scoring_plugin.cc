@@ -68,11 +68,11 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     ignition::math::Vector3d scVec(latlonyaw.X(), latlonyaw.Y(), 0.0);
 
 #if GAZEBO_MAJOR_VERSION >= 8
-      ignition::math::Vector3d cartVec =
-        _world->SphericalCoords()->LocalFromSpherical(scVec);
+    ignition::math::Vector3d cartVec =
+      _world->SphericalCoords()->LocalFromSpherical(scVec);
 #else
-      ignition::math::Vector3d cartVec =
-        _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+    ignition::math::Vector3d cartVec =
+      _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
 #endif
 
     cartVec.Z() = latlonyaw.Z();
@@ -170,7 +170,6 @@ void WayfindingScoringPlugin::Update()
     this->timer.Reset();
     this->timer.Start();
   }
-
 
   this->ScoringPlugin::SetScore(this->meanError);
 }
