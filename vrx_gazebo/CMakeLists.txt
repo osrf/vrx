@@ -99,6 +99,18 @@ install(TARGETS stationkeeping_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for scoring the waypoint navigation challenge task.
+add_library(wayfinding_scoring_plugin src/wayfinding_scoring_plugin.cc)
+target_link_libraries(wayfinding_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin)
+add_dependencies(wayfinding_scoring_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS wayfinding_scoring_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Plugin for scoring the scan and dock task.
 add_library(scan_dock_scoring_plugin src/scan_dock_scoring_plugin.cc)
 target_link_libraries(scan_dock_scoring_plugin
@@ -164,6 +176,7 @@ xacro_add_files(
   worlds/example_course.world.xacro
   worlds/navigation_task.world.xacro
   worlds/stationkeeping_task.world.xacro
+  worlds/wayfinding_task.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 
