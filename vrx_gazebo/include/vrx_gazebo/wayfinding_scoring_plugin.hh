@@ -18,7 +18,6 @@
 #ifndef VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
 
-#include <geographic_msgs/GeoPoseStamped.h>
 #include <ros/ros.h>
 #include <memory>
 #include <string>
