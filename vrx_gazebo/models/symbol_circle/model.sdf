@@ -12,9 +12,6 @@
           </cylinder>
         </geometry>
         <transparency>1</transparency>
-        <plugin name="symbol_circle_plugin" filename="libgazebo_ros_color.so">
-          <topicName>circle</topicName>
-        </plugin>
       </visual>
     </link>
   </model>

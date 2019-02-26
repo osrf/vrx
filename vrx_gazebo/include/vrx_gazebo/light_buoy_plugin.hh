@@ -58,7 +58,7 @@
 ///       <visual>robotx_light_buoy::base_link::panel_3</visual>
 ///     </visuals>
 ///     <shuffle>true</shuffle>
-///     <robot_namespace>light_buoy</robot_namespace>
+///     <robot_namespace>vrx</robot_namespace>
 ///     <topic>light_buoy/shuffle</topic>
 ///   </plugin>
 class LightBuoyPlugin : public gazebo::VisualPlugin
@@ -102,7 +102,6 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: void ChangePattern(std::string &_message);
 
   /// \brief Display the next color in the sequence, or start over if at the end
-  /// \param[in] _event Not used.
   private: void Update();
 
   /// \def Colors_t
