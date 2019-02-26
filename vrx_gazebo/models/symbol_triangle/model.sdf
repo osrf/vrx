@@ -9,9 +9,6 @@
           <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
         </geometry>
         <transparency>1</transparency>
-        <plugin name="symbol_triangle_plugin" filename="libgazebo_ros_color.so">
-          <topicName>triangle</topicName>
-        </plugin>
       </visual>
     </link>
   </model>
