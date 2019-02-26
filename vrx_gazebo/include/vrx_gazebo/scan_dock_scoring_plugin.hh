@@ -172,7 +172,11 @@ class DockChecker
 ///     <min_dock_time>Minimum amount of seconds to stay docked to be
 ///     considered a fully successfull dock.
 ///     <dockAllowed> Whether is allowed to dock in this bay or not.
-/// <dock_bonus_points>: Points granted when the dock sequence is correct.
+/// <dock_bonus_points>: Points granted when the vehicle successfully
+/// dock-and-undock in any bay.
+/// Default value is 10.
+/// <correct_dock_bonus_points>: Points granted when the vehicle successfully
+/// dock-and-undock in the specified bay.
 /// Default value is 10.
 ///
 /// Here's an example:
@@ -252,8 +256,13 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// \brief Points granted when the color sequence is correct.
   private: double colorBonusPoints = 10.0;
 
-  /// \brief Points granted when the dock sequence is correct.
+  /// \brief Points granted when the vehicle successfully
+  /// dock-and-undock in any bay
   private: double dockBonusPoints = 10.0;
+
+  /// \brief Points granted when the vehicle successfully
+  /// dock-and-undock in the specified bay.
+  private: double correctDockBonusPoints = 10.0;
 };
 
 #endif

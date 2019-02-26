@@ -310,11 +310,18 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     bayElem = bayElem->GetNextElement();
   }
 
-  // Optional: the points granted when the vehicle docks in the right bay.
+  // Optional: the points granted when the vehicle docks in any bay.
   if (_sdf->HasElement("dock_bonus_points"))
   {
     this->dockBonusPoints =
       _sdf->GetElement("dock_bonus_points")->Get<double>();
+  }
+
+  // Optional: the points granted when the vehicle docks in the expected bay.
+  if (_sdf->HasElement("correct_dock_bonus_points"))
+  {
+    this->correctDockBonusPoints =
+      _sdf->GetElement("correct_dock_bonus_points")->Get<double>();
   }
 
   return true;
@@ -346,9 +353,12 @@ void ScanDockScoringPlugin::Update()
     if (!dockChecker->AnytimeDocked() || dockChecker->CurrentlyDocked())
       continue;
 
+    // Points granted for docking!
+    this->SetScore(this->Score() + this->dockBonusPoints);
+
     // Is this the right bay?
     if (dockChecker->Allowed())
-      this->SetScore(this->Score() + this->dockBonusPoints);
+      this->SetScore(this->Score() + this->correctDockBonusPoints);
 
     // Time to finish the task as the vehicle docked.
     // Note that we only allow to dock one time. This is to prevent teams
