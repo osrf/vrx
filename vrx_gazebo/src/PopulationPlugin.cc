@@ -427,6 +427,11 @@ void PopulationPlugin::OnUpdate()
     auto modelPtr = this->dataPtr->world->GetEntity(modelName);
     if (modelPtr)
     {
+		gzmsg << modelPtr->GetName() << std::endl;
+		gzmsg << modelPtr->URI()->Str() << std::endl;
+		for (int ii = 0; ii < modelPtr->GetChildCount(); ii++){
+			gzmsg << modelPtr->GetChild(ii)->GetName() << std::endl;
+		}
 		// Save for later
 		this->dataPtr->curr_model = modelPtr;
 		this->dataPtr->orig_pose = modelPtr->GetWorldPose().Ign();
