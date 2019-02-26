@@ -15,17 +15,17 @@
  *
 */
 
-#ifndef VRX_GAZEBO_STATIONKEEPING_SCORING_PLUGIN_HH_
-#define VRX_GAZEBO_STATIONKEEPING_SCORING_PLUGIN_HH_
+#ifndef VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
+#define VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
 
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <ros/ros.h>
+#include <memory>
 #include <string>
 #include <vector>
 #include <gazebo/common/Events.hh>
-#include <gazebo/math/Pose.hh>
-#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
-#include "geographic_msgs/GeoPoseStamped.h"
 #include "vrx_gazebo/scoring_plugin.hh"
 
 /// \brief A plugin for computing the score of the wayfinding navigation task.
@@ -38,10 +38,10 @@
 ///
 /// In the running state it calculates a 2D pose error distance between the
 /// vehicle and each of the waypoints and stores the minimum error distance
-/// achieved for each waypoint so far. The current recorded minimums are published
-/// to a topic as an array of doubles. The average of all minimums is also
-/// updated. This value is published to a separate topic for mean error, and
-/// set as the current score using the SetScore() method inherited from
+/// achieved for each waypoint so far. The current recorded minimums are
+/// published to a topic as an array of doubles. The average of all minimums is
+/// also updated. This value is published to a separate topic for mean error,
+/// and set as the current score using the SetScore() method inherited from
 /// the parent. This causes it to also appear in the task information topic.
 ///
 /// This plugin requires the following SDF parameters:
@@ -54,8 +54,7 @@
 ///     lattitude, longitude and yaw of a waypoint.
 class WayfindingScoringPlugin : public ScoringPlugin
 {
-
-  // Constructor.
+  /// \brief Constructor.
   public: WayfindingScoringPlugin();
 
   // Documentation inherited.
@@ -74,60 +73,55 @@ class WayfindingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnFinished() override;
 
-  /// \brief Publish the goal pose
+  /// \brief Publish the goal pose.
   private: void PublishGoal();
-
-  /// \brief Calculate instantaneous error
-  private: double InstantaneousError();
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
- /// \brief The next task message to be published.
+  /// \brief The next task message to be published.
   private: vrx_gazebo::Task taskMsg;
 
- /// \brief Pointer to the sdf plugin element.
+  /// \brief Pointer to the sdf plugin element.
   private: sdf::ElementPtr sdf;
 
- /// \brief Topic where the list of waypoints is published.
-  protected: std::string waypointsTopic = "/vrx/task/waypoints";
+  /// \brief Topic where the list of waypoints is published.
+  private: std::string waypointsTopic = "/vrx/task/waypoints";
 
- /// \brief Topic where the current minimum pose error distance for each
- /// waypoint is published.
-  protected: std::string minErrorsTopic = "/vrx/task/min_errors";
+  /// \brief Topic where the current minimum pose error distance for each
+  /// waypoint is published.
+  private: std::string minErrorsTopic = "/vrx/task/min_errors";
 
- /// \brief Topic where the current average minimum error is published.
-  protected: std::string meanErrorTopic = "/vrx/task/mean_error";
+  /// \brief Topic where the current average minimum error is published.
+  private: std::string meanErrorTopic = "/vrx/task/mean_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
 
- /// \brief Publisher for the goal.
+  /// \brief Publisher for the goal.
   private: ros::Publisher waypointsPub;
 
- /// \brief Publisher for the combined 2D pose error.
+  /// \brief Publisher for the combined 2D pose error.
   private: ros::Publisher minErrorsPub;
 
- /// \brief Publisher for the current rms error.
+  /// \brief Publisher for the current rms error.
   private: ros::Publisher meanErrorPub;
 
   /// \brief Vector containing waypoints as 3D vectors of doubles representing
-  /// X Y yaw, where X and Y are local (Gazebo) coordinates
+  /// X Y yaw, where X and Y are local (Gazebo) coordinates.
   private: std::vector<ignition::math::Vector3d> localWaypoints;
 
   /// \brief Vector containing waypoints as 3D vectors of doubles representing
-  /// Lattitude Longitude yaw, where lattitude and longitude are given in spherical
-  /// (WGS84) coordinates
+  /// Lattitude Longitude yaw, where lattitude and longitude are given in
+  /// spherical (WGS84) coordinates.
   private: std::vector<ignition::math::Vector3d> sphericalWaypoints;
 
   /// \brief Vector containing current minimum 2D pose error achieved for each
-  /// waypoint so far
+  /// waypoint so far.
   private: std::vector<double> minErrors;
 
-  /// \brief current average minimum error for all waypoints
+  /// \brief Current average minimum error for all waypoints.
   private: double meanError;
-
-
 };
 
 #endif
