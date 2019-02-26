@@ -75,9 +75,6 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief The next task message to be published.
-  private: vrx_gazebo::Task taskMsg;
-
   /// \brief Topic where the task stats are published.
   private: std::string goalTopic = "/vrx/task/goal";
 
