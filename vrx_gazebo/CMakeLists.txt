@@ -171,10 +171,10 @@ add_custom_target(dock_erb_generation ALL
 
 # Generate world files from xacro and install
 xacro_add_files(
-  worlds/find_symbols_and_dock.world.xacro
-  worlds/sandisland.world.xacro
   worlds/example_course.world.xacro
   worlds/navigation_task.world.xacro
+  worlds/sandisland.world.xacro
+  worlds/scan_and_dock.world.xacro
   worlds/stationkeeping_task.world.xacro
   worlds/wayfinding_task.world.xacro
   INORDER INSTALL DESTINATION worlds

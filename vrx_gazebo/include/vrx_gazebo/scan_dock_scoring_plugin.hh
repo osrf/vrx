@@ -101,9 +101,13 @@ class DockChecker
                       const bool _dockAllowed,
                       const std::string &_worldName);
 
-  /// \brief Whether the robot has docked in this bay or not.
-  /// \return True when the robot has docked or false otherwise.
-  public: bool Docked() const;
+  /// \brief Whether the robot has been successfully docked in this bay or not.
+  /// \return True when the robot has been docked or false otherwise.
+  public: bool AnytimeDocked() const;
+
+  /// \brief Whether the robot is currently docked in this bay or not.
+  /// \return True when the robot is currently docked or false otherwise.
+  public: bool CurrentlyDocked() const;
 
   /// \brief Whether it is allowed to dock in this bay or not.
   public: bool Allowed() const;
@@ -140,7 +144,10 @@ class DockChecker
   private: gazebo::transport::SubscriberPtr containSub;
 
   /// \brief Whether the vehicle has successfully docked or not.
-  private: bool docked = false;
+  private: bool anytimeDocked = false;
+
+  /// \brief Whether the vehicle is currently docked or not.
+  private: bool currentlyDocked = false;
 };
 
 /// \brief A plugin for computing the score of the scan and dock task.
@@ -154,6 +161,8 @@ class DockChecker
 /// <color_1>: Expected first color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_2>: Expected second color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_3>: Expected third color of the sequence (RED, GREEN, BLUE, YELLOW).
+/// <color_bonus_points>: Points granted when the color sequence is correct.
+/// Default value is 10.
 /// <bays>: Contains at least one of the following blocks:
 ///   <bay>: A bay represents a potential play where a vehicle can dock. It has
 ///   the following required elements:
@@ -163,6 +172,8 @@ class DockChecker
 ///     <min_dock_time>Minimum amount of seconds to stay docked to be
 ///     considered a fully successfull dock.
 ///     <dockAllowed> Whether is allowed to dock in this bay or not.
+/// <dock_bonus_points>: Points granted when the dock sequence is correct.
+/// Default value is 10.
 ///
 /// Here's an example:
 /// <plugin name="scan_dock_scoring_plugin"
@@ -232,12 +243,17 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// the color sequence from the light buoy.
   private: std::unique_ptr<ColorSequenceChecker> colorChecker;
 
-  /// \brief Monitor all the available bays to decide when the vehicle
-  /// docks.
+  /// \brief Monitor all the available bays to decide when the vehicle docks.
   private: std::vector<std::unique_ptr<DockChecker>> dockCheckers;
 
   /// \brief Whether we have processed the color sequence submission or not.
   private: bool colorSubmissionProcessed = false;
+
+  /// \brief Points granted when the color sequence is correct.
+  private: double colorBonusPoints = 10.0;
+
+  /// \brief Points granted when the dock sequence is correct.
+  private: double dockBonusPoints = 10.0;
 };
 
 #endif

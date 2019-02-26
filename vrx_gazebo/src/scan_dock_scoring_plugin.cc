@@ -132,9 +132,15 @@ DockChecker::DockChecker(const std::string &_name,
 }
 
 /////////////////////////////////////////////////
-bool DockChecker::Docked() const
+bool DockChecker::AnytimeDocked() const
 {
-  return this->docked;
+  return this->anytimeDocked;
+}
+
+/////////////////////////////////////////////////
+bool DockChecker::CurrentlyDocked() const
+{
+  return this->currentlyDocked;
 }
 
 /////////////////////////////////////////////////
@@ -146,16 +152,18 @@ bool DockChecker::Allowed() const
 /////////////////////////////////////////////////
 void DockChecker::Update()
 {
-  if (this->docked)
+  if (this->anytimeDocked)
     return;
 
-  this->docked =
+  this->anytimeDocked =
     this->timer.GetElapsed() >= gazebo::common::Time(this->minDockTime);
 }
 
 /////////////////////////////////////////////////
 void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
 {
+  this->currentlyDocked = _msg->data() == 1;
+
   if (_msg->data() == 1)
     this->timer.Start();
 
@@ -230,6 +238,13 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     expectedSequence.push_back(color);
   }
 
+  // Optional: the points granted when reported the correct color sequence.
+  if (_sdf->HasElement("color_bonus_points"))
+  {
+    this->colorBonusPoints =
+      _sdf->GetElement("color_bonus_points")->Get<double>();
+  }
+
   // Instantiate the color checker.
   this->colorChecker.reset(
     new ColorSequenceChecker(expectedSequence, ns, colorSequenceService));
@@ -295,6 +310,13 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     bayElem = bayElem->GetNextElement();
   }
 
+  // Optional: the points granted when the vehicle docks in the right bay.
+  if (_sdf->HasElement("dock_bonus_points"))
+  {
+    this->dockBonusPoints =
+      _sdf->GetElement("dock_bonus_points")->Get<double>();
+  }
+
   return true;
 }
 
@@ -307,7 +329,7 @@ void ScanDockScoringPlugin::Update()
   {
     // We need to decide if we grant extra points.
     if (this->colorChecker->Correct())
-      this->SetScore(this->Score() + 10);
+      this->SetScore(this->Score() + this->colorBonusPoints);
 
     // We only allow one color sequence submission.
     this->colorChecker->Disable();
@@ -320,13 +342,13 @@ void ScanDockScoringPlugin::Update()
     // We always need to update the checkers.
     dockChecker->Update();
 
-    // Nothing to do if nobody docked.
-    if (!dockChecker->Docked())
+    // Nothing to do if nobody ever docked or we're currently docked.
+    if (!dockChecker->AnytimeDocked() || dockChecker->CurrentlyDocked())
       continue;
 
-    // We need to decide if we grant extra points.
+    // Is this the right bay?
     if (dockChecker->Allowed())
-      this->SetScore(this->Score() + 10);
+      this->SetScore(this->Score() + this->dockBonusPoints);
 
     // Time to finish the task as the vehicle docked.
     // Note that we only allow to dock one time. This is to prevent teams
