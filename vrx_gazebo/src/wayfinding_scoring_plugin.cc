@@ -119,6 +119,10 @@ void WayfindingScoringPlugin::Update()
       return;
   }
 
+  // Nothing to do if the task is not in "running" state.
+  if (this->ScoringPlugin::TaskState() != "running")
+    return;
+
   std_msgs::Float64MultiArray minErrorsMsg;
   std_msgs::Float64 meanErrorMsg;
 
@@ -176,7 +180,7 @@ void WayfindingScoringPlugin::Update()
 }
 
 //////////////////////////////////////////////////
-void WayfindingScoringPlugin::PublishGoal()
+void WayfindingScoringPlugin::PublishWaypoints()
 {
   gzmsg << "Publishing Waypoints" << std::endl;
   geographic_msgs::GeoPoseStamped wp_msg;
@@ -205,7 +209,7 @@ void WayfindingScoringPlugin::OnReady()
 {
   gzmsg << "OnReady" << std::endl;
 
-  this->PublishGoal();
+  this->PublishWaypoints();
 }
 
 
