@@ -74,8 +74,8 @@ class WayfindingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnFinished() override;
 
-  /// \brief Publish the goal pose.
-  private: void PublishGoal();
+  /// \brief Publish the waypoints through which the vehicle must navigate.
+  private: void PublishWaypoints();
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
