@@ -9,7 +9,7 @@
   <xacro:arg name="imu_enabled" default="false" />
   <xacro:arg name="lidar_enabled" default="false" />
   <xacro:arg name="ground_truth_enabled" default="false" />
-  <xacro:arg name="vmrc_sensors_enabled" default="false" />
+  <xacro:arg name="vrx_sensors_enabled" default="false" />
 
   <!-- === The WAM-V platform === -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
@@ -85,8 +85,8 @@
     <xacro:wamv_p3d name="p3d_wamv"/>
   </xacro:if>
 
-  <!-- ==== VMRC sensor configuration ==== -->
-  <xacro:if value="$(arg vmrc_sensors_enabled)">
+  <!-- ==== VRX sensor configuration ==== -->
+  <xacro:if value="$(arg vrx_sensors_enabled)">
 
     <!-- Add a stereo camera pair -->
     <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}" />

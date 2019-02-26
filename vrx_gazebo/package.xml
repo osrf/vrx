@@ -1,23 +1,29 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>usv_gazebo_plugins</name>
+  <name>vrx_gazebo</name>
   <version>0.3.2</version>
   <description>
-    Gazebo plugins for simulating Unmanned Surface Vehicles
-    Originaly copied from https://github.com/bsb808/usv_gazebo_plugins
+    The ROS package for the RobotX competition running in Gazebo.
   </description>
   <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
   <maintainer email="jriveroo@osrfoundation.org">Jose Luis Rivero</maintainer>
   <license>Apache 2.0</license>
-  <url type="website">http://wiki.ros.org/usv_gazebo_plugins</url>
+  <url type="website">http://wiki.ros.org/vrx_gazebo</url>
   <url type="bugtracker">http://bitbucket.org/osrf/vrx/issues</url>
   <author email="briansbingham@gmail.com">Brian Bingham</author>
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
   <depend version_gte="2.5.17">gazebo_ros</depend>
   <depend>gazebo_dev</depend>
-  <depend>roscpp</depend>
+  <depend>geographic_msgs</depend>
+  <depend>joy</depend>
+  <depend>joy_teleop</depend>
+  <depend>message_runtime</depend>
   <depend>std_msgs</depend>
-  <depend>eigen</depend>
-  <exec_depend>message_runtime</exec_depend>
+  <depend>wamv_gazebo</depend>
+  <depend>xacro</depend>
+  <export>
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros gazebo_media_path="${prefix}"/>
+  </export>
 </package>
