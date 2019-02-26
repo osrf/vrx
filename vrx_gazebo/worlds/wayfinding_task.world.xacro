@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<!-- World containing sandisland model and some course challenges -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="robotx_wayfinding">
+    <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
+    <xacro:sandisland />
+
+	<plugin name="wayfinding_scoring_plugin"
+            filename="libwayfinding_scoring_plugin.so">
+      <vehicle>wamv</vehicle>
+      <task_name>wayfinding_task</task_name>
+	  <!-- Goal as Latitude, Longitude, Yaw -->
+      <waypoints>
+          <waypoint>
+            <pose>21.31 -157.89 -3.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 -2.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 -1.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 0.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 1.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 2.0</pose>
+          </waypoint>
+          <waypoint>
+            <pose>21.31 -157.89 3.0</pose>
+          </waypoint>
+       </waypoints>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
+    </plugin>
+
+  </world>
+</sdf>

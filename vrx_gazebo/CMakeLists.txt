@@ -93,6 +93,19 @@ install(TARGETS stationkeeping_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for scoring the waypoint navigation challenge task.
+add_library(wayfinding_scoring_plugin src/wayfinding_scoring_plugin.cc)
+target_link_libraries(wayfinding_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin)
+add_dependencies(wayfinding_scoring_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS wayfinding_scoring_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+
 # Dock base files that need to be processed with erb
 set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
@@ -146,6 +159,7 @@ xacro_add_files(
   worlds/example_course.world.xacro
   worlds/navigation_task.world.xacro
   worlds/stationkeeping_task.world.xacro
+  worlds/wayfinding_task.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 
