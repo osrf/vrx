@@ -79,6 +79,7 @@ namespace gazebo
 
               /// \brief Pose in which the object should be placed.
               public: ignition::math::Pose3d pose;
+
             };
 
     /// \brief Collection of objects to be spawned.
@@ -98,9 +99,18 @@ namespace gazebo
     /// is empty, creating an infinite supply of objects.
     public: bool loopForever = false;
 
+
+	/// \brief Link/model name for the object poses use as their frame of reference
+  public: std::string frameName = std::string();
+	  
     /// \brief Link/model that the object poses use as their frame of reference.
     public: physics::EntityPtr frame;
 
+	/// \brief Current object that has been placed
+    public: physics::EntityPtr curr_model;
+
+    public: ignition::math::Pose3d orig_pose;
+	  
     /// \brief Node for communication.
     public: transport::NodePtr node;
 
@@ -131,7 +141,7 @@ namespace gazebo
     public: double rateModifier;
 
     /// \brief Object names will be prefixed by plugin name if True.
-    public: bool prefixObjectNames = true;
+    public: bool prefixObjectNames = false;
 
     /// \brief Id of first object to teleport.
     public: int startIndex = 0;
@@ -156,7 +166,9 @@ GZ_REGISTER_WORLD_PLUGIN(PopulationPlugin)
 PopulationPlugin::PopulationPlugin()
   : dataPtr(new PopulationPluginPrivate)
 {
-}
+	gzmsg << "PopulationPlugin loaded" << std::endl;	
+} 
+
 
 /////////////////////////////////////////////////
 PopulationPlugin::~PopulationPlugin()
@@ -190,18 +202,9 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 
   if (_sdf->HasElement("frame"))
   {
-    std::string frameName = _sdf->Get<std::string>("frame");
-    this->dataPtr->frame = this->dataPtr->world->GetEntity(frameName);
-    if (!this->dataPtr->frame) {
-      gzthrow(std::string("The frame '") + frameName + "' does not exist");
-    }
-    if (!this->dataPtr->frame->HasType(physics::Base::LINK) &&
-      !this->dataPtr->frame->HasType(physics::Base::MODEL))
-    {
-      gzthrow("'frame' tag must list the name of a link or model");
-    }
+    this->dataPtr->frameName = _sdf->Get<std::string>("frame");
   }
-
+  
   if (!_sdf->HasElement("object_sequence"))
   {
     gzerr << "PopulationPlugin: Unable to find <object_sequence> element\n";
@@ -367,10 +370,30 @@ void PopulationPlugin::OnUpdate()
   this->dataPtr->elapsedEquivalentTime += elapsedTime.Double() * this->dataPtr->rateModifier;
   if (this->dataPtr->elapsedEquivalentTime >= this->dataPtr->objects.front().time)
   {
+	gzmsg << "PopulationPlugin: spawn next object." << std::endl;
     auto obj = this->dataPtr->objects.front();
+
+	// Try to use a model/link frame if specified.
+	if (!this->dataPtr->frameName.empty())
+	{
+		this->dataPtr->frame = this->dataPtr->world->GetEntity(this->dataPtr->frameName);
+		if (!this->dataPtr->frame)
+		{
+			gzthrow(std::string("The frame '") + this->dataPtr->frameName + "' does not exist");
+		}
+		if (!this->dataPtr->frame->HasType(physics::Base::LINK) &&
+			!this->dataPtr->frame->HasType(physics::Base::MODEL))
+		{
+			gzthrow("'frame' tag must list the name of a link or model");
+		}	
+	}
+
     if (this->dataPtr->frame)
     {
-		ignition::math::Pose3d framePose = this->dataPtr->frame->GetWorldPose().Ign();
+		// Only use translation of frame pose
+		// This is a bit of a hack to deal with transients of spawning buoys with significant non-zero attitude.
+		//ignition::math::Pose3d framePose = this->dataPtr->frame->GetWorldPose().Ign();
+		ignition::math::Pose3d framePose(this->dataPtr->frame->GetWorldPose().Ign().Pos(),ignition::math::Quaterniond());
 		ignition::math::Matrix4d transMat(framePose);
 		ignition::math::Matrix4d pose_local(obj.pose);
 		obj.pose = (transMat * pose_local).Pose();
@@ -395,17 +418,29 @@ void PopulationPlugin::OnUpdate()
     }
     int index = this->dataPtr->objectCounter[obj.type];
 
+	// If necessary, move object back to original pose
+	if (this->dataPtr->curr_model){
+		this->dataPtr->curr_model->SetWorldPose(this->dataPtr->orig_pose);
+	}
     // Get a unique name for the object.
     modelName += "_" + std::to_string(index);
     auto modelPtr = this->dataPtr->world->GetEntity(modelName);
     if (modelPtr)
     {
-      // Move it to the target pose.
-      modelPtr->SetWorldPose(obj.pose);
-	  modelPtr->SetWorldTwist(ignition::math::Vector3d::Zero,
+		// Save for later
+		this->dataPtr->curr_model = modelPtr;
+		this->dataPtr->orig_pose = modelPtr->GetWorldPose().Ign();
+		
+		// Move it to the target pose.
+		modelPtr->SetWorldPose(obj.pose);
+		modelPtr->SetWorldTwist(ignition::math::Vector3d::Zero,
 							  ignition::math::Vector3d::Zero);
-      gzdbg << "Object [" << modelName << "] on belt" << std::endl;
+      gzdbg << "Object [" << modelName << "] spawned" << std::endl;
     }
+	else
+	{
+		gzerr << "Object [" << modelName << "] NOT spawned" << std::endl;
+	}
 
     this->dataPtr->objects.erase(this->dataPtr->objects.begin());
     this->dataPtr->elapsedEquivalentTime = 0.0;
