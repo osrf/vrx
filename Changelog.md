@@ -3,6 +3,9 @@
 
 ### VRX 0.4.X
 
+1. VRX requires Gazebo 9.
+  * [Pull request 70](https://bitbucket.org/osrf/vrx/pull-requests/70)
+
 1. Scoring plugin for the navigation course task.
   * [Pull request 60](https://bitbucket.org/osrf/vrx/pull-requests/60)
 
