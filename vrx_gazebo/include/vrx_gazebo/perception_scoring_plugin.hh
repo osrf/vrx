@@ -181,37 +181,11 @@ namespace gazebo
     // Documentation inherited.
     public: virtual void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
 
-    /// \brief Pause the object population.
-    public: void Pause();
-
-    /// \brief Resume the object population after a pause.
-    public: void Resume();
-
-    /// \brief Restart the the object population.
-    public: virtual void Restart();
-
     /// \brief Update the plugin.
     protected: void OnUpdate();
 
-    /// \brief Callback that receives activation messages. If the
-    /// <activation_topic> is set in SDF, the plugin won't populate any object
-    /// until the activation is received.
-    /// \param[in] _msg String message that indicates the activation command.
-    ///   * start|restart: Start/restart the object population.
-    protected: void OnActivation(ConstGzStringPtr &_msg);
-
-    /// \brief Callback that receives rate modifier messages. If the
-    /// <rate_modifier_topic> is set in SDF, the plugin will modify the population rate
-    /// by the received factor.
-    /// \param[in] _msg String message that indicates the rate modifier.
-    protected: void OnRateModification(ConstGzStringPtr &_msg);
-
-    /// \brief True when the plugin is enabled or false if it's paused.
-    protected: bool Enabled() const;
-
-    /// \brief Determine whether is time to give the plugin an update based on
-    /// the plugin's update rate.
-    protected: bool TimeToExecute();
+	/// \brief Restart the object population list
+    private: void Restart();
 
 	// Documentation inherited.
     private: void OnRunning() override;

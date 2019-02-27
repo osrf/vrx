@@ -15,8 +15,6 @@
  *
 */
 
-
-
 #include <algorithm>
 #include <mutex>
 #include <ostream>
@@ -190,9 +188,8 @@ namespace gazebo
     /// is empty, creating an infinite supply of objects.
     public: bool loopForever = false;
 
-
 	/// \brief Link/model name for the object poses use as their frame of reference
-  public: std::string frameName = std::string();
+    public: std::string frameName = std::string();
 	  
     /// \brief Link/model that the object poses use as their frame of reference.
     public: physics::EntityPtr frame;
@@ -200,39 +197,11 @@ namespace gazebo
 	/// \brief Current object that has been placed
     public: physics::EntityPtr curr_model;
 
+	/// \brief Current object's original pose
     public: ignition::math::Pose3d orig_pose;
 	  
-    /// \brief Node for communication.
-    public: transport::NodePtr node;
-
-    /// \brief Subscriber to the activation topic.
-    public: transport::SubscriberPtr activationSub;
-
-    /// \brief Subscriber to the rate modifier topic.
-    public: transport::SubscriberPtr rateModifierSub;
-
-    /// \brief If true, the objects will start populating.
-    public: bool enabled = false;
-
     /// \brief Mutex to avoid race conditions.
     public: std::mutex mutex;
-
-    /// \brief Elapsed time since "startTime" when the plugin is paused.
-    public: common::Time elapsedWhenPaused;
-
-    /// \brief Plugin update rate (Hz). A negative value means that the custom
-    /// update rate is disabled. The plugin will execute at the physics rate.
-    public: double updateRate = -1;
-
-    /// \brief Equivalent time since last object spawning, taking rate modifier into account.
-    public: double elapsedEquivalentTime = 0.0;
-
-    /// \brief Rate modifier of the populating: 1.0 will populate at the standard rate,
-    /// other values will scale the populating frequency.
-    public: double rateModifier;
-
-    /// \brief Object names will be prefixed by plugin name if True.
-    public: bool prefixObjectNames = false;
 
     /// \brief Id of first object to teleport.
     public: int startIndex = 0;
@@ -290,11 +259,6 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sd
     this->dataPtr->startIndex = _sdf->Get<int>("start_index");
   }
 
-  if (_sdf->HasElement("prefix_object_names"))
-  {
-    this->dataPtr->prefixObjectNames = _sdf->Get<bool>("prefix_object_names");
-  }
-
   if (_sdf->HasElement("frame"))
   {
     this->dataPtr->frameName = _sdf->Get<std::string>("frame");
@@ -346,13 +310,16 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sd
     sdf::ElementPtr nameElement = objectElem->GetElement("name");
     std::string name = nameElement->Get<std::string>();
 
-    // Parse the object pose (optional).
-    ignition::math::Pose3d pose;
-    if (objectElem->HasElement("pose"))
+    // Parse the object pose
+
+    if (!objectElem->HasElement("pose"))
     {
-      sdf::ElementPtr poseElement = objectElem->GetElement("pose");
-      pose = poseElement->Get<ignition::math::Pose3d>();
-    }
+	  gzerr << "PerceptionScoringPlugin: Unable to find <pose> in object.\n";
+      objectElem = objectElem->GetNextElement("object");
+      continue;
+	}
+	sdf::ElementPtr poseElement = objectElem->GetElement("pose");
+	ignition::math::Pose3d pose = poseElement->Get<ignition::math::Pose3d>();
 
     // Add the object to the collection.
     PerceptionScoringPluginPrivate::Object obj = {time, type, name, pose};
@@ -360,41 +327,11 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sd
 
     objectElem = objectElem->GetNextElement("object");
   }
+  
   std::sort(this->dataPtr->initialObjects.begin(),
-    this->dataPtr->initialObjects.end());
-
-  // Create and initialize the node.
-  this->dataPtr->node = transport::NodePtr(new transport::Node());
-  this->dataPtr->node->Init();
-
-  // Listen on the activation topic, if present. This topic is used for
-  // manual activation.
-  if (_sdf->HasElement("activation_topic"))
-  {
-    // Subscribe to the activation topic.
-    this->dataPtr->activationSub = this->dataPtr->node->Subscribe(
-        _sdf->Get<std::string>("activation_topic"),
-        &PerceptionScoringPlugin::OnActivation, this);
-  }
-  else
-    this->Restart();
+			this->dataPtr->initialObjects.end());
 
   this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
-
-  // Listen on the activation topic, if present. This topic is used for
-  // manual activation.
-  if (_sdf->HasElement("rate_modifier_topic"))
-  {
-    // Subscribe to the rate modifier topic.
-    this->dataPtr->rateModifierSub = this->dataPtr->node->Subscribe(
-        _sdf->Get<std::string>("rate_modifier_topic"),
-        &PerceptionScoringPlugin::OnRateModification, this);
-    this->dataPtr->rateModifier = 0.0;
-  }
-  else
-  {
-    this->dataPtr->rateModifier = 1.0;
-  }
 
   // Optional: ROS namespace.
   std::string ns;
@@ -411,43 +348,16 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sd
   // Instatiate the object checker
   this->dataPtr->objectChecker.reset(
 	  new ObjectChecker(ns,object_topic,_world));
-  
+
+  this->Restart();
   
   this->dataPtr->connection = event::Events::ConnectWorldUpdateEnd(
       boost::bind(&PerceptionScoringPlugin::OnUpdate, this));
 }
 
 /////////////////////////////////////////////////
-void PerceptionScoringPlugin::Pause()
-{
-  if (!this->dataPtr->enabled)
-    return;
-
-  this->dataPtr->enabled = false;
-  this->dataPtr->elapsedWhenPaused =
-    this->dataPtr->world->GetSimTime() - this->dataPtr->startTime;
-
-  gzmsg << "Object population paused" << std::endl;
-}
-
-/////////////////////////////////////////////////
-void PerceptionScoringPlugin::Resume()
-{
-  if (this->dataPtr->enabled)
-    return;
-
-  this->dataPtr->enabled = true;
-  this->dataPtr->startTime = this->dataPtr->world->GetSimTime() -
-    this->dataPtr->elapsedWhenPaused;
-
-   gzmsg << "Object population resumed" << std::endl;
-}
-
-/////////////////////////////////////////////////
 void PerceptionScoringPlugin::Restart()
 {
-  this->dataPtr->enabled = true;
-  this->dataPtr->elapsedEquivalentTime = 0;
   this->dataPtr->startTime = this->dataPtr->world->GetSimTime();
   this->dataPtr->objects = this->dataPtr->initialObjects;
 
@@ -457,11 +367,6 @@ void PerceptionScoringPlugin::Restart()
 /////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnUpdate()
 {
-  // If we're using a custom update rate value we have to check if it's time to
-  // update the plugin or not.
-  if (!this->TimeToExecute())
-    return;
-
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // Connect with object checker to see if we need to score a submission
@@ -478,13 +383,7 @@ void PerceptionScoringPlugin::OnUpdate()
 	  this->dataPtr->objectChecker->submissionScored = true;
   }
 
-  
-  if (!this->dataPtr->enabled)
-  {
-    this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
-    return;
-  }
-
+  // Have we completed a cycle through the object queue?
   if (this->dataPtr->objects.empty())
   {
     if (this->dataPtr->loopForever)
@@ -498,12 +397,9 @@ void PerceptionScoringPlugin::OnUpdate()
     }
   }
   
-  // Check whether spawn a new object from the list.
-  auto elapsedTime = this->dataPtr->world->GetSimTime() - this->dataPtr->lastUpdateTime;
-  // The rate modifier has the effect of slowing down sim time in this plugin.
-  // If the rate modifier is 0.5, we will wait for twice as much time before spawning a new object.
-  this->dataPtr->elapsedEquivalentTime += elapsedTime.Double() * this->dataPtr->rateModifier;
-  if (this->dataPtr->elapsedEquivalentTime >= this->dataPtr->objects.front().time)
+  // Check whether move the next object in the list.
+  auto elapsedTime = this->dataPtr->world->GetSimTime() - this->dataPtr->lastUpdateTime;  
+  if (elapsedTime >= this->dataPtr->objects.front().time)
   {
 	gzmsg << "PerceptionScoringPlugin: spawn next object." << std::endl;
     auto obj = this->dataPtr->objects.front();
@@ -528,7 +424,8 @@ void PerceptionScoringPlugin::OnUpdate()
 		// Only use translation of frame pose
 		// This is a bit of a hack to deal with transients of spawning buoys with significant non-zero attitude.
 		//ignition::math::Pose3d framePose = this->dataPtr->frame->GetWorldPose().Ign();
-		ignition::math::Pose3d framePose(this->dataPtr->frame->GetWorldPose().Ign().Pos(),ignition::math::Quaterniond());
+		ignition::math::Pose3d framePose(this->dataPtr->frame->GetWorldPose().Ign().Pos(),
+										 ignition::math::Quaterniond());
 		ignition::math::Matrix4d transMat(framePose);
 		ignition::math::Matrix4d pose_local(obj.pose);
 		obj.pose = (transMat * pose_local).Pose();
@@ -536,10 +433,6 @@ void PerceptionScoringPlugin::OnUpdate()
     }
 
     std::string modelName = obj.type;
-    if (this->dataPtr->prefixObjectNames)
-    {
-      modelName = this->GetHandle() + "|" + modelName;
-    }
 
 	// Setup new trial in object checker
 	this->dataPtr->objectChecker->NewTrial(obj.name,
@@ -580,74 +473,12 @@ void PerceptionScoringPlugin::OnUpdate()
 	{
 		gzerr << "Object [" << modelName << "] NOT spawned" << std::endl;
 	}
-
     this->dataPtr->objects.erase(this->dataPtr->objects.begin());
-    this->dataPtr->elapsedEquivalentTime = 0.0;
-  }
-    this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
-}
-
-/////////////////////////////////////////////////
-void PerceptionScoringPlugin::OnActivation(ConstGzStringPtr &_msg)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  gzdbg << "PerceptionScoringPlugin: received activation request: " << _msg->data() << std::endl;
-
-  if (_msg->data() == "restart")
-    this->Restart();
-  else if (_msg->data() == "pause")
-    this->Pause();
-  else if (_msg->data() == "resume")
-    this->Resume();
-  else
-    gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
-}
-
-/////////////////////////////////////////////////
-void PerceptionScoringPlugin::OnRateModification(ConstGzStringPtr &_msg)
-{
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  gzdbg << "PerceptionScoringPlugin: received rate modification request: " << _msg->data() << std::endl;
-
-  double rateModifier = std::stod(_msg->data());
-  if (rateModifier >= 0.0)
-  {
-    this->dataPtr->rateModifier = rateModifier;
-  }
-  else
-  {
-    gzdbg << "Ignoring rate modification request with negative value: " << _msg->data() << std::endl;
-  }
-}
-
-/////////////////////////////////////////////////
-bool PerceptionScoringPlugin::Enabled() const
-{
-  return this->dataPtr->enabled;
-}
-
-/////////////////////////////////////////////////
-bool PerceptionScoringPlugin::TimeToExecute()
-{
-  gazebo::common::Time curTime = this->dataPtr->world->GetSimTime();
-  // We're using a custom update rate.
-  if (this->dataPtr->updateRate <= 0)
-    return true;
-
-  auto dt = (curTime - this->dataPtr->lastUpdateTime).Double();
-  if (dt < 0)
-  {
-    // Probably we had a reset.
-    this->dataPtr->lastUpdateTime = curTime;
-    return false;
+	this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
   }
 
-  // Update based on sensorsUpdateRate.
-  if (dt < (1.0 / this->dataPtr->updateRate))
-    return false;
-
-  return true;
 }
+
 
 //////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnRunning()
