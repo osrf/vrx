@@ -174,7 +174,8 @@ xacro_add_files(
   worlds/example_course.world.xacro
   worlds/navigation_task.world.xacro
   worlds/sandisland.world.xacro
-  worlds/scan_and_dock.world.xacro
+  worlds/scan_and_dock_a.world.xacro
+  worlds/scan_and_dock_b.world.xacro
   worlds/stationkeeping_task.world.xacro
   worlds/wayfinding_task.world.xacro
   INORDER INSTALL DESTINATION worlds

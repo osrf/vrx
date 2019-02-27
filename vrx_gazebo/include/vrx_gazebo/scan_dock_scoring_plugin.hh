@@ -19,6 +19,8 @@
 #define VRX_GAZEBO_SCAN_DOCK_SCORING_PLUGIN_HH_
 
 #include <ros/ros.h>
+#include <std_msgs/String.h>
+#include <memory>
 #include <string>
 #include <vector>
 #include <gazebo/gazebo.hh>
@@ -39,17 +41,17 @@ class ColorSequenceChecker
                                const std::string &_rosNameSpace,
                                const std::string &_rosColorSequenceService);
 
-  /// Enable the ROS submission service.
+  /// \brief Enable the ROS submission service.
   public: void Enable();
 
-  /// Disable the ROS submission service.
+  /// \brief Disable the ROS submission service.
   public: void Disable();
 
-  /// Whether a team submitted the color sequence or not.
+  /// \brief Whether a team submitted the color sequence or not.
   /// \return True when the submission was received or false otherwise.
   public: bool SubmissionReceived() const;
 
-  /// Wheter a team submitted the color sequence and is correct or not.
+  /// \brief Wheter a team submitted the color sequence and is correct or not.
   /// \return True when the team submitted the color sequence and it is correct
   /// or false otherwise.
   public: bool Correct() const;
@@ -95,11 +97,14 @@ class DockChecker
   /// considered a fully successfull dock.
   /// \param[in] _dockAllowed Whether is allowed to dock in this bay or not.
   /// \param[in] _worldName Gazebo world name.
+  /// \param[in] _announceSymbol Optional symbol to announce via ROS.
   public: DockChecker(const std::string &_name,
                       const std::string &_activationTopic,
                       const double _minDockTime,
                       const bool _dockAllowed,
-                      const std::string &_worldName);
+                      const std::string &_worldName,
+                      const std::string &_rosNameSpace,
+                      const std::string &_announceSymbol);
 
   /// \brief Whether the robot has been successfully docked in this bay or not.
   /// \return True when the robot has been docked or false otherwise.
@@ -111,6 +116,9 @@ class DockChecker
 
   /// \brief Whether it is allowed to dock in this bay or not.
   public: bool Allowed() const;
+
+  /// \brief Announce the symbol of the bay via ROS.
+  public: void AnnounceSymbol();
 
   /// \brief Update function that needs to be executed periodically.
   public: void Update();
@@ -148,6 +156,21 @@ class DockChecker
 
   /// \brief Whether the vehicle is currently docked or not.
   private: bool currentlyDocked = false;
+
+  /// \brief Color and shape of symbol to announce. E.g.: red_cross, blue_circle
+  private: std_msgs::String announceSymbol;
+
+  /// \brief ROS namespace.
+  private: std::string ns;
+
+  /// \brief ROS Node handle.
+  private: std::unique_ptr<ros::NodeHandle> nh;
+
+  /// \brief Publisher for the symbol.
+  private: ros::Publisher symbolPub;
+
+  /// \brief ROS topic where the target symbol will be published.
+  private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
 };
 
 /// \brief A plugin for computing the score of the scan and dock task.
@@ -178,6 +201,11 @@ class DockChecker
 /// <correct_dock_bonus_points>: Points granted when the vehicle successfully
 /// dock-and-undock in the specified bay.
 /// Default value is 10.
+/// <announce_symbol>: Optional string with format <COLOR>_<SHAPE>, where
+/// color can be "red", "green", "blue", "yellow" and color can be "triangle",
+/// "circle", "cross". If this parameter is present, a ROS message will be
+/// sent in OnReady(). The vehicle should dock in the bay matching this color
+/// and shape.
 ///
 /// Here's an example:
 /// <plugin name="scan_dock_scoring_plugin"
@@ -218,6 +246,7 @@ class DockChecker
 ///       <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>true</dock_allowed>
+///       <announce_symbol>red_circle</announce_symbol>
 ///     </bay>
 ///   </bays>
 /// </plugin>
@@ -236,6 +265,9 @@ class ScanDockScoringPlugin : public ScoringPlugin
 
   /// \brief Callback executed at every world update.
   private: void Update();
+
+  // Documentation inherited.
+  private: void OnReady() override;
 
   // Documentation inherited.
   private: void OnRunning() override;

@@ -114,14 +114,18 @@ bool ColorSequenceChecker::OnColorSequence(
 /////////////////////////////////////////////////
 DockChecker::DockChecker(const std::string &_name,
   const std::string &_activationTopic, const double _minDockTime,
-  const bool _dockAllowed, const std::string &_worldName)
+  const bool _dockAllowed, const std::string &_worldName,
+  const std::string &_rosNameSpace, const std::string &_announceSymbol)
   : name(_name),
     activationTopic(_activationTopic),
     minDockTime(_minDockTime),
-    dockAllowed(_dockAllowed)
+    dockAllowed(_dockAllowed),
+    ns(_rosNameSpace)
 {
   this->timer.Stop();
   this->timer.Reset();
+
+  this->announceSymbol.data = _announceSymbol;
 
   // Subscriber to receive world updates (e.g.: a notification after a cloning).
   this->node.reset(new gazebo::transport::Node());
@@ -147,6 +151,20 @@ bool DockChecker::CurrentlyDocked() const
 bool DockChecker::Allowed() const
 {
   return this->dockAllowed;
+}
+
+/////////////////////////////////////////////////
+void DockChecker::AnnounceSymbol()
+{
+  if (!this->announceSymbol.data.empty())
+  {
+    // Initialize ROS transport.
+    this->nh.reset(new ros::NodeHandle());
+    this->symbolPub = 
+      this->nh->advertise<std_msgs::String>(this->symbolTopic, 1, true);
+
+    this->symbolPub.publish(this->announceSymbol);
+  }
 }
 
 /////////////////////////////////////////////////
@@ -298,10 +316,17 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     }
     bool dockAllowed = bayElem->Get<bool>("dock_allowed");
 
+    std::string announceSymbol = "";
+    if (bayElem->HasElement("announce_symbol"))
+    {
+      announceSymbol = 
+        bayElem->GetElement("announce_symbol")->Get<std::string>();
+    }
+
     // Create a new dock checker.
     std::unique_ptr<DockChecker> dockChecker(
       new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
-        this->world->GetName()));
+        this->world->GetName(), ns, announceSymbol));
 
     // Add the dock checker.
     this->dockCheckers.push_back(std::move(dockChecker));
@@ -366,6 +391,14 @@ void ScanDockScoringPlugin::Update()
     this->Finish();
     break;
   }
+}
+
+//////////////////////////////////////////////////
+void ScanDockScoringPlugin::OnReady()
+{
+  // Announce the symbol if needed.
+  for (auto &dockChecker : this->dockCheckers)
+    dockChecker->AnnounceSymbol();
 }
 
 //////////////////////////////////////////////////
