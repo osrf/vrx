@@ -29,7 +29,6 @@ generate_messages()
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES gazebo_ros_color
   CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
 )
 
@@ -37,19 +36,9 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-# Plugin for setting color of a gazebo visual through ROS
-add_library(gazebo_ros_color src/gazebo_ros_color.cc)
-target_link_libraries(gazebo_ros_color ${catkin_LIBRARIES})
-add_dependencies(gazebo_ros_color ${catkin_EXPORTED_TARGETS})
-install(TARGETS gazebo_ros_color
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 # Plugin for setting color of light buoy.
 add_library(light_buoy_plugin src/light_buoy_plugin.cc)
-target_link_libraries(gazebo_ros_color ${catkin_LIBRARIES})
+target_link_libraries(light_buoy_plugin ${catkin_LIBRARIES})
 add_dependencies(light_buoy_plugin ${catkin_EXPORTED_TARGETS})
 install(TARGETS light_buoy_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -57,11 +46,11 @@ install(TARGETS light_buoy_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Plugin for controlling symbols
-add_library(symbol_controller src/symbol_controller.cc)
-target_link_libraries(symbol_controller ${catkin_LIBRARIES})
-add_dependencies(symbol_controller ${catkin_EXPORTED_TARGETS})
-install(TARGETS symbol_controller
+# Plugin for setting color and shape of a placard.
+add_library(placard_plugin src/placard_plugin.cc)
+target_link_libraries(placard_plugin ${catkin_LIBRARIES})
+add_dependencies(placard_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS placard_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -104,17 +93,18 @@ install(TARGETS stationkeeping_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Plugin for scoring the perception challenge task.
-add_library(perception_scoring_plugin src/perception_scoring_plugin.cc)
-target_link_libraries(perception_scoring_plugin
+# Plugin for scoring the waypoint navigation challenge task.
+add_library(wayfinding_scoring_plugin src/wayfinding_scoring_plugin.cc)
+target_link_libraries(wayfinding_scoring_plugin
   ${catkin_LIBRARIES}
   scoring_plugin)
-add_dependencies(perception_scoring_plugin ${catkin_EXPORTED_TARGETS})
-install(TARGETS perception_scoring_plugin
+add_dependencies(wayfinding_scoring_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS wayfinding_scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+)
+
 
 # Dock base files that need to be processed with erb
 set (dock_base_erb_files
@@ -168,8 +158,8 @@ xacro_add_files(
   worlds/sandisland.world.xacro
   worlds/example_course.world.xacro
   worlds/navigation_task.world.xacro
-  worlds/perception_task.world.xacro
   worlds/stationkeeping_task.world.xacro
+  worlds/wayfinding_task.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 
