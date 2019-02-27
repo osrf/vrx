@@ -83,14 +83,14 @@ class WayfindingScoringPlugin : public ScoringPlugin
   private: sdf::ElementPtr sdf;
 
   /// \brief Topic where the list of waypoints is published.
-  private: std::string waypointsTopic = "/vrx/task/waypoints";
+  private: std::string waypointsTopic = "/vrx/wayfinding/waypoints";
 
   /// \brief Topic where the current minimum pose error distance for each
   /// waypoint is published.
-  private: std::string minErrorsTopic = "/vrx/task/min_errors";
+  private: std::string minErrorsTopic = "/vrx/wayfinding/min_errors";
 
   /// \brief Topic where the current average minimum error is published.
-  private: std::string meanErrorTopic = "/vrx/task/mean_error";
+  private: std::string meanErrorTopic = "/vrx/wayfinding/mean_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;

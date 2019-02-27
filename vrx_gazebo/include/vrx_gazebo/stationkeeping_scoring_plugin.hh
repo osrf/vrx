@@ -76,13 +76,13 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   private: gazebo::event::ConnectionPtr updateConnection;
 
   /// \brief Topic where the task stats are published.
-  private: std::string goalTopic = "/vrx/task/goal";
+  private: std::string goalTopic = "/vrx/station_keeping/goal";
 
   /// \brief Topic where 2D pose error is published
-  private: std::string poseErrorTopic = "/vrx/task/pose_error";
+  private: std::string poseErrorTopic = "/vrx/station_keeping/pose_error";
 
   /// \brief Topic where total RMS pose error is published.
-  private: std::string rmsErrorTopic = "/vrx/task/rms_error";
+  private: std::string rmsErrorTopic = "/vrx/station_keeping/rms_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
