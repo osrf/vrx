@@ -88,7 +88,7 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: bool ParseSDF(sdf::ElementPtr _sdf);
 
   /// \brief Callback for change pattern service, calls other changePattern
-  /// internaly.
+  /// internally.
   /// \param[in] _req Not used.
   /// \param[out] _res The Response containing a message with the new pattern.
   /// \return True when the operation succeed or false otherwise.

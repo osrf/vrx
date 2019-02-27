@@ -176,20 +176,20 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief The name of the task.
   protected: std::string taskName = "undefined";
 
-  /// \brief Pointer to the update event connection.
-  protected: gazebo::event::ConnectionPtr updateConnection;
-
-  /// \brief Topic where the task stats are published.
-  protected: std::string topic = "/vrx/task/info";
-
-  /// \brief The score.
-  protected: double score = 0.0;
-
   /// \brief The name of the vehicle to score.
   protected: std::string vehicleName;
 
   /// \brief Pointer to the vehicle to score.
   protected: gazebo::physics::ModelPtr vehicleModel;
+
+  /// \brief Pointer to the update event connection.
+  private: gazebo::event::ConnectionPtr updateConnection;
+
+  /// \brief Topic where the task stats are published.
+  private: std::string topic = "/vrx/task/info";
+
+  /// \brief The score.
+  private: double score = 0.0;
 
   /// \brief Pointer to the SDF plugin element.
   private: sdf::ElementPtr sdf;
