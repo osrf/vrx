@@ -8,7 +8,7 @@
 	<plugin name="wayfinding_scoring_plugin"
             filename="libwayfinding_scoring_plugin.so">
       <vehicle>wamv</vehicle>
-      <task_name>wayfinding_task</task_name>
+      <task_name>wayfinding</task_name>
 	  <!-- Goal as Latitude, Longitude, Yaw -->
       <waypoints>
           <waypoint>

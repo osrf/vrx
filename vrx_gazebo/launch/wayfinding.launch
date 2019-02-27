@@ -37,9 +37,6 @@
     <arg name="gui" value="$(arg gui)" />
   </include>
 
-  <!-- Set the name of the task
-  <param name="/vrx/task" value="2019/perception" />-->
-
    <!-- Load robot model -->
   <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
   <param name="robot_description"
