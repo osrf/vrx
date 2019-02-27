@@ -23,21 +23,103 @@
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/Events.hh>
-#include <gazebo/msgs/gz_string.pb.h>
-#include <gazebo/physics/Link.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/PhysicsTypes.hh>
-#include <gazebo/physics/World.hh>
 #include <gazebo/transport/transport.hh>
 #include <ignition/math/Matrix4.hh>
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/PopulationPlugin.hh"
 
+//////////////////////////////////////////////////
+ObjectChecker::ObjectChecker(const std::string &_rosNameSpace,
+							 const std::string &_rosObjectTopic,
+							 gazebo::physics::WorldPtr _world)
+	:ns(_rosNameSpace),
+	 objectTopic(_rosObjectTopic),
+	 world(_world)
+{
+    // Quit if ros plugin was not loaded
+	if (!ros::isInitialized())
+	{
+		ROS_ERROR("ROS was not initialized.");
+		return;
+	}
 
+	this->nh = ros::NodeHandle(this->ns);
+}
 
+void ObjectChecker::NewTrial(const std::string &_objectName,
+				   ignition::math::Pose3d _pose)
+{
+	// Setup for a new trial
+	this->trialCount++;
+	this->objectReceived = false;
+	this->objectCorrect = false;
+	this->objectError = -1.0;
 
+	// Store truth
+	this->trueName = _objectName;
+	this->truePose = _pose;
 
+	ROS_INFO_NAMED("ObjectChecker","Intiating new trial");
+}
+
+void ObjectChecker::Enable()
+{
+	// Subscribe
+	this->objectSub = this->nh.subscribe(this->objectTopic,1,
+										 &ObjectChecker::OnObject,
+										 this);
+}
+
+void ObjectChecker::Disable()
+{
+	this->objectSub.shutdown();
+}
+
+bool ObjectChecker::SubmissionReceived() const
+{
+	return this->objectReceived;
+}
+
+bool ObjectChecker::Correct() const
+{
+	return this->objectCorrect;
+}
+
+void ObjectChecker::OnObject(const geographic_msgs::GeoPoseStamped::ConstPtr &_msg)
+{
+	// Only accept one message per trial
+	if (this->objectReceived)
+	{
+		ROS_WARN_NAMED("ObjectChecker","Receiving multiple ID messages for same trial.  Ignoring.");
+		return;
+	}
+	
+	// Accept the message
+	this->objectReceived = true;
+	this->objectCorrect = !this->trueName.compare(_msg->header.frame_id);
+	// Convert geo pose to Gazebo pose
+	// Note - this is used in a few different VRX plugins, may want to have a separate library?
+	// Convert lat/lon to local
+	// Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
+	ignition::math::Vector3d scVec(_msg->pose.position.latitude,
+								   _msg->pose.position.longitude,
+								   0);
+    #if GAZEBO_MAJOR_VERSION >= 8
+	  ignition::math::Vector3d cartVec =
+		  this->world->SphericalCoords()->LocalFromSpherical(scVec);
+    #else
+	  ignition::math::Vector3d cartVec =
+		  this->world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+    #endif
+	
+	  this->objectError = sqrt(pow(cartVec.X() - this->truePose.Pos().X(),2)+
+							   pow(cartVec.Y() - this->truePose.Pos().Y(),2));
+	  
+	ROS_INFO_NAMED("ObjectChecker","Object ID: true = %s, submitted = %s result=%d; 2D position error = %.3f m",this->trueName.c_str(), _msg->header.frame_id.c_str(),(int)this->objectCorrect,this->objectError);
+}
+
+//////////////////////////////////////////////////
 namespace gazebo
 {
   /// \internal
@@ -160,6 +242,8 @@ namespace gazebo
     /// object to be spawned.
     public: std::map<std::string, int> objectCounter;
 
+	/// \brief Implements ROS interface to recieve and check team submissions
+    public: std::unique_ptr<ObjectChecker> objectChecker;
 
   };
 }
@@ -256,8 +340,8 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
       objectElem = objectElem->GetNextElement("object");
       continue;
     }
-    sdf::ElementPtr typeElement = objectElem->GetElement("name");
-    std::string name = typeElement->Get<std::string>();
+    sdf::ElementPtr nameElement = objectElem->GetElement("name");
+    std::string name = nameElement->Get<std::string>();
 
     // Parse the object pose (optional).
     ignition::math::Pose3d pose;
@@ -268,7 +352,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     }
 
     // Add the object to the collection.
-    PopulationPluginPrivate::Object obj = {time, type, pose, name};
+    PopulationPluginPrivate::Object obj = {time, type, name, pose};
     this->dataPtr->initialObjects.push_back(obj);
 
     objectElem = objectElem->GetNextElement("object");
@@ -309,6 +393,23 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     this->dataPtr->rateModifier = 1.0;
   }
 
+  // Optional: ROS namespace.
+  std::string ns;
+  if (_sdf->HasElement("robot_namespace"))
+    ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
+  
+  // Optional: ROS topic.
+  std::string object_topic = "/vrx/perception/landmark";
+  if (_sdf->HasElement("landmark_topic"))
+  {
+    object_topic =
+      _sdf->GetElement("landmark_topic")->Get<std::string>();
+  }
+  // Instatiate the object checker
+  this->dataPtr->objectChecker.reset(
+	  new ObjectChecker(ns,object_topic,_world));
+  
+  
   this->dataPtr->connection = event::Events::ConnectWorldUpdateEnd(
       boost::bind(&PopulationPlugin::OnUpdate, this));
 }
@@ -424,6 +525,10 @@ void PopulationPlugin::OnUpdate()
       modelName = this->GetHandle() + "|" + modelName;
     }
 
+	// Setup new trial in object checker
+	this->dataPtr->objectChecker->NewTrial(obj.name,
+										   obj.pose);
+	
     // Get a new index for the object.
     if (this->dataPtr->objectCounter.find(obj.type) ==
         this->dataPtr->objectCounter.end())
@@ -440,7 +545,7 @@ void PopulationPlugin::OnUpdate()
 	if (this->dataPtr->curr_model){
 		this->dataPtr->curr_model->SetWorldPose(this->dataPtr->orig_pose);
 	}
-    // Get a unique name for the object.
+    // Get a unique name for the new object.
     modelName += "_" + std::to_string(index);
     auto modelPtr = this->dataPtr->world->GetEntity(modelName);
     if (modelPtr)
@@ -535,4 +640,10 @@ bool PopulationPlugin::TimeToExecute()
     return false;
 
   return true;
+}
+
+//////////////////////////////////////////////////
+void PopulationPlugin::OnRunning()
+{
+	this->dataPtr->objectChecker->Enable();
 }

@@ -18,13 +18,17 @@
 #ifndef GAZEBO_POPULATION_PLUGIN_HH_
 #define GAZEBO_POPULATION_PLUGIN_HH_
 
+#include <ros/ros.h>
+#include <geographic_msgs/GeoPoseStamped.h>
 #include <memory>
-//#include <gazebo/common/Plugin.hh>
-#include "vrx_gazebo/scoring_plugin.hh"
 #include <gazebo/msgs/gz_string.pb.h>
+#include <gazebo/physics/Link.hh>
+#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsTypes.hh>
+#include <gazebo/physics/World.hh>
 #include <gazebo/transport/transport.hh>
 #include <sdf/sdf.hh>
+#include "vrx_gazebo/scoring_plugin.hh"
 
 /// \brief A class to monitor if the object and pose reported matches the
 /// currently visible object and pose.
@@ -36,13 +40,14 @@ class ObjectChecker
   /// \param[in] _rosObjectTopic The ROS topic used to receive
   /// the object identification and localization
   public: ObjectChecker(const std::string &_rosNameSpace,
-                               const std::string &_rosObjectTopic);
+						const std::string &_rosObjectTopic,
+						gazebo::physics::WorldPtr world);
 
   /// \brief Initialize a new trial
   /// \param[in] _objectName Name of the object for id purposes
   /// \param[in] _objectPose Pose of the object for localization purposes
-  public: NewTrial(const std::string &_objectName,
-				   ignition::math::pose3d _pose);
+  public: void NewTrial(const std::string &_objectName,
+						ignition::math::Pose3d _pose);
 				 
   /// Enable the ROS subscription.
   public: void Enable();
@@ -50,11 +55,11 @@ class ObjectChecker
   /// Disable the ROS subscription.
   public: void Disable();
 
-  /// Whether a team submitted an identification for currnet trial
+  /// Whether a team submitted an identification for current trial
   /// \return True when the submission was received or false otherwise.
   public: bool SubmissionReceived() const;
 
-  /// Wheter a team submitted the id  and is correct or not.
+  /// Whether a team submitted a correct id or not.
   /// \return True when the team submitted the id and it is correct
   /// or false otherwise.
   public: bool Correct() const;
@@ -63,30 +68,40 @@ class ObjectChecker
   /// \param[in] _request Contains the submission.
   /// \param[out] _res The Response. Note that this will be true even if the
   /// reported sequence is incorrect.
-  private: bool OnColorSequence(
-    ros::ServiceEvent<vrx_gazebo::ColorSequence::Request,
-      vrx_gazebo::ColorSequence::Response> &_event);
-
-  /// \brief The expected color sequence.
-  private: std::vector<std::string> expectedSequence;
+  private: void OnObject(const geographic_msgs::GeoPoseStamped::ConstPtr &_msg);
 
   /// \brief ROS namespace.
   private: std::string ns;
 
-  /// \brief ROS topic where the color sequence should be sent.
-  private: std::string colorSequenceService;
+  /// \brief ROS topic where the object id/pose is received.
+  private: std::string objectTopic;
 
   /// \brief ROS Node handle.
   private: ros::NodeHandle nh;
 
-  /// \brief Service to generate and display a new color sequence.
-  private: ros::ServiceServer colorSequenceServer;
+  /// \brief ROS subscriber
+  private: ros::Subscriber objectSub;
 
-  /// \brief Whether the color sequence has been received or not.
-  private: bool colorSequenceReceived = false;
+  /// \brief Whether the object has been received or not.
+  private: bool objectReceived = false;
 
-  /// \brief Whether the color sequence received is correct or not.
-  private: bool correctSequence = false;
+  /// \brief Whether the object ID received is correct or not.
+  private: bool objectCorrect = false;
+	
+  /// \brief Pose error of object localization.
+  private: double objectError = -1.0;
+
+  /// \brief Count the trials.
+  private: int trialCount = 0;
+
+  /// \brief Current correct object name.
+  private: std::string trueName;
+
+  /// \brief Current correct object pose.
+  private: ignition::math::Pose3d truePose;
+
+  /// \brief World pointer. Need this for spherical/local conversion.
+  public: gazebo::physics::WorldPtr world;
 };
 
 namespace gazebo
@@ -105,6 +120,7 @@ namespace gazebo
   ///                    following parameters:
   ///                      <time> Simulation time to be spawned.
   ///                      <type> Model.
+  ///                      <name> Landmark name.
   ///                      <pose> Initial object pose.
   ///
   /// <loop_forever>: Optional parameter. If true, all objects will be spawned
@@ -190,6 +206,9 @@ namespace gazebo
     /// plugin state.
     private: virtual void Publish() const;
 
+	// Documentation inherited.
+    private: void OnRunning() override;
+		  
     /// \brief Private data pointer.
     private: std::unique_ptr<PopulationPluginPrivate> dataPtr;
   };
