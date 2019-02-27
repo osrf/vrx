@@ -15,6 +15,8 @@
  *
 */
 
+
+
 #include <algorithm>
 #include <mutex>
 #include <ostream>
@@ -27,7 +29,7 @@
 #include <ignition/math/Matrix4.hh>
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
-#include "vrx_gazebo/PopulationPlugin.hh"
+#include "vrx_gazebo/perception_scoring_plugin.hh"
 
 //////////////////////////////////////////////////
 ObjectChecker::ObjectChecker(const std::string &_rosNameSpace,
@@ -124,8 +126,8 @@ void ObjectChecker::OnObject(const geographic_msgs::GeoPoseStamped::ConstPtr &_m
 namespace gazebo
 {
   /// \internal
-  /// \brief Private data for the PopulationPlugin class.
-  struct PopulationPluginPrivate
+  /// \brief Private data for the PerceptionScoringPlugin class.
+  struct PerceptionScoringPluginPrivate
   {
     /// \brief World pointer.
     public: physics::WorldPtr world;
@@ -251,23 +253,23 @@ namespace gazebo
 
 using namespace gazebo;
 
-GZ_REGISTER_WORLD_PLUGIN(PopulationPlugin)
+GZ_REGISTER_WORLD_PLUGIN(PerceptionScoringPlugin)
 
 /////////////////////////////////////////////////
-PopulationPlugin::PopulationPlugin()
-  : dataPtr(new PopulationPluginPrivate)
+PerceptionScoringPlugin::PerceptionScoringPlugin()
+  : dataPtr(new PerceptionScoringPluginPrivate)
 {
-	gzmsg << "PopulationPlugin loaded" << std::endl;	
+	gzmsg << "PerceptionScoringPlugin loaded" << std::endl;	
 } 
 
 
 /////////////////////////////////////////////////
-PopulationPlugin::~PopulationPlugin()
+PerceptionScoringPlugin::~PerceptionScoringPlugin()
 {
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
+void PerceptionScoringPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 {
   
   // Base class, also binds the update method for the base class
@@ -300,7 +302,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
   
   if (!_sdf->HasElement("object_sequence"))
   {
-    gzerr << "PopulationPlugin: Unable to find <object_sequence> element\n";
+    gzerr << "PerceptionScoringPlugin: Unable to find <object_sequence> element\n";
     return;
   }
 
@@ -317,7 +319,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     // Parse the time.
     if (!objectElem->HasElement("time"))
     {
-      gzerr << "PopulationPlugin: Unable to find <time> in object\n";
+      gzerr << "PerceptionScoringPlugin: Unable to find <time> in object\n";
       objectElem = objectElem->GetNextElement("object");
       continue;
     }
@@ -327,7 +329,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     // Parse the object type.
     if (!objectElem->HasElement("type"))
     {
-      gzerr << "PopulationPlugin: Unable to find <type> in object.\n";
+      gzerr << "PerceptionScoringPlugin: Unable to find <type> in object.\n";
       objectElem = objectElem->GetNextElement("object");
       continue;
     }
@@ -337,7 +339,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 	// Parse the object name - this is what must be matched id success.
     if (!objectElem->HasElement("name"))
     {
-      gzerr << "PopulationPlugin: Unable to find <name> in object.\n";
+      gzerr << "PerceptionScoringPlugin: Unable to find <name> in object.\n";
       objectElem = objectElem->GetNextElement("object");
       continue;
     }
@@ -353,7 +355,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     }
 
     // Add the object to the collection.
-    PopulationPluginPrivate::Object obj = {time, type, name, pose};
+    PerceptionScoringPluginPrivate::Object obj = {time, type, name, pose};
     this->dataPtr->initialObjects.push_back(obj);
 
     objectElem = objectElem->GetNextElement("object");
@@ -372,7 +374,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     // Subscribe to the activation topic.
     this->dataPtr->activationSub = this->dataPtr->node->Subscribe(
         _sdf->Get<std::string>("activation_topic"),
-        &PopulationPlugin::OnActivation, this);
+        &PerceptionScoringPlugin::OnActivation, this);
   }
   else
     this->Restart();
@@ -386,7 +388,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     // Subscribe to the rate modifier topic.
     this->dataPtr->rateModifierSub = this->dataPtr->node->Subscribe(
         _sdf->Get<std::string>("rate_modifier_topic"),
-        &PopulationPlugin::OnRateModification, this);
+        &PerceptionScoringPlugin::OnRateModification, this);
     this->dataPtr->rateModifier = 0.0;
   }
   else
@@ -412,11 +414,11 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
   
   
   this->dataPtr->connection = event::Events::ConnectWorldUpdateEnd(
-      boost::bind(&PopulationPlugin::OnUpdate, this));
+      boost::bind(&PerceptionScoringPlugin::OnUpdate, this));
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::Pause()
+void PerceptionScoringPlugin::Pause()
 {
   if (!this->dataPtr->enabled)
     return;
@@ -429,7 +431,7 @@ void PopulationPlugin::Pause()
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::Resume()
+void PerceptionScoringPlugin::Resume()
 {
   if (this->dataPtr->enabled)
     return;
@@ -442,7 +444,7 @@ void PopulationPlugin::Resume()
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::Restart()
+void PerceptionScoringPlugin::Restart()
 {
   this->dataPtr->enabled = true;
   this->dataPtr->elapsedEquivalentTime = 0;
@@ -453,7 +455,7 @@ void PopulationPlugin::Restart()
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::OnUpdate()
+void PerceptionScoringPlugin::OnUpdate()
 {
   // If we're using a custom update rate value we have to check if it's time to
   // update the plugin or not.
@@ -461,8 +463,6 @@ void PopulationPlugin::OnUpdate()
     return;
 
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  this->Publish();
 
   // Connect with object checker to see if we need to score a submission
   if (this->dataPtr->objectChecker->SubmissionReceived() &&
@@ -505,7 +505,7 @@ void PopulationPlugin::OnUpdate()
   this->dataPtr->elapsedEquivalentTime += elapsedTime.Double() * this->dataPtr->rateModifier;
   if (this->dataPtr->elapsedEquivalentTime >= this->dataPtr->objects.front().time)
   {
-	gzmsg << "PopulationPlugin: spawn next object." << std::endl;
+	gzmsg << "PerceptionScoringPlugin: spawn next object." << std::endl;
     auto obj = this->dataPtr->objects.front();
 
 	// Try to use a model/link frame if specified.
@@ -588,10 +588,10 @@ void PopulationPlugin::OnUpdate()
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::OnActivation(ConstGzStringPtr &_msg)
+void PerceptionScoringPlugin::OnActivation(ConstGzStringPtr &_msg)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  gzdbg << "PopulationPlugin: received activation request: " << _msg->data() << std::endl;
+  gzdbg << "PerceptionScoringPlugin: received activation request: " << _msg->data() << std::endl;
 
   if (_msg->data() == "restart")
     this->Restart();
@@ -604,10 +604,10 @@ void PopulationPlugin::OnActivation(ConstGzStringPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::OnRateModification(ConstGzStringPtr &_msg)
+void PerceptionScoringPlugin::OnRateModification(ConstGzStringPtr &_msg)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  gzdbg << "PopulationPlugin: received rate modification request: " << _msg->data() << std::endl;
+  gzdbg << "PerceptionScoringPlugin: received rate modification request: " << _msg->data() << std::endl;
 
   double rateModifier = std::stod(_msg->data());
   if (rateModifier >= 0.0)
@@ -621,18 +621,13 @@ void PopulationPlugin::OnRateModification(ConstGzStringPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-bool PopulationPlugin::Enabled() const
+bool PerceptionScoringPlugin::Enabled() const
 {
   return this->dataPtr->enabled;
 }
 
 /////////////////////////////////////////////////
-void PopulationPlugin::Publish() const
-{
-}
-
-/////////////////////////////////////////////////
-bool PopulationPlugin::TimeToExecute()
+bool PerceptionScoringPlugin::TimeToExecute()
 {
   gazebo::common::Time curTime = this->dataPtr->world->GetSimTime();
   // We're using a custom update rate.
@@ -655,7 +650,7 @@ bool PopulationPlugin::TimeToExecute()
 }
 
 //////////////////////////////////////////////////
-void PopulationPlugin::OnRunning()
+void PerceptionScoringPlugin::OnRunning()
 {
 	this->dataPtr->objectChecker->Enable();
 }

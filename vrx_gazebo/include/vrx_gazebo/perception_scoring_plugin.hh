@@ -15,8 +15,13 @@
  *
 */
 
-#ifndef GAZEBO_POPULATION_PLUGIN_HH_
-#define GAZEBO_POPULATION_PLUGIN_HH_
+
+/* Note - this code was originally derived from the ARIAC 
+ * PoplulationPlugin https://bitbucket.org/osrf/ariac/src/master/osrf_gear/include/osrf_gear/PopulationPlugin.hh
+*/
+
+#ifndef GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
+#define GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
 
 #include <ros/ros.h>
 #include <geographic_msgs/GeoPoseStamped.h>
@@ -110,14 +115,14 @@ class ObjectChecker
 namespace gazebo
 {
   // Forward declare private data class
-  class PopulationPluginPrivate;
+  class PerceptionScoringPluginPrivate;
 
   /// \brief A plugin that allows models to be spawned at a given location in
-  /// a specific simulation time. As an example, this plugin might be used for
-  /// placing objects in a conveyor belt.
-
+  /// a specific simulation time and then takes care of scoring coorect
+  /// identification and localization of the objects.
+  ///	
   /// The plugin accepts the following SDF parameters:
-
+  ///
   /// <object_sequence>: Contains the list of objects to be populated. An object
   ///                    should be declared as an <object> element with the
   ///                    following parameters:
@@ -141,34 +146,37 @@ namespace gazebo
   ///
   /// Here's an example of a valid SDF:
   ///
-  /// <plugin filename="libPopulationPlugin.so" name="populate_conveyor">
-  ///   <loop_forever>true</loop_forever>
-  ///   <object_sequence>
-  ///     <object>
-  ///       <time>8.0</time>
-  ///       <type>coke_can</type>
-  ///       <pose>1 6 1 0 0 0</pose>
-  ///     </object>
-  ///     <object>
-  ///       <time>4.0</time>
-  ///       <type>cordless_drill/</type>
-  ///       <pose>1 6 1 0 0 0</pose>
-  ///     </object>
-  ///     <object>
-  ///       <time>12.0</time>
-  ///       <type>beer</type>
-  ///       <pose>1 6 1 0 0 0</pose>
-  ///     </object>
-  ///   </object_sequence>
-  /// </plugin>
+  /// <plugin filename="libperception_scoring_plugin.so"
+  ///         name="perception_scoring_plugin">
+  ///	  <vehicle>wamv</vehicle>
+  ///      <task_name>perception</task_name>
+  ///     <initial_state_duration>1</initial_state_duration>
+  ///      <ready_state_duration>1</ready_state_duration>
+  ///      <running_state_duration>300</running_state_duration>
+  ///	  <!-- Parameters for PopulationPlugin -->
+  ///	  <loop_forever>false</loop_forever>
+  ///	  <frame>wamv</frame>
+  ///	  <object_sequence>
+  ///		<object>
+  ///		  <time>10.0</time>
+  ///		  <type>red</type>
+  ///		  <name>red_mark</name>
+  ///		  <pose>6 0 1 0 0 0</pose>
+  ///		</object>
+  ///		<object>
+  ///		  <time>10.0</time>
+  ///		  <type>green</type>
+  ///		  <name>green_mark</name>
+  ///		  <pose>6 6 1 0 0 0</pose>
+  ///		</object>
 
-  class GAZEBO_VISIBLE PopulationPlugin : public ScoringPlugin
+  class GAZEBO_VISIBLE PerceptionScoringPlugin : public ScoringPlugin
   {
     /// \brief Constructor.
-    public: PopulationPlugin();
+    public: PerceptionScoringPlugin();
 
     /// \brief Destructor.
-    public: virtual ~PopulationPlugin();
+    public: virtual ~PerceptionScoringPlugin();
 
     // Documentation inherited.
     public: virtual void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
@@ -205,15 +213,11 @@ namespace gazebo
     /// the plugin's update rate.
     protected: bool TimeToExecute();
 
-    /// \brief Overwrite this method for sending periodic updates with the
-    /// plugin state.
-    private: virtual void Publish() const;
-
 	// Documentation inherited.
     private: void OnRunning() override;
 		  
     /// \brief Private data pointer.
-    private: std::unique_ptr<PopulationPluginPrivate> dataPtr;
+    private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
   };
 }
 #endif
