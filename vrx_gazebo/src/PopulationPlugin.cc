@@ -54,6 +54,7 @@ void ObjectChecker::NewTrial(const std::string &_objectName,
 	this->trialCount++;
 	this->objectReceived = false;
 	this->objectCorrect = false;
+	this->submissionScored = false;
 	this->objectError = -1.0;
 
 	// Store truth
@@ -463,6 +464,21 @@ void PopulationPlugin::OnUpdate()
 
   this->Publish();
 
+  // Connect with object checker to see if we need to score a submission
+  if (this->dataPtr->objectChecker->SubmissionReceived() &&
+	  !this->dataPtr->objectChecker->submissionScored)	  
+  {
+	  ROS_INFO("Scoring a new submission");
+	  // Only add score if the identification is correct
+	  if (this->dataPtr->objectChecker->Correct())
+	  {
+		  this->SetScore(this->Score()+this->dataPtr->objectChecker->objectError);
+	  }
+	  // Mark trial as scored
+	  this->dataPtr->objectChecker->submissionScored = true;
+  }
+
+  
   if (!this->dataPtr->enabled)
   {
     this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
@@ -481,7 +497,7 @@ void PopulationPlugin::OnUpdate()
       return;
     }
   }
-
+  
   // Check whether spawn a new object from the list.
   auto elapsedTime = this->dataPtr->world->GetSimTime() - this->dataPtr->lastUpdateTime;
   // The rate modifier has the effect of slowing down sim time in this plugin.
@@ -550,15 +566,11 @@ void PopulationPlugin::OnUpdate()
     auto modelPtr = this->dataPtr->world->GetEntity(modelName);
     if (modelPtr)
     {
-		gzmsg << modelPtr->GetName() << std::endl;
-		for (int ii = 0; ii < modelPtr->GetChildCount(); ii++){
-			gzmsg << modelPtr->GetChild(ii)->GetName() << std::endl;
-		}
-		// Save for later
+		// Save current object and original pose for later
 		this->dataPtr->curr_model = modelPtr;
 		this->dataPtr->orig_pose = modelPtr->GetWorldPose().Ign();
 		
-		// Move it to the target pose.
+		// Move object to the target pose.
 		modelPtr->SetWorldPose(obj.pose);
 		modelPtr->SetWorldTwist(ignition::math::Vector3d::Zero,
 							  ignition::math::Vector3d::Zero);

@@ -55,11 +55,14 @@ class ObjectChecker
   /// Disable the ROS subscription.
   public: void Disable();
 
-  /// Whether a team submitted an identification for current trial
+  /// \brief Whether a team submitted an identification for current trial
   /// \return True when the submission was received or false otherwise.
   public: bool SubmissionReceived() const;
 
-  /// Whether a team submitted a correct id or not.
+  /// \brief Has the submission been scored?
+  public: bool submissionScored = false;
+	
+  /// \brief Whether a team submitted a correct id or not.
   /// \return True when the team submitted the id and it is correct
   /// or false otherwise.
   public: bool Correct() const;
@@ -69,6 +72,9 @@ class ObjectChecker
   /// \param[out] _res The Response. Note that this will be true even if the
   /// reported sequence is incorrect.
   private: void OnObject(const geographic_msgs::GeoPoseStamped::ConstPtr &_msg);
+
+  /// \brief Pose error of object localization.
+  public: double objectError = -1.0;
 
   /// \brief ROS namespace.
   private: std::string ns;
@@ -87,9 +93,6 @@ class ObjectChecker
 
   /// \brief Whether the object ID received is correct or not.
   private: bool objectCorrect = false;
-	
-  /// \brief Pose error of object localization.
-  private: double objectError = -1.0;
 
   /// \brief Count the trials.
   private: int trialCount = 0;
@@ -101,7 +104,7 @@ class ObjectChecker
   private: ignition::math::Pose3d truePose;
 
   /// \brief World pointer. Need this for spherical/local conversion.
-  public: gazebo::physics::WorldPtr world;
+  private: gazebo::physics::WorldPtr world;
 };
 
 namespace gazebo

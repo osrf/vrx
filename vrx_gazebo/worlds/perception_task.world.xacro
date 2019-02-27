@@ -37,19 +37,19 @@
 	  <frame>wamv</frame>
 	  <object_sequence>
 		<object>
-		  <time>5.0</time>
+		  <time>10.0</time>
 		  <type>red</type>
 		  <name>red_mark</name>
 		  <pose>6 0 1 0 0 0</pose>
 		</object>
 		<object>
-		  <time>5.0</time>
+		  <time>10.0</time>
 		  <type>green</type>
 		  <name>green_mark</name>
 		  <pose>6 6 1 0 0 0</pose>
 		</object>
 		<object>
-		  <time>5.0</time>
+		  <time>10.0</time>
 		  <type>black</type>
 		  <name>black_totem</name>
 		  <pose>6 -6 1 0 0 0</pose>
