@@ -48,7 +48,7 @@ ObjectChecker::ObjectChecker(const std::string &_rosNameSpace,
 }
 
 void ObjectChecker::NewTrial(const std::string &_objectName,
-				   ignition::math::Pose3d _pose)
+							 gazebo::physics::EntityPtr _object)
 {
 	// Setup for a new trial
 	this->trialCount++;
@@ -59,7 +59,7 @@ void ObjectChecker::NewTrial(const std::string &_objectName,
 
 	// Store truth
 	this->trueName = _objectName;
-	this->truePose = _pose;
+	this->currObject = _object;
 
 	ROS_INFO_NAMED("ObjectChecker","Intiating new trial");
 }
@@ -113,9 +113,12 @@ void ObjectChecker::OnObject(const geographic_msgs::GeoPoseStamped::ConstPtr &_m
 	  ignition::math::Vector3d cartVec =
 		  this->world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
     #endif
-	
-	  this->objectError = sqrt(pow(cartVec.X() - this->truePose.Pos().X(),2)+
-							   pow(cartVec.Y() - this->truePose.Pos().Y(),2));
+
+	// Get current pose of the current object
+	ignition::math::Pose3d truePose = this->currObject->GetWorldPose().Ign();
+	// 2D Error
+    this->objectError = sqrt(pow(cartVec.X() - truePose.Pos().X(),2)+
+							 pow(cartVec.Y() - truePose.Pos().Y(),2));
 	  
 	ROS_INFO_NAMED("ObjectChecker","Object ID: true = %s, submitted = %s result=%d; 2D position error = %.3f m",this->trueName.c_str(), _msg->header.frame_id.c_str(),(int)this->objectCorrect,this->objectError);
 }
@@ -433,10 +436,6 @@ void PerceptionScoringPlugin::OnUpdate()
     }
 
     std::string modelName = obj.type;
-
-	// Setup new trial in object checker
-	this->dataPtr->objectChecker->NewTrial(obj.name,
-										   obj.pose);
 	
     // Get a new index for the object.
     if (this->dataPtr->objectCounter.find(obj.type) ==
@@ -459,6 +458,10 @@ void PerceptionScoringPlugin::OnUpdate()
     auto modelPtr = this->dataPtr->world->GetEntity(modelName);
     if (modelPtr)
     {
+		// Setup new trial in object checker
+		this->dataPtr->objectChecker->NewTrial(obj.name,
+											   modelPtr);
+
 		// Save current object and original pose for later
 		this->dataPtr->curr_model = modelPtr;
 		this->dataPtr->orig_pose = modelPtr->GetWorldPose().Ign();

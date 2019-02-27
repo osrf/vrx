@@ -46,13 +46,13 @@ class ObjectChecker
   /// the object identification and localization
   public: ObjectChecker(const std::string &_rosNameSpace,
 						const std::string &_rosObjectTopic,
-						gazebo::physics::WorldPtr world);
+						gazebo::physics::WorldPtr _world);
 
   /// \brief Initialize a new trial
   /// \param[in] _objectName Name of the object for id purposes
   /// \param[in] _objectPose Pose of the object for localization purposes
   public: void NewTrial(const std::string &_objectName,
-						ignition::math::Pose3d _pose);
+						gazebo::physics::EntityPtr _object);
 				 
   /// Enable the ROS subscription.
   public: void Enable();
@@ -105,8 +105,10 @@ class ObjectChecker
   /// \brief Current correct object name.
   private: std::string trueName;
 
-  /// \brief Current correct object pose.
-  private: ignition::math::Pose3d truePose;
+  /// \brief Current object
+  private: gazebo::physics::EntityPtr currObject;
+/// \brief Current correct object pose.
+//private: ignition::math::Pose3d truePose;
 
   /// \brief World pointer. Need this for spherical/local conversion.
   private: gazebo::physics::WorldPtr world;
