@@ -116,18 +116,6 @@ install(TARGETS perception_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
 
-# Create the libPopulationPlugin.so library.
-add_library(population_plugin src/PopulationPlugin.cc)
-target_link_libraries(population_plugin
-  ${catkin_LIBRARIES}
-  scoring_plugin) 
-install(TARGETS population_plugin
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-
 # Dock base files that need to be processed with erb
 set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb

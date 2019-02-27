@@ -25,7 +25,8 @@
 	  <uri>model://black_totem</uri>      
 	</include>
 
-	<plugin filename="libpopulation_plugin.so" name="populate_plugin">
+	<plugin filename="libperception_scoring_plugin.so"
+			name="perception_scoring_plugin">
 	  <!-- Parameters for ScoringPlugin base class -->
 	  <vehicle>wamv</vehicle>
       <task_name>perception</task_name>
