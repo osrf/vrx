@@ -119,7 +119,8 @@ install(TARGETS perception_scoring_plugin
 # Create the libPopulationPlugin.so library.
 add_library(population_plugin src/PopulationPlugin.cc)
 target_link_libraries(population_plugin
-  ${catkin_LIBRARIES}) 
+  ${catkin_LIBRARIES}
+  scoring_plugin) 
 install(TARGETS population_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

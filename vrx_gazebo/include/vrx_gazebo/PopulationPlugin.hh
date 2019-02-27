@@ -19,11 +19,75 @@
 #define GAZEBO_POPULATION_PLUGIN_HH_
 
 #include <memory>
-#include <gazebo/common/Plugin.hh>
+//#include <gazebo/common/Plugin.hh>
+#include "vrx_gazebo/scoring_plugin.hh"
 #include <gazebo/msgs/gz_string.pb.h>
 #include <gazebo/physics/PhysicsTypes.hh>
 #include <gazebo/transport/transport.hh>
 #include <sdf/sdf.hh>
+
+/// \brief A class to monitor if the object and pose reported matches the
+/// currently visible object and pose.
+/// displayed in the light buoy.
+class ObjectChecker
+{
+  /// \brief Constructor.
+  /// \param[in] _rosNameSpace ROS namespace.
+  /// \param[in] _rosObjectTopic The ROS topic used to receive
+  /// the object identification and localization
+  public: ObjectChecker(const std::string &_rosNameSpace,
+                               const std::string &_rosObjectTopic);
+
+  /// \brief Initialize a new trial
+  /// \param[in] _objectName Name of the object for id purposes
+  /// \param[in] _objectPose Pose of the object for localization purposes
+  public: NewTrial(const std::string &_objectName,
+				   ignition::math::pose3d _pose);
+				 
+  /// Enable the ROS subscription.
+  public: void Enable();
+
+  /// Disable the ROS subscription.
+  public: void Disable();
+
+  /// Whether a team submitted an identification for currnet trial
+  /// \return True when the submission was received or false otherwise.
+  public: bool SubmissionReceived() const;
+
+  /// Wheter a team submitted the id  and is correct or not.
+  /// \return True when the team submitted the id and it is correct
+  /// or false otherwise.
+  public: bool Correct() const;
+
+  /// \brief Callback executed when a new color submission is received.
+  /// \param[in] _request Contains the submission.
+  /// \param[out] _res The Response. Note that this will be true even if the
+  /// reported sequence is incorrect.
+  private: bool OnColorSequence(
+    ros::ServiceEvent<vrx_gazebo::ColorSequence::Request,
+      vrx_gazebo::ColorSequence::Response> &_event);
+
+  /// \brief The expected color sequence.
+  private: std::vector<std::string> expectedSequence;
+
+  /// \brief ROS namespace.
+  private: std::string ns;
+
+  /// \brief ROS topic where the color sequence should be sent.
+  private: std::string colorSequenceService;
+
+  /// \brief ROS Node handle.
+  private: ros::NodeHandle nh;
+
+  /// \brief Service to generate and display a new color sequence.
+  private: ros::ServiceServer colorSequenceServer;
+
+  /// \brief Whether the color sequence has been received or not.
+  private: bool colorSequenceReceived = false;
+
+  /// \brief Whether the color sequence received is correct or not.
+  private: bool correctSequence = false;
+};
 
 namespace gazebo
 {
@@ -79,7 +143,7 @@ namespace gazebo
   ///   </object_sequence>
   /// </plugin>
 
-  class GAZEBO_VISIBLE PopulationPlugin : public WorldPlugin
+  class GAZEBO_VISIBLE PopulationPlugin : public ScoringPlugin
   {
     /// \brief Constructor.
     public: PopulationPlugin();

@@ -32,8 +32,11 @@
 #include <ignition/math/Matrix4.hh>
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
-
 #include "vrx_gazebo/PopulationPlugin.hh"
+
+
+
+
 
 namespace gazebo
 {
@@ -76,6 +79,9 @@ namespace gazebo
 
               /// \brief Object type.
               public: std::string type;
+
+			  /// \brief Object type.
+              public: std::string name;
 
               /// \brief Pose in which the object should be placed.
               public: ignition::math::Pose3d pose;
@@ -178,8 +184,10 @@ PopulationPlugin::~PopulationPlugin()
 /////////////////////////////////////////////////
 void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 {
-  GZ_ASSERT(_world, "PopulationPlugin world poinater is NULL");
-  GZ_ASSERT(_sdf, "PopulationPlugin sdf pointer is NULL");
+  
+  // Base class, also binds the update method for the base class
+  ScoringPlugin::Load(_world,_sdf);
+
   this->dataPtr->world = _world;
   this->dataPtr->sdf = _sdf;
 
@@ -241,6 +249,16 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     sdf::ElementPtr typeElement = objectElem->GetElement("type");
     std::string type = typeElement->Get<std::string>();
 
+	// Parse the object name - this is what must be matched id success.
+    if (!objectElem->HasElement("name"))
+    {
+      gzerr << "PopulationPlugin: Unable to find <name> in object.\n";
+      objectElem = objectElem->GetNextElement("object");
+      continue;
+    }
+    sdf::ElementPtr typeElement = objectElem->GetElement("name");
+    std::string name = typeElement->Get<std::string>();
+
     // Parse the object pose (optional).
     ignition::math::Pose3d pose;
     if (objectElem->HasElement("pose"))
@@ -250,7 +268,7 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     }
 
     // Add the object to the collection.
-    PopulationPluginPrivate::Object obj = {time, type, pose};
+    PopulationPluginPrivate::Object obj = {time, type, pose, name};
     this->dataPtr->initialObjects.push_back(obj);
 
     objectElem = objectElem->GetNextElement("object");
@@ -428,7 +446,6 @@ void PopulationPlugin::OnUpdate()
     if (modelPtr)
     {
 		gzmsg << modelPtr->GetName() << std::endl;
-		gzmsg << modelPtr->URI()->Str() << std::endl;
 		for (int ii = 0; ii < modelPtr->GetChildCount(); ii++){
 			gzmsg << modelPtr->GetChild(ii)->GetName() << std::endl;
 		}
