@@ -25,9 +25,21 @@
             </cylinder>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_circle_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard1</robotNamespace>
-            <topicName>circle</topicName>
+          <plugin name="placard1_plugin" filename="libplacard_plugin.so">
+            <!-- Uncomment for setting the shape and color. -->
+            <!-- 
+            <shape>cross</shape>
+            <color>blue</color>
+            -->
+            <visuals>
+              <visual>robotx_dock_2018::dock_2018_placard1::link_symbols::visual_circle</visual>
+              <visual>robotx_dock_2018::dock_2018_placard1::link_symbols::visual_h_cross</visual>
+              <visual>robotx_dock_2018::dock_2018_placard1::link_symbols::visual_v_cross</visual>
+              <visual>robotx_dock_2018::dock_2018_placard1::link_symbols::visual_triangle</visual>
+            </visuals>
+            <shuffle>true</shuffle>
+            <robot_namespace>vrx/dock_2018_placard1</robot_namespace>
+            <topic>shuffle</topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
@@ -38,10 +50,6 @@
             </box>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_cross_h_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard1</robotNamespace>
-            <topicName>cross</topicName>
-          </plugin>
         </visual>
         <visual name="visual_v_cross">
           <pose>7.81 2.75 2.1 0 1.5707963267948966 0.0</pose>
@@ -51,10 +59,6 @@
             </box>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_cross_v_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard1</robotNamespace>
-            <topicName>cross</topicName>
-          </plugin>
         </visual>
         <visual name="visual_triangle">
           <pose>7.81 2.25 1.7 1.5707963267948966 0 1.5707963267948966</pose>
@@ -62,14 +66,8 @@
             <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_triangle_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard1</robotNamespace>
-            <topicName>triangle</topicName>
-          </plugin>
         </visual>
       </link>
-      <plugin name="controller_plugin" filename="libsymbol_controller.so">
-      </plugin>
     </model>
     
     
@@ -89,9 +87,21 @@
             </cylinder>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_circle_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard2</robotNamespace>
-            <topicName>circle</topicName>
+          <plugin name="placard2_plugin" filename="libplacard_plugin.so">
+            <!-- Uncomment for setting the shape and color. -->
+            <!-- 
+            <shape>cross</shape>
+            <color>blue</color>
+            -->
+            <visuals>
+              <visual>robotx_dock_2018::dock_2018_placard2::link_symbols::visual_circle</visual>
+              <visual>robotx_dock_2018::dock_2018_placard2::link_symbols::visual_h_cross</visual>
+              <visual>robotx_dock_2018::dock_2018_placard2::link_symbols::visual_v_cross</visual>
+              <visual>robotx_dock_2018::dock_2018_placard2::link_symbols::visual_triangle</visual>
+            </visuals>
+            <shuffle>true</shuffle>
+            <robot_namespace>vrx/dock_2018_placard2</robot_namespace>
+            <topic>shuffle</topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
@@ -102,10 +112,6 @@
             </box>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_cross_h_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard2</robotNamespace>
-            <topicName>cross</topicName>
-          </plugin>
         </visual>
         <visual name="visual_v_cross">
           <pose>6.6899999999999995 2.75 2.1 0 1.5707963267948966 0.0</pose>
@@ -115,10 +121,6 @@
             </box>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_cross_v_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard2</robotNamespace>
-            <topicName>cross</topicName>
-          </plugin>
         </visual>
         <visual name="visual_triangle">
           <pose>6.6899999999999995 2.25 1.7 1.5707963267948966 0 1.5707963267948966</pose>
@@ -126,14 +128,8 @@
             <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
           </geometry>
           <transparency>1</transparency>
-          <plugin name="symbol_triangle_plugin" filename="libgazebo_ros_color.so">
-            <robotNamespace>dock_2018_placard2</robotNamespace>
-            <topicName>triangle</topicName>
-          </plugin>
         </visual>
       </link>
-      <plugin name="controller_plugin" filename="libsymbol_controller.so">
-      </plugin>
     </model>
     
     

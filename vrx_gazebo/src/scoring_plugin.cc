@@ -65,7 +65,8 @@ double ScoringPlugin::Score() const
 //////////////////////////////////////////////////
 void ScoringPlugin::SetScore(double _newScore)
 {
-  this->score = _newScore;
+  if (this->TaskState() == "running")
+    this->score = _newScore;
 }
 
 //////////////////////////////////////////////////
