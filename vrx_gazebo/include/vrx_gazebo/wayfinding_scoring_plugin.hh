@@ -18,7 +18,6 @@
 #ifndef VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
 
-#include <geographic_msgs/GeoPoseStamped.h>
 #include <ros/ros.h>
 #include <memory>
 #include <string>
@@ -74,8 +73,8 @@ class WayfindingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnFinished() override;
 
-  /// \brief Publish the goal pose.
-  private: void PublishGoal();
+  /// \brief Publish the waypoints through which the vehicle must navigate.
+  private: void PublishWaypoints();
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -84,14 +83,14 @@ class WayfindingScoringPlugin : public ScoringPlugin
   private: sdf::ElementPtr sdf;
 
   /// \brief Topic where the list of waypoints is published.
-  private: std::string waypointsTopic = "/vrx/task/waypoints";
+  private: std::string waypointsTopic = "/vrx/wayfinding/waypoints";
 
   /// \brief Topic where the current minimum pose error distance for each
   /// waypoint is published.
-  private: std::string minErrorsTopic = "/vrx/task/min_errors";
+  private: std::string minErrorsTopic = "/vrx/wayfinding/min_errors";
 
   /// \brief Topic where the current average minimum error is published.
-  private: std::string meanErrorTopic = "/vrx/task/mean_error";
+  private: std::string meanErrorTopic = "/vrx/wayfinding/mean_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;

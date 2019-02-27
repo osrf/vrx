@@ -75,17 +75,14 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief The next task message to be published.
-  private: vrx_gazebo::Task taskMsg;
-
   /// \brief Topic where the task stats are published.
-  private: std::string goalTopic = "/vrx/task/goal";
+  private: std::string goalTopic = "/vrx/station_keeping/goal";
 
   /// \brief Topic where 2D pose error is published
-  private: std::string poseErrorTopic = "/vrx/task/pose_error";
+  private: std::string poseErrorTopic = "/vrx/station_keeping/pose_error";
 
   /// \brief Topic where total RMS pose error is published.
-  private: std::string rmsErrorTopic = "/vrx/task/rms_error";
+  private: std::string rmsErrorTopic = "/vrx/station_keeping/rms_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;

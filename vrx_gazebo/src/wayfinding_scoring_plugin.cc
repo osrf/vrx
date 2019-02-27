@@ -24,6 +24,8 @@
 #include <gazebo/physics/Model.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <geographic_msgs/GeoPath.h>
 #include "vrx_gazebo/wayfinding_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
@@ -93,8 +95,8 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
   this->waypointsPub =
-    this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(
-      this->waypointsTopic, 10);
+    this->rosNode->advertise<geographic_msgs::GeoPath>(
+      this->waypointsTopic, 10, true);
 
   this->minErrorsPub =
     this->rosNode->advertise<std_msgs::Float64MultiArray>(
@@ -118,6 +120,10 @@ void WayfindingScoringPlugin::Update()
     if (!this->vehicleModel)
       return;
   }
+
+  // Nothing to do if the task is not in "running" state.
+  if (this->ScoringPlugin::TaskState() != "running")
+    return;
 
   std_msgs::Float64MultiArray minErrorsMsg;
   std_msgs::Float64 meanErrorMsg;
@@ -176,10 +182,13 @@ void WayfindingScoringPlugin::Update()
 }
 
 //////////////////////////////////////////////////
-void WayfindingScoringPlugin::PublishGoal()
+void WayfindingScoringPlugin::PublishWaypoints()
 {
   gzmsg << "Publishing Waypoints" << std::endl;
   geographic_msgs::GeoPoseStamped wp_msg;
+  geographic_msgs::GeoPath path_msg;
+
+  path_msg.header.stamp = ros::Time::now();
 
   for (auto wp : this->sphericalWaypoints)
   {
@@ -195,9 +204,9 @@ void WayfindingScoringPlugin::PublishGoal()
     wp_msg.pose.orientation.w = orientation.W();
 
     wp_msg.header.stamp = ros::Time::now();
-
-    this->waypointsPub.publish(wp_msg);
+    path_msg.poses.push_back(wp_msg);
   }
+  this->waypointsPub.publish(path_msg);
 }
 
 //////////////////////////////////////////////////
@@ -205,7 +214,7 @@ void WayfindingScoringPlugin::OnReady()
 {
   gzmsg << "OnReady" << std::endl;
 
-  this->PublishGoal();
+  this->PublishWaypoints();
 }
 
 
