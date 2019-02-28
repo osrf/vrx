@@ -2,11 +2,11 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vrx_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find vrx_gazebo)/worlds/stationkeeping_task.world" />
+  <arg name="world" default="$(find vrx_gazebo)/worlds/scan_and_dock_a.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
-  <arg name="verbose" default="true"/>
+  <arg name="verbose" default="false"/>
 
   <!-- Initial USV location and attitude-->
   <arg name="x" default="0" />
@@ -20,24 +20,24 @@
        H = stern trusters on each hull
        T = H with a lateral thruster
        X = "holonomic" configuration -->
-  <arg name="thrust_config" default="T" />
+  <arg name="thrust_config" default="H" />
 
   <!-- Do we lock the vessel to the world? -->
   <arg name="wamv_locked" default="true" />
-  
-  <!-- Do we load the VRX sensor suite? -->
+
+  <!-- VRX sensors enabled -->
   <arg name="vrx_sensors_enabled" default="true" />
 
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(arg world)"/>
-    <arg name="verbose" value="$(arg verbose)"/>
-    <arg name="paused" value="false"/>
+    <arg name="world_name"   value="$(arg world)"/>
+    <arg name="verbose"      value="$(arg verbose)"/>
+    <arg name="paused"       value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="$(arg gui)" />
+    <arg name="gui"          value="$(arg gui)" />
   </include>
 
-   <!-- Load robot model -->
+  <!-- Load robot model -->
   <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
   <param name="robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'

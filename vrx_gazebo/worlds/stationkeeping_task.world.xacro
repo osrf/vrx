@@ -8,7 +8,7 @@
   <plugin name="stationkeeping_scoring_plugin"
           filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>
-      <task_name>stationkeeping_task</task_name>
+      <task_name>stationkeeping</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
       <goal_pose>21.31 -157.89 0.0 </goal_pose>
       <initial_state_duration>10</initial_state_duration>

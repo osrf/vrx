@@ -65,7 +65,8 @@ double ScoringPlugin::Score() const
 //////////////////////////////////////////////////
 void ScoringPlugin::SetScore(double _newScore)
 {
-  this->score = _newScore;
+  if (this->TaskState() == "running")
+    this->score = _newScore;
 }
 
 //////////////////////////////////////////////////
@@ -309,7 +310,7 @@ bool ScoringPlugin::ParseJoints()
       const std::string jointName = jointElem->Get<std::string>("name");
       this->lockJointNames.push_back(jointName);
 
-      // Parse the next gate.
+      // Parse the next joint.
       jointElem = jointElem->GetNextElement("joint");
     }
   }
