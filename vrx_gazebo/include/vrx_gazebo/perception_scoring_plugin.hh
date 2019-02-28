@@ -17,19 +17,16 @@
 
 
 /* Note - this code was originally derived from the ARIAC 
- * PoplulationPlugin https://bitbucket.org/osrf/ariac/src/master/osrf_gear/include/osrf_gear/PopulationPlugin.hh
+ * PopulationPlugin https://bitbucket.org/osrf/ariac/src/master/osrf_gear/include/osrf_gear/PopulationPlugin.hh
 */
 
 #ifndef VRX_GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
 
-#include <gazebo/msgs/gz_string.pb.h>
 #include <geographic_msgs/GeoPoseStamped.h>
 #include <ros/ros.h>
 #include <memory>
 #include <string>
-#include <gazebo/physics/Link.hh>
-#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsTypes.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo/transport/transport.hh>
@@ -46,14 +43,14 @@ class ObjectChecker
   /// \param[in] _rosObjectTopic The ROS topic used to receive
   /// the object identification and localization
   public: ObjectChecker(const std::string &_rosNameSpace,
-            const std::string &_rosObjectTopic,
-            gazebo::physics::WorldPtr _world);
+                        const std::string &_rosObjectTopic,
+                        gazebo::physics::WorldPtr _world);
 
   /// \brief Initialize a new trial
   /// \param[in] _objectName Name of the object for id purposes
   /// \param[in] _objectPose Pose of the object for localization purposes
   public: void NewTrial(const std::string &_objectName,
-            gazebo::physics::EntityPtr _object);
+                        gazebo::physics::EntityPtr _object);
 
   /// Enable the ROS subscription.
   public: void Enable();
@@ -113,85 +110,87 @@ class ObjectChecker
   private: gazebo::physics::WorldPtr world;
 };
 
-namespace gazebo
+// Forward declare private data class
+class PerceptionScoringPluginPrivate;
+
+/// \brief A plugin that allows models to be spawned at a given location in
+/// a specific simulation time and then takes care of scoring correct
+/// identification and localization of the objects.
+///
+/// The plugin accepts the following SDF parameters:
+///
+/// <object_sequence>: Contains the list of objects to be populated. An object
+///                    should be declared as an <object> element with the
+///                    following parameters:
+///                      <time> Simulation time to be spawned.
+///                      <type> Model.
+///                      <name> Landmark name.
+///                      <pose> Initial object pose.
+///
+/// <loop_forever>: Optional parameter. If true, all objects will be spawned
+/// as a circular buffer. After spawning the last element of the collection,
+/// the first one will be inserted.
+///
+/// <frame>: Optional parameter. If present, the poses of the objects will be
+/// in the frame of this link/model. Otherwise the world frame is used.
+///
+/// <activation_topic>: Optional parameter. If present, the objects won't be
+/// inserted in simulation until the proper command is received in the
+/// specified topic. Available commands:
+///   "restart" : The object population will be restarted.
+///   "stop"    : Stop the object insertion.
+///
+/// Here's an example of a valid SDF:
+///
+/// <plugin filename="libperception_scoring_plugin.so"
+///         name="perception_scoring_plugin">
+///   <vehicle>wamv</vehicle>
+///   <task_name>perception</task_name>
+///   <initial_state_duration>1</initial_state_duration>
+///   <ready_state_duration>1</ready_state_duration>
+///   <running_state_duration>300</running_state_duration>
+///
+///   <!-- Parameters for PopulationPlugin -->
+///   <loop_forever>false</loop_forever>
+///   <frame>wamv</frame>
+///   <object_sequence>
+///     <object>
+///       <time>10.0</time>
+///       <type>red</type>
+///       <name>red_mark</name>
+///       <pose>6 0 1 0 0 0</pose>
+///     </object>
+///     <object>
+///       <time>10.0</time>
+///       <type>green</type>
+///       <name>green_mark</name>
+///       <pose>6 6 1 0 0 0</pose>
+///     </object>
+///   </object_sequence>
+/// </plugin>
+class PerceptionScoringPlugin : public ScoringPlugin
 {
-  // Forward declare private data class
-  class PerceptionScoringPluginPrivate;
+  /// \brief Constructor.
+  public: PerceptionScoringPlugin();
 
-  /// \brief A plugin that allows models to be spawned at a given location in
-  /// a specific simulation time and then takes care of scoring coorect
-  /// identification and localization of the objects.
-  ///
-  /// The plugin accepts the following SDF parameters:
-  ///
-  /// <object_sequence>: Contains the list of objects to be populated. An object
-  ///                    should be declared as an <object> element with the
-  ///                    following parameters:
-  ///                      <time> Simulation time to be spawned.
-  ///                      <type> Model.
-  ///                      <name> Landmark name.
-  ///                      <pose> Initial object pose.
-  ///
-  /// <loop_forever>: Optional parameter. If true, all objects will be spawned
-  /// as a circular buffer. After spawning the last element of the collection,
-  /// the first one will be inserted.
-  ///
-  /// <frame>: Optional parameter. If present, the poses of the objects will be
-  /// in the frame of this link/model. Otherwise the world frame is used.
-  ///
-  /// <activation_topic>: Optional parameter. If present, the objects won't be
-  /// inserted in simulation until the proper command is received in the
-  /// specified topic. Available commands:
-  ///   "restart" : The object population will be restarted.
-  ///   "stop"    : Stop the object insertion.
-  ///
-  /// Here's an example of a valid SDF:
-  ///
-  /// <plugin filename="libperception_scoring_plugin.so"
-  ///         name="perception_scoring_plugin">
-  ///   <vehicle>wamv</vehicle>
-  ///      <task_name>perception</task_name>
-  ///     <initial_state_duration>1</initial_state_duration>
-  ///      <ready_state_duration>1</ready_state_duration>
-  ///      <running_state_duration>300</running_state_duration>
-  ///   <!-- Parameters for PopulationPlugin -->
-  ///   <loop_forever>false</loop_forever>
-  ///   <frame>wamv</frame>
-  ///   <object_sequence>
-  ///   <object>
-  ///     <time>10.0</time>
-  ///     <type>red</type>
-  ///     <name>red_mark</name>
-  ///     <pose>6 0 1 0 0 0</pose>
-  ///   </object>
-  ///   <object>
-  ///     <time>10.0</time>
-  ///     <type>green</type>
-  ///     <name>green_mark</name>
-  ///     <pose>6 6 1 0 0 0</pose>
-  ///   </object>
-  class GAZEBO_VISIBLE PerceptionScoringPlugin : public ScoringPlugin
-  {
-    /// \brief Constructor.
-    public: PerceptionScoringPlugin();
+  /// \brief Destructor.
+  public: virtual ~PerceptionScoringPlugin();
 
-    /// \brief Destructor.
-    public: virtual ~PerceptionScoringPlugin();
+  // Documentation inherited.
+  public: virtual void Load(gazebo::physics::WorldPtr _world,
+                            sdf::ElementPtr _sdf);
 
-    // Documentation inherited.
-    public: virtual void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
+  /// \brief Update the plugin.
+  protected: void OnUpdate();
 
-    /// \brief Update the plugin.
-    protected: void OnUpdate();
+  /// \brief Restart the object population list
+  private: void Restart();
 
-    /// \brief Restart the object population list
-    private: void Restart();
+  // Documentation inherited.
+  private: void OnRunning() override;
 
-    // Documentation inherited.
-    private: void OnRunning() override;
+  /// \brief Private data pointer.
+  private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
+};
 
-    /// \brief Private data pointer.
-    private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
-  };
-}
 #endif

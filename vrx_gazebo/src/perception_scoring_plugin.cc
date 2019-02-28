@@ -23,16 +23,19 @@
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/Events.hh>
-#include <gazebo/transport/transport.hh>
 #include <ignition/math/Matrix4.hh>
 #include <ignition/math/Pose3.hh>
+#include <gazebo/physics/Link.hh>
+#include <gazebo/physics/Model.hh>
+#include <gazebo/transport/transport.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/perception_scoring_plugin.hh"
 
+using namespace gazebo;
+
 //////////////////////////////////////////////////
 ObjectChecker::ObjectChecker(const std::string &_rosNameSpace,
-               const std::string &_rosObjectTopic,
-               gazebo::physics::WorldPtr _world)
+  const std::string &_rosObjectTopic, gazebo::physics::WorldPtr _world)
   : ns(_rosNameSpace),
     objectTopic(_rosObjectTopic),
     world(_world)
@@ -47,8 +50,9 @@ ObjectChecker::ObjectChecker(const std::string &_rosNameSpace,
   this->nh = ros::NodeHandle(this->ns);
 }
 
+//////////////////////////////////////////////////
 void ObjectChecker::NewTrial(const std::string &_objectName,
-               gazebo::physics::EntityPtr _object)
+  gazebo::physics::EntityPtr _object)
 {
   // Setup for a new trial
   this->trialCount++;
@@ -64,6 +68,7 @@ void ObjectChecker::NewTrial(const std::string &_objectName,
   ROS_INFO_NAMED("ObjectChecker", "Intiating new trial");
 }
 
+//////////////////////////////////////////////////
 void ObjectChecker::Enable()
 {
   // Subscribe
@@ -71,21 +76,25 @@ void ObjectChecker::Enable()
     &ObjectChecker::OnObject, this);
 }
 
+//////////////////////////////////////////////////
 void ObjectChecker::Disable()
 {
   this->objectSub.shutdown();
 }
 
+//////////////////////////////////////////////////
 bool ObjectChecker::SubmissionReceived() const
 {
   return this->objectReceived;
 }
 
+//////////////////////////////////////////////////
 bool ObjectChecker::Correct() const
 {
   return this->objectCorrect;
 }
 
+//////////////////////////////////////////////////
 void ObjectChecker::OnObject(
   const geographic_msgs::GeoPoseStamped::ConstPtr &_msg)
 {
@@ -128,105 +137,100 @@ void ObjectChecker::OnObject(
 }
 
 //////////////////////////////////////////////////
-namespace gazebo
+/// \internal
+/// \brief Private data for the PerceptionScoringPlugin class.
+struct PerceptionScoringPluginPrivate
 {
-  /// \internal
-  /// \brief Private data for the PerceptionScoringPlugin class.
-  struct PerceptionScoringPluginPrivate
+  /// \brief World pointer.
+  public: physics::WorldPtr world;
+
+  /// \brief SDF pointer.
+  public: sdf::ElementPtr sdf;
+
+  /// \brief Class to store information about each object to be populated.
+  public: class Object
   {
-    /// \brief World pointer.
-    public: physics::WorldPtr world;
+    /// \brief Less than operator.
+    /// \param[in] _obj Other object to compare
+    /// \return True if this < _obj
+    public: bool operator<(const Object &_obj) const
+    {
+      return this->time < _obj.time;
+    }
 
-    /// \brief SDF pointer.
-    public: sdf::ElementPtr sdf;
+    /// \brief Stream insertion operator.
+    /// \param[in] _out output stream
+    /// \param[in] _obj object to output
+    /// \return The output stream
+    public: friend std::ostream &operator<<(std::ostream &_out,
+                                            const Object &_obj)
+    {
+      _out << _obj.type << std::endl;
+      _out << "  Time: [" << _obj.time << "]" << std::endl;
+      _out << "  Pose: [" << _obj.pose << "]" << std::endl;
+      return _out;
+    }
 
-    /// \brief Class to store information about each object to be populated.
-    public: class Object
-            {
-             /// \brief Less than operator.
-             /// \param[in] _obj Other object to compare
-             /// \return True if this < _obj
-             public: bool operator<(const Object &_obj) const
-             {
-               return this->time < _obj.time;
-             }
+    /// \brief Simulation time in which the object should be spawned.
+    public: double time;
 
-             /// \brief Stream insertion operator.
-             /// \param[in] _out output stream
-             /// \param[in] _obj object to output
-             /// \return The output stream
-             public: friend std::ostream &operator<<(std::ostream &_out,
-                                                     const Object &_obj)
-             {
-               _out << _obj.type << std::endl;
-               _out << "  Time: [" << _obj.time << "]" << std::endl;
-               _out << "  Pose: [" << _obj.pose << "]" << std::endl;
-               return _out;
-             }
+    /// \brief Object type.
+    public: std::string type;
 
-              /// \brief Simulation time in which the object should be spawned.
-              public: double time;
+    /// \brief Object type.
+    public: std::string name;
 
-              /// \brief Object type.
-              public: std::string type;
-
-              /// \brief Object type.
-              public: std::string name;
-
-              /// \brief Pose in which the object should be placed.
-              public: ignition::math::Pose3d pose;
-            };
-
-    /// \brief Collection of objects to be spawned.
-    public: std::vector<Object> objects;
-
-    /// \brief Contains the entire collection of objects. This is used for
-    /// inserting the objects in a cyclic way.
-    public: std::vector<Object> initialObjects;
-
-    /// \brief Connection event.
-    public: event::ConnectionPtr connection;
-
-    /// \brief The time specified in the object is relative to this time.
-    public: common::Time startTime;
-
-    /// \brief When true, "objects" will be repopulated when the object queue
-    /// is empty, creating an infinite supply of objects.
-    public: bool loopForever = false;
-
-    /// \brief Link/model name for the object poses use as their frame of
-    /// reference
-    public: std::string frameName = std::string();
-
-    /// \brief Link/model that the object poses use as their frame of reference.
-    public: physics::EntityPtr frame;
-
-    /// \brief Current object that has been placed
-    public: physics::EntityPtr curr_model;
-
-    /// \brief Current object's original pose
-    public: ignition::math::Pose3d orig_pose;
-
-    /// \brief Mutex to avoid race conditions.
-    public: std::mutex mutex;
-
-    /// \brief Id of first object to teleport.
-    public: int startIndex = 0;
-
-    /// \brief Last time (sim time) that the plugin was updated.
-    public: gazebo::common::Time lastUpdateTime;
-
-    /// \brief Counter for spawning objects with unique names on the belt.
-    /// The key is the object type and the value contains the index of the next
-    /// object to be spawned.
-    public: std::map<std::string, int> objectCounter;
-
-    /// \brief Implements ROS interface to recieve and check team submissions
-    public: std::unique_ptr<ObjectChecker> objectChecker;
+    /// \brief Pose in which the object should be placed.
+    public: ignition::math::Pose3d pose;
   };
-}
 
-using namespace gazebo;
+  /// \brief Collection of objects to be spawned.
+  public: std::vector<Object> objects;
+
+  /// \brief Contains the entire collection of objects. This is used for
+  /// inserting the objects in a cyclic way.
+  public: std::vector<Object> initialObjects;
+
+  /// \brief Connection event.
+  public: event::ConnectionPtr connection;
+
+  /// \brief The time specified in the object is relative to this time.
+  public: common::Time startTime;
+
+  /// \brief When true, "objects" will be repopulated when the object queue
+  /// is empty, creating an infinite supply of objects.
+  public: bool loopForever = false;
+
+  /// \brief Link/model name for the object poses use as their frame of
+  /// reference
+  public: std::string frameName = std::string();
+
+  /// \brief Link/model that the object poses use as their frame of reference.
+  public: physics::EntityPtr frame;
+
+  /// \brief Current object that has been placed
+  public: physics::EntityPtr curr_model;
+
+  /// \brief Current object's original pose
+  public: ignition::math::Pose3d orig_pose;
+
+  /// \brief Mutex to avoid race conditions.
+  public: std::mutex mutex;
+
+  /// \brief Id of first object to teleport.
+  public: int startIndex = 0;
+
+  /// \brief Last time (sim time) that the plugin was updated.
+  public: gazebo::common::Time lastUpdateTime;
+
+  /// \brief Counter for spawning objects with unique names on the belt.
+  /// The key is the object type and the value contains the index of the next
+  /// object to be spawned.
+  public: std::map<std::string, int> objectCounter;
+
+  /// \brief Implements ROS interface to recieve and check team submissions
+  public: std::unique_ptr<ObjectChecker> objectChecker;
+};
 
 GZ_REGISTER_WORLD_PLUGIN(PerceptionScoringPlugin)
 
