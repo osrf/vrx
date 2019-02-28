@@ -16,7 +16,7 @@
   <arg name="z" default="0.1" />
   <arg name="P" default="0" />
   <arg name="R" default="0" />
-  <arg name="Y" default="0.785" />
+  <arg name="Y" default="0" />
 
   <!-- Allow user specified thruster configurations
        H = stern trusters on each hull
