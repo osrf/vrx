@@ -1,5 +1,5 @@
-# Ubuntu 16.04 with nvidia-docker2 beta opengl support.
-FROM ubuntu:xenial 
+# Ubuntu 18.04 with nvidia-docker2 beta opengl support.
+FROM ubuntu:bionic
 
 # Tools useful during development.
 RUN apt-get update \
@@ -21,27 +21,35 @@ RUN apt-get update \
         wget \
  && apt-get clean
 
-# Get ROS kinetic and Gazebo 7.
+RUN export DEBIAN_FRONTEND=noninteractive \
+ && sudo apt-get update \
+ && sudo -E apt-get install -y \
+    tzdata \
+ && sudo ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime \
+ && sudo dpkg-reconfigure --frontend noninteractive tzdata \
+ && sudo apt-get clean
+
+# Get ROS melodic and Gazebo 9.
 RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' \
  && apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
  && /bin/sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
  && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -' \
  && apt-get update \
  && apt-get install -y \
-    ros-kinetic-desktop-full \
-    ros-kinetic-hector-gazebo-plugins \
-    ros-kinetic-joy \
-    ros-kinetic-joy-teleop \
-    ros-kinetic-robot-localization \
-    ros-kinetic-velodyne-simulator \
-    gazebo7 \
-    libgazebo7-dev \
+    ros-melodic-desktop-full \
+    ros-melodic-hector-gazebo-plugins \
+    ros-melodic-joy \
+    ros-melodic-joy-teleop \
+    ros-melodic-robot-localization \
+    ros-melodic-velodyne-simulator \
+    gazebo9 \
+    libgazebo9-dev \
  && rosdep init \
  && apt-get clean
 
 RUN rosdep update
 
-# Set USER and GROUP 
+# Set USER and GROUP
 ARG USER=developer
 ARG GROUP=developer
 
@@ -72,10 +80,10 @@ RUN mkdir -p vrx_ws/src \
  && hg clone https://bitbucket.org/osrf/vrx src/vrx
 
 # Compile the VRX project.
-RUN /bin/bash -c ". /opt/ros/kinetic/setup.bash && cd vrx_ws && catkin_make"
+RUN /bin/bash -c ". /opt/ros/melodic/setup.bash && cd vrx_ws && catkin_make"
 
 # Source all the needed environment files.
-RUN /bin/sh -c 'echo ". /opt/ros/kinetic/setup.bash" >> ~/.bashrc' \
+RUN /bin/sh -c 'echo ". /opt/ros/melodic/setup.bash" >> ~/.bashrc' \
  && /bin/sh -c 'echo ". /usr/share/gazebo/setup.sh" >> ~/.bashrc' \
  && /bin/sh -c 'echo ". ~/vrx_ws/devel/setup.sh" >> ~/.bashrc'
 

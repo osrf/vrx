@@ -29,7 +29,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <algorithm>    // std::min
 
-#include <gazebo/math/Pose.hh>
+#include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh"
 
 #define GRAVITY 9.815
@@ -125,9 +125,10 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->paramWavePeriods.push_back(_sdf->GetElement(buf.str())->Get<float>());
     buf.str("");
     buf << "wave_direction" << i;
-    math::Vector2d tmpm = _sdf->GetElement(buf.str())->Get<math::Vector2d>();
-    tmpv[0] = tmpm.x;
-    tmpv[1] = tmpm.y;
+    ignition::math::Vector2d tmpm =
+      _sdf->GetElement(buf.str())->Get<ignition::math::Vector2d>();
+    tmpv[0] = tmpm.X();
+    tmpv[1] = tmpm.Y();
     this->paramWaveDirections.push_back(tmpv);
     ROS_DEBUG_STREAM("Wave Direction " << i << ": " <<
       this->paramWaveDirections[i][0] << ", " <<
@@ -135,9 +136,9 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   // Get inertia and mass of vessel
-  const math::Vector3 kInertia =
-    this->link->GetInertial()->GetPrincipalMoments();
-  const double kMass = this->link->GetInertial()->GetMass();
+  const ignition::math::Vector3d kInertia =
+    this->link->GetInertial()->PrincipalMoments();
+  const double kMass = this->link->GetInertial()->Mass();
 
   // Report some of the pertinent parameters for verification
   ROS_DEBUG("USV Dynamics Parameters: From URDF XACRO model definition");
@@ -146,7 +147,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
                   " Y:" << kInertia[1] << " Z:" << kInertia[2]);
 
   // Initialize time and odometry position
-  this->prevUpdateTime = this->world->GetSimTime();
+  this->prevUpdateTime = this->world->SimTime();
 
   // Listen to the update event broadcastes every physics iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -172,28 +173,30 @@ double UsvDynamicsPlugin::CircleSegment(double R, double h)
 //////////////////////////////////////////////////
 void UsvDynamicsPlugin::Update()
 {
-  const common::Time kTimeNow = this->world->GetSimTime();
+  const common::Time kTimeNow = this->world->SimTime();
   double dt = (kTimeNow - this->prevUpdateTime).Double();
   this->prevUpdateTime = kTimeNow;
 
   // Get Pose/Orientation from Gazebo (if no state subscriber is active)
-  const math::Pose kPose = this->link->GetWorldPose();
-  const math::Vector3 kEuler = kPose.rot.GetAsEuler();
+  const ignition::math::Pose3d kPose = this->link->WorldPose();
+  const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
 
   // Get body-centered linear and angular rates
-  const math::Vector3 kVelLinearBody = this->link->GetRelativeLinearVel();
+  const ignition::math::Vector3d kVelLinearBody =
+    this->link->RelativeLinearVel();
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
-  const math::Vector3 kVelAngularBody = this->link->GetRelativeAngularVel();
+  const ignition::math::Vector3d kVelAngularBody =
+    this->link->RelativeAngularVel();
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
 
   // Estimate the linear and angular accelerations.
   // Note the the GetRelativeLinearAccel() and AngularAccel() functions
   // appear to be unreliable
-  const math::Vector3 kAccelLinearBody =
+  const ignition::math::Vector3d kAccelLinearBody =
     (kVelLinearBody - this->prevLinVel) / dt;
   this->prevLinVel = kVelLinearBody;
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel linear: " << kAccelLinearBody);
-  const math::Vector3 kAccelAngularBody =
+  const ignition::math::Vector3d kAccelAngularBody =
     (kVelAngularBody - this->prevAngVel) / dt;
   this->prevAngVel = kVelAngularBody;
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel angular: " << kAccelAngularBody);
@@ -204,11 +207,11 @@ void UsvDynamicsPlugin::Update()
   Eigen::MatrixXd Cmat     = Eigen::MatrixXd::Zero(6, 6);
   Eigen::MatrixXd Dmat     = Eigen::MatrixXd::Zero(6, 6);
 
-  stateDot << kAccelLinearBody.x, kAccelLinearBody.y, kAccelLinearBody.z,
-    kAccelAngularBody.x, kAccelAngularBody.y, kAccelAngularBody.z;
+  stateDot << kAccelLinearBody.X(), kAccelLinearBody.Y(), kAccelLinearBody.Z(),
+    kAccelAngularBody.X(), kAccelAngularBody.Y(), kAccelAngularBody.Z();
 
-  state << kVelLinearBody.x, kVelLinearBody.y, kVelLinearBody.z,
-    kVelAngularBody.x, kVelAngularBody.y, kVelAngularBody.z;
+  state << kVelLinearBody.X(), kVelLinearBody.Y(), kVelLinearBody.Z(),
+    kVelAngularBody.X(), kVelAngularBody.Y(), kVelAngularBody.Z();
 
   // Added Mass
   const Eigen::VectorXd kAmassVec = -1.0 * this->Ma * stateDot;
@@ -216,18 +219,18 @@ void UsvDynamicsPlugin::Update()
   ROS_DEBUG_STREAM_THROTTLE(1.0, "amassVec :\n" << kAmassVec);
 
   // Coriolis - added mass components
-  Cmat(0, 5) = this->paramYdotV * kVelLinearBody.y;
-  Cmat(1, 5) = this->paramXdotU * kVelLinearBody.x;
-  Cmat(5, 0) = this->paramYdotV * kVelLinearBody.y;
-  Cmat(5, 1) = this->paramXdotU * kVelLinearBody.x;
+  Cmat(0, 5) = this->paramYdotV * kVelLinearBody.Y();
+  Cmat(1, 5) = this->paramXdotU * kVelLinearBody.X();
+  Cmat(5, 0) = this->paramYdotV * kVelLinearBody.Y();
+  Cmat(5, 1) = this->paramXdotU * kVelLinearBody.X();
 
   // Drag
-  Dmat(0, 0) = this->paramXu + this->paramXuu * std::abs(kVelLinearBody.x);
-  Dmat(1, 1) = this->paramYv + this->paramYvv * std::abs(kVelLinearBody.y);
+  Dmat(0, 0) = this->paramXu + this->paramXuu * std::abs(kVelLinearBody.X());
+  Dmat(1, 1) = this->paramYv + this->paramYvv * std::abs(kVelLinearBody.Y());
   Dmat(2, 2) = this->paramZw;
   Dmat(3, 3) = this->paramKp;
   Dmat(4, 4) = this->paramMq;
-  Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(kVelAngularBody.z);
+  Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(kVelAngularBody.Z());
   ROS_DEBUG_STREAM_THROTTLE(1.0, "Dmat :\n" << Dmat);
   const Eigen::VectorXd kDvec = -1.0 * Dmat * state;
   ROS_DEBUG_STREAM_THROTTLE(1.0, "Dvec :\n" << kDvec);
@@ -235,7 +238,7 @@ void UsvDynamicsPlugin::Update()
   // Vehicle frame transform
   tf2::Quaternion vq = tf2::Quaternion();
   tf2::Matrix3x3 m;
-  m.setEulerYPR(kEuler.z, kEuler.y, kEuler.x);
+  m.setEulerYPR(kEuler.Z(), kEuler.Y(), kEuler.X());
   m.getRotation(vq);
   tf2::Transform xformV = tf2::Transform(vq);
 
@@ -247,9 +250,9 @@ void UsvDynamicsPlugin::Update()
 
   // Add dynamic forces/torques to link at CG
   this->link->AddRelativeForce(
-    math::Vector3(kForceSum(0), kForceSum(1), kForceSum(2)));
+    ignition::math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
   this->link->AddRelativeTorque(
-    math::Vector3(kForceSum(3), kForceSum(4), kForceSum(5)));
+    ignition::math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));
 
   // Loop over boat grid points
   // Grid point location in boat frame - might be able to precalculate these?
@@ -277,22 +280,22 @@ void UsvDynamicsPlugin::Update()
           bpntW.y() << "," << bpntW.z());
 
       // Vertical location of boat grid point in world frame
-      const float kDdz = kPose.pos.z + bpntW.z();
-      ROS_DEBUG_STREAM("Z, pose: " << kPose.pos.z << ", bpnt: " << bpntW.z() <<
-        ", dd: " << kDdz);
+      const float kDdz = kPose.Pos().Z() + bpntW.z();
+      ROS_DEBUG_STREAM("Z, pose: " << kPose.Pos().Z() << ", bpnt: "
+        << bpntW.z() << ", dd: " << kDdz);
 
       // Find vertical displacement of wave field
       // World location of grid point
-      math::Vector3 X;
-      X.x = kPose.pos.x + bpntW.x();
-      X.y = kPose.pos.y + bpntW.y();
+      ignition::math::Vector3d X;
+      X.X() = kPose.Pos().X() + bpntW.x();
+      X.Y() = kPose.Pos().Y() + bpntW.y();
 
       // sum vertical dsplacement over all waves
       double dz = 0.0;
       for (int k = 0; k < this->paramWaveN; ++k)
       {
-        const double kDdotx = this->paramWaveDirections[k][0] * X.x +
-          this->paramWaveDirections[k][1] * X.y;
+        const double kDdotx = this->paramWaveDirections[k][0] * X.X() +
+          this->paramWaveDirections[k][1] * X.Y();
         const double kW = 2.0 * M_PI / this->paramWavePeriods[k];
         const double kK = kW * kW / GRAVITY;
         dz += this->paramWaveAmps[k] * cos(kK * kDdotx - kW * kTimeNow.Float());
@@ -305,14 +308,15 @@ void UsvDynamicsPlugin::Update()
 	  deltaZ = std::min(deltaZ,this->paramHullRadius);
       // Buoyancy force at grid point
 	  const float kBuoyForce = CircleSegment(this->paramHullRadius,deltaZ)*this->paramBoatLength/((float)this->paramLengthN)*GRAVITY*this->waterDensity;
-	  
+
       ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
 
       // Apply force at grid point
       // From web, Appears that position is in the link frame
       // and force is in world frame
-      this->link->AddForceAtRelativePosition(math::Vector3(0, 0, kBuoyForce),
-        math::Vector3(bpnt.x(), bpnt.y(), bpnt.z()));
+      this->link->AddForceAtRelativePosition(
+        ignition::math::Vector3d(0, 0, kBuoyForce),
+        ignition::math::Vector3d(bpnt.x(), bpnt.y(), bpnt.z()));
     }
   }
 }

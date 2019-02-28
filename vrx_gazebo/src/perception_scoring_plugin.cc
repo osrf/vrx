@@ -125,7 +125,7 @@ void ObjectChecker::OnObject(
 #endif
 
   // Get current pose of the current object
-  ignition::math::Pose3d truePose = this->currObject->GetWorldPose().Ign();
+  ignition::math::Pose3d truePose = this->currObject->WorldPose();
   // 2D Error
   this->objectError = sqrt(pow(cartVec.X() - truePose.Pos().X(), 2)+
     pow(cartVec.Y() - truePose.Pos().Y(), 2));
@@ -332,7 +332,7 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
   std::sort(this->dataPtr->initialObjects.begin(),
     this->dataPtr->initialObjects.end());
 
-  this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
+  this->dataPtr->lastUpdateTime = this->dataPtr->world->SimTime();
 
   // Optional: ROS namespace.
   std::string ns;
@@ -358,7 +358,7 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
 /////////////////////////////////////////////////
 void PerceptionScoringPlugin::Restart()
 {
-  this->dataPtr->startTime = this->dataPtr->world->GetSimTime();
+  this->dataPtr->startTime = this->dataPtr->world->SimTime();
   this->dataPtr->objects = this->dataPtr->initialObjects;
 
   // gzmsg << "Object population restarted" << std::endl;
@@ -392,13 +392,13 @@ void PerceptionScoringPlugin::OnUpdate()
     }
     else
     {
-      this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
+      this->dataPtr->lastUpdateTime = this->dataPtr->world->SimTime();
       return;
     }
   }
 
   // Check whether move the next object in the list.
-  auto elapsedTime = this->dataPtr->world->GetSimTime() -
+  auto elapsedTime = this->dataPtr->world->SimTime() -
                      this->dataPtr->lastUpdateTime;
   if (elapsedTime >= this->dataPtr->objects.front().time)
   {
@@ -409,7 +409,7 @@ void PerceptionScoringPlugin::OnUpdate()
     if (!this->dataPtr->frameName.empty())
     {
       this->dataPtr->frame =
-        this->dataPtr->world->GetEntity(this->dataPtr->frameName);
+        this->dataPtr->world->EntityByName(this->dataPtr->frameName);
       if (!this->dataPtr->frame)
       {
         gzthrow(std::string("The frame '") + this->dataPtr->frameName +
@@ -428,7 +428,7 @@ void PerceptionScoringPlugin::OnUpdate()
       // This is a bit of a hack to deal with transients of spawning buoys with
       // significant non-zero attitude.
       ignition::math::Pose3d framePose(
-        this->dataPtr->frame->GetWorldPose().Ign().Pos(),
+        this->dataPtr->frame->WorldPose().Pos(),
         ignition::math::Quaterniond());
       ignition::math::Matrix4d transMat(framePose);
       ignition::math::Matrix4d pose_local(obj.pose);
@@ -456,7 +456,7 @@ void PerceptionScoringPlugin::OnUpdate()
     }
     // Get a unique name for the new object.
     modelName += "_" + std::to_string(index);
-    auto modelPtr = this->dataPtr->world->GetEntity(modelName);
+    auto modelPtr = this->dataPtr->world->EntityByName(modelName);
     if (modelPtr)
     {
       // Setup new trial in object checker
@@ -464,7 +464,7 @@ void PerceptionScoringPlugin::OnUpdate()
 
       // Save current object and original pose for later
       this->dataPtr->curr_model = modelPtr;
-      this->dataPtr->orig_pose = modelPtr->GetWorldPose().Ign();
+      this->dataPtr->orig_pose = modelPtr->WorldPose();
 
       // Move object to the target pose.
       modelPtr->SetWorldPose(obj.pose);
@@ -477,7 +477,7 @@ void PerceptionScoringPlugin::OnUpdate()
       gzerr << "Object [" << modelName << "] NOT spawned" << std::endl;
     }
     this->dataPtr->objects.erase(this->dataPtr->objects.begin());
-    this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
+    this->dataPtr->lastUpdateTime = this->dataPtr->world->SimTime();
   }
 }
 

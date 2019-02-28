@@ -42,7 +42,7 @@ Thruster::Thruster(UsvThrust *_parent)
 
   // Initialize some things
   this->currCmd = 0.0;
-  this->lastCmdTime = this->plugin->world->GetSimTime();
+  this->lastCmdTime = this->plugin->world->SimTime();
 }
 
 //////////////////////////////////////////////////
@@ -51,7 +51,7 @@ void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
   // When we get a new thrust command!
   ROS_DEBUG_STREAM("New thrust command! " << _msg->data);
   std::lock_guard<std::mutex> lock(this->plugin->mutex);
-  this->lastCmdTime = this->plugin->world->GetSimTime();
+  this->lastCmdTime = this->plugin->world->SimTime();
   this->currCmd = _msg->data;
 }
 
@@ -263,7 +263,7 @@ double UsvThrust::GlfThrustCmd(const double _cmd,
 //////////////////////////////////////////////////
 void UsvThrust::Update()
 {
-  common::Time now = this->world->GetSimTime();
+  common::Time now = this->world->SimTime();
 
   for (size_t i = 0; i < this->thrusters.size(); ++i)
   {
@@ -278,17 +278,17 @@ void UsvThrust::Update()
       }
 
       // Apply the thrust mapping
-      math::Vector3 tforcev(0, 0, 0);
+      ignition::math::Vector3d tforcev(0, 0, 0);
       switch (this->thrusters[i].mappingType)
       {
         case 0:
-          tforcev.x = this->ScaleThrustCmd(this->thrusters[i].currCmd,
+          tforcev.X() = this->ScaleThrustCmd(this->thrusters[i].currCmd,
                                            this->thrusters[i].maxCmd,
                                            this->thrusters[i].maxForceFwd,
                                            this->thrusters[i].maxForceRev);
           break;
         case 1:
-          tforcev.x = this->GlfThrustCmd(this->thrusters[i].currCmd,
+          tforcev.X() = this->GlfThrustCmd(this->thrusters[i].currCmd,
                                          this->thrusters[i].maxForceFwd,
                                          this->thrusters[i].maxForceRev);
           break;
@@ -347,7 +347,7 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
   }
 
   // Set position, velocity, and effort of joint from gazebo
-  gazebo::math::Angle position = _propeller->GetAngle(0);
+  ignition::math::Angle position = _propeller->Position(0);
   position.Normalize();
   this->jointStateMsg.position[index] = position.Radian();
   this->jointStateMsg.velocity[index] = _propeller->GetVelocity(0);

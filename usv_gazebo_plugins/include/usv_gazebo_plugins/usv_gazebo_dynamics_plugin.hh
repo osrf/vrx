@@ -29,7 +29,7 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <gazebo/common/common.hh>
-#include <gazebo/math/Vector3.hh>
+#include <ignition/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
 #include <sdf/sdf.hh>
 
@@ -104,11 +104,11 @@ namespace gazebo
 
     /// \brief Linear velocity from previous time step,
     /// for estimating acceleration.
-    private: math::Vector3 prevLinVel;
+    private: ignition::math::Vector3d prevLinVel;
 
     /// \brief Angular velocity from previous time step,
     /// for estimating acceleration.
-    private: math::Vector3 prevAngVel;
+    private: ignition::math::Vector3d prevAngVel;
 
     /// \brief Values to set via Plugin Parameters.
     /// Plugin Parameter: Added mass in surge, X_\dot{u}.
@@ -161,10 +161,10 @@ namespace gazebo
 
 	/// \brief Demi-hull radius [m].
     private: double paramHullRadius;
-	  
+
     /// \brief Length discretization, i.e., "N"
     private: int paramLengthN;
-	  
+
     /// \brief Added mass matrix, 6x6.
     private: Eigen::MatrixXd Ma;
 

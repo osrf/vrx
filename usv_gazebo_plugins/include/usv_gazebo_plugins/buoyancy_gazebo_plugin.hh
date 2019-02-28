@@ -23,6 +23,7 @@
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
+#include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
 
 namespace gazebo
@@ -37,7 +38,7 @@ namespace gazebo
     }
 
     /// \brief Center of volume in the link frame.
-    public: math::Vector3 cov;
+    public: ignition::math::Vector3d cov;
 
     /// \brief Horizontal area of this link.
     public: double area;

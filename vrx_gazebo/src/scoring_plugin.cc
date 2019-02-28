@@ -108,7 +108,7 @@ void ScoringPlugin::Update()
 {
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->vehicleModel)
-    this->vehicleModel = this->world->GetModel(this->vehicleName);
+    this->vehicleModel = this->world->ModelByName(this->vehicleName);
 
   this->UpdateTime();
   this->UpdateTaskState();
@@ -118,7 +118,7 @@ void ScoringPlugin::Update()
 //////////////////////////////////////////////////
 void ScoringPlugin::UpdateTime()
 {
-  this->currentTime = this->world->GetSimTime();
+  this->currentTime = this->world->SimTime();
 
   if (this->taskState == "running")
   {

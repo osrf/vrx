@@ -35,16 +35,16 @@ key="$1"
 case $key in
     -n|--nvidia)
     RUNTIME="nvidia"
-    shift 
+    shift
     ;;
     *)    # unknown option
-    POSITIONAL+=("$1") 
-    shift 
+    POSITIONAL+=("$1")
+    shift
     ;;
 esac
 done
 
-set -- "${POSITIONAL[@]}" 
+set -- "${POSITIONAL[@]}"
 
 if [ $# -lt 1 ]
 then

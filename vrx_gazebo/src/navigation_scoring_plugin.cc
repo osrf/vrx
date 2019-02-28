@@ -37,42 +37,42 @@ void NavigationScoringPlugin::Gate::Update()
     return;
 
   // The pose of the markers delimiting the gate.
-  const auto leftMarkerPose = this->leftMarkerModel->GetWorldPose();
-  const auto rightMarkerPose = this->rightMarkerModel->GetWorldPose();
+  const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
+  const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
 
   // Unit vector from the left marker to the right one.
-  auto v1 = leftMarkerPose.pos - rightMarkerPose.pos;
+  auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
   v1.Normalize();
 
   // Unit vector perpendicular to v1 in the direction we like to cross gates.
-  const auto v2 = gazebo::math::Vector3::UnitZ.Cross(v1);
+  const auto v2 = ignition::math::Vector3d::UnitZ.Cross(v1);
 
   // This is the center point of the gate.
-  const auto middle = (leftMarkerPose.pos + rightMarkerPose.pos) / 2.0;
+  const auto middle = (leftMarkerPose.Pos() + rightMarkerPose.Pos()) / 2.0;
 
   // Yaw of the gate in world coordinates.
-  const auto yaw = atan2(v2.y, v2.x);
+  const auto yaw = atan2(v2.Y(), v2.X());
 
   // The updated pose.
-  this->pose.Set(middle, gazebo::math::Vector3(0, 0, yaw));
+  this->pose.Set(middle, ignition::math::Vector3d(0, 0, yaw));
 
   // The updated width.
-  this->width = leftMarkerPose.pos.Distance(rightMarkerPose.pos);
+  this->width = leftMarkerPose.Pos().Distance(rightMarkerPose.Pos());
 }
 
 /////////////////////////////////////////////////
 NavigationScoringPlugin::GateState NavigationScoringPlugin::Gate::IsPoseInGate(
-    const gazebo::math::Pose &_robotWorldPose) const
+    const ignition::math::Pose3d &_robotWorldPose) const
 {
   // Transform to gate frame.
-  const gazebo::math::Vector3 robotLocalPosition =
-    this->pose.rot.GetInverse().RotateVector(_robotWorldPose.pos -
-    this->pose.pos);
+  const ignition::math::Vector3d robotLocalPosition =
+    this->pose.Rot().Inverse().RotateVector(_robotWorldPose.Pos() -
+    this->pose.Pos());
 
   // Are we within the width?
-  if (fabs(robotLocalPosition.y) <= this->width / 2.0)
+  if (fabs(robotLocalPosition.Y()) <= this->width / 2.0)
   {
-    if (robotLocalPosition.x >= 0.0)
+    if (robotLocalPosition.X() >= 0.0)
       return GateState::VEHICLE_AFTER;
     else
       return GateState::VEHICLE_BEFORE;
@@ -167,7 +167,7 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     const std::string &_rightMarkerName)
 {
   gazebo::physics::ModelPtr leftMarkerModel =
-    this->world->GetModel(_leftMarkerName);
+    this->world->ModelByName(_leftMarkerName);
 
   // Sanity check: Make sure that the model exists.
   if (!leftMarkerModel)
@@ -177,7 +177,7 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
   }
 
   gazebo::physics::ModelPtr rightMarkerModel =
-    this->world->GetModel(_rightMarkerName);
+    this->world->ModelByName(_rightMarkerName);
 
   // Sanity check: Make sure that the model exists.
   if (!rightMarkerModel)
@@ -198,12 +198,12 @@ void NavigationScoringPlugin::Update()
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->vehicleModel)
   {
-    this->vehicleModel = this->world->GetModel(this->vehicleName);
+    this->vehicleModel = this->world->ModelByName(this->vehicleName);
     if (!this->vehicleModel)
       return;
   }
 
-  const auto robotPose = this->vehicleModel->GetWorldPose();
+  const auto robotPose = this->vehicleModel->WorldPose();
 
   // Update the state of all gates.
   for (auto &gate : this->gates)

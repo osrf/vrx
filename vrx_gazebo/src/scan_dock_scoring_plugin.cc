@@ -160,7 +160,7 @@ void DockChecker::AnnounceSymbol()
   {
     // Initialize ROS transport.
     this->nh.reset(new ros::NodeHandle());
-    this->symbolPub = 
+    this->symbolPub =
       this->nh->advertise<std_msgs::String>(this->symbolTopic, 1, true);
 
     this->symbolPub.publish(this->announceSymbol);
@@ -319,14 +319,14 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     std::string announceSymbol = "";
     if (bayElem->HasElement("announce_symbol"))
     {
-      announceSymbol = 
+      announceSymbol =
         bayElem->GetElement("announce_symbol")->Get<std::string>();
     }
 
     // Create a new dock checker.
     std::unique_ptr<DockChecker> dockChecker(
       new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
-        this->world->GetName(), ns, announceSymbol));
+        this->world->Name(), ns, announceSymbol));
 
     // Add the dock checker.
     this->dockCheckers.push_back(std::move(dockChecker));
@@ -356,7 +356,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
 void ScanDockScoringPlugin::Update()
 {
   // Verify the color checker.
-  if (!this->colorSubmissionProcessed && 
+  if (!this->colorSubmissionProcessed &&
       this->colorChecker->SubmissionReceived())
   {
     // We need to decide if we grant extra points.

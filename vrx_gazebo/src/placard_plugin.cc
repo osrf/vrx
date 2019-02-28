@@ -191,14 +191,14 @@ void PlacardPlugin::Update()
     std_msgs::ColorRGBA color;
     color.a = 0.0;
 
-    auto name = visual->GetName();
+    auto name = visual->Name();
     auto delim = name.rfind("/");
     auto shortName = name.substr(delim + 1);
 
     if (shortName.find(this->shape) != std::string::npos)
       color = this->kColors[this->color];
 
-    gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
+    ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
 
     visual->SetAmbient(gazeboColor);
     visual->SetDiffuse(gazeboColor);
