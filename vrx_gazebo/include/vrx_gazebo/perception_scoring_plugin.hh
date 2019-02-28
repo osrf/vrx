@@ -134,11 +134,11 @@ class PerceptionScoringPluginPrivate;
 /// <frame>: Optional parameter. If present, the poses of the objects will be
 /// in the frame of this link/model. Otherwise the world frame is used.
 ///
-/// <activation_topic>: Optional parameter. If present, the objects won't be
-/// inserted in simulation until the proper command is received in the
-/// specified topic. Available commands:
-///   "restart" : The object population will be restarted.
-///   "stop"    : Stop the object insertion.
+/// <robot_namespace>: Optional parameter.  If present, specifies ROS namespace.
+///
+/// <landmark_topic>: Optional parameter.  Specify the topic to which the
+///   plugin subscribes for receiving identification and localization msgs.
+///   Default is "/vrx/perception/landmark"
 ///
 /// Here's an example of a valid SDF:
 ///

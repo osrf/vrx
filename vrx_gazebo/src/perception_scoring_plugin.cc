@@ -217,9 +217,6 @@ struct PerceptionScoringPluginPrivate
   /// \brief Mutex to avoid race conditions.
   public: std::mutex mutex;
 
-  /// \brief Id of first object to teleport.
-  public: int startIndex = 0;
-
   /// \brief Last time (sim time) that the plugin was updated.
   public: gazebo::common::Time lastUpdateTime;
 
@@ -261,11 +258,6 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
   {
     sdf::ElementPtr loopElem = _sdf->GetElement("loop_forever");
     this->dataPtr->loopForever = loopElem->Get<bool>();
-  }
-
-  if (_sdf->HasElement("start_index"))
-  {
-    this->dataPtr->startIndex = _sdf->Get<int>("start_index");
   }
 
   if (_sdf->HasElement("frame"))
@@ -449,7 +441,7 @@ void PerceptionScoringPlugin::OnUpdate()
     if (this->dataPtr->objectCounter.find(obj.type) ==
         this->dataPtr->objectCounter.end())
     {
-      this->dataPtr->objectCounter[obj.type] = this->dataPtr->startIndex;
+	  this->dataPtr->objectCounter[obj.type] = 0;
     }
     else
     {
