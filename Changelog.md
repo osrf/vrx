@@ -38,16 +38,16 @@
     * [Pull request 54](https://bitbucket.org/osrf/vrx/pull-requests/54)
 
 
-## VRX 0
+## VMRC 0
 
-### VRX 0.3.X
+### VMRC 0.3.X
 
 1. robotx_gazebo ROS package renamed to vmrc_gazebo.
     * [Pull request 44](https://bitbucket.org/osrf/vrx/pull-requests/49)
 
-### VRX 0.2.0
+### VMRC 0.2.0
 
-1. Add a standard WAM-V configuration for VRX.
+1. Add a standard WAM-V configuration for VMRC.
     * [Pull request 44](https://bitbucket.org/osrf/vrx/pull-requests/44)
 
 1. Add 3D laser to the WAM-V.
