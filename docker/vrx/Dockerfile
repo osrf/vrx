@@ -35,15 +35,20 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
  && /bin/sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
  && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -' \
  && apt-get update \
+&& DIST=melodic \
+ && GAZ=gazebo9 \
  && apt-get install -y \
-    ros-melodic-desktop-full \
-    ros-melodic-hector-gazebo-plugins \
-    ros-melodic-joy \
-    ros-melodic-joy-teleop \
-    ros-melodic-robot-localization \
-    ros-melodic-velodyne-simulator \
-    gazebo9 \
-    libgazebo9-dev \
+    ros-${DIST}-desktop-full \
+    ros-${DIST}-hector-gazebo-plugins \
+    ros-${DIST}-joy \
+    ros-${DIST}-joy-teleop \
+    ros-${DIST}-robot-localization \
+    ros-${DIST}-velodyne-simulator \
+	ros-${DIST}-key-teleop \
+	ros-${DIST}-teleop-tools \
+	ros-${DIST}-teleop-twist-keyboard \
+    ${GAZ} \
+    lib${GAZ}-dev \
  && rosdep init \
  && apt-get clean
 
@@ -80,10 +85,10 @@ RUN mkdir -p vrx_ws/src \
  && hg clone https://bitbucket.org/osrf/vrx src/vrx
 
 # Compile the VRX project.
-RUN /bin/bash -c ". /opt/ros/melodic/setup.bash && cd vrx_ws && catkin_make"
+RUN /bin/bash -c ". /opt/ros/${DIST}/setup.bash && cd vrx_ws && catkin_make"
 
 # Source all the needed environment files.
-RUN /bin/sh -c 'echo ". /opt/ros/melodic/setup.bash" >> ~/.bashrc' \
+RUN /bin/sh -c 'echo ". /opt/ros/${DIST}/setup.bash" >> ~/.bashrc' \
  && /bin/sh -c 'echo ". /usr/share/gazebo/setup.sh" >> ~/.bashrc' \
  && /bin/sh -c 'echo ". ~/vrx_ws/devel/setup.sh" >> ~/.bashrc'
 
