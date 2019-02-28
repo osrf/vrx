@@ -310,7 +310,7 @@ bool ScoringPlugin::ParseJoints()
       const std::string jointName = jointElem->Get<std::string>("name");
       this->lockJointNames.push_back(jointName);
 
-      // Parse the next gate.
+      // Parse the next joint.
       jointElem = jointElem->GetNextElement("joint");
     }
   }
