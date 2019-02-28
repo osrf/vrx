@@ -1,17 +1,48 @@
-## VRX 0
+## VRX 1
 
+### VRX 1.0.X
 
-### VRX 0.4.X
-
-1. VRX requires Gazebo 9.
+1. Transition to Gazebo 9 and ROS Melodic.
   * [Pull request 70](https://bitbucket.org/osrf/vrx/pull-requests/70)
 
-1. Scoring plugin for the navigation course task.
+1. Scoring plugin for the perception task.
+  * [Pull request 72](https://bitbucket.org/osrf/vrx/pull-requests/72)
+
+1. Scoring plugin for the wayfinding task.
+  * [Pull request 69](https://bitbucket.org/osrf/vrx/pull-requests/69)
+
+1. VMRC renamed to VRX.
+  * [Pull request 68](https://bitbucket.org/osrf/vrx/pull-requests/68)
+
+1. Scoring plugin for the station keeping task.
+  * [Pull request 67](https://bitbucket.org/osrf/vrx/pull-requests/67)
+
+1. Scoring plugin for the scan and dock task.
+  * [Pull request 64](https://bitbucket.org/osrf/vrx/pull-requests/64)
+  * [Pull request 65](https://bitbucket.org/osrf/vrx/pull-requests/65)
+  * [Pull request 66](https://bitbucket.org/osrf/vrx/pull-requests/66)
+
+1. Simplify URDF.
+  * [Pull request 62](https://bitbucket.org/osrf/vrx/pull-requests/62)
+
+1. Generic scoring plugin.
+  * [Pull request 61](https://bitbucket.org/osrf/vrx/pull-requests/61)
+
+1. Scoring plugins for the navigation course task.
   * [Pull request 60](https://bitbucket.org/osrf/vrx/pull-requests/60)
+
+1. Improved dynamics of WAM-V.
+  * [Pull request 59](https://bitbucket.org/osrf/vrx/pull-requests/59)
+
+1. Obstacle course added.
+  * [Pull request 54](https://bitbucket.org/osrf/vrx/pull-requests/54)
+
+
+## VRX 0
 
 ### VRX 0.3.X
 
-1. robotx_gazebo ROS package renamed to vrx_gazebo.
+1. robotx_gazebo ROS package renamed to vmrc_gazebo.
   * [Pull request 44](https://bitbucket.org/osrf/vrx/pull-requests/49)
 
 ### VRX 0.2.0
