@@ -2,6 +2,12 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Rename vmrc to vrx.
+* removing static tags so vessel is freee to move
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero
+
 0.3.2 (2018-10-08)
 ------------------
 * Include jrivero as maintainer of the ROS packages
