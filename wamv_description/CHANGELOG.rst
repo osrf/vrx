@@ -2,8 +2,8 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2019-02-28)
+------------------
 * Rename vmrc to vrx.
 * removing static tags so vessel is freee to move
 * Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero

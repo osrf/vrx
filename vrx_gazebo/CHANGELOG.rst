@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2019-02-28)
+------------------
 * Merge from default.
 * tweak the example
 * addressing missing documentation and simplifying by removing start_index parameter

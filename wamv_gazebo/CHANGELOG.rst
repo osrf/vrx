@@ -2,8 +2,8 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2019-02-28)
+------------------
 * Merge from default.
 * Merge from symbols_dock_part2
 * Merge from default.

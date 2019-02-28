@@ -2,8 +2,8 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2019-02-28)
+------------------
 * Porting to Gazebo 9
 * Rename vmrc to vrx.
 * More progress.
