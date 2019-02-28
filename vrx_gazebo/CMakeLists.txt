@@ -123,6 +123,18 @@ install(TARGETS scan_dock_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for scoring the perception task.
+add_library(perception_scoring_plugin src/perception_scoring_plugin.cc)
+target_link_libraries(perception_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin)
+add_dependencies(perception_scoring_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS perception_scoring_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Dock base files that need to be processed with erb
 set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
@@ -173,6 +185,7 @@ add_custom_target(dock_erb_generation ALL
 xacro_add_files(
   worlds/example_course.world.xacro
   worlds/navigation_task.world.xacro
+  worlds/perception_task.world.xacro
   worlds/sandisland.world.xacro
   worlds/scan_and_dock_a.world.xacro
   worlds/scan_and_dock_b.world.xacro

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  *
 */
 
-#ifndef GAZEBO_POPULATION_PLUGIN_HH_
-#define GAZEBO_POPULATION_PLUGIN_HH_
+#ifndef VRX_GAZEBO_POPULATION_PLUGIN_HH_
+#define VRX_GAZEBO_POPULATION_PLUGIN_HH_
 
-#include <ros/ros.h>
-#include <geographic_msgs/GeoPoseStamped.h>
-#include <memory>
 #include <gazebo/msgs/gz_string.pb.h>
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <ros/ros.h>
+#include <memory>
+#include <string>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsTypes.hh>
@@ -40,19 +41,19 @@ class ObjectChecker
   /// \param[in] _rosObjectTopic The ROS topic used to receive
   /// the object identification and localization
   public: ObjectChecker(const std::string &_rosNameSpace,
-						const std::string &_rosObjectTopic,
-						gazebo::physics::WorldPtr world);
+            const std::string &_rosObjectTopic,
+            gazebo::physics::WorldPtr world);
 
   /// \brief Initialize a new trial
   /// \param[in] _objectName Name of the object for id purposes
   /// \param[in] _objectPose Pose of the object for localization purposes
   public: void NewTrial(const std::string &_objectName,
-						ignition::math::Pose3d _pose);
-				 
-  /// Enable the ROS subscription.
+            ignition::math::Pose3d _pose);
+
+  /// \brief Enable the ROS subscription.
   public: void Enable();
 
-  /// Disable the ROS subscription.
+  /// \brief Disable the ROS subscription.
   public: void Disable();
 
   /// \brief Whether a team submitted an identification for current trial
@@ -61,7 +62,7 @@ class ObjectChecker
 
   /// \brief Has the submission been scored?
   public: bool submissionScored = false;
-	
+
   /// \brief Whether a team submitted a correct id or not.
   /// \return True when the team submitted the id and it is correct
   /// or false otherwise.
@@ -193,8 +194,8 @@ namespace gazebo
     protected: void OnActivation(ConstGzStringPtr &_msg);
 
     /// \brief Callback that receives rate modifier messages. If the
-    /// <rate_modifier_topic> is set in SDF, the plugin will modify the population rate
-    /// by the received factor.
+    /// <rate_modifier_topic> is set in SDF, the plugin will modify the
+    /// population rate by the received factor.
     /// \param[in] _msg String message that indicates the rate modifier.
     protected: void OnRateModification(ConstGzStringPtr &_msg);
 
@@ -209,9 +210,9 @@ namespace gazebo
     /// plugin state.
     private: virtual void Publish() const;
 
-	// Documentation inherited.
+    // Documentation inherited.
     private: void OnRunning() override;
-		  
+
     /// \brief Private data pointer.
     private: std::unique_ptr<PopulationPluginPrivate> dataPtr;
   };

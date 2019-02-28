@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@
  * PoplulationPlugin https://bitbucket.org/osrf/ariac/src/master/osrf_gear/include/osrf_gear/PopulationPlugin.hh
 */
 
-#ifndef GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
-#define GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
+#ifndef VRX_GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
+#define VRX_GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
 
-#include <ros/ros.h>
-#include <geographic_msgs/GeoPoseStamped.h>
-#include <memory>
 #include <gazebo/msgs/gz_string.pb.h>
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <ros/ros.h>
+#include <memory>
+#include <string>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsTypes.hh>
@@ -45,15 +46,15 @@ class ObjectChecker
   /// \param[in] _rosObjectTopic The ROS topic used to receive
   /// the object identification and localization
   public: ObjectChecker(const std::string &_rosNameSpace,
-						const std::string &_rosObjectTopic,
-						gazebo::physics::WorldPtr _world);
+            const std::string &_rosObjectTopic,
+            gazebo::physics::WorldPtr _world);
 
   /// \brief Initialize a new trial
   /// \param[in] _objectName Name of the object for id purposes
   /// \param[in] _objectPose Pose of the object for localization purposes
   public: void NewTrial(const std::string &_objectName,
-						gazebo::physics::EntityPtr _object);
-				 
+            gazebo::physics::EntityPtr _object);
+
   /// Enable the ROS subscription.
   public: void Enable();
 
@@ -66,7 +67,7 @@ class ObjectChecker
 
   /// \brief Has the submission been scored?
   public: bool submissionScored = false;
-	
+
   /// \brief Whether a team submitted a correct id or not.
   /// \return True when the team submitted the id and it is correct
   /// or false otherwise.
@@ -107,8 +108,6 @@ class ObjectChecker
 
   /// \brief Current object
   private: gazebo::physics::EntityPtr currObject;
-/// \brief Current correct object pose.
-//private: ignition::math::Pose3d truePose;
 
   /// \brief World pointer. Need this for spherical/local conversion.
   private: gazebo::physics::WorldPtr world;
@@ -122,7 +121,7 @@ namespace gazebo
   /// \brief A plugin that allows models to be spawned at a given location in
   /// a specific simulation time and then takes care of scoring coorect
   /// identification and localization of the objects.
-  ///	
+  ///
   /// The plugin accepts the following SDF parameters:
   ///
   /// <object_sequence>: Contains the list of objects to be populated. An object
@@ -150,28 +149,27 @@ namespace gazebo
   ///
   /// <plugin filename="libperception_scoring_plugin.so"
   ///         name="perception_scoring_plugin">
-  ///	  <vehicle>wamv</vehicle>
+  ///   <vehicle>wamv</vehicle>
   ///      <task_name>perception</task_name>
   ///     <initial_state_duration>1</initial_state_duration>
   ///      <ready_state_duration>1</ready_state_duration>
   ///      <running_state_duration>300</running_state_duration>
-  ///	  <!-- Parameters for PopulationPlugin -->
-  ///	  <loop_forever>false</loop_forever>
-  ///	  <frame>wamv</frame>
-  ///	  <object_sequence>
-  ///		<object>
-  ///		  <time>10.0</time>
-  ///		  <type>red</type>
-  ///		  <name>red_mark</name>
-  ///		  <pose>6 0 1 0 0 0</pose>
-  ///		</object>
-  ///		<object>
-  ///		  <time>10.0</time>
-  ///		  <type>green</type>
-  ///		  <name>green_mark</name>
-  ///		  <pose>6 6 1 0 0 0</pose>
-  ///		</object>
-
+  ///   <!-- Parameters for PopulationPlugin -->
+  ///   <loop_forever>false</loop_forever>
+  ///   <frame>wamv</frame>
+  ///   <object_sequence>
+  ///   <object>
+  ///     <time>10.0</time>
+  ///     <type>red</type>
+  ///     <name>red_mark</name>
+  ///     <pose>6 0 1 0 0 0</pose>
+  ///   </object>
+  ///   <object>
+  ///     <time>10.0</time>
+  ///     <type>green</type>
+  ///     <name>green_mark</name>
+  ///     <pose>6 6 1 0 0 0</pose>
+  ///   </object>
   class GAZEBO_VISIBLE PerceptionScoringPlugin : public ScoringPlugin
   {
     /// \brief Constructor.
@@ -186,12 +184,12 @@ namespace gazebo
     /// \brief Update the plugin.
     protected: void OnUpdate();
 
-	/// \brief Restart the object population list
+    /// \brief Restart the object population list
     private: void Restart();
 
-	// Documentation inherited.
+    // Documentation inherited.
     private: void OnRunning() override;
-		  
+
     /// \brief Private data pointer.
     private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
   };
