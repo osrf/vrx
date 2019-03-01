@@ -2,6 +2,33 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.0 (2019-02-28)
+------------------
+* Merge from default.
+* Merge from symbols_dock_part2
+* Merge from default.
+* Merged in vrx (pull request #68)
+  Rename vmrc to vrx
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+* Custom tweaks
+* More leftovers.
+* Rename vmrc to vrx.
+* assembling pieces for stationkeeping
+* Merged in urdf_easy (pull request #62)
+  Simplify urdf
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+* Simplify urdf files.
+* Locking the WAM-V conditionally.
+* Playing with locking and releasing.
+* Changed from buoyancy calculation method
+* Decrease sensor noise to more clearly allow debugging of the simulation.
+* Add the pinger plugin to the wamv_gazebo package.
+  The wamv_gazebo_sensors.urdf file has been modified to add support for the pinger plugin.
+* add missing dependencies
+* Create perception.launch and lock the WAM-V.
+* removing static tags so vessel is freee to move
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Aguero <caguero@osrfoundation.org>, Carlos Agüero <cen.aguero@gmail.com>, Jonathan Wheare <jonathan.wheare@flinders.edu.au>, chapulina <burajiru.no.chapulina@gmail.com>
+
 0.3.2 (2018-10-08)
 ------------------
 * Include jrivero as maintainer of the ROS packages

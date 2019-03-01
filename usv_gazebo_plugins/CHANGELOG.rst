@@ -2,6 +2,22 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.0 (2019-02-28)
+------------------
+* Porting to Gazebo 9
+* Rename vmrc to vrx.
+* More progress.
+* Changed from buoyancy calculation method
+* Fixing error where buoyancy force could be applied in the negative direction (downward)
+* Add dependency on usv_msgs by usv_gazebo_pinger_plugin.  This forces the message to be built before the plugin is compiled.
+* Set the sensor WAM-V as the default model
+* Fix the doxygen generation
+* Update variable names and comments to be compliant with the Gazebo style guide.
+* Add the pinger plugin to the wamv_gazebo package.
+  The wamv_gazebo_sensors.urdf file has been modified to add support for the pinger plugin.
+* removing static tags so vessel is freee to move
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Aguero <caguero@osrfoundation.org>, Jonathan Wheare <jonathan.wheare@flinders.edu.au>
+
 0.3.2 (2018-10-08)
 ------------------
 * Include jrivero as maintainer of the ROS packages
