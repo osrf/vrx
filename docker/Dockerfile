@@ -3,10 +3,10 @@ ARG BASEIMG=ubuntu:bionic
 FROM $BASEIMG
 
 # Set ROS distribution
-ENV DIST melodic
+ARG DIST=melodic
 
 # Set Gazebo verison
-env GAZ gazebo9
+ARG GAZ=gazebo9
 
 # Tools useful during development.
 RUN apt-get update \
