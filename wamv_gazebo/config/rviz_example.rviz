@@ -5,9 +5,11 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Camera1
+        - /Camera1/Status1
         - /Camera1/Visibility1
       Splitter Ratio: 0.5
-    Tree Height: 265
+    Tree Height: 263
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -16,7 +18,7 @@ Panels:
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
-    Splitter Ratio: 0.588679016
+    Splitter Ratio: 0.5886790156364441
   - Class: rviz/Views
     Expanded:
       - /Current View1
@@ -27,6 +29,8 @@ Panels:
     Name: Time
     SyncMode: 0
     SyncSource: Camera
+Preferences:
+  PromptSaveOnExit: true
 Visualization Manager:
   Class: ""
   Displays:
@@ -36,7 +40,7 @@ Visualization Manager:
       Color: 160; 160; 164
       Enabled: true
       Line Style:
-        Line Width: 0.0299999993
+        Line Width: 0.029999999329447746
         Value: Lines
       Name: Grid
       Normal Cell Count: 0
@@ -63,12 +67,21 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        front_camera_link:
+        front_left_camera_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_camera_link_optical:
+        front_left_camera_link_optical:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        front_right_camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_right_camera_link_optical:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -78,6 +91,16 @@ Visualization Manager:
           Show Trail: false
           Value: true
         imu_wamv_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lateral_engine_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lateral_propeller_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -97,6 +120,15 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        middle_right_camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        middle_right_camera_link_optical:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         right_engine_link:
           Alpha: 1
           Show Axes: false
@@ -120,19 +152,31 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
-        front_camera_link:
+        front_left_camera_link:
           Value: true
-        front_camera_link_optical:
+        front_left_camera_link_optical:
+          Value: true
+        front_right_camera_link:
+          Value: true
+        front_right_camera_link_optical:
           Value: true
         gps_wamv_link:
           Value: true
         imu_wamv_link:
+          Value: true
+        lateral_engine_link:
+          Value: true
+        lateral_propeller_link:
           Value: true
         left_engine_link:
           Value: true
         left_propeller_link:
           Value: true
         lidar_wamv_link:
+          Value: true
+        middle_right_camera_link:
+          Value: true
+        middle_right_camera_link_optical:
           Value: true
         odom:
           Value: true
@@ -150,18 +194,27 @@ Visualization Manager:
       Tree:
         odom:
           base_link:
-            front_camera_link:
-              front_camera_link_optical:
+            front_left_camera_link:
+              front_left_camera_link_optical:
+                {}
+            front_right_camera_link:
+              front_right_camera_link_optical:
                 {}
             gps_wamv_link:
               {}
             imu_wamv_link:
               {}
+            lateral_engine_link:
+              lateral_propeller_link:
+                {}
             left_engine_link:
               left_propeller_link:
                 {}
             lidar_wamv_link:
               {}
+            middle_right_camera_link:
+              middle_right_camera_link_optical:
+                {}
             right_engine_link:
               right_propeller_link:
                 {}
@@ -172,7 +225,7 @@ Visualization Manager:
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: /front_camera/image_raw
+      Image Topic: /front_right_camera/image_raw
       Name: Camera
       Overlay Alpha: 0.5
       Queue Size: 2
@@ -210,9 +263,9 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 12.5439997
+      Distance: 18.762828826904297
       Enable Stereo Rendering:
-        Stereo Eye Separation: 0.0599999987
+        Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
@@ -221,14 +274,14 @@ Visualization Manager:
         Y: 0
         Z: 0
       Focal Shape Fixed Size: true
-      Focal Shape Size: 0.0500000007
+      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.00999999978
-      Pitch: 0.785398006
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.4953979253768921
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.785398006
+      Yaw: 5.543581008911133
     Saved: ~
 Window Geometry:
   Camera:
@@ -238,7 +291,7 @@ Window Geometry:
   Height: 1016
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000016a00000360fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003a00000191000000c600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d00650072006101000001d1000001c90000001600ffffff000000010000010f0000046dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000046d0000009e00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d00650100000000000007800000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000006100000036000000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000016a0000035efc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b00000190000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000c00430061006d00650072006101000001d1000001c80000001600ffffff000000010000010f0000046dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000046d000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d00650100000000000007800000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000006100000035e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
