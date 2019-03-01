@@ -2,6 +2,11 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* changed rviz camera topic
+* Contributors: Brian Bingham<briansbingham@gmail.com>
+
 1.0.0 (2019-02-28)
 ------------------
 * Merge from default.

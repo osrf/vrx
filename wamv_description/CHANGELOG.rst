@@ -2,6 +2,14 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merged in wamv_meshes_meters (pull request #75)
+  Fix issue #66
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+* Change mesh units to meters.
+* Contributors: Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>
+
 1.0.0 (2019-02-28)
 ------------------
 * Rename vmrc to vrx.
