@@ -2,6 +2,14 @@
 
 ### VRX 1.0.X
 
+1. Convert WAM-V meshes to meters:
+    * [Pull request 75](https://bitbucket.org/osrf/vrx/pull-requests/75)
+
+1. Refactor Docker layout:
+    * [Pull request 76](https://bitbucket.org/osrf/vrx/pull-requests/76)
+    * [Pull request 74](https://bitbucket.org/osrf/vrx/pull-requests/74)
+    * [Pull request 73](https://bitbucket.org/osrf/vrx/pull-requests/73)
+
 1. Transition to Gazebo 9 and ROS Melodic.
     * [Pull request 70](https://bitbucket.org/osrf/vrx/pull-requests/70)
 
