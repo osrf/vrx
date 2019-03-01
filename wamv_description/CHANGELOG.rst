@@ -2,8 +2,8 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2019-03-01)
+------------------
 * Merged in wamv_meshes_meters (pull request #75)
   Fix issue #66
   Approved-by: Brian Bingham <briansbingham@gmail.com>
