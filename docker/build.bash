@@ -18,28 +18,45 @@
 #
 
 # Builds a Docker image.
+BUILD_NVIDIA=""
+image_name="vrx"
 
-if [ $# -eq 0 ]
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -n|--nvidia)
+    BUILD_NVIDIA="--build-arg BASEIMG=nvidia/opengl:1.0-glvnd-devel-ubuntu18.04"
+    image_name="vrx_nvidia"
+    shift
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1")
+    shift
+    ;;
+esac
+done
+
+set -- "${POSITIONAL[@]}"
+
+if [ $# -lt 1 ]
 then
-    echo "Usage: $0 directory-name"
+    echo "Usage: $0 [-n --nvidia] <dir with Dockerfile to build>"
     exit 1
 fi
 
-# Get path to current directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-if [ ! -d $DIR/$1 ]
+if [ ! -f $1/Dockerfile ]
 then
-  echo "image-name must be a directory in the same folder as this script"
-  exit 2
+    echo "Err: Directory does not contain a Dockerfile to build."
+    exit 1
 fi
 
-#user_id=$(id -u)
-image_name=$1
+
 image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
 
-#docker build --rm -t $image_plus_tag --build-arg user_id=$user_id $DIR/$image_name
-docker build --rm -t $image_plus_tag $DIR/$image_name
+docker build --rm -t $image_plus_tag "${1}" $BUILD_NVIDIA
 docker tag $image_plus_tag $image_name:latest
 
 echo "Built $image_plus_tag and tagged as $image_name:latest"

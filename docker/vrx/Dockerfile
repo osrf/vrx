@@ -1,5 +1,6 @@
 # Ubuntu 18.04 with nvidia-docker2 beta opengl support.
-FROM ubuntu:bionic
+ARG BASEIMG=ubuntu:bionic
+FROM $BASEIMG
 
 # Tools useful during development.
 RUN apt-get update \
