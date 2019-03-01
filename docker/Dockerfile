@@ -9,8 +9,8 @@ ARG DIST=melodic
 ARG GAZ=gazebo9
 
 # Tools useful during development.
-RUN apt-get update \
- && apt-get install -y \
+RUN apt update \
+ && apt install -y \
         build-essential \
         curl \
         cmake \
@@ -26,36 +26,41 @@ RUN apt-get update \
         sudo \
         vim \
         wget \
- && apt-get clean
+        libeigen3-dev \
+        pkg-config \
+        libgles2-mesa-dev \
+        qtbase5-dev \
+ && apt clean
 
 RUN export DEBIAN_FRONTEND=noninteractive \
- && sudo apt-get update \
- && sudo -E apt-get install -y \
+ && apt update \
+ && apt install -y \
     tzdata \
- && sudo ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime \
- && sudo dpkg-reconfigure --frontend noninteractive tzdata \
- && sudo apt-get clean
+ && ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime \
+ && dpkg-reconfigure --frontend noninteractive tzdata \
+ && apt clean
 
 # Get ROS melodic and Gazebo 9.
-RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' \
- && apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
- && /bin/sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
- && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -' \
- && apt-get update \
- && apt-get install -y \
-    ros-${DIST}-desktop-full \
+RUN /bin/sh -c 'echo "deb [trusted=yes] http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' \
+ && /bin/sh -c 'echo "deb [trusted=yes] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" > /etc/apt/sources.list.d/gazebo-stable.list' \
+ && apt update \
+ && apt install -y \
+    ${GAZ} \
+    lib${GAZ}-dev \
+    ros-${DIST}-ros-base \
+    ros-${DIST}-xacro \
+    ros-${DIST}-gazebo-ros \
+    ros-${DIST}-gazebo-plugins \
     ros-${DIST}-hector-gazebo-plugins \
     ros-${DIST}-joy \
     ros-${DIST}-joy-teleop \
+    ros-${DIST}-key-teleop \
+    ros-${DIST}-teleop-tools \
+    ros-${DIST}-teleop-twist-keyboard \
     ros-${DIST}-robot-localization \
     ros-${DIST}-velodyne-simulator \
-	ros-${DIST}-key-teleop \
-	ros-${DIST}-teleop-tools \
-	ros-${DIST}-teleop-twist-keyboard \
-    ${GAZ} \
-    lib${GAZ}-dev \
  && rosdep init \
- && apt-get clean
+ && apt clean
 
 RUN rosdep update
 
@@ -101,4 +106,6 @@ ENTRYPOINT ["fixuid"]
 
 CMD ["/bin/bash"]
 # Customize your image here.
+
+
 # ...
