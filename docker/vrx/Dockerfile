@@ -2,6 +2,12 @@
 ARG BASEIMG=ubuntu:bionic
 FROM $BASEIMG
 
+# Set ROS distribution
+ENV DIST melodic
+
+# Set Gazebo verison
+env GAZ gazebo9
+
 # Tools useful during development.
 RUN apt-get update \
  && apt-get install -y \
@@ -36,8 +42,6 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
  && /bin/sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
  && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -' \
  && apt-get update \
-&& DIST=melodic \
- && GAZ=gazebo9 \
  && apt-get install -y \
     ros-${DIST}-desktop-full \
     ros-${DIST}-hector-gazebo-plugins \
