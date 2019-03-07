@@ -37,8 +37,21 @@ void NavigationScoringPlugin::Gate::Update()
     return;
 
   // The pose of the markers delimiting the gate.
-  const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
-  const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
+    const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
+  #else
+    gazebo::math::Pose leftMarkerMathPose = this->leftMarkerModel-> \
+      GetWorldPose();
+    gazebo::math::Pose rightMarkerMathPose = this->rightMarkerModel-> \
+      GetWorldPose();
+    const ignition::math::Pose3d leftMarkerPose(ignition::math::Vector3d(\
+      leftMarkerMathPose.pos.x, leftMarkerMathPose.pos.y, \
+      leftMarkerMathPose.pos.z), leftMarkerMathPose.rot.Ign());
+    const ignition::math::Pose3d rightMarkerPose(ignition::math::Vector3d(\
+      rightMarkerMathPose.pos.x, rightMarkerMathPose.pos.y, \
+      rightMarkerMathPose.pos.z), rightMarkerMathPose.rot.Ign());
+  #endif  
 
   // Unit vector from the left marker to the right one.
   auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
@@ -166,8 +179,13 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
 bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     const std::string &_rightMarkerName)
 {
-  gazebo::physics::ModelPtr leftMarkerModel =
-    this->world->ModelByName(_leftMarkerName);
+  #if GAZEBO_MAJOR_VERSION >= 8
+    gazebo::physics::ModelPtr leftMarkerModel =
+      this->world->ModelByName(_leftMarkerName);
+  #else
+    gazebo::physics::ModelPtr leftMarkerModel =
+      this->world->GetModel(_leftMarkerName);
+  #endif
 
   // Sanity check: Make sure that the model exists.
   if (!leftMarkerModel)
@@ -176,8 +194,13 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     return false;
   }
 
-  gazebo::physics::ModelPtr rightMarkerModel =
-    this->world->ModelByName(_rightMarkerName);
+  #if GAZEBO_MAJOR_VERSION >= 8
+    gazebo::physics::ModelPtr rightMarkerModel =
+      this->world->ModelByName(_rightMarkerName);
+  #else
+    gazebo::physics::ModelPtr rightMarkerModel =
+      this->world->GetModel(_rightMarkerName);
+  #endif
 
   // Sanity check: Make sure that the model exists.
   if (!rightMarkerModel)
@@ -198,12 +221,22 @@ void NavigationScoringPlugin::Update()
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->vehicleModel)
   {
-    this->vehicleModel = this->world->ModelByName(this->vehicleName);
+    #if GAZEBO_MAJOR_VERSION >= 8
+      this->vehicleModel = this->world->ModelByName(this->vehicleName);
+    #else
+      this->vehicleModel = this->world->GetModel(this->vehicleName);
+    #endif
     if (!this->vehicleModel)
       return;
   }
 
-  const auto robotPose = this->vehicleModel->WorldPose();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const auto robotPose = this->vehicleModel->WorldPose();
+  #else
+    gazebo::math::Pose mathPose = this->vehicleModel->GetWorldPose();
+    const ignition::math::Pose3d robotPose(ignition::math::Vector3d( \
+    mathPose.pos.x, mathPose.pos.y, mathPose.pos.z),mathPose.rot.Ign());
+  #endif  
 
   // Update the state of all gates.
   for (auto &gate : this->gates)

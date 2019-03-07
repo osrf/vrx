@@ -107,8 +107,13 @@ void ScoringPlugin::Finish()
 void ScoringPlugin::Update()
 {
   // The vehicle might not be ready yet, let's try to get it.
-  if (!this->vehicleModel)
-    this->vehicleModel = this->world->ModelByName(this->vehicleName);
+  #if GAZEBO_MAJOR_VERSION >= 8 
+    if (!this->vehicleModel)
+      this->vehicleModel = this->world->ModelByName(this->vehicleName);
+  #else
+    if (!this->vehicleModel)
+      this->vehicleModel = this->world->GetModel(this->vehicleName);
+  #endif
 
   this->UpdateTime();
   this->UpdateTaskState();
@@ -118,7 +123,11 @@ void ScoringPlugin::Update()
 //////////////////////////////////////////////////
 void ScoringPlugin::UpdateTime()
 {
-  this->currentTime = this->world->SimTime();
+  #if GAZEBO_MAJOR_VERSION >= 8 
+    this->currentTime = this->world->SimTime();
+  #else
+    this->currentTime = this->world->GetSimTime();
+  #endif
 
   if (this->taskState == "running")
   {

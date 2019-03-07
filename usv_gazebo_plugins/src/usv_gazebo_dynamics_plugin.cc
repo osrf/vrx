@@ -136,9 +136,20 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   // Get inertia and mass of vessel
-  const ignition::math::Vector3d kInertia =
-    this->link->GetInertial()->PrincipalMoments();
-  const double kMass = this->link->GetInertial()->Mass();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const ignition::math::Vector3d kInertia =
+      this->link->GetInertial()->PrincipalMoments();
+  #else
+    gazebo::math::Vector3 moments = \
+      this->link->GetInertial()->GetPrincipalMoments();
+    const ignition::math::Vector3d kInertia(moments.x,moments.y,moments.z);
+  #endif
+  
+  #if GAZEBO_MAJOR_VERSION >= 8    
+    const double kMass = this->link->GetInertial()->Mass();
+  #else
+    const double kMass = this->link->GetInertial()->GetMass();
+  #endif
 
   // Report some of the pertinent parameters for verification
   ROS_DEBUG("USV Dynamics Parameters: From URDF XACRO model definition");
@@ -147,8 +158,12 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
                   " Y:" << kInertia[1] << " Z:" << kInertia[2]);
 
   // Initialize time and odometry position
-  this->prevUpdateTime = this->world->SimTime();
-
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->prevUpdateTime = this->world->SimTime();
+  #else
+    this->prevUpdateTime = this->world->GetSimTime();
+  #endif
+  
   // Listen to the update event broadcastes every physics iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
     std::bind(&UsvDynamicsPlugin::Update, this));
@@ -173,20 +188,44 @@ double UsvDynamicsPlugin::CircleSegment(double R, double h)
 //////////////////////////////////////////////////
 void UsvDynamicsPlugin::Update()
 {
-  const common::Time kTimeNow = this->world->SimTime();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const common::Time kTimeNow = this->world->SimTime();
+  #else
+    const common::Time kTimeNow = this->world->GetSimTime();
+  #endif
   double dt = (kTimeNow - this->prevUpdateTime).Double();
   this->prevUpdateTime = kTimeNow;
 
   // Get Pose/Orientation from Gazebo (if no state subscriber is active)
-  const ignition::math::Pose3d kPose = this->link->WorldPose();
-  const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const ignition::math::Pose3d kPose = this->link->WorldPose();
+    const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
+  #else
+    gazebo::math::Pose mathPose = this->link->GetWorldPose();
+    const ignition::math::Pose3d kPose(ignition::math::Vector3d(mathPose.pos.x,\
+      mathPose.pos.y, mathPose.pos.z),mathPose.rot.Ign());
+    const ignition::math::Vector3d kEuler = mathPose.rot.Ign().Euler();
+  #endif  
 
   // Get body-centered linear and angular rates
-  const ignition::math::Vector3d kVelLinearBody =
-    this->link->RelativeLinearVel();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const ignition::math::Vector3d kVelLinearBody =
+      this->link->RelativeLinearVel();
+  #else
+    gazebo::math::Vector3 linearVel = this->link->GetRelativeLinearVel();
+    const ignition::math::Vector3d kVelLinearBody(linearVel.x,linearVel.y, \
+      linearVel.z);
+  #endif
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
-  const ignition::math::Vector3d kVelAngularBody =
-    this->link->RelativeAngularVel();
+  
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const ignition::math::Vector3d kVelAngularBody =
+      this->link->RelativeAngularVel();
+  #else
+    gazebo::math::Vector3 angularVel = this->link->GetRelativeAngularVel();
+    const ignition::math::Vector3d kVelAngularBody(angularVel.x,angularVel.y, \
+      angularVel.z);
+  #endif
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
 
   // Estimate the linear and angular accelerations.
