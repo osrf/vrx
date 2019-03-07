@@ -5,7 +5,7 @@
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
 
-    <include>
+    <!-- <include>
       <uri>model://robotx_navigation_challenge</uri>
       <pose>15 0 2 0 0 0</pose>
     </include>
@@ -16,19 +16,19 @@
     <include>
       <uri>model://robotx_2016_qualifying_pinger_transit</uri>
       <pose>55 -50 0 0 0 -1.3</pose>
-    </include>
+    </include> -->
 
     <!-- The 2016 dock with the three placards -->
     <include>
       <uri>model://dock_2016</uri>
-      <pose>80 -8.75 0 0 0 0</pose>
+      <pose>50 -1 0 0 0 0.15</pose>
     </include>
 
     <!-- The 2018 dock with the two placards -->
-    <include>
+    <!-- <include>
       <uri>model://dock_2018</uri>
       <pose>120 -2.75 0 0 0 0</pose>
-    </include>
+    </include> -->
 
   </world>
 </sdf>
