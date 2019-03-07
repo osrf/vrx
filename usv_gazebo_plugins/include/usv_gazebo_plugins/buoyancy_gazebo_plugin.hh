@@ -19,6 +19,7 @@
 #define USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
 
 #include <map>
+#include <string>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Plugin.hh>
@@ -95,6 +96,12 @@ namespace gazebo
 
     /// \brief Connection to World Update events.
     protected: event::ConnectionPtr updateConnection;
+
+    /// \brief Pointer to the model
+    protected: physics::ModelPtr model;
+
+    /// \brief The name of the wave model
+    protected: std::string waveModelName;
 
     /// \brief The density of the fluid in which the object is submerged in
     /// kg/m^3. Defaults to 1000, the fluid density of water at 15 Celsius.
