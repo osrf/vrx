@@ -168,17 +168,20 @@ namespace gazebo
     /// \brief Added mass matrix, 6x6.
     private: Eigen::MatrixXd Ma;
 
-    /// \brief Wave parameters.
-    private: int paramWaveN;
+    /// \brief The name of the wave model
+    protected: std::string waveModelName;
 
-    /// \brief Wave amplitude values for N components.
-    private: std::vector<float> paramWaveAmps;
+    // /// \brief Wave parameters.
+    // private: int paramWaveN;
 
-    /// \brief Wave period values for N components.
-    private: std::vector<float> paramWavePeriods;
+    // /// \brief Wave amplitude values for N components.
+    // private: std::vector<float> paramWaveAmps;
 
-    /// \brief Wave direction values for N components.
-    private: std::vector<std::vector<float>> paramWaveDirections;
+    // /// \brief Wave period values for N components.
+    // private: std::vector<float> paramWavePeriods;
+
+    // /// \brief Wave direction values for N components.
+    // private: std::vector<std::vector<float>> paramWaveDirections;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;

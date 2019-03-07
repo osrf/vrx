@@ -22,6 +22,11 @@
 #include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
+#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
+#include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
+#include "asv_wave_sim_gazebo_plugins/WavefieldModelPlugin.hh"
+
+using namespace asv;
 using namespace gazebo;
 
 /////////////////////////////////////////////////
@@ -38,6 +43,13 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   GZ_ASSERT(_model != NULL, "Received NULL model pointer");
   GZ_ASSERT(_sdf != NULL, "Received NULL SDF pointer");
 
+  // Capture the model pointer.
+  this->model = _model;
+
+  if (_sdf->HasElement("wave_model"))
+  {
+    this->waveModelName = _sdf->Get<std::string>("wave_model");
+  }
   if (_sdf->HasElement("fluid_density"))
   {
     this->fluidDensity = _sdf->Get<double>("fluid_density");
@@ -162,6 +174,17 @@ void BuoyancyPlugin::Init()
 /////////////////////////////////////////////////
 void BuoyancyPlugin::OnUpdate()
 {
+  // Retrieve the wave model...
+  std::shared_ptr<const WaveParameters> waveParams 
+    = WavefieldModelPlugin::GetWaveParams(
+      this->model->GetWorld(), this->waveModelName);
+
+  // No ocean waves...
+  if (waveParams == nullptr)
+  {
+    return;
+  }  
+
   for (auto &link : this->buoyancyLinks)
   {
     VolumeProperties volumeProperties = this->volPropsMap[link->GetId()];
@@ -170,10 +193,21 @@ void BuoyancyPlugin::OnUpdate()
     double volume = height * area;
     ignition::math::Pose3d linkFrame = link->WorldPose();
 
+    // Compute the wave displacement at the centre of the link frame.
+    double simTime = this->model->GetWorld()->SimTime().Double();
+    double depth = WavefieldSampler::ComputeDepthDirectly(
+      *waveParams, linkFrame.Pos(), simTime);
+
+    double linkDepth = depth + this->fluidLevel;
+    double linkFluidLevel = linkDepth + linkFrame.Pos().Z();
+
+    // @DEBUG INFO
+    // gzmsg << "[" << simTime << "] : " << depth << std::endl;
+
     // Location of bottom of object relative to the fluid surface - assumes
     // origin is at cog of the object.
-    double bottomRelSurf =
-      this->fluidLevel - (linkFrame.Pos().Z() - height / 2.0);
+    // double bottomRelSurf = this->fluidLevel - (linkFrame.Pos().Z() - height / 2.0);
+    double bottomRelSurf = linkFluidLevel - (linkFrame.Pos().Z() - height / 2.0);
 
     // out of water
     if (bottomRelSurf <= 0)
