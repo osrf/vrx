@@ -200,8 +200,8 @@ void LightBuoyPlugin::Update()
   // Update the visuals.
   for (auto visual : this->visuals)
   {
-      visual->SetAmbient(gazeboColor);
-      visual->SetDiffuse(gazeboColor);
+    visual->SetAmbient(gazeboColor);
+    visual->SetDiffuse(gazeboColor);
   }
 
   // Increment index for next timer callback
