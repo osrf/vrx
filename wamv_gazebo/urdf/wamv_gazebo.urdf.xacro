@@ -67,9 +67,9 @@
   <xacro:wamv_multibeam_laser name="planar_lidar" />
 
   <!-- Add simulated GPS -->
-  <xacro:wamv_gps name="gps_wamv" y="0.2" />
+  <!-- <xacro:wamv_gps name="gps_wamv" y="0.2" /> -->
 
   <!-- Add Simulated IMU -->
-  <xacro:wamv_imu name="imu_wamv" y="-0.2" />
+  <!-- <xacro:wamv_imu name="imu_wamv" y="-0.2" /> -->
 
 </robot>

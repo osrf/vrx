@@ -19,6 +19,12 @@
             <size>2 0.1 3</size>
           </box>
         </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Red</name>
+          </script>
+        </material>
       </visual>
     </link>
   </model>
