@@ -15,7 +15,7 @@
  *
 */
 
-#include "asv_wave_sim_gazebo_plugins/Gazebo.hh"
+#include "wave_gazebo_plugins/Gazebo.hh"
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/common.hh>

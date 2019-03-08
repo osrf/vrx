@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/Geometry.hh"
-#include "asv_wave_sim_gazebo_plugins/Physics.hh"
-#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/Geometry.hh"
+#include "wave_gazebo_plugins/Physics.hh"
+#include "wave_gazebo_plugins/Utilities.hh"
 
 #include <Eigen/Dense>
 

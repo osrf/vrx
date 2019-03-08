@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>asv_wave_sim_gazebo_plugins</name>
+  <name>wave_gazebo_plugins</name>
   <version>0.1.2</version>
   <description>
     This package contains Gazebo plugins for the simulation of 
@@ -9,17 +9,15 @@
 
   <maintainer email="rhys.mainwaring@me.com">Rhys Mainwaring</maintainer>
 
-  <license>GPLv3</license>
+  <license>TBD</license>
 
   <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>cgal</build_depend>
   <build_depend>eigen</build_depend>
+
   <build_depend>gazebo_ros</build_depend>
-  
-  <exec_depend>cgal</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
 
   <export>

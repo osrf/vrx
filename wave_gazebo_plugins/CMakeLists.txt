@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(asv_wave_sim_gazebo_plugins)
+project(wave_gazebo_plugins)
 
 ###############################################################################
 # Compile as C++11, supported in ROS Kinetic and newer
@@ -70,7 +70,7 @@ target_link_libraries(Hydrodynamics
 
 target_compile_options(Hydrodynamics PRIVATE "-Wno-unknown-pragmas")
 
-list(APPEND ASV_WAVE_GAZEBO_LIBRARIES_LIST Hydrodynamics)
+list(APPEND WAVE_GAZEBO_LIBRARIES_LIST Hydrodynamics)
 
 ############################################################################### 
 # Plugins...
@@ -85,12 +85,12 @@ target_link_libraries(WavefieldModelPlugin
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+  ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
 target_compile_options(WavefieldModelPlugin PRIVATE "-Wno-unknown-pragmas")
 
-list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST WavefieldModelPlugin)
+list(APPEND WAVE_GAZEBO_PLUGINS_LIST WavefieldModelPlugin)
 
 # WavefieldVisualPlugin
 add_library(WavefieldVisualPlugin
@@ -102,12 +102,12 @@ target_link_libraries(WavefieldVisualPlugin
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+  ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
 target_compile_options(WavefieldVisualPlugin PRIVATE "-Wno-unknown-pragmas")
 
-list(APPEND ASV_WAVE_GAZEBO_PLUGINS_LIST WavefieldVisualPlugin)
+list(APPEND WAVE_GAZEBO_PLUGINS_LIST WavefieldVisualPlugin)
 
 ############################################################################### 
 # Executables...
@@ -126,13 +126,13 @@ add_executable(WaveMsgPublisher
 
 target_link_libraries(WaveMsgPublisher  
   ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+  ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
 target_compile_options(WaveMsgPublisher PRIVATE "-Wno-unknown-pragmas")
 
 add_dependencies(WaveMsgPublisher
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+  ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
 add_executable(WaveMsgSubscriber
@@ -141,16 +141,16 @@ add_executable(WaveMsgSubscriber
 
 target_link_libraries(WaveMsgSubscriber  
   ${GAZEBO_LIBRARIES}
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+  ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
 target_compile_options(WaveMsgSubscriber PRIVATE "-Wno-unknown-pragmas")
 
 add_dependencies(WaveMsgSubscriber
-  ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+  ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
-list(APPEND ASV_WAVE_GAZEBO_EXECUTABLES_LIST WaveMsgSubscriber)
+list(APPEND WAVE_GAZEBO_EXECUTABLES_LIST WaveMsgSubscriber)
 
 ############################################################################### 
 # Tests...
@@ -162,15 +162,15 @@ list(APPEND ASV_WAVE_GAZEBO_EXECUTABLES_LIST WaveMsgSubscriber)
 if(CATKIN_ENABLE_TESTING)
 
   catkin_add_gtest(UNIT_Geometry_TEST src/Geometry_TEST.cc)
-  target_link_libraries(UNIT_Geometry_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
+  target_link_libraries(UNIT_Geometry_TEST ${WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Geometry_TEST PRIVATE "-Wno-unknown-pragmas")
 
   catkin_add_gtest(UNIT_Physics_TEST src/Physics_TEST.cc)
-  target_link_libraries(UNIT_Physics_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
+  target_link_libraries(UNIT_Physics_TEST ${WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Physics_TEST PRIVATE "-Wno-unknown-pragmas")
 
   catkin_add_gtest(UNIT_Wavefield_TEST src/Wavefield_TEST.cc)
-  target_link_libraries(UNIT_Wavefield_TEST ${ASV_WAVE_GAZEBO_LIBRARIES_LIST})
+  target_link_libraries(UNIT_Wavefield_TEST ${WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Wavefield_TEST PRIVATE "-Wno-unknown-pragmas")
 
 endif()
@@ -178,19 +178,19 @@ endif()
 ############################################################################### 
 # Install
 
-install(TARGETS ${ASV_WAVE_GAZEBO_LIBRARIES_LIST}
+install(TARGETS ${WAVE_GAZEBO_LIBRARIES_LIST}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(TARGETS ${ASV_WAVE_GAZEBO_PLUGINS_LIST}
+install(TARGETS ${WAVE_GAZEBO_PLUGINS_LIST}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(TARGETS ${ASV_WAVE_GAZEBO_EXECUTABLES_LIST}
+install(TARGETS ${WAVE_GAZEBO_EXECUTABLES_LIST}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>asv_wave_sim_gazebo</name>
+  <name>wave_gazebo</name>
   <version>0.1.2</version>
   <description>
     This package contains Gazebo media, models and worlds for simulating
@@ -10,12 +10,12 @@
   </description>
 
   <maintainer email="rhys.mainwaring@me.com">Rhys Mainwaring</maintainer>
-  <license>GPLv3</license>
+  <license>TBD</license>
   <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <exec_depend>asv_wave_sim_gazebo_plugins</exec_depend>
+  <exec_depend>wave_gazebo_plugins</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
 
   <export>

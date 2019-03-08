@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "asv_wave_sim_gazebo_plugins/Utilities.hh"
+#include "wave_gazebo_plugins/Utilities.hh"
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/common.hh>
