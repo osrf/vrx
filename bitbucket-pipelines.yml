@@ -19,8 +19,8 @@ pipelines:
           # VRX
           - mkdir -p /tmp/vrx_ws/src
           - ln -s `pwd` /tmp/vrx_ws/src
+          - cd /tmp/vrx_ws
           # Build and run tests.
           - source /opt/ros/melodic/setup.bash
           - catkin_make
           - catkin_make run_tests -j1
-          
