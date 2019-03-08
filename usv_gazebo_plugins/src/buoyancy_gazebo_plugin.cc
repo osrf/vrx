@@ -22,9 +22,9 @@
 #include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
-#include "asv_wave_sim_gazebo_plugins/WavefieldModelPlugin.hh"
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
 
 using namespace asv;
 using namespace gazebo;

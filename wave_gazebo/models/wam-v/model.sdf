@@ -1,0 +1,66 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+
+  <model name='wam-v'>
+    <pose>0 0 0 0 0 0</pose>
+    <static>false</static>
+
+    <plugin name="usv_dynamics_wam-v" filename="libusv_gazebo_dynamics_plugin.so">
+        <bodyName>base_link</bodyName>
+        <!-- Must be same as the ocean model!-->
+        <waterLevel>0</waterLevel>
+        <waterDensity>997.8</waterDensity>
+        <!-- Added mass -->
+        <xDotU>0.0</xDotU>
+        <yDotV>0.0</yDotV>
+        <nDotR>0.0</nDotR>
+        <!-- Linear and quadratic drag -->
+        <xU>51.3</xU>
+        <xUU>72.4</xUU>
+        <yV>40.0</yV>
+        <yVV>0.0</yVV>
+        <zW>500.0</zW>
+        <kP>50.0</kP>
+        <mQ>50.0</mQ>
+        <nR>400.0</nR>
+        <nRR>0.0</nRR>
+        <!-- General dimensions -->
+        <!--<boatArea>2.2</boatArea>-->
+        <hullRadius>0.213</hullRadius> 
+            <boatWidth>2.4</boatWidth>
+            <boatLength>4.9</boatLength>
+        <!-- Length discretization, AKA, "N" -->
+        <length_n>2</length_n>
+
+        <!-- Wave model -->
+        <wave_model>ocean_waves</wave_model>
+    </plugin>
+    <link name="base_link">
+      <visual name="base_visual">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/WAM-V-Base.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="base_collision">
+        <geometry>
+          <mesh>
+            <uri>model://wam-v/meshes/wam-v-base_collision_406.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>180</mass>
+        <inertia>
+          <ixx>120</ixx>
+          <ixy>0</ixy>
+          <iyy>393</iyy>
+          <iyz>0</iyz>
+          <izz>446</izz>
+        </inertia>
+      </inertial>
+    </link>
+  </model>
+</sdf>

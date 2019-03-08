@@ -32,9 +32,9 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh"
 
-#include "asv_wave_sim_gazebo_plugins/Wavefield.hh"
-#include "asv_wave_sim_gazebo_plugins/WavefieldEntity.hh"
-#include "asv_wave_sim_gazebo_plugins/WavefieldModelPlugin.hh"
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
 
 #define GRAVITY 9.815
 

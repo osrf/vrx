@@ -19,6 +19,6 @@
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
   <depend>eigen</depend>
-  <depend>asv_wave_sim_gazebo_plugins</depend>
+  <depend>wave_gazebo_plugins</depend>
   <exec_depend>message_runtime</exec_depend>
 </package>
