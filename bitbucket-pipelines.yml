@@ -1,48 +1,49 @@
 pipelines:
-  default:
-    #- step:
-    #    image: ubuntu:bionic
-    #    script:
-    #      # tzdata wants us to select the geographic area in which we live.
-    #      - apt-get update
-    #      - export DEBIAN_FRONTEND=noninteractive
-    #      - apt-get install -y tzdata
-    #      - ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-    #      - dpkg-reconfigure --frontend noninteractive tzdata
-    #      # Install dependencies
-    #      - echo "deb [trusted=yes] http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros-latest.list
-    #      - echo "deb [trusted=yes] http://packages.osrfoundation.org/gazebo/ubuntu-stable bionic main" > /etc/apt/sources.list.d/gazebo-stable.list
-    #      - apt-get update
-    #      - apt-get -y install mercurial build-essential curl cmake lsb-release gdb git mercurial python3-dbg python3-pip python3-venv ruby libeigen3-dev pkg-config libgles2-mesa-dev qtbase5-dev
-    #      - apt-get -y install gazebo9 libgazebo9-dev ros-melodic-ros-base ros-melodic-xacro ros-melodic-gazebo-ros ros-melodic-gazebo-plugins ros-melodic-hector-gazebo-plugins ros-melodic-joy ros-melodic-joy-teleop ros-melodic-key-teleop ros-melodic-teleop-tools ros-melodic-teleop-twist-keyboard ros-melodic-robot-localization ros-melodic-velodyne-simulator
-    #      # VRX
-    #      - mkdir -p /tmp/vrx_ws/src
-    #      - ln -s `pwd` /tmp/vrx_ws/src
-    #      - cd /tmp/vrx_ws
-    #      # Build and run tests.
-    #      - source /opt/ros/melodic/setup.bash
-    #      - catkin_make
-    #      - catkin_make run_tests -j1
-    - step:
-        image: ubuntu:xenial
-        script:
-          # tzdata wants us to select the geographic area in which we live.
-          - apt-get update
-          - export DEBIAN_FRONTEND=noninteractive
-          - apt-get install -y tzdata
-          - ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-          - dpkg-reconfigure --frontend noninteractive tzdata
-          # Install dependencies
-          - echo "deb [trusted=yes] http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros-latest.list
-          - echo "deb [trusted=yes] http://packages.osrfoundation.org/gazebo/ubuntu-stable xenial main" > /etc/apt/sources.list.d/gazebo-stable.list
-          - apt-get update
-          - apt-get -y install mercurial build-essential curl cmake lsb-release gdb git mercurial python3-dbg python3-pip python3-venv ruby libeigen3-dev pkg-config libgles2-mesa-dev qtbase5-dev
-          - apt-get -y install gazebo7 libgazebo7-dev ros-kinetic-ros-base ros-kinetic-xacro ros-kinetic-gazebo-ros ros-kinetic-gazebo-plugins ros-kinetic-hector-gazebo-plugins ros-kinetic-joy ros-kinetic-joy-teleop ros-kinetic-key-teleop ros-kinetic-teleop-tools ros-kinetic-teleop-twist-keyboard ros-kinetic-robot-localization ros-kinetic-velodyne-simulator
-          # VRX
-          - mkdir -p /tmp/vrx_ws/src
-          - ln -s `pwd` /tmp/vrx_ws/src
-          - cd /tmp/vrx_ws
-          # Build and run tests.
-          - source /opt/ros/kinetic/setup.bash
-          - catkin_make
-          - catkin_make run_tests -j1
+  pull-requests:
+    - parallel:
+      - step:
+          image: ubuntu:bionic
+          script:
+            # tzdata wants us to select the geographic area in which we live.
+            - apt-get update
+            - export DEBIAN_FRONTEND=noninteractive
+            - apt-get install -y tzdata
+            - ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+            - dpkg-reconfigure --frontend noninteractive tzdata
+            # Install dependencies
+            - echo "deb [trusted=yes] http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros-latest.list
+            - echo "deb [trusted=yes] http://packages.osrfoundation.org/gazebo/ubuntu-stable bionic main" > /etc/apt/sources.list.d/gazebo-stable.list
+            - apt-get update
+            - apt-get -y install mercurial build-essential curl cmake lsb-release gdb git mercurial python3-dbg python3-pip python3-venv ruby libeigen3-dev pkg-config libgles2-mesa-dev qtbase5-dev
+            - apt-get -y install gazebo9 libgazebo9-dev ros-melodic-ros-base ros-melodic-xacro ros-melodic-gazebo-ros ros-melodic-gazebo-plugins ros-melodic-hector-gazebo-plugins ros-melodic-joy ros-melodic-joy-teleop ros-melodic-key-teleop ros-melodic-teleop-tools ros-melodic-teleop-twist-keyboard ros-melodic-robot-localization ros-melodic-velodyne-simulator
+            # VRX
+            - mkdir -p /tmp/vrx_ws/src
+            - ln -s `pwd` /tmp/vrx_ws/src
+            - cd /tmp/vrx_ws
+            # Build and run tests.
+            - source /opt/ros/melodic/setup.bash
+            - catkin_make
+            - catkin_make run_tests -j1
+      #- step:
+      #    image: ubuntu:xenial
+      #    script:
+      #      # tzdata wants us to select the geographic area in which we live.
+      #      - apt-get update
+      #      - export DEBIAN_FRONTEND=noninteractive
+      #      - apt-get install -y tzdata
+      #      - ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+      #      - dpkg-reconfigure --frontend noninteractive tzdata
+      #      # Install dependencies
+      #      - echo "deb [trusted=yes] http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros-latest.list
+      #      - echo "deb [trusted=yes] http://packages.osrfoundation.org/gazebo/ubuntu-stable xenial main" > /etc/apt/sources.list.d/gazebo-stable.list
+      #      - apt-get update
+      #      - apt-get -y install mercurial build-essential curl cmake lsb-release gdb git mercurial python3-dbg python3-pip python3-venv ruby libeigen3-dev pkg-config libgles2-mesa-dev qtbase5-dev
+      #      - apt-get -y install gazebo7 libgazebo7-dev ros-kinetic-ros-base ros-kinetic-xacro ros-kinetic-gazebo-ros ros-kinetic-gazebo-plugins ros-kinetic-hector-gazebo-plugins ros-kinetic-joy ros-kinetic-joy-teleop ros-kinetic-key-teleop ros-kinetic-teleop-tools ros-kinetic-teleop-twist-keyboard ros-kinetic-robot-localization ros-kinetic-velodyne-simulator
+      #      # VRX
+      #      - mkdir -p /tmp/vrx_ws/src
+      #      - ln -s `pwd` /tmp/vrx_ws/src
+      #      - cd /tmp/vrx_ws
+      #      # Build and run tests.
+      #      - source /opt/ros/kinetic/setup.bash
+      #      - catkin_make
+      #      - catkin_make run_tests -j1
