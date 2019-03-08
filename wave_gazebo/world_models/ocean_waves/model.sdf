@@ -51,7 +51,7 @@
         <material>
           <script>
             <uri>model://ocean_waves/materials/scripts/waves.material</uri>
-            <name>ASVWaveSim/GerstnerWaves</name>
+            <name>WaveSim/GerstnerWaves</name>
           </script>
         </material>
       </visual>
@@ -65,7 +65,7 @@
         <material>
           <script>
             <uri>model://ocean_waves/materials/scripts/waves.material</uri>
-            <name>ASVWaveSim/GerstnerWaves</name>
+            <name>WaveSim/GerstnerWaves</name>
           </script>
         </material>
       </visual>

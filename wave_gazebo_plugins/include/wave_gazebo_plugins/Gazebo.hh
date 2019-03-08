@@ -18,8 +18,8 @@
 /// \file Gazebo.hh
 /// \brief Support for methods not available in legacy versions of Gazebo.
 
-#ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_GAZEBO_HH_
-#define _ASV_WAVE_SIM_GAZEBO_PLUGINS_GAZEBO_HH_
+#ifndef _WAVE_GAZEBO_PLUGINS_GAZEBO_HH_
+#define _WAVE_GAZEBO_PLUGINS_GAZEBO_HH_
 
 #include <string>
 
@@ -49,4 +49,4 @@ namespace gazebo
 
 } // namespace gazebo
 
-#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_GAZEBO_HH_
+#endif // _WAVE_GAZEBO_PLUGINS_GAZEBO_HH_

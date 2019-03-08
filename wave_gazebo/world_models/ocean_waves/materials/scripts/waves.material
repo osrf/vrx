@@ -23,7 +23,7 @@ fragment_program GerstnerWavesFS glsl
   source ../programs/GerstnerWaves.frag
 }
 
-material ASVWaveSim/GerstnerWaves
+material WaveSim/GerstnerWaves
 {
   technique GLSL
   {
