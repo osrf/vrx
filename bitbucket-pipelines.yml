@@ -1,5 +1,5 @@
 pipelines:
-  pull-requests:
+  default:
     - parallel:
       - step:
           image: osrf/vrx:current
