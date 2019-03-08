@@ -2,6 +2,9 @@
 
 ### Forthcoming
 
+1. Fix issue with ocean reflecting the laser beams:
+    * [Pull request 79](https://bitbucket.org/osrf/vrx/pull-requests/79)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
