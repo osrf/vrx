@@ -142,6 +142,39 @@ namespace asv
 
       for (size_t i=0; i<this->number; ++i)
       {
+				// Hack this by hand for testing
+				// from wamv_gazebo_dynamics_plugin.xacro
+				double a = 0;
+				double T = 1;
+				ignition::math::Vector2d d(1,0);
+				if (i==0)
+				{
+					a = 0.06;
+					T = 12.6;
+					d = ignition::math::Vector2d(-1,0);
+				}
+				else if (i==1)
+				{
+					a = 0.04;
+					T = 3.7;
+					d = ignition::math::Vector2d(-0.7,0.7);
+				}
+				else if (i==2)
+				{
+					a = 0.03;
+					T = 6.3;
+					d = ignition::math::Vector2d(0.7, 0.7);
+				}
+				const double omega = 2.0*M_PI/T;
+				const double k = Physics::DeepWaterDispersionToWavenumber(omega);
+				const double phi = 0.0;
+				double steepness = 1.0;
+				double q = 0.0;
+				if (a != 0)
+        {
+          q = std::min(1.0, steepness / (a * k * this->number));
+        }
+				/*
         const int n = i - this->number/2;
         const double scaleFactor = std::pow(this->scale, n);
         const double a = scaleFactor * this->amplitude;
@@ -153,13 +186,15 @@ namespace asv
         {
           q = std::min(1.0, this->steepness / (a * k * this->number));
         }
+				*/
 
         this->amplitudes.push_back(a);        
         this->angularFrequencies.push_back(omega);
         this->phases.push_back(phi);
         this->steepnesses.push_back(q);
         this->wavenumbers.push_back(k);
-      
+
+				/*
         // Direction
         const double c = std::cos(n * this->angle);
         const double s = std::sin(n * this->angle);
@@ -172,6 +207,7 @@ namespace asv
           c * this->direction.X() - s * this->direction.Y(),
           s * this->direction.X() + c * this->direction.Y()
         );
+				*/
         directions.push_back(d);
       }
     }
