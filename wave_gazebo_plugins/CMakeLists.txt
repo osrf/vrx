@@ -161,14 +161,6 @@ list(APPEND WAVE_GAZEBO_EXECUTABLES_LIST WaveMsgSubscriber)
 
 if(CATKIN_ENABLE_TESTING)
 
-  catkin_add_gtest(UNIT_Geometry_TEST src/Geometry_TEST.cc)
-  target_link_libraries(UNIT_Geometry_TEST ${WAVE_GAZEBO_LIBRARIES_LIST})
-  target_compile_options(UNIT_Geometry_TEST PRIVATE "-Wno-unknown-pragmas")
-
-  catkin_add_gtest(UNIT_Physics_TEST src/Physics_TEST.cc)
-  target_link_libraries(UNIT_Physics_TEST ${WAVE_GAZEBO_LIBRARIES_LIST})
-  target_compile_options(UNIT_Physics_TEST PRIVATE "-Wno-unknown-pragmas")
-
   catkin_add_gtest(UNIT_Wavefield_TEST src/Wavefield_TEST.cc)
   target_link_libraries(UNIT_Wavefield_TEST ${WAVE_GAZEBO_LIBRARIES_LIST})
   target_compile_options(UNIT_Wavefield_TEST PRIVATE "-Wno-unknown-pragmas")
