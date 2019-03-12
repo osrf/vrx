@@ -97,8 +97,8 @@ void UsvWindPlugin::Update()
   ignition::math::Vector3d relativeWind =
     this->link->WorldPose().Rot().Inverse().RotateVector(this->windVelocity);
 #else
-  ignition::math::Vector3d relativeWind = \
-    this->link->GetWorldPose().rot.Ign().Inverse().RotateVector( \
+  ignition::math::Vector3d relativeWind =
+    this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
     this->windVelocity);
 #endif        
   // Calculate apparent wind

@@ -140,8 +140,8 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     const ignition::math::Vector3d kInertia =
       this->link->GetInertial()->PrincipalMoments();
   #else
-    const ignition::math::Vector3d kInertia = this->link->GetInertial()-> \
-      GetPrincipalMoments().Ign();
+    const ignition::math::Vector3d kInertia = 
+      this->link->GetInertial()->GetPrincipalMoments().Ign();
   #endif
   
   #if GAZEBO_MAJOR_VERSION >= 8    
@@ -201,7 +201,7 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
   #else
     const ignition::math::Pose3d kPose = this->link->GetWorldPose().Ign();
-    const ignition::math::Vector3d kEuler = \
+    const ignition::math::Vector3d kEuler =
       this->link->GetWorldPose().rot.Ign().Euler();
   #endif  
 
