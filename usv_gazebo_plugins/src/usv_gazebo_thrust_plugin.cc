@@ -42,7 +42,12 @@ Thruster::Thruster(UsvThrust *_parent)
 
   // Initialize some things
   this->currCmd = 0.0;
-  this->lastCmdTime = this->plugin->world->SimTime();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->lastCmdTime = this->plugin->world->SimTime();
+  #else
+    this->lastCmdTime = this->plugin->world->GetSimTime();
+  #endif
+  
 }
 
 //////////////////////////////////////////////////
@@ -51,7 +56,11 @@ void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
   // When we get a new thrust command!
   ROS_DEBUG_STREAM("New thrust command! " << _msg->data);
   std::lock_guard<std::mutex> lock(this->plugin->mutex);
-  this->lastCmdTime = this->plugin->world->SimTime();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->lastCmdTime = this->plugin->world->SimTime();
+  #else
+    this->lastCmdTime = this->plugin->world->GetSimTime();
+  #endif
   this->currCmd = _msg->data;
 }
 
@@ -263,7 +272,11 @@ double UsvThrust::GlfThrustCmd(const double _cmd,
 //////////////////////////////////////////////////
 void UsvThrust::Update()
 {
-  common::Time now = this->world->SimTime();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    common::Time now = this->world->SimTime();
+  #else
+    common::Time now = this->world->GetSimTime();
+  #endif
 
   for (size_t i = 0; i < this->thrusters.size(); ++i)
   {
@@ -347,7 +360,12 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
   }
 
   // Set position, velocity, and effort of joint from gazebo
-  ignition::math::Angle position = _propeller->Position(0);
+
+  #if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Angle position = _propeller->Position(0);
+  #else
+    gazebo::math::Angle position = _propeller->GetAngle(0);
+  #endif
   position.Normalize();
   this->jointStateMsg.position[index] = position.Radian();
   this->jointStateMsg.velocity[index] = _propeller->GetVelocity(0);
