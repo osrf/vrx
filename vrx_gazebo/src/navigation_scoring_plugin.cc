@@ -43,7 +43,7 @@ void NavigationScoringPlugin::Gate::Update()
   #else
     const auto leftMarkerPose = this->leftMarkerModel->GetWorldPose().Ign();
     const auto rightMarkerPose = this->rightMarkerModel->GetWorldPose().Ign();
-  #endif  
+  #endif
 
   // Unit vector from the left marker to the right one.
   auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
@@ -226,7 +226,7 @@ void NavigationScoringPlugin::Update()
     const auto robotPose = this->vehicleModel->WorldPose();
   #else
     const auto robotPose = this->vehicleModel->GetWorldPose().Ign();
-  #endif  
+  #endif
 
   // Update the state of all gates.
   for (auto &gate : this->gates)

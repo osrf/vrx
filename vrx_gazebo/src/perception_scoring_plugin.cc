@@ -370,7 +370,7 @@ void PerceptionScoringPlugin::Restart()
     this->dataPtr->startTime = this->dataPtr->world->SimTime();
   #else
     this->dataPtr->startTime = this->dataPtr->world->GetSimTime();
-  #endif  
+  #endif
   
   this->dataPtr->objects = this->dataPtr->initialObjects;
 

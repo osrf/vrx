@@ -196,7 +196,7 @@ void LightBuoyPlugin::Update()
     ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
   #else 
     gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
-  #endif 
+  #endif
   // Update the visuals.
   for (auto visual : this->visuals)
   {

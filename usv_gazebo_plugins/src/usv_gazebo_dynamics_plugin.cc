@@ -198,13 +198,11 @@ void UsvDynamicsPlugin::Update()
   // Get Pose/Orientation from Gazebo (if no state subscriber is active)
   #if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Pose3d kPose = this->link->WorldPose();
-    const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
   #else
     const ignition::math::Pose3d kPose = this->link->GetWorldPose().Ign();
-    const ignition::math::Vector3d kEuler =
-      this->link->GetWorldPose().rot.Ign().Euler();
-  #endif  
-
+  #endif
+  const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
+  
   // Get body-centered linear and angular rates
   #if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Vector3d kVelLinearBody =

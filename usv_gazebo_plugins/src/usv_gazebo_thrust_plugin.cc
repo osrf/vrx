@@ -60,7 +60,7 @@ void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
     this->lastCmdTime = this->plugin->world->SimTime();
   #else
     this->lastCmdTime = this->plugin->world->GetSimTime();
-  #endif  
+  #endif
   this->currCmd = _msg->data;
 }
 
@@ -276,7 +276,7 @@ void UsvThrust::Update()
     common::Time now = this->world->SimTime();
   #else
     common::Time now = this->world->GetSimTime();
-  #endif  
+  #endif
 
   for (size_t i = 0; i < this->thrusters.size(); ++i)
   {
@@ -365,7 +365,7 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
     ignition::math::Angle position = _propeller->Position(0);
   #else
     gazebo::math::Angle position = _propeller->GetAngle(0);
-  #endif   
+  #endif
   position.Normalize();
   this->jointStateMsg.position[index] = position.Radian();
   this->jointStateMsg.velocity[index] = _propeller->GetVelocity(0);

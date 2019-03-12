@@ -172,7 +172,7 @@ void BuoyancyPlugin::OnUpdate()
       ignition::math::Pose3d linkFrame = link->WorldPose();
     #else
       ignition::math::Pose3d linkFrame = link->GetWorldPose().Ign();
-    #endif    
+    #endif
 
     // Location of bottom of object relative to the fluid surface - assumes
     // origin is at cog of the object.
