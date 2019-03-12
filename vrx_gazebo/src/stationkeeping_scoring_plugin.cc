@@ -117,8 +117,7 @@ void StationkeepingScoringPlugin::Update()
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
   #else
-    const ignition::math::Pose3d robotPose = 
-      this->vehicleModel->GetWorldPose().Ign();
+    const auto robotPose = this->vehicleModel->GetWorldPose().Ign();
   #endif
 
   double currentHeading = robotPose.Rot().Euler().Z();
