@@ -1,25 +1,26 @@
 pipelines:
-  default:
-    - parallel:
-      - step:
-          image: osrf/vrx:current
-          script:
-            # VRX
-            - mkdir -p /tmp/vrx_ws/src
-            - ln -s `pwd` /tmp/vrx_ws/src
-            - cd /tmp/vrx_ws
-            # Build and run tests.
-            - source /opt/ros/melodic/setup.bash
-            - catkin_make
-            - catkin_make run_tests -j1
-      - step:
-          image: osrf/vmrc:current
-          script:
-            # VRX
-            - mkdir -p /tmp/vrx_ws/src
-            - ln -s `pwd` /tmp/vrx_ws/src
-            - cd /tmp/vrx_ws
-            # Build and run tests.
-            - source /opt/ros/kinetic/setup.bash
-            - catkin_make
-            - catkin_make run_tests -j1
+  pull-requests:
+    '**': #this runs as default for any branch not elsewhere defined
+      - parallel:
+        - step:
+            image: osrf/vrx:current
+            script:
+              # VRX
+              - mkdir -p /tmp/vrx_ws/src
+              - ln -s `pwd` /tmp/vrx_ws/src
+              - cd /tmp/vrx_ws
+              # Build and run tests.
+              - source /opt/ros/melodic/setup.bash
+              - catkin_make
+              - catkin_make run_tests -j1
+        - step:
+            image: osrf/vmrc:current
+            script:
+              # VRX
+              - mkdir -p /tmp/vrx_ws/src
+              - ln -s `pwd` /tmp/vrx_ws/src
+              - cd /tmp/vrx_ws
+              # Build and run tests.
+              - source /opt/ros/kinetic/setup.bash
+              - catkin_make
+              - catkin_make run_tests -j1
