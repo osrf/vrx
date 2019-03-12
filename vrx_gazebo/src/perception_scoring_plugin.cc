@@ -128,9 +128,7 @@ void ObjectChecker::OnObject(
   #if GAZEBO_MAJOR_VERSION >= 8  
     ignition::math::Pose3d truePose = this->currObject->WorldPose();
   #else
-    gazebo::math::Pose mathPose = this->currObject->GetWorldPose();
-    ignition::math::Pose3d truePose(ignition::math::Vector3d( \
-      mathPose.pos.x,mathPose.pos.y,mathPose.pos.z),mathPose.rot.Ign());
+    ignition::math::Pose3d truePose = this->currObject->GetWorldPose().Ign();
   #endif
     
   // 2D Error
@@ -462,9 +460,8 @@ void PerceptionScoringPlugin::OnUpdate()
           this->dataPtr->frame->WorldPose().Pos(),
           ignition::math::Quaterniond());
       #else
-        gazebo::math::Pose mathPose = this->dataPtr->frame->GetWorldPose();
-        ignition::math::Pose3d framePose(ignition::math::Vector3d( \
-          mathPose.pos.x, mathPose.pos.y, mathPose.pos.z), \
+        ignition::math::Pose3d framePose(
+          this->dataPtr->frame->GetWorldPose().pos.Ign(),
           ignition::math::Quaterniond());
       #endif
       ignition::math::Matrix4d transMat(framePose);
@@ -508,10 +505,7 @@ void PerceptionScoringPlugin::OnUpdate()
       #if GAZEBO_MAJOR_VERSION >= 8
         this->dataPtr->orig_pose = modelPtr->WorldPose();
       #else
-        gazebo::math::Pose mathPose = modelPtr->GetWorldPose();
-        this->dataPtr->orig_pose = ignition::math::Pose3d(\
-          ignition::math::Vector3d(mathPose.pos.x, mathPose.pos.y, \
-          mathPose.pos.z),mathPose.rot.Ign());
+        this->dataPtr->orig_pose = modelPtr->GetWorldPose().Ign();
       #endif
       // Move object to the target pose.
       modelPtr->SetWorldPose(obj.pose);

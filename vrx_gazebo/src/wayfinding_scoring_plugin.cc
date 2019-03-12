@@ -135,9 +135,8 @@ void WayfindingScoringPlugin::Update()
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
   #else
-    gazebo::math::Pose mathPose = this->vehicleModel->GetWorldPose();
-    const ignition::math::Pose3d robotPose(ignition::math::Vector3d( \
-    mathPose.pos.x,mathPose.pos.y,mathPose.pos.z),mathPose.rot.Ign());
+    const ignition::math::Pose3d robotPose = 
+      this->vehicleModel->GetWorldPose().Ign();
   #endif
   double currentHeading = robotPose.Rot().Euler().Z();
 

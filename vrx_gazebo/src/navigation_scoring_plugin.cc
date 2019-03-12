@@ -41,16 +41,10 @@ void NavigationScoringPlugin::Gate::Update()
     const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
     const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
   #else
-    gazebo::math::Pose leftMarkerMathPose = this->leftMarkerModel-> \
-      GetWorldPose();
-    gazebo::math::Pose rightMarkerMathPose = this->rightMarkerModel-> \
-      GetWorldPose();
-    const ignition::math::Pose3d leftMarkerPose(ignition::math::Vector3d(\
-      leftMarkerMathPose.pos.x, leftMarkerMathPose.pos.y, \
-      leftMarkerMathPose.pos.z), leftMarkerMathPose.rot.Ign());
-    const ignition::math::Pose3d rightMarkerPose(ignition::math::Vector3d(\
-      rightMarkerMathPose.pos.x, rightMarkerMathPose.pos.y, \
-      rightMarkerMathPose.pos.z), rightMarkerMathPose.rot.Ign());
+    const ignition::math::Pose3d leftMarkerPose = 
+      this->leftMarkerModel->GetWorldPose().Ign();
+    const ignition::math::Pose3d rightMarkerPose = 
+      this->rightMarkerModel->GetWorldPose().Ign();
   #endif  
 
   // Unit vector from the left marker to the right one.
@@ -233,9 +227,8 @@ void NavigationScoringPlugin::Update()
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
   #else
-    gazebo::math::Pose mathPose = this->vehicleModel->GetWorldPose();
-    const ignition::math::Pose3d robotPose(ignition::math::Vector3d( \
-    mathPose.pos.x, mathPose.pos.y, mathPose.pos.z),mathPose.rot.Ign());
+    const ignition::math::Pose3d robotPose = 
+      this->vehicleModel->GetWorldPose().Ign();
   #endif  
 
   // Update the state of all gates.

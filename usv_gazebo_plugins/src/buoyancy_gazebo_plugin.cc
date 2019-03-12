@@ -171,9 +171,7 @@ void BuoyancyPlugin::OnUpdate()
     #if GAZEBO_MAJOR_VERSION >= 8
       ignition::math::Pose3d linkFrame = link->WorldPose();
     #else
-      gazebo::math::Pose mathPose = link->GetWorldPose();
-      ignition::math::Pose3d linkFrame(ignition::math::Vector3d(mathPose.pos.x,\
-        mathPose.pos.y,mathPose.pos.z), mathPose.rot.Ign());
+      ignition::math::Pose3d linkFrame = link->GetWorldPose().Ign();
     #endif    
 
     // Location of bottom of object relative to the fluid surface - assumes
@@ -213,8 +211,7 @@ void BuoyancyPlugin::OnUpdate()
       #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Vector3d vel = link->WorldLinearVel();
       #else
-        gazebo::math::Vector3 linearVel = link->GetWorldLinearVel();
-        ignition::math::Vector3d vel(linearVel.x,linearVel.y,linearVel.z);
+        ignition::math::Vector3d vel= link->GetWorldLinearVel().Ign();
       #endif
       double dz = -1.0 * this->fluidDrag * vel.Z() * std::abs(vel.Z());
       ignition::math::Vector3d drag(0, 0, dz);

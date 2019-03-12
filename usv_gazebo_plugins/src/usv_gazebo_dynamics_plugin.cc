@@ -140,9 +140,8 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     const ignition::math::Vector3d kInertia =
       this->link->GetInertial()->PrincipalMoments();
   #else
-    gazebo::math::Vector3 moments = \
-      this->link->GetInertial()->GetPrincipalMoments();
-    const ignition::math::Vector3d kInertia(moments.x,moments.y,moments.z);
+    const ignition::math::Vector3d kInertia = this->link->GetInertial()-> \
+      GetPrincipalMoments().Ign();
   #endif
   
   #if GAZEBO_MAJOR_VERSION >= 8    
@@ -201,10 +200,9 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Pose3d kPose = this->link->WorldPose();
     const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
   #else
-    gazebo::math::Pose mathPose = this->link->GetWorldPose();
-    const ignition::math::Pose3d kPose(ignition::math::Vector3d(mathPose.pos.x,\
-      mathPose.pos.y, mathPose.pos.z),mathPose.rot.Ign());
-    const ignition::math::Vector3d kEuler = mathPose.rot.Ign().Euler();
+    const ignition::math::Pose3d kPose = this->link->GetWorldPose().Ign();
+    const ignition::math::Vector3d kEuler = \
+      this->link->GetWorldPose().rot.Ign().Euler();
   #endif  
 
   // Get body-centered linear and angular rates
@@ -212,9 +210,8 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Vector3d kVelLinearBody =
       this->link->RelativeLinearVel();
   #else
-    gazebo::math::Vector3 linearVel = this->link->GetRelativeLinearVel();
-    const ignition::math::Vector3d kVelLinearBody(linearVel.x,linearVel.y, \
-      linearVel.z);
+    const ignition::math::Vector3d kVelLinearBody =
+      this->link->GetRelativeLinearVel().Ign();
   #endif
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
   
@@ -222,9 +219,8 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Vector3d kVelAngularBody =
       this->link->RelativeAngularVel();
   #else
-    gazebo::math::Vector3 angularVel = this->link->GetRelativeAngularVel();
-    const ignition::math::Vector3d kVelAngularBody(angularVel.x,angularVel.y, \
-      angularVel.z);
+    const ignition::math::Vector3d kVelAngularBody = 
+      this->link->GetRelativeAngularVel().Ign();
   #endif
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
 
