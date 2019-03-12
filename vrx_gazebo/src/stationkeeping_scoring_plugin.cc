@@ -98,7 +98,11 @@ void StationkeepingScoringPlugin::Update()
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->vehicleModel)
   {
-    this->vehicleModel = this->world->ModelByName(this->vehicleName);
+    #if GAZEBO_MAJOR_VERSION >= 8
+      this->vehicleModel = this->world->ModelByName(this->vehicleName);
+    #else
+      this->vehicleModel = this->world->GetModel(this->vehicleName);
+    #endif
     if (!this->vehicleModel)
       return;
   }
@@ -110,7 +114,11 @@ void StationkeepingScoringPlugin::Update()
   std_msgs::Float64 poseErrorMsg;
   std_msgs::Float64 rmsErrorMsg;
 
-  const auto robotPose = this->vehicleModel->WorldPose();
+  #if GAZEBO_MAJOR_VERSION >= 8
+    const auto robotPose = this->vehicleModel->WorldPose();
+  #else
+    const auto robotPose = this->vehicleModel->GetWorldPose().Ign();
+  #endif
 
   double currentHeading = robotPose.Rot().Euler().Z();
   double dx   =  this->goalX - robotPose.Pos().X();
