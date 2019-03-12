@@ -192,7 +192,7 @@ void LightBuoyPlugin::Update()
     this->state = 0;
 
   auto color = this->kColors[this->pattern[this->state]].first;
-  #if GAZEBO_MAJOR_VERSION >= 8  
+  #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
   #else 
     gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);

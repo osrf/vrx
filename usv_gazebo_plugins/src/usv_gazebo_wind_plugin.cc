@@ -106,7 +106,7 @@ void UsvWindPlugin::Update()
   ignition::math::Vector3d apparentWind =
     relativeWind - this->link->RelativeLinearVel();
 #else
-  ignition::math::Vector3d apparentWind = relativeWind 
+  ignition::math::Vector3d apparentWind = relativeWind
     - this->link->GetRelativeLinearVel().Ign();
 #endif
   // gzdbg << "Relative wind: " << relativeWind << std::endl;

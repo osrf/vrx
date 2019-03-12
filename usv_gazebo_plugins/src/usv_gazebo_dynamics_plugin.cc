@@ -140,11 +140,11 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     const ignition::math::Vector3d kInertia =
       this->link->GetInertial()->PrincipalMoments();
   #else
-    const ignition::math::Vector3d kInertia = 
+    const ignition::math::Vector3d kInertia =
       this->link->GetInertial()->GetPrincipalMoments().Ign();
   #endif
   
-  #if GAZEBO_MAJOR_VERSION >= 8    
+  #if GAZEBO_MAJOR_VERSION >= 8
     const double kMass = this->link->GetInertial()->Mass();
   #else
     const double kMass = this->link->GetInertial()->GetMass();
@@ -219,7 +219,7 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Vector3d kVelAngularBody =
       this->link->RelativeAngularVel();
   #else
-    const ignition::math::Vector3d kVelAngularBody = 
+    const ignition::math::Vector3d kVelAngularBody =
       this->link->GetRelativeAngularVel().Ign();
   #endif
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);

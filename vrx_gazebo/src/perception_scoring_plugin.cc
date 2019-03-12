@@ -125,7 +125,7 @@ void ObjectChecker::OnObject(
 #endif
 
   // Get current pose of the current object
-  #if GAZEBO_MAJOR_VERSION >= 8  
+  #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Pose3d truePose = this->currObject->WorldPose();
   #else
     ignition::math::Pose3d truePose = this->currObject->GetWorldPose().Ign();
@@ -409,7 +409,7 @@ void PerceptionScoringPlugin::OnUpdate()
         this->dataPtr->lastUpdateTime = this->dataPtr->world->SimTime();
       #else
         this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
-      #endif  
+      #endif
       return;
     }
   }
@@ -418,7 +418,7 @@ void PerceptionScoringPlugin::OnUpdate()
   #if GAZEBO_MAJOR_VERSION >= 8
     auto elapsedTime = this->dataPtr->world->SimTime() -
                        this->dataPtr->lastUpdateTime;
-  #else                       
+  #else
     auto elapsedTime = this->dataPtr->world->GetSimTime() -
                        this->dataPtr->lastUpdateTime;
   #endif
