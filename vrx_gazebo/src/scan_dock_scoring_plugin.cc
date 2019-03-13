@@ -324,10 +324,16 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     }
 
     // Create a new dock checker.
-    std::unique_ptr<DockChecker> dockChecker(
-      new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
-        this->world->Name(), ns, announceSymbol));
-
+    #if GAZEBO_MAJOR_VERSION >= 8
+      std::unique_ptr<DockChecker> dockChecker(
+        new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
+          this->world->Name(), ns, announceSymbol));
+    #else
+      std::unique_ptr<DockChecker> dockChecker(
+        new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
+          this->world->GetName(), ns, announceSymbol));
+    #endif
+    
     // Add the dock checker.
     this->dockCheckers.push_back(std::move(dockChecker));
 

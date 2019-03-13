@@ -87,12 +87,22 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 void UsvWindPlugin::Update()
 {
   // Transform wind from world coordinates to body coordinates
+#if GAZEBO_MAJOR_VERSION >= 8
   ignition::math::Vector3d relativeWind =
     this->link->WorldPose().Rot().Inverse().RotateVector(this->windVelocity);
+#else
+  ignition::math::Vector3d relativeWind =
+    this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
+    this->windVelocity);
+#endif        
   // Calculate apparent wind
+#if GAZEBO_MAJOR_VERSION >= 8  
   ignition::math::Vector3d apparentWind =
     relativeWind - this->link->RelativeLinearVel();
-
+#else
+  ignition::math::Vector3d apparentWind = relativeWind
+    - this->link->GetRelativeLinearVel().Ign();
+#endif
   // gzdbg << "Relative wind: " << relativeWind << std::endl;
   // gzdbg << "Apparent wind: " << apparentWind << std::endl;
 

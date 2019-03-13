@@ -191,7 +191,11 @@ void BuoyancyPlugin::OnUpdate()
     double height = volumeProperties.height;
     double area = volumeProperties.area;
     double volume = height * area;
-    ignition::math::Pose3d linkFrame = link->WorldPose();
+    #if GAZEBO_MAJOR_VERSION >= 8
+      ignition::math::Pose3d linkFrame = link->WorldPose();
+    #else
+      ignition::math::Pose3d linkFrame = link->GetWorldPose().Ign();
+    #endif
 
     // Compute the wave displacement at the centre of the link frame.
     double simTime = this->model->GetWorld()->SimTime().Double();
@@ -238,7 +242,11 @@ void BuoyancyPlugin::OnUpdate()
     // Add some drag
     if (volume > 1e-6)
     {
-      ignition::math::Vector3d vel = link->WorldLinearVel();
+      #if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Vector3d vel = link->WorldLinearVel();
+      #else
+        ignition::math::Vector3d vel= link->GetWorldLinearVel().Ign();
+      #endif
       double dz = -1.0 * this->fluidDrag * vel.Z() * std::abs(vel.Z());
       ignition::math::Vector3d drag(0, 0, dz);
       buoyancy += drag;
