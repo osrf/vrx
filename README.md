@@ -21,7 +21,7 @@ If you have any questions about these topics, or would like to work on other asp
 
 ## Contributors
 
-We have continue to receive important improvements from the community.  We have done our best to document this on our [Contributors Wiki](https://bitbucket.org/osrf/vrx/wiki/Contributors).
+We continue to receive important improvements from the community.  We have done our best to document this on our [Contributors Wiki](https://bitbucket.org/osrf/vrx/wiki/Contributors).
 
 ## Contacts
 
