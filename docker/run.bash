@@ -76,7 +76,7 @@ fi
 
 DOCKER_OPTS=
 # Example: Bind mount a local repository on the host machine:
-#DOCKER_OPTS="--mount type=bind,source=path_to_local_repo,target=/home/developer/vrx_ws/src/vrx"
+#DOCKER_OPTS="--mount type=bind,source=$PWD,target=/home/developer/vrx_ws/src/vrx"
 
 
 # Share your vim settings.
