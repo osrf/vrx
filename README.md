@@ -4,7 +4,7 @@ This is the entry point for teams participating in the current [RobotX Maritime 
 
 This is an active development project.  We are adding and improving things all the time.  The project contains a simulation foundation, including an environment similar to the RobotX venue and description of the WAM-V platform.  It is intended as a first step for teams that would then extend the tools for their specific development needs.
 
- * Watch the [Release 0.2 Highlight Video](https://youtu.be/QvottL9P75M)
+ * Watch the [Release 0.2 Highlight Video](https://www.youtube.com/watch?v=v23cI4H9RKM)
 
 ![VRX](images/vrx.jpg)
 
