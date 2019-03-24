@@ -28,8 +28,6 @@ RUN apt update \
         wget \
         libeigen3-dev \
         pkg-config \
-        libgles2-mesa-dev \
-        qtbase5-dev \
  && apt clean
 
 RUN export DEBIAN_FRONTEND=noninteractive \

@@ -88,7 +88,7 @@ DOCKER_OPTS=
 
 USERID=$(id -u)
 GROUPID=$(id -g)
-sudo docker run -it \
+docker run -it \
   -e DISPLAY \
   -e QT_X11_NO_MITSHM=1 \
   -e XAUTHORITY=$XAUTH \
