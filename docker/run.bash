@@ -74,9 +74,11 @@ then
     chmod a+r $XAUTH
 fi
 
+VRX_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" >/dev/null 2>&1 && pwd )"
+
 DOCKER_OPTS=
 # Example: Bind mount a local repository on the host machine:
-#DOCKER_OPTS="--mount type=bind,source=$PWD,target=/home/developer/vrx_ws/src/vrx"
+#DOCKER_OPTS="--mount type=bind,source=${VRX_PATH},target=/home/developer/vrx_ws/src/vrx"
 
 
 # Share your vim settings.
