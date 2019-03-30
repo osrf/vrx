@@ -29,6 +29,8 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
+#include <ros/ros.h>
+#include <ignition/math/Rand.hh>
 
 namespace gazebo
 {
@@ -60,11 +62,32 @@ namespace gazebo
     ///  The states are taken from this link and forces applied to this link.
     private: physics::LinkPtr link;
 
-    /// \brief Wind velocity in Gazebo coordinates [m/s].
-    private: ignition::math::Vector3d windVelocity;
+    /// \brief Wind velocity unit vector in Gazebo coordinates [m/s].
+    private: ignition::math::Vector3d windDirection;
 
     /// \brief Wind force coefficients.
     private: ignition::math::Vector3d windCoeff;
+
+    /// \brief Gain constant.
+    private: double windMeanVelocity;
+
+    /// \brief Gain constant.
+    private: double gainConstant;
+
+    /// \brief Time constant.
+    private: double timeConstant;
+
+    /// \brief Current time step.
+    private: double currentTime;
+
+    /// \brief Previous time step.
+    private: double previousTime;
+
+    /// \brief Velocity at current time step.
+    private: double currentVarVel;
+
+    /// \brief Veclocity at previous time step.
+    private: double previousVarVel;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;

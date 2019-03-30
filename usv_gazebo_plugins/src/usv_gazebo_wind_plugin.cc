@@ -64,14 +64,15 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   gzmsg << "USV Model Link Name = " << linkName << std::endl;
 
-  if (_sdf->HasElement("wind_velocity_vector"))
+  if (_sdf->HasElement("wind_direction"))
   {
-    this->windVelocity =
-      _sdf->GetElement("wind_velocity_vector")->Get<ignition::math::Vector3d>();
+    this->windDirection =
+      _sdf->GetElement("wind_direction")->Get<ignition::math::Vector3d>();
+    this->windDirection = this->windDirection.Normalize();
   }
 
-  gzmsg << "Wind velocity vector = " << this->windVelocity.X() << " , "
-        << this->windVelocity.Y() << " , " << this->windVelocity.Z()
+  gzmsg << "Wind direction unit vector = " << this->windDirection.X() << " , "
+        << this->windDirection.Y() << " , " << this->windDirection.Z()
         << std::endl;
 
   if (_sdf->HasElement("wind_coeff_vector"))
@@ -83,6 +84,37 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   gzmsg << "Wind coefficient vector = " << windCoeff.X() << " , "
         << windCoeff.Y() << " , " << windCoeff.Z() << std::endl;
 
+  if (_sdf->HasElement("wind_mean_velocity"))
+  {
+    this->windMeanVelocity =
+      _sdf->GetElement("wind_mean_velocity")->Get<double>();
+  }
+
+  gzmsg << "Wind mean velocity = " << this->windMeanVelocity << std::endl;
+
+  if (_sdf->HasElement("var_wind_gain_constants"))
+  {
+    this->gainConstant =
+      _sdf->GetElement("var_wind_gain_constants")->Get<double>();
+  }
+
+  gzmsg << "var wind gain constants = " << this->gainConstant << std::endl;
+
+  if (_sdf->HasElement("var_wind_time_constants"))
+  {
+    this->timeConstant =
+      _sdf->GetElement("var_wind_time_constants")->Get<double>();
+  }
+
+  gzmsg << "var wind time constants = " << this->timeConstant << std::endl;
+
+  // initial time and velocity
+  this->previousTime = ros::Time::now().toSec();
+  this->previousVarVel = 0;
+
+  // change seed for ignition::math::Rand
+  ignition::math::Rand::Seed(ros::Time::now().toSec());
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -92,17 +124,21 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvWindPlugin::Update()
 {
-  // Transform wind from world coordinates to body coordinates
+  this->currentTime = ros::Time::now().toSec();
+  double dT= this->currentTime - this->previousTime;
+  double randomDist = ignition::math::Rand::DblNormal(0, 1);
+  this->currentVarVel = this->previousVarVel + (-1/this->timeConstant*(this->previousVarVel+this->gainConstant*randomDist))*dT;
+  double velocity = this->currentVarVel + this->windMeanVelocity;
 #if GAZEBO_MAJOR_VERSION >= 8
   ignition::math::Vector3d relativeWind =
-    this->link->WorldPose().Rot().Inverse().RotateVector(this->windVelocity);
+    this->link->WorldPose().Rot().Inverse().RotateVector(this->windDirection*velocity);
 #else
   ignition::math::Vector3d relativeWind =
     this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
-    this->windVelocity);
-#endif        
+    this->windDirection*velocity);
+#endif
   // Calculate apparent wind
-#if GAZEBO_MAJOR_VERSION >= 8  
+#if GAZEBO_MAJOR_VERSION >= 8
   ignition::math::Vector3d apparentWind =
     relativeWind - this->link->RelativeLinearVel();
 #else
@@ -123,6 +159,10 @@ void UsvWindPlugin::Update()
     ignition::math::Vector3d(windForce.X(), windForce.Y(), 0.0));
   this->link->AddRelativeTorque(
     ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
+
+  // Moving the previous time and velocity one step forward.
+  this->previousVarVel = this->currentVarVel;
+  this->previousTime = this->currentTime;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvWindPlugin);
