@@ -18,7 +18,8 @@
 #
 
 # Builds a Docker image.
-BUILD_NVIDIA=""
+BUILD_BASE=""
+BUILD_ROS_GAZ=""
 image_name="vrx"
 
 POSITIONAL=()
@@ -28,8 +29,20 @@ key="$1"
 
 case $key in
     -n|--nvidia)
-    BUILD_NVIDIA="--build-arg BASEIMG=nvidia/opengl:1.0-glvnd-devel-ubuntu18.04"
+    BUILD_BASE="--build-arg BASEIMG=nvidia/opengl:1.0-glvnd-devel-ubuntu18.04"
     image_name="vrx_nvidia"
+    shift
+    ;;
+    -k|--kinetic)
+    BUILD_BASE="--build-arg BASEIMG=ubuntu:xenial"
+    image_name="vrx_gaz7"
+    BUILD_ROS_GAZ="--build-arg DIST=kinetic --build-arg GAZ=gazebo7"
+    shift
+    ;;
+    -K|--kinetic-nvidia)
+    BUILD_BASE="--build-arg BASEIMG=nvidia/opengl:1.1-glvnd-devel-ubuntu16.04"
+    image_name="vrx_nvidia_gaz7"
+    BUILD_ROS_GAZ="--build-arg DIST=kinetic --build-arg GAZ=gazebo7"
     shift
     ;;
     *)    # unknown option
@@ -56,7 +69,7 @@ fi
 
 image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
 echo ".*" > "${1}"/.dockerignore
-docker build --rm -t $image_plus_tag -f docker/Dockerfile "${1}" $BUILD_NVIDIA && \
+docker build --rm -t $image_plus_tag -f "${1}"/docker/Dockerfile "${1}" $BUILD_BASE $BUILD_ROS_GAZ && \
 docker tag $image_plus_tag $image_name:latest && \
 echo "Built $image_plus_tag and tagged as $image_name:latest"
 rm "${1}"/.dockerignore
