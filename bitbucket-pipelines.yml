@@ -14,7 +14,7 @@ pipelines:
               - catkin_make
               - catkin_make run_tests -j1
         - step:
-            image: osrf/vmrc:current
+            image: osrf/vrx:test_gaz7
             script:
               # VRX
               - mkdir -p /tmp/vrx_ws/src
