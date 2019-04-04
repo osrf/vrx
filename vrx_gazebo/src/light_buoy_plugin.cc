@@ -63,10 +63,6 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   this->scene = _parent->GetScene();
   GZ_ASSERT(this->scene != nullptr, "NULL scene");
 
-  // This is important to disable the visual plugin running inside the GUI.
-  if (!this->scene->EnableVisualizations())
-    return;
-
   if (!this->ParseSDF(_sdf))
     return;
 
@@ -80,8 +76,8 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   if (this->shuffleEnabled)
   {
     this->nh = ros::NodeHandle(this->ns);
-    this->changePatternServer = this->nh.advertiseService(
-      this->topic, &LightBuoyPlugin::ChangePattern, this);
+    this->changePatternSub = this->nh.subscribe(
+      this->topic, 1, &LightBuoyPlugin::ChangePattern, this);
   }
 
   this->timer.Start();
@@ -194,7 +190,7 @@ void LightBuoyPlugin::Update()
   auto color = this->kColors[this->pattern[this->state]].first;
   #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
-  #else 
+  #else
     gazebo::common::Color gazeboColor(color.r, color.g, color.b, color.a);
   #endif
   // Update the visuals.
@@ -209,17 +205,7 @@ void LightBuoyPlugin::Update()
 }
 
 //////////////////////////////////////////////////
-bool LightBuoyPlugin::ChangePattern(std_srvs::Trigger::Request &_req,
-  std_srvs::Trigger::Response &_res)
-{
-  this->ChangePattern(_res.message);
-  _res.message = "New pattern: " + _res.message;
-  _res.success = true;
-  return _res.success;
-}
-
-//////////////////////////////////////////////////
-void LightBuoyPlugin::ChangePattern(std::string &_message)
+void LightBuoyPlugin::ChangePattern(const std_msgs::Empty::ConstPtr &_msg)
 {
   Pattern_t newPattern;
   // Last phase in pattern is always off

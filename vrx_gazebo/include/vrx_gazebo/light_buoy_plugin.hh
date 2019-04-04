@@ -20,7 +20,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
-#include <std_srvs/Trigger.h>
+#include <std_msgs/Empty.h>
 
 #include <array>
 #include <cstdint>
@@ -87,19 +87,9 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \param[in] _sdf SDF elements.
   private: bool ParseSDF(sdf::ElementPtr _sdf);
 
-  /// \brief Callback for change pattern service, calls other changePattern
-  /// internally.
-  /// \param[in] _req Not used.
-  /// \param[out] _res The Response containing a message with the new pattern.
-  /// \return True when the operation succeed or false otherwise.
-  private: bool ChangePattern(std_srvs::Trigger::Request &_req,
-                              std_srvs::Trigger::Response &_res);
-
-  /// \brief Generate a new pattern and reset state to OFF.
-  /// \param[in, out] _message The current pattern in string format, where
-  /// each color is represented with its initial letter.
-  /// E.g.: "RYG".
-  private: void ChangePattern(std::string &_message);
+  /// \brief Callback for generating a new color pattern.
+  /// \param[in] _msg Not used.
+  private: void ChangePattern(const std_msgs::Empty::ConstPtr &_msg);
 
   /// \brief Display the next color in the sequence, or start over if at the end
   private: void Update();
@@ -125,8 +115,8 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \brief Whether shuffle is enabled via a ROS topic or not.
   private: bool shuffleEnabled = true;
 
-  /// \brief Service to generate and display a new color sequence.
-  private: ros::ServiceServer changePatternServer;
+  /// \brief Subscriber to generate and display a new color sequence.
+  private: ros::Subscriber changePatternSub;
 
   /// \brief ROS Node handle.
   private: ros::NodeHandle nh;
