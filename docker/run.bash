@@ -74,9 +74,11 @@ then
     chmod a+r $XAUTH
 fi
 
+VRX_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" >/dev/null 2>&1 && pwd )"
+
 DOCKER_OPTS=
 # Example: Bind mount a local repository on the host machine:
-#DOCKER_OPTS="--mount type=bind,source=path_to_local_repo,target=/home/developer/vrx_ws/src/vrx"
+#DOCKER_OPTS="--mount type=bind,source=${VRX_PATH},target=/home/developer/vrx_ws/src/vrx"
 
 
 # Share your vim settings.
@@ -88,7 +90,7 @@ DOCKER_OPTS=
 
 USERID=$(id -u)
 GROUPID=$(id -g)
-sudo docker run -it \
+docker run -it \
   -e DISPLAY \
   -e QT_X11_NO_MITSHM=1 \
   -e XAUTHORITY=$XAUTH \
