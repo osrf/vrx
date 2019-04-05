@@ -83,6 +83,9 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \return The index in kColors.
   private: static uint8_t IndexFromColor(const std::string &_color);
 
+  /// \brief Initialize all color sequences.
+  private: void InitializeAllPatterns();
+
   /// \brief Parse all SDF parameters.
   /// \param[in] _sdf SDF elements.
   private: bool ParseSDF(sdf::ElementPtr _sdf);
@@ -106,6 +109,12 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// with their string name for logging.
   private: static const std::array<Colors_t, 5> kColors;
 
+  /// \brief All color sequences.
+  private: std::vector<Pattern_t> allPatterns;
+
+  /// \brief The index pointing to one of the potential color sequences.
+  private: size_t allPatternsIdx = 0u;
+
   /// \brief Collection of visual names.
   private: std::vector<std::string> visualNames;
 
@@ -125,7 +134,6 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: Pattern_t pattern;
 
   /// \brief Track current index in pattern.
-  /// \sa IncrementState(const ros::TimerEvent &_event)
   private: uint8_t state = 0u;
 
   /// \brief ROS namespace.

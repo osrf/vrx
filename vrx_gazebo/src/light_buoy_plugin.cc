@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <gazebo/rendering/Scene.hh>
-#include <ignition/math/Rand.hh>
 #include "vrx_gazebo/light_buoy_plugin.hh"
 
 const std::array<LightBuoyPlugin::Colors_t, 5> LightBuoyPlugin::kColors
@@ -55,6 +54,27 @@ uint8_t LightBuoyPlugin::IndexFromColor(const std::string &_color)
 }
 
 //////////////////////////////////////////////////
+void LightBuoyPlugin::InitializeAllPatterns()
+{
+  for (uint8_t i = 0u; i < this->kColors.size() - 1; ++i)
+  {
+    for (uint8_t j = 0u; j < this->kColors.size() - 1; ++j)
+    {
+      if (j == i)
+        continue;
+
+      for (uint8_t k = 0u; k < this->kColors.size() - 1; ++k)
+      {
+        if (k == j)
+          continue;
+
+        this->allPatterns.push_back({i, j, k, this->IndexFromColor("off")});
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////
 void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   sdf::ElementPtr _sdf)
 {
@@ -62,6 +82,8 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
 
   this->scene = _parent->GetScene();
   GZ_ASSERT(this->scene != nullptr, "NULL scene");
+
+  this->InitializeAllPatterns();
 
   if (!this->ParseSDF(_sdf))
     return;
@@ -207,30 +229,15 @@ void LightBuoyPlugin::Update()
 //////////////////////////////////////////////////
 void LightBuoyPlugin::ChangePattern(const std_msgs::Empty::ConstPtr &_msg)
 {
-  Pattern_t newPattern;
-  // Last phase in pattern is always off
-  newPattern[3] = IndexFromColor("off");
+  this->pattern = this->allPatterns[this->allPatternsIdx];
+  this->allPatternsIdx = (this->allPatternsIdx + 1) % this->allPatterns.size();
 
-  // Loop until random pattern is different from current one
-  do {
-    // Generate random sequence of 3 colors among RED, GREEN, BLUE, and YELLOW
-    for (size_t i = 0; i < 3; ++i)
-      newPattern[i] = ignition::math::Rand::IntUniform(0, 3);
-    // Ensure there is no consecutive repeats
-    while (newPattern[0] == newPattern[1] || newPattern[1] == newPattern[2])
-      newPattern[1] = ignition::math::Rand::IntUniform(0, 3);
-  } while (newPattern == this->pattern);
-
-  std::lock_guard<std::mutex> lock(this->mutex);
-  // Copy newly generated pattern to pattern
-  this->pattern = newPattern;
-  // Start in OFF state so pattern restarts at beginning
-  this->state = 3;
   // Generate string representing pattern, ex: "RGB"
+  std::string colorSeq = "";
   for (size_t i = 0; i < 3; ++i)
-    _message += this->kColors[newPattern[i]].second[0];
+    colorSeq += this->kColors[this->pattern[i]].second[0];
   // Log the new pattern
-  ROS_INFO_NAMED("LightBuoyPlugin", "Pattern is %s", _message.c_str());
+  ROS_INFO_NAMED("LightBuoyPlugin", "Pattern is %s", colorSeq.c_str());
 }
 
 // Register plugin with gazebo
