@@ -38,6 +38,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
   std::string linkName;
   physics::ModelPtr model = _parent;
+  this->world = _parent->GetWorld();
 
   // Retrieve model parameters from SDF
   if (!_sdf->HasElement("bodyName") ||
@@ -71,9 +72,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->windDirection = this->windDirection.Normalize();
   }
 
-  gzmsg << "Wind direction unit vector = " << this->windDirection.X() << " , "
-        << this->windDirection.Y() << " , " << this->windDirection.Z()
-        << std::endl;
+  gzmsg << "Wind direction unit vector = " << this->windDirection << std::endl;
 
   if (_sdf->HasElement("wind_coeff_vector"))
   {
@@ -108,12 +107,28 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   gzmsg << "var wind time constants = " << this->timeConstant << std::endl;
 
-  // initial time and velocity
-  this->previousTime = ros::Time::now().toSec();
-  this->previousVarVel = 0;
+  // setting seed for ignition::math::Rand
+  if (_sdf->HasElement("random_seed") &&
+    _sdf->GetElement("random_seed")->Get<int>() != 0)
+  {
+    ignition::math::Rand::Seed(
+      _sdf->GetElement("random_seed")->Get<int>());
+  }
+  else{
+    common::Time currentWallTime;
+    currentWallTime.SetToWallTime();
+    ignition::math::Rand::Seed(currentWallTime.sec);
+  }
 
-  // change seed for ignition::math::Rand
-  ignition::math::Rand::Seed(ros::Time::now().toSec());
+  gzmsg << "Random seed value = " << this->timeConstant << std::endl;
+
+  // initialize previous time and previous velocity
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->previousTime = this->world->SimTime().Double();
+#else
+  this->previousTime = this->world->GetSimTime().Double();
+#endif
+  this->previousVarVel = 0;
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -124,14 +139,26 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvWindPlugin::Update()
 {
-  this->currentTime = ros::Time::now().toSec();
-  double dT= this->currentTime - this->previousTime;
+
+  #if GAZEBO_MAJOR_VERSION >= 8
+  double currentTime = this->world->SimTime().Double();
+  #else
+  double currentTime = this->world->GetSimTime().Double();
+  #endif
+
+  double dT= currentTime - this->previousTime;
   double randomDist = ignition::math::Rand::DblNormal(0, 1);
-  this->currentVarVel = this->previousVarVel + (-1/this->timeConstant*(this->previousVarVel+this->gainConstant*randomDist))*dT;
+  // calculate current variable wind velocity
+  this->currentVarVel = this->previousVarVel + (-1/this->timeConstant*
+    (this->previousVarVel+this->gainConstant*randomDist))*dT;
+  // calculate current wind velocity
   double velocity = this->currentVarVel + this->windMeanVelocity;
+
+  // Transform wind from world coordinates to body coordinates
 #if GAZEBO_MAJOR_VERSION >= 8
   ignition::math::Vector3d relativeWind =
-    this->link->WorldPose().Rot().Inverse().RotateVector(this->windDirection*velocity);
+    this->link->WorldPose().Rot().Inverse().RotateVector(
+      this->windDirection*velocity);
 #else
   ignition::math::Vector3d relativeWind =
     this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
@@ -162,7 +189,7 @@ void UsvWindPlugin::Update()
 
   // Moving the previous time and velocity one step forward.
   this->previousVarVel = this->currentVarVel;
-  this->previousTime = this->currentTime;
+  this->previousTime = currentTime;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvWindPlugin);

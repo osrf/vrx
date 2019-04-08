@@ -11,6 +11,7 @@
         <wind_mean_velocity>5 </wind_mean_velocity>
         <var_wind_gain_constants>100</var_wind_gain_constants>
         <var_wind_time_constants>5</var_wind_time_constants>
+        <random_seed></random_seed> <!-- set to zero/empty to randomize -->
       </plugin>
     </gazebo>
   </xacro:macro>
