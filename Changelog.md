@@ -2,6 +2,9 @@
 
 ### Forthcoming
 
+1. Randomized wind speed in the wind plugin:
+    * [Pull request 86](https://bitbucket.org/osrf/vrx/pull-requests/86)
+
 1. Fix issue with ocean reflecting the laser beams:
     * [Pull request 79](https://bitbucket.org/osrf/vrx/pull-requests/79)
 
