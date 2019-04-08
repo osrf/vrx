@@ -80,8 +80,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       _sdf->GetElement("wind_coeff_vector")->Get<ignition::math::Vector3d>();
   }
 
-  gzmsg << "Wind coefficient vector = " << windCoeff.X() << " , "
-        << windCoeff.Y() << " , " << windCoeff.Z() << std::endl;
+  gzmsg << "Wind coefficient vector = " << this->windCoeff << std::endl;
 
   if (_sdf->HasElement("wind_mean_velocity"))
   {
