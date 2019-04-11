@@ -86,9 +86,6 @@ namespace gazebo
     /// \brief Previous time.
     private: double previousTime;
 
-    /// \brief Velocity at current time.
-    private: double currentVarVel;
-
     /// \brief Velocity at previous time.
     private: double previousVarVel;
 

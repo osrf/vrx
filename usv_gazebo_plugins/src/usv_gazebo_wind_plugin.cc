@@ -139,19 +139,19 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 void UsvWindPlugin::Update()
 {
 
-  #if GAZEBO_MAJOR_VERSION >= 8
+#if GAZEBO_MAJOR_VERSION >= 8
   double currentTime = this->world->SimTime().Double();
-  #else
+#else
   double currentTime = this->world->GetSimTime().Double();
-  #endif
+#endif
 
   double dT= currentTime - this->previousTime;
   double randomDist = ignition::math::Rand::DblNormal(0, 1);
   // calculate current variable wind velocity
-  this->currentVarVel = this->previousVarVel + (-1/this->timeConstant*
+  double currentVarVel = this->previousVarVel + (-1/this->timeConstant*
     (this->previousVarVel+this->gainConstant*randomDist))*dT;
   // calculate current wind velocity
-  double velocity = this->currentVarVel + this->windMeanVelocity;
+  double velocity = currentVarVel + this->windMeanVelocity;
 
   // Transform wind from world coordinates to body coordinates
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -187,7 +187,7 @@ void UsvWindPlugin::Update()
     ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
 
   // Moving the previous time and velocity one step forward.
-  this->previousVarVel = this->currentVarVel;
+  this->previousVarVel = currentVarVel;
   this->previousTime = currentTime;
 }
 
