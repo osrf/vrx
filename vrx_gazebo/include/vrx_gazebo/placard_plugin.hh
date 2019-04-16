@@ -141,8 +141,8 @@ class PlacardPlugin : public gazebo::VisualPlugin
   /// \brief Connects to rendering update event.
   private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief Timer used to switch colors every second
-  private: gazebo::common::Timer timer;
+  /// \brief Next time where the plugin should be updated.
+  private: gazebo::common::Time nextUpdateTime;
 
   /// \brief Locks state and pattern member variables.
   private: std::mutex mutex;

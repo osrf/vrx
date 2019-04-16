@@ -78,7 +78,7 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
       this->topic, 1, &PlacardPlugin::ChangeSymbol, this);
   }
 
-  this->timer.Start();
+  this->nextUpdateTime = this->scene->SimTime();
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&PlacardPlugin::Update, this));
@@ -183,12 +183,11 @@ void PlacardPlugin::Update()
     }
   }
 
-  if (this->timer.GetElapsed() < gazebo::common::Time(1.0))
+  // Only update the plugin at 1Hz.
+  if (this->scene->SimTime() < this->nextUpdateTime)
     return;
 
-  // Restart the timer.
-  this->timer.Reset();
-  this->timer.Start();
+  this->nextUpdateTime = this->nextUpdateTime + gazebo::common::Time(1.0);
 
   std::lock_guard<std::mutex> lock(this->mutex);
 
