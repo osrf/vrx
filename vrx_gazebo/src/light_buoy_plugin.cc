@@ -81,6 +81,7 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   GZ_ASSERT(_parent != nullptr, "Received NULL model pointer");
 
   this->scene = _parent->GetScene();
+
   GZ_ASSERT(this->scene != nullptr, "NULL scene");
 
   this->InitializeAllPatterns();
@@ -102,7 +103,7 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
       this->topic, 1, &LightBuoyPlugin::ChangePattern, this);
   }
 
-  this->timer.Start();
+  this->nextUpdateTime = this->scene->SimTime();
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&LightBuoyPlugin::Update, this));
@@ -196,12 +197,10 @@ void LightBuoyPlugin::Update()
     }
   }
 
-  if (this->timer.GetElapsed() < gazebo::common::Time(1.0))
+  if (this->scene->SimTime() < this->nextUpdateTime)
     return;
 
-  // Restart the timer.
-  this->timer.Reset();
-  this->timer.Start();
+  this->nextUpdateTime = this->nextUpdateTime + gazebo::common::Time(1.0);
 
   std::lock_guard<std::mutex> lock(this->mutex);
 
