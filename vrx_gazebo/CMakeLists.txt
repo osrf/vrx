@@ -66,8 +66,6 @@ add_library(scoring_plugin src/scoring_plugin.cc)
 target_link_libraries(scoring_plugin ${catkin_LIBRARIES})
 add_dependencies(scoring_plugin
   ${catkin_EXPORTED_TARGETS}
-  vrx_gazebo_generate_messages_cpp
-  vrx_gazebo_generate_services_cpp
 )
 install(TARGETS scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
