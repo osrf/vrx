@@ -43,6 +43,14 @@ std_msgs::ColorRGBA PlacardPlugin::CreateColor(const double _r,
 }
 
 //////////////////////////////////////////////////
+void PlacardPlugin::InitializeAllPatterns()
+{
+  for (auto const &colorPair : this->kColors)
+    for (auto const &shape : this->kShapes)
+      this->allPatterns.push_back({colorPair.first, shape});
+}
+
+//////////////////////////////////////////////////
 void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
   sdf::ElementPtr _sdf)
 {
@@ -51,9 +59,7 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
   this->scene = _parent->GetScene();
   GZ_ASSERT(this->scene != nullptr, "NULL scene");
 
-  // This is important to disable the visual plugin running inside the GUI.
-  if (!this->scene->EnableVisualizations())
-    return;
+  this->InitializeAllPatterns();
 
   if (!this->ParseSDF(_sdf))
     return;
@@ -68,11 +74,11 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
   if (this->shuffleEnabled)
   {
     this->nh = ros::NodeHandle(this->ns);
-    this->changeSymbolServer = this->nh.advertiseService(
-      this->topic, &PlacardPlugin::ChangeSymbol, this);
+    this->changeSymbolSub = this->nh.subscribe(
+      this->topic, 1, &PlacardPlugin::ChangeSymbol, this);
   }
 
-  this->timer.Start();
+  this->nextUpdateTime = this->scene->SimTime();
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&PlacardPlugin::Update, this));
@@ -81,8 +87,10 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
 //////////////////////////////////////////////////
 bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
 {
-  // Parse the shape. We initialize it with a random shape.
-  this->ShuffleShape();
+  // We initialize it with a random shape and color.
+  this->ChangeSymbol(std_msgs::Empty::ConstPtr());
+
+  // Parse the shape.
   if (_sdf->HasElement("shape"))
   {
     std::string aShape = _sdf->GetElement("shape")->Get<std::string>();
@@ -101,7 +109,6 @@ bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
   }
 
   // Parse the color. We initialize it with a random color.
-  this->ShuffleColor();
   if (_sdf->HasElement("color"))
   {
     std::string aColor = _sdf->GetElement("color")->Get<std::string>();
@@ -176,12 +183,11 @@ void PlacardPlugin::Update()
     }
   }
 
-  if (this->timer.GetElapsed() < gazebo::common::Time(1.0))
+  // Only update the plugin at 1Hz.
+  if (this->scene->SimTime() < this->nextUpdateTime)
     return;
 
-  // Restart the timer.
-  this->timer.Reset();
-  this->timer.Start();
+  this->nextUpdateTime = this->nextUpdateTime + gazebo::common::Time(1.0);
 
   std::lock_guard<std::mutex> lock(this->mutex);
 
@@ -214,47 +220,18 @@ void PlacardPlugin::Update()
 }
 
 //////////////////////////////////////////////////
-bool PlacardPlugin::ChangeSymbol(std_srvs::Trigger::Request &_req,
-  std_srvs::Trigger::Response &_res)
+void PlacardPlugin::ChangeSymbol(const std_msgs::Empty::ConstPtr &_msg)
 {
   {
     std::lock_guard<std::mutex> lock(this->mutex);
-    this->ShuffleShape();
-    this->ShuffleColor();
+    this->color = this->allPatterns[this->allPatternsIdx].at(0);
+    this->shape = this->allPatterns[this->allPatternsIdx].at(1);
+    this->allPatternsIdx =
+      (this->allPatternsIdx + 1) % this->allPatterns.size();
   }
 
-  _res.message = "New symbol: " + this->color + " " + this->shape;
-  _res.success = true;
-  return _res.success;
-}
-
-//////////////////////////////////////////////////
-void PlacardPlugin::ShuffleColor()
-{
-  std::string newColor;
-  do
-  {
-    auto iterColor = this->kColors.begin();
-    std::advance(iterColor,
-               ignition::math::Rand::IntUniform(0, this->kColors.size() - 1));
-    newColor = (*iterColor).first;
-  }
-  while (newColor == this->color);
-  this->color = newColor;
-}
-
-//////////////////////////////////////////////////
-void PlacardPlugin::ShuffleShape()
-{
-  std::string newShape;
-  do
-  {
-    newShape =
-      this->kShapes[ignition::math::Rand::IntUniform(0,
-        this->kShapes.size() - 1)];
-  }
-  while (newShape == this->shape);
-  this->shape = newShape;
+  ROS_INFO_NAMED("PlacardPlugin", "New symbol is %s %s", this->color.c_str(),
+    this->shape.c_str());
 }
 
 // Register plugin with gazebo
