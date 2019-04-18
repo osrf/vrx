@@ -97,6 +97,11 @@
         <mesh filename="package://wamv_description/mesh/WAM-V-Base.dae"/>
       </geometry>
     </visual>
+    <visual name="payload">
+      <geometry>
+        <mesh filename="package://wamv_gazebo/mesh/payload.dae"/>
+      </geometry>
+    </visual>
 
     <!-- Left base collisions -->
     <xacro:main_collisions prefix="left" reflect="1" />
@@ -104,7 +109,7 @@
     <!-- Right side collisions -->
     <xacro:main_collisions prefix="right" reflect="-1" />
 
-     <!-- Top base -->
+    <!-- Top base -->
     <collision name="top_base">
       <origin xyz="0 -0 1.25" rpy="0 0 0" />
       <geometry>

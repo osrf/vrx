@@ -2,22 +2,10 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_gps" params="name:=gps x:=0 y:=0 z:=1.3 R:=0 P:=0 Y:=0">
     <link name="${name}_link">
-      <visual name="${name}_visual_base">
+      <visual name="{name}_visual">
         <geometry>
-          <box size="0.1 0.1 0.025" />
+          <mesh filename="package://wamv_gazebo/mesh/gps.dae"/>
         </geometry>
-        <material name="${name}_visual_base_material">
-          <color rgba="1.0 1.0 1.0 1.0" />
-        </material>
-      </visual>
-      <visual name="${name}_visual_antenna">
-        <origin xyz="0 0 0.025" />
-        <geometry>
-          <sphere radius="0.03" />
-        </geometry>
-        <material name="${name}_visual_antenna_material">
-          <color rgba="0.7 0.7 0.7 1.0" />
-        </material>
       </visual>
     </link>
     <joint name="${name}_joint" type="fixed">

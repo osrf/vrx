@@ -8,6 +8,8 @@
           <speed>12</speed>
         </clouds>
       </sky>
+      <grid>0</grid>
+      <origin_visual>0</origin_visual>
     </scene>
 
     <!-- Estimated latitude/longitude of sandisland from satellite imagery -->
@@ -28,7 +30,7 @@
 
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>17.5798 4.82061 4.05674 0 0.216 -2.876</pose>
+        <pose frame=''>175.544 123.61 4.70958 0 0.168 -2.40718</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
@@ -36,15 +38,21 @@
     <include>
       <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
       to go into the model file to change the altitutde/height!-->
-      <pose> 0 0 0 0 0 0 </pose>
+      <pose>0 0 0 0 0 0</pose>
       <uri>model://sandisland</uri>
     </include>
 
     <!-- Should be at the same height as the water level in USV and buoyancy
     plugin configurations -->
     <include>
-      <pose> 0 0 0 0 0 0 </pose>
+      <pose>0 0 0 0 0 0</pose>
       <uri>model://ocean</uri>
+    </include>
+
+    <!-- The post for securing the WAM-V -->
+    <include>
+      <pose>168.07 111.75 0.333 0.046 -0.157 0</pose>
+      <uri>model://post</uri>
     </include>
   </xacro:macro>
 </world>

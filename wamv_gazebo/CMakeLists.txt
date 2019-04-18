@@ -19,6 +19,10 @@ xacro_add_files(
 install(DIRECTORY urdf/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf)
 
+# Install meshes
+install(DIRECTORY mesh/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/mesh)
+
 # Install config files
 install(DIRECTORY config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)

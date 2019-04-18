@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- Basic WAM-V with gazebo plugins for dynamics -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+       name="wamv_payload">
+  <xacro:macro name="wamv_payload" params="name">
+
+    <!-- Add the batteries and the computer boxes -->
+    <link name="${name}_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://wamv_gazebo/mesh/payload.dae"/>
+        </geometry>
+      </visual>
+      <!-- Top base -->
+      <collision name="${name}_collision">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="1 1 0.1" />
+        </geometry>
+      </collision>
+
+      <inertial>
+        <!-- From WAM-V spec sheet -->
+        <mass value="180.0"/>
+        <inertia ixx="120.0" ixy="0.0" ixz="0.0" iyy="393" iyz="0.0" izz="446.0"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+</robot>

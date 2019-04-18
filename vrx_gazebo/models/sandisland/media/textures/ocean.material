@@ -1,0 +1,13 @@
+material Ocean
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture sand_island_color.png
+      }
+    }
+  }
+}

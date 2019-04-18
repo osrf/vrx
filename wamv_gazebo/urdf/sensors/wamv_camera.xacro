@@ -2,15 +2,10 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_camera" params="name x:=0.5 y:=0 z:=1.5 R:=0 P:=0 Y:=0">
     <link name="${name}_link">
-      <visual name="${name}_visual">
-        <xacro:property name="visual_length" value="0.05" />
-        <origin xyz="-${visual_length/2.0} 0 0" rpy="0 1.57 0" />
+      <visual name="{name}_visual">
         <geometry>
-          <cylinder radius="0.01" length="${visual_length}" />
+          <mesh filename="package://wamv_gazebo/mesh/monocamera.dae"/>
         </geometry>
-        <material name="${name}_visual_material">
-          <color rgba="1.0 1.0 0.0 1.0" />
-        </material>
       </visual>
     </link>
     <joint name="${name}_joint" type="fixed">

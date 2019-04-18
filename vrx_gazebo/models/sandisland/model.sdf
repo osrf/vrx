@@ -4,7 +4,7 @@
     <pose>0 0 0 0 0 0</pose>
     <static>true</static>
     <link name="silink">
-      <collision name="shore_front_left">
+      <!-- <collision name="shore_front_left">
         <pose>160 180 -4.5 0 0 2.05</pose>
         <geometry>
           <box>
@@ -21,7 +21,7 @@
         </geometry>
       </collision>
       <collision name="shore_back">
-        <pose>-195 -147 -4.5 0 0 2.05</pose>
+        <pose>-195 -200 -4.5 0 0 2.05</pose>
         <geometry>
           <box>
             <size>275 150 11</size>
@@ -35,8 +35,8 @@
             <size>700 400 11</size>
           </box>
         </geometry>
-      </collision>
-      <visual name="si_is">
+      </collision> -->
+      <!-- <visual name="si_is">
         <geometry>
           <heightmap>
             <use_terrain_paging>false</use_terrain_paging>
@@ -63,7 +63,21 @@
             <pos>0 0 -9</pos>
           </heightmap>
         </geometry>
+      </visual> -->
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>file://sandisland/mesh/sandisland.dae</uri>
+          </mesh>
+        </geometry>
       </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>file://sandisland/mesh/sandisland.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
     </link>
   </model>
 </sdf>
