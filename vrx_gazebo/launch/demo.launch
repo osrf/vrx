@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find vrx_gazebo)/launch/vrx.launch" />
+  <include file="$(find vrx_gazebo)/launch/usv_joydrive.launch" />
+  <include file="$(find wamv_gazebo)/launch/localization_example.launch" />
+  <include file="$(find wamv_gazebo)/launch/rviz_vrx.launch" />
+</launch>

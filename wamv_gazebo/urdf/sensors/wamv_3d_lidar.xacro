@@ -18,10 +18,13 @@
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
                                             max_range:=100 noise_stddev:=0.01">
     <link name="${name}_link">
-      <visual name="{name}_visual">
+      <visual name="${name}_visual">>
         <geometry>
-          <mesh filename="package://wamv_gazebo/mesh/lidar_3d.dae"/>
+          <cylinder radius="0.025" length="0.1" />
         </geometry>
+        <material name="${name}_visual_material">
+          <color rgba="0.5 1.0 0.5 1.0" />
+        </material>
       </visual>
     </link>
     <joint name="${name}_joint" type="fixed">
