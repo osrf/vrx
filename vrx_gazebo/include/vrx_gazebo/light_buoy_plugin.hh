@@ -20,7 +20,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
-#include <std_srvs/Trigger.h>
+#include <std_msgs/Empty.h>
 
 #include <array>
 #include <cstdint>
@@ -83,23 +83,16 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \return The index in kColors.
   private: static uint8_t IndexFromColor(const std::string &_color);
 
+  /// \brief Initialize all color sequences.
+  private: void InitializeAllPatterns();
+
   /// \brief Parse all SDF parameters.
   /// \param[in] _sdf SDF elements.
   private: bool ParseSDF(sdf::ElementPtr _sdf);
 
-  /// \brief Callback for change pattern service, calls other changePattern
-  /// internally.
-  /// \param[in] _req Not used.
-  /// \param[out] _res The Response containing a message with the new pattern.
-  /// \return True when the operation succeed or false otherwise.
-  private: bool ChangePattern(std_srvs::Trigger::Request &_req,
-                              std_srvs::Trigger::Response &_res);
-
-  /// \brief Generate a new pattern and reset state to OFF.
-  /// \param[in, out] _message The current pattern in string format, where
-  /// each color is represented with its initial letter.
-  /// E.g.: "RYG".
-  private: void ChangePattern(std::string &_message);
+  /// \brief Callback for generating a new color pattern.
+  /// \param[in] _msg Not used.
+  private: void ChangePattern(const std_msgs::Empty::ConstPtr &_msg);
 
   /// \brief Display the next color in the sequence, or start over if at the end
   private: void Update();
@@ -116,6 +109,12 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// with their string name for logging.
   private: static const std::array<Colors_t, 5> kColors;
 
+  /// \brief All color sequences.
+  private: std::vector<Pattern_t> allPatterns;
+
+  /// \brief The index pointing to one of the potential color sequences.
+  private: size_t allPatternsIdx = 0u;
+
   /// \brief Collection of visual names.
   private: std::vector<std::string> visualNames;
 
@@ -125,8 +124,8 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \brief Whether shuffle is enabled via a ROS topic or not.
   private: bool shuffleEnabled = true;
 
-  /// \brief Service to generate and display a new color sequence.
-  private: ros::ServiceServer changePatternServer;
+  /// \brief Subscriber to generate and display a new color sequence.
+  private: ros::Subscriber changePatternSub;
 
   /// \brief ROS Node handle.
   private: ros::NodeHandle nh;
@@ -135,7 +134,6 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: Pattern_t pattern;
 
   /// \brief Track current index in pattern.
-  /// \sa IncrementState(const ros::TimerEvent &_event)
   private: uint8_t state = 0u;
 
   /// \brief ROS namespace.
@@ -150,8 +148,8 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \brief Connects to rendering update event.
   private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief Timer used to switch colors every second
-  private: gazebo::common::Timer timer;
+  /// \brief Next time where the plugin should be updated.
+  private: gazebo::common::Time nextUpdateTime;
 
   /// \brief Locks state and pattern member variables.
   private: std::mutex mutex;
