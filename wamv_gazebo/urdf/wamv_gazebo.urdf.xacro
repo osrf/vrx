@@ -96,7 +96,7 @@
     <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" />
 
     <!-- Add simulated GPS -->
-    <xacro:wamv_gps name="gps_wamv" y="0.2" />
+    <xacro:wamv_gps name="gps_wamv" x="-0.75" />
 
     <!-- Add Simulated IMU -->
     <xacro:wamv_imu name="imu_wamv" y="-0.2" />

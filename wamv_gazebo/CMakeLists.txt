@@ -15,6 +15,10 @@ xacro_add_files(
   INORDER INSTALL DESTINATION urdf
 )
 
+# Install meshes and textures
+install(DIRECTORY mesh/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/mesh)
+
 # Install xacro files / macros
 install(DIRECTORY urdf/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf)
