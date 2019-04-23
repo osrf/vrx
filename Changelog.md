@@ -8,6 +8,9 @@
 1. Fix issue with ocean reflecting the laser beams:
     * [Pull request 79](https://bitbucket.org/osrf/vrx/pull-requests/79)
 
+1. Add sand island basic mesh and texture:
+    * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
