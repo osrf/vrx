@@ -11,28 +11,19 @@
       <task_name>wayfinding</task_name>
   	  <!-- Goal as Latitude, Longitude, Yaw -->
       <waypoints>
+				  <!-- Approx. starting point of wamv -->
+				  <waypoint>
+						<pose>21.3109331464 -157.888576027 1.21756121843</pose>
+					</waypoint>
+				  <!-- Gazebo origin -->
           <waypoint>
-            <pose>21.31 -157.89 -3.0</pose>
+            <pose>21.30996 -157.8901 1.0</pose>
           </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 -2.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 -1.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 0.0</pose>
-          </waypoint>
-          <waypoint>
+					<!-- Another waypoint -->
+					<waypoint>
             <pose>21.31 -157.89 1.0</pose>
           </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 2.0</pose>
-          </waypoint>
-          <waypoint>
-            <pose>21.31 -157.89 3.0</pose>
-          </waypoint>
-       </waypoints>
+			</waypoints>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
