@@ -5,11 +5,11 @@
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
 
-	<plugin name="wayfinding_scoring_plugin"
+  	<plugin name="wayfinding_scoring_plugin"
             filename="libwayfinding_scoring_plugin.so">
       <vehicle>wamv</vehicle>
       <task_name>wayfinding</task_name>
-	  <!-- Goal as Latitude, Longitude, Yaw -->
+  	  <!-- Goal as Latitude, Longitude, Yaw -->
       <waypoints>
           <waypoint>
             <pose>21.31 -157.89 -3.0</pose>
