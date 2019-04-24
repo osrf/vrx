@@ -452,19 +452,19 @@ void PerceptionScoringPlugin::OnUpdate()
 
     if (this->dataPtr->frame)
     {
-			// Set object pose relative to the specified frame (e.g., the wam-v)
-			// Pitch and roll are set to zero as a hack to deal with
-			// transients associated with spawning buoys with significant attitude.
+      // Set object pose relative to the specified frame (e.g., the wam-v)
+      // Pitch and roll are set to zero as a hack to deal with
+      // transients associated with spawning buoys with significant attitude.
       #if GAZEBO_MAJOR_VERSION >= 8
-			  ignition::math::Pose3d framePose(
-					this->dataPtr->frame->WorldPose().Pos(),
-					ignition::math::Quaterniond(0.0,0.0,
-																			this->dataPtr->frame->WorldPose().Rot().Yaw()));				
+        ignition::math::Pose3d framePose(
+          this->dataPtr->frame->WorldPose().Pos(),
+          ignition::math::Quaterniond(0.0,0.0,
+            this->dataPtr->frame->WorldPose().Rot().Yaw()));
       #else
-				ignition::math::Pose3d framePose(
-					this->dataPtr->frame->GetWorldPose().pos.Ign(),
-					ignition::math::Quaterniond(0.0,0.0,
-																			this->dataPtr->frame->GetWorldPose().rot.Ign().Yaw()));
+        ignition::math::Pose3d framePose(
+          this->dataPtr->frame->GetWorldPose().pos.Ign(),
+          ignition::math::Quaterniond(0.0,0.0,
+            this->dataPtr->frame->GetWorldPose().rot.Ign().Yaw()));
       #endif
       ignition::math::Matrix4d transMat(framePose);
       ignition::math::Matrix4d pose_local(obj.pose);
@@ -477,7 +477,7 @@ void PerceptionScoringPlugin::OnUpdate()
     if (this->dataPtr->objectCounter.find(obj.type) ==
         this->dataPtr->objectCounter.end())
     {
-	  this->dataPtr->objectCounter[obj.type] = 0;
+    this->dataPtr->objectCounter[obj.type] = 0;
     }
     else
     {
