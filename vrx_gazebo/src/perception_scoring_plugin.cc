@@ -452,17 +452,19 @@ void PerceptionScoringPlugin::OnUpdate()
 
     if (this->dataPtr->frame)
     {
-      // Only use translation of frame pose
-      // This is a bit of a hack to deal with transients of spawning buoys with
-      // significant non-zero attitude.
+			// Set object pose relative to the specified frame (e.g., the wam-v)
+			// Pitch and roll are set to zero as a hack to deal with
+			// transients associated with spawning buoys with significant attitude.
       #if GAZEBO_MAJOR_VERSION >= 8
-        ignition::math::Pose3d framePose(
-          this->dataPtr->frame->WorldPose().Pos(),
-          ignition::math::Quaterniond());
+			  ignition::math::Pose3d framePose(
+					this->dataPtr->frame->WorldPose().Pos(),
+					ignition::math::Quaterniond(0.0,0.0,
+																			this->dataPtr->frame->WorldPose().Rot().Yaw()));				
       #else
-        ignition::math::Pose3d framePose(
-          this->dataPtr->frame->GetWorldPose().pos.Ign(),
-          ignition::math::Quaterniond());
+				ignition::math::Pose3d framePose(
+					this->dataPtr->frame->GetWorldPose().pos.Ign(),
+					ignition::math::Quaterniond(0.0,0.0,
+																			this->dataPtr->frame->GetWorldPose().rot.Ign().Yaw()));
       #endif
       ignition::math::Matrix4d transMat(framePose);
       ignition::math::Matrix4d pose_local(obj.pose);
