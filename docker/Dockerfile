@@ -57,9 +57,11 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
     ros-${DIST}-joy \
     ros-${DIST}-joy-teleop \
     ros-${DIST}-key-teleop \
+    ros-${DIST}-robot-localization \
+    ros-${DIST}-robot-state-publisher \
+    ros-${DIST}-rviz \
     ros-${DIST}-teleop-tools \
     ros-${DIST}-teleop-twist-keyboard \
-    ros-${DIST}-robot-localization \
     ros-${DIST}-velodyne-simulator \
  && rosdep init \
  && apt clean

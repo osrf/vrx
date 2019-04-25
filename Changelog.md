@@ -8,6 +8,9 @@
 1. Fix issue with ocean reflecting the laser beams:
     * [Pull request 79](https://bitbucket.org/osrf/vrx/pull-requests/79)
 
+1. Adding GPS antenna, collisions and inertia properties:
+    * [Pull request 90](https://bitbucket.org/osrf/vrx/pull-requests/90)
+
 1. Add sand island basic mesh and texture:
     * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
 
