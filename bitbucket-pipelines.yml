@@ -11,7 +11,7 @@ pipelines:
               - cd /tmp/vrx_ws
               # Build and run tests.
               - source /opt/ros/melodic/setup.bash
-              - catkin_make
+              - catkin_make -j1
               - catkin_make run_tests -j1
         - step:
             image: osrf/vrx:test_gaz7
@@ -22,5 +22,5 @@ pipelines:
               - cd /tmp/vrx_ws
               # Build and run tests.
               - source /opt/ros/kinetic/setup.bash
-              - catkin_make
+              - catkin_make -j1
               - catkin_make run_tests -j1
