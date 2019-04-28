@@ -27,6 +27,10 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
+#include <gazebo/transport/transport.hh>
+// #include <ContactPlugin.hh>
+
+// #include <physics/physics.hh>
 #include "vrx_gazebo/Task.h"
 
 /// \brief A plugin that provides common functionality to any scoring plugin.
@@ -96,10 +100,21 @@
 ///     </joint>
 ///   </release_joints>
 /// </plugin>
+
+// #include <sensors/sensors.hh>
 class ScoringPlugin : public gazebo::WorldPlugin
 {
   /// \brief Class constructor.
-  public: ScoringPlugin() = default;
+  public: ScoringPlugin();
+
+  // \brief Callback function when collision occurs
+  public: void onCollisionMsg(ConstContactsPtr &contacts);
+
+  // \brief collision detection node pointer
+  protected: gazebo::transport::NodePtr collisionNode;
+
+  // \brief collision detection node subscriber
+  protected: gazebo::transport::SubscriberPtr collisionSub;
 
   // Documentation inherited.
   protected: void Load(gazebo::physics::WorldPtr _world,

@@ -22,6 +22,42 @@
 #include "vrx_gazebo/scoring_plugin.hh"
 
 /////////////////////////////////////////////////
+ScoringPlugin::ScoringPlugin() : WorldPlugin(), collisionNode(new gazebo::transport::Node()){
+  std::cout << "#######################################" << '\n';
+  std::cout << "###########SCORE PLUGIN CONS ##########" << '\n';
+  std::cout << "#######################################" << '\n';
+  collisionNode->Init();
+	collisionSub = collisionNode->Subscribe("/gazebo/robotx_example_course/physics/contacts", &ScoringPlugin::onCollisionMsg,this);
+
+}
+
+void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts)
+{
+  // std::cout << "REACHED HERE" << '\n';
+  //
+  // // printf("%i\n",contacts->contact_size());
+	// for (unsigned int i = 0; i < contacts->contact_size(); ++i)
+	// {
+	// 	// if( strcmp(contacts->contact(i).collision2().c_str(), COLLISION_FILTER) == 0 )//if doesnt contact the floor
+	// 	// 	continue;
+	// 	// std::cout << "Collision between[" << contacts->contact(i).collision1()
+	// 	// 	     << "] and [" << contacts->contact(i).collision2() << "]\n";
+  // //
+  // //
+	// 	bool collisionCheck = (contacts->contact(i).collision1() ==
+  //   "wamv::base_link::base_link_fixed_joint_lump__left_float_collision" ||
+  //   contacts->contact(i).collision2() == "wamv::base_link::base_link_fixed_joint_lump__right_float_collision");
+  //
+  //   // wamv::base_link::base_link_fixed_joint_lump__left_float_collision
+	// 	if (collisionCheck)
+	// 	{
+	// 		std::cout << "You hit bro" << '\n';
+	// 	}
+  // //
+  // //
+	// }
+}
+
 void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
