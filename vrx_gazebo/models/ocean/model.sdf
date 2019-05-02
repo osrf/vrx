@@ -25,7 +25,7 @@
       <geometry>
         <mesh>
           <uri>model://ocean/meshes/mesh.dae</uri>
-          <scale>0.45 0.45 0.45</scale>
+          <scale>1.1 1.1 0.45</scale>
         </mesh>
       </geometry>
       <material>
@@ -51,70 +51,6 @@
         </script>
       </material>
       <laser_retro>-1</laser_retro>
-    </visual>
-    <visual name="north">
-      <pose>234 0 -5 0 -1.5708 0</pose>
-      <geometry>
-        <plane>
-          <normal>0 0 1</normal>
-          <size>10 468</size>
-        </plane>
-      </geometry>
-      <material>
-        <script>
-          <uri>model://ocean/materials/scripts/ocean.material</uri>
-          <name>Seabox</name>
-        </script>
-      </material>
-      <laser_retro>-1</laser_retro>      
-    </visual>
-    <visual name="south">
-      <pose>-234 0 -5 0 1.5708 0</pose>
-      <geometry>
-        <plane>
-          <normal>0 0 1</normal>
-          <size>10 468</size>
-        </plane>
-      </geometry>
-      <material>
-        <script>
-          <uri>model://ocean/materials/scripts/ocean.material</uri>
-          <name>Seabox</name>
-        </script>
-      </material>
-      <laser_retro>-1</laser_retro>      
-    </visual>
-    <visual name="west">
-      <pose>0 234 -5 1.5708 0 0</pose>
-      <geometry>
-        <plane>
-          <normal>0 0 1</normal>
-          <size>468 10</size>
-        </plane>
-      </geometry>
-      <material>
-        <script>
-          <uri>model://ocean/materials/scripts/ocean.material</uri>
-          <name>Seabox</name>
-        </script>
-      </material>
-      <laser_retro>-1</laser_retro>      
-    </visual>
-    <visual name="east">
-      <pose>0 -234 -5 -1.5708 0 0</pose>
-      <geometry>
-        <plane>
-          <normal>0 0 1</normal>
-          <size>468 10</size>
-        </plane>
-      </geometry>
-      <material>
-        <script>
-          <uri>model://ocean/materials/scripts/ocean.material</uri>
-          <name>Seabox</name>
-        </script>
-      </material>
-      <laser_retro>-1</laser_retro>      
     </visual>
   </link>
 </model>

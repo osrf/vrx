@@ -11,6 +11,9 @@
 1. Adding GPS antenna, collisions and inertia properties:
     * [Pull request 90](https://bitbucket.org/osrf/vrx/pull-requests/90)
 
+1. Add sand island basic mesh and texture:
+    * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
