@@ -236,6 +236,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Remaining time since the start of the task (running state).
   private: gazebo::common::Time remainingTime;
 
+  /// \brief Time since last hit.
+  private: gazebo::common::Time lastHitTime;
+
   /// \brief Whether the current task has timed out or not.
   private: bool timedOut = false;
 
