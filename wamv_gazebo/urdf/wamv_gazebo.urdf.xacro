@@ -12,10 +12,15 @@
   <xacro:arg name="vrx_sensors_enabled" default="false" />
 
   <!-- === The WAM-V platform === -->
-  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro"/>
+  
+  <!-- === Batteries === -->
+  <xacro:include filename="$(find wamv_description)/urdf/battery.xacro"/>
+  <xacro:battery prefix="left" position="0 1 0.45" orientation="0 0 0"/>
+  <xacro:battery prefix="right" position="0 -1 0.45" orientation="0 0 0"/>
 
   <!-- === Thrusters === -->
-  <xacro:property name="thruster_conf" value="$(arg thruster_config)"/> -->
+  <xacro:property name="thruster_conf" value="$(arg thruster_config)"/>
 
   <!-- Default WAM-V with two aft thrusters -->
   <xacro:if value="${thruster_conf == 'H'}">
