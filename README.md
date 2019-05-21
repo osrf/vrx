@@ -1,7 +1,7 @@
 # Virtual RobotX (VRX)
 
-This repository is the home to the source code and software documentation for the VRX Competition.  The repository includes a set of Gazebo simulation elements and examples to support development of RobotX systems.  Information about the competition, including registration, tasks and technical guidance documents, is available at the [RobotX VRX]( https://www.robotx.org/index.php/about/about-virtual-robotx) main page.
-
+This repository is the home to the source code and software documentation for the VRX Competition.  [Competition documentation](https://bitbucket.org/osrf/vrx/wiki/documentation) is available on the project wiki, inlcluding links to registration information and documentation of the tasks and technical specifications.
+  
 This is an active development project.  We are adding and improving things all the time.  The project contains a simulation foundation, including an environment similar to the RobotX venue and description of the WAM-V platform.  It is intended as a first step for teams that would then extend the tools for their specific development needs.
 
 
@@ -12,7 +12,8 @@ This is an active development project.  We are adding and improving things all t
  * Watch the [Release 0.2 Highlight Video](https://www.youtube.com/watch?v=v23cI4H9RKM)
  * The [VRX Wiki](https://bitbucket.org/osrf/vrx/wiki) provides documentation and tutorials.
  * The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
-
+ * For technical problems, please us the [project issue tracker](https://bitbucket.org/osrf/vrx/issues?status=new&status=open) to describe your problem or request support. 
+ 
 ## Contributing
 
 The simulation tools under active development to support the RobotX teams.  We are starting simple with the important fundamental aspects of the robot and environment, but will rely on the community to develop additional functionality around their particular use cases.
