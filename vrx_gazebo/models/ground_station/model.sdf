@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="ground_station">
+    <static>true</static>
+    <include>
+      <uri>model://tent</uri>
+    </include>
+    <include>
+      <pose>0.5 0.9 0.0 0.0 0.0 0.0</pose>
+      <uri>model://table</uri>
+    </include>
+    <include>
+      <pose>1.0 -0.5 0.0 0.0 0.0 1.57</pose>
+      <uri>model://table</uri>
+    </include>
+  </model>
+</sdf>

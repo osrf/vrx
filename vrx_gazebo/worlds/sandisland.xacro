@@ -49,10 +49,42 @@
       <uri>model://ocean</uri>
     </include>
 
-    <!-- The post for securing the WAM-V -->
+    <!-- The posts for securing the WAM-V -->
     <include>
-      <pose>168.07 111.75 0.333 0.046 -0.157 0</pose>
+      <pose>169.22 112.06 0.388 0.046 -0.157 0</pose>
       <uri>model://post</uri>
+    </include>
+    <include>
+      <pose>171.558 106.809 0.55 0.046 -0.157 0</pose>
+      <uri>model://post</uri>
+    </include>
+    <include>
+      <pose>173.64 101.86 0.55 0.046 -0.157 0</pose>
+      <uri>model://post</uri>
+    </include>
+
+    <!-- Antenna for communication with the WAM-V -->
+    <include>
+      <pose>170.32 110.2 0.50 -0.17 0 2.10</pose>
+      <uri>model://antenna</uri>
+    </include>
+
+    <!-- ground station tents -->
+    <include>
+      <pose>172.0 114.0 0.9 0 -0.15 0.4</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <pose>173.75 110.06 1.05 0 -0.15 0.4</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <pose>175.45 106.4 1.1 0 -0.15 0.4</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <pose>177.16 102.15 1.1 0 -0.15 0.4</pose>
+      <uri>model://ground_station</uri>
     </include>
   </xacro:macro>
 </world>
