@@ -1,0 +1,20 @@
+wamv_camera:
+    - name: front_camera
+      x: 0.75
+      y: 0.3
+      z: 2
+      P: ${radians(15)}
+    - name: front_left_camera
+      x: 0.75
+      y: 0.1
+      P: ${radians(15)}
+    - name: front_right_camera
+      x: 0.75
+      y: -0.1
+      P: ${radians(15)}
+wamv_gps:
+    - name: gps_wamv
+      x: -0.85
+wamv_imu:
+    - name: imu_wamv
+      y: -0.2
