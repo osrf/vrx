@@ -17,7 +17,7 @@
   </asset>
   <library_images>
     <image id="Payload_ncl1_1-image" name="Payload_ncl1_1">
-      <init_from>Payload_Diffuse.png</init_from>
+      <init_from>battery.png</init_from>
     </image>
   </library_images>
   <library_materials>
