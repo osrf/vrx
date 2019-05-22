@@ -5,7 +5,7 @@
       <visual name="${prefix}_battery_visual">
         <origin xyz="0 -1.03 -.45" rpy="0 0 0"/>
         <geometry>
-	  <mesh filename="package://vrx_gazebo/models/battery/mesh/Battery.dae"/>
+	  <mesh filename="package://vrx_gazebo/models/battery/mesh/battery.dae"/>
 	</geometry>
       </visual>
       <collision name="${prefix}_battery_collision">
