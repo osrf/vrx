@@ -1,12 +1,12 @@
 import os
 import yaml
-def macro_block_gen(availible,
-                    requested,
-                    target,
-                    boiler_plate,
-                    num_test = lambda a:True,
-                    param_test = lambda a:True,
-                    var = lambda name, params={}: params):
+def macro_block_gen(availible,#directory of macro/xacro files NOTE: will only examine files that end in .xacro NOTE: WILL search sub-directories
+                    requested,#yaml file with requested macros
+                    target,#target file for writing the macro calls too NOTE: will write over if a file is already there
+                    boiler_plate,#stuff to start the xacro file
+                    num_test = lambda a:True,#test if the number of a type of requested macros is allowed
+                    param_test = lambda a:True,#test if a given macro call parameters are sensable(NOT if the parameters are presentfor a given macro)
+                    var = lambda name, params={}: params):#add variance to a given set of full params for a type of macro 
     xacro_file=open(target, 'wb')
     xacro_file.write(boiler_plate)
 
