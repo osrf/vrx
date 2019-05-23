@@ -94,6 +94,6 @@ class Macro:
         self.params = params
        
         if contents.find('<xacro:macro') != -1:
-            raise Exception('multiple macros defined in %s'%xacro_file_name, contents.find('<xacro:macro'))
+            raise Exception('multiple macros defined in %s'%xacro_file_name)
 
 
