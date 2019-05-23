@@ -36,12 +36,23 @@ def macro_call_gen(name, params={}):
     return macro_call
 
 def get_macros(directory):
-    xacro_files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory,f))]
+    xacro_files = get_macro_files(directory)
     macros = {}
     for i in xacro_files:
-        macro = Macro(directory+str(i))
+        macro = Macro(i)
         macros[macro.name] = macro
     return macros
+
+def get_macro_files(directory):
+    xacro_files = [directory+'/'+f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory,f)) and (f[-6:] == '.xacro')]
+    child_directories = [d[0] for d in os.walk(directory)]
+    child_directories = child_directories[1:]
+    
+    for i in child_directories:
+        for j in get_macro_files(i):
+            xacro_files.append(j)
+    
+    return xacro_files
 
 class Macro:
     def __init__(self, xacro_file_name):
@@ -56,6 +67,8 @@ class Macro:
         start = contents.find('<xacro:macro')
         end = contents.find('>', start)
         declaration = contents[start:end]
+
+        contents.replace(contents[start:end+1],'') #remove the declaration from the string so we know we processed it
         name_pose = declaration.find('name')
         start = declaration.find('"', name_pose)
         end = declaration.find('"',start+1)
@@ -64,9 +77,9 @@ class Macro:
         params_pose =declaration.find('params')
         start = declaration.find('"', params_pose)
         end = declaration.find('"',start+1)
-        params_raw =declaration[start+1:end].split(' ')
+        params_str =declaration[start+1:end].split(' ')
         params={}
-        for i in params_raw:
+        for i in params_str:
             key = i
             if ':' in i:
                 key = i[:i.find(':')]
@@ -79,4 +92,10 @@ class Macro:
         
         self.name = name
         self.params = params
+       
+        if contents.find('<xacro:macro') != -1:
+            raise MultipleMacroDeclarationError('multiple macros defined in %s'%xacro_file_name)
+class MultipleMacroDeclarationError(Exception):
+    pass
+
 
