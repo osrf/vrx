@@ -5,30 +5,30 @@
       <visual name="cpu_cases_visual">
       <pose>0.073 0 -1.53 0 0 0</pose>
         <geometry>
-	  <mesh> 
-	    <uri>
+          <mesh> 
+            <uri>
               model://cpu_cases/mesh/cpu_cases.dae
             </uri>
-	  </mesh>
+          </mesh>
         </geometry>
       </visual>
       <collision name="cpu_cases_collision">
-	<pose>0 0 0 0 0 0 </pose>
+        <pose>0 0 0 0 0 0 </pose>
         <geometry>
-          <box><size>0.97 0.83 .47</size></box>
+          <box><size>0.97 0.83 0.47</size></box>
         </geometry>
       </collision>
       <inertial>
-	<pose>0 0 0 0 0 0 </pose>
-	<mass>20</mass>
-	<inertia>
-	  <ixx>1.51633333333333</ixx>
-	  <iyy>1.93633333333333</iyy>
-	  <izz>2.71633333333333</izz>
-	  <ixy>0</ixy>
-	  <ixz>0</ixz>
-	  <iyz>0</iyz>
-	</inertia>
+        <pose>0 0 0 0 0 0 </pose>
+        <mass>20</mass>
+        <inertia>
+          <ixx>1.51633333333333</ixx>
+          <iyy>1.93633333333333</iyy>
+          <izz>2.71633333333333</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
       </inertial>
     </link>
   </model>
