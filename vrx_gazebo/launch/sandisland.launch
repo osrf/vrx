@@ -22,13 +22,6 @@
        X = "holonomic" configuration -->
   <arg name="thrust_config" default="H" />
 
-  <!-- Do you want to enable sensors? -->
-  <arg name="camera_enabled"       default="false" />
-  <arg name="gps_enabled"          default="false" />
-  <arg name="imu_enabled"          default="false" />
-  <arg name="lidar_enabled"        default="false" />
-  <arg name="ground_truth_enabled" default="false" />
-
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name"   value="$(arg world)"/>
