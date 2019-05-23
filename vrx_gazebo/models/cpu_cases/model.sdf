@@ -3,7 +3,7 @@
   <model name="cpu_cases">
     <link name="cpu_cases_link">
       <visual name="cpu_cases_visual">
-      <pose>0.1 0 -1.5 0 0 0 </pose>
+      <pose>0.073 0 -1.53 0 0 0</pose>
         <geometry>
 	  <mesh> 
 	    <uri>
@@ -13,18 +13,18 @@
         </geometry>
       </visual>
       <collision name="cpu_cases_collision">
-	<origin xyz="0 0 0" rpy="0 0 0"/>
+	<pose>0 0 0 0 0 0 </pose>
         <geometry>
-          <box size="0.98 0.82 .5"/>
+          <box><size>0.97 0.83 .47</size></box>
         </geometry>
       </collision>
       <inertial>
-	<origin xyz="-0.07 0 15.2" rpy="0 0 0"/>
-	<mass>23.5</mass>
+	<pose>0 0 0 0 0 0 </pose>
+	<mass>20</mass>
 	<inertia>
-	  <ixx>0.5015291666666667</ixx>
-	  <iyy>0.8931958333333333</iyy>
-	  <izz>1.0183333333333333</izz>
+	  <ixx>1.51633333333333</ixx>
+	  <iyy>1.93633333333333</iyy>
+	  <izz>2.71633333333333</izz>
 	  <ixy>0</ixy>
 	  <ixz>0</ixz>
 	  <iyz>0</iyz>
