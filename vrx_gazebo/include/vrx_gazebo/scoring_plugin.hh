@@ -105,10 +105,10 @@ class ScoringPlugin : public gazebo::WorldPlugin
   // \brief Callback function when collision occurs
   public: void onCollisionMsg(ConstContactsPtr &contacts);
 
-  // \brief collision detection node pointer
+  // \brief Collision detection node pointer
   protected: gazebo::transport::NodePtr collisionNode;
 
-  // \brief collision detection node subscriber
+  // \brief Collision detection node subscriber
   protected: gazebo::transport::SubscriberPtr collisionSub;
 
   // Documentation inherited.
