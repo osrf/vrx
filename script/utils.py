@@ -1,6 +1,12 @@
 import os
 import yaml
-def macro_block_gen(availible, requested, target, boiler_plate, num_test, param_test):
+def macro_block_gen(availible,
+                    requested,
+                    target,
+                    boiler_plate,
+                    num_test = lambda a:True,
+                    param_test = lambda a:True,
+                    var = lambda name, params={}: params):
     xacro_file=open(target, 'wb')
     xacro_file.write(boiler_plate)
 
@@ -21,9 +27,10 @@ def macro_block_gen(availible, requested, target, boiler_plate, num_test, param_
                 #all params in all objects must be correct
                 assert j in availible_macros[key].params.keys(),"%s is not a parameter in %s"%(j,key)
                 full_params[j] = i[j]#replace the specified param's value = the value specified in yaml file
+            full_params = var(key, full_params)
             #test the full parameter list and make sure it is in accordance
             assert param_test(key, full_params),"%s %s failed parameter test"%(key, i['name'])
-            xacro_file.write(macro_call_gen(key, i))
+            xacro_file.write(macro_call_gen(key, full_params))
     xacro_file.write('</xacro:macro>\n')
     xacro_file.write('</robot>\n')
     xacro_file.close()
@@ -80,14 +87,16 @@ class Macro:
         params_str =declaration[start+1:end].split(' ')
         params={}
         for i in params_str:
-            key = i
-            if ':' in i:
-                key = i[:i.find(':')]
-            if '=' in i:
-                value = i[i.find('=')+1:]
-            else:
-                value = ''
-            params[key]=value
+            if i != '':
+                key = i
+                if ':' in i:
+                    key = i[:i.find(':')]
+                if '=' in i:
+                    value = i[i.find('=')+1:]
+                else:
+                    value = ''
+                value = value.replace('\n', '')
+                params[key]=value
         
         
         self.name = name
