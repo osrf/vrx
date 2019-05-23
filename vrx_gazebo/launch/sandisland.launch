@@ -35,12 +35,7 @@
   <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
   <param name="robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
-         thruster_config:=$(arg thrust_config)
-         camera_enabled:=$(arg camera_enabled)
-         gps_enabled:=$(arg gps_enabled)
-         imu_enabled:=$(arg imu_enabled)
-         lidar_enabled:=$(arg lidar_enabled)
-         ground_truth_enabled:=$(arg ground_truth_enabled) "/>
+         thruster_config:=$(arg thrust_config)"/>
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
