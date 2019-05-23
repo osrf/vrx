@@ -7,7 +7,7 @@
         <geometry>
 	  <mesh> 
 	    <uri>
-		    model://battery/mesh/battery.dae
+  	      model://battery/mesh/battery.dae
             </uri>
 	  </mesh>
         </geometry>
