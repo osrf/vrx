@@ -11,7 +11,7 @@ def macro_block_gen(availible, requested, target, boiler_plate, num_test, param_
 
     for key, objects in requested_macros.items():
         #object must be availible
-        assert key in availible_macros.keys(),"%s is not defined in %s"%(key, directory)
+        assert key in availible_macros.keys(),"%s is not defined in %s"%(key, availible)
         #can only have so many of this type of object
         assert num_test(key, len(objects)), "%d %s's are not allowed"%(len(objects),key)
         xacro_file.write('  <!-- === %s === -->\n'% (key))
@@ -68,7 +68,7 @@ class Macro:
         end = contents.find('>', start)
         declaration = contents[start:end]
 
-        contents.replace(contents[start:end+1],'') #remove the declaration from the string so we know we processed it
+        contents = contents.replace(contents[start:end+1],'') #remove the declaration from the string so we know we processed it
         name_pose = declaration.find('name')
         start = declaration.find('"', name_pose)
         end = declaration.find('"',start+1)
@@ -94,8 +94,6 @@ class Macro:
         self.params = params
        
         if contents.find('<xacro:macro') != -1:
-            raise MultipleMacroDeclarationError('multiple macros defined in %s'%xacro_file_name)
-class MultipleMacroDeclarationError(Exception):
-    pass
+            raise Exception('multiple macros defined in %s'%xacro_file_name, contents.find('<xacro:macro'))
 
 
