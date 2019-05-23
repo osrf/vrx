@@ -11,7 +11,7 @@
     <collision name="cpu_cases_collision">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-         <box size="0.97 0.83 0.47"/>
+        <box size="0.97 0.83 0.47"/>
       </geometry>
     </collision>
     <inertial>

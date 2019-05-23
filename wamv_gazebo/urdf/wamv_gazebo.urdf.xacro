@@ -16,7 +16,7 @@
 
   <!-- === CPU Cases === -->
   <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
-  <xacro:cpu_cases position="-0.3 0 1.53" orientation="0 0 0"/>
+  <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
 
   <!-- === Thrusters === -->
   <xacro:property name="thruster_conf" value="$(arg thruster_config)"/> -->
