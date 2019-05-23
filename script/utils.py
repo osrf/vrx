@@ -1,25 +1,27 @@
 import os
 import yaml
-def macro_block_gen(avalible, requested, target, boiler_plate, num_test, param_test):
+def macro_block_gen(availible, requested, target, boiler_plate, num_test, param_test):
     xacro_file=open(target, 'wb')
     xacro_file.write(boiler_plate)
 
-    avalible_macros = get_macros(avalible)
+    availible_macros = get_macros(availible)
 
     s = open(requested,'r')
     requested_macros = yaml.load(s)
 
     for key, objects in requested_macros.items():
-        #device must be avalible
-        assert key in avalible_macros.keys(),"%s is not defined in %s"%(key, directory)
+        #object must be availible
+        assert key in availible_macros.keys(),"%s is not defined in %s"%(key, directory)
+        #can only have so many of this type of object
         assert num_test(key, len(objects)), "%d %s's are not allowed"%(len(objects),key)
         xacro_file.write('  <!-- === %s === -->\n'% (key))
         for i in objects:
-            full_params = avalible_macros[key].params.copy()
+            full_params = availible_macros[key].params.copy()#dict of default params for this object
             for j in i:
                 #all params in all objects must be correct
-                assert j in avalible_macros[key].params.keys(),"%s is not a parameter in %s"%(j,key)
-                full_params[j] = i[j]
+                assert j in availible_macros[key].params.keys(),"%s is not a parameter in %s"%(j,key)
+                full_params[j] = i[j]#replace the specified param's value = the value specified in yaml file
+            #test the full parameter list and make sure it is in accordance
             assert param_test(key, full_params),"%s %s failed parameter test"%(key, i['name'])
             xacro_file.write(macro_call_gen(key, i))
     xacro_file.write('</xacro:macro>\n')
@@ -43,7 +45,6 @@ def get_macros(directory):
 
 class Macro:
     def __init__(self, xacro_file_name):
-
         xacro_file=open(xacro_file_name, 'r')
         contents=xacro_file.read()
         #remove comment blocks
