@@ -3,13 +3,16 @@
   <model name="ground_station">
     <static>true</static>
     <include>
+      <name>tent</name>
       <uri>model://tent</uri>
     </include>
     <include>
+      <name>table_a</name>
       <pose>0.5 0.9 0.0 0.0 0.0 0.0</pose>
       <uri>model://table</uri>
     </include>
     <include>
+      <name>table_b</name>
       <pose>1.0 -0.5 0.0 0.0 0.0 1.57</pose>
       <uri>model://table</uri>
     </include>

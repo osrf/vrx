@@ -7,7 +7,7 @@
       <visual name="visual">
         <geometry>
            <mesh>
-            <uri>file://table/meshes/table.dae</uri>
+            <uri>file://table/mesh/table.dae</uri>
           </mesh>
         </geometry>
       </visual>

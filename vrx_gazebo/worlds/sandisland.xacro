@@ -51,39 +51,66 @@
 
     <!-- The posts for securing the WAM-V -->
     <include>
-      <pose>169.22 112.06 0.388 0.046 -0.157 0</pose>
+      <name>post_0</name>
+      <pose>169.22 112.06 0.47 0.046 -0.157 0</pose>
       <uri>model://post</uri>
-    </include>
+    </include>  
     <include>
+      <name>post_1</name>
       <pose>171.558 106.809 0.55 0.046 -0.157 0</pose>
       <uri>model://post</uri>
     </include>
     <include>
+      <name>post_2</name>
       <pose>173.64 101.86 0.55 0.046 -0.157 0</pose>
       <uri>model://post</uri>
     </include>
 
     <!-- Antenna for communication with the WAM-V -->
     <include>
-      <pose>170.32 110.2 0.50 -0.17 0 2.10</pose>
+      <pose>175.69 114.29 1.37 0 0 2.00</pose>
       <uri>model://antenna</uri>
     </include>
 
     <!-- ground station tents -->
     <include>
-      <pose>172.0 114.0 0.9 0 -0.15 0.4</pose>
+      <name>ground_station_0</name>
+      <pose>177.61 117.20 1.55 0 0 0.4</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
-      <pose>173.75 110.06 1.05 0 -0.15 0.4</pose>
+      <name>ground_station_1</name>
+      <pose>179.16 113.73 1.55 0 0 0.4</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
-      <pose>175.45 106.4 1.1 0 -0.15 0.4</pose>
+      <name>ground_station_2</name>
+      <pose>180.61 110.31 1.55 0 0 0.4</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
-      <pose>177.16 102.15 1.1 0 -0.15 0.4</pose>
+      <name>ground_station_3</name>
+      <pose>182.05 106.83 1.55 0 0 0.4</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <name>ground_station_4</name>
+      <pose>183.71 103.14 1.55 0 0 0.4</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <name>ground_station_5</name>
+      <pose>185.28 99.51 1.55 0 0 0.4</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <name>ground_station_6</name>
+      <pose>186.80 96.02 1.55 0 0 0.4</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <name>ground_station_7</name>
+      <pose>188.17 92.45 1.55 0 0 0.4</pose>
       <uri>model://ground_station</uri>
     </include>
   </xacro:macro>
