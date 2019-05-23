@@ -30,24 +30,6 @@ ScoringPlugin::ScoringPlugin()
                                &ScoringPlugin::onCollisionMsg, this);
 }
 
-void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
-  for (unsigned int i = 0; i < contacts->contact_size(); ++i) {
-    std::string wamvCollisionStr = contacts->contact(i).collision1();
-    std::string wamvCollisionSubStr =
-        wamvCollisionStr.substr(0, wamvCollisionStr.find("lump"));
-
-    if (wamvCollisionSubStr == "wamv::base_link::base_link_fixed_joint_" &&
-        this->currentTime.Double() - this->lastHitTime.Double() > 3.0) {
-      std::cout << "you hit" << '\n';
-#if GAZEBO_MAJOR_VERSION >= 8
-      this->lastHitTime = this->world->SimTime();
-#else
-      this->lastHitTime = this->world->GetSimTime();
-#endif
-      std::cout << this->lastHitTime.Double() << '\n';
-    }
-  }
-}
 
 void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
@@ -248,6 +230,34 @@ void ScoringPlugin::OnRunning()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
+  //loop though collisions, if any include the wamv, increment collision counter
+  for (unsigned int i = 0; i < contacts->contact_size(); ++i) {
+    std::string wamvCollisionStr1 = contacts->contact(i).collision1();
+    std::string wamvCollisionStr2 = contacts->contact(i).collision2();
+    std::string wamvCollisionSubStr1 =
+    wamvCollisionStr1.substr(0, wamvCollisionStr1.find("lump"));
+    std::string wamvCollisionSubStr2 =
+    wamvCollisionStr2.substr(0, wamvCollisionStr2.find("lump"));
+
+    bool isWamvHit =
+    wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
+    wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_";
+    bool isHitBufferPassed =
+    this->currentTime - this->lastCollisionTime > gazebo::common::Time(3, 0);
+
+    if (isWamvHit && isHitBufferPassed) {
+      this->collisionCounter++;
+      #if GAZEBO_MAJOR_VERSION >= 8
+      this->lastCollisionTime = this->world->SimTime();
+      #else
+      this->lastCollisionTime = this->world->GetSimTime();
+      #endif
+    }
+  }
 }
 
 //////////////////////////////////////////////////

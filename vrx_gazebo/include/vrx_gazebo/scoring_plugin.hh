@@ -28,9 +28,6 @@
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include <gazebo/transport/transport.hh>
-// #include <ContactPlugin.hh>
-
-// #include <physics/physics.hh>
 #include "vrx_gazebo/Task.h"
 
 /// \brief A plugin that provides common functionality to any scoring plugin.
@@ -100,8 +97,6 @@
 ///     </joint>
 ///   </release_joints>
 /// </plugin>
-
-// #include <sensors/sensors.hh>
 class ScoringPlugin : public gazebo::WorldPlugin
 {
   /// \brief Class constructor.
@@ -236,8 +231,11 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Remaining time since the start of the task (running state).
   private: gazebo::common::Time remainingTime;
 
-  /// \brief Time since last hit.
-  private: gazebo::common::Time lastHitTime;
+  /// \brief Last collision time.
+  private: gazebo::common::Time lastCollisionTime;
+
+  /// \brief Collision counter.
+  private: int collisionCounter = 0;
 
   /// \brief Whether the current task has timed out or not.
   private: bool timedOut = false;
