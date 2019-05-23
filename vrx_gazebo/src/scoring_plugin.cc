@@ -234,28 +234,30 @@ void ScoringPlugin::OnFinished()
 
 //////////////////////////////////////////////////
 void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
-  //loop though collisions, if any include the wamv, increment collision counter
+  // loop though collisions, if any include the wamv, increment collision
+  // counter
   for (unsigned int i = 0; i < contacts->contact_size(); ++i) {
     std::string wamvCollisionStr1 = contacts->contact(i).collision1();
     std::string wamvCollisionStr2 = contacts->contact(i).collision2();
     std::string wamvCollisionSubStr1 =
-    wamvCollisionStr1.substr(0, wamvCollisionStr1.find("lump"));
+        wamvCollisionStr1.substr(0, wamvCollisionStr1.find("lump"));
     std::string wamvCollisionSubStr2 =
-    wamvCollisionStr2.substr(0, wamvCollisionStr2.find("lump"));
+        wamvCollisionStr2.substr(0, wamvCollisionStr2.find("lump"));
 
     bool isWamvHit =
-    wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
-    wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_";
-    bool isHitBufferPassed =
-    this->currentTime - this->lastCollisionTime > gazebo::common::Time(3, 0);
+        wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
+        wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_";
+    bool isHitBufferPassed = this->currentTime - this->lastCollisionTime >
+                             gazebo::common::Time(CollisionBuffer, 0);
 
     if (isWamvHit && isHitBufferPassed) {
       this->collisionCounter++;
-      #if GAZEBO_MAJOR_VERSION >= 8
+      std::cout << collisionCounter << '\n';
+#if GAZEBO_MAJOR_VERSION >= 8
       this->lastCollisionTime = this->world->SimTime();
-      #else
+#else
       this->lastCollisionTime = this->world->GetSimTime();
-      #endif
+#endif
     }
   }
 }
@@ -321,6 +323,12 @@ bool ScoringPlugin::ParseSDFParameters()
       return false;
     }
     this->runningStateDuration = value;
+  }
+
+  // This is an optional element.
+  if (this->sdf->HasElement("collision_buffer"))
+  {
+    this->CollisionBuffer = this->sdf->Get<float>("collision_buffer");
   }
 
   return this->ParseJoints();

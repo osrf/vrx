@@ -234,6 +234,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Last collision time.
   private: gazebo::common::Time lastCollisionTime;
 
+  /// \brief Collision buffer.
+  private: float CollisionBuffer = 3.0;
+
   /// \brief Collision counter.
   private: int collisionCounter = 0;
 
