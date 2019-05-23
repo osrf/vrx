@@ -252,7 +252,6 @@ void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
 
     if (isWamvHit && isHitBufferPassed) {
       this->collisionCounter++;
-      std::cout << collisionCounter << '\n';
 #if GAZEBO_MAJOR_VERSION >= 8
       this->lastCollisionTime = this->world->SimTime();
 #else

@@ -154,6 +154,7 @@
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
+      <collision_buffer>10</collision_buffer>
       <release_joints>
         <joint>
           <name>wamv_external_pivot_joint</name>
