@@ -12,20 +12,35 @@
     max_range: maximum distance for an object to be detected by laser
     noise_stddev: Standard deviation of gaussian noise applied to output pointcloud
   -->
-  <xacro:macro name="wamv_3d_lidar" params="name x:=0.7 y:=0 z:=1.45 R:=0 P:=0 Y:=0
+  <xacro:macro name="wamv_3d_lidar" params="name x:=0.7 y:=0 z:=1.33 R:=0 P:=0 Y:=0
                                             update_rate:=10 vertical_lasers:=16 samples:=1800 resolution:=0.1
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
                                             max_range:=100 noise_stddev:=0.01">
     <link name="${name}_link">
-      <visual name="${name}_visual">>
+      <visual name="${name}_visual">
+        <origin xyz="0 0 -0.035" rpy="0 0 0"/>
         <geometry>
-          <cylinder radius="0.025" length="0.1" />
+          <mesh filename="package://vrx_gazebo/models/3d_lidar/mesh/3d_lidar.dae"/>
         </geometry>
-        <material name="${name}_visual_material">
-          <color rgba="0.5 1.0 0.5 1.0" />
-        </material>
       </visual>
+      <collision name="${name}_collision">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.055" length="0.075"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1"/>
+        <inertia
+          ixx="0.00109375"
+          iyy="0.00109375"
+          izz="0.00125"
+          ixy="0"
+          ixz="0"
+          iyz="0"/>
+      </inertial>
     </link>
     <joint name="${name}_joint" type="fixed">
       <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}" />

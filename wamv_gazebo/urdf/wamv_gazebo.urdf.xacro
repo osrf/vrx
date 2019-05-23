@@ -77,7 +77,7 @@
 
   <!-- Add 3D LIDAR -->
   <xacro:if value="$(arg lidar_enabled)">
-    <xacro:wamv_3d_lidar name="lidar_wamv" y="-0.3" />
+    <xacro:wamv_3d_lidar name="lidar_wamv" y="0" />
   </xacro:if>
 
   <!-- Add P3D ground truth -->

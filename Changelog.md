@@ -14,6 +14,9 @@
 1. Add sand island basic mesh and texture:
     * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
 
+1. Add 3d lidar mesh to WAM-V:
+    * [Pull request 98](https://bitbucket.org/osrf/vrx/pull-requests/98)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
