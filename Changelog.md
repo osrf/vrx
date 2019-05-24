@@ -2,8 +2,26 @@
 
 ### Forthcoming
 
+1. Randomized wind speed in the wind plugin:
+    * [Pull request 86](https://bitbucket.org/osrf/vrx/pull-requests/86)
+
 1. Fix issue with ocean reflecting the laser beams:
     * [Pull request 79](https://bitbucket.org/osrf/vrx/pull-requests/79)
+
+1. Adding GPS antenna, collisions and inertia properties:
+    * [Pull request 90](https://bitbucket.org/osrf/vrx/pull-requests/90)
+
+1. Add sand island basic mesh and texture:
+    * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
+    
+1. Added ground station tents, tables and antenna:
+    * [Pull request 96](https://bitbucket.org/osrf/vrx/pull-requests/96)
+
+1. Add batteries to WAM-V:
+    * [Pull request 95](https://bitbucket.org/osrf/vrx/pull-requests/95)
+
+1. Add cpu cases to WAM-V:
+    * [Pull request 97](https://bitbucket.org/osrf/vrx/pull-requests/97)
 
 ### VRX 1.0.1
 

@@ -9,6 +9,7 @@
         <cylinder length="4" radius="0.2" />
       </geometry>
     </collision>
+
     <collision name="${prefix}_mid_float">
       <origin xyz="1.85 ${1.03*reflect} 0.3" rpy="${0*reflect} 1.38 0" />
       <geometry>

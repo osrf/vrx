@@ -28,8 +28,6 @@ RUN apt update \
         wget \
         libeigen3-dev \
         pkg-config \
-        libgles2-mesa-dev \
-        qtbase5-dev \
  && apt clean
 
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -49,6 +47,8 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
  && apt-key add /tmp/gazebo.key \
  && apt update \
  && apt install -y \
+    qtbase5-dev \
+    libgles2-mesa-dev \
     ${GAZ} \
     lib${GAZ}-dev \
     ros-${DIST}-ros-base \
@@ -59,9 +59,11 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
     ros-${DIST}-joy \
     ros-${DIST}-joy-teleop \
     ros-${DIST}-key-teleop \
+    ros-${DIST}-robot-localization \
+    ros-${DIST}-robot-state-publisher \
+    ros-${DIST}-rviz \
     ros-${DIST}-teleop-tools \
     ros-${DIST}-teleop-twist-keyboard \
-    ros-${DIST}-robot-localization \
     ros-${DIST}-velodyne-simulator \
  && rosdep init \
  && apt clean

@@ -4,66 +4,20 @@
     <pose>0 0 0 0 0 0</pose>
     <static>true</static>
     <link name="silink">
-      <collision name="shore_front_left">
-        <pose>160 180 -4.5 0 0 2.05</pose>
+      <visual name="visual">
         <geometry>
-          <box>
-            <size>220 160 11</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="shore_front_right">
-        <pose>240 -22 -4.5 0 0 2.08</pose>
-        <geometry>
-          <box>
-            <size>220 130 11</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="shore_back">
-        <pose>-195 -147 -4.5 0 0 2.05</pose>
-        <geometry>
-          <box>
-            <size>275 150 11</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="seafloor">
-        <pose>0 0 -9 0 0 2.354602</pose>
-        <geometry>
-          <box>
-            <size>700 400 11</size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="si_is">
-        <geometry>
-          <heightmap>
-            <use_terrain_paging>false</use_terrain_paging>
-            <texture>
-              <diffuse>file://media/materials/textures/dirt_diffusespecular.png</diffuse>
-              <normal>file://media/materials/textures/flat_normal.png</normal>
-              <size>1</size>
-            </texture>
-            <texture>
-              <diffuse>file://media/materials/textures/fungus_diffusespecular.png</diffuse>
-              <normal>file://media/materials/textures/flat_normal.png</normal>
-              <size>1</size>
-            </texture>
-            <blend>
-              <min_height>2</min_height>
-              <fade_dist>5</fade_dist>
-            </blend>
-            <blend>
-              <min_height>4</min_height>
-              <fade_dist>5</fade_dist>
-            </blend>
-            <uri>file://sandisland/heightmap.png</uri>
-            <size>469 469 10</size>
-            <pos>0 0 -9</pos>
-          </heightmap>
+          <mesh>
+            <uri>file://sandisland/meshes/sandisland.dae</uri>
+          </mesh>
         </geometry>
       </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>file://sandisland/meshes/sandisland.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
     </link>
   </model>
 </sdf>
