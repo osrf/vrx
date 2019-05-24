@@ -13,6 +13,15 @@
 
 1. Add sand island basic mesh and texture:
     * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
+    
+1. Added ground station tents, tables and antenna:
+    * [Pull request 96](https://bitbucket.org/osrf/vrx/pull-requests/96)
+
+1. Add batteries to WAM-V:
+    * [Pull request 95](https://bitbucket.org/osrf/vrx/pull-requests/95)
+
+1. Add cpu cases to WAM-V:
+    * [Pull request 97](https://bitbucket.org/osrf/vrx/pull-requests/97)
 
 1. Support the ability to customize sensor location via YAML:
     * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
