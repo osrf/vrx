@@ -2,7 +2,6 @@
 <sdf version="1.6">
   <model name="table">
     <static>true</static>
-    <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
       <visual name="visual">
         <geometry>
