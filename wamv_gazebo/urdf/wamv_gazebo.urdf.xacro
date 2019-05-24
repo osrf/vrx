@@ -14,10 +14,6 @@
   <!-- === The WAM-V platform === -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro" />
 
-  <!-- === CPU Cases === -->
-  <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
-  <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
-
   <!-- === Thrusters === -->
   <xacro:property name="thruster_conf" value="$(arg thruster_config)"/> -->
 
@@ -91,6 +87,10 @@
 
   <!-- ==== VRX sensor configuration ==== -->
   <xacro:if value="$(arg vrx_sensors_enabled)">
+
+    <!-- Add CPU Cases -->
+    <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
+    <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
 
     <!-- Add a stereo camera pair -->
     <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}" />

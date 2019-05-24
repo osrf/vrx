@@ -13,13 +13,11 @@
         </geometry>
       </visual>
       <collision name="cpu_cases_collision">
-        <pose>0 0 0 0 0 0 </pose>
         <geometry>
           <box><size>0.97 0.83 0.47</size></box>
         </geometry>
       </collision>
       <inertial>
-        <pose>0 0 0 0 0 0 </pose>
         <mass>20</mass>
         <inertia>
           <ixx>1.51633333333333</ixx>
