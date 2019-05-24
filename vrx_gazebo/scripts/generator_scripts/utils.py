@@ -23,10 +23,10 @@ def macro_block_gen(target,#target file for writing the macro calls too NOTE: wi
         assert num_test(key, len(objects)), "%d %s's are not allowed"%(len(objects),key)
         xacro_file.write('  <!-- === %s === -->\n'% (key))
         for i in objects:
-            full_params = availible_macros[key].params.copy()#dict of default params for this object
+            full_params = availible_macros[key].copy()#dict of default params for this object
             for j in i:
                 #all params in all objects must be correct
-                assert j in availible_macros[key].params.keys(),"%s is not a parameter in %s"%(j,key)
+                assert j in availible_macros[key].keys(),"%s is not a parameter in %s"%(j,key)
                 full_params[j] = i[j]#replace the specified param's value = the value specified in yaml file
             full_params = var(key, full_params)
             #test the full parameter list and make sure it is in accordance
@@ -47,8 +47,8 @@ def get_macros(directory):
     xacro_files = get_macro_files(directory)
     macros = {}
     for i in xacro_files:
-        macro = Macro(i)
-        macros[macro.name] = macro
+        name, params = parse_xacro_file(i)
+        macros[name] = params
     return macros
 
 def get_macro_files(directory):
@@ -62,48 +62,43 @@ def get_macro_files(directory):
     
     return xacro_files
 
-class Macro:
-    def __init__(self, xacro_file_name):
-        xacro_file=open(xacro_file_name, 'r')
-        contents=xacro_file.read()
-        #remove comment blocks
-        while '<!--' in contents:
-            start=contents.find('<!--')
-            end = contents.find('-->')
-            contents = contents.replace(contents[start:end+3], '')
-        #get macro declaration
-        start = contents.find('<xacro:macro')
-        end = contents.find('>', start)
-        declaration = contents[start:end]
+def parse_xacro_file(xacro_file_name):
+    xacro_file=open(xacro_file_name, 'r')
+    contents=xacro_file.read()
+    #remove comment blocks
+    while '<!--' in contents:
+        start=contents.find('<!--')
+        end = contents.find('-->')
+        contents = contents.replace(contents[start:end+3], '')
+    #get macro declaration
+    start = contents.find('<xacro:macro')
+    end = contents.find('>', start)
+    declaration = contents[start:end]
 
-        contents = contents.replace(contents[start:end+1],'') #remove the declaration from the string so we know we processed it
-        name_pose = declaration.find('name')
-        start = declaration.find('"', name_pose)
-        end = declaration.find('"',start+1)
-        name = declaration[start+1:end]
+    contents = contents.replace(contents[start:end+1],'') #remove the declaration from the string so we know we processed it
+    name_pose = declaration.find('name')
+    start = declaration.find('"', name_pose)
+    end = declaration.find('"',start+1)
+    name = declaration[start+1:end]
 
-        params_pose =declaration.find('params')
-        start = declaration.find('"', params_pose)
-        end = declaration.find('"',start+1)
-        params_str =declaration[start+1:end].split(' ')
-        params={}
-        for i in params_str:
-            if i != '':
-                key = i
-                if ':' in i:
-                    key = i[:i.find(':')]
-                if '=' in i:
-                    value = i[i.find('=')+1:]
-                else:
-                    value = ''
-                value = value.replace('\n', '')
-                params[key]=value
-        
-        
-        self.name = name
-        self.params = params
-       
-        if contents.find('<xacro:macro') != -1:
-            raise Exception('multiple macros defined in %s'%xacro_file_name)
+    params_pose =declaration.find('params')
+    start = declaration.find('"', params_pose)
+    end = declaration.find('"',start+1)
+    params_str =declaration[start+1:end].split(' ')
+    params={}
+    for i in params_str:
+        if i != '':
+            key = i
+            if ':' in i:
+                key = i[:i.find(':')]
+            if '=' in i:
+                value = i[i.find('=')+1:]
+            else:
+                value = ''
+            value = value.replace('\n', '')
+            params[key]=value
 
+    if contents.find('<xacro:macro') != -1:
+        raise Exception('multiple macros defined in %s'%xacro_file_name)
 
+    return name, params
