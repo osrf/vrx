@@ -57,12 +57,12 @@
     </include>  
     <include>
       <name>post_1</name>
-      <pose>171.558 106.809 0.55 0.046 -0.157 0</pose>
+      <pose>173.558 100.809 0.42 0.046 -0.157 0</pose>
       <uri>model://post</uri>
     </include>
     <include>
       <name>post_2</name>
-      <pose>173.64 101.86 0.55 0.046 -0.157 0</pose>
+      <pose>177.64 90.86 0.3 0.046 -0.157 0</pose>
       <uri>model://post</uri>
     </include>
 
@@ -75,42 +75,42 @@
     <!-- ground station tents -->
     <include>
       <name>ground_station_0</name>
-      <pose>177.61 117.20 1.55 0 0 0.4</pose>
+      <pose>177.61 117.20 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_1</name>
-      <pose>179.16 113.73 1.55 0 0 0.4</pose>
+      <pose>179.16 113.73 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_2</name>
-      <pose>180.61 110.31 1.55 0 0 0.4</pose>
+      <pose>180.61 110.31 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_3</name>
-      <pose>182.05 106.83 1.55 0 0 0.4</pose>
+      <pose>182.05 106.83 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_4</name>
-      <pose>183.71 103.14 1.55 0 0 0.4</pose>
+      <pose>183.71 103.14 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_5</name>
-      <pose>185.28 99.51 1.55 0 0 0.4</pose>
+      <pose>185.28 99.51 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_6</name>
-      <pose>186.80 96.02 1.55 0 0 0.4</pose>
+      <pose>186.80 96.02 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_7</name>
-      <pose>188.17 92.45 1.55 0 0 0.4</pose>
+      <pose>188.17 92.45 1.55 0 0 3.54</pose>
       <uri>model://ground_station</uri>
     </include>
   </xacro:macro>
