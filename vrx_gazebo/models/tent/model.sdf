@@ -6,7 +6,7 @@
       <visual name="visual">
         <geometry>
            <mesh>
-            <uri>file://tent/mesh/tent.dae</uri>
+            <uri>model://tent/mesh/tent.dae</uri>
           </mesh>
         </geometry>
       </visual>
