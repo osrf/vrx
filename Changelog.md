@@ -19,6 +19,10 @@
 
 1. Add batteries to WAM-V:
     * [Pull request 95](https://bitbucket.org/osrf/vrx/pull-requests/95)
+
+1. Add cpu cases to WAM-V:
+    * [Pull request 97](https://bitbucket.org/osrf/vrx/pull-requests/97)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
