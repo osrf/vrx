@@ -70,7 +70,7 @@ namespace asv
   ///
   /// # Published Topics
   ///
-  /// 1. ~/reponse (gazebo::msgs::Response)
+  /// 1. ~/response (gazebo::msgs::Response)
   ///
   /// # Parameters
   ///

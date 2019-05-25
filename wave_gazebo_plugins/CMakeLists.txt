@@ -164,6 +164,20 @@ add_dependencies(WaveMsgSubscriber
 
 list(APPEND WAVE_GAZEBO_EXECUTABLES_LIST WaveMsgSubscriber)
 
+
+add_executable(WaveRequester
+  src/WaveRequester.cc
+)
+
+target_link_libraries(WaveRequester
+  ${GAZEBO_LIBRARIES}
+)
+
+#target_compile_options(WaveMsgSubscriber PRIVATE "-Wno-unknown-pragmas")
+
+list(APPEND WAVE_GAZEBO_EXECUTABLES_LIST WaveRequester)
+
+
 ############################################################################### 
 # Tests...
 # 
