@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
 #include <functional>
 #include <string>
 #include <gazebo/common/Console.hh>
@@ -155,7 +156,6 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvWindPlugin::Update()
 {
-
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double currentTime = this->world->SimTime().Double();
