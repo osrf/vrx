@@ -19,12 +19,13 @@ You should have received a copy of the GNU General Public License
 along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
 #include <functional>
 #include <string>
 #include <gazebo/common/Console.hh>
 
 #include "usv_gazebo_plugins/usv_gazebo_wind_plugin.hh"
+
+#include <std_msgs/Float64.h>
 
 using namespace gazebo;
 
@@ -107,6 +108,14 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   gzmsg << "var wind time constants = " << this->timeConstant << std::endl;
 
+  if (_sdf->HasElement("publishing_buffer"))
+  {
+    this->publishingBuffer =
+      _sdf->GetElement("publishing_buffer")->Get<double>();
+  }
+
+  gzmsg << "publishing buffer  = " << this->publishingBuffer << std::endl;
+
   // setting seed for ignition::math::Rand
   if (_sdf->HasElement("random_seed") &&
     _sdf->GetElement("random_seed")->Get<int>() != 0)
@@ -130,6 +139,13 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 #endif
   this->previousVarVel = 0;
 
+  // Initialize ROS transport.
+  this->rosNode.reset(new ros::NodeHandle());
+  this->windSpeedPub =
+      this->rosNode->advertise<std_msgs::Float64>(this->topicWindSpeed, 100);
+  this->windDirectionPub = this->rosNode->advertise<std_msgs::Float64>(
+      this->topicWindDirection, 100);
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -139,6 +155,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvWindPlugin::Update()
 {
+
 
 #if GAZEBO_MAJOR_VERSION >= 8
   double currentTime = this->world->SimTime().Double();
@@ -190,6 +207,18 @@ void UsvWindPlugin::Update()
   // Moving the previous time and velocity one step forward.
   this->previousVarVel = currentVarVel;
   this->previousTime = currentTime;
+
+  // Publishing the wind speed and direction
+  if (currentTime - this->lastPublishTime > this->publishingBuffer){
+    std_msgs::Float64 windSpeedMsg;
+    std_msgs::Float64 windDirectionMsg;
+    windSpeedMsg.data = velocity;
+    windDirectionMsg.data =
+        atan2(this->windDirection[1], this->windDirection[0]) * 180 / M_PI;
+    this->windSpeedPub.publish(windSpeedMsg);
+    this->windDirectionPub.publish(windDirectionMsg);
+    this->lastPublishTime = currentTime;
+  }
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvWindPlugin);

@@ -30,6 +30,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
 #include <ignition/math/Rand.hh>
+#include <ros/ros.h>
 
 namespace gazebo
 {
@@ -88,6 +89,27 @@ namespace gazebo
 
     /// \brief Velocity at previous time.
     private: double previousVarVel;
+
+    /// \brief ROS node handle.
+    private: std::unique_ptr<ros::NodeHandle> rosNode;
+
+    /// \brief Publisher for wind speed.
+    private: ros::Publisher windSpeedPub;
+
+    /// \brief Publisher for wind direction.
+    private: ros::Publisher windDirectionPub;
+
+    /// \brief Topic where the wind speed is published.
+    private: std::string topicWindSpeed = "/wind_speed";
+
+    /// \brief Topic where the wind direction is published.
+    private: std::string topicWindDirection = "/wind_direction";
+
+    /// \brief Last time wind speed and direction was published.
+    private: double lastPublishTime = 0;
+
+    /// \brief Publishing buffer for wind speed and direction.
+    private: double publishingBuffer;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
