@@ -26,7 +26,6 @@ ScoringPlugin::ScoringPlugin()
     : WorldPlugin(), collisionNode(new gazebo::transport::Node()) {
 }
 
-
 void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
