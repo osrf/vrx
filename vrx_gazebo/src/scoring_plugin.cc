@@ -24,10 +24,6 @@
 /////////////////////////////////////////////////
 ScoringPlugin::ScoringPlugin()
     : WorldPlugin(), collisionNode(new gazebo::transport::Node()) {
-  collisionNode->Init();
-  collisionSub =
-      collisionNode->Subscribe("/gazebo/robotx_example_course/physics/contacts",
-                               &ScoringPlugin::onCollisionMsg, this);
 }
 
 
@@ -63,6 +59,17 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScoringPlugin::Update, this));
+
+  collisionNode->Init();
+#if GAZEBO_MAJOR_VERSION >= 8
+  std::string worldName = this->world->Name();
+#else
+  std::string worldName = this->world->GetName();
+#endif
+  std::string collisionTopic =
+    std::string("/gazebo/") + worldName + std::string("/physics/contacts");
+  collisionSub = collisionNode->Subscribe(collisionTopic,
+                                          &ScoringPlugin::onCollisionMsg, this);
 }
 
 //////////////////////////////////////////////////
@@ -252,6 +259,11 @@ void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
 
     if (isWamvHit && isHitBufferPassed) {
       this->collisionCounter++;
+      gzmsg << "[" << this->collisionCounter
+            << "] New collision counted between ["
+            << contacts->contact(i).collision1() << "] and ["
+            << contacts->contact(i).collision2() << "]" << std::endl;
+      gzdbg << contacts->contact(i).DebugString() << std::endl;
 #if GAZEBO_MAJOR_VERSION >= 8
       this->lastCollisionTime = this->world->SimTime();
 #else
