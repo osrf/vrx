@@ -12,7 +12,7 @@
     max_range: maximum distance for an object to be detected by laser
     noise_stddev: Standard deviation of gaussian noise applied to output pointcloud
   -->
-  <xacro:macro name="wamv_3d_lidar" params="name x:=0.7 y:=0 z:=1.545 R:=0 P:=0 Y:=${-pi/2} height:=0
+  <xacro:macro name="wamv_3d_lidar" params="name x:=0.7 y:=0 z:=1.545 R:=0 P:=0 Y:=${-pi/2} height:=0.25
                                             update_rate:=10 vertical_lasers:=16 samples:=1800 resolution:=0.1
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}

@@ -7,7 +7,7 @@
       <visual name="post_visual">
         <pose>0 -0.2515 0 0 0</pose>
         <geometry>
-          <mesh> 
+          <mesh>
             <uri>model://sensor_post/mesh/sensor_post.dae</uri>
           </mesh>
         </geometry>
