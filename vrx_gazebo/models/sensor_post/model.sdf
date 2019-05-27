@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="sensor_post">
+    <!-- Post link -->
+    <link name="post_link">
+      <visual name="post_visual">
+        <pose>0 0 0 -1.570796 0 0</pose>
+        <geometry>
+          <mesh> 
+            <uri>model://sensor_post/mesh/sensor_post.dae</uri>
+            <scale>1 1 1</scale>
+            <submesh>
+              <name>Post</name>
+              <center>true</center>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <collision name="post_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.0076</radius>
+            <length>0.503</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 0 0 0 0 </pose>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.010549261666667</ixx>
+          <iyy>0.010549261666667</iyy>
+          <izz>0.000014440000000</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+    </link>
+
+    <!-- Arm link -->
+    <link name="arm_link">
+      <pose>0 0 0 -1.570796 0 0</pose>
+      <visual name="arm_visual">
+        <geometry>
+          <mesh> 
+            <uri>
+              model://sensor_post/mesh/sensor_post.dae
+            </uri>
+            <scale>1 1 1</scale>
+            <submesh>
+              <name>Arm</name>
+              <center>true</center>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <collision name="arm_collision">
+        <pose>0 0 0 -0.15 0 0 </pose>
+        <geometry>
+          <cylinder>
+            <radius>0.008</radius>
+            <length>0.065</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <inertial>
+        <pose>0 0 0 -0.15 0 0 </pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00003680833</ixx>
+          <iyy>0.00003680833</iyy>
+          <izz>0.00000320000</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia> 
+      </inertial>
+
+    </link>
+  </model>
+</sdf>
