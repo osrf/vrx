@@ -237,8 +237,14 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Collision buffer.
   private: float CollisionBuffer = 3.0;
 
-  /// \brief Collision counter.
+  /// \brief Collisions counter.
   private: int collisionCounter = 0;
+
+  /// \brief Collision list.
+  private: std::vector<std::string> collisionList;
+
+  /// \brief Collisions timestamps.
+  private: std::vector<gazebo::common::Time> collisionTimestamps;
 
   /// \brief Whether the current task has timed out or not.
   private: bool timedOut = false;

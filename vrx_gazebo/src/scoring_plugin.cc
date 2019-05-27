@@ -268,6 +268,11 @@ void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
 #else
       this->lastCollisionTime = this->world->GetSimTime();
 #endif
+      this->collisionList.push_back(
+          contacts->contact(i).collision1() +
+          std::string(" || ") + contacts->contact(i).collision2());
+      this->collisionTimestamps.push_back(this->currentTime);
+      }
     }
   }
 }
