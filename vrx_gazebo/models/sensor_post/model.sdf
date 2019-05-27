@@ -1,21 +1,19 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
   <model name="sensor_post">
+    <pose>0 0 0 1.57 0 0</pose>
     <!-- Post link -->
     <link name="post_link">
       <visual name="post_visual">
-        <pose>0 0 0 -1.570796 0 0</pose>
+        <pose>0 -0.2515 0 0 0</pose>
         <geometry>
           <mesh> 
             <uri>model://sensor_post/mesh/sensor_post.dae</uri>
-            <submesh>
-              <name>Post</name>
-              <center>true</center>
-            </submesh>
           </mesh>
         </geometry>
       </visual>
       <collision name="post_collision">
+        <pose>0 0 0 1.57 0 0</pose>
         <geometry>
           <cylinder>
             <radius>0.0076</radius>
@@ -24,6 +22,7 @@
         </geometry>
       </collision>
       <inertial>
+        <pose>0 0 0 1.57 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.010549261666667</ixx>
@@ -38,15 +37,12 @@
 
     <!-- Arm link -->
     <link name="arm_link">
-      <pose>0 0.03 0.2 -1.570796 0 0</pose> <!-- Relative position of arm -->
+      <pose>0 0.2 0.03 0 0 0</pose>
       <visual name="arm_visual">
+        <pose>0 -0.016 -0.035 0 0 0 </pose>
         <geometry>
           <mesh> 
-            <uri>model://sensor_post/mesh/sensor_post.dae</uri>
-            <submesh>
-              <name>Arm</name>
-              <center>true</center>
-            </submesh>
+            <uri>model://sensor_post/mesh/sensor_post_arm.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -77,6 +73,7 @@
     <joint name="post_to_arm_joint" type="fixed">
       <parent>post_link</parent>
       <child>arm_link</child>
+      <pose>0 0 -0.03 0 0 0</pose>
     </joint>
 
   </model>
