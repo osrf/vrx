@@ -20,13 +20,11 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <std_msgs/Float64.h>
 #include <functional>
 #include <string>
 #include <gazebo/common/Console.hh>
-
 #include "usv_gazebo_plugins/usv_gazebo_wind_plugin.hh"
-
-#include <std_msgs/Float64.h>
 
 using namespace gazebo;
 
