@@ -74,6 +74,15 @@ target_link_libraries(usv_gazebo_wind_plugin
   ${catkin_LIBRARIES}
   ${Eigen_LIBRARIES}
 )
+
+#if(CATKIN_ENABLE_TESTING)
+# copy all the test world files
+file(COPY test/worlds DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# buoyancy plugin test
+catkin_add_gtest(buoyancy_plugin_test test/buoyancy_test.cc)
+target_link_libraries(buoyancy_plugin_test gazebo_test_fixture buoyancy_gazebo_plugin)
+#endif()
+
 install(TARGETS usv_gazebo_wind_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

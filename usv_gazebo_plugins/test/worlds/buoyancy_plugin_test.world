@@ -1,0 +1,203 @@
+<?xml version="1.0" ?>
+<!-- World containing buoyancy test models -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name='buoyancy_test'>
+    <gravity>0 0 0</gravity>
+    <scene>
+      <grid>false</grid>
+      <origin_visual>false</origin_visual>
+      <ambient>0.6 0.6 0.6 1</ambient>
+      <background>0.8 0.8 0.8 1</background>
+    </scene>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>4.84693 -4.51466 1.77033 0 0.275643 2.35619</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+    <!-- water level for visual reference at z = 0-->
+    <model name="plane">
+      <static>true</static>
+      <pose>3 3 0 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>10 10</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.0 0.0 0.6 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- test_1: floating box -->
+    <model name="1_box">
+      <pose>0 0 2 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- test_2: simple objects -->
+    <model name="2_box">
+      <pose>2 0 0.2 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="2_sphere">
+      <pose>4 0 0.2 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="2_cylinder">
+      <pose>6 0 0.2 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>1</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- test_3: angled simple objects -->
+    <model name="3_box">
+      <pose>2 2 0 0 0.78 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="3_cylinder">
+      <pose>6 2 0 0 0.78 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>1</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- test_4: complex objects -->
+    <model name="4_complex_a">
+      <pose>2 4 0 0 1.57 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual_box">
+          <pose>0 0 -0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <visual name="visual_cylinder">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>1</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="4_complex_b">
+      <pose>6 4 0 0 1.57 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual_cylinder">
+          <pose>0 0 -0.5 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>1</length>
+            </cylinder>
+          </geometry>
+        </visual>
+        <visual name="visual_sphere">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.5</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- test_5: complex object angled -->
+    <model name="5_complex_a">
+      <pose>2 6 0 0 2.35 0</pose>
+      <static>true</static>
+      <link name="link">
+        <visual name="visual_box">
+          <pose>0 0 -0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <visual name="visual_cylinder">
+          <pose>0 0 0.5 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>1</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
