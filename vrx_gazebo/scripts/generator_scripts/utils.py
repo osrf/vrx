@@ -5,12 +5,12 @@ def macro_block_gen(target,#target file for writing the macro calls too NOTE: wi
                     requested = None,#yaml file with requested macros
                     requested_macros = {},#for if a dictionary is passed directly, no yaml file needed
                     boiler_plate_top = '',#stuff to start the xacro file
-                    boilder_plate_bot = '',#stuff to end the xacro file
+                    boiler_plate_bot = '',#stuff to end the xacro file
                     num_test = lambda a:True,#test if the number of a type of requested macros is allowed
                     param_test = lambda a:True,#test if a given macro call parameters are sensable(NOT if the parameters are presentfor a given macro)
                     var = lambda name, params={}: params):#add variance to a given set of full params for a type of macro 
     xacro_file=open(target, 'wb')
-    xacro_file.write(boiler_plate)
+    xacro_file.write(boiler_plate_top)
 
     availible_macros = get_macros(availible)
     if requested_macros == {}:
@@ -25,11 +25,12 @@ def macro_block_gen(target,#target file for writing the macro calls too NOTE: wi
         xacro_file.write('  <!-- === %s === -->\n'% (key))
         for i in objects:
             full_params = availible_macros[key].copy()#dict of default params for this object
-            for j in i:
-                #all params in all objects must be correct
-                assert j in availible_macros[key].keys(),"%s is not a parameter in %s"%(j,key)
-                full_params[j] = i[j]#replace the specified param's value = the value specified in yaml file
-            full_params = var(key, full_params)
+            if i != None:
+                for j in i:
+                    #all params in all objects must be correct
+                    assert j in availible_macros[key].keys(),"%s is not a parameter in %s"%(j,key)
+                    full_params[j] = i[j]#replace the specified param's value = the value specified in yaml file
+                full_params = var(key, full_params)
             #test the full parameter list and make sure it is in accordance
             assert param_test(key, full_params),"%s %s failed parameter test"%(key, i['name'])
             xacro_file.write(macro_call_gen(key, full_params))
