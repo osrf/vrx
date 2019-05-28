@@ -1,1 +1,0 @@
-from generator_scripts.sensor_config import configure_sensors
