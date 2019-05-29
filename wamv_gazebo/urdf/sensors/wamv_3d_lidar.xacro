@@ -12,7 +12,7 @@
     max_range: maximum distance for an object to be detected by laser
     noise_stddev: Standard deviation of gaussian noise applied to output pointcloud
   -->
-  <xacro:macro name="wamv_3d_lidar" params="name x:=0.7 y:=0 z:=1.545 R:=0 P:=0 Y:=0 height:=0.24
+  <xacro:macro name="wamv_3d_lidar" params="name x:=0.7 y:=0 z:=1.8 R:=0 P:=0 Y:=0 post_Y:=0
                                             update_rate:=10 vertical_lasers:=16 samples:=1800 resolution:=0.1
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
@@ -96,39 +96,46 @@
 
     <!-- Base to sensor post joint -->
     <joint name="base_to_${name}_post_joint" type="fixed">
-      <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y-pi/2}" />
+      <origin xyz="${x-0.04-0.035} ${y} 1.545" rpy="0 0 ${post_Y-pi/2}" />
       <parent link="base_link" />
       <child link="${name}_post_link" />
     </joint>
 
-    <!-- Sensor post to sensor post arm joint -->
-    <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
-      <origin xyz="0 0.035 ${height}" rpy="${-radians(70)} 0 0" />
-      <parent link="${name}_post_link" />
-      <child link="${name}_post_arm_link" />
-    </joint>
-
-    <!-- Adjustment joint -->
+    <!-- Adjustment 1 joint -->
     <link name="adjustment_1_link"/>
     <joint name="adjustment_1_joint" type="fixed">
-      <origin xyz="0 0 0" rpy="${radians(70)} 0 0" />
-      <parent link="${name}_post_arm_link" />
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
+      <parent link="${name}_post_link" />
       <child link="adjustment_1_link" />
+    </joint>
+
+    <!-- Sensor post to sensor post arm joint -->
+    <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
+      <origin xyz="0.035 0 ${z-1.545-0.045}" rpy="${-radians(70)} 0 ${-pi/2}" />
+      <parent link="adjustment_1_link" />
+      <child link="${name}_post_arm_link" />
     </joint>
 
     <!-- Adjustment 2 joint -->
     <link name="adjustment_2_link"/>
     <joint name="adjustment_2_joint" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
-      <parent link="adjustment_link" />
+      <origin xyz="0 0 0" rpy="${radians(70)} 0 0" />
+      <parent link="${name}_post_arm_link" />
       <child link="adjustment_2_link" />
+    </joint>
+
+    <!-- Adjustment 3 joint -->
+    <link name="adjustment_3_link"/>
+    <joint name="adjustment_3_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
+      <parent link="adjustment_2_link" />
+      <child link="adjustment_3_link" />
     </joint>
 
     <!-- Sensor post arm to lidar joint -->
     <joint name="${name}_post_arm_to_${name}_lidar_joint" type="fixed">
-      <!-- rpy="${pi/3} 0 0" for flat lidar -->
-      <origin xyz="0.04 0 0.045" rpy="0 ${radians(15)} 0" />
-      <parent link="adjustment_2_link" />
+      <origin xyz="0.04 0 0.045" rpy="${R} ${P} ${Y}" />
+      <parent link="adjustment_3_link" />
       <child link="${name}_link" />
     </joint>
 
