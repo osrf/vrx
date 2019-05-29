@@ -19,6 +19,8 @@ def world_gen(coordinates = {}, master = {}):
                     for param, value in params.iteritems():
                         params[param] = (lambda n: eval(value))(coordinates[axis_name])
                     world[macro_name].append(params)
+                else:
+                    world[macro_name].append({})
     return world
 
 a = world_gen(coordinates={'environment':0}, master=master)
