@@ -110,7 +110,8 @@
 
     <!-- Sensor post arm to lidar joint -->
     <joint name="${name}_post_arm_to_${name}_lidar_joint" type="fixed">
-      <origin xyz="0 -0.025 0.055" rpy="${pi/3} 0 0" />
+      <!-- rpy="${pi/3} 0 0" for flat lidar -->
+      <origin xyz="0 -0.025 0.055" rpy="${pi/3-radians(15)} 0 0" />
       <parent link="${name}_post_arm_link" />
       <child link="${name}_link" />
     </joint>
@@ -134,7 +135,7 @@
             </vertical>
           </scan>
           <range>
-            <min>0.05</min>
+            <min>0.1</min>
             <max>${max_range}</max>
           </range>
           <noise>
