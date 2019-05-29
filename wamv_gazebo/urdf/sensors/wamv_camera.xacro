@@ -100,11 +100,19 @@
       <child link="${name}_post_arm_link" />
     </joint>
 
+    <!-- Adjustment joint -->
+    <link name="adjustment_link"/>
+    <joint name="adjustment_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${pi/3} 0 0" />
+      <parent link="${name}_post_arm_link" />
+      <child link="adjustment_link" />
+    </joint>
+
     <!-- Sensor post arm to camera joint -->
     <joint name="${name}_post_arm_to_${name}_lidar_joint" type="fixed">
       <!-- rpy="${pi/3} 0 0" for flat camera -->
-      <origin xyz="0 -0.015 0.035" rpy="${pi/3-radians(15)} 0 0" />
-      <parent link="${name}_post_arm_link" />
+      <origin xyz="0 0.02 0.03" rpy="${-radians(15)} 0 ${pi}" />
+      <parent link="adjustment_link" />
       <child link="${name}_link" />
     </joint>
 
