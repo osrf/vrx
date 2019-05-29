@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="robotx_example_course">
+   <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />  <!-- === sandisland === -->
+  </wolrd>
+</sdf>
