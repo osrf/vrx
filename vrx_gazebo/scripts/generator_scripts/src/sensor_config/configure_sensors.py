@@ -6,7 +6,6 @@ import rospy
 from compliance import param_compliance, sensor_number_compliance
 from .. utils import macro_block_gen
 #generate '../wamv_description/urdf/sensors.xacro'
-
 macro_block_gen(availible=rospy.get_param('availible'),#directory containing the .xacro files allowed NOTE:(ONE macro per file)
                 requested=rospy.get_param('requested'),#yaml requesting which sensors with what parameters go where 
                 target=rospy.get_param('target'),#where the macro block is going
