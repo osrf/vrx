@@ -6,8 +6,8 @@ def macro_block_gen(target,#target file for writing the macro calls too NOTE: wi
                     requested_macros = {},#for if a dictionary is passed directly, no yaml file needed
                     boiler_plate_top = '',#stuff to start the xacro file
                     boiler_plate_bot = '',#stuff to end the xacro file
-                    num_test = lambda a:True,#test if the number of a type of requested macros is allowed
-                    param_test = lambda a:True,#test if a given macro call parameters are sensable(NOT if the parameters are presentfor a given macro)
+                    num_test = lambda name, num:True,#test if the number of a type of requested macros is allowed
+                    param_test = lambda name, params ={}:True,#test if a given macro call parameters are sensable(NOT if the parameters are presentfor a given macro)
                     var = lambda name, params={}: params):#add variance to a given set of full params for a type of macro 
     xacro_file=open(target, 'wb')
     xacro_file.write(boiler_plate_top)
