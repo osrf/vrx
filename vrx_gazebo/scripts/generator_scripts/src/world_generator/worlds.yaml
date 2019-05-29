@@ -1,0 +1,7 @@
+sand_island:
+    steps: 1
+    macros:
+        sandisland:
+            -
+    sequence:
+

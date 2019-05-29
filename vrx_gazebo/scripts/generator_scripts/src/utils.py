@@ -13,6 +13,7 @@ def macro_block_gen(target,#target file for writing the macro calls too NOTE: wi
     xacro_file.write(boiler_plate_top)
 
     availible_macros = get_macros(availible)
+    print availible_macros
     if requested_macros == {}:
         s = open(requested,'r')
         requested_macros = yaml.load(s)
