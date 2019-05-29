@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="availible" default="$(find vrx_gazebo)/worlds/xacros"/>
-  <param name="availible" value="$(arg availible)"/>
+	<arg name="available" default="$(find vrx_gazebo)/worlds/xacros"/>
+  <param name="available" value="$(arg available)"/>
 
   <arg name="requested" default="$(find vrx_gazebo)/scripts/generator_scripts/src/world_generator/worlds.yaml"/>
   <param name="requested" value="$(arg requested)"/>
