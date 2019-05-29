@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="availible" default="$(find wamv_gazebo)/urdf/sensors"/>
-  <param name="availible" value="$(arg availible)"/>
+  <arg name="available" default="$(find wamv_gazebo)/urdf/sensors"/>
+  <param name="available" value="$(arg available)"/>
 
   <arg name="requested" default="$(find vrx_gazebo)/scripts/generator_scripts/src/sensor_config/sensor_config.yaml"/>
   <param name="requested" value="$(arg requested)"/>
@@ -9,5 +9,5 @@
   <arg name="target" default="$(find wamv_description)/urdf/sensors.xacro"/>
   <param name="target" value="$(arg target)"/>
 
-  <node name = "sensor_gen" pkg="vrx_gazebo" type="generate_sensors.py" />
+  <node name = "sensor_gen" pkg="vrx_gazebo" type="generate_sensors.py" output="screen"/>
 </launch>

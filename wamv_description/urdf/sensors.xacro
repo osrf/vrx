@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v-sensors">
-<xacro:macro name="sensors">
+  <xacro:macro name="sensors">
   <!-- === wamv_imu === -->
   <xacro:wamv_imu P="0" R="0" name="imu_wamv" Y="0" x="0" z="1.3" y="-0.2" />
   <!-- === wamv_gps === -->
