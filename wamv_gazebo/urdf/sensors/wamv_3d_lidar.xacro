@@ -103,23 +103,23 @@
 
     <!-- Base to sensor post joint -->
     <joint name="base_to_${name}_post_joint" type="fixed">
-      <origin xyz="${x-0.07} ${y} 1.545" rpy="0 0 ${-pi/2}" />
+      <origin xyz="${x-0.07*cos(post_Y)} ${y-0.07*sin(post_Y)} 1.545" rpy="0 0 ${post_Y-pi/2}" />
       <parent link="base_link" />
       <child link="${name}_post_link" />
     </joint>
     
-    <!-- Adjustment 1 joint -->
-    <link name="adjustment_1_link"/>
-    <joint name="adjustment_1_joint" type="fixed">
+    <!-- Adjustment joint -->
+    <link name="adjustment_link"/>
+    <joint name="adjustment_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
       <parent link="${name}_post_link" />
-      <child link="adjustment_1_link" />
+      <child link="adjustment_link" />
     </joint>
 
     <!-- Sensor post to sensor post arm joint -->
     <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
       <origin xyz="0.028 0 ${z-1.545-0.05}" rpy="${radians(-50)} 0 ${-pi/2}"/>
-      <parent link="adjustment_1_link"/>
+      <parent link="adjustment_link"/>
       <child link="${name}_post_arm_link"/>
     </joint>
 
