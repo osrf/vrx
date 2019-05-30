@@ -70,19 +70,19 @@
     <!-- Sensor post arm -->
     <link name="${name}_post_arm_link">
       <visual name="${name}_post_arm_visual">
-        <origin xyz="0 -0.016 -0.035" rpy="0 0 0"/>
+        <origin xyz="-0.038 0 -0.003" rpy="${radians(-60)} 0 ${-pi/2}"/>
         <geometry>
           <mesh filename="package://vrx_gazebo/models/sensor_post/mesh/sensor_post_arm.dae"/>
         </geometry>
       </visual>
       <collision name="${name}_post_arm_collision">
-        <origin xyz="0 0 0" rpy="${-pi/20} 0 0"/>
+        <origin xyz="0 0 0" rpy="${radians(-60)-pi/20} 0 ${-pi/2}"/>
         <geometry>
           <cylinder radius="0.008" length="0.065"/>
         </geometry>
       </collision>
       <inertial>
-        <origin xyz="0 0 0" rpy="${-pi/20} 0 0"/>
+        <origin xyz="0 0 0" rpy="${radians(-60)-pi/20} 0 ${-pi/2}"/>
         <mass value="0.1"/>
         <inertia
           ixx="0.00003680833"
@@ -94,33 +94,25 @@
       </inertial>
     </link>
 
-    <!-- Base to lidar joint -->
-    <joint name="base_to_${name}_joint" type="fixed">
-      <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}" />
-      <parent link="base_link" />
-      <child link="${name}_link" />
-    </joint>
-
     <!-- Base to sensor post joint -->
     <joint name="base_to_${name}_post_joint" type="fixed">
-      <origin xyz="${x-0.07*cos(post_Y)} ${y-0.07*sin(post_Y)} 1.545" rpy="0 0 ${post_Y-pi/2}" />
+      <origin xyz="${x-(0.03+0.04)*cos(post_Y)} ${y-(0.03+0.04)*sin(post_Y)} 1.545" rpy="0 0 ${post_Y}" />
       <parent link="base_link" />
       <child link="${name}_post_link" />
-    </joint>
-    
-    <!-- Adjustment joint -->
-    <link name="adjustment_link"/>
-    <joint name="adjustment_joint" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
-      <parent link="${name}_post_link" />
-      <child link="adjustment_link" />
     </joint>
 
     <!-- Sensor post to sensor post arm joint -->
     <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
-      <origin xyz="0.028 0 ${z-1.545-0.05}" rpy="${radians(-50)} 0 ${-pi/2}"/>
-      <parent link="adjustment_link"/>
-      <child link="${name}_post_arm_link"/>
+      <origin xyz="0.03 0 ${z-1.545-0.05}" rpy="0 0 0" />
+      <parent link="${name}_post_link" />
+      <child link="${name}_post_arm_link" />
+    </joint>
+
+    <!-- Sensor post arm to lidar joint -->
+    <joint name="${name}_post_arm_to_${name}_joint" type="fixed">
+      <origin xyz="0.04 0 0.05" rpy="${R} ${P} ${Y-post_Y}" />
+      <parent link="${name}_post_arm_link" />
+      <child link="${name}_link" />
     </joint>
 
     <gazebo reference="${name}_link">
