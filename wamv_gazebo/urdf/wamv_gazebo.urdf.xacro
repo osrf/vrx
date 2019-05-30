@@ -67,7 +67,7 @@
 
   <!-- Add a front camera -->
   <xacro:if value="$(arg camera_enabled)">
-    <xacro:wamv_camera name="front_camera"/> 
+    <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}"/>
   </xacro:if>
 
   <!-- Add simulated GPS -->
@@ -98,11 +98,11 @@
     <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
 
     <!-- Add a stereo camera pair -->
-    <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75"/>
-    <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75"/>
+    <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}"/>
+    <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75" P="${radians(15)}"/>
 
     <!-- Add a camera facing right -->
-    <xacro:wamv_camera name="middle_right_camera" y="-0.45" Y="${radians(-90)}" />
+    <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" post_Y="${radians(-90)}"/>
 
     <!-- Add simulated GPS -->
     <xacro:wamv_gps name="gps_wamv" x="-0.85" />
