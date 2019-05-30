@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Macro to insert a 3D scanning LIDAR with ROS integration
+    name: Prefix used for naming.
+    x: X position of the laser (from the base_link).
+    y: Y position of the laser (from the base_link).
+    z: Z position of the laser (from the base_link).
+    R: Roll orientation of the laser (from the laser's origin).
+    P: Pitch orientation of the laser (from the laser's origin).
+    Y: Yaw orientation of the laser (from the laser's origin).
+    post_Y: Yaw orientation of the post (from the post's origin).
     update_rate: frequency to publish output, hz
     vertical_lasers: number of vertical lasers which spin about Z to generate output
     samples: number of samples during spin, higher is more dense but slows down simulation
-    resolution: proportion of samples to actually simulate, rest are interprolated. Ex: 0.1 means 9/10 samples are interprolated
+    resolution: This number is multiplied by samples to determine the number of range data points returned.
     min_angle: the horizontal angle that the scan begins at
     max_angle: the angle that the scan ends at
     min_vertical_angle: the angle of the lowest vertical beam
@@ -12,7 +20,10 @@
     max_range: maximum distance for an object to be detected by laser
     noise_stddev: Standard deviation of gaussian noise applied to output pointcloud
   -->
-  <xacro:macro name="wamv_3d_lidar" params="name x:=0.7 y:=0 z:=1.8 R:=0 P:=0 Y:=0 post_Y:=0
+  <xacro:macro name="wamv_3d_lidar" params="name
+                                            x:=0.7 y:=0 z:=1.8
+                                            R:=0 P:=0 Y:=0
+                                            post_Y:=0
                                             update_rate:=10 vertical_lasers:=16 samples:=1800 resolution:=0.1
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
