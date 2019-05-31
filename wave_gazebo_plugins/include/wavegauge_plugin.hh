@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Open Source Robotics Foundation
+ * Copyright (C) 2019 Brian Bingham
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
-#define USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
+#ifndef WAVE_GAZEBO_PLUGINS_WAVEGUAGE_PLUGIN_HH_
+#define WAVE_GAZEBO_PLUGINS_WAVEGUAGE_PLUGIN_HH_
 
 #include <map>
 #include <string>
@@ -79,10 +79,10 @@ namespace gazebo
   ///
   ///     <height>:           Vertical height of this link.
   ///                         This field is required.
-  class BuoyancyPlugin : public ModelPlugin
+  class WaveguagePlugin : public ModelPlugin
   {
     /// \brief Constructor.
-    public: BuoyancyPlugin();
+    public: WaveguagePlugin();
 
     // Documentation inherited.
     public: virtual void Load(physics::ModelPtr _model,

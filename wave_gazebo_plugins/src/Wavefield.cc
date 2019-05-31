@@ -457,7 +457,7 @@ namespace asv
     };
 
     // Compute the target function and Jacobian. Also calculate pz,
-    // the z-componen of the Gerstner wave, which we essentially get for free.
+    // the z-component of the Gerstner wave, which we essentially get for free.
     auto wave_fdf = [=](auto x, auto p, auto t, auto& wp, auto& F, auto& J)
     {
       double pz = 0;

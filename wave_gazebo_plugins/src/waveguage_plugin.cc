@@ -20,8 +20,8 @@
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Events.hh>
 #include <ignition/math/Pose3.hh>
-#include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
+#include "wave_gazebo_plugins/waveguage_plugin.hh"
 #include "wave_gazebo_plugins/Wavefield.hh"
 #include "wave_gazebo_plugins/WavefieldEntity.hh"
 #include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
@@ -30,7 +30,7 @@ using namespace asv;
 using namespace gazebo;
 
 /////////////////////////////////////////////////
-BuoyancyPlugin::BuoyancyPlugin()
+WaveguagePlugin::WaveguagePlugin()
   : fluidDensity(999.1026),
     fluidLevel(0.0),
     fluidDrag(0.0)
@@ -38,7 +38,7 @@ BuoyancyPlugin::BuoyancyPlugin()
 }
 
 /////////////////////////////////////////////////
-void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+void WaveguagePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   GZ_ASSERT(_model != NULL, "Received NULL model pointer");
   GZ_ASSERT(_sdf != NULL, "Received NULL SDF pointer");
@@ -119,7 +119,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       else
       {
         gzwarn << "Required element center_of_volume missing from link ["
-               << name << "] in BuoyancyPlugin SDF" << std::endl;
+               << name << "] in WaveguagePlugin SDF" << std::endl;
         continue;
       }
 
@@ -128,7 +128,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         double area = linkElem->GetElement("area")->Get<double>();
         if (area <= 0)
         {
-          gzwarn << "Nonpositive area specified in BuoyancyPlugin!"
+          gzwarn << "Nonpositive area specified in WaveguagePlugin!"
                  << std::endl;
           // Remove the element from the map since it's invalid.
           this->volPropsMap.erase(id);
@@ -139,7 +139,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       else
       {
         gzwarn << "Required element 'area' missing from element link [" << name
-               << "] in BuoyancyPlugin SDF" << std::endl;
+               << "] in WaveguagePlugin SDF" << std::endl;
         continue;
       }
 
@@ -148,7 +148,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         double height = linkElem->GetElement("height")->Get<double>();
         if (height <= 0)
         {
-          gzwarn << "Nonpositive height specified in BuoyancyPlugin!"
+          gzwarn << "Nonpositive height specified in WaveguagePlugin!"
                  << std::endl;
           // Remove the element from the map since it's invalid.
           this->volPropsMap.erase(id);
@@ -159,7 +159,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       else
       {
         gzwarn << "Required element 'height' missing from element link ["
-               << name << "] in BuoyancyPlugin SDF" << std::endl;
+               << name << "] in WaveguagePlugin SDF" << std::endl;
         continue;
       }
     }
@@ -170,15 +170,15 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-void BuoyancyPlugin::Init()
+void WaveguagePlugin::Init()
 {
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-      std::bind(&BuoyancyPlugin::OnUpdate, this));
+      std::bind(&WaveguagePlugin::OnUpdate, this));
 
 }
 
 /////////////////////////////////////////////////
-void BuoyancyPlugin::OnUpdate()
+void WaveguagePlugin::OnUpdate()
 {
   // Retrieve the wave model...
   std::shared_ptr<const WaveParameters> waveParams 
@@ -295,4 +295,4 @@ void BuoyancyPlugin::OnUpdate()
   }
 }
 
-GZ_REGISTER_MODEL_PLUGIN(BuoyancyPlugin)
+GZ_REGISTER_MODEL_PLUGIN(WaveguagePlugin)

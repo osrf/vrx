@@ -33,7 +33,7 @@
         <number>3</number>
         <scale>2.0</scale>
         <angle>0.4</angle>
-        <steepness>1.0</steepness>
+        <steepness>0.0</steepness>
         <amplitude>1.0</amplitude>
         <period>7.0</period>
         <direction>-1.0 -1.0</direction>

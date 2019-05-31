@@ -23,7 +23,7 @@
     <gui>
       <plugin name="keyboard_gui_plugin" filename="libKeyboardGUIPlugin.so"/>
       <camera name='user_camera'>
-        <pose frame=''>73.3604 -0.353679 10.7644 0 0.271643 3.09219</pose>
+        <pose frame=''>-20 0  5 0 0.271643 0</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -56,10 +56,20 @@
 
     <!-- Models  -->
     <model name="a3_buoy">
+      <pose>0 0 4 0 0 0 </pose>
       <include>
 	<uri>model://polyform_a3</uri>
-	<pose>45 -1 0 0 0 0 </pose>
       </include>
     </model>
+
+    <!--
+    <model name="surmark46104">
+      <include>
+	<uri>model://surmark46104</uri>
+	<pose>0 2 4 0 0 0 </pose>
+      </include>
+      </model>
+      -->
+	
   </world>
 </sdf>
