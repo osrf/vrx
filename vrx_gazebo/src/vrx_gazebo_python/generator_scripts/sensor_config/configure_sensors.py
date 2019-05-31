@@ -9,10 +9,7 @@ from .. utils import macro_block_gen
 
 def main():
     comp = Compliance() 
-    macro_block_gen(available=rospy.get_param('available'),
-                    # directory containing the .xacro files allowed
-                    # NOTE:(ONE macro per file)
-                    requested=rospy.get_param('requested'),
+    macro_block_gen(requested=rospy.get_param('requested'),
                     # yaml requesting which sensors with what parameters go where
                     target=rospy.get_param('xacro_target'),
                     # where the macro block is going
