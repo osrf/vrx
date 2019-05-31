@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="available" default="$(find vrx_gazebo)/worlds/xacros"/>
+  <param name="available" value="$(arg available)"/>
+
+  <arg name="requested"/>
+  <param name="requested" value="$(arg requested)"/>
+
+  <arg name="world_xacro_target" default="$(find vrx_gazebo)/worlds/generated_world_xacros/"/>
+  <param name="world_xacro_target" value="$(arg world_xacro_target)"/>
+
+  <arg name="world_target" default="$(find vrx_gazebo)/worlds/"/>
+  <param name="world_target" value="$(arg world_target)"/>
+
+  <node name = "sensor_gen" pkg="vrx_gazebo" type="generate_worlds" />
+</launch>
