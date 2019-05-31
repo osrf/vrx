@@ -1,8 +1,14 @@
 <?xml version="1.0" ?>
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
 <world name="robotx_example_course">
-<xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/include_all_xacros.xacro" />
+  <xacro:include_all_xacros/>
   <!-- === sandisland === -->
-  <xacro:sandisland />
+  <xacro:sandisland/>
+  <xacro:nav_challenge/>
+  <xacro:light_buoy/>
+  <xacro:qualifying_pinger_transit_2016/>
+  <xacro:dock_2016/>
+  <xacro:dock_2018/>
 </world>
 </sdf>
