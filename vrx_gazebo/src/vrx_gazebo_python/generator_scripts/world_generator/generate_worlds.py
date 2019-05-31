@@ -67,7 +67,6 @@ def linear_combinations(master = {}):
     for axis, value in master.iteritems():
         start[axis] = 0
         axies[axis] = value['steps']-1
-
     iterate(axies_max = axies, coordinates = combinations, current_coordinate = start)
     return combinations
 
