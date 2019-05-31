@@ -1,12 +1,23 @@
-sand_island:
-    steps: 4
+field:
+    steps: 2
     macros:
+        include_all_xacros:
+            -
         sandisland:
             -
+        nav_challenge:
+            -
+        light_buoy:
+            -
+        qualifying_pinger_transit_2016:
+            -
+        dock_2016:
+            -
+        dock_2018:
+            -
     sequence:
-a:
-    steps: 3
-b:
-    steps: 2
-c:
-    steps: 1
+        1:
+            include_all_xacros:
+                -
+            sandisland:
+                -

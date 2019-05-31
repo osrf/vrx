@@ -3,7 +3,7 @@
   <arg name="available" default="$(find vrx_gazebo)/worlds/xacros"/>
   <param name="available" value="$(arg available)"/>
 
-  <arg name="requested"/>
+  <arg name="requested" default="$(find vrx_gazebo)/src/vrx_gazebo_python/generator_scripts/world_generator/worlds.yaml"/>
   <param name="requested" value="$(arg requested)"/>
 
   <arg name="world_xacro_target" default="$(find vrx_gazebo)/worlds/generated_world_xacros/"/>
