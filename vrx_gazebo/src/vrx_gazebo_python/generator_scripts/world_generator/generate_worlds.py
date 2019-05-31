@@ -18,7 +18,7 @@ def main():
         macro_block_gen(target = rospy.get_param('world_xacro_target') + 'world' + str(num) + '.world.xacro',
                         available = rospy.get_param('available'),
                         requested_macros = world_gen(coordinate=i, master=master),
-                        boiler_plate_top = '<?xml version="1.0" ?>\n<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">\n<world name="robotx_example_course">\n<xacro:include filename="$(find vrx_gazebo)/worlds/xacros/include_all_xacros.xacro" />\n',
+                        boiler_plate_top = '<?xml version="1.0" ?>\n<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">\n<world name="robotx_example_course">\n  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/include_all_xacros.xacro" />\n',
                         boiler_plate_bot = '</world>\n</sdf>')
         os.system('rosrun xacro xacro --inorder -o' +
                   rospy.get_param('world_target') + 'world' + str(num) + '.world ' +
@@ -30,18 +30,31 @@ def main():
 def world_gen(coordinate = {}, master = {}):
     world = {}
     for axis_name, axis in master.iteritems():
-        if coordinate[axis_name] in axis['sequence']:
-            world.update(axis['sequence'][coordinate[axis_name]])
-            break
-        for macro_name, macro_calls in axis['macros'].iteritems():
-            world[macro_name] = []
-            for params in macro_calls:
-                if params != None:
-                    for param, value in params.iteritems():
-                        params[param] = (lambda n: eval(value))(coordinate[axis_name])
-                    world[macro_name].append(params)
-                else:
-                    world[macro_name].append({})
+        #if a sequence instance is explicitely defined
+        if axis['sequence'] != None and coordinate[axis_name] in axis['sequence']:
+            #concatonate all the repeate macros
+            for i in world:
+                if i in axis['sequence'][coordinate[axis_name]]:
+                    world[i] += axis['sequence'][coordinate[axis_name]]
+            #add all unique macros in sequence to world
+            for i in axis['sequence'][coordinate[axis_name]]:
+                if not i in world:
+                    if axis['sequence'][coordinate[axis_name]][i] == [None]:
+                        world[i] = [{}]
+                    else:
+                        world[i] = axis['sequence'][coordinate[axis_name]][i]
+
+        else:
+            for macro_name, macro_calls in axis['macros'].iteritems():
+                if macro_name not in world:
+                    world[macro_name] = []
+                for params in macro_calls:
+                    if params != None:
+                        for param, value in params.iteritems():
+                            params[param] = (lambda n: eval(str(value)))(coordinate[axis_name])
+                        world[macro_name].append(params)
+                    else:
+                        world[macro_name].append({})
     return world
 
 def linear_combinations(master = {}):
@@ -68,8 +81,5 @@ def iterate(axies_max={}, coordinates=[], current_coordinate = {}):
             else:
                 current_coordinate[axis] = 0
         iterate(axies_max=axies_max, coordinates = coordinates, current_coordinate = current_coordinate)
-
-
-
 
 

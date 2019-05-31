@@ -1,10 +1,16 @@
-field:
-    steps: 2
+constant:
+    steps: 1
     macros:
         include_all_xacros:
             -
         sandisland:
             -
+        light_buoy:
+            - x: 120
+    sequence:
+field:
+    steps: 3
+    macros:
         nav_challenge:
             -
         light_buoy:
@@ -16,8 +22,9 @@ field:
         dock_2018:
             -
     sequence:
-        1:
-            include_all_xacros:
+        0:
+            nav_challenge:
                 -
-            sandisland:
+        1:
+            light_buoy:
                 -

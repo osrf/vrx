@@ -1,7 +1,10 @@
 <?xml version="1.0" ?>
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
 <world name="robotx_example_course">
-<xacro:include filename="$(find vrx_gazebo)/worlds/xacros/include_all_xacros.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/include_all_xacros.xacro" />
+  <!-- === light_buoy === -->
+  <xacro:light_buoy P="0" R="0" y="28" Y="0" x="110" z="0.25" />
+  <xacro:light_buoy P="0" R="0" y="28" Y="0" x="120" z="0.25" />
   <!-- === include_all_xacros === -->
   <xacro:include_all_xacros />
   <!-- === sandisland === -->
