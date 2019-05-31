@@ -5,10 +5,6 @@ import yaml
 def macro_block_gen(target,
                     # target file for writing the macro calls too
                     # NOTE: will write over if a file is already there
-                    available,
-                    # directory of macro/xacro files
-                    # NOTE: will only examine files that end in .xacro
-                    # NOTE: WILL search sub-directories
                     requested=None,  # yaml file with requested macros
                     requested_macros={},
                     # if a dictionary is passed directly, no yaml file needed
@@ -19,41 +15,25 @@ def macro_block_gen(target,
                     param_test=lambda name, params={}: True,
                     # test if a given macro call parameters are sensable
                     # NOT if the parameters are presentfor a given macro
-                    var=lambda name, params={}: params
-                    # add variance to a set of params for a type of macro
                     ):
     xacro_file = open(target, 'wb')
     xacro_file.write(boiler_plate_top)
 
-    available_macros = get_macros(available)
     if requested_macros == {}:
         s = open(requested, 'r')
         requested_macros = yaml.load(s)
 
     for key, objects in requested_macros.items():
         # object must be available
-        assert key in available_macros, \
-                "%s not defined in %s" % (key, available)
         # can only have so many of this type of object
         assert num_test(key, len(objects)), \
             "%d %s's not allowed" % (len(objects), key)
         xacro_file.write('  <!-- === %s === -->\n' % key)
         for i in objects:
-            full_params = available_macros[key].copy()
-            # dict of default params for this object
-            if i is not None:
-                for j in i:
-                    # all params in all objects must be correct
-                    assert j in available_macros[key].keys(), \
-                        "%s is not a parameter in %s" % (j, key)
-                    full_params[j] = i[j]
-                    # replace the specified param's value with
-                    # the value specified in yaml file
-                full_params = var(key, full_params)
-            # test the full parameter list and make sure it is in accordance
-            assert param_test(key, full_params), \
+            # test the parameter list and make sure it is in accordance
+            assert param_test(key, i), \
                 "%s %s failed parameter test" % (key, i['name'])
-            xacro_file.write(macro_call_gen(key, full_params))
+            xacro_file.write(macro_call_gen(key, i))
     xacro_file.write(boiler_plate_bot)
     xacro_file.close()
 
