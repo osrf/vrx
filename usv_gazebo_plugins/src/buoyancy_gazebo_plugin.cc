@@ -213,16 +213,17 @@ void BuoyancyPlugin::OnUpdate()
     // double bottomRelSurf = this->fluidLevel - (linkFrame.Pos().Z() - height / 2.0);
     double bottomRelSurf = linkFluidLevel - (linkFrame.Pos().Z() - height / 2.0);
 
-    // out of water
+    // Out of water
     if (bottomRelSurf <= 0)
     {
       volume = 0.0;
     }
-    // at surface
+    // Floating at surface
     else if (bottomRelSurf <= height)
     {
       volume = bottomRelSurf * area;
     }
+    // Submerged
     else
     {
       volume = height * area;

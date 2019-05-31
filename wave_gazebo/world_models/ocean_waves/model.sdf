@@ -31,12 +31,12 @@
       <cell_count>50 50</cell_count>
       <wave>
         <number>3</number>
-        <scale>2.5</scale>
-        <angle>0.3</angle>
+        <scale>2.0</scale>
+        <angle>0.4</angle>
         <steepness>1.0</steepness>
-        <amplitude>0.0</amplitude>
-        <period>8.0</period>
-        <direction>1 1</direction>
+        <amplitude>1.0</amplitude>
+        <period>7.0</period>
+        <direction>-1.0 -1.0</direction>
       </wave>
     </plugin>
 

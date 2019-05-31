@@ -13,7 +13,7 @@
 
   <!-- Resume the logic in empty_world.launch, over-riding a number of arguments -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find wave_gazebo)/worlds/ocean.world" />
+    <arg name="world_name" value="$(find wave_gazebo)/worlds/ocean_buoys.world" />
     <arg name="paused" value="$(arg paused)" />
     <arg name="use_sim_time" value="$(arg use_sim_time)" />
     <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)" />
