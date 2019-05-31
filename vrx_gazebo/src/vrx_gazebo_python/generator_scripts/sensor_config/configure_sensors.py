@@ -20,11 +20,11 @@ def main():
                   'name="wam-v-sensors">\n' +
                   '  <xacro:macro name="yaml_sensors">\n',
                   # things to start/open the macro
-                  boiler_plate_bot='  </xacro:macro>\n</robot>',
+                  boiler_plate_bot='  </xacro:macro>\n</robot>'#,
                   # things to close the macro
-                  num_test=sensor_number_compliance,
+                  #num_test=sensor_number_compliance,
                   # function to test the number of a type of sensor is allowed
-                  param_test=param_compliance
+                  #param_test=param_compliance
                   # function to test if parameters of a sensor are in compliance
                    )
  

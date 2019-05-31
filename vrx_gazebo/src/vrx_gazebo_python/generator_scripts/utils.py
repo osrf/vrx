@@ -113,6 +113,7 @@ def parse_xacro_file(xacro_file_name):
     params_str = declaration[start+1:end].split(' ')
     params = {}
     for i in params_str:
+        i = i.replace('\n', '')
         if i != '':
             key = i
             if ':' in i:
