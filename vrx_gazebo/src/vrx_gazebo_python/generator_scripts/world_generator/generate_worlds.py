@@ -18,7 +18,7 @@ def main():
         macro_block_gen(target = rospy.get_param('world_xacro_target') + 'world' + str(num) + '.world.xacro',
                         available = rospy.get_param('available'),
                         requested_macros = world_gen(coordinate=i, master=master),
-                        boiler_plate_top = '<?xml version="1.0" ?>\n<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">\n<world name="robotx_example_course">\n  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/include_all_xacros.xacro" />\n',
+                        boiler_plate_top = '<?xml version="1.0" ?>\n<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">\n<world name="robotx_example_course">\n  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/include_all_xacros.xacro" />\n  <xacro:include_all_xacros />\n',
                         boiler_plate_bot = '</world>\n</sdf>')
         os.system('rosrun xacro xacro --inorder -o' +
                   rospy.get_param('world_target') + 'world' + str(num) + '.world ' +
@@ -51,7 +51,10 @@ def world_gen(coordinate = {}, master = {}):
                 for params in macro_calls:
                     if params != None:
                         for param, value in params.iteritems():
-                            params[param] = (lambda n: eval(str(value)))(coordinate[axis_name])
+                            if str(param) == 'name':
+                                params[param] = str(value)
+                            else:
+                                params[param] = (lambda n: eval(str(value)))(coordinate[axis_name])
                         world[macro_name].append(params)
                     else:
                         world[macro_name].append({})
