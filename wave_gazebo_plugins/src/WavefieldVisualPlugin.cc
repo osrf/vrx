@@ -342,14 +342,14 @@ namespace asv
 
     GZ_ASSERT(_msg != nullptr, "Response message must not be null");
 
-    msgs::Param_V windMsg;
-    if (_msg->type() == windMsg.GetTypeName())
+    msgs::Param_V waveMsg;
+    if (_msg->type() == waveMsg.GetTypeName())
     {
       // Parse the response
-      windMsg.ParseFromString(_msg->serialized_data());
+      waveMsg.ParseFromString(_msg->serialized_data());
 
       // Update wave params and vertex shader 
-      this->data->waveParams->SetFromMsg(windMsg);
+      this->data->waveParams->SetFromMsg(waveMsg);
       this->SetShaderParams();
 
       // @DEBUG_INFO
