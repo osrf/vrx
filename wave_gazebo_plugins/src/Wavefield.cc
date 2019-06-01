@@ -412,19 +412,32 @@ namespace asv
  
   void WaveParameters::DebugPrint() const
   {
+		gzmsg << "Input Parameters:" << std::endl;
     gzmsg << "number:     " << this->data->number << std::endl;
     gzmsg << "scale:      " << this->data->scale << std::endl;
     gzmsg << "angle:      " << this->data->angle << std::endl;
+		gzmsg << "steepness:  " << this->data->steepness << std::endl;
+		gzmsg << "amplitude:  " << this->data->amplitude << std::endl;
     gzmsg << "period:     " << this->data->period << std::endl;
-    gzmsg << "amplitude:  " << this->data->amplitudes << std::endl;
-    gzmsg << "wavenumber: " << this->data->wavenumbers << std::endl;
-    gzmsg << "omega:      " << this->data->angularFrequencies << std::endl;
-    gzmsg << "phase:      " << this->data->phases << std::endl;
-    gzmsg << "steepness:  " << this->data->steepnesses << std::endl;
+		gzmsg << "direction:  " << this->data->direction << std::endl;
+		gzmsg << "Derived Parameters:" << std::endl;
+    gzmsg << "amplitudes:  " << this->data->amplitudes << std::endl;
+    gzmsg << "wavenumbers: " << this->data->wavenumbers << std::endl;
+    gzmsg << "omegas:      " << this->data->angularFrequencies << std::endl;
+		gzmsg << "periods:     ";
+		for (auto&& omega : this->data->angularFrequencies)
+		{
+			gzmsg << 2.0 * M_PI / omega <<", ";
+		}
+		gzmsg << std::endl;
+    gzmsg << "phases:      " << this->data->phases << std::endl;
+    gzmsg << "steepnesses: " << this->data->steepnesses << std::endl;
+		gzmsg << "directions:  ";
     for (auto&& d : this->data->directions)
     {
-      gzmsg << "direction:  " << d << std::endl;
+      gzmsg << d << "; ";
     }
+		gzmsg << std::endl;
   }
 
 ///////////////////////////////////////////////////////////////////////////////    
