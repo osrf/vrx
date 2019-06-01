@@ -36,6 +36,7 @@ catkin_package(
     Hydrodynamics
     WavefieldModelPlugin
     WavefieldVisualPlugin
+		wavegauge_plugin
   DEPENDS
     gazebo_ros
 )
@@ -122,22 +123,22 @@ target_compile_options(WavefieldVisualPlugin PRIVATE "-Wno-unknown-pragmas")
 list(APPEND WAVE_GAZEBO_PLUGINS_LIST WavefieldVisualPlugin)
 
 
-# WaveguagePlugin
-add_library(waveguage_plugin
+# WavegaugePlugin
+add_library(wavegauge_plugin
   SHARED
-    src/waveguage_plugin.cc
+    src/wavegauge_plugin.cc
 )
 
-target_link_libraries(waveguage_plugin
+target_link_libraries(wavegauge_plugin
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
 
-target_compile_options(waveguage_plugin PRIVATE "-Wno-unknown-pragmas")
+target_compile_options(wavegauge_plugin PRIVATE "-Wno-unknown-pragmas")
 
-list(APPEND WAVE_GAZEBO_PLUGINS_LIST waveguage_plugin)
+list(APPEND WAVE_GAZEBO_PLUGINS_LIST wavegauge_plugin)
 
 ############################################################################### 
 # Executables...

@@ -207,6 +207,15 @@ namespace asv
       const WaveParameters& _waveParams,
       const ignition::math::Vector3d& _point,
       double time);
+
+		/// A simpler version of determining wave height at a point.
+		/// This method enforces that q (steepness) = 0 which allows us
+		/// to caculate the wave height exactly for a given 2D point without the
+		/// need to interatively solve for the position/height.
+	  public: static double ComputeDepthSimply(
+       const WaveParameters& _waveParams,
+      const ignition::math::Vector3d& _point,
+      double time);
   };
 
 ///////////////////////////////////////////////////////////////////////////////

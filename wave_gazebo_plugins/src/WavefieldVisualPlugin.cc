@@ -424,6 +424,8 @@ namespace asv
     visual.SetMaterialShaderParam(
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
 #else
+		rendering::SetMaterialShaderParam(visual,
+			"Nwaves",shaderType,std::to_string(this->data->waveParams->Number()));
     rendering::SetMaterialShaderParam(visual,
       "amplitude", shaderType, Ogre::StringConverter::toString(amplitude));
     rendering::SetMaterialShaderParam(visual,

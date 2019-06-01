@@ -35,6 +35,7 @@
 //
 
 // Input parameters
+uniform int Nwaves;
 uniform vec3 eyePos;
 uniform float rescale;
 uniform vec2 bumpScale;
@@ -71,12 +72,13 @@ void main(void)
     // Use combination of three waves. Values here are chosen rather arbitrarily.
     // Other parameters might lead to better-looking waves.
 
-    #define N_WAVES 3
-    WaveParameters waves[N_WAVES];
+    //#define N_WAVES 3
+    //WaveParameters waves[N_WAVES];
+		WaveParameters waves[3];
 	
     waves[0] = WaveParameters(wavenumber.x, amplitude.x, omega.x, dir0.xy, steepness.x);
-    waves[1] = WaveParameters(wavenumber.y, amplitude.y, omega.y, dir1.xy, steepness.y);
-	waves[2] = WaveParameters(wavenumber.z, amplitude.z, omega.z, dir2.xy, steepness.z);
+		waves[1] = WaveParameters(wavenumber.y, amplitude.y, omega.y, dir1.xy, steepness.y);
+		waves[2] = WaveParameters(wavenumber.z, amplitude.z, omega.z, dir2.xy, steepness.z);
 
     vec4 P = gl_Vertex;
 
@@ -86,21 +88,22 @@ void main(void)
     vec3 N = vec3(0.0, 0.0, 1.0);
 
 	// Wave synthesis using linear combination of Gerstner waves
-	for(int i = 0; i < N_WAVES; ++i)
-	// int i = 2;
+	//for(int i = 0; i < N_WAVES; ++i)
+	for(int i = 0; i < Nwaves; ++i)
+	//int i = 0;
 	{
 	    // Evaluate wave equation:
-        float k = waves[i].k;
-		float a = waves[i].a;
-        float q = waves[i].q;
-		float dx = waves[i].d.x;
-		float dy = waves[i].d.y;
-        float theta = dot(waves[i].d, P.xy)*k - time*waves[i].omega;
-		float c = cos(theta);
-		float s = sin(theta);
+      float k = waves[i].k;
+			float a = waves[i].a;
+      float q = waves[i].q;
+		  float dx = waves[i].d.x;
+		  float dy = waves[i].d.y;
+      float theta = dot(waves[i].d, P.xy)*k - time*waves[i].omega;
+		  float c = cos(theta);
+		  float s = sin(theta);
 
-        // Displacement of point due to wave (Eq. 9)
-		P.x -= q*a*dx*s;
+       // Displacement of point due to wave (Eq. 9)
+		   P.x -= q*a*dx*s;
 		P.y -= q*a*dx*s;
 		P.z += a*c;
 

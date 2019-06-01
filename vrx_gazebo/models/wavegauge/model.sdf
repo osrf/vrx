@@ -1,41 +1,39 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
-  <!-- Reference: https://www.polyformus.com/buoys/a-series -->
-  <model name="polyform_a3">
+  <model name="wavegauge">
     <static>false</static>
     <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
+			<gravity>0</gravity>
       <inertial>
-        <!-- Reference: https://www.sailrite.com/PDF/Polyform-Buoys-Fenders-Accessories.pdf, page 8 -->
-        <mass>3.1</mass>
+        <mass>0.000001</mass>
       </inertial>
       <visual name="visual">
         <geometry>
-          <sphere><radius>0.216</radius></sphere>
+          <cylinder>
+						<radius>0.2</radius>
+						<length>0.01</length>
+					</cylinder>
         </geometry>
         <material>
           <script>
             <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Black</name>
+            <name>Gazebo/Red</name>
           </script>
         </material>
       </visual>
       <collision name="collision">
         <geometry>
-          <sphere><radius>0.216</radius></sphere>
+          <sphere><radius>0.1</radius></sphere>
         </geometry>
       </collision>
     </link>
-    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+    <plugin name="wavegauge_plugin" filename="libwavegauge_plugin.so">
       <wave_model>ocean_waves</wave_model>
-      <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
-      <fluid_drag>1.0</fluid_drag>
       <link name="link">
         <name>base_link</name>
         <center_of_volume>0 0 0</center_of_volume>
-        <area>0.1466</area>
-        <height>0.432</height>
       </link>
     </plugin>
   </model>

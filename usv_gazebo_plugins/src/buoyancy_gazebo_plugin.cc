@@ -210,10 +210,13 @@ void BuoyancyPlugin::OnUpdate()
     #endif
 
     // Compute the wave displacement at the centre of the link frame.
-    // Wavefield height at the link, relative to the mean water level.
-    double waveHeight = WavefieldSampler::ComputeDepthDirectly(
+    // Wavefield height at the link, relative to the mean water level. 
+    //double waveHeight = WavefieldSampler::ComputeDepthDirectly(
+    //  *waveParams, linkFrame.Pos(), simTime);
+    double waveHeight = WavefieldSampler::ComputeDepthSimply(
       *waveParams, linkFrame.Pos(), simTime);
-    // Absolute water height at link
+
+		// Absolute water height at link
     double linkHeight = waveHeight + this->fluidLevel;
     double linkFluidLevel = linkHeight; // + linkFrame.Pos().Z();
 
@@ -230,13 +233,14 @@ void BuoyancyPlugin::OnUpdate()
     // Location of bottom of object
     double bottomZ = linkFrame.Pos().Z() - height/2.0;
     double bottomRelSurf = linkFluidLevel - (bottomZ);
-    
+
+		/*
     gzdbg << " Wave Height at link  = " << linkHeight
       	  << ", Link Pose at COG  = " << linkFrame.Pos().Z()
 	  << ", Link Post at bottom of link = " << bottomZ 
 	  << ", bottomRelSurf = " << bottomRelSurf
 	  << std::endl;
-    
+    */
     // Out of water
     if (bottomRelSurf <= 0)
      {
@@ -263,7 +267,7 @@ void BuoyancyPlugin::OnUpdate()
     //    -this->fluidDensity * volume * this->model->GetWorld()->Gravity();
     const ignition::math::Vector3d kGravity(0, 0, -9.81);
     ignition::math::Vector3d buoyancy = -this->fluidDensity * volume * kGravity;
-    gzdbg << "buoyancy.Z() = " << buoyancy.Z() << std::endl;
+    //gzdbg << "buoyancy.Z() = " << buoyancy.Z() << std::endl;
     
     // Add some drag
     // Note - the drag implicitly assumes that the water is static.
@@ -278,7 +282,7 @@ void BuoyancyPlugin::OnUpdate()
       // Relative velocity of link w.r.t. water
       double relV = vel.Z() - heightdot;
       double dz = -1.0 * this->fluidDrag * relV * std::abs(relV);
-      gzdbg << "vel.Z() = " << vel.Z() << ", heightdot = " << heightdot << ", relV = " << relV << ", dz " << dz << std::endl;
+      //gzdbg << "vel.Z() = " << vel.Z() << ", heightdot = " << heightdot << ", relV = " << relV << ", dz " << dz << std::endl;
       ignition::math::Vector3d drag(0, 0, dz);
       buoyancy += drag;
       if (buoyancy.Z() < 0.0)

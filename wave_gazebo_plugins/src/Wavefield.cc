@@ -430,6 +430,30 @@ namespace asv
 ///////////////////////////////////////////////////////////////////////////////    
 // WavefieldSampler
 
+	double WavefieldSampler::ComputeDepthSimply(
+		const WaveParameters& _waveParams,
+    const ignition::math::Vector3d& _point,
+    double time
+  )
+  {
+		double h = 0.0;
+		for (std::size_t ii = 0; ii < _waveParams.Number(); ++ii)
+			//int ii = 0;
+		{
+			double k = _waveParams.Wavenumber_V()[ii];
+			double a = _waveParams.Amplitude_V()[ii];
+			double q = 0.0;
+			double dx =  _waveParams.Direction_V()[ii].X();
+			double dy =  _waveParams.Direction_V()[ii].Y();
+			double dot = _point.X()*dx + _point.Y()*dy;
+			double omega = _waveParams.AngularFrequency_V()[ii];
+			double theta = k*dot - omega*time;
+			double c = cos(theta);
+			h += a*c;
+		}
+		return h;
+	}
+	
   double WavefieldSampler::ComputeDepthDirectly(  
     const WaveParameters& _waveParams,
     const ignition::math::Vector3d& _point,
@@ -533,7 +557,8 @@ namespace asv
     // Use the target point as the initial guess (this is within sum{amplitudes} of the solution)
     Eigen::Vector2d p2(_point.X(), _point.Y());
     const double pz = solver(wave_fdf, p2, p2, time, wp, tol, nmax);
-    const double h = pz - _point.Z();
+    //const double h = pz - _point.Z();  // Why?
+		const double h = pz;
     return h;
   }
 

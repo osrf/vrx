@@ -50,14 +50,8 @@ namespace gazebo
 
   /// \brief A plugin that simulates buoyancy of an object immersed in fluid.
   /// All SDF parameters are optional.
-  ///   <fluid_density>: Sets the density of the fluid that surrounds the
-  ///                    buoyant object [kg/m^3].
-  ///                    This paramater is optional.
   ///
   ///   <fluid_level>:   The height of the fluid/air interface [m].
-  ///                    This parameter is optional.
-  ///
-  ///   <fluid_drag>:    Quadratic drag generally applied to Z velocity.
   ///                    This parameter is optional.
   ///
   ///   <link>:          Describe the volume properties of individual links in
@@ -74,11 +68,6 @@ namespace gazebo
   ///                         link in the link frame. This is where the buoyancy
   ///                         force will be applied. This field is required.
   ///
-  ///     <area>:             Horizontal area of this link.
-  ///                         This field is required
-  ///
-  ///     <height>:           Vertical height of this link.
-  ///                         This field is required.
   class WaveguagePlugin : public ModelPlugin
   {
     /// \brief Constructor.
@@ -103,15 +92,8 @@ namespace gazebo
     /// \brief The name of the wave model
     protected: std::string waveModelName;
 
-    /// \brief The density of the fluid in which the object is submerged in
-    /// kg/m^3. Defaults to 1000, the fluid density of water at 15 Celsius.
-    protected: double fluidDensity;
-
     /// \brief The height of the fluid/air interface [m]. Defaults to 0.
     protected: double fluidLevel;
-
-    /// \brief Quadratic drag generally applied to Z velocity. Defaults to 0.
-    protected: double fluidDrag;
 
     /// \brief Map of <link ID, point> pairs mapping link IDs to the CoV
     /// (center of volume) and volume of the link.
@@ -120,12 +102,6 @@ namespace gazebo
     /// \brief Vector of links in the model for which we will apply buoyancy
     /// forces.
     protected: physics::Link_V buoyancyLinks;
-
-    /// \brief Vector of water height at each link from previous timestep
-    protected: std::vector<double> buoyancyHeights;
-
-    /// \brief Previous update time
-  protected: double lastSimTime;
   };
 }
 
