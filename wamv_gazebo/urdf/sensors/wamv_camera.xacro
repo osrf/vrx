@@ -47,10 +47,12 @@
     <!-- Sensor post -->
     <link name="${name}_post_link">
       <visual name="${name}_post_visual">
-        <origin xyz="0 0 ${-0.2515*post_length/mesh_post_length}" rpy="${pi/2} 0 0"/>
         <geometry>
-          <mesh filename="package://vrx_gazebo/models/sensor_post/mesh/sensor_post.dae" scale="1 ${post_length/mesh_post_length} 1"/>
+          <cylinder radius="0.0076" length="${post_length}"/>
         </geometry>
+        <material name="${name}_post_material">
+          <color rgba="1.0 0.0 0.0 1.0"/>
+        </material>
       </visual>
       <collision name="${name}_post_collision">
         <geometry>
