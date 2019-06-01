@@ -168,12 +168,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Callback executed when a collision is detected for the WAMV.
   private: virtual void OnCollision();
 
-  /// \brief Collision detection node pointer
-  private: gazebo::transport::NodePtr collisionNode;
-
-  /// \brief Collision detection node subscriber
-  private: gazebo::transport::SubscriberPtr collisionSub;
-
   /// \brief Callback function when collision occurs in the world.
   /// \param[in] _contacts List of all collisions from lst simulation iteration
   private: void OnCollisionMsg(ConstContactsPtr &_contacts);
@@ -202,6 +196,12 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Last collision time.
   protected: gazebo::common::Time lastCollisionTime;
+
+  /// \brief Collision detection node pointer
+  private: gazebo::transport::NodePtr collisionNode;
+
+  /// \brief Collision detection node subscriber
+  private: gazebo::transport::SubscriberPtr collisionSub;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
