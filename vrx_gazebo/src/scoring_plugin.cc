@@ -68,7 +68,7 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   std::string collisionTopic =
     std::string("/gazebo/") + worldName + std::string("/physics/contacts");
   collisionSub = collisionNode->Subscribe(collisionTopic,
-                                          &ScoringPlugin::onCollisionMsg, this);
+                                          &ScoringPlugin::OnCollisionMsg, this);
 }
 
 //////////////////////////////////////////////////
@@ -239,12 +239,17 @@ void ScoringPlugin::OnFinished()
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
+void ScoringPlugin::OnCollision()
+{
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
   // loop though collisions, if any include the wamv, increment collision
   // counter
-  for (unsigned int i = 0; i < contacts->contact_size(); ++i) {
-    std::string wamvCollisionStr1 = contacts->contact(i).collision1();
-    std::string wamvCollisionStr2 = contacts->contact(i).collision2();
+  for (unsigned int i = 0; i < _contacts->contact_size(); ++i) {
+    std::string wamvCollisionStr1 = _contacts->contact(i).collision1();
+    std::string wamvCollisionStr2 = _contacts->contact(i).collision2();
     std::string wamvCollisionSubStr1 =
         wamvCollisionStr1.substr(0, wamvCollisionStr1.find("lump"));
     std::string wamvCollisionSubStr2 =
@@ -260,18 +265,19 @@ void ScoringPlugin::onCollisionMsg(ConstContactsPtr &contacts) {
       this->collisionCounter++;
       gzmsg << "[" << this->collisionCounter
             << "] New collision counted between ["
-            << contacts->contact(i).collision1() << "] and ["
-            << contacts->contact(i).collision2() << "]" << std::endl;
-      gzdbg << contacts->contact(i).DebugString() << std::endl;
+            << _contacts->contact(i).collision1() << "] and ["
+            << _contacts->contact(i).collision2() << "]" << std::endl;
+      gzdbg << _contacts->contact(i).DebugString() << std::endl;
 #if GAZEBO_MAJOR_VERSION >= 8
       this->lastCollisionTime = this->world->SimTime();
 #else
       this->lastCollisionTime = this->world->GetSimTime();
 #endif
       this->collisionList.push_back(
-          contacts->contact(i).collision1() +
-          std::string(" || ") + contacts->contact(i).collision2());
+          _contacts->contact(i).collision1() +
+          std::string(" || ") + _contacts->contact(i).collision2());
       this->collisionTimestamps.push_back(this->currentTime);
+      return;
     }
   }
 }
