@@ -1,10 +1,15 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_camera" params="name x:=0.5 y:=0 z:=1.5 R:=0 P:=0 Y:=0 post_Y:=0">
+    <!-- Define length variables for link positioning -->
     <xacro:property name="platform_z" value="1.2965"/>
-    <xacro:property name="post_arm_to_camera_z_offset" value="0.027"/>
+    <xacro:property name="post_to_post_arm_x" value="0.03"/>
+    <xacro:property name="post_arm_to_camera_x" value="0.02"/>
+    <xacro:property name="post_arm_to_camera_z" value="0.027"/>
+
+    <!-- Define post length based on desired z position of sensor -->
+    <xacro:property name="post_length" value="${z-platform_z-post_arm_to_camera_z}"/>
     <xacro:property name="mesh_post_length" value="0.503"/>
-    <xacro:property name="post_length" value="${z-platform_z-post_arm_to_camera_z_offset}"/>
 
     <!-- Monocular Camera -->
     <link name="${name}_link">
@@ -94,21 +99,21 @@
     <!-- Base to sensor post joint -->
     <xacro:property name="post_z" value="${platform_z+post_length/2}"/>
     <joint name="base_to_${name}_post_joint" type="fixed">
-      <origin xyz="${x-(0.03+0.02)*cos(post_Y)} ${y-(0.03+0.02)*sin(post_Y)} ${post_z}" rpy="0 0 ${post_Y}" />
+      <origin xyz="${x-(post_to_post_arm_x+post_arm_to_camera_x)*cos(post_Y)} ${y-(post_to_post_arm_x+post_arm_to_camera_x)*sin(post_Y)} ${post_z}" rpy="0 0 ${post_Y}" />
       <parent link="base_link" />
       <child link="${name}_post_link" />
     </joint>
 
     <!-- Sensor post to sensor post arm joint -->
     <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
-      <origin xyz="0.03 0 ${z-post_z-post_arm_to_camera_z_offset}" rpy="0 0 0" />
+      <origin xyz="${post_to_post_arm_x} 0 ${z-post_z-post_arm_to_camera_z}" rpy="0 0 0" />
       <parent link="${name}_post_link" />
       <child link="${name}_post_arm_link" />
     </joint>
 
     <!-- Sensor post arm to camera joint -->
     <joint name="${name}_post_arm_to_${name}_joint" type="fixed">
-      <origin xyz="0.02 0 ${post_arm_to_camera_z_offset}" rpy="${R} ${P} ${Y-post_Y}" />
+      <origin xyz="${post_arm_to_camera_x} 0 ${post_arm_to_camera_z}" rpy="${R} ${P} ${Y-post_Y}" />
       <parent link="${name}_post_arm_link" />
       <child link="${name}_link" />
     </joint>
