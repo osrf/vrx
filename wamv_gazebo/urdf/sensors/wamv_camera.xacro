@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_camera" params="name x:=0.5 y:=0 z:=1.5 R:=0 P:=0 Y:=0 post_Y:=0">
+    <xacro:property name="platform_z" value="1.2965"/>
+    <xacro:property name="post_arm_to_camera_z_offset" value="0.027"/>
+    <xacro:property name="mesh_post_length" value="0.503"/>
+    <xacro:property name="post_length" value="${z-platform_z-post_arm_to_camera_z_offset}"/>
+
     <!-- Monocular Camera -->
     <link name="${name}_link">
       <visual name="${name}_visual">
@@ -37,14 +42,14 @@
     <!-- Sensor post -->
     <link name="${name}_post_link">
       <visual name="${name}_post_visual">
-        <origin xyz="0 0 -0.2515" rpy="${pi/2} 0 0"/>
+        <origin xyz="0 0 ${-0.2515*post_length/mesh_post_length}" rpy="${pi/2} 0 0"/>
         <geometry>
-          <mesh filename="package://vrx_gazebo/models/sensor_post/mesh/sensor_post.dae"/>
+          <mesh filename="package://vrx_gazebo/models/sensor_post/mesh/sensor_post.dae" scale="1 ${post_length/mesh_post_length} 1"/>
         </geometry>
       </visual>
       <collision name="${name}_post_collision">
         <geometry>
-          <cylinder radius="0.0076" length="0.503"/>
+          <cylinder radius="0.0076" length="${post_length}"/>
         </geometry>
       </collision>
       <inertial>
@@ -87,22 +92,23 @@
     </link>
     
     <!-- Base to sensor post joint -->
+    <xacro:property name="post_z" value="${platform_z+post_length/2}"/>
     <joint name="base_to_${name}_post_joint" type="fixed">
-      <origin xyz="${x-(0.03+0.02)*cos(post_Y)} ${y-(0.03+0.02)*sin(post_Y)} 1.545" rpy="0 0 ${post_Y}" />
+      <origin xyz="${x-(0.03+0.02)*cos(post_Y)} ${y-(0.03+0.02)*sin(post_Y)} ${post_z}" rpy="0 0 ${post_Y}" />
       <parent link="base_link" />
       <child link="${name}_post_link" />
     </joint>
 
     <!-- Sensor post to sensor post arm joint -->
     <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
-      <origin xyz="0.03 0 ${z-1.545-0.05}" rpy="0 0 0" />
+      <origin xyz="0.03 0 ${z-post_z-post_arm_to_camera_z_offset}" rpy="0 0 0" />
       <parent link="${name}_post_link" />
       <child link="${name}_post_arm_link" />
     </joint>
 
     <!-- Sensor post arm to camera joint -->
     <joint name="${name}_post_arm_to_${name}_joint" type="fixed">
-      <origin xyz="0.02 0 0.027" rpy="${R} ${P} ${Y-post_Y}" />
+      <origin xyz="0.02 0 ${post_arm_to_camera_z_offset}" rpy="${R} ${P} ${Y-post_Y}" />
       <parent link="${name}_post_arm_link" />
       <child link="${name}_link" />
     </joint>
