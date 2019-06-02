@@ -169,7 +169,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: virtual void OnCollision();
 
   /// \brief Callback function when collision occurs in the world.
-  /// \param[in] _contacts List of all collisions from lst simulation iteration
+  /// \param[in] _contacts List of all collisions from last simulation iteration
   private: void OnCollisionMsg(ConstContactsPtr &_contacts);
 
   /// \brief Parse all SDF parameters.
