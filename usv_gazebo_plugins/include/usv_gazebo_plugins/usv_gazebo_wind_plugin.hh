@@ -24,13 +24,15 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef USV_GAZEBO_PLUGINS_WIND_HH_
 #define USV_GAZEBO_PLUGINS_WIND_HH_
 
+#include <ros/ros.h>
+#include <memory>
+#include <string>
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
 #include <ignition/math/Rand.hh>
-#include <ros/ros.h>
 
 namespace gazebo
 {
@@ -38,12 +40,21 @@ namespace gazebo
   /// following parameters:
   ///
   /// <bodyName>: The link that will receive the effect of the wind.
-  /// <wind_direction>: Wind direction vector.
+  ///
+  /// <wind_direction>: Wind direction vector. Wind direction is specified as
+  /// the positive direction of the wind velocity vector in the horizontal plane
+  /// in degrees using the ENU coordinate convention
+  ///
   /// <wind_coeff_vector>: Coefficients from Sarda et al.,
+  ///
   /// <wind_mean_velocity>: The wind average velocity.
+  ///
   /// <var_wind_gain_constants>: Variable wind speed gain constant.
+  ///
   /// <var_wind_time_constants>: Variable wind speed time constant.
+  ///
   /// <random_seed>: Set the seed for wind speed randomization.
+  ///
   /// <update_rate>: Publishing rate of the wind topic. If set to 0, it will not
   /// publish, if set to a -1 it will publish every simulation iteration.
   /// "Station-keeping control of an unmanned surface vehicle exposed to
