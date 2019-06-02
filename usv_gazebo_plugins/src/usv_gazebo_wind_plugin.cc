@@ -107,19 +107,20 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   gzmsg << "var wind time constants = " << this->timeConstant << std::endl;
 
   // setting seed for ignition::math::Rand
+  int random_seed;
   if (_sdf->HasElement("random_seed") &&
     _sdf->GetElement("random_seed")->Get<int>() != 0)
   {
-    ignition::math::Rand::Seed(
-      _sdf->GetElement("random_seed")->Get<int>());
+    random_seed = _sdf->GetElement("random_seed")->Get<int>();
   }
   else{
     common::Time currentWallTime;
     currentWallTime.SetToWallTime();
-    ignition::math::Rand::Seed(currentWallTime.sec);
+    random_seed = currentWallTime.sec;
   }
 
-  gzmsg << "Random seed value = " << this->timeConstant << std::endl;
+  ignition::math::Rand::Seed(random_seed);
+  gzmsg << "Random seed value = " << random_seed << std::endl;
 
   // initialize previous time and previous velocity
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -147,6 +148,11 @@ void UsvWindPlugin::Update()
 
   double dT= currentTime - this->previousTime;
   double randomDist = ignition::math::Rand::DblNormal(0, 1);
+
+  // Investigate if values are pseudorandom
+  static int numTimes = 0;
+  gzerr << numTimes++ << ". " << randomDist << std::endl;
+
   // calculate current variable wind velocity
   double currentVarVel = this->previousVarVel + (-1/this->timeConstant*
     (this->previousVarVel+this->gainConstant*randomDist))*dT;
