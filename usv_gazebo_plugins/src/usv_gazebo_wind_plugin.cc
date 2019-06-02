@@ -70,7 +70,7 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     double windAngle = _sdf->GetElement("wind_direction")->Get<double>();
     this->windDirection[0] = cos(windAngle * M_PI / 180);
     this->windDirection[1] = sin(windAngle * M_PI / 180);
-    this->windDirection[3] = 0;
+    this->windDirection[2] = 0;
   }
 
   gzmsg << "Wind direction unit vector = " << this->windDirection << std::endl;
@@ -107,13 +107,13 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   gzmsg << "var wind time constants = " << this->timeConstant << std::endl;
 
-  if (_sdf->HasElement("publishing_buffer"))
+  if (_sdf->HasElement("update_rate"))
   {
-    this->publishingBuffer =
-      _sdf->GetElement("publishing_buffer")->Get<double>();
+    this->updateRate =
+      _sdf->GetElement("update_rate")->Get<double>();
   }
 
-  gzmsg << "publishing buffer  = " << this->publishingBuffer << std::endl;
+  gzmsg << "update rate  = " << this->updateRate << std::endl;
 
   // setting seed for ignition::math::Rand
   if (_sdf->HasElement("random_seed") &&
@@ -206,8 +206,14 @@ void UsvWindPlugin::Update()
   this->previousVarVel = currentVarVel;
   this->previousTime = currentTime;
 
+  double publishingBuffer = 1/this->updateRate;
+  if (this->updateRate >= 0){
+    publishingBuffer = 1/this->updateRate;
+  } else {
+    publishingBuffer = -1;
+  }
   // Publishing the wind speed and direction
-  if (currentTime - this->lastPublishTime > this->publishingBuffer){
+  if (currentTime - this->lastPublishTime > publishingBuffer){
     std_msgs::Float64 windSpeedMsg;
     std_msgs::Float64 windDirectionMsg;
     windSpeedMsg.data = velocity;

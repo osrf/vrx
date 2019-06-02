@@ -44,6 +44,8 @@ namespace gazebo
   /// <var_wind_gain_constants>: Variable wind speed gain constant.
   /// <var_wind_time_constants>: Variable wind speed time constant.
   /// <random_seed>: Set the seed for wind speed randomization.
+  /// <update_rate>: Publishing rate of the wind topic. If set to 0, it will not
+  /// publish, if set to a -1 it will publish every simulation iteration.
   /// "Station-keeping control of an unmanned surface vehicle exposed to
   /// current and wind disturbances".
   class UsvWindPlugin : public ModelPlugin
@@ -108,8 +110,8 @@ namespace gazebo
     /// \brief Last time wind speed and direction was published.
     private: double lastPublishTime = 0;
 
-    /// \brief Publishing buffer for wind speed and direction.
-    private: double publishingBuffer;
+    /// \brief Update rate buffer for wind speed and direction.
+    private: double updateRate;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
