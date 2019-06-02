@@ -277,6 +277,7 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
           _contacts->contact(i).collision1() +
           std::string(" || ") + _contacts->contact(i).collision2());
       this->collisionTimestamps.push_back(this->currentTime);
+      this->OnCollision();
       return;
     }
   }
