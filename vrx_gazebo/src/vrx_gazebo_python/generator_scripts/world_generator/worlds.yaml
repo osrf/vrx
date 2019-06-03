@@ -11,6 +11,7 @@ field:
             - name: nav_challenge
         light_buoy:
             - name: stc2
+              x: n+110
         qualifying_pinger_transit_2016:
             - name: pinger
         dock_2016:
