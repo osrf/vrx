@@ -22,6 +22,13 @@
        X = "holonomic" configuration -->
   <arg name="thrust_config" default="H" />
 
+  <!-- Do you want to enable sensors? -->
+  <arg name="camera_enabled"       default="false" />
+  <arg name="gps_enabled"          default="false" />
+  <arg name="imu_enabled"          default="false" />
+  <arg name="lidar_enabled"        default="false" />
+  <arg name="ground_truth_enabled" default="false" />
+
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name"   value="$(arg world)"/>
@@ -35,7 +42,12 @@
   <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
   <param name="robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
-         thruster_config:=$(arg thrust_config)"/>
+         thruster_config:=$(arg thrust_config)
+         camera_enabled:=$(arg camera_enabled)
+         gps_enabled:=$(arg gps_enabled)
+         imu_enabled:=$(arg imu_enabled)
+         lidar_enabled:=$(arg lidar_enabled)
+         ground_truth_enabled:=$(arg ground_truth_enabled) "/>
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
@@ -43,3 +55,4 @@
         -R $(arg R) -P $(arg P) -Y $(arg Y)
         -urdf -param robot_description -model wamv"/>
 </launch>
+
