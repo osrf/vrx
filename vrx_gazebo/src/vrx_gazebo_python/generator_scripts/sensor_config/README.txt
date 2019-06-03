@@ -25,7 +25,7 @@ Quick Start Instructions:
 		wamv_target explained:
 			this is the root path to the urdf of your wamv which will be generated
 	Step 7:
-		see the confirmation message "wamv sucessfully generated" in the terminal and close the script (CTRL+c)
+		see the confirmation message "wamv sucessfully generated" in the terminal with no errors present
 	Step 8:
 		launch the example world with your wamv:
 			roslaunch vrx_gazebo sandisland.launch urdf:=/home/<username>/my_wamv/my_wamv.urdf
@@ -40,11 +40,13 @@ Quick Start Instructions:
 		close gazebo:
 			Ctrl+c
 Description:
-	generate_sensors.launch is a simple script that allows sensor configurations to be submitted by YAML (as oppossed to urdf) while making sure that the sensors are in compliance as defined by sensor_config/compliance.py and are allowed (defined in wamv_gazebo/urdf/sensors).
+	generate_sensors.launch is a simple script that allows sensor configurations to be submitted by YAML (as oppossed to urdf) while making sure that the sensors are in compliance as defined by sensor_config/compliance.py and are allowed (included by wamv_gazebo/urdf/wamv_gazebo.urdf.xacro).
 	
-	It operates by looking at all macros defined in a directory(in this case, wamv_gazebo/urdf/sensors) and all macros called (as well as their parameters). It makes sure that all the macros called are avalible in wamv_gazebo/urdf/sensors as well as the specified parameters. It also checks the number of times a macro is called for compliance ie: only one lidar allowed. It also checks the parameters of each macro call for compliance ie: all sensors must be in a bounding box around the WAM-V.
+	It operates by all macros called (as well as their parameters) by the user_generated yaml. It also checks the number of times a macro is called for compliance ie: only one lidar allowed. It checks the parameters of each macro call for compliance ie: all sensors must be in a bounding box around the WAM-V. Sensors not included by wamv_gazebo/urdf/wamv_gazebo.urdf.xacro are not  not supported and will generate an XML error if attempted to be used.
 
 	If the sensor configuration passes, the script auto fills out a xacro at xacro_target and calls a xacro command to generate the urdf at wamv_target using wamv_gazebo/urdf/wamv_gazebo.urdf.xacro.
+Note:
+see wamv_gazebo/urdf/sensors for a list of the supported xacros and parameters(parameters here mirror thier xacro counterparts)
 
 example yaml sensor configuration file:
 

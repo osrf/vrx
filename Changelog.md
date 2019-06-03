@@ -27,7 +27,7 @@
     * [Pull request 98](https://bitbucket.org/osrf/vrx/pull-requests/98)
 
 1. Support the ability to customize sensor location via YAML:
-    * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
+    * [Pull request 99](https://bitbucket.org/osrf/vrx/pull-requests/99)
 
 ### VRX 1.0.1
 
