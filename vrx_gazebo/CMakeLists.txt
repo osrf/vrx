@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_dev
   geographic_msgs
   std_msgs
+  rospy
 )
 
 ########################
@@ -29,6 +30,9 @@ add_service_files(
   FILES
   ColorSequence.srv
 )
+
+# Python scripts setup
+catkin_python_setup()
 
 generate_messages()
 
@@ -225,3 +229,9 @@ if (CATKIN_ENABLE_TESTING)
                     test/sandisland.cc)
   target_link_libraries(sandisland_test ${catkin_LIBRARIES})
 endif()
+
+# Python Scripts
+catkin_install_python(PROGRAMS bin/generate_sensors
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+

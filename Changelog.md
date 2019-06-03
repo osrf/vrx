@@ -26,6 +26,9 @@
 1. Add 3d lidar mesh to WAM-V:
     * [Pull request 98](https://bitbucket.org/osrf/vrx/pull-requests/98)
 
+1. Support the ability to customize sensor location via YAML:
+    * [Pull request 99](https://bitbucket.org/osrf/vrx/pull-requests/99)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
