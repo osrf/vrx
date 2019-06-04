@@ -137,7 +137,27 @@ std::string BoxShape::disp()
 double BoxShape::calculateVolume(const ignition::math::Pose3d &pose,
     double fluidLevel)
 {
-  return 0;
+  double height = z;
+  double area = x * y;
+
+  // Location of bottom of object relative to the fluid surface - assumes
+  // origin is at cog of the object.
+  double bottomRelSurf = fluidLevel - (pose.Pos().Z() - height / 2.0);
+
+  // out of water
+  if (bottomRelSurf <= 0)
+  {
+    return 0.0;
+  }
+  // at surface
+  else if (bottomRelSurf <= height)
+  {
+    return bottomRelSurf * area;
+  }
+  else
+  {
+    return height * area;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -333,55 +353,7 @@ void BuoyancyPlugin::OnUpdate()
 
     // todo: add buoyancy obj's pose
 
-    double height = 0;
-    double area = 0;
-    if (buoyancyObj.shape->type == ShapeType::Box)
-    {
-      auto shape = dynamic_cast<BoxShape*>(buoyancyObj.shape.get());
-      height = shape->z;
-      area = shape->x * shape->y;
-    }
-    else if (buoyancyObj.shape->type == ShapeType::Sphere)
-    {
-      auto shape = dynamic_cast<SphereShape*>(buoyancyObj.shape.get());
-      height = shape->r;
-      area = shape->r * shape->r;
-      continue;
-    }
-    else if (buoyancyObj.shape->type == ShapeType::Cylinder)
-    {
-      auto shape = dynamic_cast<CylinderShape*>(buoyancyObj.shape.get());
-      height = shape->h;
-      area = shape->r * shape->r;
-      continue;
-    }
-    else
-    {
-      gzwarn << "invalid object";
-      continue;
-    }
-
-    double volume;
-
-    // Location of bottom of object relative to the fluid surface - assumes
-    // origin is at cog of the object.
-    double bottomRelSurf =
-        this->fluidLevel - (linkFrame.Pos().Z() - height / 2.0);
-
-    // out of water
-    if (bottomRelSurf <= 0)
-    {
-      volume = 0.0;
-    }
-      // at surface
-    else if (bottomRelSurf <= height)
-    {
-      volume = bottomRelSurf * area;
-    }
-    else
-    {
-      volume = height * area;
-    }
+    double volume = buoyancyObj.shape->calculateVolume(linkFrame, this->fluidLevel);
 
     GZ_ASSERT(volume >= 0, "Nonpositive volume found in volume properties!");
 
