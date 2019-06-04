@@ -1,0 +1,8 @@
+#! /usr/bin/env python
+
+
+import vrx_gazebo_python.generator_scripts.sensor_config.configure_sensors
+
+
+if __name__ == '__main__':
+    vrx_gazebo_python.generator_scripts.sensor_config.configure_sensors.main()

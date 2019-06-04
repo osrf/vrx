@@ -27,6 +27,7 @@
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
+#include <gazebo/transport/transport.hh>
 #include "vrx_gazebo/Task.h"
 
 /// \brief A plugin that provides common functionality to any scoring plugin.
@@ -72,6 +73,10 @@
 /// amount of maximum seconds that the plugin will be in the "running" state.
 /// Note that this parameter specifies the maximum task time.
 ///
+/// <collision_buffer>: Optional parameter (double type) specifying the
+/// minimum amount of seconds between two collisions. If N collisions happen
+/// within this time frame, only one will be counted.
+///
 /// <release_joints>: Optional element specifying the collection of joints that
 /// should be dettached when transitioning to the "ready" state.
 ///
@@ -99,7 +104,7 @@
 class ScoringPlugin : public gazebo::WorldPlugin
 {
   /// \brief Class constructor.
-  public: ScoringPlugin() = default;
+  public: ScoringPlugin();
 
   // Documentation inherited.
   protected: void Load(gazebo::physics::WorldPtr _world,
@@ -160,6 +165,13 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Callback executed when the task state transition into "finished".
   private: virtual void OnFinished();
 
+  /// \brief Callback executed when a collision is detected for the WAMV.
+  private: virtual void OnCollision();
+
+  /// \brief Callback function when collision occurs in the world.
+  /// \param[in] _contacts List of all collisions from last simulation iteration
+  private: void OnCollisionMsg(ConstContactsPtr &_contacts);
+
   /// \brief Parse all SDF parameters.
   /// \return True when all parameters were successfully parsed or false
   /// otherwise.
@@ -181,6 +193,15 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Pointer to the vehicle to score.
   protected: gazebo::physics::ModelPtr vehicleModel;
+
+  /// \brief Last collision time.
+  protected: gazebo::common::Time lastCollisionTime;
+
+  /// \brief Collision detection node pointer
+  private: gazebo::transport::NodePtr collisionNode;
+
+  /// \brief Collision detection node subscriber
+  private: gazebo::transport::SubscriberPtr collisionSub;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -220,6 +241,18 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Remaining time since the start of the task (running state).
   private: gazebo::common::Time remainingTime;
+
+  /// \brief Collision buffer.
+  private: float CollisionBuffer = 3.0;
+
+  /// \brief Collisions counter.
+  private: int collisionCounter = 0;
+
+  /// \brief Collision list.
+  private: std::vector<std::string> collisionList;
+
+  /// \brief Collisions timestamps.
+  private: std::vector<gazebo::common::Time> collisionTimestamps;
 
   /// \brief Whether the current task has timed out or not.
   private: bool timedOut = false;
