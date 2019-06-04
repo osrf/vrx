@@ -256,9 +256,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   if (_sdf->HasElement("buoyancy"))
   {
-    gzmsg << "Found that SDF has at least one buoyancy element, looking at "
-          <<  "each element." << std::endl;
-    int counter = 0;
+    gzmsg << "Found buoyancy element(s), looking at each element..." << std::endl;
     for (sdf::ElementPtr buoyancyElem = _sdf->GetElement("buoyancy"); buoyancyElem;
         buoyancyElem = buoyancyElem->GetNextElement("buoyancy")) {
       try
@@ -266,115 +264,18 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         BuoyancyObject buoyObj = BuoyancyObject();
         buoyObj.load(_model, buoyancyElem);
         gzmsg << buoyObj.disp() << std::endl;
-        counter++;
-      }
-      catch (const ParseException& e)
-      {
-        gzwarn << e.what() << std::endl;
+
+        // add link to linkMap if it is not in the map
+        if (linkMap.find(buoyObj.linkId) == linkMap.end())
+        {
+          linkMap[buoyObj.linkId] = _model->GetLink(buoyObj.linkName);
+        }
+        // add buoyancy object to list
+        buoyancyObjects.push_back(std::move(buoyObj));
       }
       catch (const std::exception& e)
       {
         gzwarn << e.what() << std::endl;
-      }
-    }
-  }
-
-  if (_sdf->HasElement("link"))
-  {
-    gzmsg << "Found that SDF has at least one link element, looking at each "
-          << "link..." << std::endl;
-    int counter = 0;
-    for (sdf::ElementPtr linkElem = _sdf->GetElement("link"); linkElem;
-         linkElem = linkElem->GetNextElement("link"))
-    {
-      // Print each attribute for the link
-      gzmsg << "Looking for name attribute in link number " << counter
-            << ", which has " << linkElem->GetAttributeCount()
-            << " attributes" << std::endl;
-      counter++;
-      int id = -1;
-      std::string name = "";
-
-      if (linkElem->HasElement("name"))
-      {
-        name = linkElem->GetElement("name")->Get<std::string>();
-        gzmsg << "Found link name in SDF [" << name << "]" << std::endl;
-        physics::LinkPtr link = _model->GetLink(name);
-        if (!link)
-        {
-          gzwarn << "Specified link [" << name << "] not found." << std::endl;
-          continue;
-        }
-        id = link->GetId();
-        // Add this link to our list for applying buoy forces
-        this->buoyancyLinks.push_back(link);
-      }
-      else
-      {
-        gzwarn << "Missing 'name' element within link number ["
-               << counter - 1 << "] in SDF" << std::endl;
-        // Exit if we didn't set ID
-        continue;
-      }
-
-      if (this->volPropsMap.count(id) != 0)
-      {
-        gzwarn << "Properties for link [" << name << "] already set, skipping "
-               << "second property block" << std::endl;
-        continue;
-      }
-
-      if (linkElem->HasElement("center_of_volume"))
-      {
-        ignition::math::Vector3d cov = linkElem->GetElement("center_of_volume")
-            ->Get<ignition::math::Vector3d>();
-        this->volPropsMap[id].cov = cov;
-      }
-      else
-      {
-        gzwarn << "Required element center_of_volume missing from link ["
-               << name << "] in BuoyancyPlugin SDF" << std::endl;
-        continue;
-      }
-
-      if (linkElem->HasElement("area"))
-      {
-        double area = linkElem->GetElement("area")->Get<double>();
-        if (area <= 0)
-        {
-          gzwarn << "Nonpositive area specified in BuoyancyPlugin!"
-                 << std::endl;
-          // Remove the element from the map since it's invalid.
-          this->volPropsMap.erase(id);
-          continue;
-        }
-        this->volPropsMap[id].area = area;
-      }
-      else
-      {
-        gzwarn << "Required element 'area' missing from element link [" << name
-               << "] in BuoyancyPlugin SDF" << std::endl;
-        continue;
-      }
-
-      if (linkElem->HasElement("height"))
-      {
-        auto height = linkElem->GetElement("height")->Get<double>();
-        if (height <= 0)
-        {
-          gzwarn << "Nonpositive height specified in BuoyancyPlugin!"
-                 << std::endl;
-          // Remove the element from the map since it's invalid.
-          this->volPropsMap.erase(id);
-          continue;
-        }
-        this->volPropsMap[id].height = height;
-      }
-      else
-      {
-        gzwarn << "Required element 'height' missing from element link ["
-               << name << "] in BuoyancyPlugin SDF" << std::endl;
-        continue;
       }
     }
   }

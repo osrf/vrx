@@ -126,7 +126,6 @@ namespace gazebo
       /// \brief display string for buoyancy object
       std::string disp();
 
-    private:
       /// \brief associated link ID
       int linkId;
 
@@ -237,6 +236,12 @@ namespace gazebo
 
     /// \brief Quadratic drag generally applied to Z velocity. Defaults to 0.
     protected: double fluidDrag;
+
+    /// \brief list of buoyancy objects for model
+    protected: std::vector<buoyancy::BuoyancyObject> buoyancyObjects;
+
+    /// \brief maps linkId to link pointer
+    protected: std::map<int, gazebo::physics::LinkPtr> linkMap;
 
     /// \brief Map of <link ID, point> pairs mapping link IDs to the CoV
     /// (center of volume) and volume of the link.
