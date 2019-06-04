@@ -17,6 +17,8 @@ under each instance of a macro, the parameters are to be filled.
 multiple instances of a macro may be included by adding more (-)
 (most macros have a name feild which must be filled(sandisland is an exception))
 params will be functionally determined by the step of its axis(n) as evaluated as a lambda in pyhton.
+NOTE: desired macros must be included by vrx_gazebo/worlds/xacros/include_all_macros.xacro. Otherwise, XML erros will be produced
+
 
 SEQUENCE:
 each axis MUST have a sequence tag at the same level as steps and macros.
