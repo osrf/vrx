@@ -6,7 +6,7 @@ using namespace gazebo;
 class BuoyancyPluginTest : public ServerFixture {
 public:
   BuoyancyPluginTest() {
-    Load("worlds/buoyancy_plugin_test.world", true);
+    Load("test/worlds/buoyancy_plugin_test.world", true);
   }
 };
 

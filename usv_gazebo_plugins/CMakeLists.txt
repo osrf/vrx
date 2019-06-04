@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(usv_gazebo_plugins)
-find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation)
+find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation xacro)
 find_package(Eigen3 REQUIRED)
 
 ###################################
@@ -76,8 +76,14 @@ target_link_libraries(usv_gazebo_wind_plugin
 )
 
 #if(CATKIN_ENABLE_TESTING)
-# copy all the test world files
-file(COPY test/worlds DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Generate test world files from xacro and install
+xacro_add_files(
+  test/worlds/buoyancy_plugin_test.world.xacro
+  INORDER INSTALL DESTINATION worlds
+)
+install(DIRECTORY test/worlds/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
+
 # buoyancy plugin test
 catkin_add_gtest(buoyancy_plugin_test test/buoyancy_test.cc)
 target_link_libraries(buoyancy_plugin_test gazebo_test_fixture buoyancy_gazebo_plugin)

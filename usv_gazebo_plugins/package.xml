@@ -19,5 +19,6 @@
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
   <depend>eigen</depend>
+  <depend>xacro</depend>
   <exec_depend>message_runtime</exec_depend>
 </package>

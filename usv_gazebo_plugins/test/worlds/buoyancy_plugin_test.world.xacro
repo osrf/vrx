@@ -1,0 +1,146 @@
+<?xml version="1.0" ?>
+<!-- World containing buoyancy test models -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="basic_shape" params="name static *pose *shape *inertial">
+    <model name="${name}">
+      <xacro:insert_block name="pose" />
+      <static>${static}</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <xacro:insert_block name="shape" />
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <xacro:insert_block name="shape" />
+          </geometry>
+        </collision>
+        <xacro:insert_block name="inertial" />
+      </link>
+      <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <fluid_drag>5.0</fluid_drag>
+        <buoyancy name="buoyancy">
+          <link_name>link</link_name>
+          <geometry>
+            <xacro:insert_block name="shape" />
+          </geometry>
+        </buoyancy>
+      </plugin>
+    </model>
+  </xacro:macro>
+
+  <!-- calculates inertial components of a box with mass and dimensions (x, y, z) -->
+  <xacro:macro name="box_inertial" params="mass x y z">
+    <inertial>
+      <mass>${mass}</mass>
+      <inertia>
+        <ixx>${0.083 * mass * (y*y+z*z)}</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>${0.083 * mass * (x*x+z*z)}</iyy>
+        <iyz>0</iyz>
+        <izz>${0.083 * mass * (x*x+y*y)}</izz>
+      </inertia>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertial" params="mass r">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia>
+        <ixx>${0.4 * mass * r * r}</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>${0.4 * mass * r * r}</iyy>
+        <iyz>0</iyz>
+        <izz>${0.4 * mass * r * r}</izz>
+      </inertia>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertial" params="mass r l">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia>
+        <ixx>${0.0833333 * mass * (3 * r * r + l * l)}</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>${0.0833333 * mass * (3 * r * r + l * l)}</iyy>
+        <iyz>0</iyz>
+        <izz>${0.5 * mass * r * r}</izz>
+      </inertia>
+    </inertial>
+  </xacro:macro>
+
+  <world name='buoyancy_test'>
+    <scene>
+      <grid>false</grid>
+      <origin_visual>false</origin_visual>
+      <ambient>0.6 0.6 0.6 1</ambient>
+      <background>0.8 0.8 0.8 1</background>
+    </scene>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>4.84693 -4.51466 1.77033 0 0.275643 2.35619</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+    <!-- water level for visual reference at z = 0-->
+    <model name="plane">
+      <static>true</static>
+      <pose>3 3 0 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>10 10</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.0 0.0 0.6 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- test_1: floating box -->
+    <xacro:basic_shape name="1_box" static="false">
+      <pose>0 0 2 0 0 0</pose>
+      <box>
+        <size>1 1 1</size>
+      </box>
+      <xacro:box_inertial mass="5" x="1" y="1" z="1"/>
+    </xacro:basic_shape>
+
+    <xacro:basic_shape name="1_sphere" static="false">
+      <pose>2 0 2 0 0 0</pose>
+      <sphere>
+        <radius>1</radius>
+      </sphere>
+      <xacro:sphere_inertial mass="5" r="1"/>
+    </xacro:basic_shape>
+
+    <xacro:basic_shape name="1_cylinder" static="false">
+      <pose>4 0 2 0 0 0</pose>
+      <cylinder>
+        <radius>1</radius>
+        <length>1</length>
+      </cylinder>
+      <xacro:cylinder_inertial mass="5" r="1" l="1" />
+    </xacro:basic_shape>
+
+
+  </world>
+</sdf>

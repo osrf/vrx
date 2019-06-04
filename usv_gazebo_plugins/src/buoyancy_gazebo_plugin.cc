@@ -19,6 +19,7 @@
 #include <string>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Events.hh>
+#include <gazebo/physics/Shape.hh>
 #include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
@@ -49,6 +50,25 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("fluid_drag"))
   {
     this->fluidDrag = _sdf->Get<double>("fluid_drag");
+  }
+
+  if (_sdf->HasElement("buoyancy")) {
+    gzmsg << "Found that SDF has at least one buoyancy element, looking at "
+          <<  "each element." << std::endl;
+    int counter = 0;
+    for (sdf::ElementPtr buoyancyElem = _sdf->GetElement("buoyancy"); buoyancyElem;
+        buoyancyElem = buoyancyElem->GetNextElement("buoyancy")) {
+      try {
+        BuoyancyObject* obj = BuoyancyObject::parseBuoyancyObject(_model, buoyancyElem, counter);
+        if(obj->shape->type == ShapeType::Box) {
+          auto box = dynamic_cast<BoxShape*>(obj->shape);
+          gzmsg << box->print() << std::endl;
+        }
+        counter++;
+      } catch (const std::runtime_error& e){
+        gzwarn << e.what() << std::endl;
+      }
+    }
   }
 
   if (_sdf->HasElement("link"))
