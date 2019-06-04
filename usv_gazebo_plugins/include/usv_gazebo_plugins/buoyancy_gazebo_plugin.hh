@@ -120,6 +120,7 @@ namespace gazebo
       /// \brief Default constructor
       BuoyancyObject();
 
+      /// \brief loads buoyancy object from sdf
       void load(const physics::ModelPtr model, const sdf::ElementPtr elem);
 
       /// \brief display string for buoyancy object

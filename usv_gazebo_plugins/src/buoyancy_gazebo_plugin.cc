@@ -359,7 +359,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
       if (linkElem->HasElement("height"))
       {
-        double height = linkElem->GetElement("height")->Get<double>();
+        auto height = linkElem->GetElement("height")->Get<double>();
         if (height <= 0)
         {
           gzwarn << "Nonpositive height specified in BuoyancyPlugin!"
