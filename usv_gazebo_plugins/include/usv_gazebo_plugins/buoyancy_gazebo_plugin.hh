@@ -52,6 +52,12 @@ namespace gazebo
       /// \brief display string for shape object
       virtual std::string disp();
 
+      /// \brief calculates volume of shape underwater
+      /// @param pose: world of buoyancy shape
+      /// @param fluidLevel: height of fluid
+      virtual double calculateVolume(const ignition::math::Pose3d& pose,
+                                     double fluidLevel) = 0;
+
       /// \brief type of shape
       ShapeType type;
     };
@@ -68,6 +74,10 @@ namespace gazebo
 
       /// \brief display string for box shape
       std::string disp() override;
+
+      // Documentation inherited.
+      double calculateVolume(const ignition::math::Pose3d& pose,
+                             double fluidLevel) override;
 
       /// \brief length
       double x;
@@ -91,6 +101,10 @@ namespace gazebo
       /// \brief display string for cylinder shape
       std::string disp() override;
 
+      // Documentation inherited.
+      double calculateVolume(const ignition::math::Pose3d& pose,
+                             double fluidLevel) override;
+
       /// \brief radius of cylinder
       double r;
 
@@ -107,6 +121,10 @@ namespace gazebo
 
       /// \brief display string for sphere shape
       std::string disp() override;
+
+      // Documentation inherited.
+      double calculateVolume(const ignition::math::Pose3d& pose,
+                             double fluidLevel) override;
 
       /// \brief radius of sphere
       double r;
@@ -163,25 +181,6 @@ namespace gazebo
       std::string output_;
     };
   } // end of buoyancy namespace
-
-  /// \brief A class for storing the volume properties of a link.
-  class VolumeProperties
-  {
-    /// \brief Default constructor.
-    public: VolumeProperties()
-      : area(0), height(0)
-    {
-    }
-
-    /// \brief Center of volume in the link frame.
-    public: ignition::math::Vector3d cov;
-
-    /// \brief Horizontal area of this link.
-    public: double area;
-
-    /// \brief Vertical height for this link.
-    public: double height;
-  };
 
   /// \brief A plugin that simulates buoyancy of an object immersed in fluid.
   /// All SDF parameters are optional.
@@ -247,14 +246,6 @@ namespace gazebo
 
     /// \brief Map of <link ID, link pointer>
     protected: std::map<int, gazebo::physics::LinkPtr> linkMap;
-
-    /// \brief Map of <link ID, point> pairs mapping link IDs to the CoV
-    /// (center of volume) and volume of the link.
-    protected: std::map<int, VolumeProperties> volPropsMap;
-
-    /// \brief Vector of links in the model for which we will apply buoyancy
-    /// forces.
-    protected: physics::Link_V buoyancyLinks;
   };
 }
 

@@ -133,6 +133,13 @@ std::string BoxShape::disp()
   return ss.str();
 }
 
+//////////////////////////////////////////////////
+double BoxShape::calculateVolume(const ignition::math::Pose3d &pose,
+    double fluidLevel)
+{
+  return 0;
+}
+
 /////////////////////////////////////////////////
 CylinderShape::CylinderShape(double r, double h)
   : r(r),
@@ -147,6 +154,13 @@ std::string CylinderShape::disp()
   std::stringstream ss;
   ss << Shape::disp() << ":" << r << "," << h;
   return ss.str();
+}
+
+/////////////////////////////////////////////////
+double CylinderShape::calculateVolume(const ignition::math::Pose3d &pose,
+    double fluidLevel)
+{
+  return 0;
 }
 
 //////////////////////////////////////////////////
@@ -165,6 +179,13 @@ std::string SphereShape::disp()
 }
 
 //////////////////////////////////////////////////
+double SphereShape::calculateVolume(const ignition::math::Pose3d &pose,
+    double fluidLevel)
+{
+  return 0;
+}
+
+//////////////////////////////////////////////////
 BuoyancyObject::BuoyancyObject()
   : linkId(-1),
     linkName(""),
@@ -175,10 +196,10 @@ BuoyancyObject::BuoyancyObject()
 
 ///////////////////////////////////////////////////
 BuoyancyObject::BuoyancyObject(BuoyancyObject &&obj) noexcept
-    : linkId(obj.linkId),
-      linkName(obj.linkName),
-      pose(obj.pose),
-      shape(std::move(obj.shape))
+  : linkId(obj.linkId),
+    linkName(obj.linkName),
+    pose(obj.pose),
+    shape(std::move(obj.shape))
 {
 }
 
@@ -303,33 +324,56 @@ void BuoyancyPlugin::OnUpdate()
 {
   for (auto& buoyancyObj : this->buoyancyObjects)
   {
-    gzmsg << buoyancyObj.disp() << std::endl;
-  }
-  gzmsg << "--------" << std::endl;
-
-  for (auto &link : this->buoyancyLinks)
-  {
-    VolumeProperties volumeProperties = this->volPropsMap[link->GetId()];
-    double height = volumeProperties.height;
-    double area = volumeProperties.area;
-    double volume = height * area;
+    auto link = linkMap[buoyancyObj.linkId];
     #if GAZEBO_MAJOR_VERSION >= 8
-      ignition::math::Pose3d linkFrame = link->WorldPose();
+        ignition::math::Pose3d linkFrame = link->WorldPose();
     #else
-      ignition::math::Pose3d linkFrame = link->GetWorldPose().Ign();
+        ignition::math::Pose3d linkFrame = link->GetWorldPose().Ign();
     #endif
+
+    // todo: add buoyancy obj's pose
+
+    double height = 0;
+    double area = 0;
+    if (buoyancyObj.shape->type == ShapeType::Box)
+    {
+      auto shape = dynamic_cast<BoxShape*>(buoyancyObj.shape.get());
+      height = shape->z;
+      area = shape->x * shape->y;
+    }
+    else if (buoyancyObj.shape->type == ShapeType::Sphere)
+    {
+      auto shape = dynamic_cast<SphereShape*>(buoyancyObj.shape.get());
+      height = shape->r;
+      area = shape->r * shape->r;
+      continue;
+    }
+    else if (buoyancyObj.shape->type == ShapeType::Cylinder)
+    {
+      auto shape = dynamic_cast<CylinderShape*>(buoyancyObj.shape.get());
+      height = shape->h;
+      area = shape->r * shape->r;
+      continue;
+    }
+    else
+    {
+      gzwarn << "invalid object";
+      continue;
+    }
+
+    double volume;
 
     // Location of bottom of object relative to the fluid surface - assumes
     // origin is at cog of the object.
     double bottomRelSurf =
-      this->fluidLevel - (linkFrame.Pos().Z() - height / 2.0);
+        this->fluidLevel - (linkFrame.Pos().Z() - height / 2.0);
 
     // out of water
     if (bottomRelSurf <= 0)
     {
       volume = 0.0;
     }
-    // at surface
+      // at surface
     else if (bottomRelSurf <= height)
     {
       volume = bottomRelSurf * area;
@@ -354,9 +398,9 @@ void BuoyancyPlugin::OnUpdate()
     if (volume > 1e-6)
     {
       #if GAZEBO_MAJOR_VERSION >= 8
-        ignition::math::Vector3d vel = link->WorldLinearVel();
+            ignition::math::Vector3d vel = link->WorldLinearVel();
       #else
-        ignition::math::Vector3d vel= link->GetWorldLinearVel().Ign();
+            ignition::math::Vector3d vel= link->GetWorldLinearVel().Ign();
       #endif
       double dz = -1.0 * this->fluidDrag * vel.Z() * std::abs(vel.Z());
       ignition::math::Vector3d drag(0, 0, dz);
@@ -369,9 +413,9 @@ void BuoyancyPlugin::OnUpdate()
 
     // rotate buoyancy into the link frame before applying the force.
     ignition::math::Vector3d buoyancyLinkFrame =
-      linkFrame.Rot().Inverse().RotateVector(buoyancy);
+        linkFrame.Rot().Inverse().RotateVector(buoyancy);
 
-    link->AddForceAtRelativePosition(buoyancy, volumeProperties.cov);
+    link->AddForceAtRelativePosition(buoyancy, linkFrame.Pos());
   }
 }
 
