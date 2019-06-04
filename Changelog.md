@@ -29,6 +29,9 @@
 1. Support the ability to customize sensor location via YAML:
     * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
 
+1. Support the ability to customize thruster location via YAML:
+    * [Pull request 102](https://bitbucket.org/osrf/vrx/pull-requests/102)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:

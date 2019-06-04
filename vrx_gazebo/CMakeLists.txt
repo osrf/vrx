@@ -234,4 +234,6 @@ endif()
 catkin_install_python(PROGRAMS bin/generate_sensors
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+catkin_install_python(PROGRAMS bin/generate_thrusters
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
