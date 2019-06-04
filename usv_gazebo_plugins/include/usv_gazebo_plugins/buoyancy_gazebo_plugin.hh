@@ -43,12 +43,11 @@ namespace gazebo
 
     /// \brief parent shape object for buoyancy objects
     struct Shape {
+      /// \brief Default destructor
+      virtual ~Shape() = default;
 
       /// \brief factory method for shape. Parses a shape object from sdf data
       static std::unique_ptr<Shape> makeShape(const sdf::ElementPtr sdf);
-
-      /// \brief Default destructor
-      virtual ~Shape() = default;
 
       /// \brief display string for shape object
       virtual std::string disp();
@@ -119,6 +118,12 @@ namespace gazebo
 
       /// \brief Default constructor
       BuoyancyObject();
+
+      /// \brief Default move constructor
+      BuoyancyObject(BuoyancyObject&& obj) noexcept;
+
+      /// \brief no copy constructor
+      BuoyancyObject(BuoyancyObject& obj) = delete;
 
       /// \brief loads buoyancy object from sdf
       void load(const physics::ModelPtr model, const sdf::ElementPtr elem);
@@ -240,7 +245,7 @@ namespace gazebo
     /// \brief list of buoyancy objects for model
     protected: std::vector<buoyancy::BuoyancyObject> buoyancyObjects;
 
-    /// \brief maps linkId to link pointer
+    /// \brief Map of <link ID, link pointer>
     protected: std::map<int, gazebo::physics::LinkPtr> linkMap;
 
     /// \brief Map of <link ID, point> pairs mapping link IDs to the CoV

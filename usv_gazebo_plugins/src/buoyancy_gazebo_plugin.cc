@@ -153,6 +153,7 @@ std::string CylinderShape::disp()
 SphereShape::SphereShape(double r)
   : r(r)
 {
+  type = ShapeType::Sphere;
 }
 
 //////////////////////////////////////////////////
@@ -169,6 +170,15 @@ BuoyancyObject::BuoyancyObject()
     linkName(""),
     pose(0, 0, 0, 0, 0, 0),
     shape(nullptr)
+{
+}
+
+///////////////////////////////////////////////////
+BuoyancyObject::BuoyancyObject(BuoyancyObject &&obj) noexcept
+    : linkId(obj.linkId),
+      linkName(obj.linkName),
+      pose(obj.pose),
+      shape(std::move(obj.shape))
 {
 }
 
@@ -204,7 +214,7 @@ void BuoyancyObject::load(const physics::ModelPtr model,
     sdf::ElementPtr geometry = elem->GetElement("geometry");
     try
     {
-      shape = Shape::makeShape(geometry);
+      shape = std::move(Shape::makeShape(geometry));
     }
     catch (...)
     {
@@ -291,6 +301,12 @@ void BuoyancyPlugin::Init()
 /////////////////////////////////////////////////
 void BuoyancyPlugin::OnUpdate()
 {
+  for (auto& buoyancyObj : this->buoyancyObjects)
+  {
+    gzmsg << buoyancyObj.disp() << std::endl;
+  }
+  gzmsg << "--------" << std::endl;
+
   for (auto &link : this->buoyancyLinks)
   {
     VolumeProperties volumeProperties = this->volPropsMap[link->GetId()];
