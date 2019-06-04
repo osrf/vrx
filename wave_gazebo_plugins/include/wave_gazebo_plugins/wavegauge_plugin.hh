@@ -102,6 +102,12 @@ namespace gazebo
     /// \brief Vector of links in the model for which we will apply buoyancy
     /// forces.
     protected: physics::Link_V buoyancyLinks;
+
+		/// \brief Simulation time of the last update.
+    private: common::Time prevUpdateTime;
+
+		/// \brief Wave height from previous time step for velocity estimate.
+	  private: double prevWaveHeight;
   };
 }
 

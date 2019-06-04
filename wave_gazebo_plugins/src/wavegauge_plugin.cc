@@ -111,7 +111,9 @@ void WaveguagePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       }
     }
   }
-  }
+	 // Initialize time and odometry position
+  this->prevUpdateTime = this->world->SimTime();
+}
 
 /////////////////////////////////////////////////
 void WaveguagePlugin::Init()
@@ -136,6 +138,8 @@ void WaveguagePlugin::OnUpdate()
   }
 	
   double simTime = this->model->GetWorld()->SimTime().Double();
+	dt = (simTime - this->prevUpdateTime).Double;
+	this->prevUpdateTime = simTime;
   for (auto &link : this->buoyancyLinks)
   {
     #if GAZEBO_MAJOR_VERSION >= 8
@@ -157,6 +161,10 @@ void WaveguagePlugin::OnUpdate()
 		*/
 		
 		waveHeightS += this->fluidLevel;
+
+		double hdot = (waveHeightS - this->prevWaveHeight)/dt;
+		this->prevWaveHeight = waveHeightS;
+		
 		// Set vertical location to match the wave height
 		// Use simple method for now - seems more consistent with visual render.
 		//linkFrame.Pos().Z(waveHeight);
