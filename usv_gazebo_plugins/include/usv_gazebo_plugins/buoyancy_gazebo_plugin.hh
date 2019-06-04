@@ -18,7 +18,10 @@
 #ifndef USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
 #define USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
 
+#include <exception>
 #include <map>
+#include <string>
+
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Plugin.hh>
@@ -28,6 +31,131 @@
 
 namespace gazebo
 {
+  namespace buoyancy {
+
+    /// \brief type of geometry shape
+    enum class ShapeType {
+      None,
+      Box,
+      Sphere,
+      Cylinder
+    };
+
+    /// \brief parent shape object for buoyancy objects
+    struct Shape {
+
+      /// \brief factory method for shape. Parses a shape object from sdf data
+      static Shape* makeShape(const sdf::ElementPtr sdf);
+
+      /// \brief Default destructor
+      virtual ~Shape() = default;
+
+      /// \brief display string for shape object
+      virtual std::string disp();
+
+      /// \brief type of shape
+      ShapeType type;
+    };
+    typedef std::unique_ptr<Shape> ShapePtr;
+
+    /// \brief box shape
+    struct BoxShape : public Shape {
+
+      /// \brief Default constructor
+      /// @param x: length
+      /// @param y: width
+      /// @param z: height
+      explicit BoxShape(double x, double y, double z);
+
+      /// \brief display string for box shape
+      std::string disp() override;
+
+      /// \brief length
+      double x;
+
+      /// \brief width
+      double y;
+
+      /// \brief height
+      double z;
+    };
+
+    /// \brief cylinder shape
+    struct CylinderShape : public Shape {
+    public:
+
+      /// \brief Default constructor
+      /// @param r: radius
+      /// @param l: length
+      explicit CylinderShape(double r, double l);
+
+      /// \brief display string for cylinder shape
+      std::string disp() override;
+
+      /// \brief radius of cylinder
+      double r;
+
+      /// \brief height of cylinder
+      double h;
+    };
+
+    /// \brief sphere shape
+    struct SphereShape : public Shape {
+
+      /// \brief Default constructor
+      /// @param r: radius
+      explicit SphereShape(double r);
+
+      /// \brief display string for sphere shape
+      std::string disp() override;
+
+      /// \brief radius of sphere
+      double r;
+    };
+
+    /// \brief A class for storing buoyancy object properties
+    class BuoyancyObject {
+    public:
+
+      /// \brief Default constructor
+      BuoyancyObject();
+
+      void load(const physics::ModelPtr model, const sdf::ElementPtr elem);
+
+      /// \brief display string for buoyancy object
+      std::string disp();
+
+    private:
+      /// \brief associated link ID
+      int linkId;
+
+      /// \brief associated link name
+      std::string linkName;
+
+      /// \brief buoyancy object shape
+      Shape* shape;
+    };
+
+    /// \brief custom exception for parsing errors
+    struct ParseException : public std::exception
+    {
+      ParseException(const char* shape, const char* message)
+      {
+        std::stringstream ss;
+        ss << "Parse error for <" << shape << ">: " << message;
+        output_ = ss.str();
+      }
+
+      const char* what() const throw()
+      {
+        return output_.c_str();
+      }
+
+    private:
+      std::string output_;
+    };
+  } // end of buoyancy namespace
+
   /// \brief A class for storing the volume properties of a link.
   class VolumeProperties
   {
@@ -45,196 +173,6 @@ namespace gazebo
 
     /// \brief Vertical height for this link.
     public: double height;
-  };
-
-  enum class ShapeType {
-    None,
-    Box,
-    Sphere,
-    Cylinder
-  };
-
-  class Shape {
-  public:
-    explicit Shape(ShapeType type) : type(type) {}
-    virtual ~Shape() = default;
-
-    ShapeType type;
-
-    virtual std::string print() {
-      switch(type) {
-        case ShapeType::None:
-          return "None";
-        case ShapeType::Box:
-          return "Box";
-        case ShapeType::Cylinder:
-          return "Cylinder";
-        case ShapeType::Sphere:
-          return "Sphere";
-      }
-    }
-
-    static Shape* make_shape(const sdf::ElementPtr geometry);
-  };
-
-  class BoxShape : public Shape {
-  public:
-    explicit BoxShape(double x, double y, double z) : Shape(ShapeType::Box), x(x), y(y), z(z) {}
-
-    explicit BoxShape(const sdf::ElementPtr boxElem) : Shape(ShapeType::Box) {
-      if (boxElem->HasElement("size")) {
-        ignition::math::Vector3d cov = boxElem->GetElement("size")
-            ->Get<ignition::math::Vector3d>();
-        if (cov[0] > 1e-9 && cov[1] > 1e-9 && cov[2] > 1e-9) {
-          x = cov[0];
-          y = cov[1];
-          z = cov[2];
-        } else {
-          std::stringstream errMsg;
-          errMsg << "Incorrect dimensions " << cov << " for 'box' geometry "
-                 << "for buoyancy element number in SDF";
-          throw std::runtime_error(errMsg.str().c_str());
-        }
-      } else {
-        throw std::runtime_error("Error parsing box");
-      }
-    }
-
-    double x;
-    double y;
-    double z;
-
-    std::string print() override {
-      return Shape::print();
-    }
-  };
-
-  class CylinderShape : public Shape {
-  public:
-    explicit CylinderShape(double r, double h) : Shape(ShapeType::Cylinder), r(r), h(h) {}
-
-    explicit CylinderShape(const sdf::ElementPtr cylinderElem) : Shape(ShapeType::Cylinder) {
-      if (cylinderElem->HasElement("radius")) {
-        r = cylinderElem->GetElement("radius")->Get<double>();
-      } else {
-        throw std::runtime_error("Error parsing cylinder");
-      }
-
-      if (cylinderElem->HasElement("length")) {
-        h = cylinderElem->GetElement("length")->Get<double>();
-      } else {
-        throw std::runtime_error("Error parsing cylinder");
-      }
-
-      if (r < 1e-9 || h < 1e-9) {
-        throw std::runtime_error("Error parsing cylinder");
-      }
-    }
-
-    double r;
-    double h;
-
-    std::string print() override {
-      return Shape::print();
-    }
-  };
-
-  class SphereShape : public Shape {
-  public:
-    explicit SphereShape(double r) : Shape(ShapeType::Sphere), r(r) {}
-
-    double r;
-
-    explicit SphereShape(const sdf::ElementPtr sphereElem) : Shape(ShapeType::Cylinder) {
-      if (sphereElem->HasElement("radius")) {
-        r = sphereElem->GetElement("radius")->Get<double>();
-      } else {
-        throw std::runtime_error("Error parsing sphere");
-      }
-
-      if (r < 1e-9) {
-        throw std::runtime_error("Error parsing sphere");
-      }
-    }
-
-    std::string print() override {
-      return Shape::print();
-    }
-  };
-
-  Shape* Shape::make_shape(const sdf::ElementPtr geometry) {
-    int counter = 0;
-    if (geometry->HasElement("box")) {
-      return dynamic_cast<Shape*>(new BoxShape(geometry->GetElement("box")));
-    } else if (geometry->HasElement("sphere")) {
-      return dynamic_cast<Shape*>(new SphereShape(geometry->GetElement("sphere")));
-    } else if (geometry->HasElement("cylinder")) {
-      return dynamic_cast<Shape*>(new CylinderShape(geometry->GetElement("cylinder")));
-    } else {
-      std::stringstream errMsg;
-      errMsg << "Invalid 'geometry' element within buoyancy element number ["
-             << counter << "] in SDF" << std::endl;
-      throw std::runtime_error(errMsg.str().c_str());
-    }
-  }
-
-  /// \brief A class for storing buoyancy object properties
-  class BuoyancyObject {
-
-    /// \brief Default constructor
-  public:
-    BuoyancyObject()
-      : linkId(-1),
-        linkName(""),
-        shape(nullptr) {}
-
-    /// \brief associated link ID
-    int linkId;
-
-    /// \brief associated link name
-    std::string linkName;
-
-    /// \brief buoyancy object pose relative to link
-
-    /// \brief buoyancy object shape
-    Shape* shape;
-
-    // Factory Method
-    static BuoyancyObject *parseBuoyancyObject(const physics::ModelPtr model, const sdf::ElementPtr elem, int counter) {
-      auto *output = new BuoyancyObject();
-      gzmsg << "Buoyancy element number " << counter << std::endl;
-
-      // parse link
-      if (elem->HasElement("link_name")) {
-        output->linkName = elem->GetElement("link_name")->Get<std::string>();
-        gzmsg << "\tFound link name in SDF [" << output->linkName << "]" << std::endl;
-        physics::LinkPtr link = model->GetLink(output->linkName);
-        if (!link) {
-          std::stringstream errMsg;
-          errMsg << "\tSpecified link [" << output->linkName << "] not found.";
-          throw std::runtime_error(errMsg.str().c_str());
-        }
-        output->linkId = link->GetId();
-      } else {
-        std::stringstream errMsg;
-        errMsg << "Missing 'link_name' element within buoyancy element number ["
-                << counter << "] in SDF";
-        throw std::runtime_error(errMsg.str().c_str());
-      }
-
-      // parse geometry
-      if (elem->HasElement("geometry")) {
-        sdf::ElementPtr geometry = elem->GetElement("geometry");
-        output->shape = Shape::make_shape(geometry);
-      } else {
-        std::stringstream errMsg;
-        errMsg << "Missing 'geometry' element within buoyancy element number ["
-               << counter << "] in SDF" << std::endl;
-        throw std::runtime_error(errMsg.str().c_str());
-      }
-      return output;
-    }
-
   };
 
   /// \brief A plugin that simulates buoyancy of an object immersed in fluid.

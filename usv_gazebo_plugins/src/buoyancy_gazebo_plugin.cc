@@ -19,11 +19,205 @@
 #include <string>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Events.hh>
-#include <gazebo/physics/Shape.hh>
 #include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
 using namespace gazebo;
+using namespace gazebo::buoyancy;
+
+/////////////////////////////////////////////////
+Shape* Shape::makeShape(const sdf::ElementPtr sdf)
+{
+  double epsilon = 1e-20;
+
+  Shape* shape = nullptr;
+
+  if (sdf->HasElement("box"))
+  {
+    auto boxElem = sdf->GetElement("box");
+    if (boxElem->HasElement("size"))
+    {
+      ignition::math::Vector3d dim = boxElem->GetElement("size")
+          ->Get<ignition::math::Vector3d>();
+      if (dim[0] > epsilon && dim[1] > epsilon && dim[2] > epsilon)
+      {
+        shape = dynamic_cast<Shape*>(new BoxShape(dim[0], dim[1], dim[2]));
+      }
+      else
+      {
+        throw ParseException("box", "incorrect dimensions");
+      }
+    }
+    else
+    {
+      throw ParseException("box", "missing <size> element");
+    }
+  }
+  else if (sdf->HasElement("sphere"))
+  {
+    auto sphereElem = sdf->GetElement("sphere");
+    if (sphereElem->HasElement("radius"))
+    {
+      auto r = sphereElem->GetElement("radius")->Get<double>();
+      if (r > epsilon)
+      {
+        shape = dynamic_cast<Shape*>(new SphereShape(r));
+      }
+      else
+      {
+        throw ParseException("sphere", "incorrect dimensions");
+      }
+    }
+    else
+    {
+      throw ParseException("sphere", "missing <radius> element");
+    }
+  }
+  else if (sdf->HasElement("cylinder"))
+  {
+    auto cylinderElem = sdf->GetElement("cylinder");
+    if (cylinderElem->HasElement("radius") && cylinderElem->HasElement("length"))
+    {
+      auto r = cylinderElem->GetElement("radius")->Get<double>();
+      auto l = cylinderElem->GetElement("length")->Get<double>();
+      if (r > epsilon || l > epsilon)
+      {
+        shape = dynamic_cast<Shape*>(new CylinderShape(r, l));
+      }
+      else
+      {
+        throw ParseException("cylinder", "incorrect dimensions");
+      }
+    }
+    else
+    {
+      throw ParseException("cylinder", "missing <radius> or <length> element");
+    }
+  } else {
+    throw ParseException("geometry", "missing <box>, <cylinder> or <sphere> element");
+  }
+
+  return shape;
+}
+
+/////////////////////////////////////////////////
+std::string Shape::disp()
+{
+  switch(type)
+  {
+    case ShapeType::None:
+      return "None";
+    case ShapeType::Box:
+      return "Box";
+    case ShapeType::Cylinder:
+      return "Cylinder";
+    case ShapeType::Sphere:
+      return "Sphere";
+  }
+}
+
+//////////////////////////////////////////////////
+BoxShape::BoxShape(double x, double y, double z)
+  : x(x),
+    y(y),
+    z(z)
+{
+  type = ShapeType::Box;
+}
+
+//////////////////////////////////////////////////
+std::string BoxShape::disp()
+{
+  std::stringstream ss;
+  ss << Shape::disp() << ":" << x << "," << y << "," << z;
+  return ss.str();
+}
+
+/////////////////////////////////////////////////
+CylinderShape::CylinderShape(double r, double h)
+  : r(r),
+    h(h)
+{
+  type = ShapeType::Cylinder;
+}
+
+/////////////////////////////////////////////////
+std::string CylinderShape::disp()
+{
+  std::stringstream ss;
+  ss << Shape::disp() << ":" << r << "," << h;
+  return ss.str();
+}
+
+//////////////////////////////////////////////////
+SphereShape::SphereShape(double r)
+  : r(r)
+{
+}
+
+//////////////////////////////////////////////////
+std::string SphereShape::disp()
+{
+  std::stringstream ss;
+  ss << Shape::disp() << ":" << r;
+  return ss.str();
+}
+
+//////////////////////////////////////////////////
+BuoyancyObject::BuoyancyObject()
+  : linkId(-1),
+    linkName(""),
+    shape(nullptr)
+{
+}
+
+///////////////////////////////////////////////////
+void BuoyancyObject::load(const physics::ModelPtr model,
+    const sdf::ElementPtr elem)
+{
+  // parse link
+  if (elem->HasElement("link_name"))
+  {
+    linkName = elem->GetElement("link_name")->Get<std::string>();
+    physics::LinkPtr link = model->GetLink(linkName);
+    if (!link)
+    {
+      throw ParseException("link_name", "invalid link name");
+    }
+    linkId = link->GetId();
+  }
+  else
+  {
+    throw ParseException("link_name", "missing element");
+  }
+
+  // parse geometry
+  if (elem->HasElement("geometry"))
+  {
+    sdf::ElementPtr geometry = elem->GetElement("geometry");
+    try
+    {
+      shape = Shape::makeShape(geometry);
+    }
+    catch (...)
+    {
+      throw;
+    }
+  }
+  else
+  {
+    throw ParseException("geometry", "missing element");
+  }
+}
+
+//////////////////////////////////////////////////
+std::string BuoyancyObject::disp() {
+  std::stringstream ss;
+  ss << "Buoyancy object\n"
+      << "\tlink: " << linkName << "[" << linkId << "]\n"
+      << "\tgeometry " << shape->disp();
+  return ss.str();
+}
 
 /////////////////////////////////////////////////
 BuoyancyPlugin::BuoyancyPlugin()
@@ -36,8 +230,8 @@ BuoyancyPlugin::BuoyancyPlugin()
 /////////////////////////////////////////////////
 void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  GZ_ASSERT(_model != NULL, "Received NULL model pointer");
-  GZ_ASSERT(_sdf != NULL, "Received NULL SDF pointer");
+  GZ_ASSERT(_model != nullptr, "Received NULL model pointer");
+  GZ_ASSERT(_sdf != nullptr, "Received NULL SDF pointer");
 
   if (_sdf->HasElement("fluid_density"))
   {
@@ -52,20 +246,26 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->fluidDrag = _sdf->Get<double>("fluid_drag");
   }
 
-  if (_sdf->HasElement("buoyancy")) {
+  if (_sdf->HasElement("buoyancy"))
+  {
     gzmsg << "Found that SDF has at least one buoyancy element, looking at "
           <<  "each element." << std::endl;
     int counter = 0;
     for (sdf::ElementPtr buoyancyElem = _sdf->GetElement("buoyancy"); buoyancyElem;
         buoyancyElem = buoyancyElem->GetNextElement("buoyancy")) {
-      try {
-        BuoyancyObject* obj = BuoyancyObject::parseBuoyancyObject(_model, buoyancyElem, counter);
-        if(obj->shape->type == ShapeType::Box) {
-          auto box = dynamic_cast<BoxShape*>(obj->shape);
-          gzmsg << box->print() << std::endl;
-        }
+      try
+      {
+        BuoyancyObject buoyObj = BuoyancyObject();
+        buoyObj.load(_model, buoyancyElem);
+        gzmsg << buoyObj.disp() << std::endl;
         counter++;
-      } catch (const std::runtime_error& e){
+      }
+      catch (const ParseException& e)
+      {
+        gzwarn << e.what() << std::endl;
+      }
+      catch (const std::exception& e)
+      {
         gzwarn << e.what() << std::endl;
       }
     }
