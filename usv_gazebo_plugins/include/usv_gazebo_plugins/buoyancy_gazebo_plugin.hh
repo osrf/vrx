@@ -45,7 +45,7 @@ namespace gazebo
     struct Shape {
 
       /// \brief factory method for shape. Parses a shape object from sdf data
-      static Shape* makeShape(const sdf::ElementPtr sdf);
+      static std::unique_ptr<Shape> makeShape(const sdf::ElementPtr sdf);
 
       /// \brief Default destructor
       virtual ~Shape() = default;
@@ -133,7 +133,7 @@ namespace gazebo
       std::string linkName;
 
       /// \brief buoyancy object shape
-      Shape* shape;
+      ShapePtr shape;
     };
 
     /// \brief custom exception for parsing errors

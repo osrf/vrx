@@ -26,7 +26,7 @@ using namespace gazebo;
 using namespace gazebo::buoyancy;
 
 /////////////////////////////////////////////////
-Shape* Shape::makeShape(const sdf::ElementPtr sdf)
+ShapePtr Shape::makeShape(const sdf::ElementPtr sdf)
 {
   double epsilon = 1e-20;
 
@@ -97,7 +97,7 @@ Shape* Shape::makeShape(const sdf::ElementPtr sdf)
     throw ParseException("geometry", "missing <box>, <cylinder> or <sphere> element");
   }
 
-  return shape;
+  return std::unique_ptr<Shape>(shape);
 }
 
 /////////////////////////////////////////////////
