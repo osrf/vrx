@@ -167,6 +167,7 @@ std::string SphereShape::disp()
 BuoyancyObject::BuoyancyObject()
   : linkId(-1),
     linkName(""),
+    pose(0, 0, 0, 0, 0, 0),
     shape(nullptr)
 {
 }
@@ -189,6 +190,12 @@ void BuoyancyObject::load(const physics::ModelPtr model,
   else
   {
     throw ParseException("link_name", "missing element");
+  }
+
+  // parse pose (optional)
+  if (elem->HasElement("pose"))
+  {
+    pose = elem->GetElement("pose")->Get<ignition::math::Pose3d>();
   }
 
   // parse geometry
@@ -215,6 +222,7 @@ std::string BuoyancyObject::disp() {
   std::stringstream ss;
   ss << "Buoyancy object\n"
       << "\tlink: " << linkName << "[" << linkId << "]\n"
+      << "\tpose: " << pose << '\n'
       << "\tgeometry " << shape->disp();
   return ss.str();
 }

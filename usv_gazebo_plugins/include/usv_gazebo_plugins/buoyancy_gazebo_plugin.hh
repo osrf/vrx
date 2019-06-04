@@ -132,6 +132,9 @@ namespace gazebo
       /// \brief associated link name
       std::string linkName;
 
+      /// \brief pose of buoyancy relative to link
+      ignition::math::Pose3d pose;
+
       /// \brief buoyancy object shape
       ShapePtr shape;
     };
