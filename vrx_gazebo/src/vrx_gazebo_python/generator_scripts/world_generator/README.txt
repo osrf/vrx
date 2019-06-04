@@ -1,4 +1,4 @@
-yaml filling instructions:
+YAML filling instructions:
 AXIS:
 each initial feild of the yaml is considered its own axis(the name of the axies do not matter, so long they are unique)
 
@@ -27,4 +27,34 @@ any macro excluded in a step's override will not be included in the the worlds c
 the whole set of macros (for that axis) must be specified as numbers.
 The params of the macros in a sequence override will NOT be evaluated as a Lambda, they must be the literal values.
 
+
+Quick Start Instructions:
+1.
+create a directory some where to hold some things ie:
+mkdir ~/generated_worlds
+cd generated_worlds/
+
+2.
+create a yaml according to the yaml filling instructions (also see example) ie:
+gedit worlds.yaml
+
+3.
+make a new directory to hold the world xacros for convienience ie:
+mkdir world_xacros/
+
+4.
+same for worlds
+mkdir worlds/
+
+4.
+run the script:
+roslaunch vrx_gazebo generate_worlds.launch requested:=/home/<username>/generated_worlds/worlds.yaml world_xacro_target:=/home/<username>/generated_worlds/world_xacros/
+
+5.
+examine the generated xacros under world_xacros/ and make sure they are what you want. (these are meant to be more human readable than the .worlds files generated in your devel space) ie:
+gedit world_xacros/world0.world.xacro
+
+6.
+run one of your new worlds:
+roslaunch vrx_gazebo sandisland.launch world:=/home/<username>/generated_worlds/worlds/world0.world
 
