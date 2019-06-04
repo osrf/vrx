@@ -22,6 +22,10 @@
 #include "vrx_gazebo/scoring_plugin.hh"
 
 /////////////////////////////////////////////////
+ScoringPlugin::ScoringPlugin()
+    : WorldPlugin(), collisionNode(new gazebo::transport::Node()) {
+}
+
 void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
@@ -54,6 +58,17 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScoringPlugin::Update, this));
+
+  collisionNode->Init();
+#if GAZEBO_MAJOR_VERSION >= 8
+  std::string worldName = this->world->Name();
+#else
+  std::string worldName = this->world->GetName();
+#endif
+  std::string collisionTopic =
+    std::string("/gazebo/") + worldName + std::string("/physics/contacts");
+  collisionSub = collisionNode->Subscribe(collisionTopic,
+                                          &ScoringPlugin::OnCollisionMsg, this);
 }
 
 //////////////////////////////////////////////////
@@ -224,6 +239,51 @@ void ScoringPlugin::OnFinished()
 }
 
 //////////////////////////////////////////////////
+void ScoringPlugin::OnCollision()
+{
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
+  // loop though collisions, if any include the wamv, increment collision
+  // counter
+  for (unsigned int i = 0; i < _contacts->contact_size(); ++i) {
+    std::string wamvCollisionStr1 = _contacts->contact(i).collision1();
+    std::string wamvCollisionStr2 = _contacts->contact(i).collision2();
+    std::string wamvCollisionSubStr1 =
+        wamvCollisionStr1.substr(0, wamvCollisionStr1.find("lump"));
+    std::string wamvCollisionSubStr2 =
+        wamvCollisionStr2.substr(0, wamvCollisionStr2.find("lump"));
+
+    bool isWamvHit =
+        wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
+        wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_";
+    bool isHitBufferPassed = this->currentTime - this->lastCollisionTime >
+                             gazebo::common::Time(CollisionBuffer, 0);
+
+    if (isWamvHit && isHitBufferPassed) {
+      this->collisionCounter++;
+      gzmsg << "[" << this->collisionCounter
+            << "] New collision counted between ["
+            << _contacts->contact(i).collision1() << "] and ["
+            << _contacts->contact(i).collision2() << "]" << std::endl;
+      gzdbg << _contacts->contact(i).DebugString() << std::endl;
+#if GAZEBO_MAJOR_VERSION >= 8
+      this->lastCollisionTime = this->world->SimTime();
+#else
+      this->lastCollisionTime = this->world->GetSimTime();
+#endif
+      this->collisionList.push_back(
+          _contacts->contact(i).collision1() +
+          std::string(" || ") + _contacts->contact(i).collision2());
+      this->collisionTimestamps.push_back(this->currentTime);
+      this->OnCollision();
+      return;
+    }
+  }
+}
+
+//////////////////////////////////////////////////
 bool ScoringPlugin::ParseSDFParameters()
 {
   // This is a required element.
@@ -284,6 +344,12 @@ bool ScoringPlugin::ParseSDFParameters()
       return false;
     }
     this->runningStateDuration = value;
+  }
+
+  // This is an optional element.
+  if (this->sdf->HasElement("collision_buffer"))
+  {
+    this->CollisionBuffer = this->sdf->Get<float>("collision_buffer");
   }
 
   return this->ParseJoints();
