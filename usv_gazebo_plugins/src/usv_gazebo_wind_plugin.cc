@@ -34,37 +34,59 @@ UsvWindPlugin::UsvWindPlugin()
 }
 
 //////////////////////////////////////////////////
-void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
+void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 {
   std::string linkName;
-  physics::ModelPtr model = _parent;
-  this->world = _parent->GetWorld();
+  this->world = _parent;
 
   // Retrieve model parameters from SDF
-  if (!_sdf->HasElement("bodyName") ||
-      !_sdf->GetElement("bodyName")->GetValue())
+  if (!_sdf->HasElement("models_n") ||
+      !_sdf->GetElement("models_n")->GetValue())
   {
-    this->link = model->GetLink();
-    linkName = this->link->GetName();
-    gzerr << "Did not find SDF parameter bodyName" << std::endl;
+    gzerr << "Did not find SDF parameter models_n" << std::endl;
   }
   else
   {
-    linkName = _sdf->GetElement("bodyName")->Get<std::string>();
-    this->link = model->GetLink(linkName);
-
-    gzmsg << "Found SDF parameter bodyName as [" << linkName << "]"
-          << std::endl;
+    int n = _sdf->GetElement("models_n")->Get<int>();
+    for(int i=0; i<n; ++i)
+    {
+      std::string model_name ="model_name_" + std::to_string(i);
+      if (!_sdf->HasElement(model_name) ||
+      !_sdf->GetElement(model_name)->GetValue())
+      {
+        gzerr << ("Did not find SDF parameter model_name_%d",n) << std::endl;
+      }
+      else
+      {
+        std::string link_name ="link_name_" + std::to_string(i);
+        if (!_sdf->HasElement(link_name) ||
+        !_sdf->GetElement(link_name)->GetValue())
+        {
+          gzerr << ("Did not find SDF parameter link_name_%d",n) << std::endl;
+        }
+        else
+        {
+          std::string coeff_vector ="coeff_vector_" + std::to_string(i);
+          if (!_sdf->HasElement(coeff_vector) ||
+          !_sdf->GetElement(coeff_vector)->GetValue())
+          {
+            gzerr << ("Did not find SDF parameter coeff_vector_%d",i) << std::endl;
+          }
+          else
+          {
+            physics::ModelPtr model = world->ModelByName(_sdf->GetElement(model_name)->Get<std::string>());
+            physics::LinkPtr link = model->GetLink(_sdf->GetElement(link_name)->Get<std::string>());
+	    
+	    UsvWindPlugin::WindObj obj;
+	    obj.link = link;
+	    obj.windCoeff = _sdf->GetElement(coeff_vector)->Get<ignition::math::Vector3d>();
+            
+	    this->windObjs.push_back(obj);
+	  }
+        }
+      }
+    }
   }
-  if (!this->link)
-  {
-    gzerr << "usv_gazebo_wind_plugin error: bodyName: [" << linkName << "] does"
-          << " not exist" << std::endl;
-    return;
-  }
-
-  gzmsg << "USV Model Link Name = " << linkName << std::endl;
-
   if (_sdf->HasElement("wind_direction"))
   {
     this->windDirection =
@@ -73,14 +95,6 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
 
   gzmsg << "Wind direction unit vector = " << this->windDirection << std::endl;
-
-  if (_sdf->HasElement("wind_coeff_vector"))
-  {
-    windCoeff =
-      _sdf->GetElement("wind_coeff_vector")->Get<ignition::math::Vector3d>();
-  }
-
-  gzmsg << "Wind coefficient vector = " << this->windCoeff << std::endl;
 
   if (_sdf->HasElement("wind_mean_velocity"))
   {
@@ -154,41 +168,44 @@ void UsvWindPlugin::Update()
   double velocity = currentVarVel + this->windMeanVelocity;
 
   // Transform wind from world coordinates to body coordinates
+  for (auto i : this->windObjs)
+  {
 #if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Vector3d relativeWind =
-    this->link->WorldPose().Rot().Inverse().RotateVector(
-      this->windDirection*velocity);
+    ignition::math::Vector3d relativeWind =
+      i.link->WorldPose().Rot().Inverse().RotateVector(
+        this->windDirection*velocity);
 #else
-  ignition::math::Vector3d relativeWind =
-    this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
-    this->windDirection*velocity);
+    ignition::math::Vector3d relativeWind =
+      this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
+      this->windDirection*velocity);
 #endif
   // Calculate apparent wind
 #if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Vector3d apparentWind =
-    relativeWind - this->link->RelativeLinearVel();
+    ignition::math::Vector3d apparentWind =
+      relativeWind - i.link->RelativeLinearVel();
 #else
   ignition::math::Vector3d apparentWind = relativeWind
-    - this->link->GetRelativeLinearVel().Ign();
+    - i.->GetRelativeLinearVel().Ign();
 #endif
-  // gzdbg << "Relative wind: " << relativeWind << std::endl;
-  // gzdbg << "Apparent wind: " << apparentWind << std::endl;
+  
+    // gzdbg << "Relative wind: " << relativeWind << std::endl;
+    // gzdbg << "Apparent wind: " << apparentWind << std::endl;
 
-  // Calculate wind force - body coordinates
-  ignition::math::Vector3d windForce(
-    windCoeff.X() * relativeWind.X() * abs(relativeWind.X()),
-    windCoeff.Y() * relativeWind.Y() * abs(relativeWind.Y()),
-    -2.0 * windCoeff.Z() * relativeWind.X() * relativeWind.Y());
+    // Calculate wind force - body coordinates
+    ignition::math::Vector3d windForce(
+      i.windCoeff.X() * relativeWind.X() * abs(relativeWind.X()),
+      i.windCoeff.Y() * relativeWind.Y() * abs(relativeWind.Y()),
+      -2.0 * i.windCoeff.Z() * relativeWind.X() * relativeWind.Y());
 
-  // Add forces/torques to link at CG
-  this->link->AddRelativeForce(
-    ignition::math::Vector3d(windForce.X(), windForce.Y(), 0.0));
-  this->link->AddRelativeTorque(
-    ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
-
+    // Add forces/torques to link at CG
+    i.link->AddRelativeForce(
+      ignition::math::Vector3d(windForce.X(), windForce.Y(), 0.0));
+    i.link->AddRelativeTorque(
+      ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
+  }
   // Moving the previous time and velocity one step forward.
   this->previousVarVel = currentVarVel;
   this->previousTime = currentTime;
 }
 
-GZ_REGISTER_MODEL_PLUGIN(UsvWindPlugin);
+GZ_REGISTER_WORLD_PLUGIN(UsvWindPlugin);

@@ -24,6 +24,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef USV_GAZEBO_PLUGINS_WIND_HH_
 #define USV_GAZEBO_PLUGINS_WIND_HH_
 
+#include <vector>
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
@@ -36,17 +37,30 @@ namespace gazebo
   /// \brief A plugin that simulates a simple wind model. It accepts the
   /// following parameters:
   ///
-  /// <bodyName>: The link that will receive the effect of the wind.
+  /// <models_n>: the number of modelsto be effected by the wind.
+  /// <model_name_i> where 0<=i<models_n, name of model i
+  /// <link_name_i> where 0<=i<models_n, name of link to be effected by wind on model i
+  /// <coeff_vector_i> where 0<=i<models_n, the wind coeffcient vector for the link on model i
+  ///
+  ///
   /// <wind_direction>: Wind direction vector.
-  /// <wind_coeff_vector>: Coefficients from Sarda et al.,
   /// <wind_mean_velocity>: The wind average velocity.
   /// <var_wind_gain_constants>: Variable wind speed gain constant.
   /// <var_wind_time_constants>: Variable wind speed time constant.
   /// <random_seed>: Set the seed for wind speed randomization.
   /// "Station-keeping control of an unmanned surface vehicle exposed to
   /// current and wind disturbances".
-  class UsvWindPlugin : public ModelPlugin
+  class UsvWindPlugin : public WorldPlugin
   {
+    struct WindObj
+    {
+      /// \brief Pointer to model link in gazebo,
+      ///  optionally specified by the bodyName parameter,
+      ///  The states are taken from this link and forces applied to this link.
+      physics::LinkPtr link;
+      /// \brief Wind force coefficients.
+      ignition::math::Vector3d windCoeff;
+    };
     /// \brief Constructor.
     public: UsvWindPlugin();
 
@@ -54,25 +68,20 @@ namespace gazebo
     public: virtual ~UsvWindPlugin() = default;
 
     // Documentation inherited.
-    public: virtual void Load(physics::ModelPtr _parent,
+    public: virtual void Load(physics::WorldPtr _parent,
                               sdf::ElementPtr _sdf);
 
     /// \brief Callback executed at every physics update.
     protected: virtual void Update();
 
+    /// \breif vector of simple objects effected by the wind
+    private: std::vector<UsvWindPlugin::WindObj> windObjs;
+ 
     /// \brief Pointer to the Gazebo world
     private: physics::WorldPtr world;
 
-    /// \brief Pointer to model link in gazebo,
-    ///  optionally specified by the bodyName parameter,
-    ///  The states are taken from this link and forces applied to this link.
-    private: physics::LinkPtr link;
-
     /// \brief Wind velocity unit vector in Gazebo coordinates [m/s].
     private: ignition::math::Vector3d windDirection;
-
-    /// \brief Wind force coefficients.
-    private: ignition::math::Vector3d windCoeff;
 
     /// \brief Average wind velocity.
     private: double windMeanVelocity;
