@@ -7,9 +7,6 @@
     <xacro:property name="post_arm_to_camera_x" value="0.02"/>
     <xacro:property name="post_arm_to_camera_z" value="0.027"/>
 
-    <!-- Define post length based on desired z position of sensor -->
-    <xacro:property name="post_length" value="${z-platform_z-post_arm_to_camera_z}"/>
-
     <!-- Monocular Camera -->
     <link name="${name}_link">
       <visual name="${name}_visual">
@@ -43,6 +40,12 @@
       </inertial>
     </link>
 
+    <!-- Define post length and mass based on desired z position of sensor -->
+    <xacro:property name="post_length" value="${z-platform_z-post_arm_to_camera_z}"/>
+    <xacro:property name="post_mass_per_meter" value="0.9"/>
+    <xacro:property name="post_mass" value="${post_mass_per_meter * post_length}"/>
+    <xacro:property name="post_radius" value="0.0076"/>
+
     <!-- Sensor post -->
     <link name="${name}_post_link">
       <visual>
@@ -55,15 +58,15 @@
       </visual>
       <collision name="${name}_post_collision">
         <geometry>
-          <cylinder radius="0.0076" length="${post_length}"/>
+          <cylinder radius="${post_radius}" length="${post_length}"/>
         </geometry>
       </collision>
       <inertial>
-        <mass value="0.5"/>
+        <mass value="${post_mass}"/>
         <inertia
-          ixx="0.010549261666667"
-          iyy="0.010549261666667"
-          izz="0.000014440000000"
+          ixx="${(post_mass/12) * (3*post_radius*post_radius + post_length*post_length)}"
+          iyy="${(post_mass/12) * (3*post_radius*post_radius + post_length*post_length)}"
+          izz="${(post_mass/2) * (post_radius*post_radius)}"
           ixy="0"
           ixz="0"
           iyz="0"/>
