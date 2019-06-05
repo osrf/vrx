@@ -54,6 +54,10 @@ namespace gazebo
   {
     struct WindObj
     {
+      bool init;
+      std::string model_name;
+      physics::ModelPtr model;
+      std::string link_name;
       /// \brief Pointer to model link in gazebo,
       ///  optionally specified by the bodyName parameter,
       ///  The states are taken from this link and forces applied to this link.
@@ -76,6 +80,8 @@ namespace gazebo
 
     /// \breif vector of simple objects effected by the wind
     private: std::vector<UsvWindPlugin::WindObj> windObjs;
+
+    private: bool windObjsInit = false;
  
     /// \brief Pointer to the Gazebo world
     private: physics::WorldPtr world;
