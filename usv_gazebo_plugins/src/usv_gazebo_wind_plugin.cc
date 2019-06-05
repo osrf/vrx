@@ -38,7 +38,7 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 {
   std::string linkName;
   this->world = _parent;
-  // Retrieve model parameters from SDF
+  // Retrieve models' parameters from SDF
   if (!_sdf->HasElement("models_n") ||
       !_sdf->GetElement("models_n")->GetValue())
   {
@@ -74,7 +74,6 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
           else
           { 
 	    UsvWindPlugin::WindObj obj; 
-	    obj.init = false;
 	    obj.model_name = _sdf->GetElement(model_name)->Get<std::string>();
 	    obj.link_name = _sdf->GetElement(link_name)->Get<std::string>();
 	    obj.windCoeff = _sdf->GetElement(coeff_vector)->Get<ignition::math::Vector3d>(); 
@@ -150,12 +149,13 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvWindPlugin::Update()
 {
+  //look for the missing models if not all of them have been initialized
   if (!this->windObjsInit)
   {
     int objs = 0;
     for (auto& i : this->windObjs)
     {
-      if ((!i.init)&&(this->world->ModelByName(i.model_name)))//search model exists in world by name
+      if ((!i.init)&&(this->world->ModelByName(i.model_name)))
       {
         gzdbg << i.model_name << " initialized"<<std::endl;
 	++objs;
@@ -181,12 +181,12 @@ void UsvWindPlugin::Update()
   // calculate current wind velocity
   double velocity = currentVarVel + this->windMeanVelocity;
 
-  // Transform wind from world coordinates to body coordinates
   for (auto i : this->windObjs)
   {
+    // Apply the forces of the wind to all wind objects only if they have been initialized
     if(i.init)
-    {
-      
+    { 
+      // Transform wind from world coordinates to body coordinates
 #if GAZEBO_MAJOR_VERSION >= 8
       ignition::math::Vector3d relativeWind =
         i.link->WorldPose().Rot().Inverse().RotateVector(
@@ -196,13 +196,13 @@ void UsvWindPlugin::Update()
         this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
         this->windDirection*velocity);
 #endif
-  // Calculate apparent wind
+      // Calculate apparent wind
 #if GAZEBO_MAJOR_VERSION >= 8
       ignition::math::Vector3d apparentWind =
         relativeWind - i.link->RelativeLinearVel();
 #else
-    ignition::math::Vector3d apparentWind = relativeWind
-      - i.->GetRelativeLinearVel().Ign();
+      ignition::math::Vector3d apparentWind = relativeWind
+        - i.->GetRelativeLinearVel().Ign();
 #endif
   
       // gzdbg << "Relative wind: " << relativeWind << std::endl;

@@ -54,9 +54,13 @@ namespace gazebo
   {
     struct WindObj
     {
-      bool init;
+      /// \Bool to show weather the model and link pointers have been set
+      bool init=false;
+      /// \name of model as it will be looked by in the world
       std::string model_name;
+      /// \model Pointer to the model
       physics::ModelPtr model;
+      /// \Name of the link on that model
       std::string link_name;
       /// \brief Pointer to model link in gazebo,
       ///  optionally specified by the bodyName parameter,
@@ -81,6 +85,7 @@ namespace gazebo
     /// \breif vector of simple objects effected by the wind
     private: std::vector<UsvWindPlugin::WindObj> windObjs;
 
+    /// \breif Bool to keep track if ALL of the windObjs have been initialized
     private: bool windObjsInit = false;
  
     /// \brief Pointer to the Gazebo world
