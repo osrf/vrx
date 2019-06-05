@@ -127,18 +127,18 @@
     <xacro:basic_shape name="1_sphere" static="false">
       <pose>2 0 2 0 0 0</pose>
       <sphere>
-        <radius>1</radius>
+        <radius>0.5</radius>
       </sphere>
-      <xacro:sphere_inertial mass="5" r="1"/>
+      <xacro:sphere_inertial mass="5" r="0.5"/>
     </xacro:basic_shape>
 
     <xacro:basic_shape name="1_cylinder" static="false">
       <pose>4 0 2 0 0 0</pose>
       <cylinder>
-        <radius>1</radius>
-        <length>1</length>
+        <radius>0.5</radius>
+        <length>0.3</length>
       </cylinder>
-      <xacro:cylinder_inertial mass="5" r="1" l="1" />
+      <xacro:cylinder_inertial mass="5" r="0.5" l="0.3" />
     </xacro:basic_shape>
 
 

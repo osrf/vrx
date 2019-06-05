@@ -180,7 +180,27 @@ std::string CylinderShape::disp()
 double CylinderShape::calculateVolume(const ignition::math::Pose3d &pose,
     double fluidLevel)
 {
-  return 0;
+  double height = h;
+  double area = M_PI * r * r;
+
+  // Location of bottom of object relative to the fluid surface - assumes
+  // origin is at cog of the object.
+  double bottomRelSurf = fluidLevel - (pose.Pos().Z() - height / 2.0);
+
+  // out of water
+  if (bottomRelSurf <= 0)
+  {
+    return 0.0;
+  }
+    // at surface
+  else if (bottomRelSurf <= height)
+  {
+    return bottomRelSurf * area;
+  }
+  else
+  {
+    return height * area;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -202,7 +222,23 @@ std::string SphereShape::disp()
 double SphereShape::calculateVolume(const ignition::math::Pose3d &pose,
     double fluidLevel)
 {
-  return 0;
+  // Location of bottom of object relative to the fluid surface - assumes
+  // origin is at cog of the object.
+  double h = fluidLevel - (pose.Pos().Z() - r);
+  // out of water
+  if (h <= 0)
+  {
+    return 0.0;
+  }
+  // at surface
+  else if (h <= 2 * r)
+  {
+    return (h * h *  r - ::pow(h, 3) / 3.0) * M_PI;
+  }
+  else
+  {
+    return 4. / 3. * M_PI * ::pow(r, 3);
+  }
 }
 
 //////////////////////////////////////////////////
