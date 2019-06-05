@@ -321,7 +321,9 @@ void UsvDynamicsPlugin::Update()
 
       // Compute the depth at the grid point.
       double simTime = kTimeNow.Double();
-      double depth = WavefieldSampler::ComputeDepthDirectly(
+      //double depth = WavefieldSampler::ComputeDepthDirectly(
+      //  *waveParams, X, simTime);
+			double depth = WavefieldSampler::ComputeDepthSimply(
         *waveParams, X, simTime);
 
       // Vertical wave displacement.

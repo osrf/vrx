@@ -52,67 +52,7 @@ void WaveguagePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     this->fluidLevel = _sdf->Get<double>("fluid_level");
   }
-  if (_sdf->HasElement("link"))
-  {
-    gzmsg << "Found that SDF has at least one link element, looking at each "
-          << "link..." << std::endl;
-    int counter = 0;
-    for (sdf::ElementPtr linkElem = _sdf->GetElement("link"); linkElem;
-         linkElem = linkElem->GetNextElement("link"))
-    {
-      // Print each attribute for the link
-      gzmsg << "Looking for name attribute in link number " << counter
-            << ", which has " << linkElem->GetAttributeCount()
-            << " attributes" << std::endl;
-      counter++;
-      int id = -1;
-      std::string name = "";
 
-      if (linkElem->HasElement("name"))
-      {
-        name = linkElem->GetElement("name")->Get<std::string>();
-        gzmsg << "Found link name in SDF [" << name << "]" << std::endl;
-        physics::LinkPtr link = _model->GetLink(name);
-        if (!link)
-        {
-          gzwarn << "Specified link [" << name << "] not found." << std::endl;
-          continue;
-        }
-        id = link->GetId();
-        // Add this link to our list for applying buoy forces
-        this->buoyancyLinks.push_back(link);
-      }
-      else
-      {
-        gzwarn << "Missing 'name' element within link number ["
-               << counter - 1 << "] in SDF" << std::endl;
-        // Exit if we didn't set ID
-        continue;
-      }
-
-      if (this->volPropsMap.count(id) != 0)
-      {
-        gzwarn << "Properties for link [" << name << "] already set, skipping "
-               << "second property block" << std::endl;
-        continue;
-      }
-
-      if (linkElem->HasElement("center_of_volume"))
-      {
-        ignition::math::Vector3d cov = linkElem->GetElement("center_of_volume")
-            ->Get<ignition::math::Vector3d>();
-        this->volPropsMap[id].cov = cov;
-      }
-      else
-      {
-        gzwarn << "Required element center_of_volume missing from link ["
-               << name << "] in WaveguagePlugin SDF" << std::endl;
-        continue;
-      }
-    }
-  }
-	 // Initialize time and odometry position
-  this->prevUpdateTime = this->world->SimTime();
 }
 
 /////////////////////////////////////////////////
@@ -136,47 +76,27 @@ void WaveguagePlugin::OnUpdate()
   {
     return;
   }
-	
-  double simTime = this->model->GetWorld()->SimTime().Double();
-	dt = (simTime - this->prevUpdateTime).Double;
-	this->prevUpdateTime = simTime;
-  for (auto &link : this->buoyancyLinks)
-  {
-    #if GAZEBO_MAJOR_VERSION >= 8
-      ignition::math::Pose3d linkFrame = link->WorldPose();
-    #else
-      ignition::math::Pose3d linkFrame = link->GetWorldPose().Ign();
-    #endif
+  #if GAZEBO_MAJOR_VERSION >= 8
+	  ignition::math::Pose3d modelPose = this->model->WorldPose();
+  #else
+	  ignition::math::Pose3d modelPose = this->model->GetWorldPose().Ign();
+  #endif
 
-    // Compute the wave displacement at the centre of the link frame.
-    // Wavefield height at the link, relative to the mean water level.
-		//double lastz =  linkFrame.Pos().Z();
-		//double waveHeight = WavefieldSampler::ComputeDepthDirectly(
-    //  *waveParams, linkFrame.Pos(),simTime);
-		double waveHeightS = WavefieldSampler::ComputeDepthSimply(
-      *waveParams, linkFrame.Pos(),simTime);
-		/*
+  // Compute the wave displacement at the model location
+	double waveHeightS = WavefieldSampler::ComputeDepthSimply(
+      *waveParams, modelPose.Pos(),
+			this->model->GetWorld()->SimTime().Double());
+	/*
 		gzdbg << "Waveheight: directly = " << waveHeight
-					<< ", simply = " << waveHeightS << std::endl;
-		*/
-		
-		waveHeightS += this->fluidLevel;
+		<< ", simply = " << waveHeightS << std::endl;
+	*/
+	
+	// Add the mean water level	
+	waveHeightS += this->fluidLevel;
 
-		double hdot = (waveHeightS - this->prevWaveHeight)/dt;
-		this->prevWaveHeight = waveHeightS;
-		
-		// Set vertical location to match the wave height
-		// Use simple method for now - seems more consistent with visual render.
-		//linkFrame.Pos().Z(waveHeight);
-		linkFrame.Pos().Z(waveHeightS);
-		
-    link->SetWorldPose(linkFrame);
-		/*
-		gzdbg << "linkFrame.Pos().Z(), before =  " << lastz
-					<< ", after = " <<  linkFrame.Pos().Z()
-					<< ", waveHeight = " << waveHeight << std::endl;
-		*/
-  }
+	// Set vertical location to match the wave height
+	modelPose.Pos().Z(waveHeightS);
+	this->model->SetWorldPose(modelPose);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(WaveguagePlugin)

@@ -10,9 +10,10 @@
       </inertial>
       <visual name="visual">
         <geometry>
-          <sphere>
-						<radius>0.1</radius>
-					</sphere>
+          <cylinder>
+						<radius>0.05></radius>
+						<length>0.2></length>
+					</cylinder>
         </geometry>
         <material>
           <script>
@@ -21,19 +22,10 @@
           </script>
         </material>
       </visual>
-      <collision name="collision">
-        <geometry>
-          <sphere><radius>0.1</radius></sphere>
-        </geometry>
-      </collision>
     </link>
     <plugin name="wavegauge_plugin" filename="libwavegauge_plugin.so">
       <wave_model>ocean_waves</wave_model>
       <fluid_level>0.0</fluid_level>
-      <link name="link">
-        <name>base_link</name>
-        <center_of_volume>0 0 0</center_of_volume>
-      </link>
     </plugin>
 		<link name="bar1">
 			<gravity>0</gravity>

@@ -34,9 +34,9 @@
         <scale>2.0</scale>
         <angle>0.4</angle>
         <steepness>0.0</steepness>
-        <amplitude>1.0</amplitude>
+        <amplitude>0.25</amplitude>
         <period>7.0</period>
-        <direction>0.0 1.0</direction>
+        <direction>1.0 0.0</direction>
       </wave>
     </plugin>
 

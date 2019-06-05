@@ -65,7 +65,7 @@
 		-->
 		
     <model name="wavegauge">
-      <pose>0 0 4 0 0 0 </pose>
+      <pose>1 1 0 0 0 0 </pose>
       <include>
 				<uri>model://wavegauge</uri>
       </include>
