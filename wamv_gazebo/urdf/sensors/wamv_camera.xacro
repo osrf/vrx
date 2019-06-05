@@ -45,7 +45,7 @@
 
     <!-- Sensor post -->
     <link name="${name}_post_link">
-      <visual name="${name}_post_visual">
+      <visual>
         <geometry>
           <cylinder radius="0.0076" length="${post_length}"/>
         </geometry>
@@ -119,6 +119,7 @@
       <child link="${name}_link" />
     </joint>
 
+    <!-- Gazebo camera setup -->
     <gazebo reference="${name}_link">
       <sensor type="camera" name="${name}_sensor">
         <update_rate>30.0</update_rate>
@@ -158,6 +159,8 @@
         </plugin>
       </sensor>
     </gazebo>
+
+    <!-- Set color of post -->
     <gazebo reference="${name}_post_link">
       <material>Gazebo/Black</material>
     </gazebo>
