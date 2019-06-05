@@ -9,7 +9,6 @@
 
     <!-- Define post length based on desired z position of sensor -->
     <xacro:property name="post_length" value="${z-platform_z-post_arm_to_camera_z}"/>
-    <xacro:property name="mesh_post_length" value="0.503"/>
 
     <!-- Monocular Camera -->
     <link name="${name}_link">
@@ -51,7 +50,7 @@
           <cylinder radius="0.0076" length="${post_length}"/>
         </geometry>
         <material name="${name}_post_material">
-          <color rgba="1.0 0.0 0.0 1.0"/>
+          <color rgba="0.0 0.0 0.0 1.0"/>
         </material>
       </visual>
       <collision name="${name}_post_collision">
@@ -158,6 +157,9 @@
           <distortionT2>0.0</distortionT2>
         </plugin>
       </sensor>
+    </gazebo>
+    <gazebo reference="${name}_post_link">
+      <material>Gazebo/Black</material>
     </gazebo>
   </xacro:macro>
 </robot>
