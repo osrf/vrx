@@ -128,7 +128,7 @@
       <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75" P="${radians(15)}" />
     
       <!-- Add a camera facing right -->
-      <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" />
+      <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" post_Y="${radians(-90)}" />
     
       <!-- Add simulated GPS -->
       <xacro:wamv_gps name="gps_wamv" x="-0.85" />

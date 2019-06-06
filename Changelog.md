@@ -27,7 +27,10 @@
     * [Pull request 98](https://bitbucket.org/osrf/vrx/pull-requests/98)
 
 1. Support the ability to customize sensor location via YAML:
-    * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
+    * [Pull request 99](https://bitbucket.org/osrf/vrx/pull-requests/99)
+
+1. Add camera mesh to WAM-V:
+    * [Pull request 101](https://bitbucket.org/osrf/vrx/pull-requests/101)
 
 1. Support the ability to customize thruster location via YAML:
     * [Pull request 102](https://bitbucket.org/osrf/vrx/pull-requests/102)

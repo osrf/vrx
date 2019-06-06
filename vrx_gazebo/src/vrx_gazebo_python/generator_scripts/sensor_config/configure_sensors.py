@@ -8,9 +8,9 @@ from .. utils import macro_block_gen
 
 
 def main():
-    comp = Compliance() 
+    comp = Compliance()
     macro_block_gen(requested=rospy.get_param('requested'),
-                    # yaml requesting which sensors with what parameters go where
+                    # yaml requesting which sensors with what parameters
                     target=rospy.get_param('xacro_target'),
                     # where the macro block is going
                     boiler_plate_top='<?xml version="1.0"?>\n' +
@@ -21,24 +21,14 @@ def main():
                     boiler_plate_bot='  </xacro:macro>\n</robot>',
                     # things to close the macro
                     num_test=comp.sensor_number_compliance,
-                    # function to test the number of a type of sensor is allowed
+                    # test the number of a type of sensor
                     param_test=comp.param_compliance
-                    # function to test if parameters of a sensor are in compliance
+                    # test if parameters of a sensor are in compliance
                     )
-    
     os.system('rosrun xacro xacro --inorder -o ' +
               rospy.get_param('wamv_target') +
               " '" + rospy.get_param('wamv_gazebo') + "' " +
               'yaml_sensor_generation:=true ' +
-             'sensor_xacro_file:=' +
+              'sensor_xacro_file:=' +
               rospy.get_param('xacro_target'))
-    
     print 'wamv sucessfully generated'
- 
- 
- 
- 
- 
- 
- 
- 
