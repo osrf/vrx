@@ -50,7 +50,7 @@
     <link name="${name}_post_link">
       <visual>
         <geometry>
-          <cylinder radius="0.0076" length="${post_length}"/>
+          <cylinder radius="${post_radius}" length="${post_length}"/>
         </geometry>
         <material name="${name}_post_material">
           <color rgba="0.0 0.0 0.0 1.0"/>
