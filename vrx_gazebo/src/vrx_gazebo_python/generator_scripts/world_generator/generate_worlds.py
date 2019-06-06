@@ -62,12 +62,13 @@ def world_gen(coordinate={}, master={}):
                     if params is not None:
                         for param, value in params.iteritems():
                             # name parameters will not be evaluated as lambdas
+                            evaluated_params = {}
                             if str(param) == 'name':
-                                params[param] = str(value)
+                                evaluated_params[param] = str(value)
                             else:
-                                params[param] = (lambda n: eval(
-                                    str(value)))(coordinate[axis_name])
-                        world[macro_name].append(params)
+                                f = lambda n: eval(str(value))
+                                evaluated_params[param] = f(coordinate[axis_name])
+                        world[macro_name].append(evaluated_params)
                     else:
                         world[macro_name].append({})
     return world
