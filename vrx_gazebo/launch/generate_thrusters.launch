@@ -1,19 +1,21 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="available" default="$(find wamv_description)/urdf"/>
-  <param name="available" value="$(arg available)"/>
+  <arg name="namespace" value="thruster_config"/>
+  <group ns="$(arg namespace)">
+    <arg name="available" default="$(find wamv_description)/urdf/thrusters"/>
+    <param name="available" value="$(arg available)"/>
 
-  <arg name="requested"/>
-  <param name="requested" value="$(arg requested)"/>
+    <arg name="requested"/>
+    <param name="requested" value="$(arg requested)"/>
 
-  <arg name="xacro_target"/>
-  <param name="xacro_target" value="$(arg xacro_target)"/>
-  
-  <arg name="wamv_target"/>
-  <param name="wamv_target" value="$(arg wamv_target)"/>
+    <arg name="xacro_target"/>
+    <param name="xacro_target" value="$(arg xacro_target)"/>
+    
+    <arg name="wamv_target"/>
+    <param name="wamv_target" value="$(arg wamv_target)"/>
 
-  <param name="wamv_gazebo" value="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
+    <param name="wamv_gazebo" value="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
 
-  <node name="thruster_gen" pkg="vrx_gazebo" type="generate_thrusters" output="screen"/>
-  
+    <node name="thruster_gen" pkg="vrx_gazebo" type="generate_thrusters" output="screen"/>
+  </group>
 </launch>
