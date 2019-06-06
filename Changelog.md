@@ -32,6 +32,9 @@
 1. Add camera mesh to WAM-V:
     * [Pull request 101](https://bitbucket.org/osrf/vrx/pull-requests/101)
 
+1. Add varying lidar pole length:
+    * [Pull request 103](https://bitbucket.org/osrf/vrx/pull-requests/103)
+
 1. Support the ability to customize thruster location via YAML:
     * [Pull request 104](https://bitbucket.org/osrf/vrx/pull-requests/104)
 
