@@ -37,7 +37,8 @@ def main():
                     boiler_plate_top=boiler_plate_top,
                     boiler_plate_bot=boiler_plate_bot,
                     num_test=num_test,
-                    param_test=param_test
+                    param_test=param_test,
+                    macro_type="thruster"
                     )
     
     os.system('rosrun xacro xacro --inorder -o ' +

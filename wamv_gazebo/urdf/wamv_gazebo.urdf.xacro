@@ -30,8 +30,7 @@
   <!-- === Thrusters === -->
   <!-- Use thruster yaml file if given -->
   <xacro:if value="$(arg yaml_thruster_generation)">
-    <xacro:include filename="$(arg thruster_xacro_file)"/>
-    <xacro:yaml_thrusters />
+    <xacro:wamv_gazebo thruster_layout="$(arg thruster_xacro_file)"/>
   </xacro:if>
   
   <!-- Otherwise, add thrusters based on thruster_config variable -->
