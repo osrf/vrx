@@ -32,6 +32,9 @@
 1. Add camera mesh to WAM-V:
     * [Pull request 101](https://bitbucket.org/osrf/vrx/pull-requests/101)
 
+1. Add varying lidar pole length:
+    * [Pull request 103](https://bitbucket.org/osrf/vrx/pull-requests/103)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
