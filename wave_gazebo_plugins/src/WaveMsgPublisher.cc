@@ -68,7 +68,7 @@ int main(int _argc, char **_argv)
   {
     // Copyright notice.
     std::cout
-      << "ASV Wave Simulator: wave parameter publisher.\n"
+      << "Wave Simulator: wave parameter publisher.\n"
       << "Copyright (C) 2019  Rhys Mainwaring.\n";
 
     // Program options
@@ -92,7 +92,9 @@ int main(int _argc, char **_argv)
       ("angle", po::value<double>(),
         "The angle determines the range of directions about the mean.")
       ("steepness,q", po::value<double>(),
-        "The steepness determines the sharpness of the wave peaks.");
+        "The steepness determines the sharpness of the wave peaks.")
+		("tau,t", po::value<double>(),
+        "Time constant for turning on the waves.");
 
     po::variables_map vm;
     // po::store(po::parse_command_line(_argc, _argv, options), vm);

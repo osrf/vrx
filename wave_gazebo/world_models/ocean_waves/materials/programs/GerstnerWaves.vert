@@ -48,6 +48,7 @@ uniform vec3 steepness;
 uniform vec2 dir0;
 uniform vec2 dir1;
 uniform vec2 dir2;
+uniform float tau;
 
 // Output variables
 varying mat3 rotMatrix;
@@ -94,7 +95,7 @@ void main(void)
 	{
 	    // Evaluate wave equation:
       float k = waves[i].k;
-			float a = waves[i].a;
+			float a = waves[i].a * (1.0 - exp(-1.0*time/tau));
       float q = waves[i].q;
 		  float dx = waves[i].d.x;
 		  float dy = waves[i].d.y;

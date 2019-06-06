@@ -1,0 +1,128 @@
+\documentclass[11pt]{article}
+%\usepackage[firstpage]{draftwatermark}
+\usepackage{times}
+\usepackage{pdfpages}
+\usepackage{fullpage}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\usepackage{subcaption}
+\usepackage{units}
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{./math_bbing}
+
+
+% Highlighting
+\usepackage{color,soul}
+\DeclareRobustCommand{\hlr}[1]{{\sethlcolor{red}\hl{#1}}}
+\DeclareRobustCommand{\hlg}[1]{{\sethlcolor{green}\hl{#1}}}
+\DeclareRobustCommand{\hlb}[1]{{\sethlcolor{blue}\hl{#1}}}
+\DeclareRobustCommand{\hly}[1]{{\sethlcolor{yellow}\hl{#1}}}
+
+\setcounter{secnumdepth}{4}
+\graphicspath{{images/}}
+\pagestyle{fancy}
+
+% Conditional for notes
+\newif\ifnotes
+\notesfalse
+
+
+\newcommand{\doctitle}{Wave Generation}
+
+\newcommand{\docnumber}{\doctitle}
+
+\addtolength{\headheight}{2em}
+\addtolength{\headsep}{1.5em}
+\lhead{\docnumber}
+\rhead{}
+
+\newcommand{\capt}[1]{\caption{\small \em #1}}
+
+\cfoot{\small Brian Bingham \today \\ \thepage}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\newenvironment{xitemize}{\begin{itemize}\addtolength{\itemsep}{-0.75em}}{\end{itemize}}
+\newenvironment{tasklist}{\begin{enumerate}[label=\textbf{\thesubsubsection-\arabic*},ref=\thesubsubsection-\arabic*,leftmargin=*]}{\end{enumerate}}
+\newcommand\todo[1]{{\bf TODO: #1}}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{4}
+
+\makeatletter
+\newcommand*{\compress}{\@minipagetrue}
+\makeatother
+
+%\renewcommand{\chaptername}{Volume}
+%\renewcommand{\thesection}{\Roman{section}}
+%\renewcommand{\thesubsection}{\Roman{section}-\Alph{subsection}}
+
+\begin{document}
+\input{./Commands}  
+\input{./defs}
+\newpage
+% Title Page
+\setcounter{page}{1}
+\begin{center}
+{\huge \doctitle}
+\end{center}
+
+
+\section{Overview}
+Blah
+
+\section{Gerstner Wave Model}
+
+From \cite{tessendorf99simulating} and \cite{gpugems_waves}.  A summation of Gersnter waves at a nominal location ($\Vi{x_o} = \{x_o, y_o\}$) to generate a wave height $z$ at the location $\V{x} = \{x, y\}$
+\begin{eqnarray}
+  \V{x} & = & \Vi{x}{o} - \sum_{i=1}^{N} q_i A_i \sin(\Vi{k}{i} \cdot \Vi{x}{o} - \omega_i t + \phi_i) \\
+  z & = & \sum_{i=1}^N A_i \cos(\Vi{k}{i} \cdot \Vi{x}{o} - \omega_i t + \phi_i)
+\end{eqnarray}
+
+\section{User Specified Parameters}
+
+\begin{description}
+  \item[number ($N$)]: The number of component waves.  Currently the visual implementation in GernstnerWaves.vert is limited to no more than three, so N <= 3.
+  \item[scale ($s$)]: The scale factor used to generate component waves, typically 2.0.
+  \item[amplitude ($\bar{A}$)]: The amplitude of the median wave.
+  \item[steepness ($q$)]: Steepness factor for Gernstner Waves - see Tessendorf, Simulating Ocean Waves
+  \item[period ($\bar{T}$)]: Mean period
+  \item[direction ($\bar{\V{d}}=\{d_x,d_y\}=\angle{\theta_d}$)]: Mean direction of wave field, expressed as 2D unit vector
+  \item[angle ($a$)]: Incremental angle relative to specified mean direction for generating individual component waves.
+\end{description}
+
+\section{Derived Wave Parameters}
+
+\begin{algorithm}
+  \caption{Component Wave Parameter Generation}
+  \begin{algorithmic}
+    \STATE $\bar{\omega} = \frac{2 \pi}{\bar{T}}$
+    \STATE $\bar{k}= \frac{\bar{\omega}^2}{g}$ (Deep water dispersion)
+    \STATE $i = 0$
+    \FOR{$i<N$}
+    \STATE $n=i - N/2$
+    \STATE $A_i = \bar{A} (s^n)$
+    \STATE $k_i = \frac{\bar{k}}{s^n}$
+    \STATE $\omega_i = \sqrt{g k_i} = \bar{\omega}/ \sqrt{s^n}$
+    \STATE $T_i = \bar{T} \sqrt{s^n}$
+    \STATE $\Vi{d}{i} = \angle{(\theta_d + (n)(a))}$
+    \STATE $\Vi{k}{i} = k_i \Vi{d}{i}$
+    \STATE $q_i = \min{\{1.0, q/(A_i k_i N)\}}$
+    \STATE $\phi_i = 0$
+    \STATE $i++$
+    \ENDFOR
+  \end{algorithmic}
+\end{algorithm}
+
+%\newpage
+%\setcounter{page}{1}
+\bibliographystyle{ieeetr}
+\bibliography{refs}
+
+\end{document}

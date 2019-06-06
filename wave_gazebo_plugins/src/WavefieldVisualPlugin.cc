@@ -440,6 +440,10 @@ namespace asv
       "dir1", shaderType, Ogre::StringConverter::toString(dir1));
     rendering::SetMaterialShaderParam(visual,
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
+		float tau = this->data->waveParams->Tau();
+    rendering::SetMaterialShaderParam(visual,
+      "tau", shaderType, Ogre::StringConverter::toString(tau));
+
 #endif
   }
 

@@ -37,6 +37,7 @@
         </geometry>
       </collision>
       <visual name="visual">
+				<pose>0 0 -0.15 0 0 0 </pose>
         <geometry>
 	        <mesh><uri>model://surmark950400/mesh/surmark950400.dae</uri></mesh>
         </geometry>
@@ -52,12 +53,12 @@
       <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
-      <fluid_drag>5.0</fluid_drag>
+      <fluid_drag>0.0</fluid_drag>
       <link>
         <name>link</name>
-        <center_of_volume>0 0 0.5</center_of_volume>
+        <center_of_volume>0 0 0.6</center_of_volume>
         <area>0.63</area>
-        <height>0.70</height>
+        <height>1.0</height>
       </link>
     </plugin>
   </model>

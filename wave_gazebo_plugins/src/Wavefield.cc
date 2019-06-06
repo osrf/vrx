@@ -66,7 +66,8 @@ namespace asv
       direction(1, 0),
       angularFrequency(2.0*M_PI),
       wavelength(2*M_PI/Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)), 
-      wavenumber(Physics::DeepWaterDispersionToWavenumber(2.0*M_PI))
+      wavenumber(Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)),
+			tau(1.0)
     {
     }
 
@@ -88,11 +89,14 @@ namespace asv
     /// \brief The mean wave period [s]
     public: double period;
 
-    /// \brief The mean wve phase (not currently enabled).
+    /// \brief The mean wave phase (not currently enabled).
     public: double phase;
 
     /// \brief The mean wave direction.
     public: ignition::math::Vector2d direction;
+
+		/// \brief The time constant for exponential increasing waves on startup
+   	public: double tau;
 
     /// \brief The mean wave angular frequency (derived).    
     public: double angularFrequency;
@@ -237,6 +241,13 @@ namespace asv
       nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
       nextParam->mutable_value()->set_double_value(this->data->period);
     }
+		// "tau"
+    {
+      auto nextParam = _msg.add_param();
+      nextParam->set_name("tau");
+      nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
+      nextParam->mutable_value()->set_double_value(this->data->tau);
+    }
     // "direction"
     {
       const auto& direction = this->data->direction;
@@ -259,6 +270,7 @@ namespace asv
     this->data->scale     = Utilities::MsgParamDouble(_msg,   "scale",      this->data->scale);
     this->data->angle     = Utilities::MsgParamDouble(_msg,   "angle",      this->data->angle);
     this->data->steepness = Utilities::MsgParamDouble(_msg,   "steepness",  this->data->steepness);
+		this->data->tau = Utilities::MsgParamDouble(_msg,   "tau",  this->data->tau);
 
     this->data->Recalculate();
   }
@@ -273,6 +285,7 @@ namespace asv
     this->data->scale     = Utilities::SdfParamDouble(_sdf,   "scale",      this->data->scale);
     this->data->angle     = Utilities::SdfParamDouble(_sdf,   "angle",      this->data->angle);
     this->data->steepness = Utilities::SdfParamDouble(_sdf,   "steepness",  this->data->steepness);
+		this->data->tau = Utilities::SdfParamDouble(_sdf,   "tau",  this->data->tau);
 
     this->data->Recalculate();
   }
@@ -325,6 +338,11 @@ namespace asv
   double WaveParameters::Wavenumber() const
   {
     return this->data->wavenumber;
+  }
+
+	float WaveParameters::Tau() const
+  {
+    return this->data->tau;
   }    
 
   ignition::math::Vector2d WaveParameters::Direction() const
@@ -373,7 +391,13 @@ namespace asv
     this->data->phase = _phase;
     this->data->Recalculate();
   }
-  
+
+	void WaveParameters::SetTau(double _tau)
+  {
+    this->data->tau = _tau;
+    //this->data->Recalculate();
+  }
+
   void WaveParameters::SetDirection(const ignition::math::Vector2d& _direction)
   {
     this->data->direction = _direction;
@@ -420,6 +444,7 @@ namespace asv
 		gzmsg << "amplitude:  " << this->data->amplitude << std::endl;
     gzmsg << "period:     " << this->data->period << std::endl;
 		gzmsg << "direction:  " << this->data->direction << std::endl;
+		gzmsg << "tau:  " << this->data->tau << std::endl;
 		gzmsg << "Derived Parameters:" << std::endl;
     gzmsg << "amplitudes:  " << this->data->amplitudes << std::endl;
     gzmsg << "wavenumbers: " << this->data->wavenumbers << std::endl;
@@ -446,7 +471,8 @@ namespace asv
 	double WavefieldSampler::ComputeDepthSimply(
 		const WaveParameters& _waveParams,
     const ignition::math::Vector3d& _point,
-    double time
+    double time,
+		double time_init /*=0*/
   )
   {
 		double h = 0.0;
@@ -464,13 +490,16 @@ namespace asv
 			double c = cos(theta);
 			h += a*c;
 		}
-		return h;
+
+		// Exponentially grow the waves
+		return h*(1-exp(-1.0*(time-time_init)/_waveParams.Tau()));
 	}
 	
   double WavefieldSampler::ComputeDepthDirectly(  
     const WaveParameters& _waveParams,
     const ignition::math::Vector3d& _point,
-    double time
+    double time,
+		double time_init
   )
   {
     // Struture for passing wave parameters to lambdas
@@ -529,7 +558,8 @@ namespace asv
         J(1, 0) += df2x;
         J(1, 1) += df2y;
       }
-      return pz;
+			// Exponentially grow the waves
+      return pz * (1-exp(-1.0*(time-time_init)/_waveParams.Tau()));
     };
 
     // Simple multi-variate Newton solver - this version returns the z-component of the

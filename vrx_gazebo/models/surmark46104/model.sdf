@@ -37,6 +37,7 @@
         </geometry>
       </collision>
       <visual name="visual">
+				<pose>0 0 -0.35 0 0 0 </pose>
         <geometry>
 	        <mesh><uri>model://surmark46104/mesh/surmark46104.dae</uri></mesh>
         </geometry>

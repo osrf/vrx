@@ -52,10 +52,10 @@
       <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
-      <fluid_drag>5.0</fluid_drag>
+      <fluid_drag>0.0</fluid_drag>
       <link>
         <name>link</name>
-        <center_of_volume>0 0 0.5</center_of_volume>
+        <center_of_volume>0 0 0.6</center_of_volume>
         <area>0.63</area>
         <height>1.05</height>
       </link>

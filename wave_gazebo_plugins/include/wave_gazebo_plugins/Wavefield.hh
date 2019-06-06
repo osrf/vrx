@@ -111,6 +111,9 @@ namespace asv
     /// \brief The mean wavenumber.
     public: double Wavenumber() const;
 
+		/// \brief Time-constant for starting waves.
+    public: float Tau() const;
+
     /// \brief A two component vector specifiying the direction of the mean wave.
     public: ignition::math::Vector2d Direction() const;
 
@@ -151,6 +154,11 @@ namespace asv
     ///
     /// \param[in] _phase The phase parameter.
     public: void SetPhase(double _phase);
+
+		/// \brief Set the time constant.
+    ///
+    /// \param[in] _tau The time constant.
+    public: void SetTau(double _tau);
 
     /// \brief Set the mean wave direction.
     ///
@@ -206,16 +214,16 @@ namespace asv
     public: static double ComputeDepthDirectly(
       const WaveParameters& _waveParams,
       const ignition::math::Vector3d& _point,
-      double time);
+      double time, double time_init=0);
 
 		/// A simpler version of determining wave height at a point.
 		/// This method enforces that q (steepness) = 0 which allows us
 		/// to caculate the wave height exactly for a given 2D point without the
 		/// need to interatively solve for the position/height.
 	  public: static double ComputeDepthSimply(
-       const WaveParameters& _waveParams,
+			const WaveParameters& _waveParams,
       const ignition::math::Vector3d& _point,
-      double time);
+			double time, double time_init=0);
   };
 
 ///////////////////////////////////////////////////////////////////////////////
