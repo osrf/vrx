@@ -2,10 +2,10 @@ import os
 import yaml
 
 
-def macro_block_gen(target,
+def macro_block_gen(xacro_target,
                     # target file for writing the macro calls too
                     # NOTE: will write over if a file is already there
-                    requested=None,  # yaml file with requested macros
+                    yaml_file=None,  # yaml file with requested macros
                     requested_macros={},
                     # if a dictionary is passed directly, no yaml file needed
                     boiler_plate_top='',  # stuff to start the xacro file
@@ -17,11 +17,11 @@ def macro_block_gen(target,
                     # NOT if the parameters are presentfor a given macro
                     macro_type="",
                     ):
-    xacro_file = open(target, 'wb')
+    xacro_file = open(xacro_target, 'wb')
     xacro_file.write(boiler_plate_top)
 
     if requested_macros == {}:
-        s = open(requested, 'r')
+        s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
     if requested_macros is None:
         xacro_file.write(boiler_plate_bot)
