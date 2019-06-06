@@ -21,7 +21,7 @@ def main():
     boiler_plate_top=('<?xml version="1.0"?>\n' + 
             '<robot xmlns:xacro="http://ros.org/wiki/xacro" ' +
             'name="wam-v-thrusters">\n' +
-            '<xacro:include filename="$(find wamv_description)/urdf/thrusters/engine.xacro" />\n')
+            '  <xacro:include filename="$(find wamv_description)/urdf/thrusters/engine.xacro" />\n')
 
     # things to close the macro
     boiler_plate_bot = '</robot>'

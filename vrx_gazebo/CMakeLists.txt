@@ -231,9 +231,6 @@ if (CATKIN_ENABLE_TESTING)
 endif()
 
 # Python Scripts
-catkin_install_python(PROGRAMS bin/generate_sensors
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-catkin_install_python(PROGRAMS bin/generate_thrusters
+catkin_install_python(PROGRAMS bin/generate_sensors bin/generate_thrusters 
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
