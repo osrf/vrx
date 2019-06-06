@@ -33,7 +33,7 @@
     * [Pull request 101](https://bitbucket.org/osrf/vrx/pull-requests/101)
 
 1. Support the ability to customize thruster location via YAML:
-    * [Pull request 102](https://bitbucket.org/osrf/vrx/pull-requests/102)
+    * [Pull request 104](https://bitbucket.org/osrf/vrx/pull-requests/104)
 
 ### VRX 1.0.1
 
