@@ -29,6 +29,9 @@
 1. Support the ability to customize sensor location via YAML:
     * [Pull request 99](https://bitbucket.org/osrf/vrx/pull-requests/99)
 
+1. Support the ability for automated world generation via YAML:
+    * [Pull request 90](https://bitbucket.org/osrf/vrx/pull-requests/102)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
