@@ -68,9 +68,9 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("wind_direction"))
   {
     double windAngle = _sdf->GetElement("wind_direction")->Get<double>();
-    this->windDirection[0] = cos(windAngle * M_PI / 180);
-    this->windDirection[1] = sin(windAngle * M_PI / 180);
-    this->windDirection[2] = 0;
+    this->windDirection.X(cos(windAngle * M_PI / 180));
+    this->windDirection.Y(sin(windAngle * M_PI / 180));
+    this->windDirection.Z(0);
   }
 
   gzmsg << "Wind direction unit vector = " << this->windDirection << std::endl;
