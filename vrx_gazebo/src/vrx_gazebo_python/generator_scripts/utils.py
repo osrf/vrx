@@ -4,7 +4,7 @@ import yaml
 
 def create_xacro_file(xacro_target,
                     yaml_file=None,
-                    requested_macros={},
+                    requested_macros=None,
                     boiler_plate_top='',
                     boiler_plate_bot='',
                     num_test=lambda name, num: True,
@@ -12,7 +12,6 @@ def create_xacro_file(xacro_target,
                     xacro_type="",
                     ):
     """
-
     Purpose: Create a .xacro file for the purpose of creating a custom WAM-V .urdf
 
     Args:
@@ -33,7 +32,7 @@ def create_xacro_file(xacro_target,
     xacro_file.write(boiler_plate_top)
 
     # If requested_macros not given, then open yaml_file
-    if requested_macros == {}:
+    if requested_macros is None:
         s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
 
@@ -43,17 +42,22 @@ def create_xacro_file(xacro_target,
             xacro_file.close()
             return
 
+    # Object must be available
     for key, objects in requested_macros.items():
-        # object must be available
-        # can only have so many of this type of object
+        # Check if number of objects is valid
         assert num_test(key, len(objects)), \
             "%d %s's not allowed" % (len(objects), key)
-        xacro_file.write('  <!-- === %s === -->\n' % key)
+
+        # Create block for each object
+        xacro_file.write('    <!-- === %s === -->\n' % key)
         for i in objects:
-            # test the parameter list and make sure it is in accordance
+            # Check for valid parameters
             assert param_test(key, i), \
                 "%s %s failed parameter test" % (key, i['name'])
-            xacro_file.write(macro_call_gen(key, i))
+
+            # Write macro
+            xacro_file.write('    ' + macro_call_gen(key, i))
+        xacro_file.write('\n')
 
     if xacro_type == "thruster":
         # WAM-V Gazebo thrust plugin setup
@@ -72,7 +76,7 @@ def create_xacro_file(xacro_target,
 
 
 def macro_call_gen(name, params={}):
-    macro_call = '  <xacro:%s ' % name
+    macro_call = '<xacro:%s ' % name
     for i in params:
         macro_call += '%s="%s" ' % (i, str(params[i]))
     macro_call += '/>\n'
