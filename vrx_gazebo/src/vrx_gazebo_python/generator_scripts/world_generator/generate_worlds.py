@@ -60,9 +60,9 @@ def world_gen(coordinate={}, master={}):
                     world[macro_name] = []
                 for params in macro_calls:
                     if params is not None:
+                        evaluated_params = {}
                         for param, value in params.iteritems():
                             # name parameters will not be evaluated as lambdas
-                            evaluated_params = {}
                             if str(param) == 'name':
                                 evaluated_params[param] = str(value)
                             else:
