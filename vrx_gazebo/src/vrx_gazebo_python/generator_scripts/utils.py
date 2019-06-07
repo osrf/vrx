@@ -40,9 +40,22 @@ def macro_block_gen(target,
 
 def macro_call_gen(name, params={}):
     macro_call = '  <xacro:%s ' % name
+    endline = '/>\n'
+    insert = []
     for i in params:
-        macro_call += '%s="%s" ' % (i, str(params[i]))
-    macro_call += '/>\n'
+        if i[:3] == '/**':
+            endline = '>\n'
+            insert.append(i[3:])
+        else:
+            macro_call += '%s="%s" ' % (i, str(params[i]))
+    macro_call += endline
+    if insert == []:
+        return macro_call
+    for i in insert:
+        macro_call += '    <%s>\n' % i
+        macro_call += str(params['/**' + i])
+        macro_call += '    </%s>\n' % i
+    macro_call += '  </xacro:' + name + '>\n'
     return macro_call
 
 
