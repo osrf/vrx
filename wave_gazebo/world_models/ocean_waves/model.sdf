@@ -30,12 +30,12 @@
       <size>1000 1000</size>
       <cell_count>50 50</cell_count>
       <wave>
-        <number>1</number>
+        <number>3</number>
         <scale>2.0</scale>
         <angle>0.4</angle>
         <steepness>0.0</steepness>
-        <amplitude>0.5</amplitude>
-        <period>5.0</period>
+        <amplitude>0.1</amplitude>
+        <period>7</period>
         <direction>1.0 0.0</direction>
 				<tau>1.0</tau>
       </wave>
