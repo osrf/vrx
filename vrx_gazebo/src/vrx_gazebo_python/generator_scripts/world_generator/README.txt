@@ -38,7 +38,7 @@ constant:
     #every axis MUST have a sequence feild (even if it is empty)(more on what sequence does later)
     sequence:
 
-#now lets pick soething that will varry independently of all other things we want to test between the simulations, say position of the sun (time of day).
+#now lets pick something that will varry independently of all other things we want to test between the simulations, say position of the sun (time of day).
 #ie: we want to test all tasks at all times of day. Time of day will be independelty of the task being tested
 environment:
     #lets say we want to test 5 times of day, so 5 steps
@@ -51,9 +51,9 @@ environment:
             # so we want to test times 8, 11, 14, 17, and  20
             #we can express this as a function based on the index of this axis(n)! NOTE: n starts at 0 and goes to steps-1.
             #NOTE: the parameter will be evaluated as a python lambda.
-            #NOTE: all parameters defined under macros of an axis(except 'name' parameter)(NOT defiened in sequence) will be evaluated as Lambdas
+            #NOTE: all parameters defined under macros of an axis(NOT defiened in sequence) will be evaluated as Lambdas (unless the "' '" is used)
             - time: (3*n)+8
-    #sequence MUST be here, even if it is empty)
+    #sequence MUST be here, even if it is empty
     sequence:
 
 #now lets get those tasks that we originally wanted to test in here 
@@ -61,28 +61,29 @@ tasks:
     #lets say we wanted to test 2 tasks, but when we are testing one, we do not want to test the other
     steps: 2
     #so we say that this axis will contribute these macros to the world files, and we fill out the parameters that we want
-    #NOTE: these actually do not need to be here do too this axis's application, but I think it makes the axis more decriptive
+    #NOTE: these technically do not need to be here do too this axis's application(all steps overridden by sequence), but I think it makes the axis more decriptive
+    #NOTE: in order to specify a string evaluated parameterter (as opposed to the default: functional) use "'my_string'"
     macros:
         nav_challenge:
-            - name: nav_challenge
+            - name: "'nav_challenge'"
         light_buoy:
-            - name: stc
+            - name: "'stc'"
     #now we learn about sequence
-    #sequence is a way to override whatever macros are dinfined 
+    #sequence is a way to override whatever macros are defined 
     sequence:
         #so lets say for step 0, we want to run the nav_challenge
         0:
             #so we include the nav_chanllenge here and overload ALL it parameters
             #NOTE: when a step is overriden by sequence, the macros are directly passed to the xacro macro, no Lambda evaluation
             #NOTE: if a macro is excluded in a sequence override on an axis, it will also be excluded from world files of that coordinate of that axis
-            #ie: worlds with the 'tasks' coordinate == 0 will NOT have the light_buoy macro, the ONLY macros contributed by this axis for 'tasks'  0, will be nav_challenge
+            #ie: worlds with the 'tasks' coordinate == 0 will NOT have the light_buoy macro, the ONLY macros contributed by this axis for 'tasks' of 0, will be nav_challenge
             nav_challenge:
-                - name: nav_challenge
+                - name: "'nav_challenge'"
         #so now we want want to test the light_buoy
         1:
-            #so we include the light buoy and overload ALL its parameters
+            #so we include the light buoy and specify all the parameterse we do not want to be default
             light_buoy:
-                - name: stc
+                - name: "'stc'"
 
 #That is it, so now we will have 10 world xcaros and subsiquent world files.
 #ALL of them will have the sandisland macro
@@ -111,7 +112,7 @@ each macro must have at least one instance (-)
 under each instance of a macro, the parameters are to be filled.
 multiple instances of a macro may be included by adding more (-)
 (most macros have a name feild which must be filled(sandisland is an exception))
-params will be functionally determined by the step of its axis(n) as evaluated as a lambda in pyhton.
+params will be functionally determined by the step of its axis(n) as evaluated as a lambda in pyhton (unless the "' '" is used).
 NOTE: desired macros must be included by vrx_gazebo/worlds/xacros/include_all_macros.xacro. Otherwise, XML erros will be produced
 
 
@@ -122,7 +123,7 @@ the numbers after sequence tag refer to the step which is being overridden.
 the over ride must be a number and nothing else.
 any macro excluded in a step's override will not be included in the the worlds created with this step of this axis.
 the whole set of macros (for that axis) must be specified as numbers.
-The params of the macros in a sequence override will NOT be evaluated as a Lambda, they must be the literal values.
+The params of the macros in a sequence override will NOT be evaluated as a Lambda, they will be evaluated as string values.
 
 
 Quick Start Instructions:

@@ -63,8 +63,8 @@ def world_gen(coordinate={}, master={}):
                         evaluated_params = {}
                         for param, value in params.iteritems():
                             # name parameters will not be evaluated as lambdas
-                            if str(param) == 'name':
-                                evaluated_params[param] = str(value)
+                            if value[0] == "'" and value[-1] == "'":
+                                evaluated_params[param] = value[1:-1]
                             else:
                                 f = lambda n: eval(str(value))
                                 evaluated_params[param] = f(coordinate[axis_name])
