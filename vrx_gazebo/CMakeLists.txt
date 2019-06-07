@@ -231,6 +231,6 @@ if (CATKIN_ENABLE_TESTING)
 endif()
 
 # Python Scripts
-catkin_install_python(PROGRAMS bin/generate_sensors bin/generate_thrusters bin/generate_wamv
+catkin_install_python(PROGRAMS bin/generate_wamv
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

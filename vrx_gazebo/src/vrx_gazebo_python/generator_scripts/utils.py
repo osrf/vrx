@@ -2,31 +2,46 @@ import os
 import yaml
 
 
-def macro_block_gen(xacro_target,
-                    # target file for writing the macro calls too
-                    # NOTE: will write over if a file is already there
-                    yaml_file=None,  # yaml file with requested macros
+def create_xacro_file(xacro_target,
+                    yaml_file=None,
                     requested_macros={},
-                    # if a dictionary is passed directly, no yaml file needed
-                    boiler_plate_top='',  # stuff to start the xacro file
-                    boiler_plate_bot='',  # stuff to end the xacro file
+                    boiler_plate_top='',
+                    boiler_plate_bot='',
                     num_test=lambda name, num: True,
-                    # test if the number of a type of macros is allowed
                     param_test=lambda name, params={}: True,
-                    # test if a given macro call parameters are sensable
-                    # NOT if the parameters are presentfor a given macro
-                    macro_type="",
+                    xacro_type="",
                     ):
+    """
+
+    Purpose: Create a .xacro file for the purpose of creating a custom WAM-V .urdf
+
+    Args:
+        xacro_target (str): Target file for writing the xacro to 
+                            NOTE: will overwrite an existing file
+        yaml_file (str): .yaml file with requested macros
+        requested_macros (dict): if dictionary is passed directly, no yaml file needed
+        boiler_plate_top (str): String to start the xacro file
+        boiler_plate_bot (str): String to end the xacro file
+        num_test (function): test if the number of macro types is allowed
+        param_test (function): test if a given macro call parameters are sensible
+        xacro_type (str): type of xacro file
+
+    Creates a xacro file at 'xacro_target'
+    """
+    # Initialize xacro file
     xacro_file = open(xacro_target, 'wb')
     xacro_file.write(boiler_plate_top)
 
+    # If requested_macros not given, then open yaml_file
     if requested_macros == {}:
         s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
-    if requested_macros is None:
-        xacro_file.write(boiler_plate_bot)
-        xacro_file.close()
-        return
+
+        # Handle case with empty yaml file 
+        if requested_macros is None:
+            xacro_file.write(boiler_plate_bot)
+            xacro_file.close()
+            return
 
     for key, objects in requested_macros.items():
         # object must be available
@@ -40,7 +55,7 @@ def macro_block_gen(xacro_target,
                 "%s %s failed parameter test" % (key, i['name'])
             xacro_file.write(macro_call_gen(key, i))
 
-    if macro_type == "thruster":
+    if xacro_type == "thruster":
         # WAM-V Gazebo thrust plugin setup
         xacro_file.write('  <gazebo>\n')
         xacro_file.write('    <plugin name="wamv_gazebo_thrust" filename="libusv_gazebo_thrust_plugin.so">\n')
