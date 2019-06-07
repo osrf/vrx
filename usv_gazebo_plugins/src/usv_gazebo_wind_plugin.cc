@@ -173,13 +173,22 @@ void UsvWindPlugin::Update()
     int objs = 0;
     for (auto& i : this->windObjs)
     {
+#if GAZEBO_MAJOR_VERSION >= 8
       if ((!i.init)&&(this->world->ModelByName(i.model_name)))
+#else
+      if ((!i.init)&&(this->world->GetModel(i.model_name)))
+#endif
       {
         gzdbg << i.model_name << " initialized"<<std::endl;
 	++objs;
 	i.init = true;
+#if GAZEBO_MAJOR_VERSION >= 8
         i.model = this->world->ModelByName(i.model_name);
+#else 
+        i.model = this->world->GetModel(i.model_name);
+#endif
 	i.link = i.model->GetLink(i.link_name);
+
       }
     }
     if(objs == windObjs.size())
@@ -220,7 +229,7 @@ void UsvWindPlugin::Update()
         relativeWind - i.link->RelativeLinearVel();
 #else
       ignition::math::Vector3d apparentWind = relativeWind
-        - i.->GetRelativeLinearVel().Ign();
+        - i.link->GetRelativeLinearVel().Ign();
 #endif
   
       // gzdbg << "Relative wind: " << relativeWind << std::endl;
