@@ -1,28 +1,27 @@
-import os
 import yaml
 
 
 def create_xacro_file(xacro_target,
-                    yaml_file=None,
-                    requested_macros=None,
-                    boiler_plate_top='',
-                    boiler_plate_bot='',
-                    num_test=lambda name, num: True,
-                    param_test=lambda name, params={}: True,
-                    xacro_type="",
-                    ):
+                      yaml_file=None,
+                      requested_macros=None,
+                      boiler_plate_top='',
+                      boiler_plate_bot='',
+                      num_test=lambda name, num: True,
+                      param_test=lambda name, params={}: True,
+                      xacro_type="",
+                      ):
     """
-    Purpose: Create a .xacro file for the purpose of creating a custom WAM-V .urdf
+    Purpose: Create a .xacro file to create a custom WAM-V .urdf
 
     Args:
-        xacro_target (str): Target file for writing the xacro to 
+        xacro_target (str): Target file for writing the xacro to
                             NOTE: will overwrite an existing file
         yaml_file (str): .yaml file with requested macros
-        requested_macros (dict): if dictionary is passed directly, no yaml file needed
+        requested_macros (dict): dict is passed directly => yaml file ignored
         boiler_plate_top (str): String to start the xacro file
         boiler_plate_bot (str): String to end the xacro file
         num_test (function): test if the number of macro types is allowed
-        param_test (function): test if a given macro call parameters are sensible
+        param_test (function): test if a macro call parameters are sensible
         xacro_type (str): type of xacro file
 
     Creates a xacro file at 'xacro_target'
@@ -36,7 +35,7 @@ def create_xacro_file(xacro_target,
         s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
 
-        # Handle case with empty yaml file 
+        # Handle case with empty yaml file
         if requested_macros is None:
             xacro_file.write(boiler_plate_bot)
             xacro_file.close()
@@ -62,12 +61,17 @@ def create_xacro_file(xacro_target,
     if xacro_type == "thruster":
         # WAM-V Gazebo thrust plugin setup
         xacro_file.write('  <gazebo>\n')
-        xacro_file.write('    <plugin name="wamv_gazebo_thrust" filename="libusv_gazebo_thrust_plugin.so">\n')
+        xacro_file.write('    <plugin name="wamv_gazebo_thrust" '
+                         'filename="libusv_gazebo_thrust_plugin.so">\n')
         xacro_file.write('      <cmdTimeout>1.0</cmdTimeout>\n')
-        xacro_file.write('      ' + macro_call_gen('include', {'filename': '$(find wamv_gazebo)/urdf/thruster_layouts/wamv_gazebo_thruster_config.xacro'}))
+        xacro_file.write('      <xacro:include filename="$(find wamv_gazebo)'
+                         '/urdf/thruster_layouts/'
+                         'wamv_gazebo_thruster_config.xacro" />\n')
         for key, objects in requested_macros.items():
             for obj in objects:
-                xacro_file.write('      ' + macro_call_gen('wamv_gazebo_thruster_config', {'name': obj['prefix']}))
+                xacro_file.write('      ' +
+                                 macro_call_gen('wamv_gazebo_thruster_config',
+                                                {'name': obj['prefix']}))
         xacro_file.write('    </plugin>\n')
         xacro_file.write('  </gazebo>\n')
 
@@ -81,4 +85,3 @@ def macro_call_gen(name, params={}):
         macro_call += '%s="%s" ' % (i, str(params[i]))
     macro_call += '/>\n'
     return macro_call
-
