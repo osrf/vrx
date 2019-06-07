@@ -125,6 +125,7 @@ namespace asv
     /// \brief The component wave dirctions (derived).
     public: std::vector<ignition::math::Vector2d> directions;
 
+		/*
     /// \brief Recalculate all derived quantities from inputs.
     public: void Recalculate()
     {
@@ -151,6 +152,75 @@ namespace asv
         const double a = scaleFactor * this->amplitude;
         const double k = this->wavenumber / scaleFactor;
         const double omega = Physics::DeepWaterDispersionToOmega(k);
+        const double phi = this->phase;
+        double q = 0.0;
+        if (a != 0)
+        {
+          q = std::min(1.0, this->steepness / (a * k * this->number));
+        }
+
+        this->amplitudes.push_back(a);        
+        this->angularFrequencies.push_back(omega);
+        this->phases.push_back(phi);
+        this->steepnesses.push_back(q);
+        this->wavenumbers.push_back(k);
+      
+        // Direction
+        const double c = std::cos(n * this->angle);
+        const double s = std::sin(n * this->angle);
+        // const TransformMatrix T(
+        //   c, -s,
+        //   s,  c
+        // );
+        // const ignition::math::Vector2d d = T(this->direction);
+        const ignition::math::Vector2d d(
+          c * this->direction.X() - s * this->direction.Y(),
+          s * this->direction.X() + c * this->direction.Y()
+        );
+        directions.push_back(d);
+      }
+    }
+		*/
+
+	  public: double pm(double omega, double omega_p)
+	  {
+			double alpha = 0.0081;
+			double g = 9.81;
+			return alpha*std::pow(g,2.0)/std::pow(omega,5.0)*std::exp(-(5.0/4.0)*std::pow(omega_p/omega,4));
+		}
+		/// \brief Recalculate all derived quantities from inputs.
+    public: void Recalculate()
+    {
+      // Normalize direction
+      this->direction = Geometry::Normalize(this->direction);
+
+      // Derived mean values
+      this->angularFrequency = 2.0 * M_PI / this->period;
+      this->wavenumber = Physics::DeepWaterDispersionToWavenumber(this->angularFrequency);
+      this->wavelength = 2.0 * M_PI / this->wavenumber;
+
+      // Update components
+      this->angularFrequencies.clear();
+      this->amplitudes.clear();
+      this->phases.clear();
+      this->wavenumbers.clear();
+      this->steepnesses.clear();
+      this->directions.clear();
+
+			// Vector for spaceing
+			std::vector<double> omega_spacing;
+			omega_spacing.push_back(this->angularFrequency*(1.0-1.0/this->scale));
+			omega_spacing.push_back(this->angularFrequency*(this->scale-1.0/this->scale)/2.0);
+			omega_spacing.push_back(this->angularFrequency*(this->scale-1.0));
+			
+      for (size_t i=0; i<this->number; ++i)
+      {
+        const int n = i - 1;
+        const double scaleFactor = std::pow(this->scale, n);
+				const double omega = this->angularFrequency*scaleFactor;
+				const double pms = pm(omega,this->angularFrequency);
+				const double a = 0.25*std::sqrt(2.0*pms*omega_spacing[i]);
+        const double k = Physics::DeepWaterDispersionToWavenumber(omega);
         const double phi = this->phase;
         double q = 0.0;
         if (a != 0)
