@@ -8,7 +8,6 @@ def create_xacro_file(xacro_target,
                       boiler_plate_bot='',
                       num_test=lambda name, num: True,
                       param_test=lambda name, params={}: True,
-                      xacro_type="",
                       ):
     """
     Purpose: Create a .xacro file to create a custom WAM-V .urdf
@@ -22,7 +21,6 @@ def create_xacro_file(xacro_target,
         boiler_plate_bot (str): String to end the xacro file
         num_test (function): test if the number of macro types is allowed
         param_test (function): test if a macro call parameters are sensible
-        xacro_type (str): type of xacro file
 
     Creates a xacro file at 'xacro_target'
     """
@@ -58,22 +56,37 @@ def create_xacro_file(xacro_target,
             xacro_file.write('    ' + macro_call_gen(key, i))
         xacro_file.write('\n')
 
-    if xacro_type == "thruster":
-        # WAM-V Gazebo thrust plugin setup
-        xacro_file.write('  <gazebo>\n')
-        xacro_file.write('    <plugin name="wamv_gazebo_thrust" '
-                         'filename="libusv_gazebo_thrust_plugin.so">\n')
-        xacro_file.write('      <cmdTimeout>1.0</cmdTimeout>\n')
-        xacro_file.write('      <xacro:include filename="$(find wamv_gazebo)'
-                         '/urdf/thruster_layouts/'
-                         'wamv_gazebo_thruster_config.xacro" />\n')
-        for key, objects in requested_macros.items():
-            for obj in objects:
-                xacro_file.write('      ' +
-                                 macro_call_gen('wamv_gazebo_thruster_config',
-                                                {'name': obj['prefix']}))
-        xacro_file.write('    </plugin>\n')
-        xacro_file.write('  </gazebo>\n')
+    xacro_file.write(boiler_plate_bot)
+    xacro_file.close()
+
+
+def add_gazebo_thruster_config(xacro_target,
+                               yaml_file=None,
+                               requested_macros=None,
+                               boiler_plate_top='',
+                               boiler_plate_bot='',
+                               ):
+    # Initialize xacro file for appending
+    xacro_file = open(xacro_target, 'ab')
+    xacro_file.write(boiler_plate_top)
+
+    # If requested_macros not given, then open yaml_file
+    if requested_macros is None:
+        s = open(yaml_file, 'r')
+        requested_macros = yaml.load(s)
+
+        # Handle case with empty yaml file
+        if requested_macros is None:
+            xacro_file.write(boiler_plate_bot)
+            xacro_file.close()
+            return
+
+    # WAM-V Gazebo thrust plugin setup
+    for key, objects in requested_macros.items():
+        for obj in objects:
+            xacro_file.write('      ' +
+                             macro_call_gen('wamv_gazebo_thruster_config',
+                                            {'name': obj['prefix']}))
 
     xacro_file.write(boiler_plate_bot)
     xacro_file.close()

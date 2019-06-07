@@ -6,6 +6,7 @@ from compliance import Sensor_Compliance
 from compliance import Thruster_Compliance
 
 from .. utils import create_xacro_file
+from .. utils import add_gazebo_thruster_config
 
 
 def main():
@@ -65,21 +66,39 @@ def create_thruster_xacro():
                                  'engine.xacro" />\n')
 
     # Things to close the macro
-    thruster_boiler_plate_bot = '</robot>'
+    thruster_boiler_plate_bot = ''
 
     # Check if valid number of thrusters and valid thruster parameters
     comp = Thruster_Compliance()
     thruster_num_test = comp.number_compliance
     thruster_param_test = comp.param_compliance
 
+    # Create thruster xacro with thruster macros
     create_xacro_file(yaml_file=thruster_yaml,
                       xacro_target=thruster_xacro_target,
                       boiler_plate_top=thruster_boiler_plate_top,
                       boiler_plate_bot=thruster_boiler_plate_bot,
                       num_test=thruster_num_test,
                       param_test=thruster_param_test,
-                      xacro_type="thruster"
                       )
+
+    gz_boiler_plate_top = ('  <gazebo>\n'
+                           '    <plugin name="wamv_gazebo_thrust" '
+                           'filename="libusv_gazebo_thrust_plugin.so">\n'
+                           '      <cmdTimeout>1.0</cmdTimeout>\n'
+                           '      <xacro:include filename="$(find wamv_gazebo)'
+                           '/urdf/thruster_layouts/'
+                           'wamv_gazebo_thruster_config.xacro" />\n')
+    gz_boiler_plate_bot = ('    </plugin>\n'
+                           '  </gazebo>\n'
+                           '</robot>')
+
+    # Append gazebo thruster config to thruster xacro
+    add_gazebo_thruster_config(yaml_file=thruster_yaml,
+                               xacro_target=thruster_xacro_target,
+                               boiler_plate_top=gz_boiler_plate_top,
+                               boiler_plate_bot=gz_boiler_plate_bot,
+                               )
 
 
 def create_sensor_xacro():
@@ -104,13 +123,13 @@ def create_sensor_xacro():
     sensor_num_test = comp.number_compliance
     sensor_param_test = comp.param_compliance
 
+    # Create sensor xacro with sensor macros
     create_xacro_file(yaml_file=sensor_yaml,
                       xacro_target=sensor_xacro_target,
                       boiler_plate_top=sensor_boiler_plate_top,
                       boiler_plate_bot=sensor_boiler_plate_bot,
                       num_test=sensor_num_test,
                       param_test=sensor_param_test,
-                      xacro_type="sensor"
                       )
 
 
