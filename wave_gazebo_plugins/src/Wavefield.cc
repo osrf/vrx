@@ -56,6 +56,7 @@ namespace asv
   {
     /// \brief Constructor.
     public: WaveParametersPrivate():
+			model(""),
       number(1), 
       scale(2.0),
       angle(2.0*M_PI/10.0),
@@ -67,10 +68,14 @@ namespace asv
       angularFrequency(2.0*M_PI),
       wavelength(2*M_PI/Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)), 
       wavenumber(Physics::DeepWaterDispersionToWavenumber(2.0*M_PI)),
-			tau(1.0)
+			tau(1.0),
+			gain(1.0)
     {
     }
 
+		/// \brief Name of wavefield model to use - must be "PMS" or "CWR"
+	  public: std::string model;
+		
     /// \brief The number of component waves.
     public: size_t number;
 
@@ -97,6 +102,9 @@ namespace asv
 
 		/// \brief The time constant for exponential increasing waves on startup
    	public: double tau;
+
+		/// \brief The multiplier applied to PM spectra 
+   	public: double gain;
 
     /// \brief The mean wave angular frequency (derived).    
     public: double angularFrequency;
@@ -125,9 +133,8 @@ namespace asv
     /// \brief The component wave dirctions (derived).
     public: std::vector<ignition::math::Vector2d> directions;
 
-		/*
-    /// \brief Recalculate all derived quantities from inputs.
-    public: void Recalculate()
+    /// \brief Recalculate for constant wavelength-amplitude ratio
+    public: void RecalculateCmr()
     {
       // Normalize direction
       this->direction = Geometry::Normalize(this->direction);
@@ -180,18 +187,19 @@ namespace asv
         directions.push_back(d);
       }
     }
-		*/
-
+		
+		// \brief Pierson-Moskowitz wave spectrum
 	  public: double pm(double omega, double omega_p)
 	  {
 			double alpha = 0.0081;
 			double g = 9.81;
 			return alpha*std::pow(g,2.0)/std::pow(omega,5.0)*std::exp(-(5.0/4.0)*std::pow(omega_p/omega,4));
 		}
-		/// \brief Recalculate all derived quantities from inputs.
-    public: void Recalculate()
-    {
-      // Normalize direction
+	 
+		/// \brief Recalculate for Pierson-Moskowitz spectrum sampling model
+		public: void RecalculatePms()
+		{
+			// Normalize direction
       this->direction = Geometry::Normalize(this->direction);
 
       // Derived mean values
@@ -219,7 +227,7 @@ namespace asv
         const double scaleFactor = std::pow(this->scale, n);
 				const double omega = this->angularFrequency*scaleFactor;
 				const double pms = pm(omega,this->angularFrequency);
-				const double a = 0.25*std::sqrt(2.0*pms*omega_spacing[i]);
+				const double a = this->gain*std::sqrt(2.0*pms*omega_spacing[i]);
         const double k = Physics::DeepWaterDispersionToWavenumber(omega);
         const double phi = this->phase;
         double q = 0.0;
@@ -249,6 +257,26 @@ namespace asv
         directions.push_back(d);
       }
     }
+	  /// \brief Recalculate all derived quantities from inputs.
+    public: void Recalculate()
+    {
+			if (!this->model.compare("PMS"))
+			{
+				gzmsg << "Using Pierson-Moskowitz spectrum sampling wavefield model "
+							<< std::endl;
+				this->RecalculatePms();
+			}
+			else if (!this->model.compare("CWR"))
+			{
+				gzmsg << "Using Constant wavelength-ampltude ratio wavefield model "
+							<< std::endl;
+				this->RecalculateCmr();
+			}
+			else
+			{
+				gzerr << "Wavefield model specified as <" << this->model << "> which is not one of the two supported wavefield models: PMS or CWR!!!" << std::endl;
+			}
+		}
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,6 +297,13 @@ namespace asv
     // Clear 
     _msg.mutable_param()->Clear();
 
+		    // "model"
+    {
+      auto nextParam = _msg.add_param();
+      nextParam->set_name("model");
+      nextParam->mutable_value()->set_type(gazebo::msgs::Any::STRING);
+      nextParam->mutable_value()->set_string_value(this->data->model);
+    }
     // "number"
     {
       auto nextParam = _msg.add_param();
@@ -318,6 +353,13 @@ namespace asv
       nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
       nextParam->mutable_value()->set_double_value(this->data->tau);
     }
+		// "gain"
+    {
+      auto nextParam = _msg.add_param();
+      nextParam->set_name("gain");
+      nextParam->mutable_value()->set_type(gazebo::msgs::Any::DOUBLE);
+      nextParam->mutable_value()->set_double_value(this->data->gain);
+    }
     // "direction"
     {
       const auto& direction = this->data->direction;
@@ -332,6 +374,7 @@ namespace asv
 
   void WaveParameters::SetFromMsg(const gazebo::msgs::Param_V& _msg)
   {
+		this->data->model     = Utilities::MsgParamString(_msg, "model", this->data->model);
     this->data->number    = Utilities::MsgParamSizeT(_msg,    "number",     this->data->number);
     this->data->amplitude = Utilities::MsgParamDouble(_msg,   "amplitude",  this->data->amplitude);
     this->data->period    = Utilities::MsgParamDouble(_msg,   "period",     this->data->period);
@@ -341,12 +384,14 @@ namespace asv
     this->data->angle     = Utilities::MsgParamDouble(_msg,   "angle",      this->data->angle);
     this->data->steepness = Utilities::MsgParamDouble(_msg,   "steepness",  this->data->steepness);
 		this->data->tau = Utilities::MsgParamDouble(_msg,   "tau",  this->data->tau);
+		this->data->gain = Utilities::MsgParamDouble(_msg,   "gain",  this->data->gain);
 
     this->data->Recalculate();
   }
 
   void WaveParameters::SetFromSDF(sdf::Element& _sdf)
   {
+		this->data->model     = Utilities::SdfParamString(_sdf,"model","default");
     this->data->number    = Utilities::SdfParamSizeT(_sdf,    "number",     this->data->number);
     this->data->amplitude = Utilities::SdfParamDouble(_sdf,   "amplitude",  this->data->amplitude);
     this->data->period    = Utilities::SdfParamDouble(_sdf,   "period",     this->data->period);
@@ -356,6 +401,7 @@ namespace asv
     this->data->angle     = Utilities::SdfParamDouble(_sdf,   "angle",      this->data->angle);
     this->data->steepness = Utilities::SdfParamDouble(_sdf,   "steepness",  this->data->steepness);
 		this->data->tau = Utilities::SdfParamDouble(_sdf,   "tau",  this->data->tau);
+		this->data->gain = Utilities::SdfParamDouble(_sdf,   "gain",  this->data->gain);
 
     this->data->Recalculate();
   }
@@ -415,6 +461,11 @@ namespace asv
     return this->data->tau;
   }    
 
+	float WaveParameters::Gain() const
+  {
+    return this->data->gain;
+  }    
+
   ignition::math::Vector2d WaveParameters::Direction() const
   {
     return this->data->direction;
@@ -467,6 +518,11 @@ namespace asv
     this->data->tau = _tau;
     //this->data->Recalculate();
   }
+	void WaveParameters::SetGain(double _gain)
+  {
+    this->data->gain = _gain;
+    //this->data->Recalculate();
+  }
 
   void WaveParameters::SetDirection(const ignition::math::Vector2d& _direction)
   {
@@ -515,6 +571,7 @@ namespace asv
     gzmsg << "period:     " << this->data->period << std::endl;
 		gzmsg << "direction:  " << this->data->direction << std::endl;
 		gzmsg << "tau:  " << this->data->tau << std::endl;
+		gzmsg << "gain:  " << this->data->gain << std::endl;
 		gzmsg << "Derived Parameters:" << std::endl;
     gzmsg << "amplitudes:  " << this->data->amplitudes << std::endl;
     gzmsg << "wavenumbers: " << this->data->wavenumbers << std::endl;

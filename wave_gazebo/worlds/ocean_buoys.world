@@ -61,20 +61,19 @@
       <include>
 				<uri>model://polyform_a3</uri>
       </include>
+			</model>
+			    <model name="surmark46104">
+      <include>
+				<uri>model://surmark46104</uri>
+				<pose>0 -1 4 0 0 0 </pose>
+      </include>
     </model>
 		-->
 		
     <model name="wavegauge">
-      <pose>1 1 0 0 0 0 </pose>
+      <pose>0 0 0 0 0 0 </pose>
       <include>
 				<uri>model://wavegauge</uri>
-      </include>
-    </model>
-
-    <model name="surmark46104">
-      <include>
-				<uri>model://surmark46104</uri>
-				<pose>0 -1 4 0 0 0 </pose>
       </include>
     </model>
 	

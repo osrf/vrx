@@ -114,6 +114,9 @@ namespace asv
 		/// \brief Time-constant for starting waves.
     public: float Tau() const;
 
+		/// \brief Amplitude multiplier for PMS.
+    public: float Gain() const;
+
     /// \brief A two component vector specifiying the direction of the mean wave.
     public: ignition::math::Vector2d Direction() const;
 
@@ -159,6 +162,11 @@ namespace asv
     ///
     /// \param[in] _tau The time constant.
     public: void SetTau(double _tau);
+
+		/// \brief Set the PMS amplitude multiplier
+    ///
+    /// \param[in] _gain The multiplier
+    public: void SetGain(double _gain);
 
     /// \brief Set the mean wave direction.
     ///
