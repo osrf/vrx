@@ -17,7 +17,7 @@ def create_xacro_file(xacro_target,
         xacro_target (str): Target file for writing the xacro to
                             NOTE: will overwrite an existing file
         yaml_file (str): .yaml file with requested macros
-        requested_macros (dict): dict is passed directly => yaml file ignored
+        requested_macros (dict): if dict is passed directly => ignore yaml file
         boiler_plate_top (str): String to start the xacro file
         boiler_plate_bot (str): String to end the xacro file
         num_test (function): test if the number of macro types is allowed
@@ -67,6 +67,23 @@ def add_gazebo_thruster_config(xacro_target,
                                boiler_plate_top='',
                                boiler_plate_bot='',
                                ):
+    """
+    Purpose: Append gazebo thruster config tags to a .xacro file to
+             create a custom WAM-V .urdf
+
+    Args:
+        xacro_target (str): Target file for writing the xacro to
+                            NOTE: will append an existing file
+                                  should be used on thruster
+                                  xacro file created by
+                                  create_xacro_file()
+        yaml_file (str): .yaml file with requested macros
+        requested_macros (dict): if dict is passed directly => ignore yaml file
+        boiler_plate_top (str): First string to append to the xacro file
+        boiler_plate_bot (str): Last string to append to the xacro file
+
+    Appends gazebo thruster config tags to 'xacro_target'
+    """
     # Initialize xacro file for appending
     xacro_file = open(xacro_target, 'ab')
     xacro_file.write(boiler_plate_top)

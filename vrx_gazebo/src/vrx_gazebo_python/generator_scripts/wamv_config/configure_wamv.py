@@ -50,6 +50,10 @@ def main():
 
 
 def create_thruster_xacro():
+    """
+    Purpose: Create a thruster xacro file using the given
+             rosparameters
+    """
     # Get yaml files for thruster number and pose
     thruster_yaml = rospy.get_param('thruster_yaml')
 
@@ -102,6 +106,10 @@ def create_thruster_xacro():
 
 
 def create_sensor_xacro():
+    """
+    Purpose: Create a sensor xacro file using the given
+             rosparameters
+    """
     # Get yaml files for sensor number and pose
     sensor_yaml = rospy.get_param('sensor_yaml')
 
