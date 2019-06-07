@@ -1,17 +1,26 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="usv_wind_gazebo" params="n:=0 **models" >
+	<xacro:macro name="usv_wind_gazebo" params="n:=0 
+						    **models
+						    direction:=270
+						    mean_vel:=10
+						    var_gain:=100
+						    var_time:=5
+						    seed:=''
+						    ros_update_rate:=1
+						    " >
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <plugin name="wind" filename="libusv_gazebo_wind_plugin.so">
         <!-- models to be effected by the wind -->
 	<models_n>${n}</models_n> 
 	<xacro:insert_block name="models"/>
         <!-- Wind -->
-        <wind_direction>-0.5 0.5 0 </wind_direction>
-        <wind_mean_velocity>10</wind_mean_velocity>
-        <var_wind_gain_constants>100</var_wind_gain_constants>
-        <var_wind_time_constants>5</var_wind_time_constants>
-        <random_seed></random_seed> <!-- set to zero/empty to randomize -->
+	<wind_direction>${direction}</wind_direction> <!-- in degrees -->
+	<wind_mean_velocity>${mean_vel}</wind_mean_velocity>
+	<var_wind_gain_constants>${var_gain}</var_wind_gain_constants>
+	<var_wind_time_constants>${var_time}</var_wind_time_constants>
+	<random_seed>${seed}</random_seed> <!-- set to zero/empty to randomize -->
+	<update_rate>${ros_update_rate}</update_rate>
       </plugin>
   </xacro:macro>
 </world>

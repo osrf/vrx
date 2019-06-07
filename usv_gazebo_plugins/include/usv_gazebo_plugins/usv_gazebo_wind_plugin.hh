@@ -25,6 +25,9 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #define USV_GAZEBO_PLUGINS_WIND_HH_
 
 #include <vector>
+#include <ros/ros.h>
+#include <memory>
+#include <string>
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
@@ -42,12 +45,21 @@ namespace gazebo
   /// <link_name_i> where 0<=i<models_n, name of link to be effected by wind on model i
   /// <coeff_vector_i> where 0<=i<models_n, the wind coeffcient vector for the link on model i
   ///
+  /// <wind_direction>: Wind direction vector. Wind direction is specified as
+  /// the positive direction of the wind velocity vector in the horizontal plane
+  /// in degrees using the ENU coordinate convention
   ///
-  /// <wind_direction>: Wind direction vector.
+  ///
   /// <wind_mean_velocity>: The wind average velocity.
+  ///
   /// <var_wind_gain_constants>: Variable wind speed gain constant.
+  ///
   /// <var_wind_time_constants>: Variable wind speed time constant.
+  ///
   /// <random_seed>: Set the seed for wind speed randomization.
+  ///
+  /// <update_rate>: Publishing rate of the wind topic. If set to 0, it will not
+  /// publish, if set to a -1 it will publish every simulation iteration.
   /// "Station-keeping control of an unmanned surface vehicle exposed to
   /// current and wind disturbances".
   class UsvWindPlugin : public WorldPlugin
@@ -108,6 +120,27 @@ namespace gazebo
 
     /// \brief Velocity at previous time.
     private: double previousVarVel;
+
+    /// \brief ROS node handle.
+    private: std::unique_ptr<ros::NodeHandle> rosNode;
+
+    /// \brief Publisher for wind speed.
+    private: ros::Publisher windSpeedPub;
+
+    /// \brief Publisher for wind direction.
+    private: ros::Publisher windDirectionPub;
+
+    /// \brief Topic where the wind speed is published.
+    private: std::string topicWindSpeed = "/wind_speed";
+
+    /// \brief Topic where the wind direction is published.
+    private: std::string topicWindDirection = "/wind_direction";
+
+    /// \brief Last time wind speed and direction was published.
+    private: double lastPublishTime = 0;
+
+    /// \brief Update rate buffer for wind speed and direction.
+    private: double updateRate;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
