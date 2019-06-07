@@ -3,9 +3,6 @@
   <arg name="namespace" value="wamv_config"/>
 
   <group ns="$(arg namespace)">
-    <arg name="available_sensors" default="$(find wamv_description)/urdf/thrusters"/>
-    <param name="available_sensors" value="$(arg available_sensors)"/>
-
     <arg name="sensor_yaml" default=""/>
     <param name="sensor_yaml" value="$(arg sensor_yaml)"/>
 
