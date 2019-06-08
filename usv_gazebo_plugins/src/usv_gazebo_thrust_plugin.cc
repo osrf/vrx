@@ -21,6 +21,8 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <boost/algorithm/clamp.hpp>
+#include <cmath>
 #include <ros/time.h>
 
 #include <functional>
@@ -34,9 +36,11 @@ Thruster::Thruster(UsvThrust *_parent)
 {
   // Set some defaults
   this->cmdTopic = "thruster_default_cmdTopic";
+  this->angleTopic = "thruster_default_angleTopic";
   this->maxCmd = 1.0;
   this->maxForceFwd = 100.0;
   this->maxForceRev = -100.0;
+  this->maxAngle = M_PI / 2;
   this->mappingType = 0;
   this->plugin = _parent;
 
@@ -62,6 +66,15 @@ void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
     this->lastCmdTime = this->plugin->world->GetSimTime();
   #endif
   this->currCmd = _msg->data;
+}
+
+//////////////////////////////////////////////////
+void Thruster::OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg)
+{
+  // When we get a new thrust angle!
+  ROS_DEBUG_STREAM("New thrust angle! " << _msg->data);
+  std::lock_guard<std::mutex> lock(this->plugin->mutex);
+  this->currAngle = boost::algorithm::clamp(_msg->data, -this->maxAngle, this->maxAngle);
 }
 
 //////////////////////////////////////////////////
@@ -160,6 +173,8 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
       thruster.maxForceRev =
         this->SdfParamDouble(thrusterSDF, "maxForceRev", -100.0);
+      thruster.maxAngle = this->SdfParamDouble(thrusterSDF, "maxAngle", M_PI / 2);
+
       if (thrusterSDF->HasElement("mappingType"))
       {
         thruster.mappingType = thrusterSDF->Get<int>("mappingType");
@@ -173,7 +188,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
           "Using default value of <" << thruster.mappingType << ">.");
       }
 
-      // Parse for subscription topic
+      // Parse for cmd subscription topic
       if (thrusterSDF->HasElement("cmdTopic"))
       {
         thruster.cmdTopic = thrusterSDF->Get<std::string>("cmdTopic");
@@ -181,6 +196,17 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       else
       {
         ROS_ERROR_STREAM("Please specify a cmdTopic (for ROS subscription) "
+          "for each thruster!");
+      }
+
+      // Parse for angle subscription topic
+      if (thrusterSDF->HasElement("angleTopic"))
+      {
+        thruster.angleTopic = thrusterSDF->Get<std::string>("angleTopic");
+      }
+      else
+      {
+        ROS_ERROR_STREAM("Please specify a angleTopic (for ROS subscription) "
           "for each thruster!");
       }
 
@@ -217,6 +243,11 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     // Subscribe to commands for each thruster.
     this->thrusters[i].cmdSub = this->rosnode->subscribe(
       this->thrusters[i].cmdTopic, 1, &Thruster::OnThrustCmd,
+      &this->thrusters[i]);
+
+    // Subscribe to angles for each thruster.
+    this->thrusters[i].angleSub = this->rosnode->subscribe(
+      this->thrusters[i].angleTopic, 1, &Thruster::OnThrustAngle,
       &this->thrusters[i]);
   }
 
@@ -295,15 +326,17 @@ void UsvThrust::Update()
       switch (this->thrusters[i].mappingType)
       {
         case 0:
-          tforcev.X() = this->ScaleThrustCmd(this->thrusters[i].currCmd,
+          tforcev.X() = cos(this->thrusters[i].currAngle) * this->ScaleThrustCmd(this->thrusters[i].currCmd,
                                            this->thrusters[i].maxCmd,
                                            this->thrusters[i].maxForceFwd,
                                            this->thrusters[i].maxForceRev);
+          tforcev.Y() = tan(this->thrusters[i].currAngle) * tforcev.X();
           break;
         case 1:
-          tforcev.X() = this->GlfThrustCmd(this->thrusters[i].currCmd,
+          tforcev.X() = cos(this->thrusters[i].currAngle) * this->GlfThrustCmd(this->thrusters[i].currCmd,
                                          this->thrusters[i].maxForceFwd,
                                          this->thrusters[i].maxForceRev);
+          tforcev.Y() = tan(this->thrusters[i].currAngle) * tforcev.X();
           break;
         default:
             ROS_FATAL_STREAM("Cannot use mappingType=" <<
