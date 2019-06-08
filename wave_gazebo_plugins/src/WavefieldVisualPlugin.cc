@@ -15,16 +15,14 @@
  *
 */
 
-#include "wave_gazebo_plugins/WavefieldVisualPlugin.hh"
-#include "wave_gazebo_plugins/Gazebo.hh"
-#include "wave_gazebo_plugins/Wavefield.hh"
-#include "wave_gazebo_plugins/Utilities.hh"
+#include <memory>
+#include <thread>
+#include <vector>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/common/Plugin.hh>
-#include "gazebo/rendering/ogre_gazebo.h"
 #include <gazebo/rendering/rendering.hh>
 #include <gazebo/rendering/RenderTypes.hh>
 #include <gazebo/rendering/Scene.hh>
@@ -35,15 +33,17 @@
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
-#include <memory>
-#include <thread>
-#include <vector>
+#include "gazebo/rendering/ogre_gazebo.h"
+
+#include "wave_gazebo_plugins/WavefieldVisualPlugin.hh"
+#include "wave_gazebo_plugins/Gazebo.hh"
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/Utilities.hh"
 
 using namespace gazebo;
 
 namespace asv
 {
-
   GZ_REGISTER_VISUAL_PLUGIN(WavefieldVisualPlugin)
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ namespace asv
       gzerr << "Vector must have size 2 or less" << std::endl;
       return;
     }
-    for (size_t i=0; i<_v.size(); ++i)
+    for (size_t i = 0; i < _v.size(); ++i)
     {
       _vout[i] = _v[i];
     }
@@ -79,7 +79,7 @@ namespace asv
       gzerr << "Vector must have size 3 or less" << std::endl;
       return;
     }
-    for (size_t i=0; i<_v.size(); ++i)
+    for (size_t i = 0; i < _v.size(); ++i)
     {
       _vout[i] = _v[i];
     }
@@ -234,7 +234,8 @@ namespace asv
 
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Load WavefieldVisualPlugin [thread: " << threadId << "]" << std::endl;
+    // gzmsg << "Load WavefieldVisualPlugin [thread: "
+		//       << threadId << "]" << std::endl;
 
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
@@ -288,7 +289,8 @@ namespace asv
 
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Init WavefieldVisualPlugin [thread: " << threadId << "]" << std::endl;
+    // gzmsg << "Init WavefieldVisualPlugin [thread: "
+		//       << threadId << "]" << std::endl;
   
     if (!this->data->isInitialised)
     {
@@ -424,9 +426,9 @@ namespace asv
     visual.SetMaterialShaderParam(
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
 #else
-		rendering::SetMaterialShaderParam(visual,
+		rendering::SetMaterialShaderParam(visual, 
 			"Nwaves",shaderType,std::to_string(this->data->waveParams->Number()));
-    rendering::SetMaterialShaderParam(visual,
+    rendering::SetMaterialShaderParam(visual, 
       "amplitude", shaderType, Ogre::StringConverter::toString(amplitude));
     rendering::SetMaterialShaderParam(visual,
       "wavenumber", shaderType, Ogre::StringConverter::toString(wavenumber));
@@ -447,4 +449,4 @@ namespace asv
 #endif
   }
 
-} // namespace asv
+}  // namespace asv

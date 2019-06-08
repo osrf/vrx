@@ -53,19 +53,20 @@ void RequestResponseUtility()
 {
 	gazebo::transport::init();
 	gazebo::transport::run();
-	boost::shared_ptr<gazebo::msgs::Response> response = gazebo::transport::request("robotx_example_course","wave_param");
+	boost::shared_ptr<gazebo::msgs::Response> response = \
+		gazebo::transport::request("robotx_example_course", "wave_param");
 	std::cout << response->DebugString() << std::endl;
 	gazebo::transport::fini();
 }
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
-{	
-	std::cout << "Attempt to get a response with utility function..."
+{
+	std::cout << "Attempt to get a response with utility function..." \
 						<< std::endl;
 	RequestResponseUtility();
 
-	// Interestingly I needed to put the utilitye function
+	// Interestingly I needed to put the utility function
 	// (gazebo::transport::request) in a separate funtion for the
 	// by-hand pub/sub example to work?
 	std::cout << "Now try to do the same with publish/subscribe..." << std::endl;
@@ -77,18 +78,16 @@ int main(int _argc, char **_argv)
 
 	// Subscribe
 	std::string topic("~/response");
-	gazebo::transport::SubscriberPtr sub =
-		node->Subscribe(topic, &OnResponse);
+	gazebo::transport::SubscriberPtr sub = node->Subscribe(topic, &OnResponse);
 	
 	// Publish to a Gazebo topic
-	gazebo::transport::PublisherPtr pub =
+	gazebo::transport::PublisherPtr pub = \
     node->Advertise<gazebo::msgs::Request>("~/request");
 
 	// Wait for a subscriber to connect, but don't block forever...
 	if ( !pub->WaitForConnection(gazebo::common::Time(1, 0)) )
 	{
 		std::cout << "Error - couldn't connect to subscriber!" << std::endl;
-		//return 1;
 	}
 	
 	// Create a request message
@@ -105,13 +104,9 @@ int main(int _argc, char **_argv)
 		{
 			std::cout << "Publish request" << std::endl;
 			g_rx = false;
-			//pub->Publish(*msg);
 		}
-
 	}
-
 	std::cout << "Shutting down" << std::endl;
 	sub.reset();
 	gazebo::transport::fini();
-	
 }

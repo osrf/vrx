@@ -15,16 +15,18 @@
  *
 */
 
-#include "wave_gazebo_plugins/Geometry.hh"
+#include <cmath>
 
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
-#include <cmath>
+#include "wave_gazebo_plugins/Geometry.hh"
+
 
 namespace asv 
 {
-  ignition::math::Vector2d Geometry::Normalize(const ignition::math::Vector2d& _v)
+  ignition::math::Vector2d
+	Geometry::Normalize(const ignition::math::Vector2d& _v)
   {
     if (_v == ignition::math::Vector2d::Zero)
       return _v;
@@ -32,7 +34,8 @@ namespace asv
       return _v/_v.Length(); 
   }
 
-  ignition::math::Vector3d Geometry::Normalize(const ignition::math::Vector3d& _v)
+  ignition::math::Vector3d
+	Geometry::Normalize(const ignition::math::Vector3d& _v)
   {
     if (_v == ignition::math::Vector3d::Zero)
       return _v;
@@ -53,5 +56,5 @@ namespace asv
       return n/n.Length(); 
   }
   
-} // namespace asv
+}  // namespace asv
 

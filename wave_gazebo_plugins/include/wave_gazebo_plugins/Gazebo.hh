@@ -47,6 +47,6 @@ namespace gazebo
 
   }; // namespace rendering
 
-} // namespace gazebo
+}  // namespace gazebo
 
-#endif // _WAVE_GAZEBO_PLUGINS_GAZEBO_HH_
+#endif  // _WAVE_GAZEBO_PLUGINS_GAZEBO_HH_

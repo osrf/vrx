@@ -15,10 +15,10 @@
  *
 */
 
-#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
-#include "wave_gazebo_plugins/Wavefield.hh"
-#include "wave_gazebo_plugins/WavefieldEntity.hh"
-#include "wave_gazebo_plugins/Utilities.hh"
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <thread>
 
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/common.hh>
@@ -30,20 +30,18 @@
 #include <gazebo/msgs/param.pb.h>
 #include <gazebo/msgs/param_v.pb.h>
 
-#include <algorithm>
-#include <iostream>
-#include <string>
-#include <thread>
-
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/Utilities.hh"
 using namespace gazebo;
 
 namespace asv
 {
-
   GZ_REGISTER_MODEL_PLUGIN(WavefieldModelPlugin)
 
-///////////////////////////////////////////////////////////////////////////////
-// WavefieldModelPluginPrivate
+  /////////////////////////////////////////////////////////////////////////////
+  // WavefieldModelPluginPrivate
 
   /// \internal
   /// \brief Private data for the WavefieldModelPlugin
@@ -109,11 +107,13 @@ namespace asv
   {
   }
 
-  void WavefieldModelPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+  void WavefieldModelPlugin::Load(physics::ModelPtr _model, \
+																	sdf::ElementPtr _sdf)
   {
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Load WavefieldModelPlugin [thread: " << threadId << "]" << std::endl;
+    // gzmsg << "Load WavefieldModelPlugin [thread: "
+		//       << threadId << "]" << std::endl;
 
     GZ_ASSERT(_model != nullptr, "Invalid parameter _model");
     GZ_ASSERT(_sdf != nullptr, "Invalid parameter _sdf");
@@ -144,10 +144,12 @@ namespace asv
 
     // Parameters
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
-    this->data->updateRate = Utilities::SdfParamDouble(*_sdf, "update_rate", 30.0);
+    this->data->updateRate = Utilities::SdfParamDouble(*_sdf, "update_rate", \
+																											 30.0);
 
     // Wavefield
-    this->data->wavefieldEntity.reset(new ::asv::WavefieldEntity(this->data->model));
+    this->data->wavefieldEntity.reset( \
+			new ::asv::WavefieldEntity(this->data->model));
     this->data->wavefieldEntity->Load(_sdf);
     this->data->wavefieldEntity->Init();
 
@@ -161,7 +163,8 @@ namespace asv
   {
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
-    // gzmsg << "Init WavefieldModelPlugin [thread: " << threadId << "]" << std::endl;
+    // gzmsg << "Init WavefieldModelPlugin [thread: "
+		//       << threadId << "]" << std::endl;
   }
 
   void WavefieldModelPlugin::Fini()
@@ -178,7 +181,8 @@ namespace asv
   {
     GZ_ASSERT(this->data->world != nullptr, "World is NULL");
     GZ_ASSERT(this->data->model != nullptr, "Model is NULL");
-    GZ_ASSERT(this->data->wavefieldEntity != nullptr, "Wavefield Entity is NULL");
+    GZ_ASSERT(this->data->wavefieldEntity != nullptr, \
+							"Wavefield Entity is NULL");
 
     if (!this->data->isStatic)
     {
@@ -203,9 +207,10 @@ namespace asv
     GZ_ASSERT(_world != nullptr, "World is null");
 
     physics::ModelPtr wavefieldModel = _world->ModelByName(_waveModelName);    
-    if(wavefieldModel == nullptr)
+    if (wavefieldModel == nullptr)
     {
-      gzerr << "No Wavefield Model found with name '" << _waveModelName << "'." << std::endl;
+      gzerr << "No Wavefield Model found with name '"
+						<< _waveModelName << "'." << std::endl;
       return nullptr;
     }
 
@@ -216,11 +221,13 @@ namespace asv
       = boost::dynamic_pointer_cast<WavefieldEntity>(base);
     if (wavefieldEntity == nullptr)
     {
-      gzerr << "Wavefield Entity is null: " << wavefieldEntityName << std::endl;
+      gzerr << "Wavefield Entity is null: "
+						<< wavefieldEntityName << std::endl;
       return nullptr;
     }
-	// BSB - appears this method is not a part of the feature/vrx branch?
-    //GZ_ASSERT(wavefieldEntity->GetWavefield() != nullptr, "Wavefield is null.");
+	  // BSB - appears this method is not a part of the feature/vrx branch?
+    //GZ_ASSERT(wavefieldEntity->GetWavefield() != nullptr, \
+		//          "Wavefield is null.");
 
     return wavefieldEntity->GetWaveParams();
   }

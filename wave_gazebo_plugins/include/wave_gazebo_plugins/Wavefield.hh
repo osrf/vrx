@@ -46,15 +46,14 @@ namespace sdf
 
 namespace asv
 {
-
 ///////////////////////////////////////////////////////////////////////////////
 // WaveParameters
-
   /// \internal
   /// \brief Class to hold private data for WaveParameters.
   class WaveParametersPrivate;
 
-  /// \brief A class to manage the parameters for generating a wave in a wave field.
+  /// \brief A class to manage the parameters for generating a wave
+	/// in a wave field.
   class WaveParameters
   {
     /// \brief Destructor.
@@ -117,7 +116,8 @@ namespace asv
 		/// \brief Amplitude multiplier for PMS.
     public: float Gain() const;
 
-    /// \brief A two component vector specifiying the direction of the mean wave.
+    /// \brief A two component vector specifiying the direction
+		/// of the mean wave.
     public: ignition::math::Vector2d Direction() const;
 
     /// \brief Set the number of wave components (3 max).
@@ -205,16 +205,20 @@ namespace asv
   /// \brief A class to manage sampling depths from a wave field.
   class WavefieldSampler
   {
-    /// \brief Compute the depth at a point directly (no sampling or interpolation).
+    /// \brief Compute the depth at a point directly
+		/// (no sampling or interpolation).
     ///
-    /// This method solves for (x, y) that when input into the Gerstner wave function
-    /// gives the coordinates of the supplied parameter _point (_point.x(), _point.y()),
+    /// This method solves for (x, y) that when input into the
+		/// Gerstner wave function
+    /// gives the coordinates of the supplied parameter
+		/// _point (_point.x(), _point.y()),
     /// and also computes the wave height pz at this point.
     /// The depth h = pz - point.z().  
-    /// This is a numerical method that uses a multi-variate Newton solver to solve
+    /// This is a numerical method that uses a multi-variate
+		/// Newton solver to solve
     /// the two dimensional non-linear system. In general it is not as fast as
-    /// sampling from a discretised wave field with an efficient line intersection
-    /// algorithm.
+    /// sampling from a discretised wave field with an efficient
+		/// line intersection algorithm.
     ///
     /// \param[in] _waveParams  Gerstner wave parameters. 
     /// \param[in] _point       The point at which we want the depth.
@@ -231,11 +235,11 @@ namespace asv
 	  public: static double ComputeDepthSimply(
 			const WaveParameters& _waveParams,
       const ignition::math::Vector3d& _point,
-			double time, double time_init=0);
+			double time, double time_init = 0);
   };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // namespace asv
+}  // namespace asv
 
-#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
+#endif  // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_

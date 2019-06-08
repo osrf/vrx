@@ -17,7 +17,8 @@
 
 /// \file WavefieldVisualPlugin.hh
 /// \brief This file defines a Gazebo VisualPlugin used to render
-/// a wave field and keep it synchronised with the model used in the physics engine.
+/// a wave field and keep it synchronised with the model used in
+/// the physics engine.
 
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_VISUAL_PLUGIN_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_VISUAL_PLUGIN_HH_
@@ -93,10 +94,12 @@ namespace asv
   ///   The scale between the mean and largest / smallest component waves.
   ///
   /// 4. <angle> (double, default: 2*pi/10)
-  ///   The angle between the mean wave direction and the largest / smallest component waves.
+  ///   The angle between the mean wave direction and the 
+	///   largest / smallest component waves.
   ///
   /// 5. <steepness> (double, default: 1.0)
-  ///   A parameter in [0, 1] controlling the wave steepness with 1 being steepest.
+  ///   A parameter in [0, 1] controlling the wave steepness
+	///   with 1 being steepest.
   ///
   /// 6. <amplitude> (double, default: 0.0)
   ///   The amplitude of the mean wave in [m].

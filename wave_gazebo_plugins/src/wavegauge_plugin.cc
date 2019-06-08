@@ -52,7 +52,6 @@ void WaveguagePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     this->fluidLevel = _sdf->Get<double>("fluid_level");
   }
-
 }
 
 /////////////////////////////////////////////////
@@ -60,14 +59,13 @@ void WaveguagePlugin::Init()
 {
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
       std::bind(&WaveguagePlugin::OnUpdate, this));
-
 }
 
 /////////////////////////////////////////////////
 void WaveguagePlugin::OnUpdate()
 {
   // Retrieve the wave model...
-  std::shared_ptr<const WaveParameters> waveParams 
+  std::shared_ptr<const WaveParameters> waveParams \
     = WavefieldModelPlugin::GetWaveParams(
       this->model->GetWorld(), this->waveModelName);
 
@@ -86,12 +84,8 @@ void WaveguagePlugin::OnUpdate()
 	double waveHeightS = WavefieldSampler::ComputeDepthSimply(
       *waveParams, modelPose.Pos(),
 			this->model->GetWorld()->SimTime().Double());
-	/*
-		gzdbg << "Waveheight: directly = " << waveHeight
-		<< ", simply = " << waveHeightS << std::endl;
-	*/
-	
-	// Add the mean water level	
+
+	// Add the mean water level
 	waveHeightS += this->fluidLevel;
 
 	// Set vertical location to match the wave height

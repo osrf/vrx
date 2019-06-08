@@ -15,22 +15,21 @@
  *
 */
 
-#include "wave_gazebo_plugins/Gazebo.hh"
-
-#include <gazebo/gazebo.hh>
-#include <gazebo/common/common.hh>
-#include <gazebo/rendering/rendering.hh>
-
 #include <array>
 #include <iostream>
 #include <iterator>
 #include <string>
 
+#include <gazebo/gazebo.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/rendering/rendering.hh>
+
+#include "wave_gazebo_plugins/Gazebo.hh"
+
 namespace gazebo
 {
   namespace rendering
   {
-
     void SetMaterialShaderParam(
       Visual& _visual,
       const std::string &_paramName,
@@ -128,17 +127,20 @@ namespace gazebo
 
           if (_shaderType == "vertex" && pass->hasVertexProgram())
           {
-            setNamedParam(pass->getVertexProgramParameters(), _paramName, _value);
+            setNamedParam(pass->getVertexProgramParameters(), \
+													_paramName, _value);
           }
           else if (_shaderType == "fragment" && pass->hasFragmentProgram())
           {
-            setNamedParam(pass->getFragmentProgramParameters(), _paramName, _value);
+            setNamedParam(pass->getFragmentProgramParameters(), \
+													_paramName, _value);
           }
           else
           {
             gzerr << "Failed to retrieve shaders for material: '"
                   << _visual.GetMaterialName() << "', technique: '"
-                  << technique->getName() << "', pass: '" << pass->getName() << "'"
+                  << technique->getName() << "', pass: '"
+									<< pass->getName() << "'"
                   << std::endl;
             continue;
           }
@@ -146,7 +148,7 @@ namespace gazebo
       }
     }
 
-  } // namespace rendering
-} // namespace gazebo
+  }  // namespace rendering
+}  // namespace gazebo
 
 ///////////////////////////////////////////////////////////////////////////////

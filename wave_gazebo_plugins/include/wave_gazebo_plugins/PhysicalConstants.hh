@@ -24,14 +24,14 @@
 
 namespace asv
 {
-
 ///////////////////////////////////////////////////////////////////////////////
 // PhysicalConstants
 
   /// \brief A collection of static methods to retrieve physical constants.
   class PhysicalConstants
   {
-    /// \brief Uniform acceleration due to gravity at earth's surface (orientation is z-up).
+    /// \brief Uniform acceleration due to gravity
+		/// at earth's surface (orientation is z-up).
     ///
     /// \return     -9.8 [m s-2].
     public: static double Gravity(); 
@@ -55,6 +55,6 @@ namespace asv
     public: static double WaterKinematicViscosity();
   };
 
-} // namespace asv
+}   // namespace asv
 
-#endif // _WAVE_GAZEBO_PLUGINS_PHYSICAL_CONSTANTS_HH_
+#endif   // _WAVE_GAZEBO_PLUGINS_PHYSICAL_CONSTANTS_HH_

@@ -15,10 +15,10 @@
  *
 */
 
+#include <cmath>
+
 #include "wave_gazebo_plugins/Physics.hh"
 #include "wave_gazebo_plugins/PhysicalConstants.hh"
-
-#include <cmath>
 
 namespace asv 
 {
@@ -35,5 +35,5 @@ namespace asv
     return _omega * _omega / g; 
   }
 
-} // namespace asv
+}  // namespace asv
 

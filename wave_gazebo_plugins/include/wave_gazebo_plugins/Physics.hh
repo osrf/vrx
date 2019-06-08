@@ -26,7 +26,6 @@ namespace asv
 
 ///////////////////////////////////////////////////////////////////////////////
 // Physics
-
   /// \brief A collection of static methods for various physics calculations.
   class Physics
   {
@@ -44,6 +43,6 @@ namespace asv
     public: static double DeepWaterDispersionToWavenumber(double _omega);
   };
   
-} // namespace asv
+}  // namespace asv
 
 #endif // _WAVE_GAZEBO_PLUGINS_PHYSICS_HH_

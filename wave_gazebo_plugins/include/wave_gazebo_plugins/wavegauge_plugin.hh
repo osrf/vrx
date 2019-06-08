@@ -29,45 +29,23 @@
 
 namespace gazebo
 {
-  /// \brief A class for storing the volume properties of a link.
-  class VolumeProperties
-  {
-    /// \brief Default constructor.
-    public: VolumeProperties()
-      : area(0), height(0)
-    {
-    }
-
-    /// \brief Center of volume in the link frame.
-    public: ignition::math::Vector3d cov;
-
-    /// \brief Horizontal area of this link.
-    public: double area;
-
-    /// \brief Vertical height for this link.
-    public: double height;
-  };
-
-  /// \brief A plugin that simulates buoyancy of an object immersed in fluid.
+  /// \brief A plugin that sets the model height (z) to be the same
+	/// as the wave height calculated for the physics.
   /// All SDF parameters are optional.
   ///
   ///   <fluid_level>:   The height of the fluid/air interface [m].
   ///                    This parameter is optional.
   ///
-  ///   <link>:          Describe the volume properties of individual links in
-  ///                    the model.
-  ///                    For example:
+  ///   <wave_model>:    Name of the model that includes and instance of the
+	///                    WavefieldModelPlugin.
+	///   For Example:
+	///   <plugin name="wavegauge_plugin" filename="libwavegauge_plugin.so">
+  ///     <wave_model>ocean_waves</wave_model>
+  ///     <fluid_level>0.0</fluid_level>
+  ///   </plugin> example
+	/// 
   ///
-  ///                    <link name="body">
-  ///                      <center_of_volume>1 2 3</center_of_volume>
-  ///                      <area>10</volume>
-  ///                      <height>5</height>
-  ///                    </link>
-  ///
-  ///     <center_of_volume>: A point representing the volumetric center of the
-  ///                         link in the link frame. This is where the buoyancy
-  ///                         force will be applied. This field is required.
-  ///
+
   class WaveguagePlugin : public ModelPlugin
   {
     /// \brief Constructor.
@@ -94,14 +72,6 @@ namespace gazebo
 
     /// \brief The height of the fluid/air interface [m]. Defaults to 0.
     protected: double fluidLevel;
-
-    /// \brief Map of <link ID, point> pairs mapping link IDs to the CoV
-    /// (center of volume) and volume of the link.
-    protected: std::map<int, VolumeProperties> volPropsMap;
-
-    /// \brief Vector of links in the model for which we will apply buoyancy
-    /// forces.
-    protected: physics::Link_V buoyancyLinks;
 	};
 }
 

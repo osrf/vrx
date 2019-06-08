@@ -18,10 +18,8 @@
 
 namespace asv 
 {
-
-///////////////////////////////////////////////////////////////////////////////    
+/////////////////////////////////////////////////////////////////////////////   
 // PhysicalConstants
-
   double PhysicalConstants::Gravity()
   {
     return -9.8;
@@ -42,5 +40,5 @@ namespace asv
     return 1.0533E-6;
   }
 
-} // namespace asv
+}  // namespace asv
 

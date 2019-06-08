@@ -37,7 +37,7 @@ std::vector<po::option> ignore_numbers(std::vector<std::string>& args)
 {
   std::vector<po::option> result;
   int pos = 0;
-  while(!args.empty())
+  while (!args.empty())
   {
     const auto& arg = args[0];
     double num;
@@ -72,7 +72,8 @@ int main(int _argc, char **_argv)
       << "Copyright (C) 2019  Rhys Mainwaring.\n";
 
     // Program options
-    po::options_description options("Publish wave parameters to gztopic \"~/wave\"");
+    po::options_description \
+			options("Publish wave parameters to gztopic \"~/wave\"");
 
     options.add_options()
       ("help,h", 
@@ -88,7 +89,7 @@ int main(int _argc, char **_argv)
       ("direction,d", po::value<std::vector<int>>()->multitoken(),
         "Set the mean wave direction. Must be two numbers.")
       ("scale,s", po::value<double>(),
-        "The scale determines the range of amplitudes and wavelengths about the mean.")
+        "The scale determines the amplitudes and wavelengths about the mean.")
       ("angle", po::value<double>(),
         "The angle determines the range of directions about the mean.")
       ("steepness,q", po::value<double>(),
@@ -149,14 +150,16 @@ int main(int _argc, char **_argv)
       auto nextParam = waveMsg.add_param();
       nextParam->set_name("steepness");
       nextParam->mutable_value()->set_type(msgs::Any::DOUBLE);
-      nextParam->mutable_value()->set_double_value(vm["steepness"].as<double>());
+      nextParam->mutable_value()-> \
+				set_double_value(vm["steepness"].as<double>());
     }
     if (vm.count("amplitude"))
     {
       auto nextParam = waveMsg.add_param();
       nextParam->set_name("amplitude");
       nextParam->mutable_value()->set_type(msgs::Any::DOUBLE);
-      nextParam->mutable_value()->set_double_value(vm["amplitude"].as<double>());
+      nextParam->mutable_value()-> \
+				set_double_value(vm["amplitude"].as<double>());
     }
     if (vm.count("period"))
     {
@@ -170,7 +173,9 @@ int main(int _argc, char **_argv)
       std::vector<int> dir(vm["direction"].as<std::vector<int>>());
       if (dir.size() != 2)
       {
-        std::cout << "The value for option '--direction' must be two numbers." << std::endl;
+        std::cout
+					<< "The value for option '--direction' must be two numbers."
+					<< std::endl;
         std::cout << "For example: '--direction 1 1'" << std::endl;
         return -1;
       }
@@ -189,7 +194,8 @@ int main(int _argc, char **_argv)
     // Publish message (block while message is written)
     wavePub->Publish(waveMsg, true);
 
-    std::cout << "Publishing on topic [" << wavePub->GetTopic() << "]" << std::endl;
+    std::cout << "Publishing on topic [" << wavePub->GetTopic() << "]"
+							<< std::endl;
     std::cout << waveMsg.DebugString() << std::endl;
 
     // Tear down

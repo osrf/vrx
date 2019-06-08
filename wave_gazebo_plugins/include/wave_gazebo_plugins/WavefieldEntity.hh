@@ -22,13 +22,13 @@
 #ifndef _WAVE_GAZEBO_PLUGINS_WAVEFIELD_ENTITY_HH_
 #define _WAVE_GAZEBO_PLUGINS_WAVEFIELD_ENTITY_HH_
 
+#include <memory>
+#include <string>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/Base.hh>
-#include <memory>
 
 namespace asv
 {
-  
 ///////////////////////////////////////////////////////////////////////////////
 // WavefieldEntity
 
@@ -76,6 +76,6 @@ namespace asv
     private: std::shared_ptr<WavefieldEntityPrivate> data;
   };
 
-} // namespace asv
+}  // namespace asv
 
-#endif // _WAVE_GAZEBO_PLUGINS_WAVEFIELD_ENTITY_HH_
+#endif  // _WAVE_GAZEBO_PLUGINS_WAVEFIELD_ENTITY_HH_
