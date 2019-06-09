@@ -44,7 +44,9 @@
       </inertial>
     </link>
 
-    <joint name="${prefix}_chasis_engine_joint" type="fixed">
+    <joint name="${prefix}_chasis_engine_joint" type="revolute">
+      <axis xyz="0 0 1"/>
+      <limit lower="${-pi}" upper="${pi}" effort="10" velocity="10"/>
       <origin xyz="${position}" rpy="${orientation}"/>
       <parent link="base_link"/>
       <child link="${prefix}_engine_link"/>

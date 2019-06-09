@@ -167,6 +167,29 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
           << thrusterCounter);
       }
 
+      // Parse out engine joint name
+      if (thrusterSDF->HasElement("engineJointName"))
+      {
+        std::string engineName =
+          thrusterSDF->GetElement("engineJointName")->Get<std::string>();
+        thruster.engineJoint = this->model->GetJoint(engineName);
+        if (thruster.engineJoint == nullptr)
+        {
+          ROS_WARN_STREAM("Could not find a engine joint by the name of <" <<
+            engineName << "> in the model!");
+        }
+        else
+        {
+          ROS_DEBUG_STREAM("Engine joint <" << engineName <<
+            "> added to thruster");
+        }
+      }
+      else
+      {
+        ROS_WARN_STREAM("No engineJointName SDF parameter for thruster #"
+          << thrusterCounter);
+      }
+
       // Parse individual thruster SDF parameters
       thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd", 1.0);
       thruster.maxForceFwd =
@@ -321,22 +344,23 @@ void UsvThrust::Update()
         ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "] Cmd Timeout");
       }
 
+      // Set the thruster engine joint angle
+      this->thrusters[i].engineJoint->SetPosition(0, this->thrusters[i].currAngle, true);
+
       // Apply the thrust mapping
       ignition::math::Vector3d tforcev(0, 0, 0);
       switch (this->thrusters[i].mappingType)
       {
         case 0:
-          tforcev.X() = cos(this->thrusters[i].currAngle) * this->ScaleThrustCmd(this->thrusters[i].currCmd,
+          tforcev.X() = this->ScaleThrustCmd(this->thrusters[i].currCmd,
                                            this->thrusters[i].maxCmd,
                                            this->thrusters[i].maxForceFwd,
                                            this->thrusters[i].maxForceRev);
-          tforcev.Y() = tan(this->thrusters[i].currAngle) * tforcev.X();
           break;
         case 1:
-          tforcev.X() = cos(this->thrusters[i].currAngle) * this->GlfThrustCmd(this->thrusters[i].currCmd,
+          tforcev.X() = this->GlfThrustCmd(this->thrusters[i].currCmd,
                                          this->thrusters[i].maxForceFwd,
                                          this->thrusters[i].maxForceRev);
-          tforcev.Y() = tan(this->thrusters[i].currAngle) * tforcev.X();
           break;
         default:
             ROS_FATAL_STREAM("Cannot use mappingType=" <<

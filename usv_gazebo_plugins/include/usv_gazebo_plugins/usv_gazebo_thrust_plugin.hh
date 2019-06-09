@@ -99,6 +99,9 @@ namespace gazebo
     /// \brief Joint controlling the propeller.
     public: physics::JointPtr propJoint;
 
+    /// \brief Joint controlling the engine.
+    public: physics::JointPtr engineJoint;
+
     /// \brief Plugin parent pointer - for accessing world, etc.
     protected: UsvThrust *plugin;
   };
@@ -117,6 +120,7 @@ namespace gazebo
   ///   Required elements:
   ///   <linkName>: Name of the link on which to apply thrust forces.
   ///   <propJointName>: The name of the propeller joint.
+  ///   <engineJointName>: The name of the engine joint.
   ///   <cmdTopic>: The ROS topic to control this thruster.
   ///   Optional eleents:
   ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear),
@@ -138,6 +142,7 @@ namespace gazebo
   ///      <thruster>
   ///        <linkName>left_propeller_link</linkName>
   ///        <propJointName>left_engine_propeller_joint</propJointName>
+  ///        <engineJointName>left_chasis_engine_joint</engineJointName>
   ///        <cmdTopic>left_thrust_cmd</cmdTopic>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
@@ -147,6 +152,7 @@ namespace gazebo
   ///      <thruster>
   ///        <linkName>right_propeller_link</linkName>
   ///        <propJointName>right_engine_propeller_joint</propJointName>
+  ///        <engineJointName>right_chasis_engine_joint</engineJointName>
   ///        <cmdTopic>right_thrust_cmd</cmdTopic>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
