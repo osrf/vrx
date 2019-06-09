@@ -348,7 +348,7 @@ void UsvThrust::Update()
       #if GAZEBO_MAJOR_VERSION >= 8
         this->thrusters[i].engineJoint->SetPosition(0, this->thrusters[i].currAngle, true);
       #else
-        this->thrusters[i].engineJoint->SetAngle(0, gazebo::math::Angle(this->thrusters[i].currAngle));
+        this->thrusters[i].engineJoint->SetPosition(0, this->thrusters[i].currAngle);
       #endif
 
       // Apply the thrust mapping
