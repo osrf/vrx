@@ -2,10 +2,10 @@ import os
 import yaml
 
 
-def macro_block_gen(target,
+def macro_block_gen(xacro_target,
                     # target file for writing the macro calls too
                     # NOTE: will write over if a file is already there
-                    requested=None,  # yaml file with requested macros
+                    yaml_file=None,  # yaml file with requested macros
                     requested_macros={},
                     # if a dictionary is passed directly, no yaml file needed
                     boiler_plate_top='',  # stuff to start the xacro file
@@ -15,13 +15,18 @@ def macro_block_gen(target,
                     param_test=lambda name, params={}: True,
                     # test if a given macro call parameters are sensable
                     # NOT if the parameters are presentfor a given macro
+                    macro_type="",
                     ):
-    xacro_file = open(target, 'wb')
+    xacro_file = open(xacro_target, 'wb')
     xacro_file.write(boiler_plate_top)
 
     if requested_macros == {}:
-        s = open(requested, 'r')
+        s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
+    if requested_macros is None:
+        xacro_file.write(boiler_plate_bot)
+        xacro_file.close()
+        return
 
     for key, objects in requested_macros.items():
         # object must be available
@@ -34,6 +39,19 @@ def macro_block_gen(target,
             assert param_test(key, i), \
                 "%s %s failed parameter test" % (key, i['name'])
             xacro_file.write(macro_call_gen(key, i))
+
+    if macro_type == "thruster":
+        # WAM-V Gazebo thrust plugin setup
+        xacro_file.write('  <gazebo>\n')
+        xacro_file.write('    <plugin name="wamv_gazebo_thrust" filename="libusv_gazebo_thrust_plugin.so">\n')
+        xacro_file.write('      <cmdTimeout>1.0</cmdTimeout>\n')
+        xacro_file.write('      ' + macro_call_gen('include', {'filename': '$(find wamv_gazebo)/urdf/thruster_layouts/wamv_gazebo_thruster_config.xacro'}))
+        for key, objects in requested_macros.items():
+            for obj in objects:
+                xacro_file.write('      ' + macro_call_gen('wamv_gazebo_thruster_config', {'name': obj['prefix']}))
+        xacro_file.write('    </plugin>\n')
+        xacro_file.write('  </gazebo>\n')
+
     xacro_file.write(boiler_plate_bot)
     xacro_file.close()
 

@@ -25,6 +25,7 @@ def main():
                     param_test=comp.param_compliance
                     # test if parameters of a sensor are in compliance
                     )
+
     os.system('rosrun xacro xacro --inorder -o ' +
               rospy.get_param('wamv_target') +
               " '" + rospy.get_param('wamv_gazebo') + "' " +
