@@ -115,7 +115,7 @@
       </link>
     </model>
 
-    <!-- test_1: floating box -->
+    <!-- test_1: basic shape drop test | no rotation -->
     <xacro:basic_shape name="1_box" static="false">
       <pose>0 0 2 0 0 0</pose>
       <box>
@@ -134,6 +134,32 @@
 
     <xacro:basic_shape name="1_cylinder" static="false">
       <pose>4 0 2 0 0 0</pose>
+      <cylinder>
+        <radius>0.5</radius>
+        <length>0.3</length>
+      </cylinder>
+      <xacro:cylinder_inertial mass="5" r="0.5" l="0.3" />
+    </xacro:basic_shape>
+
+    <!-- test_2: basic shape drop test | rotation -->
+    <xacro:basic_shape name="2_box" static="false">
+      <pose>0 2 2 0 0 0</pose>
+      <box>
+        <size>1 1 1</size>
+      </box>
+      <xacro:box_inertial mass="5" x="1" y="1" z="1"/>
+    </xacro:basic_shape>
+
+    <xacro:basic_shape name="2_sphere" static="false">
+      <pose>2 2 2 0 0 0</pose>
+      <sphere>
+        <radius>0.5</radius>
+      </sphere>
+      <xacro:sphere_inertial mass="5" r="0.5"/>
+    </xacro:basic_shape>
+
+    <xacro:basic_shape name="2_cylinder" static="false">
+      <pose>4 2 2 0 0 0</pose>
       <cylinder>
         <radius>0.5</radius>
         <length>0.3</length>

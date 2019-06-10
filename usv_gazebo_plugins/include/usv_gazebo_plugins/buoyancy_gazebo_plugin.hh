@@ -246,6 +246,9 @@ namespace gazebo
 
     /// \brief Map of <link ID, link pointer>
     protected: std::map<int, gazebo::physics::LinkPtr> linkMap;
+
+    /// \brief Pointer to base model
+    protected: physics::ModelPtr model;
   };
 }
 

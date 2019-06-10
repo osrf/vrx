@@ -328,6 +328,8 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   GZ_ASSERT(_model != nullptr, "Received NULL model pointer");
   GZ_ASSERT(_sdf != nullptr, "Received NULL SDF pointer");
 
+  model = _model;
+
   if (_sdf->HasElement("fluid_density"))
   {
     this->fluidDensity = _sdf->Get<double>("fluid_density");
@@ -386,21 +388,16 @@ void BuoyancyPlugin::OnUpdate()
     #else
         ignition::math::Pose3d linkFrame = link->GetWorldPose().Ign();
     #endif
-
-    // todo: add buoyancy obj's pose
+    linkFrame = linkFrame * buoyancyObj.pose;
 
     double volume = buoyancyObj.shape->calculateVolume(linkFrame, this->fluidLevel);
 
-    GZ_ASSERT(volume >= 0, "Nonpositive volume found in volume properties!");
+    GZ_ASSERT(volume >= 0, "Non-positive volume found in volume properties!");
 
     // By Archimedes' principle,
     // buoyancy = -(mass*gravity)*fluid_density/object_density
     // object_density = mass/volume, so the mass term cancels.
-    // Therefore,
-    //    math::Vector3 buoyancy =
-    //    -this->fluidDensity * volume * this->model->GetWorld()->Gravity();
-    const ignition::math::Vector3d kGravity(0, 0, -9.81);
-    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume * kGravity;
+    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume * model->GetWorld()->Gravity();
 
     // Add some drag
     if (volume > 1e-6)
@@ -423,7 +420,7 @@ void BuoyancyPlugin::OnUpdate()
     ignition::math::Vector3d buoyancyLinkFrame =
         linkFrame.Rot().Inverse().RotateVector(buoyancy);
 
-    link->AddForceAtRelativePosition(buoyancy, linkFrame.Pos());
+    link->AddForceAtRelativePosition(buoyancy, buoyancyObj.pose.Pos());
   }
 }
 
