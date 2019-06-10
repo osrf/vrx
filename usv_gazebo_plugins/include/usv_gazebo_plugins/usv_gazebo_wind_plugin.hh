@@ -24,10 +24,10 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef USV_GAZEBO_PLUGINS_WIND_HH_
 #define USV_GAZEBO_PLUGINS_WIND_HH_
 
-#include <vector>
 #include <ros/ros.h>
 #include <memory>
 #include <string>
+#include <vector>
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
@@ -69,11 +69,11 @@ namespace gazebo
       /// \Bool to show weather the model and link pointers have been set
       bool init=false;
       /// \name of model as it will be looked by in the world
-      std::string model_name;
+      std::string modelName;
       /// \model Pointer to the model
       physics::ModelPtr model;
       /// \Name of the link on that model
-      std::string link_name;
+      std::string linkName;
       /// \brief Pointer to model link in gazebo,
       ///  optionally specified by the bodyName parameter,
       ///  The states are taken from this link and forces applied to this link.
