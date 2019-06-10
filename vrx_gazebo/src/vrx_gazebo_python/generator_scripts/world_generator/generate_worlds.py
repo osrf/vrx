@@ -16,35 +16,43 @@ def main():
     # create a world xacro and subsiquent world file for each coordinate
     for num, i in enumerate(coordinates):
         create_xacro_file(xacro_target=rospy.get_param('world_xacro_target') +
-                         'world' + str(num) + '.world.xacro',
-                         requested_macros=world_gen(coordinate=i,
-                                                    master=master),
-                         boiler_plate_top='<?xml version="1.0" ?>\n' +
-                         '<sdf version="1.6" ' +
-                         'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
-                         '<world name="robotx_example_course">\n' +
-                         '  <xacro:include filename="$(find vrx_gazebo)' +
-                         '/worlds/xacros/include_all_xacros.xacro" />\n' +
-                         '  <xacro:include_all_xacros />\n',
-                         boiler_plate_bot='</world>\n</sdf>')
+                          'world' + str(num) + '.world.xacro',
+                          
+                          requested_macros=world_gen(coordinate=i,
+                                                     master=master),
+                          
+                          boiler_plate_top='<?xml version="1.0" ?>\n' +
+                          '<sdf version="1.6" ' +
+                          'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
+                          '<world name="robotx_example_course">\n' +
+                          '  <xacro:include filename="$(find vrx_gazebo)' +
+                          '/worlds/xacros/include_all_xacros.xacro" />\n' +
+                          '  <xacro:include_all_xacros />\n',
+                          
+                          boiler_plate_bot='</world>\n</sdf>')
+
         os.system('rosrun xacro xacro --inorder -o' +
                   rospy.get_param('world_target') + 'world' + str(num) +
                   '.world ' +
                   rospy.get_param('world_xacro_target') + 'world' +
                   str(num) + '.world.xacro')
+   
     print 'All ', len(coordinates), ' worlds generated'
 
 
 def world_gen(coordinate={}, master={}):
     world = {}
     for axis_name, axis in master.iteritems():
+
         # if a sequence override defined for this axis at this step
         if axis['sequence'] is not None and \
                 coordinate[axis_name] in axis['sequence']:
+        
             # instances of macros already present in the world dict
             for i in world:
                 if i in axis['sequence'][coordinate[axis_name]]:
                     world[i] += axis['sequence'][coordinate[axis_name]]
+            
             # add all unique macros in sequence to world
             for i in axis['sequence'][coordinate[axis_name]]:
                 if i not in world:
@@ -52,9 +60,11 @@ def world_gen(coordinate={}, master={}):
                         world[i] = [{}]
                     else:
                         world[i] = axis['sequence'][coordinate[axis_name]][i]
+        
         # for the non-sequence override case:
         else:
             for macro_name, macro_calls in axis['macros'].iteritems():
+        
                 # if this one is new
                 if macro_name not in world:
                     world[macro_name] = []
@@ -62,9 +72,12 @@ def world_gen(coordinate={}, master={}):
                     if params is not None:
                         evaluated_params = {}
                         for param, value in params.iteritems():
-                            # name parameters will not be evaluated as lambdas
+                
+                            # parameter values flanked by ' will be evaluated as strings
                             if value[0] == "'" and value[-1] == "'":
                                 evaluated_params[param] = value[1:-1]
+                            
+                            # parameter values not flanked by ' will be evaluated as lambdas
                             else:
                                 f = lambda n: eval(str(value))
                                 evaluated_params[param] = f(coordinate[axis_name])
