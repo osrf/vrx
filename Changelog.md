@@ -35,8 +35,8 @@
 1. Add varying lidar pole length:
     * [Pull request 103](https://bitbucket.org/osrf/vrx/pull-requests/103)
 
-1. Support the ability for automated world generation via YAML:
-    * [Pull request 90](https://bitbucket.org/osrf/vrx/pull-requests/102)
+1. Support the ability to customize WAM-V thruster and sensor location via YAML:
+    * [Pull request 104](https://bitbucket.org/osrf/vrx/pull-requests/104)
 
 ### VRX 1.0.1
 

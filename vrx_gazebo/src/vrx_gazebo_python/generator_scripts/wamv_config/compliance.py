@@ -12,6 +12,7 @@ class Sensor_Compliance:
         # ie: are n wamv_cameras allowed?
         return True
 
+
 class Thruster_Compliance:
     def __init__(self):
         return
