@@ -4,7 +4,7 @@ import rospy
 import os
 from collections import OrderedDict
 
-from .. utils import macro_block_gen
+from .. utils import create_xacro_file
 
 
 def main():
@@ -15,18 +15,18 @@ def main():
     coordinates = linear_combinations(master)
     # create a world xacro and subsiquent world file for each coordinate
     for num, i in enumerate(coordinates):
-        macro_block_gen(target=rospy.get_param('world_xacro_target') +
-                        'world' + str(num) + '.world.xacro',
-                        requested_macros=world_gen(coordinate=i,
-                                                   master=master),
-                        boiler_plate_top='<?xml version="1.0" ?>\n' +
-                        '<sdf version="1.6" ' +
-                        'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
-                        '<world name="robotx_example_course">\n' +
-                        '  <xacro:include filename="$(find vrx_gazebo)' +
-                        '/worlds/xacros/include_all_xacros.xacro" />\n' +
-                        '  <xacro:include_all_xacros />\n',
-                        boiler_plate_bot='</world>\n</sdf>')
+        create_xacro_file(xacro_target=rospy.get_param('world_xacro_target') +
+                         'world' + str(num) + '.world.xacro',
+                         requested_macros=world_gen(coordinate=i,
+                                                    master=master),
+                         boiler_plate_top='<?xml version="1.0" ?>\n' +
+                         '<sdf version="1.6" ' +
+                         'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
+                         '<world name="robotx_example_course">\n' +
+                         '  <xacro:include filename="$(find vrx_gazebo)' +
+                         '/worlds/xacros/include_all_xacros.xacro" />\n' +
+                         '  <xacro:include_all_xacros />\n',
+                         boiler_plate_bot='</world>\n</sdf>')
         os.system('rosrun xacro xacro --inorder -o' +
                   rospy.get_param('world_target') + 'world' + str(num) +
                   '.world ' +
