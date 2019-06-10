@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="requested" default="$(find vrx_gazebo)/src/vrx_gazebo_python/generator_scripts/world_generator/worlds.yaml"/>
+  <arg name="requested" default=""/>
   <param name="requested" value="$(arg requested)"/>
 
-  <arg name="world_xacro_target" default="$(find vrx_gazebo)/worlds/generated_world_xacros/"/>
+  <arg name="world_xacro_target" default=""/>
   <param name="world_xacro_target" value="$(arg world_xacro_target)"/>
 
-  <arg name="world_target" default="$(find vrx_gazebo)/worlds/"/>
+  <arg name="world_target" default=""/>
   <param name="world_target" value="$(arg world_target)"/>
 
   <node name = "world_gen" pkg="vrx_gazebo" type="generate_worlds" />
