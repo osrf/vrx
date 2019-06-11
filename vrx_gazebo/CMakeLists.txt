@@ -7,6 +7,14 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTOUIC ON)
+
+find_package (Qt5Widgets REQUIRED)
+find_package (Qt5Core REQUIRED)
+find_package (Protobuf REQUIRED)
+find_package (gazebo REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   message_generation
   wamv_gazebo
@@ -15,10 +23,6 @@ find_package(catkin REQUIRED COMPONENTS
   geographic_msgs
   std_msgs
   rospy
-  Qt5Widgets
-  Qt5Core
-  Protobuf
-  gazebo
 )
 
 ########################
@@ -47,7 +51,7 @@ catkin_package(
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS})
 
 # Plugin for setting color of light buoy.
 add_library(light_buoy_plugin src/light_buoy_plugin.cc)
