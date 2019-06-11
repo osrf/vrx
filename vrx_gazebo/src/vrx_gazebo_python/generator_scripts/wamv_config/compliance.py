@@ -24,6 +24,10 @@ class Sensor_Compliance:
         # check if the sensor is allowed
         assert sensor_type in self.default_parameters,\
                 '%s is not defined anywhere under %s' % (sensor_type, self.dir)
+        for i in params:
+            if i not in self.numeric[sensor_type]['allowed_params']:
+                assert False, '%s parameter not permitted' % i
+
         # add the default params to params if not specified
         for i in self.default_parameters[sensor_type]:
             if i not in params:
@@ -44,7 +48,7 @@ class Sensor_Compliance:
 
     def number_compliance(self, sensor_type, n):
         # ie: are n wamv_cameras allowed?
-        if n > self.numeric[sensor_type]:
+        if n > self.numeric[sensor_type]['num']:
             print '\n', 'maximum of', self.numeric[sensor_type], sensor_type, \
                 'allowed\n'
             return False
