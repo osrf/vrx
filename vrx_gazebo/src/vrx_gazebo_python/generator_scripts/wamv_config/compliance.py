@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import rospy
 import numpy as np
 import yaml
 from .. import utils
@@ -10,12 +11,9 @@ class Sensor_Compliance:
         # open sensor_compliance_visual.sdf and all the boxes defined => boxes
         self.boxes = find_boxes('sensor_compliance_visual.sdf')
         # look at all sensors in sensors directory and get the default params
-        self.sensors_dir = os.getcwd()[:-4] +\
-            '/vrx_ws/src/vrx/wamv_gazebo/urdf/sensors/'
+        self.sensors_dir = rospy.get_param('sensors_dir') + '/'
         self.default_parameters = utils.get_macros(self.sensors_dir)
-        self.dir = os.getcwd()[:-4] +\
-            'vrx_ws/src/vrx/vrx_gazebo/src/vrx_gazebo_python/' +\
-            'generator_scripts/wamv_config/'
+        self.dir = rospy.get_param('compliance_dir') + '/'
         self.numeric = yaml.load(open(self.dir +
                                       'sensor_compliance_numeric.yaml'))
         return
@@ -83,10 +81,8 @@ class Box:
         return True
 
 
-def find_boxes(relative_addrs_of_sdf):
-    addrs = os.getcwd()[:-4] +\
-        'vrx_ws/src/vrx/vrx_gazebo/src/vrx_gazebo_python/generator_scripts/' +\
-        'wamv_config/' + relative_addrs_of_sdf
+def find_boxes(sdf):
+    addrs = rospy.get_param('compliance_dir') + '/' + sdf
     sdf = open(addrs, 'r')
     sdf = sdf.read()
     boxes = []
