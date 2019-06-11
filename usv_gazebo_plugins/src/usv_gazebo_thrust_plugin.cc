@@ -43,9 +43,12 @@ Thruster::Thruster(UsvThrust *_parent)
   this->maxAngle = M_PI / 2;
   this->mappingType = 0;
   this->plugin = _parent;
+  this->engineJointPID.Init(5555, 0.0, 350);
 
   // Initialize some things
   this->currCmd = 0.0;
+  this->desiredAngle = 0.0;
+
   #if GAZEBO_MAJOR_VERSION >= 8
     this->lastCmdTime = this->plugin->world->SimTime();
   #else
@@ -74,7 +77,7 @@ void Thruster::OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg)
   // When we get a new thrust angle!
   ROS_DEBUG_STREAM("New thrust angle! " << _msg->data);
   std::lock_guard<std::mutex> lock(this->plugin->mutex);
-  this->currAngle = boost::algorithm::clamp(_msg->data, -this->maxAngle, this->maxAngle);
+  this->desiredAngle = boost::algorithm::clamp(_msg->data, -this->maxAngle, this->maxAngle);
 }
 
 //////////////////////////////////////////////////
@@ -344,12 +347,15 @@ void UsvThrust::Update()
         ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "] Cmd Timeout");
       }
 
-      // Set the thruster engine joint angle
-      #if GAZEBO_MAJOR_VERSION >= 8
-        this->thrusters[i].engineJoint->SetPosition(0, this->thrusters[i].currAngle, true);
-      #else
-        this->thrusters[i].engineJoint->SetPosition(0, this->thrusters[i].currAngle);
-      #endif
+      // Adjust thruster engine joint angle with PID
+      common::Time stepTime = now - this->thrusters[i].lastAngleUpdateTime;
+      double desiredAngle = this->thrusters[i].desiredAngle;
+      double currAngle = this->thrusters[i].engineJoint->Position(0);
+      double effort = this->thrusters[i].engineJointPID.Update(currAngle - desiredAngle, stepTime);
+      this->thrusters[i].engineJoint->SetForce(0, effort);
+
+      // Store last update time
+      this->thrusters[i].lastAngleUpdateTime = now;
 
       // Apply the thrust mapping
       ignition::math::Vector3d tforcev(0, 0, 0);

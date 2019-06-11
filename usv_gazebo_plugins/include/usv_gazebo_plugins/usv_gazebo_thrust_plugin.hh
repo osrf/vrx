@@ -90,17 +90,23 @@ namespace gazebo
     /// \brief Current, most recent command.
     public: double currCmd;
 
-    /// \brief Current, most recent angle.
-    public: double currAngle;
+    /// \brief Most recent desired angle.
+    public: double desiredAngle;
 
     /// \brief Last time received a command via ROS topic.
     public: common::Time lastCmdTime;
+
+    /// \brief Last time of update
+    public: common::Time lastAngleUpdateTime;
 
     /// \brief Joint controlling the propeller.
     public: physics::JointPtr propJoint;
 
     /// \brief Joint controlling the engine.
     public: physics::JointPtr engineJoint;
+
+    /// \brief PID for engine joint angle
+    public: common::PID engineJointPID;
 
     /// \brief Plugin parent pointer - for accessing world, etc.
     protected: UsvThrust *plugin;
