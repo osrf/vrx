@@ -353,7 +353,7 @@ void UsvThrust::Update()
       #if GAZEBO_MAJOR_VERSION >= 8
         double currAngle = this->thrusters[i].engineJoint->Position(0);
       #else
-        double currAngle = this->thrusters[i].engineJoint->GetAngle(0);
+        double currAngle = this->thrusters[i].engineJoint->GetAngle(0).Radian();
       #endif
       double effort = this->thrusters[i].engineJointPID.Update(currAngle - desiredAngle, stepTime);
       this->thrusters[i].engineJoint->SetForce(0, effort);
