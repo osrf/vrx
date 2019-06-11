@@ -350,7 +350,11 @@ void UsvThrust::Update()
       // Adjust thruster engine joint angle with PID
       common::Time stepTime = now - this->thrusters[i].lastAngleUpdateTime;
       double desiredAngle = this->thrusters[i].desiredAngle;
-      double currAngle = this->thrusters[i].engineJoint->Position(0);
+      #if GAZEBO_MAJOR_VERSION >= 8
+        double currAngle = this->thrusters[i].engineJoint->Position(0);
+      #else
+        double currAngle = this->thrusters[i].engineJoint->GetAngle(0);
+      #endif
       double effort = this->thrusters[i].engineJointPID.Update(currAngle - desiredAngle, stepTime);
       this->thrusters[i].engineJoint->SetForce(0, effort);
 
