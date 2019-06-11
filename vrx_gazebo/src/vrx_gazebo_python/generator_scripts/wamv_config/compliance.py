@@ -9,19 +9,20 @@ from .. import utils
 class Sensor_Compliance:
     def __init__(self):
         # open sensor_compliance_visual.sdf and all the boxes defined => boxes
-        self.boxes = find_boxes('sensor_compliance_visual.sdf')
+        self.boxes = find_boxes('sensor_compliance/visual.sdf')
         # look at all sensors in sensors directory and get the default params
         self.sensors_dir = rospy.get_param('sensors_dir') + '/'
         self.default_parameters = utils.get_macros(self.sensors_dir)
         self.dir = rospy.get_param('compliance_dir') + '/'
         self.numeric = yaml.load(open(self.dir +
-                                      'sensor_compliance_numeric.yaml'))
+                                      'sensor_compliance/numeric.yaml'))
         return
 
     def param_compliance(self, sensor_type, params={}):
         # ie: given an instance of sensor_type = 'wamv_camera'
         # with parameters = params, is this camera in compliance
         # check if the sensor is allowed
+        params = params.copy()
         assert sensor_type in self.default_parameters,\
                 '%s is not defined anywhere under %s' % (sensor_type, self.dir)
         for i in params:
@@ -49,7 +50,7 @@ class Sensor_Compliance:
     def number_compliance(self, sensor_type, n):
         # ie: are n wamv_cameras allowed?
         if n > self.numeric[sensor_type]['num']:
-            print '\n', 'maximum of', self.numeric[sensor_type], sensor_type, \
+            print '\n', 'maximum of', self.numeric[sensor_type]['num'], sensor_type, \
                 'allowed\n'
             return False
         return True
@@ -57,15 +58,47 @@ class Sensor_Compliance:
 
 class Thruster_Compliance:
     def __init__(self):
+        
+        # open sensor_compliance_visual.sdf and all the boxes defined => boxes
+        self.boxes = find_boxes('thruster_compliance/visual.sdf')
+        # look at all sensors in sensors directory and get the default params
+        self.thrusters_dir = rospy.get_param('thrusters_dir') + '/'
+        self.default_parameters = utils.get_macros(self.thrusters_dir)
+        self.dir = rospy.get_param('compliance_dir') + '/'
+        self.numeric = yaml.load(open(self.dir +
+                                      'thruster_compliance/numeric.yaml'))
         return
 
     def param_compliance(self, thruster_type, params={}):
-        # ie: given an instance of thruster_type = 'wamv_camera'
+        # ie: given an instance of sensor_type = 'wamv_camera'
         # with parameters = params, is this camera in compliance
-        return True
+        # check if the sensor is allowed
+        params = params.copy()
+        assert thruster_type in self.default_parameters,\
+                '%s is not defined anywhere under %s' % (thruster_type, self.dir)
+        for i in params:
+            if i not in self.numeric[thruster_type]['allowed_params']:
+                assert False, '%s parameter not permitted' % i
 
+        # add the default params to params if not specified
+        for i in self.default_parameters[thruster_type]:
+            if i not in params:
+                params[i] = self.default_parameters[thruster_type][i]
+        # right now the ONLY compliance check we have is to make sure that
+        # the sensors are in at least one of the boxes
+        xyz = np.array([float(j) for j in [i for i in params['position'].split(' ')
+                              if i != '']])
+        for box in self.boxes:
+            if box.fit(xyz):
+                return True
+        print '\n', thruster_type, params['prefix'], 'is out of bounds\n'
+        return False
+ 
     def number_compliance(self, thruster_type, n):
-        # ie: are n wamv_cameras allowed?
+        if n > self.numeric[thruster_type]['num']:
+            print '\n', 'maximum of', self.numeric[thruster_type]['num'], thruster_type, \
+                'allowed\n'
+            return False
         return True
 
 
