@@ -16,7 +16,8 @@
 */
 #include <sstream>
 #include <gazebo/msgs/msgs.hh>
-#include "GUITaskWidget.hh"
+#include "vrx_gazebo/Task.h"
+#include "vrx_gazebo/gui_task_widget.hh"
 
 using namespace gazebo;
 
@@ -80,31 +81,31 @@ GUITaskWidget::~GUITaskWidget()
 }
 
 /////////////////////////////////////////////////
-void GUITaskWidget::OnTaskInfo(ConstTaskPtr &_msg)
+void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
 {
   std::ostringstream taskInfoStream;
   taskInfoStream.str("");
-  stream << "Task Name: " << _msg->name << "\n";
-  stream << "Task Stream: " << _msg->state << "\n";
-  stream << "Ready Time: " << this->FormatTime(_msg->ready_time) << "\n";
-  stream << "Running Time: " << this->FormatTime(_msg->running_time) << "\n";
-  stream << "Elapsed Time: " << this->FormatTime(_msg->elapsed_time) << "\n";
-  stream << "Remaining Time: " << this->FormatTime(_msg->remaining_time) << "\n";
-  stream << "Timed out: " << _msg->timed_out << "\n";
-  stream << "Score: " << _msg->score << "\n";
+  taskInfoStream << "Task Name: " << _msg->name << "\n";
+  taskInfoStream << "Task Stream: " << _msg->state << "\n";
+  taskInfoStream << "Ready Time: " << this->FormatTime(_msg->ready_time) << "\n";
+  taskInfoStream << "Running Time: " << this->FormatTime(_msg->running_time) << "\n";
+  taskInfoStream << "Elapsed Time: " << this->FormatTime(_msg->elapsed_time) << "\n";
+  taskInfoStream << "Remaining Time: " << this->FormatTime(_msg->remaining_time) << "\n";
+  taskInfoStream << "Timed out: " << _msg->timed_out << "\n";
+  taskInfoStream << "Score: " << _msg->score << "\n";
 
   this->SetTaskInfo(QString::fromStdString(taskInfoStream.str()));
 }
 
 /////////////////////////////////////////////////
-std::string GUITaskWidget::FormatTime(const msgs::Time &_msg) const
+std::string GUITaskWidget::FormatTime(const ros::Time &_duration) const
 {
   std::ostringstream stream;
   unsigned int day, hour, min, sec, msec;
 
   stream.str("");
 
-  sec = _msg.sec();
+  sec = _duration.toSec();
 
   day = sec / 86400;
   sec -= day * 86400;

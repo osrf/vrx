@@ -22,6 +22,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/transport/transport.hh>
+#include "vrx_gazebo/Task.h"
 
 namespace gazebo
 {
@@ -41,12 +42,12 @@ namespace gazebo
 
     /// \brief Callback that received task info messages.
     /// \param[in] _msg Task info message that is received.
-    protected: void OnTaskInfo(ConstTaskPtr &_msg);
+    protected: void OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg);
 
     /// \brief Helper function to format time string.
     /// \param[in] _msg Time message.
     /// \return Time formatted as a string.
-    private: std::string FormatTime(const msgs::Time &_msg) const;
+    private: std::string FormatTime(const ros::Time &_duration) const;
 
     /// \brief Node used to establish communication with gzserver.
     private: transport::NodePtr node;
