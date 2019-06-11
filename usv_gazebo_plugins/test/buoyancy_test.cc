@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 #include <gazebo/test/ServerFixture.hh>
-#include "usv_gazebo_plugins/buoyancy.hpp"
+#include "usv_gazebo_plugins/volume_object.hpp"
 
 using namespace gazebo;
+using namespace buoyancy;
 
 class BuoyancyPluginTest : public ServerFixture {
 public:
@@ -20,140 +21,158 @@ public:
 //  ASSERT_TRUE(model != nullptr);
 //}
 
-
-TEST(BuoyancyPluginTest, Cube) {
-  auto cube = buoyancy::make_cube(2, 2, 2);
-//  for(const auto& v : cube.verts) {
-//    std::cout << v << std::endl;
-//  }
+/////////////////////////////////////////////////
+TEST(BuoyancyPluginTest, CubeTotalVolume)
+{
+  auto cube = Polyhedron::makeCube(2,2,2);
+  auto volume = cube.computeFullVolume();
+  EXPECT_FLOAT_EQ(volume.volume, 8.0);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Z(), 0.0);
 }
 
-TEST(BuoyancyPluginTest, Cylinder) {
-  auto cylinder = buoyancy::make_cylinder(1, 2, 5);
+/////////////////////////////////////////////////
+TEST(BuoyancyPluginTest, CylinderTotalVolume)
+{
+  auto cylinder = Polyhedron::makeCylinder(0.5,2,100);
+  auto volume = cylinder.computeFullVolume();
+  EXPECT_NEAR(volume.volume, 1.57, 0.01);
+  EXPECT_NEAR(volume.centroid.X(), 0.0, 1e-10);
+  EXPECT_NEAR(volume.centroid.Y(), 0.0, 1e-10);
+  EXPECT_NEAR(volume.centroid.Z(), 0.0, 1e-10);
 }
 
-TEST(BuoyancyPluginTest, CubeVolume) {
-  // make cube
-  buoyancy::Polyhedron cube = buoyancy::make_cube(2,2,2);
-
-  double volume;
-  ignition::math::Vector3d centroid;
-  std::tie(volume, centroid) = buoyancy::computeVolume(cube);
-  EXPECT_FLOAT_EQ(volume, 8.0);
-  EXPECT_FLOAT_EQ(centroid.X(), 0.0);
-  EXPECT_FLOAT_EQ(centroid.Y(), 0.0);
-  EXPECT_FLOAT_EQ(centroid.Z(), 0.0);
-}
-
-TEST(BuoyancyPluginTest, CylinderVolume) {
-  // make cube
-  buoyancy::Polyhedron cube = buoyancy::make_cylinder(0.5,2,100);
-
-  double volume;
-  ignition::math::Vector3d centroid;
-  std::tie(volume, centroid) = buoyancy::computeVolume(cube);
-  EXPECT_NEAR(volume, 1.57, 0.01);
-  EXPECT_NEAR(centroid.X(), 0.0, 1e-10);
-  EXPECT_NEAR(centroid.Y(), 0.0, 1e-10);
-  EXPECT_NEAR(centroid.Z(), 0.0, 1e-10);
-}
-
-TEST(BuoyancyPluginTest, CubeVolumeNotSubmerged) {
-  // make cube
-  buoyancy::Polyhedron cube = buoyancy::make_cube(1,1,1);
-
+///////////////////////////////////////////////////
+TEST(BuoyancyPluginTest, CubeNotSubmerged)
+{
+  auto cube = Polyhedron::makeCube(1,1,1);
+  // water surface at z = 0
   buoyancy::Plane waterSurface;
-  waterSurface.normal = ignition::math::Vector3d{0,0,1};
-  waterSurface.offset = 0.f;
 
-  double volume;
-  ignition::math::Vector3d centroid;
-  std::tie(volume, centroid) = buoyancy::submergedVolume(ignition::math::Vector3d{0,0,2}, ignition::math::Quaterniond{1,0,0,0},
-      cube, waterSurface);
+  auto volume = cube.submergedVolume(ignition::math::Vector3d{0,0,2},
+      ignition::math::Quaterniond{1,0,0,0},
+      waterSurface);
 
-  EXPECT_FLOAT_EQ(volume, 0.0);
-  EXPECT_FLOAT_EQ(centroid.X(), 0.0);
-  EXPECT_FLOAT_EQ(centroid.Y(), 0.0);
-  EXPECT_FLOAT_EQ(centroid.Z(), 0.0);
+  EXPECT_FLOAT_EQ(volume.volume, 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Z(), 0.0);
 }
 
-TEST(BuoyancyPluginTest, CubeVolumeSubmerged) {
-  // make cube
-  buoyancy::Polyhedron cube = buoyancy::make_cube(1,1,1);
-
+///////////////////////////////////////////////////
+TEST(BuoyancyPluginTest, CylinderNotSubmerged)
+{
+  auto cylinder = Polyhedron::makeCylinder(0.5,2,10);
+  // water surface at z = 0
   buoyancy::Plane waterSurface;
-  waterSurface.normal = ignition::math::Vector3d{0,0,1};
-  waterSurface.offset = 0.f;
 
-  double volume;
-  ignition::math::Vector3d centroid;
-  std::tie(volume, centroid) = buoyancy::submergedVolume(ignition::math::Vector3d{0,0,0.0}, ignition::math::Quaterniond{1,0,0,0},
-                                                         cube, waterSurface);
+  auto volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,2},
+      ignition::math::Quaterniond{1,0,0,0},
+      waterSurface);
 
-  EXPECT_FLOAT_EQ(volume, 0.5);
-  EXPECT_NEAR(centroid.X(), 0.0, 1e-15);
-  EXPECT_NEAR(centroid.Y(), 0.0, 1e-15);
-  EXPECT_FLOAT_EQ(centroid.Z(), -0.125);
-
-  std::tie(volume, centroid) = buoyancy::submergedVolume(ignition::math::Vector3d{0,0,-2}, ignition::math::Quaterniond{1,0,0,0},
-                                                         cube, waterSurface);
-
-  EXPECT_FLOAT_EQ(volume, 1.0);
-  EXPECT_NEAR(centroid.X(), 0.0, 1e-15);
-  EXPECT_NEAR(centroid.Y(), 0.0, 1e-15);
-//  EXPECT_FLOAT_EQ(centroid.Z(), -0.5);
+  EXPECT_FLOAT_EQ(volume.volume, 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Z(), 0.0);
 }
 
-TEST(BuoyancyPluginTest, CylinderVolumeNotSubmerged) {
-  // make cube
-  buoyancy::Polyhedron cube = buoyancy::make_cylinder(0.5,2,10);
-
+///////////////////////////////////////////////////
+TEST(BuoyancyPluginTest, CubeSubmerged)
+{
+  auto cube = Polyhedron::makeCube(1,1,1);
+  // water surface at z = 0
   buoyancy::Plane waterSurface;
-  waterSurface.normal = ignition::math::Vector3d{0,0,1};
-  waterSurface.offset = 0.f;
 
-  double volume;
-  ignition::math::Vector3d centroid;
-  std::tie(volume, centroid) = buoyancy::submergedVolume(ignition::math::Vector3d{0,0,2}, ignition::math::Quaterniond{1,0,0,0},
-                                                         cube, waterSurface);
+  // half of the cube is submerged
+  //        -----
+  // -------|   |--------
+  //        -----
+  auto volume = cube.submergedVolume(ignition::math::Vector3d{0,0,0},
+      ignition::math::Quaterniond{1,0,0,0},
+      waterSurface);
+  EXPECT_FLOAT_EQ(volume.volume, 0.5);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Z(), -0.25);
 
-  EXPECT_FLOAT_EQ(volume, 0.0);
-  EXPECT_FLOAT_EQ(centroid.X(), 0.0);
-  EXPECT_FLOAT_EQ(centroid.Y(), 0.0);
-  EXPECT_FLOAT_EQ(centroid.Z(), 0.0);
+  // cube is fully submerged
+  // -------------------
+  //        -----
+  //        |   |
+  //        -----
+  volume = cube.submergedVolume(ignition::math::Vector3d{0,0,-2},
+      ignition::math::Quaterniond{1,0,0,0},
+      waterSurface);
+  EXPECT_FLOAT_EQ(volume.volume, 1.0);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Z(), -2.0);
+
+  // cube is slightly submerged at a 45 degree angle in roll
+  //       /\
+  //      /  \
+  // -----\  /---------
+  //       \/
+  volume = cube.submergedVolume(ignition::math::Vector3d{0,0,0.25},
+      ignition::math::Quaterniond{0.9238795, 0.3826834, 0, 0},
+      waterSurface);
+  EXPECT_NEAR(volume.volume, 0.21, 0.01);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_NEAR(volume.centroid.Z(), -0.15, 0.01);
 }
 
-TEST(BuoyancyPluginTest, CylinderVolumeSubmerged) {
-  // make cube
-  buoyancy::Polyhedron cube = buoyancy::make_cylinder(0.5,2,100);
-
+///////////////////////////////////////////////////
+TEST(BuoyancyPluginTest, CylinderSubmerged)
+{
+  auto cylinder = Polyhedron::makeCylinder(0.5, 2, 100);
+  // water surface at z = 0
   buoyancy::Plane waterSurface;
-  waterSurface.normal = ignition::math::Vector3d{0,0,1};
-  waterSurface.offset = 0.f;
 
-  double volume;
-  ignition::math::Vector3d centroid;
-  std::tie(volume, centroid) = buoyancy::submergedVolume(ignition::math::Vector3d{0,0,0.0}, ignition::math::Quaterniond{1,0,0,0},
-                                                         cube, waterSurface);
+  // half of the cylinder is submerged
+  //        ---
+  // -------| |--------
+  //        ---
+  auto volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,0.0},
+      ignition::math::Quaterniond{1,0,0,0},
+      waterSurface);
+  EXPECT_NEAR(volume.volume, 0.785, 0.001);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Z(), -0.5);
 
-  EXPECT_NEAR(volume, 0.78, 0.01);
-  EXPECT_NEAR(centroid.X(), 0.0, 1e-15);
-  EXPECT_NEAR(centroid.Y(), 0.0, 1e-15);
-//  EXPECT_FLOAT_EQ(centroid.Z(), -0.125);
+  // cylinder is fully submerged
+  // -------------------
+  //        ---
+  //        | |
+  //        ---
+  volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,-4},
+      ignition::math::Quaterniond{1,0,0,0},
+      waterSurface);
+  EXPECT_NEAR(volume.volume, 1.57, 0.01);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Z(), -4.0);
 
-  std::tie(volume, centroid) = buoyancy::submergedVolume(ignition::math::Vector3d{0,0,-2}, ignition::math::Quaterniond{1,0,0,0},
-                                                         cube, waterSurface);
-
-  EXPECT_NEAR(volume, 1.57, 0.01);
-  EXPECT_NEAR(centroid.X(), 0.0, 1e-15);
-  EXPECT_NEAR(centroid.Y(), 0.0, 1e-15);
-//  EXPECT_FLOAT_EQ(centroid.Z(), -0.5);
+  // cube is half submerged at a 45 degree angle in roll
+  //     --------
+  // ----|      |------
+  //     --------
+  volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,0},
+      ignition::math::Quaterniond{0.707,0.707,0,0},
+      waterSurface);
+  EXPECT_NEAR(volume.volume, 0.785, 0.001);
+  EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
+  EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
+  EXPECT_NEAR(volume.centroid.Z(), -0.21, 0.01);
 }
 
 
 /////////////////////////////////////////////////
 /// Main
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
