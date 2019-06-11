@@ -9,7 +9,7 @@
   <xacro:arg name="imu_enabled" default="false" />
   <xacro:arg name="lidar_enabled" default="false" />
   <xacro:arg name="ground_truth_enabled" default="false" />
-  <xacro:arg name="vrx_sensors_enabled" default="false" />
+  <xacro:arg name="vrx_sensors_enabled" default="true" />
   
   <!-- Sensor yaml file -->
   <xacro:arg name="yaml_sensor_generation" default="false"/>

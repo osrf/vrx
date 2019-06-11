@@ -143,3 +143,4 @@ def create_sensor_xacro():
 
 def yaml_to_xacro_extension(string):
     return string[0:string.index('.')] + '.xacro'
+

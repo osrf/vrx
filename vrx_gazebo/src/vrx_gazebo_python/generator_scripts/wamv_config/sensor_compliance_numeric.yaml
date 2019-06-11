@@ -1,0 +1,5 @@
+wamv_camera: 3
+wamv_gps: 1
+wamv_imu: 1
+wamv_3d_lidar: 1
+wamv_p3d: 1
