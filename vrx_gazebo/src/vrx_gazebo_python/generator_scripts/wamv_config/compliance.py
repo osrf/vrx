@@ -76,7 +76,7 @@ class Box:
     def fit(self, pose):
         pose = pose-self.pose[:3]
         for idx, i in enumerate(pose):
-            if abs(i) > self.size[idx]:
+            if abs(i) > self.size[idx]/2:
                 return False
         return True
 
