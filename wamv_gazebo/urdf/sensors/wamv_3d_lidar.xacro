@@ -28,6 +28,12 @@
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
                                             max_range:=100 noise_stddev:=0.01">
+    <!-- Define length variables for link positioning -->
+    <xacro:property name="platform_z" value="1.2965"/>
+    <xacro:property name="post_to_post_arm_x" value="0.03"/>
+    <xacro:property name="post_arm_to_lidar_x" value="0.04"/>
+    <xacro:property name="post_arm_to_lidar_z" value="0.05"/>
+
     <!-- 3d lidar sensor -->
     <link name="${name}_link">
       <visual name="${name}_visual">
@@ -53,25 +59,33 @@
       </inertial>
     </link>
 
+    <!-- Define post length and mass based on desired z position of sensor -->
+    <xacro:property name="post_length" value="${z-platform_z-post_arm_to_lidar_z}"/>
+    <xacro:property name="post_mass_per_meter" value="0.9"/>
+    <xacro:property name="post_mass" value="${post_mass_per_meter * post_length}"/>
+    <xacro:property name="post_radius" value="0.0076"/>
+
     <!-- Sensor post -->
     <link name="${name}_post_link">
-      <visual name="${name}_post_visual">
-        <origin xyz="0 0 -0.2515" rpy="${pi/2} 0 0"/>
+      <visual>
         <geometry>
-          <mesh filename="package://vrx_gazebo/models/sensor_post/mesh/sensor_post.dae"/>
+          <cylinder radius="${post_radius}" length="${post_length}"/>
         </geometry>
+        <material name="${name}_post_material">
+          <color rgba="0.0 0.0 0.0 1.0"/>
+        </material>
       </visual>
       <collision name="${name}_post_collision">
         <geometry>
-          <cylinder radius="0.0076" length="0.503"/>
+          <cylinder radius="${post_radius}" length="${post_length}"/>
         </geometry>
       </collision>
       <inertial>
-        <mass value="0.5"/>
+        <mass value="${post_mass}"/>
         <inertia
-          ixx="0.010549261666667"
-          iyy="0.010549261666667"
-          izz="0.000014440000000"
+          ixx="${(post_mass/12) * (3*post_radius*post_radius + post_length*post_length)}"
+          iyy="${(post_mass/12) * (3*post_radius*post_radius + post_length*post_length)}"
+          izz="${(post_mass/2) * (post_radius*post_radius)}"
           ixy="0"
           ixz="0"
           iyz="0"/>
@@ -106,22 +120,24 @@
     </link>
 
     <!-- Base to sensor post joint -->
+    <xacro:property name="post_z" value="${platform_z+post_length/2}"/>
+    <xacro:property name="post_to_lidar_x" value="${post_to_post_arm_x+post_arm_to_lidar_x}"/>
     <joint name="base_to_${name}_post_joint" type="fixed">
-      <origin xyz="${x-(0.03+0.04)*cos(post_Y)} ${y-(0.03+0.04)*sin(post_Y)} 1.545" rpy="0 0 ${post_Y}" />
+      <origin xyz="${x-(post_to_lidar_x)*cos(post_Y)} ${y-(post_to_lidar_x)*sin(post_Y)} ${post_z}" rpy="0 0 ${post_Y}" />
       <parent link="base_link" />
       <child link="${name}_post_link" />
     </joint>
 
     <!-- Sensor post to sensor post arm joint -->
     <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
-      <origin xyz="0.03 0 ${z-1.545-0.05}" rpy="0 0 0" />
+      <origin xyz="${post_to_post_arm_x} 0 ${z-post_z-post_arm_to_lidar_z}" rpy="0 0 0" />
       <parent link="${name}_post_link" />
       <child link="${name}_post_arm_link" />
     </joint>
 
     <!-- Sensor post arm to lidar joint -->
     <joint name="${name}_post_arm_to_${name}_joint" type="fixed">
-      <origin xyz="0.04 0 0.05" rpy="${R} ${P} ${Y-post_Y}" />
+      <origin xyz="${post_arm_to_lidar_x} 0 ${post_arm_to_lidar_z}" rpy="${R} ${P} ${Y-post_Y}" />
       <parent link="${name}_post_arm_link" />
       <child link="${name}_link" />
     </joint>
@@ -160,6 +176,11 @@
           <min_intensity>0</min_intensity>
         </plugin>
       </sensor>
+    </gazebo>
+
+    <!-- Set color of post -->
+    <gazebo reference="${name}_post_link">
+      <material>Gazebo/Black</material>
     </gazebo>
   </xacro:macro>
 </robot>

@@ -20,10 +20,10 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <std_msgs/Float64.h>
 #include <functional>
 #include <string>
 #include <gazebo/common/Console.hh>
-
 #include "usv_gazebo_plugins/usv_gazebo_wind_plugin.hh"
 
 using namespace gazebo;
@@ -67,9 +67,10 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   if (_sdf->HasElement("wind_direction"))
   {
-    this->windDirection =
-      _sdf->GetElement("wind_direction")->Get<ignition::math::Vector3d>();
-    this->windDirection = this->windDirection.Normalize();
+    double windAngle = _sdf->GetElement("wind_direction")->Get<double>();
+    this->windDirection.X(cos(windAngle * M_PI / 180));
+    this->windDirection.Y(sin(windAngle * M_PI / 180));
+    this->windDirection.Z(0);
   }
 
   gzmsg << "Wind direction unit vector = " << this->windDirection << std::endl;
@@ -106,6 +107,14 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   gzmsg << "var wind time constants = " << this->timeConstant << std::endl;
 
+  if (_sdf->HasElement("update_rate"))
+  {
+    this->updateRate =
+      _sdf->GetElement("update_rate")->Get<double>();
+  }
+
+  gzmsg << "update rate  = " << this->updateRate << std::endl;
+
   // setting seed for ignition::math::Rand
   if (_sdf->HasElement("random_seed") &&
     _sdf->GetElement("random_seed")->Get<int>() != 0)
@@ -128,6 +137,13 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->previousTime = this->world->GetSimTime().Double();
 #endif
   this->previousVarVel = 0;
+
+  // Initialize ROS transport.
+  this->rosNode.reset(new ros::NodeHandle());
+  this->windSpeedPub =
+      this->rosNode->advertise<std_msgs::Float64>(this->topicWindSpeed, 100);
+  this->windDirectionPub = this->rosNode->advertise<std_msgs::Float64>(
+      this->topicWindDirection, 100);
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -189,6 +205,24 @@ void UsvWindPlugin::Update()
   // Moving the previous time and velocity one step forward.
   this->previousVarVel = currentVarVel;
   this->previousTime = currentTime;
+
+  double publishingBuffer = 1/this->updateRate;
+  if (this->updateRate >= 0){
+    publishingBuffer = 1/this->updateRate;
+  } else {
+    publishingBuffer = -1;
+  }
+  // Publishing the wind speed and direction
+  if (currentTime - this->lastPublishTime > publishingBuffer){
+    std_msgs::Float64 windSpeedMsg;
+    std_msgs::Float64 windDirectionMsg;
+    windSpeedMsg.data = velocity;
+    windDirectionMsg.data =
+        atan2(this->windDirection[1], this->windDirection[0]) * 180 / M_PI;
+    this->windSpeedPub.publish(windSpeedMsg);
+    this->windDirectionPub.publish(windDirectionMsg);
+    this->lastPublishTime = currentTime;
+  }
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvWindPlugin);
