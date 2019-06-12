@@ -15,6 +15,7 @@ pipelines:
               - catkin_make run_tests -j1
               - apt-get update
               - apt-get -y install cppcheck
+              - cd src/vrx
               - sh tools/code_check.sh
         - step:
             image: osrf/vrx:test_gaz7
@@ -29,4 +30,5 @@ pipelines:
               - catkin_make run_tests -j1
               - apt-get update
               - apt-get -y install cppcheck
+              - cd src/vrx
               - sh tools/code_check.sh
