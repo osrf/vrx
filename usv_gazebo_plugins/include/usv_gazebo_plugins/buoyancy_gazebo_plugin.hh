@@ -27,7 +27,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
-#include <sdf/sdf.hh>
+#include "usv_gazebo_plugins/polyhedron_volume.hpp"
 
 namespace gazebo
 {

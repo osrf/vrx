@@ -1,4 +1,4 @@
-#include "usv_gazebo_plugins/volume_object.hpp"
+#include "usv_gazebo_plugins/polyhedron_volume.hpp"
 
 using namespace buoyancy;
 using Face = Polyhedron::Face;

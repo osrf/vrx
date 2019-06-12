@@ -1,10 +1,8 @@
 #pragma once
 
 #include <cassert>
-#include <utility>
 #include <ignition/math/Vector3.hh>
 #include <ignition/math/Quaternion.hh>
-#include <ostream>
 
 namespace buoyancy
 {

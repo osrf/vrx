@@ -26,8 +26,8 @@ link_directories(
 ## Declare a C++ library
 add_library(buoyancy_gazebo_plugin
   src/buoyancy_gazebo_plugin.cc
-        src/volume_object.cpp
- )
+        src/polyhedron_volume.cpp
+)
 target_link_libraries(buoyancy_gazebo_plugin
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
