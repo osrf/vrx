@@ -5,7 +5,10 @@ pipelines:
         - step:
             image: osrf/vrx:current
             script:
-              # VRX
+              # Code style
+              - sudo apt-get -y install cppcheck
+              - sh tools/code_check.sh
+              # Set up workspace
               - mkdir -p /tmp/vrx_ws/src
               - ln -s `pwd` /tmp/vrx_ws/src
               - cd /tmp/vrx_ws
@@ -13,13 +16,13 @@ pipelines:
               - source /opt/ros/melodic/setup.bash
               - catkin_make -j1
               - catkin_make run_tests -j1
-              - sudo apt-get -y install cppcheck
-              - cd src/vrx
-              - sh tools/code_check.sh
         - step:
             image: osrf/vrx:test_gaz7
             script:
-              # VRX
+              # Code style
+              - sudo apt-get -y install cppcheck
+              - sh tools/code_check.sh
+              # Set up workspace
               - mkdir -p /tmp/vrx_ws/src
               - ln -s `pwd` /tmp/vrx_ws/src
               - cd /tmp/vrx_ws
@@ -27,6 +30,3 @@ pipelines:
               - source /opt/ros/kinetic/setup.bash
               - catkin_make -j1
               - catkin_make run_tests -j1
-              - sudo apt-get -y install cppcheck
-              - cd src/vrx
-              - sh tools/code_check.sh
