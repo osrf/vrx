@@ -85,9 +85,9 @@ namespace gazebo
                                    const std::string &_paramName,
                                    const double _defaultVal) const;
 
-	/// \brief Convenience function for calculating the area of circle segment
-	/// \param[in] R Radius of circle
-	/// \param[in] h Height of the chord line
+  /// \brief Convenience function for calculating the area of circle segment
+  /// \param[in] R Radius of circle
+  /// \param[in] h Height of the chord line
     /// \return The area
     private: double CircleSegment(double R, double h);
 
@@ -150,16 +150,16 @@ namespace gazebo
     /// \brief Water height [m].
     private: double waterLevel;
 
-	/// \brief Water density [kg/m^3].
+  /// \brief Water density [kg/m^3].
     private: double waterDensity;
 
-	/// \brief Vessel length [m].
+  /// \brief Vessel length [m].
     private: double paramBoatLength;
 
-	/// \brief Vessel width [m].
+  /// \brief Vessel width [m].
     private: double paramBoatWidth;
 
-	/// \brief Demi-hull radius [m].
+  /// \brief Demi-hull radius [m].
     private: double paramHullRadius;
 
     /// \brief Length discretization, i.e., "N"

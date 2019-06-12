@@ -47,7 +47,6 @@ Thruster::Thruster(UsvThrust *_parent)
   #else
     this->lastCmdTime = this->plugin->world->GetSimTime();
   #endif
-  
 }
 
 //////////////////////////////////////////////////
@@ -343,7 +342,7 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
   _propeller->SetForce(0, effort);
 
   // Get index in joint state message for this propeller
-  uint8_t index = -1;
+  int8_t index = -1;
   for (int i = 0; i < this->thrusters.size(); ++i)
   {
     if (_propeller->GetName() == this->jointStateMsg.name[i])
