@@ -13,7 +13,7 @@ pipelines:
               - source /opt/ros/melodic/setup.bash
               - catkin_make -j1
               - catkin_make run_tests -j1
-              - apt-get -y install cppcheck
+              - sudo apt-get -y install cppcheck
               - sh tools/code_check.sh
         - step:
             image: osrf/vrx:test_gaz7
@@ -26,5 +26,5 @@ pipelines:
               - source /opt/ros/kinetic/setup.bash
               - catkin_make -j1
               - catkin_make run_tests -j1
-              - apt-get -y install cppcheck
+              - sudo apt-get -y install cppcheck
               - sh tools/code_check.sh
