@@ -20,10 +20,8 @@ Good News, we do!
 
 1. Create a directory some where to hold some things ie:
 
-```
 mkdir ~/generated_worlds
 cd generated_worlds/
-```
 
 2. Create a yaml according to the yaml filling instructions (also see example):
 gedit worlds.yaml
@@ -162,46 +160,33 @@ Quick Start Instructions:
 
 1. Create a directory some where to hold some things ie:
 
-```
 mkdir ~/generated_worlds
 cd generated_worlds/
-```
 
 2. Create a yaml according to the yaml filling instructions (also see example):
 
-```
 gedit worlds.yaml
-```
 
 3. Make a new directory to hold the world xacros for convenience:
 
-```
 mkdir world_xacros/
-```
 
 4. Same for worlds:
 
-```
 mkdir worlds/
-```
 
 5. Run the script:
 
-```
 roslaunch vrx_gazebo generate_worlds.launch requested:=/home/<username>/generated_worlds/worlds.yaml world_xacro_target:=/home/<username>/generated_worlds/world_xacros/ world_target:=/home/<username>/generated_worlds/worlds/ --screen
-```
 
 6 See the success message: All  <n>  worlds generated
 
 7. Examine the generated xacros under world_xacros/ and make sure they are what
 you want (these are meant to be more human readable than the .worlds files):
 
-```
 gedit world_xacros/world0.world.xacro
-```
 
 7. Run one of your new worlds:
 
-```
 roslaunch vrx_gazebo sandisland.launch world:=/home/<username>/generated_worlds/worlds/world0.world
-```
+
