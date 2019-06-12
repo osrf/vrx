@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-	<xacro:macro name="usv_wind_gazebo" params="n:=0 
-						    **wind_objs
+	<xacro:macro name="usv_wind_gazebo" params="**wind_objs
 						    direction:=270
 						    mean_vel:=10
 						    var_gain:=100
@@ -12,7 +11,6 @@
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <plugin name="wind" filename="libusv_gazebo_wind_plugin.so">
         <!-- models to be effected by the wind -->
-	<models_n>${n}</models_n> 
 	<xacro:insert_block name="wind_objs"/>
         <!-- Wind -->
 	<wind_direction>${direction}</wind_direction> <!-- in degrees -->
