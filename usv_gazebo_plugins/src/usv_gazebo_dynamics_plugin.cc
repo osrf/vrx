@@ -143,7 +143,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     const ignition::math::Vector3d kInertia =
       this->link->GetInertial()->GetPrincipalMoments().Ign();
   #endif
-  
+
   #if GAZEBO_MAJOR_VERSION >= 8
     const double kMass = this->link->GetInertial()->Mass();
   #else
@@ -162,7 +162,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   #else
     this->prevUpdateTime = this->world->GetSimTime();
   #endif
-  
+
   // Listen to the update event broadcastes every physics iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
     std::bind(&UsvDynamicsPlugin::Update, this));
@@ -176,12 +176,11 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     0,                0,                0,   0.1, 0,   0,
     0,                0,                0,   0,   0.1, 0,
     0,                0,                0,   0,   0,   this->paramNdotR;
-
 }
 
 double UsvDynamicsPlugin::CircleSegment(double R, double h)
 {
-	return R*R*acos( (R-h)/R ) - (R-h)*sqrt(2*R*h-h*h) ;
+  return R*R*acos( (R-h)/R ) - (R-h)*sqrt(2*R*h-h*h);
 }
 
 //////////////////////////////////////////////////
@@ -202,7 +201,7 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Pose3d kPose = this->link->GetWorldPose().Ign();
   #endif
   const ignition::math::Vector3d kEuler = kPose.Rot().Euler();
-  
+
   // Get body-centered linear and angular rates
   #if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Vector3d kVelLinearBody =
@@ -212,7 +211,7 @@ void UsvDynamicsPlugin::Update()
       this->link->GetRelativeLinearVel().Ign();
   #endif
   ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
-  
+
   #if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Vector3d kVelAngularBody =
       this->link->RelativeAngularVel();
@@ -295,12 +294,13 @@ void UsvDynamicsPlugin::Update()
   // For each hull
   for (int ii = 0; ii < 2; ii++)
   {
-	// Grid point in boat frame
-	bpnt.setY((ii*2.0-1.0)*this->paramBoatWidth/2.0);
-	// For each length segment
+  // Grid point in boat frame
+  bpnt.setY((ii*2.0-1.0)*this->paramBoatWidth/2.0);
+  // For each length segment
     for (int jj = 1; jj <= this->paramLengthN; jj++)
     {
-	  bpnt.setX( ((jj-0.5)/((float)this->paramLengthN) - 0.5 )*this->paramBoatLength);
+      bpnt.setX(((jj - 0.5) / (static_cast<float>(this->paramLengthN)) - 0.5) *
+        this->paramBoatLength);
 
       // Transform from vessel to water/world frame
       bpntW = xformV * bpnt;
@@ -335,12 +335,14 @@ void UsvDynamicsPlugin::Update()
       }
       ROS_DEBUG_STREAM_THROTTLE(1.0, "wave disp: " << dz);
 
-	  // Total z location of boat grid point relative to water surface
-	  double  deltaZ = (this->waterLevel + dz) - kDdz;
-	  deltaZ = std::max(deltaZ,0.0);  // enforce only upward buoy force
-	  deltaZ = std::min(deltaZ,this->paramHullRadius);
+    // Total z location of boat grid point relative to water surface
+    double  deltaZ = (this->waterLevel + dz) - kDdz;
+    deltaZ = std::max(deltaZ, 0.0);  // enforce only upward buoy force
+    deltaZ = std::min(deltaZ, this->paramHullRadius);
       // Buoyancy force at grid point
-	  const float kBuoyForce = CircleSegment(this->paramHullRadius,deltaZ)*this->paramBoatLength/((float)this->paramLengthN)*GRAVITY*this->waterDensity;
+    const float kBuoyForce = CircleSegment(this->paramHullRadius, deltaZ) *
+      this->paramBoatLength/(static_cast<float>(this->paramLengthN)) * GRAVITY *
+      this->waterDensity;
 
       ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
 
