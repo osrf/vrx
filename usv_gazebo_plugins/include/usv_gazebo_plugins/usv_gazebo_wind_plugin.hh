@@ -40,10 +40,15 @@ namespace gazebo
   /// \brief A plugin that simulates a simple wind model. It accepts the
   /// following parameters:
   ///
-  /// <models_n>: the number of modelsto be effected by the wind.
-  /// <model_name_i> where 0<=i<models_n, name of model i
-  /// <link_name_i> where 0<=i<models_n, name of link to be effected by wind on model i
-  /// <coeff_vector_i> where 0<=i<models_n, the wind coeffcient vector for the link on model i
+  ///<wind_objs>: declaring block of objects (models) to be effected by the wind
+  ///  <wind_obj>: declaring block for wind obj. NOTE: may include as many wind_obj's as you like
+  ///    <name>wamv</name>: name of the model(object) that will be effected by the wind
+  ///    <link_name>base_link</link_name>: link on that model which will feel the force of the wind (limited to ONE per model)
+  ///    <coeff_vector>0.5 0.5 0.33</coeff_vector>: coefficient vector of the particluar wind object
+  ///  </wind_obj> 
+  ///</wind_objs>
+  /// 
+  /// 
   ///
   /// <wind_direction>: Wind direction vector. Wind direction is specified as
   /// the positive direction of the wind velocity vector in the horizontal plane
@@ -94,10 +99,10 @@ namespace gazebo
     /// \brief Callback executed at every physics update.
     protected: virtual void Update();
 
-    /// \breif vector of simple objects effected by the wind
+    /// \brief vector of simple objects effected by the wind
     private: std::vector<UsvWindPlugin::WindObj> windObjs;
 
-    /// \breif Bool to keep track if ALL of the windObjs have been initialized
+    /// \brief Bool to keep track if ALL of the windObjs have been initialized
     private: bool windObjsInit = false;
  
     /// \brief Pointer to the Gazebo world
