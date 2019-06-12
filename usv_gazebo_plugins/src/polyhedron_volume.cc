@@ -1,4 +1,4 @@
-#include "usv_gazebo_plugins/polyhedron_volume.hpp"
+#include "usv_gazebo_plugins/polyhedron_volume.hh"
 
 using namespace buoyancy;
 using Face = Polyhedron::Face;
@@ -16,14 +16,13 @@ Polyhedron::Face::Face(int _i1, int _i2, int _i3)
 }
 
 //////////////////////////////////////////////////////
-Polyhedron::Volume::Volume()
+Volume::Volume()
   : volume(0.0), centroid(Vec3({0,0,0}))
 {
 }
 
 //////////////////////////////////////////////////////
-Polyhedron::Volume&
-Polyhedron::Volume::operator+=(const Polyhedron::Volume &rhs)
+Volume& Volume::operator+=(const Volume &rhs)
 {
   this->volume += rhs.volume;
   this->centroid += rhs.centroid;
@@ -107,7 +106,7 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
 }
 
 //////////////////////////////////////////////////////
-Polyhedron::Volume Polyhedron::tetrahedronVolume(const Vec3 &v1,
+Volume Polyhedron::tetrahedronVolume(const Vec3 &v1,
     const Vec3 &v2, const Vec3 &v3, const Vec3 &p)
 {
   Vec3 a = v2 - v1;
@@ -121,7 +120,7 @@ Polyhedron::Volume Polyhedron::tetrahedronVolume(const Vec3 &v1,
 }
 
 //////////////////////////////////////////////////////
-Polyhedron::Volume Polyhedron::computeFullVolume()
+Volume Polyhedron::computeFullVolume()
 {
   Volume output;
   // Compute the contribution of each triangle face
@@ -136,8 +135,7 @@ Polyhedron::Volume Polyhedron::computeFullVolume()
 }
 
 //////////////////////////////////////////////////////
-Polyhedron::Volume
-Polyhedron::clipTriangle(const Vec3 &v1, const Vec3 &v2,
+Volume Polyhedron::clipTriangle(const Vec3 &v1, const Vec3 &v2,
     const Vec3 &v3, double d1, double d2, double d3, const Vec3 &p)
 {
   assert(d1 * d2 < 0);
@@ -183,7 +181,7 @@ Polyhedron::clipTriangle(const Vec3 &v1, const Vec3 &v2,
 }
 
 //////////////////////////////////////////////////////
-Polyhedron::Volume Polyhedron::submergedVolume(const Vec3 &x,
+Volume Polyhedron::submergedVolume(const Vec3 &x,
     const ignition::math::Quaterniond &q, Plane &plane)
 {
   // transform the plane into the polyhedron frame

@@ -18,7 +18,6 @@
 #ifndef USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
 #define USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
 
-#include <exception>
 #include <map>
 #include <string>
 
@@ -27,109 +26,11 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
-#include "usv_gazebo_plugins/polyhedron_volume.hpp"
+#include "usv_gazebo_plugins/shape_volume.hh"
 
 namespace gazebo
 {
   namespace buoyancy {
-
-    /// \brief type of geometry shape
-    enum class ShapeType {
-      None,
-      Box,
-      Sphere,
-      Cylinder
-    };
-
-    /// \brief parent shape object for buoyancy objects
-    struct Shape {
-      /// \brief Default destructor
-      virtual ~Shape() = default;
-
-      /// \brief factory method for shape. Parses a shape object from sdf data
-      static std::unique_ptr<Shape> makeShape(const sdf::ElementPtr sdf);
-
-      /// \brief display string for shape object
-      virtual std::string disp();
-
-      /// \brief calculates volume of shape underwater
-      /// @param pose: world of buoyancy shape
-      /// @param fluidLevel: height of fluid
-      virtual double calculateVolume(const ignition::math::Pose3d& pose,
-                                     double fluidLevel) = 0;
-
-      /// \brief type of shape
-      ShapeType type;
-    };
-    typedef std::unique_ptr<Shape> ShapePtr;
-
-    /// \brief box shape
-    struct BoxShape : public Shape {
-
-      /// \brief Default constructor
-      /// @param x: length
-      /// @param y: width
-      /// @param z: height
-      explicit BoxShape(double x, double y, double z);
-
-      /// \brief display string for box shape
-      std::string disp() override;
-
-      // Documentation inherited.
-      double calculateVolume(const ignition::math::Pose3d& pose,
-                             double fluidLevel) override;
-
-      /// \brief length
-      double x;
-
-      /// \brief width
-      double y;
-
-      /// \brief height
-      double z;
-    };
-
-    /// \brief cylinder shape
-    struct CylinderShape : public Shape {
-    public:
-
-      /// \brief Default constructor
-      /// @param r: radius
-      /// @param l: length
-      explicit CylinderShape(double r, double l);
-
-      /// \brief display string for cylinder shape
-      std::string disp() override;
-
-      // Documentation inherited.
-      double calculateVolume(const ignition::math::Pose3d& pose,
-                             double fluidLevel) override;
-
-      /// \brief radius of cylinder
-      double r;
-
-      /// \brief height of cylinder
-      double h;
-    };
-
-    /// \brief sphere shape
-    struct SphereShape : public Shape {
-
-      /// \brief Default constructor
-      /// @param r: radius
-      explicit SphereShape(double r);
-
-      /// \brief display string for sphere shape
-      std::string disp() override;
-
-      // Documentation inherited.
-      double calculateVolume(const ignition::math::Pose3d& pose,
-                             double fluidLevel) override;
-
-      /// \brief radius of sphere
-      double r;
-    };
-
     /// \brief A class for storing buoyancy object properties
     class BuoyancyObject {
     public:
@@ -159,26 +60,7 @@ namespace gazebo
       ignition::math::Pose3d pose;
 
       /// \brief buoyancy object shape
-      ShapePtr shape;
-    };
-
-    /// \brief custom exception for parsing errors
-    struct ParseException : public std::exception
-    {
-      ParseException(const char* shape, const char* message)
-      {
-        std::stringstream ss;
-        ss << "Parse error for <" << shape << ">: " << message;
-        output_ = ss.str();
-      }
-
-      const char* what() const throw()
-      {
-        return output_.c_str();
-      }
-
-    private:
-      std::string output_;
+      ::buoyancy::ShapeVolumePtr shape;
     };
   } // end of buoyancy namespace
 

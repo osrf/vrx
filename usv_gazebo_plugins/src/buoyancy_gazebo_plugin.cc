@@ -19,227 +19,11 @@
 #include <string>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Events.hh>
-#include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
 using namespace gazebo;
 using namespace gazebo::buoyancy;
-
-/////////////////////////////////////////////////
-ShapePtr Shape::makeShape(const sdf::ElementPtr sdf)
-{
-  double epsilon = 1e-20;
-
-  Shape* shape = nullptr;
-
-  if (sdf->HasElement("box"))
-  {
-    auto boxElem = sdf->GetElement("box");
-    if (boxElem->HasElement("size"))
-    {
-      ignition::math::Vector3d dim = boxElem->GetElement("size")
-          ->Get<ignition::math::Vector3d>();
-      if (dim[0] > epsilon && dim[1] > epsilon && dim[2] > epsilon)
-      {
-        shape = dynamic_cast<Shape*>(new BoxShape(dim[0], dim[1], dim[2]));
-      }
-      else
-      {
-        throw ParseException("box", "incorrect dimensions");
-      }
-    }
-    else
-    {
-      throw ParseException("box", "missing <size> element");
-    }
-  }
-  else if (sdf->HasElement("sphere"))
-  {
-    auto sphereElem = sdf->GetElement("sphere");
-    if (sphereElem->HasElement("radius"))
-    {
-      auto r = sphereElem->GetElement("radius")->Get<double>();
-      if (r > epsilon)
-      {
-        shape = dynamic_cast<Shape*>(new SphereShape(r));
-      }
-      else
-      {
-        throw ParseException("sphere", "incorrect dimensions");
-      }
-    }
-    else
-    {
-      throw ParseException("sphere", "missing <radius> element");
-    }
-  }
-  else if (sdf->HasElement("cylinder"))
-  {
-    auto cylinderElem = sdf->GetElement("cylinder");
-    if (cylinderElem->HasElement("radius") && cylinderElem->HasElement("length"))
-    {
-      auto r = cylinderElem->GetElement("radius")->Get<double>();
-      auto l = cylinderElem->GetElement("length")->Get<double>();
-      if (r > epsilon || l > epsilon)
-      {
-        shape = dynamic_cast<Shape*>(new CylinderShape(r, l));
-      }
-      else
-      {
-        throw ParseException("cylinder", "incorrect dimensions");
-      }
-    }
-    else
-    {
-      throw ParseException("cylinder", "missing <radius> or <length> element");
-    }
-  } else {
-    throw ParseException("geometry", "missing <box>, <cylinder> or <sphere> element");
-  }
-
-  return std::unique_ptr<Shape>(shape);
-}
-
-/////////////////////////////////////////////////
-std::string Shape::disp()
-{
-  switch(type)
-  {
-    case ShapeType::None:
-      return "None";
-    case ShapeType::Box:
-      return "Box";
-    case ShapeType::Cylinder:
-      return "Cylinder";
-    case ShapeType::Sphere:
-      return "Sphere";
-  }
-}
-
-//////////////////////////////////////////////////
-BoxShape::BoxShape(double x, double y, double z)
-  : x(x),
-    y(y),
-    z(z)
-{
-  type = ShapeType::Box;
-}
-
-//////////////////////////////////////////////////
-std::string BoxShape::disp()
-{
-  std::stringstream ss;
-  ss << Shape::disp() << ":" << x << "," << y << "," << z;
-  return ss.str();
-}
-
-//////////////////////////////////////////////////
-double BoxShape::calculateVolume(const ignition::math::Pose3d &pose,
-    double fluidLevel)
-{
-  double height = z;
-  double area = x * y;
-
-  // Location of bottom of object relative to the fluid surface - assumes
-  // origin is at cog of the object.
-  double bottomRelSurf = fluidLevel - (pose.Pos().Z() - height / 2.0);
-
-  // out of water
-  if (bottomRelSurf <= 0)
-  {
-    return 0.0;
-  }
-  // at surface
-  else if (bottomRelSurf <= height)
-  {
-    return bottomRelSurf * area;
-  }
-  else
-  {
-    return height * area;
-  }
-}
-
-/////////////////////////////////////////////////
-CylinderShape::CylinderShape(double r, double h)
-  : r(r),
-    h(h)
-{
-  type = ShapeType::Cylinder;
-}
-
-/////////////////////////////////////////////////
-std::string CylinderShape::disp()
-{
-  std::stringstream ss;
-  ss << Shape::disp() << ":" << r << "," << h;
-  return ss.str();
-}
-
-/////////////////////////////////////////////////
-double CylinderShape::calculateVolume(const ignition::math::Pose3d &pose,
-    double fluidLevel)
-{
-  double height = h;
-  double area = M_PI * r * r;
-
-  // Location of bottom of object relative to the fluid surface - assumes
-  // origin is at cog of the object.
-  double bottomRelSurf = fluidLevel - (pose.Pos().Z() - height / 2.0);
-
-  // out of water
-  if (bottomRelSurf <= 0)
-  {
-    return 0.0;
-  }
-    // at surface
-  else if (bottomRelSurf <= height)
-  {
-    return bottomRelSurf * area;
-  }
-  else
-  {
-    return height * area;
-  }
-}
-
-//////////////////////////////////////////////////
-SphereShape::SphereShape(double r)
-  : r(r)
-{
-  type = ShapeType::Sphere;
-}
-
-//////////////////////////////////////////////////
-std::string SphereShape::disp()
-{
-  std::stringstream ss;
-  ss << Shape::disp() << ":" << r;
-  return ss.str();
-}
-
-//////////////////////////////////////////////////
-double SphereShape::calculateVolume(const ignition::math::Pose3d &pose,
-    double fluidLevel)
-{
-  // Location of bottom of object relative to the fluid surface - assumes
-  // origin is at cog of the object.
-  double h = fluidLevel - (pose.Pos().Z() - r);
-  // out of water
-  if (h <= 0)
-  {
-    return 0.0;
-  }
-  // at surface
-  else if (h <= 2 * r)
-  {
-    return (h * h *  r - ::pow(h, 3) / 3.0) * M_PI;
-  }
-  else
-  {
-    return 4. / 3. * M_PI * ::pow(r, 3);
-  }
-}
+using namespace ::buoyancy;
 
 //////////////////////////////////////////////////
 BuoyancyObject::BuoyancyObject()
@@ -291,7 +75,7 @@ void BuoyancyObject::load(const physics::ModelPtr model,
     sdf::ElementPtr geometry = elem->GetElement("geometry");
     try
     {
-      shape = std::move(Shape::makeShape(geometry));
+      shape = std::move(ShapeVolume::makeShape(geometry));
     }
     catch (...)
     {
@@ -310,7 +94,7 @@ std::string BuoyancyObject::disp() {
   ss << "Buoyancy object\n"
       << "\tlink: " << linkName << "[" << linkId << "]\n"
       << "\tpose: " << pose << '\n'
-      << "\tgeometry " << shape->disp();
+      << "\tgeometry " << shape->display();
   return ss.str();
 }
 
@@ -390,17 +174,17 @@ void BuoyancyPlugin::OnUpdate()
     #endif
     linkFrame = linkFrame * buoyancyObj.pose;
 
-    double volume = buoyancyObj.shape->calculateVolume(linkFrame, this->fluidLevel);
+    auto volume = buoyancyObj.shape->calculateVolume(linkFrame, this->fluidLevel);
 
-    GZ_ASSERT(volume >= 0, "Non-positive volume found in volume properties!");
+    GZ_ASSERT(volume.volume >= 0, "Non-positive volume found in volume properties!");
 
     // By Archimedes' principle,
     // buoyancy = -(mass*gravity)*fluid_density/object_density
     // object_density = mass/volume, so the mass term cancels.
-    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume * model->GetWorld()->Gravity();
+    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume.volume * model->GetWorld()->Gravity();
 
     // Add some drag
-    if (volume > 1e-6)
+    if (volume.volume > 1e-6)
     {
       #if GAZEBO_MAJOR_VERSION >= 8
             ignition::math::Vector3d vel = link->WorldLinearVel();

@@ -21,6 +21,21 @@ namespace buoyancy
     float offset;
   };
 
+  /// \brief Represents output volume with centroid
+  struct Volume
+  {
+    Volume ();
+
+    /// \brief overloads += for volume object
+    Volume& operator+=(const Volume& rhs);
+
+    /// \brief volume
+    double volume;
+
+    /// \brief vector3 representing volume centroid
+    Vec3 centroid;
+  };
+
   /// \brief Submerged volume calculation using polyhedron
   /// based on: Exact Buoyancy for Polyhedra by Eric Catto
   class Polyhedron
@@ -36,21 +51,6 @@ namespace buoyancy
 
       /// \brief index of vertices
       int i1, i2, i3;
-    };
-
-    /// \brief Represents output volume with centroid
-    struct Volume
-    {
-      Volume ();
-
-      /// \brief overloads += for volume object
-      Volume& operator+=(const Volume& rhs);
-
-      /// \brief volume
-      double volume;
-
-      /// \brief vector3 representing volume centroid
-      Vec3 centroid;
     };
 
     /// \brief generate a cube polyhedron centered at origin

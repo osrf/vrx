@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <gazebo/test/ServerFixture.hh>
-#include "usv_gazebo_plugins/polyhedron_volume.hpp"
+#include "usv_gazebo_plugins/polyhedron_volume.hh"
 
 using namespace gazebo;
 using namespace buoyancy;
