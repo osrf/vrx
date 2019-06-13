@@ -12,6 +12,7 @@ ARG GAZ=gazebo9
 RUN apt update \
  && apt install -y \
         build-essential \
+        cppcheck \
         curl \
         cmake \
         lsb-release \
