@@ -22,6 +22,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/transport/transport.hh>
+#include "ros/ros.h"
 #include "vrx_gazebo/Task.h"
 
 namespace gazebo
@@ -47,13 +48,13 @@ namespace gazebo
     /// \brief Helper function to format time string.
     /// \param[in] _msg Time message.
     /// \return Time formatted as a string.
-    private: std::string FormatTime(const ros::Time &_duration) const;
+    private: std::string FormatTime(unsigned int sec) const;
 
-    /// \brief Node used to establish communication with gzserver.
-    private: transport::NodePtr node;
+    /// \brief A ros NodeHandle
+    private: ros::NodeHandle node;
 
     /// \brief Subscriber to Task messages.
-    private: transport::SubscriberPtr taskSub;
+    private: ros::Subscriber taskSub;
   };
 }
 

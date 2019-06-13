@@ -68,10 +68,8 @@ GUITaskWidget::GUITaskWidget()
   this->move(200, 10);
   this->resize(200, 40);
 
-  // Create a node for transportation
-  this->node = transport::NodePtr(new transport::Node());
-  this->node->Init("default");
-  this->taskSub = this->node->Subscribe("/vrx/task/info",
+  // Subscribe to tasks topic
+  this->taskSub = this->node.subscribe("/vrx/task/info", 1,
       &GUITaskWidget::OnTaskInfo, this);
 }
 
@@ -87,10 +85,10 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream.str("");
   taskInfoStream << "Task Name: " << _msg->name << "\n";
   taskInfoStream << "Task Stream: " << _msg->state << "\n";
-  taskInfoStream << "Ready Time: " << this->FormatTime(_msg->ready_time) << "\n";
-  taskInfoStream << "Running Time: " << this->FormatTime(_msg->running_time) << "\n";
-  taskInfoStream << "Elapsed Time: " << this->FormatTime(_msg->elapsed_time) << "\n";
-  taskInfoStream << "Remaining Time: " << this->FormatTime(_msg->remaining_time) << "\n";
+  taskInfoStream << "Ready Time: " << this->FormatTime(_msg->ready_time.toSec()) << "\n";
+  taskInfoStream << "Running Time: " << this->FormatTime(_msg->running_time.toSec()) << "\n";
+  taskInfoStream << "Elapsed Time: " << this->FormatTime(_msg->elapsed_time.toSec()) << "\n";
+  taskInfoStream << "Remaining Time: " << this->FormatTime(_msg->remaining_time.toSec()) << "\n";
   taskInfoStream << "Timed out: " << _msg->timed_out << "\n";
   taskInfoStream << "Score: " << _msg->score << "\n";
 
@@ -98,14 +96,12 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-std::string GUITaskWidget::FormatTime(const ros::Time &_duration) const
+std::string GUITaskWidget::FormatTime(unsigned int sec) const
 {
   std::ostringstream stream;
-  unsigned int day, hour, min, sec, msec;
+  unsigned int day, hour, min, msec;
 
   stream.str("");
-
-  sec = _duration.toSec();
 
   day = sec / 86400;
   sec -= day * 86400;
@@ -116,13 +112,11 @@ std::string GUITaskWidget::FormatTime(const ros::Time &_duration) const
   min = sec / 60;
   sec -= min * 60;
 
-  msec = rint(_msg.nsec() * 1e-6);
-
   stream << std::setw(2) << std::setfill('0') << day << " ";
   stream << std::setw(2) << std::setfill('0') << hour << ":";
   stream << std::setw(2) << std::setfill('0') << min << ":";
   stream << std::setw(2) << std::setfill('0') << sec << ".";
-  stream << std::setw(3) << std::setfill('0') << msec;
 
   return stream.str();
 }
+
