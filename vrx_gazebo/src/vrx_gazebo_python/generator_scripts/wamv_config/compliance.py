@@ -24,7 +24,7 @@ class Sensor_Compliance:
         # check if the sensor is allowed
         params = params.copy()
         assert sensor_type in self.default_parameters,\
-                '%s is not defined anywhere under %s' % (sensor_type, self.dir)
+            '%s is not defined anywhere under %s' % (sensor_type, self.dir)
         for i in params:
             if i not in self.numeric[sensor_type]['allowed_params']:
                 assert False, '%s parameter not permitted' % i
@@ -58,7 +58,7 @@ class Sensor_Compliance:
 
 class Thruster_Compliance:
     def __init__(self):
-        
+
         # open sensor_compliance_visual.sdf and all the boxes defined => boxes
         self.boxes = find_boxes('thruster_compliance/visual.sdf')
         # look at all sensors in sensors directory and get the default params
@@ -75,7 +75,7 @@ class Thruster_Compliance:
         # check if the sensor is allowed
         params = params.copy()
         assert thruster_type in self.default_parameters,\
-                '%s is not defined anywhere under %s' % (thruster_type, self.dir)
+            '%s is not defined anywhere under %s' % (thruster_type, self.dir)
         for i in params:
             if i not in self.numeric[thruster_type]['allowed_params']:
                 assert False, '%s parameter not permitted' % i
@@ -87,13 +87,13 @@ class Thruster_Compliance:
         # right now the ONLY compliance check we have is to make sure that
         # the sensors are in at least one of the boxes
         xyz = np.array([float(j) for j in [i for i in params['position'].split(' ')
-                              if i != '']])
+                        if i != '']])
         for box in self.boxes:
             if box.fit(xyz):
                 return True
         print '\n', thruster_type, params['prefix'], 'is out of bounds\n'
         return False
- 
+
     def number_compliance(self, thruster_type, n):
         if n > self.numeric[thruster_type]['num']:
             print '\n', 'maximum of', self.numeric[thruster_type]['num'], thruster_type, \
