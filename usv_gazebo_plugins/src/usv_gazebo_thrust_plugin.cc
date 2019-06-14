@@ -43,7 +43,7 @@ Thruster::Thruster(UsvThrust *_parent)
   this->maxAngle = M_PI / 2;
   this->mappingType = 0;
   this->plugin = _parent;
-  this->engineJointPID.Init(5555, 0.0, 350);
+  this->engineJointPID.Init(300, 0.0, 20);
   this->enableAngle = false;
 
   // Initialize some things
