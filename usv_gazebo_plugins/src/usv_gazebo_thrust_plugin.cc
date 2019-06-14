@@ -124,7 +124,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       {
         std::string linkName = thrusterSDF->Get<std::string>("linkName");
         thruster.link = this->model->GetLink(linkName);
-        if (thruster.link == nullptr)
+        if (!thruster.link)
         {
           ROS_ERROR_STREAM("Could not find a link by the name <" << linkName
             << "> in the model!");
