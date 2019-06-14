@@ -31,6 +31,7 @@ speedBindings = {
         'v': -1,
     }
 
+
 def getKey():
     tty.setraw(sys.stdin.fileno())
     select.select([sys.stdin], [], [], 0)
@@ -69,8 +70,10 @@ if __name__ == "__main__":
 
             elif key in speedBindings.keys():
                 # Increment/decrement speed of angle change and print it
-                thrust_angle_speed += speedBindings[key] * 0.1 * thrust_angle_speed
-                print('currently:\tthruster angle speed {} '.format(thrust_angle_speed))
+                thrust_angle_speed += (speedBindings[key] * 0.1 *
+                                       thrust_angle_speed)
+                print('currently:\t'
+                      'thruster angle speed {} '.format(thrust_angle_speed))
 
             else:
                 if (key == '\x03'):

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="set_thrust_angle" default="false"/>
+  <arg name="max_angle" default="$(eval pi/2)"/>
 
   <!-- Keyboard teleop -->
   <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen">
@@ -15,6 +16,7 @@
   <!-- Set thruster angles -->
   <group if="$(arg set_thrust_angle)">
     <node pkg="vrx_gazebo" type="key2thrust_angle.py" name="key2thrust_angle" output="screen">
+      <param name="max_angle" value="$(arg max_angle)"/>
     </node>
   </group>
 
