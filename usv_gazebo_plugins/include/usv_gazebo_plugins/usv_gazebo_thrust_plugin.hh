@@ -81,6 +81,10 @@ namespace gazebo
     /// \brief Subscription to thruster commands.
     public: ros::Subscriber cmdSub;
 
+    /// \brief If true, thruster will have adjustable angle.
+    ///        If false, thruster will have constant angle.
+    public: bool enableAngle;
+
     /// \brief Topic name for incoming ROS thruster angle commands.
     public: std::string angleTopic;
 
@@ -131,6 +135,8 @@ namespace gazebo
   ///               typically within [-1.0 , 1.0]
   ///   <angleTopic>: The ROS topic to control the angle of this thruster,
   ///                 will be clipped to stay within [-maxAngle, maxAngle]
+  ///   <enableAngle>: If true, thruster will have adjustable angle.
+  ///                  If false, thruster will have constant angle.
   ///   Optional elements:
   ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear),
   ///   default is 0
@@ -161,6 +167,7 @@ namespace gazebo
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
   ///        <maxAngle>1.57</maxAngle>
+  ///        <enableAngle>false</enableAngle>
   ///      </thruster>
   ///      <thruster>
   ///        <linkName>right_propeller_link</linkName>
@@ -173,6 +180,7 @@ namespace gazebo
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
   ///        <maxAngle>1.57</maxAngle>
+  ///        <enableAngle>false</enableAngle>
   ///      </thruster>
   ///    </plugin>
 

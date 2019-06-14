@@ -12,6 +12,7 @@
       <maxForceFwd>250.0</maxForceFwd>
       <maxForceRev>-100.0</maxForceRev>
       <maxAngle>${pi/2}</maxAngle>
+      <enableAngle>true</enableAngle>
     </thruster>
   </xacro:macro>
 </plugin>

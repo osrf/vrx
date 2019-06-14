@@ -44,6 +44,7 @@ Thruster::Thruster(UsvThrust *_parent)
   this->mappingType = 0;
   this->plugin = _parent;
   this->engineJointPID.Init(5555, 0.0, 350);
+  this->enableAngle = false;
 
   // Initialize some things
   this->currCmd = 0.0;
@@ -237,6 +238,17 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
           "for each thruster!");
       }
 
+      // Parse for enableAngle bool
+      if (thrusterSDF->HasElement("enableAngle"))
+      {
+        thruster.enableAngle = thrusterSDF->Get<bool>("enableAngle");
+      }
+      else
+      {
+        ROS_ERROR_STREAM("Please specify for each thruster if it should enable "
+          "angle adjustment (for ROS subscription)!");
+      }
+
       // Push to vector and increment
       this->thrusters.push_back(thruster);
       thrusterSDF = thrusterSDF->GetNextElement("thruster");
@@ -273,9 +285,12 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       &this->thrusters[i]);
 
     // Subscribe to angles for each thruster.
-    this->thrusters[i].angleSub = this->rosnode->subscribe(
-      this->thrusters[i].angleTopic, 1, &Thruster::OnThrustAngle,
-      &this->thrusters[i]);
+    if (this->thrusters[i].enableAngle)
+    {
+      this->thrusters[i].angleSub = this->rosnode->subscribe(
+        this->thrusters[i].angleTopic, 1, &Thruster::OnThrustAngle,
+        &this->thrusters[i]);
+    }
   }
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
