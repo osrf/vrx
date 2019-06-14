@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   geographic_msgs
   std_msgs
   rospy
+  roscpp
 )
 
 ########################
@@ -136,9 +137,16 @@ install(TARGETS scan_dock_scoring_plugin
 )
 
 # Plugin for Task Info GUI Overlay
-add_library(gui_task_widget src/gui_task_widget.cc)
-target_link_libraries(gui_task_widget
-  ${catkin_LIBRARIES})
+add_library(gui_task_widget
+	src/gui_task_widget.cc
+)
+target_link_libraries(gui_task_widget 
+  ${catkin_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${Qt5Core_LIBRARIES}
+  ${Qt5Widgets_LIBRARIES}
+  ${PROTOBUF_LIBRARIES}
+)
 add_dependencies(gui_task_widget ${catkin_EXPORTED_TARGETS})
 install(TARGETS gui_task_widget
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

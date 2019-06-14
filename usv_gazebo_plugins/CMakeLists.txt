@@ -26,7 +26,7 @@ link_directories(
 ## Declare a C++ library
 add_library(buoyancy_gazebo_plugin
   src/buoyancy_gazebo_plugin.cc
- )
+)
 target_link_libraries(buoyancy_gazebo_plugin
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}

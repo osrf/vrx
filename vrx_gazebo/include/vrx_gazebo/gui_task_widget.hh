@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/transport/transport.hh>
@@ -29,7 +30,7 @@ namespace gazebo
 {
   class GAZEBO_VISIBLE GUITaskWidget : public GUIPlugin
   {
-    Q_OBJECT
+    //Q_OBJECT
 
     /// \brief Constructor
     public: GUITaskWidget();
@@ -51,7 +52,7 @@ namespace gazebo
     private: std::string FormatTime(unsigned int sec) const;
 
     /// \brief A ros NodeHandle
-    private: ros::NodeHandle node;
+    private: boost::shared_ptr<ros::NodeHandle> node;
 
     /// \brief Subscriber to Task messages.
     private: ros::Subscriber taskSub;

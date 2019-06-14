@@ -28,6 +28,19 @@ GZ_REGISTER_GUI_PLUGIN(GUITaskWidget)
 GUITaskWidget::GUITaskWidget()
   : GUIPlugin()
 {
+  
+  if (!ros::isInitialized())
+  {
+    int argc = 0;
+    char** argv = NULL;
+    ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler |
+              ros::init_options::AnonymousName);
+    
+  }
+  node.reset(new ros::NodeHandle);
+  
+  gzdbg << "Hello World" << std::endl;
+  
   // Set the frame background and foreground colors
   this->setStyleSheet(
       "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
@@ -69,8 +82,9 @@ GUITaskWidget::GUITaskWidget()
   this->resize(200, 40);
 
   // Subscribe to tasks topic
-  this->taskSub = this->node.subscribe("/vrx/task/info", 1,
+  this->taskSub = this->node->subscribe("/vrx/task/info", 1,
       &GUITaskWidget::OnTaskInfo, this);
+  
 }
 
 /////////////////////////////////////////////////
@@ -80,7 +94,7 @@ GUITaskWidget::~GUITaskWidget()
 
 /////////////////////////////////////////////////
 void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
-{
+{/**
   std::ostringstream taskInfoStream;
   taskInfoStream.str("");
   taskInfoStream << "Task Name: " << _msg->name << "\n";
@@ -93,6 +107,7 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream << "Score: " << _msg->score << "\n";
 
   this->SetTaskInfo(QString::fromStdString(taskInfoStream.str()));
+**/
 }
 
 /////////////////////////////////////////////////
