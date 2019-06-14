@@ -127,8 +127,10 @@ namespace gazebo
   ///   <linkName>: Name of the link on which to apply thrust forces.
   ///   <propJointName>: The name of the propeller joint.
   ///   <engineJointName>: The name of the engine joint.
-  ///   <cmdTopic>: The ROS topic to control this thruster.
-  ///   Optional eleents:
+  ///   <cmdTopic>: The ROS topic to control this thruster, typically within [-1.0 , 1.0]
+  ///   <angleTopic>: The ROS topic to control the angle of this thruster,
+  ///                 will be clipped to stay within [-maxAngle, maxAngle]
+  ///   Optional elements:
   ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear),
   ///   default is 0
   ///   <maxCmd>:Maximum (abs val) of thrust commands,
@@ -137,6 +139,8 @@ namespace gazebo
   ///   default is 100.0 N
   ///   <maxForceRev>: Maximum reverse force [N].
   ///   default is 100.0 N
+  ///   <maxAngle>: Absolute value of maximum thruster angle [radians].
+  ///   default is pi/2
   ///
   /// Here is an example:
   ///
@@ -150,20 +154,24 @@ namespace gazebo
   ///        <propJointName>left_engine_propeller_joint</propJointName>
   ///        <engineJointName>left_chasis_engine_joint</engineJointName>
   ///        <cmdTopic>left_thrust_cmd</cmdTopic>
+  ///        <angleTopic>left_thrust_angle</angleTopic>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
+  ///        <maxAngle>1.57</maxAngle>
   ///      </thruster>
   ///      <thruster>
   ///        <linkName>right_propeller_link</linkName>
   ///        <propJointName>right_engine_propeller_joint</propJointName>
   ///        <engineJointName>right_chasis_engine_joint</engineJointName>
   ///        <cmdTopic>right_thrust_cmd</cmdTopic>
+  ///        <angleTopic>right_thrust_angle</angleTopic>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
+  ///        <maxAngle>1.57</maxAngle>
   ///      </thruster>
   ///    </plugin>
 
