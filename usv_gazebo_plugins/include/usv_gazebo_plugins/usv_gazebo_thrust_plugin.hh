@@ -162,12 +162,12 @@ namespace gazebo
   ///        <engineJointName>left_chasis_engine_joint</engineJointName>
   ///        <cmdTopic>left_thrust_cmd</cmdTopic>
   ///        <angleTopic>left_thrust_angle</angleTopic>
+  ///        <enableAngle>false</enableAngle>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
   ///        <maxAngle>1.57</maxAngle>
-  ///        <enableAngle>false</enableAngle>
   ///      </thruster>
   ///      <thruster>
   ///        <linkName>right_propeller_link</linkName>
@@ -175,12 +175,12 @@ namespace gazebo
   ///        <engineJointName>right_chasis_engine_joint</engineJointName>
   ///        <cmdTopic>right_thrust_cmd</cmdTopic>
   ///        <angleTopic>right_thrust_angle</angleTopic>
+  ///        <enableAngle>false</enableAngle>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
   ///        <maxAngle>1.57</maxAngle>
-  ///        <enableAngle>false</enableAngle>
   ///      </thruster>
   ///    </plugin>
 
