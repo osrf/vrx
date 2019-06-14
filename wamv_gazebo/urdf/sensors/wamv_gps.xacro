@@ -29,16 +29,16 @@
       <parent link="base_link" />
       <child link="${name}_link" />
     </joint>
-    <!--gazebo>
+    <gazebo>
       <plugin name="gps_plugin_${name}" filename="libhector_gazebo_ros_gps.so">
         <updateRate>15.0</updateRate>
         <alwaysOn>true</alwaysOn>
         <bodyName>${name}_link</bodyName>
         <frameId>${name}_link</frameId>
-        <topicName>gps/fix</topicName>
-        <velocityTopicName>gps/fix_velocity</velocityTopicName-->
+        <topicName>gps1/fix</topicName>
+        <velocityTopicName>gps1/fix_velocity</velocityTopicName>
         <!-- Location of origin of Gazebo Sand Island map -->
-        <!--referenceLatitude>21.30996</referenceLatitude>
+        <referenceLatitude>21.30996</referenceLatitude>
         <referenceLongitude>-157.8901</referenceLongitude>
         <referenceAltitude>${z}</referenceAltitude>
         <referenceHeading>90</referenceHeading>
@@ -49,7 +49,7 @@
         <velocityDrift>0.0 0.0 0.0</velocityDrift>
         <velocityGaussianNoise>0.0 0.0 0.0</velocityGaussianNoise>
       </plugin>      
-    </gazebo-->
+    </gazebo>
     <gazebo reference="${name}_link">
         <sensor name='gps_${name}' type='gps'>
         <always_on>true</always_on>
@@ -59,10 +59,14 @@
         <gps>
         </gps>
         <plugin  name="gps_plugin_${name}" filename="libusv_gazebo_gps_plugin.so">
-          <topicName>/gps/fix</topicName>
-          <velTopicName>/gps/fix_velocity</velTopicName>          
+          <topicName>/gps2/fix</topicName>
+          <velTopicName>/gps2/fix_velocity</velTopicName>          
         </plugin>
     </sensor>
+    </gazebo>
+    <gazebo>
+        <plugin name="vel_${name}" filename="libusv_gazebo_v3d_plugin.so">
+        </plugin>
     </gazebo>
   </xacro:macro>
 </robot>

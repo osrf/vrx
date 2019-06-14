@@ -29,18 +29,24 @@ namespace gazebo
 {
 /// \brief ROS interface to Gazebo's GPS sensor plugin
 ///
-/// Implements an interface for ROS to Gazebo's ointernal GPS plugin.  The 
-/// plugin is minimal since coordinate generation and noise are provided by the 
-/// Gazebo sensor plugin<br>
+/// This sensor plugin implements an interface for ROS to a Gazebo GPS plugin.  
+/// The plugin is minimal since geodetic coordinate generation and noise are  
+/// provided by the Gazebo sensor<br>
 /// <robotNamespace> - Set the namespace of the robot.  Used to setup the ROS
 ///   nodehandle.   <br>
 /// <frameId> - Tf frame of the sensor message.  Used as part of the sensor 
 ///   message publication.<br>
-/// <topicName> - Name of the topic that the sensor message will be published 
+/// <topicName> - Name of the topic that the fix message will be published 
 /// on.<br>
 /// <velTopicName> - Name of the topic that will be used for velocity 
 /// messages.<br>
-/// <updateRate> - Rate of simulated sensor messages.<br>
+/// <covarianceType> - Type of covariance creation supported by this message. 
+/// This is used to populate the position_covariance_type member of ROS' 
+/// NavSatFix message.  Defaults to 1 corresponding with an approximated 
+/// covariance. <br>
+/// <covarianceEast> - covariance value for horizontal east-west <br>
+/// <covarianceNorth> - covariance value for horizontal north-south <br>
+/// <covarianceUp> - covariance value for vertical <br>
 
   class USVGazeboGPS : public SensorPlugin
   {

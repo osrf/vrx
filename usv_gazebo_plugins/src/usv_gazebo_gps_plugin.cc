@@ -38,13 +38,13 @@
  *  \desc   Example ROS plugin for Gazebo
  *  \Original plugin from gazebo_plugins package 
  *  \(https://github.com/ros-simulation/gazebo_ros_pkgs), 
- *  \modified to implement a simulated pinger sensor for Maritime ASVs
- *  \Modifications by Jonathan Wheare.
+ *  \modified to implement a ROS interface to gazebo's GPS sensor 
+ *  \by Jonathan Wheare.
  *  
  */
 
 #include <usv_gazebo_plugins/usv_gazebo_gps_plugin.hh>
-#include "gazebo/common/CommonIface.hh"
+#include <gazebo/common/CommonIface.hh>
 
 namespace gazebo
 {
@@ -177,6 +177,9 @@ void USVGazeboGPS::Load( sensors::SensorPtr _parent, sdf::ElementPtr _sdf )
       _parent->Topic().c_str());
   ROS_INFO_NAMED("usv_gazebo_gps_plugin","starting callback using topic %s", 
       internalTopicName.c_str());
+            
+  ignition::math::Vector3d poseCenter(0,0,0);
+  //ignition::math::Vector3d spherical = this->sensor->dataPtr->sphericalCoordinates->SphericalFromLocal(poseCenter);
       
   // connect the update function to the world update event.  
   this->gps_sub_ = this->gazebo_node_->Subscribe(internalTopicName, 
