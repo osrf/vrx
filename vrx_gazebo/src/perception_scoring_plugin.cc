@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <mutex>
-#include <ostream>
 #include <string>
 #include <vector>
 #include <gazebo/common/Assert.hh>
@@ -130,7 +129,7 @@ void ObjectChecker::OnObject(
   #else
     ignition::math::Pose3d truePose = this->currObject->GetWorldPose().Ign();
   #endif
-    
+
   // 2D Error
   this->objectError = sqrt(pow(cartVec.X() - truePose.Pos().X(), 2)+
     pow(cartVec.Y() - truePose.Pos().Y(), 2));
@@ -371,7 +370,7 @@ void PerceptionScoringPlugin::Restart()
   #else
     this->dataPtr->startTime = this->dataPtr->world->GetSimTime();
   #endif
-  
+
   this->dataPtr->objects = this->dataPtr->initialObjects;
 
   // gzmsg << "Object population restarted" << std::endl;
@@ -422,7 +421,7 @@ void PerceptionScoringPlugin::OnUpdate()
     auto elapsedTime = this->dataPtr->world->GetSimTime() -
                        this->dataPtr->lastUpdateTime;
   #endif
-                       
+
   if (elapsedTime >= this->dataPtr->objects.front().time)
   {
     gzmsg << "PerceptionScoringPlugin: spawn next object." << std::endl;
@@ -458,12 +457,12 @@ void PerceptionScoringPlugin::OnUpdate()
       #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Pose3d framePose(
           this->dataPtr->frame->WorldPose().Pos(),
-          ignition::math::Quaterniond(0.0,0.0,
+          ignition::math::Quaterniond(0.0, 0.0,
             this->dataPtr->frame->WorldPose().Rot().Yaw()));
       #else
         ignition::math::Pose3d framePose(
           this->dataPtr->frame->GetWorldPose().pos.Ign(),
-          ignition::math::Quaterniond(0.0,0.0,
+          ignition::math::Quaterniond(0.0, 0.0,
             this->dataPtr->frame->GetWorldPose().rot.Ign().Yaw()));
       #endif
       ignition::math::Matrix4d transMat(framePose);

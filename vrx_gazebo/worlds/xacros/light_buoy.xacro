@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="light_buoy" params="name x:=110 y:=28 z:=0.25 R:=0 P:=0 Y:=0">
+    <include>
+      <name>${name}</name>
+      <uri>model://robotx_light_buoy</uri>
+      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose> 
+    </include>
+  </xacro:macro>
+</world>

@@ -40,20 +40,16 @@ namespace gazebo
   /// \brief A plugin that simulates a simple wind model. It accepts the
   /// following parameters:
   ///
-  ///<wind_objs>: declaring block of objects (models) to be effected by the wind
-  ///  <wind_obj>: declaring block for wind obj. NOTE: may include as many wind_obj's as you like
-  ///    <name>wamv</name>: name of the model(object) that will be effected by the wind
-  ///    <link_name>base_link</link_name>: link on that model which will feel the force of the wind (limited to ONE per model)
-  ///    <coeff_vector>0.5 0.5 0.33</coeff_vector>: coefficient vector of the particluar wind object
-  ///  </wind_obj> 
-  ///</wind_objs>
-  /// 
-  /// 
+  /// <wind_objs>: Block of objects (models) to be effected by the wind.
+  ///   <wind_obj>: A wind object. NOTE: may include as many objects as you like
+  ///     <name>: Name of the model (object) that will be effected by the wind
+  ///     <link_name>: Link on that model which will feel the force of the wind
+  ///                  (limited to ONE per model).
+  ///     <coeff_vector>: Coefficient vector of the particluar wind object.
   ///
   /// <wind_direction>: Wind direction vector. Wind direction is specified as
   /// the positive direction of the wind velocity vector in the horizontal plane
   /// in degrees using the ENU coordinate convention
-  ///
   ///
   /// <wind_mean_velocity>: The wind average velocity.
   ///
@@ -72,7 +68,7 @@ namespace gazebo
     struct WindObj
     {
       /// \Bool to show weather the model and link pointers have been set
-      bool init=false;
+      bool init = false;
       /// \name of model as it will be looked by in the world
       std::string modelName;
       /// \model Pointer to the model
@@ -104,7 +100,7 @@ namespace gazebo
 
     /// \brief Bool to keep track if ALL of the windObjs have been initialized
     private: bool windObjsInit = false;
- 
+
     /// \brief Pointer to the Gazebo world
     private: physics::WorldPtr world;
 
