@@ -127,7 +127,8 @@ namespace gazebo
   ///   <linkName>: Name of the link on which to apply thrust forces.
   ///   <propJointName>: The name of the propeller joint.
   ///   <engineJointName>: The name of the engine joint.
-  ///   <cmdTopic>: The ROS topic to control this thruster, typically within [-1.0 , 1.0]
+  ///   <cmdTopic>: The ROS topic to control this thruster,
+  ///               typically within [-1.0 , 1.0]
   ///   <angleTopic>: The ROS topic to control the angle of this thruster,
   ///                 will be clipped to stay within [-maxAngle, maxAngle]
   ///   Optional elements:

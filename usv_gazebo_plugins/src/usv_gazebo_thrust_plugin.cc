@@ -22,9 +22,9 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <boost/algorithm/clamp.hpp>
-#include <cmath>
 #include <ros/time.h>
 
+#include <cmath>
 #include <functional>
 
 #include "usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh"
@@ -76,7 +76,8 @@ void Thruster::OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg)
   // When we get a new thrust angle!
   ROS_DEBUG_STREAM("New thrust angle! " << _msg->data);
   std::lock_guard<std::mutex> lock(this->plugin->mutex);
-  this->desiredAngle = boost::algorithm::clamp(_msg->data, -this->maxAngle, this->maxAngle);
+  this->desiredAngle = boost::algorithm::clamp(_msg->data, -this->maxAngle,
+                                               this->maxAngle);
 }
 
 //////////////////////////////////////////////////
@@ -198,7 +199,8 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
       thruster.maxForceRev =
         this->SdfParamDouble(thrusterSDF, "maxForceRev", -100.0);
-      thruster.maxAngle = this->SdfParamDouble(thrusterSDF, "maxAngle", M_PI / 2);
+      thruster.maxAngle = this->SdfParamDouble(thrusterSDF, "maxAngle",
+                                               M_PI / 2);
 
       if (thrusterSDF->HasElement("mappingType"))
       {
@@ -354,7 +356,10 @@ void UsvThrust::Update()
       #else
         double currAngle = this->thrusters[i].engineJoint->GetAngle(0).Radian();
       #endif
-      double effort = this->thrusters[i].engineJointPID.Update(currAngle - desiredAngle, stepTime);
+      double angleError = currAngle - desiredAngle;
+
+      double effort = this->thrusters[i].engineJointPID.Update(angleError,
+                                                               stepTime);
       this->thrusters[i].engineJoint->SetForce(0, effort);
 
       // Store last update time
