@@ -143,9 +143,9 @@ namespace gazebo
   ///   <maxCmd>:Maximum (abs val) of thrust commands,
   ///   defualt is 1.0
   ///   <maxForceFwd>: Maximum forward force [N].
-  ///   default is 100.0 N
+  ///   default is 250.0 N
   ///   <maxForceRev>: Maximum reverse force [N].
-  ///   default is 100.0 N
+  ///   default is -100.0 N
   ///   <maxAngle>: Absolute value of maximum thruster angle [radians].
   ///   default is pi/2
   ///

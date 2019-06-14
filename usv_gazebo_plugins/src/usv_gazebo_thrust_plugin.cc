@@ -34,19 +34,9 @@ using namespace gazebo;
 //////////////////////////////////////////////////
 Thruster::Thruster(UsvThrust *_parent)
 {
-  // Set some defaults
-  this->cmdTopic = "thruster_default_cmdTopic";
-  this->angleTopic = "thruster_default_angleTopic";
-  this->maxCmd = 1.0;
-  this->maxForceFwd = 100.0;
-  this->maxForceRev = -100.0;
-  this->maxAngle = M_PI / 2;
-  this->mappingType = 0;
+  // Initialize fields
   this->plugin = _parent;
   this->engineJointPID.Init(300, 0.0, 20);
-  this->enableAngle = false;
-
-  // Initialize some things
   this->currCmd = 0.0;
   this->desiredAngle = 0.0;
 
@@ -128,6 +118,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
       ROS_DEBUG_STREAM("Thruster #" << thrusterCounter);
 
+      // REQUIRED PARAMETERS
       // Find link by name in SDF
       if (thrusterSDF->HasElement("linkName"))
       {
@@ -156,8 +147,8 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         thruster.propJoint = this->model->GetJoint(propName);
         if (thruster.propJoint == nullptr)
         {
-          ROS_WARN_STREAM("Could not find a propellor joint by the name of <" <<
-            propName << "> in the model!");
+          ROS_ERROR_STREAM("Could not find a propellor joint by the name of <"
+            << propName << "> in the model!");
         }
         else
         {
@@ -167,7 +158,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
       else
       {
-        ROS_WARN_STREAM("No propJointName SDF parameter for thruster #"
+        ROS_ERROR_STREAM("No propJointName SDF parameter for thruster #"
           << thrusterCounter);
       }
 
@@ -179,7 +170,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         thruster.engineJoint = this->model->GetJoint(engineName);
         if (thruster.engineJoint == nullptr)
         {
-          ROS_WARN_STREAM("Could not find a engine joint by the name of <" <<
+          ROS_ERROR_STREAM("Could not find a engine joint by the name of <" <<
             engineName << "> in the model!");
         }
         else
@@ -190,30 +181,8 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
       else
       {
-        ROS_WARN_STREAM("No engineJointName SDF parameter for thruster #"
+        ROS_ERROR_STREAM("No engineJointName SDF parameter for thruster #"
           << thrusterCounter);
-      }
-
-      // Parse individual thruster SDF parameters
-      thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd", 1.0);
-      thruster.maxForceFwd =
-        this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
-      thruster.maxForceRev =
-        this->SdfParamDouble(thrusterSDF, "maxForceRev", -100.0);
-      thruster.maxAngle = this->SdfParamDouble(thrusterSDF, "maxAngle",
-                                               M_PI / 2);
-
-      if (thrusterSDF->HasElement("mappingType"))
-      {
-        thruster.mappingType = thrusterSDF->Get<int>("mappingType");
-        ROS_DEBUG_STREAM("Parameter found - setting <mappingType> to <" <<
-          thruster.mappingType << ">.");
-      }
-      else
-      {
-        thruster.mappingType = 0;
-        ROS_INFO_STREAM("Parameter <mappingType> not found: "
-          "Using default value of <" << thruster.mappingType << ">.");
       }
 
       // Parse for cmd subscription topic
@@ -248,6 +217,29 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         ROS_ERROR_STREAM("Please specify for each thruster if it should enable "
           "angle adjustment (for ROS subscription)!");
       }
+
+      // OPTIONAL PARAMETERS
+      // Parse individual thruster SDF parameters
+      if (thrusterSDF->HasElement("mappingType"))
+      {
+        thruster.mappingType = thrusterSDF->Get<int>("mappingType");
+        ROS_DEBUG_STREAM("Parameter found - setting <mappingType> to <" <<
+          thruster.mappingType << ">.");
+      }
+      else
+      {
+        thruster.mappingType = 0;
+        ROS_INFO_STREAM("Parameter <mappingType> not found: "
+          "Using default value of <" << thruster.mappingType << ">.");
+      }
+
+      thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd", 1.0);
+      thruster.maxForceFwd =
+        this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
+      thruster.maxForceRev =
+        this->SdfParamDouble(thrusterSDF, "maxForceRev", -100.0);
+      thruster.maxAngle = this->SdfParamDouble(thrusterSDF, "maxAngle",
+                                               M_PI / 2);
 
       // Push to vector and increment
       this->thrusters.push_back(thruster);
