@@ -145,7 +145,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         std::string propName =
           thrusterSDF->GetElement("propJointName")->Get<std::string>();
         thruster.propJoint = this->model->GetJoint(propName);
-        if (thruster.propJoint == nullptr)
+        if (!thruster.propJoint)
         {
           ROS_ERROR_STREAM("Could not find a propellor joint by the name of <"
             << propName << "> in the model!");
@@ -168,7 +168,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         std::string engineName =
           thrusterSDF->GetElement("engineJointName")->Get<std::string>();
         thruster.engineJoint = this->model->GetJoint(engineName);
-        if (thruster.engineJoint == nullptr)
+        if (!thruster.engineJoint)
         {
           ROS_ERROR_STREAM("Could not find a engine joint by the name of <" <<
             engineName << "> in the model!");
