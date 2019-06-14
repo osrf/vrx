@@ -1,0 +1,6 @@
+#! /usr/bin/env python
+
+import vrx_gazebo_python.generator_scripts.wamv_config.configure_wamv
+
+if __name__ == '__main__':
+    vrx_gazebo_python.generator_scripts.wamv_config.configure_wamv.main()
