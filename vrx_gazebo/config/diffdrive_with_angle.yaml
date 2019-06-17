@@ -25,7 +25,7 @@ teleop:
     axis_mappings:
       - axis: 2
         target: data
-        scale: 1.0
+        scale: -1.0
 
   turn_right_thruster:
     type: topic
@@ -34,4 +34,4 @@ teleop:
     axis_mappings:
       - axis: 2
         target: data
-        scale: 1.0
+        scale: -1.0
