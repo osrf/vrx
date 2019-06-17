@@ -37,6 +37,7 @@ def create_xacro_file(xacro_target,
         s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
 
+
         # Handle case with empty yaml file
         if requested_macros is None:
             xacro_file.write(boiler_plate_bot)
@@ -113,10 +114,23 @@ def add_gazebo_thruster_config(xacro_target,
 
 
 def macro_call_gen(name, params={}):
-    macro_call = '<xacro:%s ' % name
+    macro_call = '  <xacro:%s ' % name
+    endline = '/>\n'
+    insert = []
     for i in params:
-        macro_call += '%s="%s" ' % (i, str(params[i]))
-    macro_call += '/>\n'
+        if i[:3] == '/**':
+            endline = '>\n'
+            insert.append(i[3:])
+        else:
+            macro_call += '%s="%s" ' % (i, str(params[i]))
+    macro_call += endline
+    if insert == []:
+        return macro_call
+    for i in insert:
+        macro_call += '    <%s>\n' % i
+        macro_call += str(params['/**' + i])
+        macro_call += '    </%s>\n' % i
+    macro_call += '  </xacro:' + name + '>\n'
     return macro_call
 
 
