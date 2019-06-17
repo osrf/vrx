@@ -50,7 +50,12 @@ void main(void)
     WaveParameters waves[N_WAVES];
     waves[0] = WaveParameters(frequency, 0.6*amplitude, 0.5, vec2(-1, 0), steepness);
     waves[1] = WaveParameters(3.2*frequency, 0.4*amplitude, 1.7, vec2(-0.7, 0.7), 1.5*steepness);
-	waves[2] = WaveParameters(1.8*frequency, 0.3*amplitude, 1.0, vec2(0.7, 0.7), 0.8*steepness);
+	  waves[2] = WaveParameters(1.8*frequency, 0.3*amplitude, 1.0, vec2(0.7, 0.7), 0.8*steepness);
+    // Hardcoded from PMS
+    waves[0] = WaveParameters(0.698132,   0.0153085 , 1.0, vec2(0.921061,  -0.389418), 0.01);
+    waves[1] = WaveParameters(1.0472,     0.0786791 , 1.0, vec2(1.0, 0.0), 0.01);
+    waves[2] = WaveParameters(1.5708,     0.0516463 , 1.0, vec2(0.921061, 0.3894180), 0.01);
+
 
     vec4 P = gl_Vertex;
 
