@@ -78,9 +78,9 @@ class Thruster_Compliance:
         return
 
     def param_compliance(self, thruster_type, params={}):
-        # ie: given an instance of sensor_type = 'wamv_camera'
-        # with parameters = params, is this camera in compliance
-        # check if the sensor is allowed
+        # ie: given an instance of thruster_type = 'engine'
+        # with parameters = params, is this engine in compliance
+        # check if the thruster is allowed
         params = params.copy()
         if thruster_type not in self.default_parameters:
             rospy.logerr('%s is not defined anywhere under %s' %
