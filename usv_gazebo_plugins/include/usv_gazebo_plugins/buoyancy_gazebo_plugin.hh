@@ -20,6 +20,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Plugin.hh>
@@ -125,7 +126,7 @@ namespace gazebo
     protected: std::vector<double> buoyancyHeights;
 
     /// \brief Previous update time
-  protected: double lastSimTime;
+    protected: double lastSimTime;
   };
 }
 
