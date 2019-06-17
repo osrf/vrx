@@ -34,16 +34,16 @@
         <!-- Waves x3 -->
         <wave_n>3</wave_n>
 
-        <wave_amp0> 0.00850471</wave_amp0>
-        <wave_period0>3</wave_period0>
+        <wave_amp0> 0.0510282 </wave_amp0>
+        <wave_period0>12</wave_period0>
         <wave_direction0>0.921061 -0.389418</wave_direction0>
 
-        <wave_amp1>0.0437106</wave_amp1>
-        <wave_period1>2</wave_period1>
+        <wave_amp1>0.262264</wave_amp1>
+        <wave_period1>8</wave_period1>
         <wave_direction1>1.0 0.0 </wave_direction1>
 
-        <wave_amp2>0.0286924</wave_amp2>
-        <wave_period2>1</wave_period2>
+        <wave_amp2> 0.172154 </wave_amp2>
+        <wave_period2>5.33</wave_period2>
         <wave_direction2> 0.921061 0.389418</wave_direction2>
       </plugin>
     </gazebo>

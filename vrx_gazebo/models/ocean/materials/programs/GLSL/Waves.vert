@@ -52,9 +52,9 @@ void main(void)
     //waves[1] = WaveParameters(3.2*frequency, 0.4*amplitude, 1.7, vec2(-0.7, 0.7), 1.5*steepness);
 	  //waves[2] = WaveParameters(1.8*frequency, 0.3*amplitude, 1.0, vec2(0.7, 0.7), 0.8*steepness);
     // Hardcoded from PMS
-    vec3 K = vec3(0.447601, 1.0071, 2.26598);
-    vec3 A = vec3(0.00850471, 0.0437106, 0.0286924);
-    vec3 O = vec3( 2.0944, 3.14159, 4.71239);
+    vec3 K = vec3(0.0279751, 0.0629439, 0.141624);
+    vec3 A = vec3(0.0510282, 0.262264, 0.172154);
+    vec3 O = vec3(0.523599, 0.785398, 1.1781);
     waves[0] = WaveParameters(K[0],  A[0], O[0], vec2(0.921061,  -0.389418), 0.0);
     waves[1] = WaveParameters(K[1],  A[1], O[1], vec2(1.0, 0.0), 0.0);
     waves[2] = WaveParameters(K[2],  A[2], O[2], vec2(0.921061, 0.3894180), 0.0);
