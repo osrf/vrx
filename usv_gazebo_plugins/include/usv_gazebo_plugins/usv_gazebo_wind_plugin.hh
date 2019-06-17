@@ -101,6 +101,9 @@ namespace gazebo
     /// \brief Bool to keep track if ALL of the windObjs have been initialized
     private: bool windObjsInit = false;
 
+    /// \brief Bool to keep track if ALL of the windObjs have been initialized
+    private: unsigned int windObjsInitCount = 0;
+
     /// \brief Pointer to the Gazebo world
     private: physics::WorldPtr world;
 
