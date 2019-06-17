@@ -29,8 +29,8 @@ class Sensor_Compliance:
             '%s is not defined anywhere under %s' % (sensor_type, self.dir)
         for i in params:
             if i not in self.numeric[sensor_type]['allowed_params']:
-                rospy.logerr('%s parameter specification is not permitted' % i)
-                assert False
+                rospy.logerr('%s parameter specification of %s not permitted' %
+                             (i, sensor_type))
 
         # add the default params to params if not specified
         for i in self.default_parameters[sensor_type]:
@@ -45,10 +45,10 @@ class Sensor_Compliance:
                     return True
             rospy.logerr('%s %s is out of bounds' %
                          (sensor_type, params['name']))
-            rospy.logerr('%s %s is at xyz=(%s, %s, %s), \
-                         it must fit in at least one of the following boxes:'
-                         % (sensor_type, params['name'],
-                             xyz[0], xyz[1], xyz[2]))
+            rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
+                         (sensor_type, params['name'],
+                          xyz[0], xyz[1], xyz[2],
+                          'must fit in at least one of the following boxes:'))
             for box in self.boxes:
                 rospy.logerr('  %s' % str(box))
             return False
@@ -82,12 +82,16 @@ class Thruster_Compliance:
         # with parameters = params, is this camera in compliance
         # check if the sensor is allowed
         params = params.copy()
+        if thruster_type not in self.default_parameters:
+            rospy.logerr('%s is not defined anywhere under %s' %
+                         (thruster_type, self.dir))
         assert thruster_type in self.default_parameters,\
             '%s is not defined anywhere under %s' % \
             (thruster_type, self.dir)
         for i in params:
             if i not in self.numeric[thruster_type]['allowed_params']:
-                rospy.logerr('%s parameter specification is not permitted' % i)
+                rospy.logerr('%s parameter specification of not permitted' %
+                             (i, thruster_type))
                 assert False
 
         # add the default params to params if not specified
@@ -104,10 +108,10 @@ class Thruster_Compliance:
                 return True
         rospy.logerr('%s %s is out of bounds' %
                      (thruster_type, params['prefix']))
-        rospy.logerr('%s %s is at xyz=(%s, %s, %s),\
-                     it must fit in at least one of the following boxes:'
-                     % (thruster_type, params['prefix'],
-                        xyz[0], xyz[1], xyz[2]))
+        rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
+                     (thruster_type, params['prefix'],
+                      xyz[0], xyz[1], xyz[2],
+                      'it must fit in at least one of the following boxes:'))
         for box in self.boxes:
             rospy.logerr('  %s' % str(box))
         return False
