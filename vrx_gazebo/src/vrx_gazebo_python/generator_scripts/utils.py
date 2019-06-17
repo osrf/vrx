@@ -24,6 +24,8 @@ def create_xacro_file(xacro_target,
         param_test (function): test if a macro call parameters are sensible
 
     Creates a xacro file at 'xacro_target'
+
+    Returns test_fail (bool): Indicator if the wamv passed compliance tests
     """
     test_fail = False
     # Initialize xacro file
@@ -58,6 +60,7 @@ def create_xacro_file(xacro_target,
 
     xacro_file.write(boiler_plate_bot)
     xacro_file.close()
+    return test_fail
 
 
 def add_gazebo_thruster_config(xacro_target,
