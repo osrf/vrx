@@ -2,50 +2,138 @@ import os
 import yaml
 
 
-def macro_block_gen(target,
-                    # target file for writing the macro calls too
-                    # NOTE: will write over if a file is already there
-                    requested=None,  # yaml file with requested macros
-                    requested_macros={},
-                    # if a dictionary is passed directly, no yaml file needed
-                    boiler_plate_top='',  # stuff to start the xacro file
-                    boiler_plate_bot='',  # stuff to end the xacro file
-                    num_test=lambda name, num: True,
-                    # test if the number of a type of macros is allowed
-                    param_test=lambda name, params={}: True,
-                    # test if a given macro call parameters are sensable
-                    # NOT if the parameters are presentfor a given macro
-                    ):
-    xacro_file = open(target, 'wb')
+def create_xacro_file(xacro_target,
+                      yaml_file=None,
+                      requested_macros=None,
+                      boiler_plate_top='',
+                      boiler_plate_bot='',
+                      num_test=lambda name, num: True,
+                      param_test=lambda name, params={}: True,
+                      ):
+    """
+    Purpose: Create a .xacro file to create a custom WAM-V .urdf
+
+    Args:
+        xacro_target (str): Target file for writing the xacro to
+                            NOTE: will overwrite an existing file
+        yaml_file (str): .yaml file with requested macros
+        requested_macros (dict): if dict is passed directly => ignore yaml file
+        boiler_plate_top (str): String to start the xacro file
+        boiler_plate_bot (str): String to end the xacro file
+        num_test (function): test if the number of macro types is allowed
+        param_test (function): test if a macro call parameters are sensible
+
+    Creates a xacro file at 'xacro_target'
+    """
+    # Initialize xacro file
+    xacro_file = open(xacro_target, 'wb')
     xacro_file.write(boiler_plate_top)
 
-    if requested_macros == {}:
-        s = open(requested, 'r')
+    # If requested_macros not given, then open yaml_file
+    if requested_macros is None:
+        s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
 
+
+        # Handle case with empty yaml file
+        if requested_macros is None:
+            xacro_file.write(boiler_plate_bot)
+            xacro_file.close()
+            return
+
+    # Object must be available
     for key, objects in requested_macros.items():
-        # object must be available
-        # can only have so many of this type of object
+        # Check if number of objects is valid
         assert num_test(key, len(objects)), \
             "%d %s's not allowed" % (len(objects), key)
-        xacro_file.write('  <!-- === %s === -->\n' % key)
+
+        # Create block for each object
+        xacro_file.write('    <!-- === %s === -->\n' % key)
         for i in objects:
-            # test the parameter list and make sure it is in accordance
+            # Check for valid parameters
             assert param_test(key, i), \
                 "%s %s failed parameter test" % (key, i['name'])
-            xacro_file.write(macro_call_gen(key, i))
+
+            # Write macro
+            xacro_file.write('    ' + macro_call_gen(key, i))
+        xacro_file.write('\n')
+
+    xacro_file.write(boiler_plate_bot)
+    xacro_file.close()
+
+
+def add_gazebo_thruster_config(xacro_target,
+                               yaml_file=None,
+                               requested_macros=None,
+                               boiler_plate_top='',
+                               boiler_plate_bot='',
+                               ):
+    """
+    Purpose: Append gazebo thruster config tags to a .xacro file to
+             create a custom WAM-V .urdf
+
+    Args:
+        xacro_target (str): Target file for writing the xacro to
+                            NOTE: will append an existing file
+                                  should be used on thruster
+                                  xacro file created by
+                                  create_xacro_file()
+        yaml_file (str): .yaml file with requested macros
+        requested_macros (dict): if dict is passed directly => ignore yaml file
+        boiler_plate_top (str): First string to append to the xacro file
+        boiler_plate_bot (str): Last string to append to the xacro file
+
+    Appends gazebo thruster config tags to 'xacro_target'
+    """
+    # Initialize xacro file for appending
+    xacro_file = open(xacro_target, 'ab')
+    xacro_file.write(boiler_plate_top)
+
+    # If requested_macros not given, then open yaml_file
+    if requested_macros is None:
+        s = open(yaml_file, 'r')
+        requested_macros = yaml.load(s)
+
+        # Handle case with empty yaml file
+        if requested_macros is None:
+            xacro_file.write(boiler_plate_bot)
+            xacro_file.close()
+            return
+
+    # WAM-V Gazebo thrust plugin setup
+    for key, objects in requested_macros.items():
+        for obj in objects:
+            xacro_file.write('      ' +
+                             macro_call_gen('wamv_gazebo_thruster_config',
+                                            {'name': obj['prefix']}))
+
     xacro_file.write(boiler_plate_bot)
     xacro_file.close()
 
 
 def macro_call_gen(name, params={}):
     macro_call = '  <xacro:%s ' % name
+    endline = '/>\n'
+    insert = []
     for i in params:
-        macro_call += '%s="%s" ' % (i, str(params[i]))
-    macro_call += '/>\n'
+        if i[:3] == '/**':
+            endline = '>\n'
+            insert.append(i[3:])
+        else:
+            macro_call += '%s="%s" ' % (i, str(params[i]))
+    macro_call += endline
+    if insert == []:
+        return macro_call
+    for i in insert:
+        macro_call += '    <%s>\n' % i
+        macro_call += str(params['/**' + i])
+        macro_call += '    </%s>\n' % i
+    macro_call += '  </xacro:' + name + '>\n'
     return macro_call
 
 
+# Note: all functions below are not currently used, but they are intended
+#       to be used by compliance tests.
 def get_macros(directory):
     xacro_files = get_macro_files(directory)
     macros = {}

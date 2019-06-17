@@ -122,7 +122,8 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ignition::math::Rand::Seed(
       _sdf->GetElement("random_seed")->Get<int>());
   }
-  else{
+  else
+  {
     common::Time currentWallTime;
     currentWallTime.SetToWallTime();
     ignition::math::Rand::Seed(currentWallTime.sec);
@@ -154,7 +155,6 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvWindPlugin::Update()
 {
-
 #if GAZEBO_MAJOR_VERSION >= 8
   double currentTime = this->world->SimTime().Double();
 #else
@@ -207,13 +207,17 @@ void UsvWindPlugin::Update()
   this->previousTime = currentTime;
 
   double publishingBuffer = 1/this->updateRate;
-  if (this->updateRate >= 0){
+  if (this->updateRate >= 0)
+  {
     publishingBuffer = 1/this->updateRate;
-  } else {
+  }
+  else
+  {
     publishingBuffer = -1;
   }
   // Publishing the wind speed and direction
-  if (currentTime - this->lastPublishTime > publishingBuffer){
+  if (currentTime - this->lastPublishTime > publishingBuffer)
+  {
     std_msgs::Float64 windSpeedMsg;
     std_msgs::Float64 windDirectionMsg;
     windSpeedMsg.data = velocity;

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="nav_challenge" params="name x:=58 y:=68 z:=2 R:=0 P:=0 Y:=0.4">
+    <include>
+      <name>${name}</name>
+      <uri>model://robotx_navigation_challenge</uri>
+      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose> 
+    </include>
+  </xacro:macro>
+</world>

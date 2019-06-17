@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="qualifying_pinger_transit_2016" params="name x:=55 y:=-50 z:=0 R:=0 P:=0 Y:=-1.3">
+    <include>
+      <name>${name}</name>
+      <uri>model://robotx_2016_qualifying_pinger_transit</uri>
+      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose> 
+    </include>
+  </xacro:macro>
+</world>
