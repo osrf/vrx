@@ -188,6 +188,11 @@ void UsvWindPlugin::Update()
         i.model = this->world->GetModel(i.modelName);
 #endif
         i.link = i.model->GetLink(i.linkName);
+        if (!i.link)
+        {
+          gzdbg << i.modelName << "'s link name: " << i.linkName
+                << " is invalid" << std::endl;
+        }
       }
     }
     if (windObjsInitCount == windObjs.size())
@@ -210,11 +215,6 @@ void UsvWindPlugin::Update()
   {
     // Apply the forces of the wind to all wind objects only if they have been
     // initialized
-    if (!windObj.link)
-    {
-      gzdbg << windObj.modelName << "'s link name: " << windObj.linkName
-            << " is invalid" << std::endl;
-    }
     if (!windObj.init || !windObj.link)
       continue;
 
