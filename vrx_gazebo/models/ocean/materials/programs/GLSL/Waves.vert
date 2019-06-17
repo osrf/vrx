@@ -34,9 +34,9 @@ varying vec2 bumpCoord;
 
 // Information regarding a single wave
 struct WaveParameters {
-    float w;   // frequency
+    float k;   // wavenumber
     float a;   // amplitude
-    float phi; // phase constant of speed
+    float omega; // angular frequency
     vec2 d;    // horizontal direction of wave
 	float q;   // steepness for Gerstner wave (q=0: rolling sine waves)
 };
@@ -48,14 +48,16 @@ void main(void)
 
     #define N_WAVES 3
     WaveParameters waves[N_WAVES];
-    waves[0] = WaveParameters(frequency, 0.6*amplitude, 0.5, vec2(-1, 0), steepness);
-    waves[1] = WaveParameters(3.2*frequency, 0.4*amplitude, 1.7, vec2(-0.7, 0.7), 1.5*steepness);
-	  waves[2] = WaveParameters(1.8*frequency, 0.3*amplitude, 1.0, vec2(0.7, 0.7), 0.8*steepness);
+    //waves[0] = WaveParameters(frequency, 0.6*amplitude, 0.5, vec2(-1, 0), steepness);
+    //waves[1] = WaveParameters(3.2*frequency, 0.4*amplitude, 1.7, vec2(-0.7, 0.7), 1.5*steepness);
+	  //waves[2] = WaveParameters(1.8*frequency, 0.3*amplitude, 1.0, vec2(0.7, 0.7), 0.8*steepness);
     // Hardcoded from PMS
-    waves[0] = WaveParameters(0.698132,   0.0153085 , 1.0, vec2(0.921061,  -0.389418), 0.01);
-    waves[1] = WaveParameters(1.0472,     0.0786791 , 1.0, vec2(1.0, 0.0), 0.01);
-    waves[2] = WaveParameters(1.5708,     0.0516463 , 1.0, vec2(0.921061, 0.3894180), 0.01);
-
+    vec3 K = vec3(0.447601, 1.0071, 2.26598);
+    vec3 A = vec3(0.00850471, 0.0437106, 0.0286924);
+    vec3 O = vec3( 2.0944, 3.14159, 4.71239);
+    waves[0] = WaveParameters(K[0],  A[0], O[0], vec2(0.921061,  -0.389418), 0.0);
+    waves[1] = WaveParameters(K[1],  A[1], O[1], vec2(1.0, 0.0), 0.0);
+    waves[2] = WaveParameters(K[2],  A[2], O[2], vec2(0.921061, 0.3894180), 0.0);
 
     vec4 P = gl_Vertex;
 
@@ -68,7 +70,7 @@ void main(void)
 	for(int i = 0; i < N_WAVES; ++i)
 	{
 	    // Evaluate wave equation:
-        float angle = dot(waves[i].d, P.xy)*waves[i].w + time*waves[i].phi;
+        float angle = dot(waves[i].d, P.xy)*waves[i].k + time*waves[i].omega;
 		float c = cos(angle);
 		float s = sin(angle);
         float q = waves[i].q;
@@ -79,7 +81,8 @@ void main(void)
 		P.z += waves[i].a*s;
 
         // Modify normals due to wave displacement (Eq. 10-12)
-		float wa = waves[i].a*waves[i].w;
+		//float wa = waves[i].a*waves[i].w;
+    float wa = waves[i].a*waves[i].k;
 		float qwas = q*wa*s;
 		float wac = wa*c;
 		float dx = waves[i].d.x;
