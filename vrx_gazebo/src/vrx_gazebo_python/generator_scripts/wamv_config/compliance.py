@@ -22,6 +22,9 @@ class Sensor_Compliance:
         # with parameters = params, is this camera in compliance
         # check if the sensor is allowed
         params = params.copy()
+        if sensor_type not in self.default_parameters:
+            rospy.logerr('%s is not defined anywhere under %s' %
+                         (sensor_type, self.dir))
         assert sensor_type in self.default_parameters,\
             '%s is not defined anywhere under %s' % (sensor_type, self.dir)
         for i in params:
