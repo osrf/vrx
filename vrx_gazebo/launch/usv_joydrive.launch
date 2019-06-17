@@ -1,8 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="set_thrust_angle" default="false"/>
-  <arg name="max_angle" default="$(eval pi/2)"/>
-
   <!-- Joystick Driver -->
   <node pkg="joy" type="joy_node" name="joy">
     <param name="dev" value="/dev/input/js0"/>
@@ -10,17 +7,9 @@
     <param name="autorepeat_rate" value="10"/>
   </node>
 
-  <!-- Choose if set thrust angle or not -->
-  <group if="$(arg set_thrust_angle)">
-    <rosparam file="$(find vrx_gazebo)/config/diffdrive_with_angle.yaml"
-              command="load"/>
-  </group>
-  <group unless="$(arg set_thrust_angle)">
-    <rosparam file="$(find vrx_gazebo)/config/diffdrive.yaml"
-              command="load"/>
-  </group>
-
   <!-- Joystick Teleop -->
+  <rosparam file="$(find vrx_gazebo)/config/diffdrive.yaml"
+            command="load"/>
   <node pkg="joy_teleop" type="joy_teleop.py" name="joy_teleop">
     <remap from="cmd_vel" to="cmd_vel" />
   </node>
