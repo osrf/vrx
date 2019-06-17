@@ -34,12 +34,6 @@ wamv_imu:
 wamv_3d_lidar:
     num: 1
     allowed_params:
-        x
-        y
-        z
-        R
-        P
-        Y
         name
 
 wamv_p3d:

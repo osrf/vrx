@@ -25,6 +25,7 @@ def create_xacro_file(xacro_target,
 
     Creates a xacro file at 'xacro_target'
     """
+    test_fail = False
     # Initialize xacro file
     xacro_file = open(xacro_target, 'wb')
     xacro_file.write(boiler_plate_top)
@@ -43,15 +44,13 @@ def create_xacro_file(xacro_target,
     # Object must be available
     for key, objects in requested_macros.items():
         # Check if number of objects is valid
-        assert num_test(key, len(objects)), \
-            "%d %s's not allowed" % (len(objects), key)
+        test_fail = num_test(key, len(objects))
 
         # Create block for each object
         xacro_file.write('    <!-- === %s === -->\n' % key)
         for i in objects:
             # Check for valid parameters
-            assert param_test(key, i), \
-                "%s %s failed parameter test" % (key, i['name'])
+            test_fail = param_test(key, i)
 
             # Write macro
             xacro_file.write('    ' + macro_call_gen(key, i))
