@@ -34,8 +34,8 @@
         <number>3</number>
         <scale>1.5</scale>
         <steepness>0.0</steepness>
-        <amplitude>0.1</amplitude>  <!-- No effect for the PMS model -->
-        <period>6.0</period>
+        <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
+        <period>6</period>
 				<gain>0.2</gain>
         <direction>1.0 0.0</direction>
 				<angle>0.4</angle>				
