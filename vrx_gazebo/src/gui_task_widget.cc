@@ -27,15 +27,13 @@ GZ_REGISTER_GUI_PLUGIN(GUITaskWidget)
 /////////////////////////////////////////////////
 GUITaskWidget::GUITaskWidget()
   : GUIPlugin()
-{
-  
+{ 
   if (!ros::isInitialized())
   {
     int argc = 0;
     char** argv = NULL;
     ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler |
-              ros::init_options::AnonymousName);
-    
+              ros::init_options::AnonymousName);  
   }
   node.reset(new ros::NodeHandle);
   
