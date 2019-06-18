@@ -74,6 +74,7 @@ if __name__ == "__main__":
     thrust_angle_speed = 0.1
     max_angle = rospy.get_param("~max_angle", math.pi / 2)
     curr_angle = 0
+    num_prints = 0
 
     try:
         # Output instructions
@@ -95,6 +96,11 @@ if __name__ == "__main__":
                                        thrust_angle_speed)
                 print('currently:\t'
                       'thruster angle speed {} '.format(thrust_angle_speed))
+
+                # Reprint instructions after 14 speed updates
+                if (num_prints == 14):
+                    print(instructions)
+                num_prints = (num_prints + 1) % 15
 
             elif key == '\x03':
                 break
