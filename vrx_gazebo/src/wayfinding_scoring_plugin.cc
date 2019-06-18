@@ -15,17 +15,17 @@
  *
 */
 
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <geographic_msgs/GeoPath.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/String.h>
 #include <cmath>
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/SphericalCoordinates.hh>
-#include <gazebo/physics/Model.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
-#include <geographic_msgs/GeoPoseStamped.h>
-#include <geographic_msgs/GeoPath.h>
+#include <gazebo/physics/Model.hh>
 #include "vrx_gazebo/wayfinding_scoring_plugin.hh"
 
 /////////////////////////////////////////////////

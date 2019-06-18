@@ -11,6 +11,7 @@
       <grid>0</grid>
       <origin_visual>0</origin_visual>
     </scene>
+
     <!-- Estimated latitude/longitude of sandisland from satellite imagery -->
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
@@ -32,7 +33,6 @@
         <pose frame=''>175.544 123.61 4.70958 0 0.168 -2.40718</pose>
         <view_controller>orbit</view_controller>
       </camera>
-      <plugin name="GUITaskWidget" filename="libgui_task_widget.so"/>
     </gui>
 
     <include>

@@ -17,3 +17,21 @@ teleop:
     type: action
     action_name: joy_priority_action
     buttons: [9]
+
+  turn_left_thruster:
+    type: topic
+    message_type: std_msgs/Float32
+    topic_name: left_thrust_angle
+    axis_mappings:
+      - axis: 2
+        target: data
+        scale: -1.0
+
+  turn_right_thruster:
+    type: topic
+    message_type: std_msgs/Float32
+    topic_name: right_thrust_angle
+    axis_mappings:
+      - axis: 2
+        target: data
+        scale: -1.0

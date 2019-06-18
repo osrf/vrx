@@ -196,7 +196,7 @@ void PlacardPlugin::Update()
   {
     std_msgs::ColorRGBA color;
     color.a = 0.0;
-    
+
     #if GAZEBO_MAJOR_VERSION >= 8
       auto name = visual->Name();
     #else

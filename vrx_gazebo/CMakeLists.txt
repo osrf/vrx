@@ -227,6 +227,7 @@ xacro_add_files(
   worlds/scan_and_dock_b.world.xacro
   worlds/stationkeeping_task.world.xacro
   worlds/wayfinding_task.world.xacro
+  worlds/wind_test.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 
@@ -263,7 +264,7 @@ if (CATKIN_ENABLE_TESTING)
 endif()
 
 # Python Scripts
-catkin_install_python(PROGRAMS bin/generate_sensors
+catkin_install_python(PROGRAMS bin/generate_wamv
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 

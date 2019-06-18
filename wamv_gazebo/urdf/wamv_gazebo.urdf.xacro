@@ -11,8 +11,13 @@
   <xacro:arg name="ground_truth_enabled" default="false" />
   <xacro:arg name="vrx_sensors_enabled" default="false" />
   
+  <!-- Sensor yaml file -->
   <xacro:arg name="yaml_sensor_generation" default="false"/>
   <xacro:arg name="sensor_xacro_file" default = ""/>
+
+  <!-- Thruster yaml file -->
+  <xacro:arg name="yaml_thruster_generation" default="false"/>
+  <xacro:arg name="thruster_xacro_file" default = ""/>
 
   <!-- === The WAM-V platform === -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro"/>
@@ -23,24 +28,32 @@
   <xacro:battery prefix="right" position="0 -1 0.45" orientation="0 0 0"/>
 
   <!-- === Thrusters === -->
-  <xacro:property name="thruster_conf" value="$(arg thruster_config)"/>
-
-  <!-- Default WAM-V with two aft thrusters -->
-  <xacro:if value="${thruster_conf == 'H'}">
-     <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"/>
+  <!-- Use thruster yaml file if given -->
+  <xacro:if value="$(arg yaml_thruster_generation)">
+    <xacro:wamv_gazebo thruster_layout="$(arg thruster_xacro_file)"/>
   </xacro:if>
+  
+  <!-- Otherwise, add thrusters based on thruster_config variable -->
+  <xacro:unless value="$(arg yaml_thruster_generation)">
+    <xacro:property name="thruster_conf" value="$(arg thruster_config)"/>
 
-  <!-- WAMV with "T" thruster configuration -->
-  <xacro:if value="${thruster_conf == 'T'}">
-    <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"/>
-  </xacro:if>
+    <!-- Default WAM-V with two aft thrusters -->
+    <xacro:if value="${thruster_conf == 'H'}">
+       <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"/>
+    </xacro:if>
 
-  <!-- WAMV with "X" thruster configuration -->
-  <xacro:if value="${thruster_conf == 'X'}">
-    <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_x_thrusters.xacro"/>
-  </xacro:if>
+    <!-- WAMV with "T" thruster configuration -->
+    <xacro:if value="${thruster_conf == 'T'}">
+      <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"/>
+    </xacro:if>
 
-  <!-- Decide if we lock the robot to the world -->
+    <!-- WAMV with "X" thruster configuration -->
+    <xacro:if value="${thruster_conf == 'X'}">
+      <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_x_thrusters.xacro"/>
+    </xacro:if>
+  </xacro:unless>
+
+  <!-- === Decide if we lock the robot to the world === -->
   <xacro:if value="$(arg locked)">
     <gazebo>
       <link name="wamv_external_link"/>
@@ -68,11 +81,14 @@
     </gazebo>
   </xacro:if>
 
+  <!-- === Sensors === -->
+  <!-- Use sensor yaml file if given -->
   <xacro:if value="$(arg yaml_sensor_generation)">
     <xacro:include filename="$(arg sensor_xacro_file)"/>
     <xacro:yaml_sensors />
   </xacro:if>
   
+  <!-- Otherwise, add sensors based on enable variables -->
   <xacro:unless value="$(arg yaml_sensor_generation)">
     <!-- Add a front camera -->
     <xacro:if value="$(arg camera_enabled)">
@@ -123,6 +139,5 @@
       <xacro:wamv_3d_lidar name="lidar_wamv" P="${radians(8)}" />
     </xacro:if>
   </xacro:unless>
-
 
 </robot>

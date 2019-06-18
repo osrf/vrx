@@ -1,0 +1,7 @@
+#! /usr/bin/env python
+
+import vrx_gazebo_python.generator_scripts.world_generator.generate_worlds
+
+if __name__ == '__main__':
+    vrx_gazebo_python.generator_scripts.world_generator.generate_worlds.main()
+
