@@ -234,8 +234,13 @@ namespace asv
     this->data->sdf = _sdf;
 
     // Process SDF Parameters
-    gzmsg << "WavefieldVisualPlugin <" << _visual->Name() 
-          << ">: Loading WaveParamaters from SDF" <<  std::endl;
+    #if GAZEBO_MAJOR_VERSION >= 8
+      gzmsg << "WavefieldVisualPlugin <" << _visual->Name() 
+            << ">: Loading WaveParamaters from SDF" <<  std::endl;
+    #else
+      gzmsg << "WavefieldVisualPlugin <" << _visual->GetName() 
+            << ">: Loading WaveParamaters from SDF" <<  std::endl;
+    #endif
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
     this->data->waveParams.reset(new WaveParameters());
     if (_sdf->HasElement("wave"))

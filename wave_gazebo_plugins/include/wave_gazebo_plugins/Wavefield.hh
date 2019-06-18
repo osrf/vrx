@@ -62,16 +62,6 @@ namespace asv
     /// \brief Constructor.
     public: WaveParameters();
 
-    /// \brief Populate the message with the wave parameters.
-    ///
-    /// \param[out] _msg  The message to be populated (a vector of parameters).
-    public: void FillMsg(gazebo::msgs::Param_V& _msg) const;
-
-    /// \brief Set the parameters from a message.
-    ///
-    /// \param[in] _msg   The message containing the wave parameters.
-    public: void SetFromMsg(const gazebo::msgs::Param_V& _msg);
-
     /// \brief Set the parameters from an SDF Element tree.
     ///
     /// \param[in] _sdf   The SDF Element tree containing the wave parameters.

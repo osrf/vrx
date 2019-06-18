@@ -65,6 +65,7 @@ void WaveguagePlugin::Init()
 void WaveguagePlugin::OnUpdate()
 {
   // Retrieve the wave model...
+
   std::shared_ptr<const WaveParameters> waveParams \
     = WavefieldModelPlugin::GetWaveParams(
       this->model->GetWorld(), this->waveModelName);
@@ -81,9 +82,17 @@ void WaveguagePlugin::OnUpdate()
   #endif
 
   // Compute the wave displacement at the model location
-	double waveHeightS = WavefieldSampler::ComputeDepthSimply(
+  #if GAZEBO_MAJOR_VERSION >= 8
+    double waveHeightS = WavefieldSampler::ComputeDepthSimply(
       *waveParams, modelPose.Pos(),
-			this->model->GetWorld()->SimTime().Double());
+      this->model->GetWorld()->SimTime().Double());
+  #else
+    double waveHeightS = WavefieldSampler::ComputeDepthSimply(
+      *waveParams, modelPose.Pos(),
+      this->model->GetWorld()->GetSimTime().Double());
+  #endif
+
+	
 
 	// Add the mean water level
 	waveHeightS += this->fluidLevel;

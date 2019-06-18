@@ -24,12 +24,6 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 
-#include <gazebo/msgs/any.pb.h>
-#include <gazebo/msgs/empty.pb.h>
-#include <gazebo/msgs/gz_string.pb.h>
-#include <gazebo/msgs/param.pb.h>
-#include <gazebo/msgs/param_v.pb.h>
-
 #include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
 #include "wave_gazebo_plugins/Wavefield.hh"
 #include "wave_gazebo_plugins/WavefieldEntity.hh"
@@ -138,7 +132,11 @@ namespace asv
   void WavefieldModelPlugin::Reset()
   {
     // Reset time
-    this->data->prevTime = this->data->world->SimTime(); 
+    #if GAZEBO_MAJOR_VERSION >= 8
+      this->data->prevTime = this->data->world->SimTime(); 
+    #else
+      this->data->prevTime = this->data->world->GetSimTime();
+    #endif
   }
 
   void WavefieldModelPlugin::OnUpdate()
@@ -152,7 +150,12 @@ namespace asv
     {
       // Throttle update [30 FPS by default]
       auto updatePeriod = 1.0/this->data->updateRate;
-      auto currentTime = this->data->world->SimTime();
+      #if GAZEBO_MAJOR_VERSION >= 8
+        auto currentTime = this->data->world->SimTime(); 
+      #else
+        auto currentTime = this->data->world->GetSimTime(); 
+      #endif
+      
       if ((currentTime - this->data->prevTime).Double() < updatePeriod)
       {
         return;
@@ -169,8 +172,11 @@ namespace asv
     const std::string& _waveModelName)
   {
     GZ_ASSERT(_world != nullptr, "World is null");
-
-    physics::ModelPtr wavefieldModel = _world->ModelByName(_waveModelName);    
+    #if GAZEBO_MAJOR_VERSION >= 8
+      physics::ModelPtr wavefieldModel = _world->ModelByName(_waveModelName);    
+    #else
+      physics::ModelPtr wavefieldModel = _world->GetModel(_waveModelName); 
+    #endif
     if (wavefieldModel == nullptr)
     {
       gzerr << "No Wavefield Model found with name '"

@@ -165,7 +165,12 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   // Initialize sim time memory
-  this->lastSimTime =  this->world->SimTime().Double();
+  
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->lastSimTime =  this->world->SimTime().Double();
+  #else
+    this->lastSimTime =  this->world->GetSimTime().Double();
+  #endif
 }
 
 /////////////////////////////////////////////////
@@ -187,7 +192,12 @@ void BuoyancyPlugin::OnUpdate()
       this->world, this->waveModelName);
   }
 
-  double simTime = this->world->SimTime().Double();
+
+  #if GAZEBO_MAJOR_VERSION >= 8
+    double simTime = this->world->SimTime().Double();
+  #else
+    double simTime = this->world->GetSimTime().Double();    
+  #endif
   double dt = simTime - this->lastSimTime;
   this->lastSimTime = simTime;
   // for (auto &link : this->buoyancyLinks)
