@@ -165,7 +165,6 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   // Initialize sim time memory
-  
   #if GAZEBO_MAJOR_VERSION >= 8
     this->lastSimTime =  this->world->SimTime().Double();
   #else
@@ -196,7 +195,7 @@ void BuoyancyPlugin::OnUpdate()
   #if GAZEBO_MAJOR_VERSION >= 8
     double simTime = this->world->SimTime().Double();
   #else
-    double simTime = this->world->GetSimTime().Double();    
+    double simTime = this->world->GetSimTime().Double();
   #endif
   double dt = simTime - this->lastSimTime;
   this->lastSimTime = simTime;
