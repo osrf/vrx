@@ -17,14 +17,15 @@
 #ifndef _GUI_TASK_WIDGET_HH_
 #define _GUI_TASK_WIDGET_HH_
 
+#include <ros/ros.h>
+#include <vrx_gazebo/Task.h>
+#include <boost/shared_ptr.hpp>
+
 #include <string>
 
-#include <boost/shared_ptr.hpp>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/transport/transport.hh>
-#include "ros/ros.h"
-#include "vrx_gazebo/Task.h"
 
 namespace gazebo
 {
