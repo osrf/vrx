@@ -27,16 +27,16 @@ GZ_REGISTER_GUI_PLUGIN(GUITaskWidget)
 /////////////////////////////////////////////////
 GUITaskWidget::GUITaskWidget()
   : GUIPlugin()
-{ 
+{
   if (!ros::isInitialized())
   {
     int argc = 0;
     char** argv = NULL;
     ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler |
-              ros::init_options::AnonymousName);  
+              ros::init_options::AnonymousName);
   }
   node.reset(new ros::NodeHandle);
-   
+
   // Set the frame background and foreground colors
   this->setStyleSheet(
       "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
@@ -79,7 +79,7 @@ GUITaskWidget::GUITaskWidget()
 
   // Subscribe to tasks topic
   this->taskSub = this->node->subscribe("/vrx/task/info", 1,
-      &GUITaskWidget::OnTaskInfo, this); 
+      &GUITaskWidget::OnTaskInfo, this);
 }
 
 /////////////////////////////////////////////////
@@ -94,10 +94,14 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream.str("");
   taskInfoStream << "Task Name: " << _msg->name << "\n";
   taskInfoStream << "Task Stream: " << _msg->state << "\n";
-  taskInfoStream << "Ready Time: " << this->FormatTime(_msg->ready_time.toSec()) << "\n";
-  taskInfoStream << "Running Time: " << this->FormatTime(_msg->running_time.toSec()) << "\n";
-  taskInfoStream << "Elapsed Time: " << this->FormatTime(_msg->elapsed_time.toSec()) << "\n";
-  taskInfoStream << "Remaining Time: " << this->FormatTime(_msg->remaining_time.toSec()) << "\n";
+  taskInfoStream << "Ready Time: " <<
+    this->FormatTime(_msg->ready_time.toSec()) << "\n";
+  taskInfoStream << "Running Time: " <<
+    this->FormatTime(_msg->running_time.toSec()) << "\n";
+  taskInfoStream << "Elapsed Time: " <<
+    this->FormatTime(_msg->elapsed_time.toSec()) << "\n";
+  taskInfoStream << "Remaining Time: " <<
+    this->FormatTime(_msg->remaining_time.toSec()) << "\n";
   taskInfoStream << "Timed out: " << _msg->timed_out << "\n";
   taskInfoStream << "Score: " << _msg->score << "\n";
   this->SetTaskInfo(QString::fromStdString(taskInfoStream.str()));
@@ -107,7 +111,7 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
 std::string GUITaskWidget::FormatTime(unsigned int sec) const
 {
   std::ostringstream stream;
-  unsigned int day, hour, min, msec;
+  unsigned int day, hour, min;
 
   stream.str("");
 
