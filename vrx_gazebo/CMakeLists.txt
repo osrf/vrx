@@ -140,7 +140,6 @@ install(TARGETS scan_dock_scoring_plugin
 add_library(gui_task_widget
 	SHARED
        	src/gui_task_widget.cc
-	include/vrx_gazebo/gui_task_widget.hh
 )
 
 message("gazebo libraries ${GAZEBO_LIBRARIES}    ====")
