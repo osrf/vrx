@@ -5,9 +5,6 @@
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
   
-    <gui>
-      <plugin name="gui_task" filename="libgui_task_widget.so"/>
-    </gui>
 
   <plugin name="stationkeeping_scoring_plugin"
           filename="libstationkeeping_scoring_plugin.so">
