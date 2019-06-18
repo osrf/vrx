@@ -26,7 +26,7 @@
 #include <ignition/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
 #include <sdf/sdf.hh>
- 
+
 #include "wave_gazebo_plugins/Wavefield.hh"
 #include "wave_gazebo_plugins/WavefieldEntity.hh"
 #include "wave_gazebo_plugins/WavefieldModelPlugin.hh"

@@ -185,7 +185,7 @@ void BuoyancyPlugin::OnUpdate()
           << " Trying to get wave parameters from ocean model" << std::endl;
     this->waveParams = WavefieldModelPlugin::GetWaveParams(
       this->world, this->waveModelName);
-  }  
+  }
 
   double simTime = this->world->SimTime().Double();
   double dt = simTime - this->lastSimTime;

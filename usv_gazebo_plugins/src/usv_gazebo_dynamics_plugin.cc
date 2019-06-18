@@ -173,7 +173,7 @@ void UsvDynamicsPlugin::Update()
           << " Trying to get wave parameters from ocean model" << std::endl;
     this->waveParams = WavefieldModelPlugin::GetWaveParams(
       this->world, this->waveModelName);
-  }  
+  }
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const common::Time kTimeNow = this->world->SimTime();
@@ -314,13 +314,13 @@ void UsvDynamicsPlugin::Update()
 
       // Compute the depth at the grid point.
       double simTime = kTimeNow.Double();
-      //double depth = WavefieldSampler::ComputeDepthDirectly(
+      // double depth = WavefieldSampler::ComputeDepthDirectly(
       //  *waveParams, X, simTime);
       double depth = WavefieldSampler::ComputeDepthSimply(
         *waveParams, X, simTime);
 
       // Vertical wave displacement.
-      double dz = depth + X.Z(); 
+      double dz = depth + X.Z();
 
       // Total z location of boat grid point relative to water surface
       double  deltaZ = (this->waterLevel + dz) - kDdz;
@@ -328,7 +328,7 @@ void UsvDynamicsPlugin::Update()
       deltaZ = std::min(deltaZ, this->paramHullRadius);
       // Buoyancy force at grid point
       const float kBuoyForce = CircleSegment(this->paramHullRadius, deltaZ) *
-        this->paramBoatLength/(static_cast<float>(this->paramLengthN)) * 
+        this->paramBoatLength/(static_cast<float>(this->paramLengthN)) *
         GRAVITY * this->waterDensity;
       ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
 
