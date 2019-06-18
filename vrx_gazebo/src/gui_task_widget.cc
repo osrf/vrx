@@ -92,7 +92,7 @@ GUITaskWidget::~GUITaskWidget()
 
 /////////////////////////////////////////////////
 void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
-{/**
+{
   std::ostringstream taskInfoStream;
   taskInfoStream.str("");
   taskInfoStream << "Task Name: " << _msg->name << "\n";
@@ -105,7 +105,7 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream << "Score: " << _msg->score << "\n";
 
   this->SetTaskInfo(QString::fromStdString(taskInfoStream.str()));
-**/
+
 }
 
 /////////////////////////////////////////////////
