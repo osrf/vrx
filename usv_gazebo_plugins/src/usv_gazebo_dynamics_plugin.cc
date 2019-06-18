@@ -32,9 +32,6 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 #include <ignition/math/Pose3.hh>
 
 #include "usv_gazebo_plugins/usv_gazebo_dynamics_plugin.hh"
-#include "wave_gazebo_plugins/Wavefield.hh"
-#include "wave_gazebo_plugins/WavefieldEntity.hh"
-#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
 
 #define GRAVITY 9.815
 
@@ -120,6 +117,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     this->waveModelName = _sdf->Get<std::string>("wave_model");
   }
+  this->waveParams = nullptr;
 
   // Get inertia and mass of vessel
   #if GAZEBO_MAJOR_VERSION >= 8
@@ -168,15 +166,13 @@ double UsvDynamicsPlugin::CircleSegment(double R, double h)
 //////////////////////////////////////////////////
 void UsvDynamicsPlugin::Update()
 {
-  // Retrieve the wave model parameters from ocean model plugin.
-  std::shared_ptr<const WaveParameters> waveParams = 
-    WavefieldModelPlugin::GetWaveParams(
-      this->world, this->waveModelName);
-
-  // No ocean waves...
+  // If we haven't yet, retrieve the wave parameters from ocean model plugin.
   if (waveParams == nullptr)
   {
-    return;
+    gzmsg << "usv_gazebo_dynamics_plugin: waveParams is null. "
+          << " Trying to get wave parameters from ocean model" << std::endl;
+    this->waveParams = WavefieldModelPlugin::GetWaveParams(
+      this->world, this->waveModelName);
   }  
 
   #if GAZEBO_MAJOR_VERSION >= 8

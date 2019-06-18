@@ -22,10 +22,6 @@
 #include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/buoyancy_gazebo_plugin.hh"
 
-#include "wave_gazebo_plugins/Wavefield.hh"
-#include "wave_gazebo_plugins/WavefieldEntity.hh"
-#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
-
 using namespace asv;
 using namespace gazebo;
 
@@ -43,13 +39,16 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   GZ_ASSERT(_model != NULL, "Received NULL model pointer");
   GZ_ASSERT(_sdf != NULL, "Received NULL SDF pointer");
 
-  // Capture the model pointer.
+  // Capture the model and world pointers.
   this->model = _model;
+  this->world = this->model->GetWorld();
 
   if (_sdf->HasElement("wave_model"))
   {
     this->waveModelName = _sdf->Get<std::string>("wave_model");
   }
+  this->waveParams = nullptr;
+
   if (_sdf->HasElement("fluid_density"))
   {
     this->fluidDensity = _sdf->Get<double>("fluid_density");
@@ -166,7 +165,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   // Initialize sim time memory
-  this->lastSimTime =  this->model->GetWorld()->SimTime().Double();
+  this->lastSimTime =  this->world->SimTime().Double();
 }
 
 /////////////////////////////////////////////////
@@ -179,18 +178,16 @@ void BuoyancyPlugin::Init()
 /////////////////////////////////////////////////
 void BuoyancyPlugin::OnUpdate()
 {
-  // Retrieve the wave model...
-  std::shared_ptr<const WaveParameters> waveParams
-    = WavefieldModelPlugin::GetWaveParams(
-      this->model->GetWorld(), this->waveModelName);
-
-  // No ocean waves...
+  // If we haven't yet, retrieve the wave parameters from ocean model plugin.
   if (waveParams == nullptr)
   {
-    return;
-  }
+    gzmsg << "usv_gazebo_dynamics_plugin: waveParams is null. "
+          << " Trying to get wave parameters from ocean model" << std::endl;
+    this->waveParams = WavefieldModelPlugin::GetWaveParams(
+      this->world, this->waveModelName);
+  }  
 
-  double simTime = this->model->GetWorld()->SimTime().Double();
+  double simTime = this->world->SimTime().Double();
   double dt = simTime - this->lastSimTime;
   this->lastSimTime = simTime;
   // for (auto &link : this->buoyancyLinks)

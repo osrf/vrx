@@ -74,16 +74,20 @@ namespace asv
 																   ignition::math::Vector2d(50, 50));
 
     // Wave Parameters
+    gzmsg << "WavefieldEntity: Loading WaveParameters from SDF" <<  std::endl;
     this->data->waveParams.reset(new WaveParameters());
     if (_sdf->HasElement("wave"))
     {
+      gzmsg << "Found <wave> tag" << std::endl;
       sdf::ElementPtr sdfWave = _sdf->GetElement("wave");
       this->data->waveParams->SetFromSDF(*sdfWave);
     }
-
+    else
+    {
+      gzmsg << "Missing <wave> tag" << std::endl;
+    }
     // @DEBUG_INFO
-    // gzmsg << "WavefieldEntity..." <<  std::endl;
-    // this->data->waveParams->DebugPrint();
+    this->data->waveParams->DebugPrint();
   }
 
   void WavefieldEntity::Fini()

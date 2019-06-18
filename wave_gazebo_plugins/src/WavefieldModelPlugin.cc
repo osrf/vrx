@@ -67,21 +67,6 @@ namespace asv
 
     /// \brief Connection to the World Update events.
     public: event::ConnectionPtr updateConnection;
-
-    /// \brief Ignition transport node for igntopic "/marker".
-    public: ignition::transport::Node ignNode;
-
-    /// \brief Gazebo transport node.
-    public: transport::NodePtr gzNode;
-
-    /// \brief Publish to gztopic "~/reponse".
-    public: transport::PublisherPtr responsePub;
-
-    /// \brief Subscribe to gztopic "~/request".
-    public: transport::SubscriberPtr requestSub;
-
-    /// \brief Subscribe to gztopic "~/wave".
-    public: transport::SubscriberPtr waveSub;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,11 +79,6 @@ namespace asv
 
     // Reset connections and transport.
     this->data->updateConnection.reset();
-    this->data->requestSub.reset();
-    this->data->waveSub.reset();
-    this->data->responsePub.reset();
-    this->data->gzNode->Fini();
-    this->Fini();
   }
 
   WavefieldModelPlugin::WavefieldModelPlugin() : 
@@ -123,21 +103,6 @@ namespace asv
     this->data->world = _model->GetWorld();
     GZ_ASSERT(this->data->world != nullptr, "Model has invalid World");
 
-    // Transport
-    this->data->gzNode = transport::NodePtr(new transport::Node());
-    this->data->gzNode->Init(this->data->world->Name());
-
-    // Publishers
-    this->data->responsePub 
-      = this->data->gzNode->Advertise<msgs::Response>("~/response");
-
-    // Subscribers
-    this->data->requestSub = this->data->gzNode->Subscribe(
-      "~/request", &WavefieldModelPlugin::OnRequest, this);
-
-    this->data->waveSub = this->data->gzNode->Subscribe(
-      "~/wave", &WavefieldModelPlugin::OnWaveMsg, this);
-
     // Bind the update callback to the world update event 
     this->data->updateConnection = event::Events::ConnectWorldUpdateBegin(
       std::bind(&WavefieldModelPlugin::OnUpdate, this));
@@ -146,7 +111,6 @@ namespace asv
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
     this->data->updateRate = Utilities::SdfParamDouble(*_sdf, "update_rate", \
 																											 30.0);
-
     // Wavefield
     this->data->wavefieldEntity.reset( \
 			new ::asv::WavefieldEntity(this->data->model));
@@ -232,43 +196,4 @@ namespace asv
     return wavefieldEntity->GetWaveParams();
   }
 
-  // See for example: gazebo/physics/Wind.cc
-  void WavefieldModelPlugin::OnRequest(ConstRequestPtr &_msg)
-  {
-    GZ_ASSERT(_msg != nullptr, "Request message must not be null");
-    
-    if (_msg->request() == "wave_param")
-    {
-      auto waveParams = this->data->wavefieldEntity->GetWaveParams();
-
-      msgs::Param_V waveMsg;
-      waveParams->FillMsg(waveMsg);
-
-      msgs::Response response;
-      response.set_id(_msg->id());
-      response.set_request(_msg->request());
-      response.set_response("success");
-      std::string *serializedData = response.mutable_serialized_data();
-      response.set_type(waveMsg.GetTypeName());
-      waveMsg.SerializeToString(serializedData);
-      this->data->responsePub->Publish(response);
-    }
-  }
-
-  // @TODO_FRAGILE - the Entity needs proper clone and set methods to be safe
-  void WavefieldModelPlugin::OnWaveMsg(ConstParam_VPtr &_msg)
-  {
-    GZ_ASSERT(_msg != nullptr, "Wave message must not be null");
-
-    // Update wave params 
-    auto constWaveParams = this->data->wavefieldEntity->GetWaveParams();
-    GZ_ASSERT(constWaveParams != nullptr, "WaveParameters must not be null");
-    auto& waveParams = const_cast<WaveParameters&>(*constWaveParams);
-    waveParams.SetFromMsg(*_msg);
-
-    // @DEBUG_INFO
-    gzmsg << "Wavefield Model received message on topic ["
-      << this->data->waveSub->GetTopic() << "]" << std::endl;
-    waveParams.DebugPrint();
-  }
 } // namespace gazebo

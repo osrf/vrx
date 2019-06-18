@@ -143,59 +143,6 @@ list(APPEND WAVE_GAZEBO_PLUGINS_LIST wavegauge_plugin)
 ############################################################################### 
 # Executables...
 
-include_directories(
-  ${GAZEBO_INCLUDE_DIRS}
-)
-
-link_directories(
-  ${GAZEBO_LIBRARY_DIRS}
-)
-
-add_executable(WaveMsgPublisher
-  src/WaveMsgPublisher.cc
-)
-
-target_link_libraries(WaveMsgPublisher  
-  ${GAZEBO_LIBRARIES}
-  ${WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-target_compile_options(WaveMsgPublisher PRIVATE "-Wno-unknown-pragmas")
-
-add_dependencies(WaveMsgPublisher
-  ${WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-add_executable(WaveMsgSubscriber
-  src/WaveMsgSubscriber.cc
-)
-
-target_link_libraries(WaveMsgSubscriber  
-  ${GAZEBO_LIBRARIES}
-  ${WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-target_compile_options(WaveMsgSubscriber PRIVATE "-Wno-unknown-pragmas")
-
-add_dependencies(WaveMsgSubscriber
-  ${WAVE_GAZEBO_LIBRARIES_LIST}
-)
-
-list(APPEND WAVE_GAZEBO_EXECUTABLES_LIST WaveMsgSubscriber)
-
-
-add_executable(WaveRequester
-  src/WaveRequester.cc
-)
-
-target_link_libraries(WaveRequester
-  ${GAZEBO_LIBRARIES}
-)
-
-#target_compile_options(WaveMsgSubscriber PRIVATE "-Wno-unknown-pragmas")
-
-list(APPEND WAVE_GAZEBO_EXECUTABLES_LIST WaveRequester)
-
 
 ############################################################################### 
 # Tests...

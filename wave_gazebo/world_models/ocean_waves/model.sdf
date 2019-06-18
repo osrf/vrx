@@ -35,8 +35,8 @@
         <scale>1.5</scale>
         <steepness>0.0</steepness>
         <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-        <period>6</period>
-				<gain>0.2</gain>
+        <period>10</period>
+				<gain>1.0</gain>
         <direction>1.0 0.0</direction>
 				<angle>0.4</angle>				
 				<tau>1.0</tau>
@@ -45,7 +45,20 @@
 
     <link name="ocean_waves_link">
       <visual name="ocean_waves_visual">
-        <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so" />
+        <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
+          <wave>
+            <model>PMS</model>
+            <number>3</number>
+            <scale>1.5</scale>
+            <steepness>0.0</steepness>
+            <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
+            <period>10</period>
+            <gain>1.0</gain>
+            <direction>1.0 0.0</direction>
+            <angle>0.4</angle>        
+            <tau>1.0</tau>
+          </wave>
+        </plugin>
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh.dae</uri>
@@ -59,7 +72,20 @@
         </material>
       </visual>
       <visual name="ocean_waves_below_visual">
-        <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so" />
+        <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
+          <wave>
+            <model>PMS</model>
+            <number>3</number>
+            <scale>1.5</scale>
+            <steepness>0.0</steepness>
+            <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
+            <period>10</period>
+            <gain>1.0</gain>
+            <direction>1.0 0.0</direction>
+            <angle>0.4</angle>        
+            <tau>1.0</tau>
+          </wave>
+        </plugin>
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh_below.dae</uri>

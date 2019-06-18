@@ -26,7 +26,6 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo/msgs/msgs.hh>
 
 namespace asv
 {
@@ -60,16 +59,6 @@ namespace asv
   ///   </wave>
   /// </plugin>
   /// \endcode
-  ///
-  /// # Subscribed Topics
-  ///
-  /// 1. ~/request (gazebo::msgs::Request)
-  ///   
-  /// 2. ~/wave (gazebo::msgs::Param_V)
-  ///
-  /// # Published Topics
-  ///
-  /// 1. ~/response (gazebo::msgs::Response)
   ///
   /// # Parameters
   ///
@@ -120,6 +109,8 @@ namespace asv
 	///
 	/// 15. <tau> (double, default: 1.0)
   ///   Time constant used to gradually increase wavefield at startup.
+  ///
+
   class GAZEBO_VISIBLE WavefieldModelPlugin : public gazebo::ModelPlugin
   {
     /// \brief Destructor.
@@ -154,19 +145,6 @@ namespace asv
     /// internal
     /// \brief Callback for World Update events.
     private: void OnUpdate();
-
-    /// internal
-    /// \brief Callback for gztopic "~/request" when the request is "wave_param".
-    ///
-    /// \param[in] _msg Request message.
-    private: void OnRequest(ConstRequestPtr &_msg);
-
-    /// internal
-    /// \brief Callback for gztopic "~/wave".
-    ///
-    /// \param[in] _msg Wave message.
-    private: void OnWaveMsg(ConstParam_VPtr &_msg);
-
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldModelPluginPrivate> data;

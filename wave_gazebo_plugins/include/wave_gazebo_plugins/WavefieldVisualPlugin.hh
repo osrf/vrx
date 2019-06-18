@@ -137,18 +137,6 @@ namespace asv
     private: void OnUpdate();
 
     /// internal
-    /// \brief Callback for gztopic "~/response" when the response type is a wave message.
-    ///
-    /// \param[in] _msg Response message.
-    private: void OnResponse(ConstResponsePtr &_msg);
-
-    /// internal
-    /// \brief Callback for gztopic "~/wave".
-    ///
-    /// \param[in] _msg Wave message.
-    private: void OnWaveMsg(ConstParam_VPtr &_msg);
-
-    /// internal
     /// \brief Callback for gztopic "~/world_stats".
     ///
     /// \param[in] _msg World statistics message.

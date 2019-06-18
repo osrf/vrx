@@ -189,15 +189,6 @@ namespace asv
     /// \brief Node used to establish communication with gzserver.
     public: transport::NodePtr gzNode;
 
-    /// \brief Publish to gztopic "~/request".
-    public: transport::PublisherPtr requestPub;
-
-    /// \brief Subscribe to gztopic "~/response".
-    public: transport::SubscriberPtr responseSub;
-
-    /// \brief Subscribe to gztopic "~/wave".
-    public: transport::SubscriberPtr waveSub;
-
     /// \brief Subscribe to gztopic "~/world_stats".
     public: transport::SubscriberPtr statsSub;
   };
@@ -213,9 +204,6 @@ namespace asv
     // Reset connections and transport.
     this->data->connection.reset();
     this->data->statsSub.reset();
-    this->data->waveSub.reset();
-    this->data->responseSub.reset();
-    this->data->requestPub.reset();
     this->data->gzNode.reset();
   }
 
@@ -245,21 +233,30 @@ namespace asv
     this->data->visual = _visual;
     this->data->sdf = _sdf;
 
+    // Process SDF Parameters
+    gzmsg << "WavefieldVisualPlugin <" << _visual->Name() 
+          << ">: Loading WaveParamaters from SDF" <<  std::endl;
+    this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
+    this->data->waveParams.reset(new WaveParameters());
+    if (_sdf->HasElement("wave"))
+    {
+      gzmsg << "Found <wave> tag" << std::endl;
+      sdf::ElementPtr sdfWave = _sdf->GetElement("wave");
+      this->data->waveParams->SetFromSDF(*sdfWave);
+    }
+    else
+    {
+      gzerr << "Missing <wave> tag" << std::endl;
+    }
+ 
+    // @DEBUG_INFO
+    this->data->waveParams->DebugPrint();
+
     // Transport
     this->data->gzNode = transport::NodePtr(new transport::Node());
     this->data->gzNode->Init();
 
-    // Publishers
-    this->data->requestPub 
-      = this->data->gzNode->Advertise<msgs::Request>("~/request");
-
     // Subscribers
-    this->data->responseSub = this->data->gzNode->Subscribe(
-      "~/response", &WavefieldVisualPlugin::OnResponse, this);
-
-    this->data->waveSub = this->data->gzNode->Subscribe(
-      "~/wave", &WavefieldVisualPlugin::OnWaveMsg, this);
-
     this->data->statsSub = this->data->gzNode->Subscribe(
       "~/world_stats", &WavefieldVisualPlugin::OnStatsMsg, this);
 
@@ -267,20 +264,6 @@ namespace asv
     this->data->connection = event::Events::ConnectPreRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
 
-    // Wave Parameters
-    this->data->waveParams.reset(new WaveParameters());
-    if (_sdf->HasElement("wave"))
-    {
-      sdf::ElementPtr sdfWave = _sdf->GetElement("wave");
-      this->data->waveParams->SetFromSDF(*sdfWave);
-    }
-
-    // Plugin
-    this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
-
-    // @DEBUG_INFO
-    // gzmsg << "WavefieldVisualPlugin..." <<  std::endl;
-    // this->data->waveParams->DebugPrint();
   }
 
   void WavefieldVisualPlugin::Init()
@@ -295,8 +278,8 @@ namespace asv
     if (!this->data->isInitialised)
     {
       // Request "wave_param"
-      msgs::RequestPtr requestMsg(msgs::CreateRequest("wave_param", ""));
-      this->data->requestPub->Publish(*requestMsg);
+      //msgs::RequestPtr requestMsg(msgs::CreateRequest("wave_param", ""));
+      //this->data->requestPub->Publish(*requestMsg);
 
       // Initialise vertex shader
       std::string shaderType = "vertex";
@@ -326,55 +309,15 @@ namespace asv
 
     if (!this->data->isStatic && !this->data->paused)
     { 
-      std::string shaderType = "vertex";
-      float simTime = this->data->simTime;
+      
 #if 0
       this->data->visual->SetMaterialShaderParam(
         "time", shaderType, std::to_string(simTime));
 #else
       rendering::SetMaterialShaderParam(*this->data->visual,
-        "time", shaderType, std::to_string(simTime));
+        "time", "vertex", std::to_string((float)this->data->simTime));
 #endif
     }
-  }
-
-  void WavefieldVisualPlugin::OnResponse(ConstResponsePtr &_msg)
-  {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    GZ_ASSERT(_msg != nullptr, "Response message must not be null");
-
-    msgs::Param_V waveMsg;
-    if (_msg->type() == waveMsg.GetTypeName())
-    {
-      // Parse the response
-      waveMsg.ParseFromString(_msg->serialized_data());
-
-      // Update wave params and vertex shader 
-      this->data->waveParams->SetFromMsg(waveMsg);
-      this->SetShaderParams();
-
-      // @DEBUG_INFO
-      gzmsg << "Wavefield Visual received message on topic [" 
-        << this->data->responseSub->GetTopic() << "]" << std::endl;
-      this->data->waveParams->DebugPrint();
-    }
-  }
-
-  void WavefieldVisualPlugin::OnWaveMsg(ConstParam_VPtr &_msg)
-  {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    GZ_ASSERT(_msg != nullptr, "Wave message must not be null");
-
-    // Update wave params and vertex shader 
-    this->data->waveParams->SetFromMsg(*_msg);
-    this->SetShaderParams();
-
-    // @DEBUG_INFO
-    gzmsg << "Wavefield Visual received message on topic [" 
-      << this->data->waveSub->GetTopic() << "]" << std::endl;
-    this->data->waveParams->DebugPrint();
   }
 
   void WavefieldVisualPlugin::OnStatsMsg(ConstWorldStatisticsPtr &_msg)
@@ -382,8 +325,8 @@ namespace asv
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
     this->data->simTime = gazebo::msgs::Convert(_msg->sim_time()).Double();
-    this->data->realTime = gazebo::msgs::Convert(_msg->real_time()).Double();
-    this->data->pauseTime = gazebo::msgs::Convert(_msg->pause_time()).Double();
+    //this->data->realTime = gazebo::msgs::Convert(_msg->real_time()).Double();
+    //this->data->pauseTime = gazebo::msgs::Convert(_msg->pause_time()).Double();
     this->data->paused = _msg->paused();
   }
 
