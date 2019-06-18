@@ -5,10 +5,8 @@ from std_msgs.msg import Float32
 
 import math
 import numpy
-import select
 import sys
 import termios
-import tty
 
 instructions = """
 Reading from the keyboard and Publishing Thrust Angles!
@@ -32,17 +30,40 @@ speedBindings = {
     }
 
 
-def getKey():
-    tty.setraw(sys.stdin.fileno())
-    select.select([sys.stdin], [], [], 0)
-    key = sys.stdin.read(1)
-    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
-    return key
+# Implement getch function, which reads in 1 char from user input.
+# Purposely different from teleop_twist_keyboard.py b/c of
+# issues outputting to stdout when they both read from the input.
+# Reference https://gist.github.com/houtianze/9e623a90bb836aedadc3abea54cf6747
+
+def __gen_ch_getter(echo):
+
+    def __fun():
+        fd = sys.stdin.fileno()
+        oldattr = termios.tcgetattr(fd)
+        newattr = oldattr[:]
+        try:
+            if echo:
+                # disable ctrl character printing, otherwise,
+                # backspace will be printed as "^?"
+                lflag = ~(termios.ICANON | termios.ECHOCTL)
+            else:
+                lflag = ~(termios.ICANON | termios.ECHO)
+            newattr[3] &= lflag
+            termios.tcsetattr(fd, termios.TCSADRAIN, newattr)
+            ch = sys.stdin.read(1)
+            if echo and ord(ch) == 127:  # backspace
+                # emulate backspace erasing
+                # https://stackoverflow.com/a/47962872/404271
+                sys.stdout.write('\b \b')
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, oldattr)
+        return ch
+    return __fun
 
 
 if __name__ == "__main__":
-    # Setup settings var for key reading
-    settings = termios.tcgetattr(sys.stdin)
+    # Setup getch function
+    getch = __gen_ch_getter(False)
 
     # Setup ros publishers and node
     left_pub = rospy.Publisher('left_thrust_angle', Float32, queue_size=1)
@@ -60,7 +81,7 @@ if __name__ == "__main__":
         print('Max Angle: {}'.format(max_angle))
         while(1):
             # Read in pressed key
-            key = getKey()
+            key = getch()
 
             if key in moveBindings.keys():
                 # Increment angle, but clip it between [-max_angle, max_angle]
@@ -75,9 +96,8 @@ if __name__ == "__main__":
                 print('currently:\t'
                       'thruster angle speed {} '.format(thrust_angle_speed))
 
-            else:
-                if (key == '\x03'):
-                    break
+            elif key == '\x03':
+                break
 
             # Publish thrust angle
             angle_msg = Float32()
@@ -94,6 +114,3 @@ if __name__ == "__main__":
         angle_msg.data = 0
         left_pub.publish(angle_msg)
         right_pub.publish(angle_msg)
-
-        # Set attributes
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
