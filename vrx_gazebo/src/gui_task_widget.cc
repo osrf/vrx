@@ -50,7 +50,7 @@ GUITaskWidget::GUITaskWidget()
   // Create the layout that sits inside the frame
   QHBoxLayout *frameLayout = new QHBoxLayout();
 
-  QLabel *label = new QLabel(tr("Task Info:"));
+  QLabel *label = new QLabel(tr(""));
 
   // Create a time label
   QLabel *timeLabel = new QLabel(tr("00:00:00.00"));
@@ -75,7 +75,7 @@ GUITaskWidget::GUITaskWidget()
 
   // Position and resize this widget
   this->move(10, 10);
-  this->resize(300, 200);
+  this->resize(200, 200);
 
   // Subscribe to tasks topic
   this->taskSub = this->node->subscribe("/vrx/task/info", 1,
