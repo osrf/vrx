@@ -17,7 +17,7 @@
 #include <sstream>
 #include <gazebo/msgs/msgs.hh>
 #include "vrx_gazebo/Task.h"
-#include "vrx_gazebo/gui_task_widget.hh"
+#include "gui_task_widget.hh"
 
 using namespace gazebo;
 
@@ -36,9 +36,7 @@ GUITaskWidget::GUITaskWidget()
               ros::init_options::AnonymousName);  
   }
   node.reset(new ros::NodeHandle);
-  
-  gzdbg << "Hello World" << std::endl;
-  
+   
   // Set the frame background and foreground colors
   this->setStyleSheet(
       "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
@@ -76,13 +74,12 @@ GUITaskWidget::GUITaskWidget()
   this->setLayout(mainLayout);
 
   // Position and resize this widget
-  this->move(200, 10);
-  this->resize(200, 40);
+  this->move(10, 10);
+  this->resize(300, 200);
 
   // Subscribe to tasks topic
   this->taskSub = this->node->subscribe("/vrx/task/info", 1,
-      &GUITaskWidget::OnTaskInfo, this);
-  
+      &GUITaskWidget::OnTaskInfo, this); 
 }
 
 /////////////////////////////////////////////////
@@ -103,9 +100,7 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream << "Remaining Time: " << this->FormatTime(_msg->remaining_time.toSec()) << "\n";
   taskInfoStream << "Timed out: " << _msg->timed_out << "\n";
   taskInfoStream << "Score: " << _msg->score << "\n";
-
   this->SetTaskInfo(QString::fromStdString(taskInfoStream.str()));
-
 }
 
 /////////////////////////////////////////////////
