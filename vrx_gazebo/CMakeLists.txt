@@ -195,6 +195,7 @@ xacro_add_files(
   worlds/scan_and_dock_b.world.xacro
   worlds/stationkeeping_task.world.xacro
   worlds/wayfinding_task.world.xacro
+  worlds/wind_test.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 

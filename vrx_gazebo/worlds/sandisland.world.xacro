@@ -3,6 +3,17 @@
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="sandisland">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
-    <xacro:sandisland />
+    <xacro:sandisland /> 
+    <!--wind for the wamv-->
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/gazebo_wind_plugin.xacro"/>
+    <xacro:usv_wind_gazebo>
+      <wind_objs>
+        <wind_obj>
+          <name>wamv</name>
+          <link_name>base_link</link_name>
+          <coeff_vector>.5 .5 .33</coeff_vector>
+	</wind_obj>
+      </wind_objs>
+    </xacro:usv_wind_gazebo>
   </world>
 </sdf>
