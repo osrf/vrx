@@ -129,7 +129,7 @@ namespace asv
     if (_v.size() > 2)
       ToOgreVector2(_v[2], _vout2);
   }
-  
+
   void ToOgreVector3(
     const std::vector<ignition::math::Vector3d>& _v,
     Ogre::Vector3& _vout0,
@@ -197,7 +197,7 @@ namespace asv
 // WavefieldVisualPlugin
 
   WavefieldVisualPlugin::~WavefieldVisualPlugin()
-  { 
+  {
     // Clean up.
     this->data->waveParams.reset();
 
@@ -223,7 +223,7 @@ namespace asv
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
     // gzmsg << "Load WavefieldVisualPlugin [thread: "
-		//       << threadId << "]" << std::endl;
+    //       << threadId << "]" << std::endl;
 
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
@@ -235,10 +235,10 @@ namespace asv
 
     // Process SDF Parameters
     #if GAZEBO_MAJOR_VERSION >= 8
-      gzmsg << "WavefieldVisualPlugin <" << _visual->Name() 
+      gzmsg << "WavefieldVisualPlugin <" << _visual->Name()
             << ">: Loading WaveParamaters from SDF" <<  std::endl;
     #else
-      gzmsg << "WavefieldVisualPlugin <" << _visual->GetName() 
+      gzmsg << "WavefieldVisualPlugin <" << _visual->GetName()
             << ">: Loading WaveParamaters from SDF" <<  std::endl;
     #endif
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
@@ -253,7 +253,7 @@ namespace asv
     {
       gzerr << "Missing <wave> tag" << std::endl;
     }
- 
+
     // @DEBUG_INFO
     this->data->waveParams->DebugPrint();
 
@@ -268,7 +268,6 @@ namespace asv
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectPreRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
-
   }
 
   void WavefieldVisualPlugin::Init()
@@ -278,14 +277,10 @@ namespace asv
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
     // gzmsg << "Init WavefieldVisualPlugin [thread: "
-		//       << threadId << "]" << std::endl;
-  
+    //       << threadId << "]" << std::endl;
+
     if (!this->data->isInitialised)
     {
-      // Request "wave_param"
-      //msgs::RequestPtr requestMsg(msgs::CreateRequest("wave_param", ""));
-      //this->data->requestPub->Publish(*requestMsg);
-
       // Initialise vertex shader
       std::string shaderType = "vertex";
 #if 0
@@ -296,7 +291,7 @@ namespace asv
         "time", shaderType, std::to_string(0.0));
 #endif
       this->SetShaderParams();
-      this->data->isInitialised = true;   
+      this->data->isInitialised = true;
     }
   }
 
@@ -313,14 +308,14 @@ namespace asv
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
     if (!this->data->isStatic && !this->data->paused)
-    { 
-      
+    {
 #if 0
       this->data->visual->SetMaterialShaderParam(
         "time", shaderType, std::to_string(simTime));
 #else
       rendering::SetMaterialShaderParam(*this->data->visual,
-        "time", "vertex", std::to_string((float)this->data->simTime));
+        "time", "vertex",
+        std::to_string(static_cast<float>(this->data->simTime)));
 #endif
     }
   }
@@ -330,8 +325,6 @@ namespace asv
     std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
 
     this->data->simTime = gazebo::msgs::Convert(_msg->sim_time()).Double();
-    //this->data->realTime = gazebo::msgs::Convert(_msg->real_time()).Double();
-    //this->data->pauseTime = gazebo::msgs::Convert(_msg->pause_time()).Double();
     this->data->paused = _msg->paused();
   }
 
@@ -349,7 +342,7 @@ namespace asv
     Ogre::Vector2 dir0 = Ogre::Vector2::ZERO;
     Ogre::Vector2 dir1 = Ogre::Vector2::ZERO;
     Ogre::Vector2 dir2 = Ogre::Vector2::ZERO;
-    
+
     ToOgreVector3(this->data->waveParams->Amplitude_V(), amplitude);
     ToOgreVector3(this->data->waveParams->Wavenumber_V(), wavenumber);
     ToOgreVector3(this->data->waveParams->AngularFrequency_V(), omega);
@@ -374,9 +367,9 @@ namespace asv
     visual.SetMaterialShaderParam(
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
 #else
-		rendering::SetMaterialShaderParam(visual, 
-			"Nwaves",shaderType,std::to_string(this->data->waveParams->Number()));
-    rendering::SetMaterialShaderParam(visual, 
+    rendering::SetMaterialShaderParam(visual,
+      "Nwaves", shaderType, std::to_string(this->data->waveParams->Number()));
+    rendering::SetMaterialShaderParam(visual,
       "amplitude", shaderType, Ogre::StringConverter::toString(amplitude));
     rendering::SetMaterialShaderParam(visual,
       "wavenumber", shaderType, Ogre::StringConverter::toString(wavenumber));
@@ -390,11 +383,9 @@ namespace asv
       "dir1", shaderType, Ogre::StringConverter::toString(dir1));
     rendering::SetMaterialShaderParam(visual,
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
-		float tau = this->data->waveParams->Tau();
+    float tau = this->data->waveParams->Tau();
     rendering::SetMaterialShaderParam(visual,
       "tau", shaderType, Ogre::StringConverter::toString(tau));
-
 #endif
   }
-
-}  // namespace asv
+}

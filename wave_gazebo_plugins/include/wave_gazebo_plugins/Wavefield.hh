@@ -17,8 +17,8 @@
 
 /// \file Wavefield.hh
 /// \brief This file contains definitions for classes used to manage
-/// a wave field. This includes wave parameters, wave generation, 
-/// and sampling from the wave field. 
+/// a wave field. This includes wave parameters, wave generation,
+/// and sampling from the wave field.
 
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
@@ -27,6 +27,7 @@
 #include <ignition/math/Vector3.hh>
 
 #include <memory>
+#include <vector>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Forward Declarations
@@ -53,7 +54,7 @@ namespace asv
   class WaveParametersPrivate;
 
   /// \brief A class to manage the parameters for generating a wave
-	/// in a wave field.
+    /// in a wave field.
   class WaveParameters
   {
     /// \brief Destructor.
@@ -82,7 +83,7 @@ namespace asv
     ///        with 1 being steepest.
     public: double Steepness() const;
 
-    /// \brief The angular frequency 
+    /// \brief The angular frequency
     public: double AngularFrequency() const;
 
     /// \brief The amplitude of the mean wave in [m].
@@ -100,14 +101,14 @@ namespace asv
     /// \brief The mean wavenumber.
     public: double Wavenumber() const;
 
-		/// \brief Time-constant for starting waves.
+        /// \brief Time-constant for starting waves.
     public: float Tau() const;
 
-		/// \brief Amplitude multiplier for PMS.
+        /// \brief Amplitude multiplier for PMS.
     public: float Gain() const;
 
     /// \brief A two component vector specifiying the direction
-		/// of the mean wave.
+        /// of the mean wave.
     public: ignition::math::Vector2d Direction() const;
 
     /// \brief Set the number of wave components (3 max).
@@ -115,7 +116,7 @@ namespace asv
     /// \param[in] _number    The number of component waves.
     public: void SetNumber(size_t _number);
 
-    /// \brief Set the angle parameter controlling 
+    /// \brief Set the angle parameter controlling
     /// the direction of the component waves.
     ///
     /// \param[in] _angle     The angle parameter.
@@ -148,12 +149,12 @@ namespace asv
     /// \param[in] _phase The phase parameter.
     public: void SetPhase(double _phase);
 
-		/// \brief Set the time constant.
+        /// \brief Set the time constant.
     ///
     /// \param[in] _tau The time constant.
     public: void SetTau(double _tau);
 
-		/// \brief Set the PMS amplitude multiplier
+        /// \brief Set the PMS amplitude multiplier
     ///
     /// \param[in] _gain The multiplier
     public: void SetGain(double _gain);
@@ -196,40 +197,37 @@ namespace asv
   class WavefieldSampler
   {
     /// \brief Compute the depth at a point directly
-		/// (no sampling or interpolation).
+        /// (no sampling or interpolation).
     ///
     /// This method solves for (x, y) that when input into the
-		/// Gerstner wave function
+        /// Gerstner wave function
     /// gives the coordinates of the supplied parameter
-		/// _point (_point.x(), _point.y()),
+        /// _point (_point.x(), _point.y()),
     /// and also computes the wave height pz at this point.
-    /// The depth h = pz - point.z().  
+    /// The depth h = pz - point.z().
     /// This is a numerical method that uses a multi-variate
-		/// Newton solver to solve
+        /// Newton solver to solve
     /// the two dimensional non-linear system. In general it is not as fast as
     /// sampling from a discretised wave field with an efficient
-		/// line intersection algorithm.
+        /// line intersection algorithm.
     ///
-    /// \param[in] _waveParams  Gerstner wave parameters. 
+    /// \param[in] _waveParams  Gerstner wave parameters.
     /// \param[in] _point       The point at which we want the depth.
     /// \return                 The depth 'h' at the point.
     public: static double ComputeDepthDirectly(
       const WaveParameters& _waveParams,
       const ignition::math::Vector3d& _point,
-      double time, double time_init=0);
+      double time, double time_init = 0);
 
-		/// A simpler version of determining wave height at a point.
-		/// This method enforces that q (steepness) = 0 which allows us
-		/// to caculate the wave height exactly for a given 2D point without the
-		/// need to interatively solve for the position/height.
-	  public: static double ComputeDepthSimply(
-			const WaveParameters& _waveParams,
+    /// A simpler version of determining wave height at a point.
+    /// This method enforces that q (steepness) = 0 which allows us
+    /// to caculate the wave height exactly for a given 2D point without the
+    /// need to interatively solve for the position/height.
+    public: static double ComputeDepthSimply(
+            const WaveParameters& _waveParams,
       const ignition::math::Vector3d& _point,
-			double time, double time_init = 0);
+            double time, double time_init = 0);
   };
+}
 
-///////////////////////////////////////////////////////////////////////////////
-
-}  // namespace asv
-
-#endif  // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
+#endif

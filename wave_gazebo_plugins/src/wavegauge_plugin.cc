@@ -76,9 +76,9 @@ void WaveguagePlugin::OnUpdate()
     return;
   }
   #if GAZEBO_MAJOR_VERSION >= 8
-	  ignition::math::Pose3d modelPose = this->model->WorldPose();
+    ignition::math::Pose3d modelPose = this->model->WorldPose();
   #else
-	  ignition::math::Pose3d modelPose = this->model->GetWorldPose().Ign();
+    ignition::math::Pose3d modelPose = this->model->GetWorldPose().Ign();
   #endif
 
   // Compute the wave displacement at the model location
@@ -92,14 +92,12 @@ void WaveguagePlugin::OnUpdate()
       this->model->GetWorld()->GetSimTime().Double());
   #endif
 
-	
+  // Add the mean water level
+  waveHeightS += this->fluidLevel;
 
-	// Add the mean water level
-	waveHeightS += this->fluidLevel;
-
-	// Set vertical location to match the wave height
-	modelPose.Pos().Z(waveHeightS);
-	this->model->SetWorldPose(modelPose);
+  // Set vertical location to match the wave height
+  modelPose.Pos().Z(waveHeightS);
+  this->model->SetWorldPose(modelPose);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(WaveguagePlugin)

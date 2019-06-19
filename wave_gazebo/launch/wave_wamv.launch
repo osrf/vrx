@@ -28,8 +28,7 @@
   <arg name="ground_truth_enabled" default="true" />
 
   <!-- Start Gazebo with the world file -->
-  <include file="$(find gazebo_ros)/launch/empty_world.l
-aunch">
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name"   value="$(arg world)"/>
     <arg name="verbose"      value="$(arg verbose)"/>
     <arg name="paused"       value="$(arg paused)"/>

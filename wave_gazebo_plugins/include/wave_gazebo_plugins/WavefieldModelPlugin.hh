@@ -22,6 +22,7 @@
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_MODEL_PLUGIN_HH_
 
 #include <memory>
+#include <string>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/Plugin.hh>
@@ -39,8 +40,8 @@ namespace asv
   /// \brief A Gazebo model plugin to simulate water waves.
   ///
   /// # Usage
-  /// 
-  /// Add the SDF for the plugin to the <model> element of your wave model. 
+  ///
+  /// Add the SDF for the plugin to the <model> element of your wave model.
   ///
   /// \code
   /// <plugin name="wavefield" filename="libWavefieldModelPlugin.so">
@@ -64,13 +65,13 @@ namespace asv
   ///
   /// 1. <static> (bool, default: false)
   ///   Create a static wave field if set to true.
-  ///   
+  ///
   /// 2. <update_rate> (double, default: 30.0)
   ///   The rate in Hz at which the wavefield is updated.
-  ///   
+  ///
   /// 3. <size> (Vector2D, default: (1000 1000))
   ///   A two component vector for the size of the wave field in each direction.
-  ///   
+  ///
   /// 4. <cell_count> (int, default: (50 50))
   ///   A two component vector for the number of grid cells in each direction.
   ///
@@ -82,11 +83,11 @@ namespace asv
   ///
   /// 7. <angle> (double, default: 2*pi/10)
   ///   The angle between the mean wave direction and the
-	///   largest / smallest component waves.
+  ///   largest / smallest component waves.
   ///
   /// 8. <steepness> (double, default: 1.0)
   ///   A parameter in [0, 1] controlling the wave steepness with
-	///   1 being steepest.
+  ///   1 being steepest.
   ///
   /// 9. <amplitude> (double, default: 0.0)
   ///   The amplitude of the mean wave in [m].
@@ -100,17 +101,16 @@ namespace asv
   /// 12. <direction> (Vector2D, default: (1 0))
   ///   A two component vector specifiying the direction of the mean wave.
   ///
-	/// 13. <model> (string, default: default)
+  /// 13. <model> (string, default: default)
   ///   The model used to generate component waves.
-	///   Should be either "PMS" or "CWR"
-	///
-	/// 14. <gain> (double, default: 1.0)
+  ///   Should be either "PMS" or "CWR"
+  ///
+  /// 14. <gain> (double, default: 1.0)
   ///   For PMS, the multiplier applied to component amplitudes.
-	///
-	/// 15. <tau> (double, default: 1.0)
+  ///
+  /// 15. <tau> (double, default: 1.0)
   ///   Time constant used to gradually increase wavefield at startup.
   ///
-
   class GAZEBO_VISIBLE WavefieldModelPlugin : public gazebo::ModelPlugin
   {
     /// \brief Destructor.
@@ -132,11 +132,11 @@ namespace asv
     public: void Reset();
 
     /// \brief Retrive a pointer to the wavefield parameters
-		/// from the Wavefield plugin.
+    /// from the Wavefield plugin.
     ///
     /// \param _world   A pointer to the world containing the wave field.
     /// \param _waveModelName   The name of the wavefield model
-		///                         containing the wave field. 
+    ///                         containing the wave field.
     /// \return A valid pointer to WaveParameters if found and nullptr if not.
     public: static std::shared_ptr<const WaveParameters> GetWaveParams(
       gazebo::physics::WorldPtr _world,
@@ -149,6 +149,6 @@ namespace asv
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldModelPluginPrivate> data;
   };
-}  // namespace asv
+}
 
 #endif  // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_MODEL_PLUGIN_HH_

@@ -29,7 +29,6 @@ namespace asv
   /// \brief A collection of static methods for various physics calculations.
   class Physics
   {
-
     /// \brief Compute the deep water dispersion.
     ///
     /// \param[in] _wavenumber  The wavenumber: k = 2 PI / wavelength.
@@ -42,7 +41,6 @@ namespace asv
     /// \return                 The wavenumber k.
     public: static double DeepWaterDispersionToWavenumber(double _omega);
   };
-  
-}  // namespace asv
+}
 
-#endif // _WAVE_GAZEBO_PLUGINS_PHYSICS_HH_
+#endif

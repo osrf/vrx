@@ -128,27 +128,24 @@ namespace gazebo
           if (_shaderType == "vertex" && pass->hasVertexProgram())
           {
             setNamedParam(pass->getVertexProgramParameters(), \
-													_paramName, _value);
+                          _paramName, _value);
           }
           else if (_shaderType == "fragment" && pass->hasFragmentProgram())
           {
             setNamedParam(pass->getFragmentProgramParameters(), \
-													_paramName, _value);
+                          _paramName, _value);
           }
           else
           {
             gzerr << "Failed to retrieve shaders for material: '"
                   << _visual.GetMaterialName() << "', technique: '"
                   << technique->getName() << "', pass: '"
-									<< pass->getName() << "'"
+                  << pass->getName() << "'"
                   << std::endl;
             continue;
           }
         }
       }
     }
-
-  }  // namespace rendering
-}  // namespace gazebo
-
-///////////////////////////////////////////////////////////////////////////////
+  }
+}

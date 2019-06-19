@@ -30,10 +30,10 @@
 using namespace gazebo;
 using namespace common;
 
-namespace asv 
+namespace asv
 {
 
-/////////////////////////////////////////////////////////////////////////////   
+/////////////////////////////////////////////////////////////////////////////
 // WavefieldEntity
 
   /// \internal
@@ -44,23 +44,26 @@ namespace asv
     public: ignition::math::Vector2d size;
 
     /// \brief The number of grid cells in the wavefield.
-		/// Default value is [50 50].
+    /// Default value is [50 50].
     public: ignition::math::Vector2d cellCount;
 
     /// \brief The wave parameters.
     public: std::shared_ptr<asv::WaveParameters> waveParams;
   };
 
+  /////////////////////////////////////////////////
   WavefieldEntity::~WavefieldEntity()
   {
   }
 
+  /////////////////////////////////////////////////
   WavefieldEntity::WavefieldEntity(physics::BasePtr _parent) :
     Base(_parent),
     data(new WavefieldEntityPrivate())
   {
   }
 
+  /////////////////////////////////////////////////
   void WavefieldEntity::Load(sdf::ElementPtr _sdf)
   {
     GZ_ASSERT(_sdf != nullptr, "Invalid parameter _sdf");
@@ -69,9 +72,9 @@ namespace asv
 
     // Wavefield Parameters
     this->data->size = Utilities::SdfParamVector2(*_sdf, "size", \
-																	ignition::math::Vector2d(1000, 1000));
+                                  ignition::math::Vector2d(1000, 1000));
     this->data->cellCount = Utilities::SdfParamVector2(*_sdf, "cell_count", \
-																   ignition::math::Vector2d(50, 50));
+                                   ignition::math::Vector2d(50, 50));
 
     // Wave Parameters
     gzmsg << "WavefieldEntity: Loading WaveParameters from SDF" <<  std::endl;
@@ -90,35 +93,36 @@ namespace asv
     this->data->waveParams->DebugPrint();
   }
 
+  /////////////////////////////////////////////////
   void WavefieldEntity::Fini()
   {
     Base::Fini();
   }
 
+  /////////////////////////////////////////////////
   void WavefieldEntity::Init()
   {
-    // Wavefield  
-    // std::string meshName = "_WAVEFIELD";
-    // std::string meshPath = "";
   }
 
+  /////////////////////////////////////////////////
   void WavefieldEntity::Reset()
   {
   }
 
+  /////////////////////////////////////////////////
   void WavefieldEntity::Update()
   {
   }
 
+  /////////////////////////////////////////////////
   std::shared_ptr<const WaveParameters> WavefieldEntity::GetWaveParams() const
   {
     return this->data->waveParams;
   }
 
+  /////////////////////////////////////////////////
   std::string WavefieldEntity::MakeName(const std::string& _parentName)
   {
     return std::string(_parentName + "::wavefield_entity");
   }
-
-}  // namespace asv
-
+}

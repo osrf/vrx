@@ -29,68 +29,64 @@
 
 #include "wave_gazebo_plugins/Utilities.hh"
 
-namespace asv 
+namespace asv
 {
-///////////////////////////////////////////////////////////////////////////////
-// Templates
+  /////////////////////////////////////////////////////////////////////////////
+  // Templates
 
-// This code adapted vmrc/usv_gazebo_plugins/usv_gazebo_dynamics_plugin.cc
-template <typename T>T
-  SdfParam(sdf::Element& _sdf, const std::string &_paramName, \
-					 const T _defaultVal)
-{
-  if (!_sdf.HasElement(_paramName))
+  // This code adapted vmrc/usv_gazebo_plugins/usv_gazebo_dynamics_plugin.cc
+  template <typename T>T
+    SdfParam(sdf::Element& _sdf, const std::string &_paramName, \
+             const T &_defaultVal)
   {
-    gzmsg << "Parameter <" << _paramName << "> not found: " 
-      <<  "Using default value of <" << _defaultVal << ">." << std::endl;
-    return _defaultVal;
+    if (!_sdf.HasElement(_paramName))
+    {
+      gzmsg << "Parameter <" << _paramName << "> not found: "
+        <<  "Using default value of <" << _defaultVal << ">." << std::endl;
+      return _defaultVal;
+    }
+
+    T val = _sdf.Get<T>(_paramName);
+    gzmsg << "Parameter found - setting <" << _paramName
+      << "> to <" << val << ">." << std::endl;
+    return val;
   }
 
-  T val = _sdf.Get<T>(_paramName);
-  gzmsg << "Parameter found - setting <" << _paramName 
-    << "> to <" << val << ">." << std::endl;
-  return val;
+  /////////////////////////////////////////////////////////////////////////////
+  // Utilities
+  bool Utilities::SdfParamBool(sdf::Element& _sdf,
+    const std::string& _paramName, const bool _defaultVal)
+  {
+    return SdfParam<bool>(_sdf, _paramName, _defaultVal);
+  }
+
+  size_t Utilities::SdfParamSizeT(sdf::Element& _sdf,
+    const std::string& _paramName, const size_t _defaultVal)
+  {
+    return SdfParam<double>(_sdf, _paramName, _defaultVal);
+  }
+
+  double Utilities::SdfParamDouble(sdf::Element& _sdf,
+    const std::string& _paramName, const double _defaultVal)
+  {
+    return SdfParam<double>(_sdf, _paramName, _defaultVal);
+  }
+
+  std::string Utilities::SdfParamString(sdf::Element& _sdf,
+    const std::string& _paramName, const std::string &_defaultVal)
+  {
+    return SdfParam<std::string>(_sdf, _paramName, _defaultVal);
+  }
+
+  ignition::math::Vector2d Utilities::SdfParamVector2(sdf::Element& _sdf,
+    const std::string& _paramName, const ignition::math::Vector2d _defaultVal)
+  {
+    return SdfParam<ignition::math::Vector2d>(_sdf, _paramName, _defaultVal);
+  }
+
+  ignition::math::Vector3d Utilities::SdfParamVector3(sdf::Element& _sdf,
+    const std::string& _paramName, const ignition::math::Vector3d _defaultVal)
+  {
+    return SdfParam<ignition::math::Vector3d>(_sdf, _paramName, _defaultVal);
+  }
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Utilities
-
-bool Utilities::SdfParamBool(sdf::Element& _sdf,
-  const std::string& _paramName, const bool _defaultVal)
-{
-  return SdfParam<bool>(_sdf, _paramName, _defaultVal);
-}
-
-size_t Utilities::SdfParamSizeT(sdf::Element& _sdf,
-  const std::string& _paramName, const size_t _defaultVal)
-{
-  return SdfParam<double>(_sdf, _paramName, _defaultVal);
-}
-
-double Utilities::SdfParamDouble(sdf::Element& _sdf,
-  const std::string& _paramName, const double _defaultVal)
-{
-  return SdfParam<double>(_sdf, _paramName, _defaultVal);
-}
-
-std::string Utilities::SdfParamString(sdf::Element& _sdf,
-  const std::string& _paramName, const std::string &_defaultVal)
-{
-  return SdfParam<std::string>(_sdf, _paramName, _defaultVal);
-}
-
-ignition::math::Vector2d Utilities::SdfParamVector2(sdf::Element& _sdf,
-  const std::string& _paramName, const ignition::math::Vector2d _defaultVal)
-{
-  return SdfParam<ignition::math::Vector2d>(_sdf, _paramName, _defaultVal);
-}
-
-ignition::math::Vector3d Utilities::SdfParamVector3(sdf::Element& _sdf,
-  const std::string& _paramName, const ignition::math::Vector3d _defaultVal)
-{
-  return SdfParam<ignition::math::Vector3d>(_sdf, _paramName, _defaultVal);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}  // namespace asv

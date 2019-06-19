@@ -45,8 +45,7 @@ namespace gazebo
       const std::string &_shaderType,
       const std::string &_value);
 
-  }; // namespace rendering
+  };
+}
 
-}  // namespace gazebo
-
-#endif  // _WAVE_GAZEBO_PLUGINS_GAZEBO_HH_
+#endif
