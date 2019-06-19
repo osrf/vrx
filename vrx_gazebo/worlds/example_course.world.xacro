@@ -29,7 +29,7 @@
       <uri>model://dock_2018</uri>
       <pose>-2 -18 0 0 0 0.2</pose>
     </include> 
-    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/gazebo_wind_plugin.xacro"/>
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo>
       <wind_objs>
         <wind_obj>
