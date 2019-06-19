@@ -44,7 +44,6 @@ namespace gazebo
       const std::string &_paramName,
       const std::string &_shaderType,
       const std::string &_value);
-
   };
 }
 
