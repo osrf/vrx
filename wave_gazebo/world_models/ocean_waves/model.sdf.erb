@@ -21,6 +21,22 @@
   Copyright (c) 2019 Rhys Mainwaring.
   Modified to include wave field model and visual plugins.
 -->
+
+<%
+  # Wave model parameters
+  model = "PMS"     # Wave model, must be PMS or CWR
+  period = 10       # Peak wave period [s]
+  number = 3        # Number of component waves
+  scale = 1.5       # Spectrum sampling scale 
+  gain = 1.0        # Multiplider applied to component amplitudes
+  direction_x = 1.0 # Direction of peak wave component 
+  direction_y = 0.0
+  angle = 0.4       # Delta direction for components
+  tau = 1.0         # Time constant for starting wave [s]
+  amplitude = 0.0  # No effect for PMS
+  steepness = 0.0  # Not yet supported
+%>
+
 <sdf version="1.6">
   <model name="ocean_waves">
     <static>true</static>
@@ -30,16 +46,16 @@
       <size>1000 1000</size>
       <cell_count>50 50</cell_count>
       <wave>
-				<model>PMS</model>
-        <number>3</number>
-        <scale>1.5</scale>
-        <steepness>0.0</steepness>
-        <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-        <period>10</period>
-				<gain>1.0</gain>
-        <direction>1.0 0.0</direction>
-				<angle>0.4</angle>				
-				<tau>1.0</tau>
+				<model><%= model %></model>
+        <period><%= period %></period>
+        <number><%= number %></number>
+        <scale><%= scale %></scale>
+        <gain><%= gain %></gain>
+        <direction><%= direction_x %> <%=direction_y %></direction>
+        <angle><%= angle %></angle>        
+        <tau><%= tau %></tau>
+        <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
+        <steepness><%= steepness %></steepness>
       </wave>
     </plugin>
 
@@ -47,16 +63,16 @@
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <wave>
-            <model>PMS</model>
-            <number>3</number>
-            <scale>1.5</scale>
-            <steepness>0.0</steepness>
-            <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-            <period>10</period>
-            <gain>1.0</gain>
-            <direction>1.0 0.0</direction>
-            <angle>0.4</angle>        
-            <tau>1.0</tau>
+            <model><%= model %></model>
+            <period><%= period %></period>
+            <number><%= number %></number>
+            <scale><%= scale %></scale>
+            <gain><%= gain %></gain>
+            <direction><%= direction_x %> <%=direction_y %></direction>
+            <angle><%= angle %></angle>        
+            <tau><%= tau %></tau>
+            <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
+            <steepness><%= steepness %></steepness>
           </wave>
         </plugin>
         <geometry>
@@ -74,16 +90,16 @@
       <visual name="ocean_waves_below_visual">
         <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <wave>
-            <model>PMS</model>
-            <number>3</number>
-            <scale>1.5</scale>
-            <steepness>0.0</steepness>
-            <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-            <period>10</period>
-            <gain>1.0</gain>
-            <direction>1.0 0.0</direction>
-            <angle>0.4</angle>        
-            <tau>1.0</tau>
+            <model><%= model %></model>
+            <period><%= period %></period>
+            <number><%= number %></number>
+            <scale><%= scale %></scale>
+            <gain><%= gain %></gain>
+            <direction><%= direction_x %> <%=direction_y %></direction>
+            <angle><%= angle %></angle>        
+            <tau><%= tau %></tau>
+            <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
+            <steepness><%= steepness %></steepness>
           </wave>
         </plugin>
         <geometry>
