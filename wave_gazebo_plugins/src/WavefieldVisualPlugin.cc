@@ -180,17 +180,8 @@ namespace asv
     /// \brief Prevent multiple calls to Init loading visuals twice...
     public: bool isInitialised;
 
-    /// \brief Mutex
-    public: std::recursive_mutex mutex;
-
     /// \brief Event based connections.
     public: event::ConnectionPtr connection;
-
-    /// \brief Node used to establish communication with gzserver.
-    public: transport::NodePtr gzNode;
-
-    /// \brief Subscribe to gztopic "~/world_stats".
-    public: transport::SubscriberPtr statsSub;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,8 +194,6 @@ namespace asv
 
     // Reset connections and transport.
     this->data->connection.reset();
-    this->data->statsSub.reset();
-    this->data->gzNode.reset();
   }
 
   WavefieldVisualPlugin::WavefieldVisualPlugin() :
@@ -218,8 +207,6 @@ namespace asv
     rendering::VisualPtr _visual,
     sdf::ElementPtr _sdf)
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
     // gzmsg << "Load WavefieldVisualPlugin [thread: "
@@ -257,14 +244,6 @@ namespace asv
     // @DEBUG_INFO
     this->data->waveParams->DebugPrint();
 
-    // Transport
-    this->data->gzNode = transport::NodePtr(new transport::Node());
-    this->data->gzNode->Init();
-
-    // Subscribers
-    this->data->statsSub = this->data->gzNode->Subscribe(
-      "~/world_stats", &WavefieldVisualPlugin::OnStatsMsg, this);
-
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectPreRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
@@ -272,8 +251,6 @@ namespace asv
 
   void WavefieldVisualPlugin::Init()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
     // gzmsg << "Init WavefieldVisualPlugin [thread: "
@@ -297,41 +274,28 @@ namespace asv
 
   void WavefieldVisualPlugin::Reset()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     // @DEBUG_INFO
     // gzmsg << "Reset WavefieldVisualPlugin" << std::endl;
   }
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     if (!this->data->isStatic && !this->data->paused)
     {
 #if 0
       this->data->visual->SetMaterialShaderParam(
         "time", shaderType, std::to_string(simTime));
 #else
+      auto simTime = this->data->visual->GetScene()->SimTime();
       rendering::SetMaterialShaderParam(*this->data->visual,
         "time", "vertex",
-        std::to_string(static_cast<float>(this->data->simTime)));
+        std::to_string(static_cast<float>(simTime.Double())));
 #endif
     }
   }
 
-  void WavefieldVisualPlugin::OnStatsMsg(ConstWorldStatisticsPtr &_msg)
-  {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    this->data->simTime = gazebo::msgs::Convert(_msg->sim_time()).Double();
-    this->data->paused = _msg->paused();
-  }
-
   void WavefieldVisualPlugin::SetShaderParams()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     const std::string shaderType = "vertex";
 
     // Parameters (to load from SDF)

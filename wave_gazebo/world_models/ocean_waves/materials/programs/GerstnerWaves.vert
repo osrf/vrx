@@ -25,7 +25,7 @@
 //
 // px = x - dir.x * a * k * sin(theta)
 // py = y - dir.y * a * k * sin(theta)
-// pz =     		a * k * cos(theta)
+// pz =         a * k * cos(theta)
 //
 // k is the wavenumber
 // omega is the angular frequency
@@ -61,74 +61,70 @@ varying vec2 bumpCoord;
 
 // Information regarding a single wave
 struct WaveParameters {
-    float k;   		// wavenumber
-    float a;   		// amplitude
-    float omega; 	// phase constant of speed
-    vec2 d;    		// horizontal direction of wave
-	float q;   		// steepness for Gerstner wave (q=0: rolling sine waves)
+  float k;      // wavenumber
+  float a;      // amplitude
+  float omega;  // phase constant of speed
+  vec2 d;       // horizontal direction of wave
+  float q;      // steepness for Gerstner wave (q=0: rolling sine waves)
 };
 
 void main(void)
 {
-    // Use combination of three waves. Values here are chosen rather arbitrarily.
-    // Other parameters might lead to better-looking waves.
+  // Use combination of three waves. Values here are chosen rather arbitrarily.
+  // Other parameters might lead to better-looking waves.
 
-    //#define N_WAVES 3
-    //WaveParameters waves[N_WAVES];
-		WaveParameters waves[3];
-	
-    waves[0] = WaveParameters(wavenumber.x, amplitude.x, omega.x, dir0.xy, steepness.x);
-		waves[1] = WaveParameters(wavenumber.y, amplitude.y, omega.y, dir1.xy, steepness.y);
-		waves[2] = WaveParameters(wavenumber.z, amplitude.z, omega.z, dir2.xy, steepness.z);
+  WaveParameters waves[3];
+  
+  waves[0] = WaveParameters(wavenumber.x, amplitude.x, omega.x, dir0.xy, steepness.x);
+  waves[1] = WaveParameters(wavenumber.y, amplitude.y, omega.y, dir1.xy, steepness.y);
+  waves[2] = WaveParameters(wavenumber.z, amplitude.z, omega.z, dir2.xy, steepness.z);
 
-    vec4 P = gl_Vertex;
+  vec4 P = gl_Vertex;
 
-    // Iteratively compute binormal, tangent, and normal vectors:
-    vec3 B = vec3(1.0, 0.0, 0.0);
-    vec3 T = vec3(0.0, 1.0, 0.0);
-    vec3 N = vec3(0.0, 0.0, 1.0);
+  // Iteratively compute binormal, tangent, and normal vectors:
+  vec3 B = vec3(1.0, 0.0, 0.0);
+  vec3 T = vec3(0.0, 1.0, 0.0);
+  vec3 N = vec3(0.0, 0.0, 1.0);
 
-	// Wave synthesis using linear combination of Gerstner waves
-	//for(int i = 0; i < N_WAVES; ++i)
-	for(int i = 0; i < Nwaves; ++i)
-	//int i = 0;
-	{
-	    // Evaluate wave equation:
-      float k = waves[i].k;
-			float a = waves[i].a * (1.0 - exp(-1.0*time/tau));
-      float q = waves[i].q;
-		  float dx = waves[i].d.x;
-		  float dy = waves[i].d.y;
-      float theta = dot(waves[i].d, P.xy)*k - time*waves[i].omega;
-		  float c = cos(theta);
-		  float s = sin(theta);
+  // Wave synthesis using linear combination of Gerstner waves
+  for(int i = 0; i < Nwaves; ++i)
+  {
+    // Evaluate wave equation:
+    float k = waves[i].k;
+    float a = waves[i].a * (1.0 - exp(-1.0*time/tau));
+    float q = waves[i].q;
+    float dx = waves[i].d.x;
+    float dy = waves[i].d.y;
+    float theta = dot(waves[i].d, P.xy)*k - time*waves[i].omega;
+    float c = cos(theta);
+    float s = sin(theta);
 
-       // Displacement of point due to wave (Eq. 9)
-		   P.x -= q*a*dx*s;
-		P.y -= q*a*dx*s;
-		P.z += a*c;
+    // Displacement of point due to wave (Eq. 9)
+    P.x -= q*a*dx*s;
+    P.y -= q*a*dx*s;
+    P.z += a*c;
 
-        // Modify normals due to wave displacement (Eq. 10-12)
-		float ka = a*k;
-		float qkac = q*ka*c;
-		float kas = ka*s;
-		float dxy = dx*dy;
+    // Modify normals due to wave displacement (Eq. 10-12)
+    float ka = a*k;
+    float qkac = q*ka*c;
+    float kas = ka*s;
+    float dxy = dx*dy;
 
-		B += vec3(-qkac*dx*dx, -qkac*dxy, -kas*dx);
-		T += vec3(-qkac*dxy, -qkac*dy*dy, -kas*dy);
-		N += vec3(dx*kas, dy*kas, -qkac);
-	}
+    B += vec3(-qkac*dx*dx, -qkac*dxy, -kas*dx);
+    T += vec3(-qkac*dxy, -qkac*dy*dy, -kas*dy);
+    N += vec3(dx*kas, dy*kas, -qkac);
+  }
 
-    // Compute (Surf2World * Rescale) matrix
-    B = normalize(B)*rescale;
-    T = normalize(T)*rescale;
-    N = normalize(N);
-	rotMatrix = mat3(B, T, N);
+  // Compute (Surf2World * Rescale) matrix
+  B = normalize(B)*rescale;
+  T = normalize(T)*rescale;
+  N = normalize(N);
+  rotMatrix = mat3(B, T, N);
 
-	gl_Position = gl_ModelViewProjectionMatrix*P;
+  gl_Position = gl_ModelViewProjectionMatrix*P;
 
-	// Compute texture coordinates for bump map
-	bumpCoord = gl_MultiTexCoord0.xy*bumpScale + time*bumpSpeed;
+  // Compute texture coordinates for bump map
+  bumpCoord = gl_MultiTexCoord0.xy*bumpScale + time*bumpSpeed;
 
-	eyeVec = P.xyz - eyePos; // eye position in vertex space
+  eyeVec = P.xyz - eyePos; // eye position in vertex space
 }
