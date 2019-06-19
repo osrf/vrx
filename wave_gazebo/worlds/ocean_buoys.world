@@ -68,12 +68,19 @@
 				<pose>0 -1 4 0 0 0 </pose>
       </include>
     </model>
-		-->
+  
 		
     <model name="wavegauge">
       <pose>0 0 0 0 0 0 </pose>
       <include>
 				<uri>model://wavegauge</uri>
+      </include>
+    </model>
+        -->
+    <!-- Add auto generated model with N buoys -->
+    <model name="robotx_2018_qualifying_avoid_obstacles_buoys">
+      <include>
+        <uri>model://robotx_2018_qualifying_avoid_obstacles_buoys</uri>
       </include>
     </model>
 	
