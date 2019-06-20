@@ -19,13 +19,16 @@
 
 #include <ros/ros.h>
 #include <vrx_gazebo/Task.h>
+#include <vrx_gazebo/Contact.h>
 
 #include <string>
+#include <vector>
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/transport/transport.hh>
 #include "std_msgs/Float64.h"
+#include "gazebo_msgs/LinkStates.h"
 
 namespace gazebo
 {
@@ -45,11 +48,11 @@ namespace gazebo
 
     /// \brief A signal used to set the wind speed info line edit.
     /// \param[in] _string String representation of windspeed info.
-    signals: void SetWindSpeedInfo(QString _string);
+    signals: void SetWindDirection(QPixmap _pixmap);
 
     /// \brief A signal used to set the wind speed info line edit.
     /// \param[in] _string String representation of windspeed info.
-    signals: void SetWindDirectionInfo(QPixmap _pixmap);
+    signals: void SetContact(QPixmap _pixmap);
 
     /// \brief Callback that received task info messages.
     /// \param[in] _msg Task info message that is received.
@@ -62,11 +65,16 @@ namespace gazebo
     /// \brief Callback that received wind direction messages.
     /// \param[in] _msg wind direction info message that is received.
     protected: void OnWindDirection(const std_msgs::Float64::ConstPtr &_msg);
-    /*
+   
     /// \brief Callback that received wind direction messages.
     /// \param[in] _msg wind direction info message that is received.
-    protected: void OnContact(const std_msgs::Float64::ConstPtr &_msg);
-    */
+    protected: void OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg);
+    private: double wamvHeading;
+ 
+    /// \brief Callback that received wind direction messages.
+    /// \param[in] _msg wind direction info message that is received.
+    protected: void OnContact(const vrx_gazebo::Contact::ConstPtr &_msg);
+
     /// \brief Helper function to format time string.
     /// \param[in] _msg Time message.
     /// \return Time formatted as a string.
@@ -85,11 +93,22 @@ namespace gazebo
     private: ros::Subscriber windDirectionSub;
 
     /// \brief Subscriber to wind direction messages.
+    private: ros::Subscriber linkStateSub;
+
+    /// \brief Subscriber to wind direction messages.
     private: ros::Subscriber contactSub;
 
-    private: QPixmap pixmap;
+    private: ros::Time contactTime;
 
-    private: QPainter painter;
+    private: QPixmap windPixmap;
+
+    private: QPainter windPainter;
+
+    private: QPixmap contactPixmap;
+
+    private: QPainter contactPainter;
+
+    private: QPen pen;
 
     private: double windSpeed;
   };

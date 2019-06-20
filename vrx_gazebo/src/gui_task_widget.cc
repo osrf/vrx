@@ -16,9 +16,8 @@
 */
 #include <sstream>
 #include <gazebo/msgs/msgs.hh>
-#include "vrx_gazebo/Task.h"
-#include "vrx_gazebo/Contact.h"
 #include "gui_task_widget.hh"
+#include <tf/tf.h>
 #include <math.h>
 
 using namespace gazebo;
@@ -28,7 +27,9 @@ GZ_REGISTER_GUI_PLUGIN(GUITaskWidget)
 
 /////////////////////////////////////////////////
 GUITaskWidget::GUITaskWidget()
-  : GUIPlugin(), pixmap(150,150), painter(&(this->pixmap))
+  : GUIPlugin(), windPixmap(150,150), windPainter(&(this->windPixmap)),
+    contactPixmap(150,150), contactPainter(&(this->contactPixmap)),
+	contactTime(ros::Time::now())
 {
   if (!ros::isInitialized())
   {
@@ -65,26 +66,16 @@ GUITaskWidget::GUITaskWidget()
   QLabel *windDirection = new QLabel; 
   // Add the label to the frame's layout
   InfoLayout->addWidget(windDirection);
-  connect(this, SIGNAL(SetWindDirectionInfo(QPixmap)),
+  connect(this, SIGNAL(SetWindDirection(QPixmap)),
       windDirection, SLOT(setPixmap(QPixmap)), Qt::QueuedConnection); 
- 
-  // Wind speed block
-  // Create a time label
-  QLabel *windSpeed = new QLabel; 
-  // Add the label to the frame's layout
-  InfoLayout->addWidget(windSpeed);
-  connect(this, SIGNAL(SetWindSpeedInfo(QString)),
-      windSpeed, SLOT(setText(QString)), Qt::QueuedConnection); 
 
-  this->pixmap.fill(Qt::gray);
-  this->painter.setBrush(Qt::NoBrush);
-  QPen pen;
-  pen.setColor(Qt::black);
-  pen.setWidth(10);
-  this->painter.setPen(pen);
-  this->painter.drawEllipse(5, 5, 140, 140);
-  this->painter.setPen(Qt::red);
-  this->painter.drawText(QRect(71, -2, 20, 20), 0, tr("N"), nullptr);
+  // Contact block
+  // Create a time label
+  QLabel *contact = new QLabel; 
+  // Add the label to the frame's layout
+  InfoLayout->addWidget(contact);
+  connect(this, SIGNAL(SetContact(QPixmap)),
+      contact, SLOT(setPixmap(QPixmap)), Qt::QueuedConnection); 
 
   // Add frameLayout to the frame
   mainFrame->setLayout(InfoLayout);
@@ -104,6 +95,10 @@ GUITaskWidget::GUITaskWidget()
       &GUITaskWidget::OnWindSpeed, this);
   this->windDirectionSub = this->node->subscribe("/vrx/debug/wind/direction", 1,
       &GUITaskWidget::OnWindDirection, this);
+  this->linkStateSub = this->node->subscribe("/gazebo/link_states", 1,
+      &GUITaskWidget::OnLinkStates, this);
+  this->contactSub = this->node->subscribe("/vrx/debug/contact", 1,
+      &GUITaskWidget::OnContact, this);
 }
 
 /////////////////////////////////////////////////
@@ -112,14 +107,77 @@ GUITaskWidget::~GUITaskWidget()
 }
 
 /////////////////////////////////////////////////
+void GUITaskWidget::OnContact(const vrx_gazebo::Contact::ConstPtr &_msg)
+{
+  this->contactPixmap.fill(Qt::red);
+  this->contactPainter.setBrush(Qt::NoBrush);
+  this->pen.setColor(Qt::black);
+  this->pen.setWidth(10);
+  this->contactPainter.setPen(this->pen);
+  this->contactPainter.drawText(QPoint(10, 15), QString("CONTACT WITH:"));
+  this->contactPainter.drawText(QPoint(10, 30), QString::fromStdString(_msg->collision2));
+ 
+  this->contactTime = ros::Time::now();
+
+  this->SetContact(this->contactPixmap);
+}
+/////////////////////////////////////////////////
+void GUITaskWidget::OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg)
+{
+  unsigned int c = 0;
+  for(auto& i : _msg->name)
+  {
+    if (i == "wamv::base_link")
+      break;
+    ++c;
+  }
+  tf::Quaternion q(_msg->pose[c].orientation.x,
+                   _msg->pose[c].orientation.y,
+                   _msg->pose[c].orientation.z,
+                   _msg->pose[c].orientation.w);
+  tf::Matrix3x3 m(q);
+  double roll, pitch;
+  m.getRPY(roll, pitch, this->wamvHeading);
+  gzdbg << "time since contact"  << (ros::Time::now() - this->contactTime) << std::endl;
+  gzdbg << "1 sec"  << ros::Duration(1) << std::endl;
+  if ((ros::Time::now() - this->contactTime) > ros::Duration(1))
+  {
+    this->contactPixmap.fill(Qt::gray);
+    this->SetContact(this->contactPixmap);
+  }
+}
+
+/////////////////////////////////////////////////
 void GUITaskWidget::OnWindDirection(const std_msgs::Float64::ConstPtr &_msg)
 {
-  double pi = 3.14159265;
-  double scale = 5*this->windSpeed;
-  double x = scale*cos((pi/180)*(_msg->data - 90)) + 75;
-  double y = scale*sin((pi/180)*(_msg->data - 90)) + 75;
-  this->painter.drawLine(QLine(75,75,x,y));
-  this->SetWindDirectionInfo(this->pixmap);
+  this->windPixmap.fill(Qt::gray);
+  this->windPainter.setBrush(Qt::NoBrush);
+  this->pen.setColor(Qt::black);
+  this->pen.setWidth(10);
+  this->windPainter.setPen(this->pen);
+  this->windPainter.drawEllipse(5, 5, 140, 140);
+  this->windPainter.setPen(Qt::red);
+  this->windPainter.drawText(QRect(71, -2, 20, 20), 0, tr("N"), nullptr);
+  this->pen.setColor(Qt::red);
+  this->pen.setWidth(5);
+  this->windPainter.setPen(this->pen);
+  
+  const double pi = 3.14159265;
+  double scale = .3*(pow(this->windSpeed,2));
+  double x = scale*cos((pi/-180)*(_msg->data)) + 75;
+  double y = scale*sin((pi/-180)*(_msg->data)) + 75;
+  this->pen.setWidth(10);
+  this->windPainter.setPen(this->pen);
+  this->windPainter.drawLine(QLine(75,75,x,y));
+
+  this->pen.setWidth(6);
+  this->pen.setColor(Qt::blue);
+  this->windPainter.setPen(this->pen);
+  x = (-40*cos(this->wamvHeading + pi)) + 75;
+  y = (40*sin(this->wamvHeading + pi)) + 75;
+  this->windPainter.drawLine(QLine(75,75,x,y));
+
+  this->SetWindDirection(this->windPixmap);
 }
 
 /////////////////////////////////////////////////
@@ -128,7 +186,7 @@ void GUITaskWidget::OnWindSpeed(const std_msgs::Float64::ConstPtr &_msg)
   std::ostringstream windSpeedStream;
   windSpeedStream.str("");
   windSpeedStream << "Wind Speed: " << _msg->data << "\n";
-  this->SetWindSpeedInfo(QString::fromStdString(windSpeedStream.str()));
+  //this->SetWindSpeedInfo(QString::fromStdString(windSpeedStream.str()));
   this->windSpeed = _msg->data;
 }
 
@@ -139,7 +197,7 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream.str("");
   taskInfoStream << "Task Info:\n";
   taskInfoStream << "Task Name: " << _msg->name << "\n";
-  taskInfoStream << "Task Stream: " << _msg->state << "\n";
+  taskInfoStream << "Task Phase: " << _msg->state << "\n";
   taskInfoStream << "Ready Time: " <<
     this->FormatTime(_msg->ready_time.toSec()) << "\n";
   taskInfoStream << "Running Time: " <<
