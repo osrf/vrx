@@ -115,7 +115,7 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   private: double poseError;
 
   /// \brief Number of instant pose error scores calculated so far .
-  private: double sampleCount;
+  private: unsigned int sampleCount = 0;
 
   /// \brief Sum of squared error scores calculated so far.
   private: double totalSquaredError;
