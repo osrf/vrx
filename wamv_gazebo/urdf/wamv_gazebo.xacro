@@ -10,7 +10,5 @@
     <xacro:include filename="${thruster_layout}"/>
     <!-- Attach hydrodynamics plugin -->
     <xacro:usv_dynamics_gazebo name="wamv_dynamics_plugin"/>
-    <!-- Attach wind plugin -->
-    <xacro:usv_wind_gazebo name="wamv_wind_plugin"/>
   </xacro:macro>
 </robot>
