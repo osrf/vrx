@@ -33,6 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   Task.msg
+  Contact.msg
 )
 
 add_service_files(
@@ -43,7 +44,10 @@ add_service_files(
 # Python scripts setup
 catkin_python_setup()
 
-generate_messages()
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 catkin_package(
   INCLUDE_DIRS include

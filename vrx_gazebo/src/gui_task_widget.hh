@@ -19,13 +19,13 @@
 
 #include <ros/ros.h>
 #include <vrx_gazebo/Task.h>
-#include <boost/shared_ptr.hpp>
 
 #include <string>
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/transport/transport.hh>
+#include "std_msgs/Float64.h"
 
 namespace gazebo
 {
@@ -43,20 +43,55 @@ namespace gazebo
     /// \param[in] _string String representation of task info.
     signals: void SetTaskInfo(QString _string);
 
+    /// \brief A signal used to set the wind speed info line edit.
+    /// \param[in] _string String representation of windspeed info.
+    signals: void SetWindSpeedInfo(QString _string);
+
+    /// \brief A signal used to set the wind speed info line edit.
+    /// \param[in] _string String representation of windspeed info.
+    signals: void SetWindDirectionInfo(QPixmap _pixmap);
+
     /// \brief Callback that received task info messages.
     /// \param[in] _msg Task info message that is received.
     protected: void OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg);
-
+    
+    /// \brief Callback that received wind speed messages.
+    /// \param[in] _msg windspeed info message that is received.
+    protected: void OnWindSpeed(const std_msgs::Float64::ConstPtr &_msg);
+    
+    /// \brief Callback that received wind direction messages.
+    /// \param[in] _msg wind direction info message that is received.
+    protected: void OnWindDirection(const std_msgs::Float64::ConstPtr &_msg);
+    /*
+    /// \brief Callback that received wind direction messages.
+    /// \param[in] _msg wind direction info message that is received.
+    protected: void OnContact(const std_msgs::Float64::ConstPtr &_msg);
+    */
     /// \brief Helper function to format time string.
     /// \param[in] _msg Time message.
     /// \return Time formatted as a string.
     private: std::string FormatTime(unsigned int sec) const;
 
     /// \brief A ros NodeHandle
-    private: boost::shared_ptr<ros::NodeHandle> node;
+    private: std::unique_ptr<ros::NodeHandle> node;
 
     /// \brief Subscriber to Task messages.
     private: ros::Subscriber taskSub;
+
+    /// \brief Subscriber to wind Speed messages.
+    private: ros::Subscriber windSpeedSub;
+
+    /// \brief Subscriber to wind direction messages.
+    private: ros::Subscriber windDirectionSub;
+
+    /// \brief Subscriber to wind direction messages.
+    private: ros::Subscriber contactSub;
+
+    private: QPixmap pixmap;
+
+    private: QPainter painter;
+
+    private: double windSpeed;
   };
 }
 
