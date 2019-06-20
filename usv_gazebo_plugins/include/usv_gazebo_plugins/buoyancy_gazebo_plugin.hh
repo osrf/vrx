@@ -28,6 +28,10 @@
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
 
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
+
 namespace gazebo
 {
   /// \brief A class for storing the volume properties of a link.
@@ -98,6 +102,9 @@ namespace gazebo
     /// \brief Connection to World Update events.
     protected: event::ConnectionPtr updateConnection;
 
+    /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
+    protected: physics::WorldPtr world;
+
     /// \brief Pointer to the model
     protected: physics::ModelPtr model;
 
@@ -127,6 +134,9 @@ namespace gazebo
 
     /// \brief Previous update time
     protected: double lastSimTime;
+
+    /// \brief The wave parameters.
+    protected: std::shared_ptr<const asv::WaveParameters> waveParams;
   };
 }
 

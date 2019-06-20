@@ -129,7 +129,7 @@ namespace asv
     if (_v.size() > 2)
       ToOgreVector2(_v[2], _vout2);
   }
-  
+
   void ToOgreVector3(
     const std::vector<ignition::math::Vector3d>& _v,
     Ogre::Vector3& _vout0,
@@ -180,43 +180,20 @@ namespace asv
     /// \brief Prevent multiple calls to Init loading visuals twice...
     public: bool isInitialised;
 
-    /// \brief Mutex
-    public: std::recursive_mutex mutex;
-
     /// \brief Event based connections.
     public: event::ConnectionPtr connection;
-
-    /// \brief Node used to establish communication with gzserver.
-    public: transport::NodePtr gzNode;
-
-    /// \brief Publish to gztopic "~/request".
-    public: transport::PublisherPtr requestPub;
-
-    /// \brief Subscribe to gztopic "~/response".
-    public: transport::SubscriberPtr responseSub;
-
-    /// \brief Subscribe to gztopic "~/wave".
-    public: transport::SubscriberPtr waveSub;
-
-    /// \brief Subscribe to gztopic "~/world_stats".
-    public: transport::SubscriberPtr statsSub;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
 // WavefieldVisualPlugin
 
   WavefieldVisualPlugin::~WavefieldVisualPlugin()
-  { 
+  {
     // Clean up.
     this->data->waveParams.reset();
 
     // Reset connections and transport.
     this->data->connection.reset();
-    this->data->statsSub.reset();
-    this->data->waveSub.reset();
-    this->data->responseSub.reset();
-    this->data->requestPub.reset();
-    this->data->gzNode.reset();
   }
 
   WavefieldVisualPlugin::WavefieldVisualPlugin() :
@@ -230,12 +207,10 @@ namespace asv
     rendering::VisualPtr _visual,
     sdf::ElementPtr _sdf)
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
     // gzmsg << "Load WavefieldVisualPlugin [thread: "
-		//       << threadId << "]" << std::endl;
+    //       << threadId << "]" << std::endl;
 
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
@@ -245,59 +220,44 @@ namespace asv
     this->data->visual = _visual;
     this->data->sdf = _sdf;
 
-    // Transport
-    this->data->gzNode = transport::NodePtr(new transport::Node());
-    this->data->gzNode->Init();
+    // Process SDF Parameters
+    #if GAZEBO_MAJOR_VERSION >= 8
+      gzmsg << "WavefieldVisualPlugin <" << _visual->Name()
+            << ">: Loading WaveParamaters from SDF" <<  std::endl;
+    #else
+      gzmsg << "WavefieldVisualPlugin <" << _visual->GetName()
+            << ">: Loading WaveParamaters from SDF" <<  std::endl;
+    #endif
+    this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
+    this->data->waveParams.reset(new WaveParameters());
+    if (_sdf->HasElement("wave"))
+    {
+      gzmsg << "Found <wave> tag" << std::endl;
+      sdf::ElementPtr sdfWave = _sdf->GetElement("wave");
+      this->data->waveParams->SetFromSDF(*sdfWave);
+    }
+    else
+    {
+      gzerr << "Missing <wave> tag" << std::endl;
+    }
 
-    // Publishers
-    this->data->requestPub 
-      = this->data->gzNode->Advertise<msgs::Request>("~/request");
-
-    // Subscribers
-    this->data->responseSub = this->data->gzNode->Subscribe(
-      "~/response", &WavefieldVisualPlugin::OnResponse, this);
-
-    this->data->waveSub = this->data->gzNode->Subscribe(
-      "~/wave", &WavefieldVisualPlugin::OnWaveMsg, this);
-
-    this->data->statsSub = this->data->gzNode->Subscribe(
-      "~/world_stats", &WavefieldVisualPlugin::OnStatsMsg, this);
+    // @DEBUG_INFO
+    this->data->waveParams->DebugPrint();
 
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectPreRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
-
-    // Wave Parameters
-    this->data->waveParams.reset(new WaveParameters());
-    if (_sdf->HasElement("wave"))
-    {
-      sdf::ElementPtr sdfWave = _sdf->GetElement("wave");
-      this->data->waveParams->SetFromSDF(*sdfWave);
-    }
-
-    // Plugin
-    this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
-
-    // @DEBUG_INFO
-    // gzmsg << "WavefieldVisualPlugin..." <<  std::endl;
-    // this->data->waveParams->DebugPrint();
   }
 
   void WavefieldVisualPlugin::Init()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     // @DEBUG_INFO
     // std::thread::id threadId = std::this_thread::get_id();
     // gzmsg << "Init WavefieldVisualPlugin [thread: "
-		//       << threadId << "]" << std::endl;
-  
+    //       << threadId << "]" << std::endl;
+
     if (!this->data->isInitialised)
     {
-      // Request "wave_param"
-      msgs::RequestPtr requestMsg(msgs::CreateRequest("wave_param", ""));
-      this->data->requestPub->Publish(*requestMsg);
-
       // Initialise vertex shader
       std::string shaderType = "vertex";
 #if 0
@@ -308,89 +268,34 @@ namespace asv
         "time", shaderType, std::to_string(0.0));
 #endif
       this->SetShaderParams();
-      this->data->isInitialised = true;   
+      this->data->isInitialised = true;
     }
   }
 
   void WavefieldVisualPlugin::Reset()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     // @DEBUG_INFO
     // gzmsg << "Reset WavefieldVisualPlugin" << std::endl;
   }
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     if (!this->data->isStatic && !this->data->paused)
-    { 
-      std::string shaderType = "vertex";
-      float simTime = this->data->simTime;
+    {
 #if 0
       this->data->visual->SetMaterialShaderParam(
         "time", shaderType, std::to_string(simTime));
 #else
+      auto simTime = this->data->visual->GetScene()->SimTime();
       rendering::SetMaterialShaderParam(*this->data->visual,
-        "time", shaderType, std::to_string(simTime));
+        "time", "vertex",
+        std::to_string(static_cast<float>(simTime.Double())));
 #endif
     }
   }
 
-  void WavefieldVisualPlugin::OnResponse(ConstResponsePtr &_msg)
-  {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    GZ_ASSERT(_msg != nullptr, "Response message must not be null");
-
-    msgs::Param_V waveMsg;
-    if (_msg->type() == waveMsg.GetTypeName())
-    {
-      // Parse the response
-      waveMsg.ParseFromString(_msg->serialized_data());
-
-      // Update wave params and vertex shader 
-      this->data->waveParams->SetFromMsg(waveMsg);
-      this->SetShaderParams();
-
-      // @DEBUG_INFO
-      gzmsg << "Wavefield Visual received message on topic [" 
-        << this->data->responseSub->GetTopic() << "]" << std::endl;
-      this->data->waveParams->DebugPrint();
-    }
-  }
-
-  void WavefieldVisualPlugin::OnWaveMsg(ConstParam_VPtr &_msg)
-  {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    GZ_ASSERT(_msg != nullptr, "Wave message must not be null");
-
-    // Update wave params and vertex shader 
-    this->data->waveParams->SetFromMsg(*_msg);
-    this->SetShaderParams();
-
-    // @DEBUG_INFO
-    gzmsg << "Wavefield Visual received message on topic [" 
-      << this->data->waveSub->GetTopic() << "]" << std::endl;
-    this->data->waveParams->DebugPrint();
-  }
-
-  void WavefieldVisualPlugin::OnStatsMsg(ConstWorldStatisticsPtr &_msg)
-  {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
-    this->data->simTime = gazebo::msgs::Convert(_msg->sim_time()).Double();
-    this->data->realTime = gazebo::msgs::Convert(_msg->real_time()).Double();
-    this->data->pauseTime = gazebo::msgs::Convert(_msg->pause_time()).Double();
-    this->data->paused = _msg->paused();
-  }
-
   void WavefieldVisualPlugin::SetShaderParams()
   {
-    std::lock_guard<std::recursive_mutex> lock(this->data->mutex);
-
     const std::string shaderType = "vertex";
 
     // Parameters (to load from SDF)
@@ -401,7 +306,7 @@ namespace asv
     Ogre::Vector2 dir0 = Ogre::Vector2::ZERO;
     Ogre::Vector2 dir1 = Ogre::Vector2::ZERO;
     Ogre::Vector2 dir2 = Ogre::Vector2::ZERO;
-    
+
     ToOgreVector3(this->data->waveParams->Amplitude_V(), amplitude);
     ToOgreVector3(this->data->waveParams->Wavenumber_V(), wavenumber);
     ToOgreVector3(this->data->waveParams->AngularFrequency_V(), omega);
@@ -426,9 +331,9 @@ namespace asv
     visual.SetMaterialShaderParam(
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
 #else
-		rendering::SetMaterialShaderParam(visual, 
-			"Nwaves",shaderType,std::to_string(this->data->waveParams->Number()));
-    rendering::SetMaterialShaderParam(visual, 
+    rendering::SetMaterialShaderParam(visual,
+      "Nwaves", shaderType, std::to_string(this->data->waveParams->Number()));
+    rendering::SetMaterialShaderParam(visual,
       "amplitude", shaderType, Ogre::StringConverter::toString(amplitude));
     rendering::SetMaterialShaderParam(visual,
       "wavenumber", shaderType, Ogre::StringConverter::toString(wavenumber));
@@ -442,11 +347,9 @@ namespace asv
       "dir1", shaderType, Ogre::StringConverter::toString(dir1));
     rendering::SetMaterialShaderParam(visual,
       "dir2", shaderType, Ogre::StringConverter::toString(dir2));
-		float tau = this->data->waveParams->Tau();
+    float tau = this->data->waveParams->Tau();
     rendering::SetMaterialShaderParam(visual,
       "tau", shaderType, Ogre::StringConverter::toString(tau));
-
 #endif
   }
-
-}  // namespace asv
+}

@@ -65,6 +65,7 @@ void WaveguagePlugin::Init()
 void WaveguagePlugin::OnUpdate()
 {
   // Retrieve the wave model...
+
   std::shared_ptr<const WaveParameters> waveParams \
     = WavefieldModelPlugin::GetWaveParams(
       this->model->GetWorld(), this->waveModelName);
@@ -75,22 +76,28 @@ void WaveguagePlugin::OnUpdate()
     return;
   }
   #if GAZEBO_MAJOR_VERSION >= 8
-	  ignition::math::Pose3d modelPose = this->model->WorldPose();
+    ignition::math::Pose3d modelPose = this->model->WorldPose();
   #else
-	  ignition::math::Pose3d modelPose = this->model->GetWorldPose().Ign();
+    ignition::math::Pose3d modelPose = this->model->GetWorldPose().Ign();
   #endif
 
   // Compute the wave displacement at the model location
-	double waveHeightS = WavefieldSampler::ComputeDepthSimply(
+  #if GAZEBO_MAJOR_VERSION >= 8
+    double waveHeightS = WavefieldSampler::ComputeDepthSimply(
       *waveParams, modelPose.Pos(),
-			this->model->GetWorld()->SimTime().Double());
+      this->model->GetWorld()->SimTime().Double());
+  #else
+    double waveHeightS = WavefieldSampler::ComputeDepthSimply(
+      *waveParams, modelPose.Pos(),
+      this->model->GetWorld()->GetSimTime().Double());
+  #endif
 
-	// Add the mean water level
-	waveHeightS += this->fluidLevel;
+  // Add the mean water level
+  waveHeightS += this->fluidLevel;
 
-	// Set vertical location to match the wave height
-	modelPose.Pos().Z(waveHeightS);
-	this->model->SetWorldPose(modelPose);
+  // Set vertical location to match the wave height
+  modelPose.Pos().Z(waveHeightS);
+  this->model->SetWorldPose(modelPose);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(WaveguagePlugin)

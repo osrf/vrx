@@ -30,7 +30,7 @@
 
 namespace asv
 {
-  
+
 ///////////////////////////////////////////////////////////////////////////////
 // WavefieldVisualPlugin
 
@@ -38,7 +38,7 @@ namespace asv
   /// \brief Class to hold private data for WavefieldModelPlugin.
   class WavefieldVisualPluginPrivate;
 
-  /// \brief A Gazebo visual plugin to synchronise and control 
+  /// \brief A Gazebo visual plugin to synchronise and control
   /// a vertex shader rendering Gerstner waves.
   ///
   /// # Usage
@@ -48,7 +48,7 @@ namespace asv
   /// The SDF parameters specifying the wave are all optional, and normal
   /// use will be overridden.
   ///
-  /// If this visual is loaded as part of a wave model that also contains 
+  /// If this visual is loaded as part of a wave model that also contains
   /// the plugin libWavefieldModelPlugin.so, then it will receive a response
   /// to its request for ~/wave_param and set the wave parameters to be
   /// consistent with the wave generator operating on the physics server.
@@ -71,7 +71,7 @@ namespace asv
   /// # Subscribed Topics
   ///
   /// 1. ~/reponse (gazebo::msgs::Response)
-  ///   
+  ///
   /// 2. ~/wave (gazebo::msgs::Param_V)
   ///
   /// 3. ~/world_stats (gazebo::msgs::WorldStatistics)
@@ -86,7 +86,7 @@ namespace asv
   ///
   /// 1. <static> (bool, default: false)
   ///   Display a static wave field if set to true.
-  ///   
+  ///
   /// 2. <number> (int, default: 1)
   ///   The number of component waves.
   ///
@@ -94,12 +94,12 @@ namespace asv
   ///   The scale between the mean and largest / smallest component waves.
   ///
   /// 4. <angle> (double, default: 2*pi/10)
-  ///   The angle between the mean wave direction and the 
-	///   largest / smallest component waves.
+  ///   The angle between the mean wave direction and the
+  ///   largest / smallest component waves.
   ///
   /// 5. <steepness> (double, default: 1.0)
   ///   A parameter in [0, 1] controlling the wave steepness
-	///   with 1 being steepest.
+  ///   with 1 being steepest.
   ///
   /// 6. <amplitude> (double, default: 0.0)
   ///   The amplitude of the mean wave in [m].
@@ -137,18 +137,6 @@ namespace asv
     private: void OnUpdate();
 
     /// internal
-    /// \brief Callback for gztopic "~/response" when the response type is a wave message.
-    ///
-    /// \param[in] _msg Response message.
-    private: void OnResponse(ConstResponsePtr &_msg);
-
-    /// internal
-    /// \brief Callback for gztopic "~/wave".
-    ///
-    /// \param[in] _msg Wave message.
-    private: void OnWaveMsg(ConstParam_VPtr &_msg);
-
-    /// internal
     /// \brief Callback for gztopic "~/world_stats".
     ///
     /// \param[in] _msg World statistics message.
@@ -162,7 +150,6 @@ namespace asv
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldVisualPluginPrivate> data;
   };
+}
 
-} // namespace asv
-
-#endif // _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_VISUAL_PLUGIN_HH_
+#endif

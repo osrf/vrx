@@ -30,22 +30,21 @@
 namespace gazebo
 {
   /// \brief A plugin that sets the model height (z) to be the same
-	/// as the wave height calculated for the physics.
+  /// as the wave height calculated for the physics.
   /// All SDF parameters are optional.
   ///
   ///   <fluid_level>:   The height of the fluid/air interface [m].
   ///                    This parameter is optional.
   ///
   ///   <wave_model>:    Name of the model that includes and instance of the
-	///                    WavefieldModelPlugin.
-	///   For Example:
-	///   <plugin name="wavegauge_plugin" filename="libwavegauge_plugin.so">
+  ///                    WavefieldModelPlugin.
+  ///   For Example:
+  ///   <plugin name="wavegauge_plugin" filename="libwavegauge_plugin.so">
   ///     <wave_model>ocean_waves</wave_model>
   ///     <fluid_level>0.0</fluid_level>
   ///   </plugin> example
-	/// 
   ///
-
+  ///
   class WaveguagePlugin : public ModelPlugin
   {
     /// \brief Constructor.
@@ -72,7 +71,7 @@ namespace gazebo
 
     /// \brief The height of the fluid/air interface [m]. Defaults to 0.
     protected: double fluidLevel;
-	};
+  };
 }
 
 #endif

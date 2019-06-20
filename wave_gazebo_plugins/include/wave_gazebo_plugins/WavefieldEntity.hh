@@ -61,7 +61,7 @@ namespace asv
 
     /// \brief Update the object.
     public: virtual void Update();
-    
+
     /// \brief Get a pointer to the wave pararameters.
     std::shared_ptr<const WaveParameters> GetWaveParams() const;
 
@@ -75,7 +75,6 @@ namespace asv
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldEntityPrivate> data;
   };
-
-}  // namespace asv
+}
 
 #endif  // _WAVE_GAZEBO_PLUGINS_WAVEFIELD_ENTITY_HH_

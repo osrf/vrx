@@ -20,20 +20,19 @@
 #include "wave_gazebo_plugins/Physics.hh"
 #include "wave_gazebo_plugins/PhysicalConstants.hh"
 
-namespace asv 
+namespace asv
 {
-
+  /////////////////////////////////////////////////
   double Physics::DeepWaterDispersionToOmega(double _wavenumber)
   {
     const double g = std::fabs(PhysicalConstants::Gravity());
     return std::sqrt(g * _wavenumber);
   }
 
+  /////////////////////////////////////////////////
   double Physics::DeepWaterDispersionToWavenumber(double _omega)
   {
     const double g = std::fabs(PhysicalConstants::Gravity());
-    return _omega * _omega / g; 
+    return _omega * _omega / g;
   }
-
-}  // namespace asv
-
+}

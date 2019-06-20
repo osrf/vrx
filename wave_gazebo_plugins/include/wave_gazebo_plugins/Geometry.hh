@@ -37,18 +37,18 @@ namespace asv
     ///
     /// \param[in] _v     The vector to normalise.
     /// \return           The normalized vector.
-    public: static ignition::math::Vector2d 
-		Normalize(const ignition::math::Vector2d& _v);
+    public: static ignition::math::Vector2d
+    Normalize(const ignition::math::Vector2d& _v);
 
     /// \brief Normalise a Vector3 (i.e. ensure it has unit length)
     ///
     /// \param[in] _v     The vector to normalise.
     /// \return           The normalized vector.
     public: static ignition::math::Vector3d
-		Normalize(const ignition::math::Vector3d& _v);
+    Normalize(const ignition::math::Vector3d& _v);
 
     /// \brief Compute the (normalised) normal to the plane defined
-		/// by a triangle.
+    /// by a triangle.
     ///
     /// \param[in] _p0    Point at the first vertex.
     /// \param[in] _p1    Point at the second vertex.
@@ -57,10 +57,8 @@ namespace asv
     public: static ignition::math::Vector3d Normal(
       const ignition::math::Vector3d& _v0,
       const ignition::math::Vector3d& _v1,
-      const ignition::math::Vector3d& _v2
-    );
+      const ignition::math::Vector3d& _v2);
   };
-
-}  // namespace asv
+}
 
 #endif  // _WAVE_GAZEBO_PLUGINS_GEOMETRY_HH_

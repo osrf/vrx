@@ -16,7 +16,7 @@
 */
 
 /// \file PhysicalConstants.hh
-/// \brief This file contains definitions of some physical constants used 
+/// \brief This file contains definitions of some physical constants used
 /// in the physics calculations.
 
 #ifndef _WAVE_GAZEBO_PLUGINS_PHYSICAL_CONSTANTS_HH_
@@ -31,16 +31,16 @@ namespace asv
   class PhysicalConstants
   {
     /// \brief Uniform acceleration due to gravity
-		/// at earth's surface (orientation is z-up).
+    /// at earth's surface (orientation is z-up).
     ///
     /// \return     -9.8 [m s-2].
-    public: static double Gravity(); 
-    
+    public: static double Gravity();
+
     /// \brief Universal gravitational constant.
     ///
     /// \return     6.67408E-11 [m3 kg-1 s-2].
     public: static double G();
-    
+
     /// \brief Density of water.
     ///
     /// \return     998.6 [kg m-3].
@@ -54,7 +54,6 @@ namespace asv
     /// \return     1.0533E-6 [m2 s-1].
     public: static double WaterKinematicViscosity();
   };
+}
 
-}   // namespace asv
-
-#endif   // _WAVE_GAZEBO_PLUGINS_PHYSICAL_CONSTANTS_HH_
+#endif

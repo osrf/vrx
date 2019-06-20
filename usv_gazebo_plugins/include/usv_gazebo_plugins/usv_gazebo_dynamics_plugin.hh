@@ -27,6 +27,10 @@
 #include <gazebo/physics/physics.hh>
 #include <sdf/sdf.hh>
 
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
+
 namespace gazebo
 {
   /// \brief Plugin class to implement hydrodynamics and wave response.
@@ -179,6 +183,9 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    /// \brief The wave parameters.
+    private: std::shared_ptr<const asv::WaveParameters> waveParams;
   };
 }
 

@@ -22,27 +22,29 @@
 
 #include "wave_gazebo_plugins/Geometry.hh"
 
-
-namespace asv 
+namespace asv
 {
+  /////////////////////////////////////////////////
   ignition::math::Vector2d
-	Geometry::Normalize(const ignition::math::Vector2d& _v)
+  Geometry::Normalize(const ignition::math::Vector2d& _v)
   {
     if (_v == ignition::math::Vector2d::Zero)
       return _v;
     else
-      return _v/_v.Length(); 
+      return _v/_v.Length();
   }
 
+  /////////////////////////////////////////////////
   ignition::math::Vector3d
-	Geometry::Normalize(const ignition::math::Vector3d& _v)
+  Geometry::Normalize(const ignition::math::Vector3d& _v)
   {
     if (_v == ignition::math::Vector3d::Zero)
       return _v;
     else
-      return _v/_v.Length(); 
+      return _v/_v.Length();
   }
 
+  /////////////////////////////////////////////////
   ignition::math::Vector3d Geometry::Normal(
     const ignition::math::Vector3d& _p0,
     const ignition::math::Vector3d& _p1,
@@ -53,8 +55,6 @@ namespace asv
     if (n == ignition::math::Vector3d::Zero)
       return n;
     else
-      return n/n.Length(); 
+      return n/n.Length();
   }
-  
-}  // namespace asv
-
+}
