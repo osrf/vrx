@@ -16,7 +16,7 @@
 */
 #include <sstream>
 #include <gazebo/msgs/msgs.hh>
-#include "vrx_gazebo/gui_task_widget.hh"
+#include "gui_task_widget.hh"
 #include <tf/tf.h>
 #include <math.h>
 
@@ -138,6 +138,8 @@ void GUITaskWidget::OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg)
   tf::Matrix3x3 m(q);
   double roll, pitch;
   m.getRPY(roll, pitch, this->wamvHeading);
+  gzdbg << "time since contact"  << (ros::Time::now() - this->contactTime) << std::endl;
+  gzdbg << "1 sec"  << ros::Duration(1) << std::endl;
   if ((ros::Time::now() - this->contactTime) > ros::Duration(1))
   {
     this->contactPixmap.fill(Qt::gray);
