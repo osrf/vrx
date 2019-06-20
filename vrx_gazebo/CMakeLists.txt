@@ -58,6 +58,8 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS})
 
+add_definitions(${QT_DEFINITIONS})
+
 # Plugin for setting color of light buoy.
 add_library(light_buoy_plugin src/light_buoy_plugin.cc)
 target_link_libraries(light_buoy_plugin ${catkin_LIBRARIES})
@@ -141,8 +143,7 @@ install(TARGETS scan_dock_scoring_plugin
 )
 
 # Plugin for Task Info GUI Overlay
-add_library(gui_task_widget
-	SHARED
+add_library(gui_task_widget SHARED ${headers_MOC}
        	src/gui_task_widget.cc
 )
 
@@ -151,10 +152,9 @@ message("gazebo libraries ${GAZEBO_LIBRARIES}    ====")
 target_link_libraries(gui_task_widget 
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
-  ${Qt5Core_LIBRARIES}
-  ${Qt5Widgets_LIBRARIES}
   ${PROTOBUF_LIBRARIES}
 )
+qt5_use_modules(gui_task_widget Widgets)
 add_dependencies(gui_task_widget ${catkin_EXPORTED_TARGETS})
 install(TARGETS gui_task_widget
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
