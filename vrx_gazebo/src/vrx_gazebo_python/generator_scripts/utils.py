@@ -37,7 +37,6 @@ def create_xacro_file(xacro_target,
         s = open(yaml_file, 'r')
         requested_macros = yaml.load(s)
 
-
         # Handle case with empty yaml file
         if requested_macros is None:
             xacro_file.write(boiler_plate_bot)
