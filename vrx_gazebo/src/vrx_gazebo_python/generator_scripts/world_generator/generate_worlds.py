@@ -69,9 +69,9 @@ def world_gen(coordinate={}, master={}):
                                 evaluated_params[param] = value[1:-1]
                             # values not flanked by ' evaluated as lambdas
                             else:
+                                f = str(value)
                                 evaluated_params[param] =\
-                                    (lambda n: eval(str(value)))(
-                                            coordinate[axis_name])
+                                    (lambda n: eval(f))(coordinate[axis_name])
                         world[macro_name].append(evaluated_params)
                     else:
                         world[macro_name].append({})
