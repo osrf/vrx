@@ -145,6 +145,7 @@ install(TARGETS scan_dock_scoring_plugin
 # Plugin for Task Info GUI Overlay
 add_library(gui_task_widget SHARED ${headers_MOC}
        	src/gui_task_widget.cc
+	include/vrx_gazebo/gui_task_widget.hh
 )
 
 message("gazebo libraries ${GAZEBO_LIBRARIES}    ====")
