@@ -99,13 +99,13 @@
     <!-- water level for visual reference at z = 0-->
     <model name="plane">
       <static>true</static>
-      <pose>3 3 0 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>10 10</size>
+              <size>2 2</size>
             </plane>
           </geometry>
           <material>
@@ -116,55 +116,56 @@
     </model>
 
     <!-- test_1: basic shape drop test | no rotation -->
+    <!-- density ~ 400 kg/m^3 (wood) | mass = 2kg | volume = 0.005m^3-->
     <xacro:basic_shape name="1_box" static="false">
-      <pose>0 0 2 0 0 0</pose>
+      <pose>0.1 0 0.5 0 0 0</pose>
       <box>
-        <size>1 1 1</size>
+        <size>0.171 0.171 0.171</size>
       </box>
-      <xacro:box_inertial mass="17.3" x="1" y="1" z="1"/>
+      <xacro:box_inertial mass="2" x="0.171" y="0.171" z="0.171"/>
     </xacro:basic_shape>
 
     <xacro:basic_shape name="1_sphere" static="false">
-      <pose>2 0 2 0 0 0</pose>
+      <pose>0.4 0 0.5 0 0 0</pose>
       <sphere>
-        <radius>0.5</radius>
+        <radius>0.106</radius>
       </sphere>
-      <xacro:sphere_inertial mass="5" r="0.5"/>
+      <xacro:sphere_inertial mass="2" r="0.106"/>
     </xacro:basic_shape>
 
     <xacro:basic_shape name="1_cylinder" static="false">
-      <pose>4 0 2 0 0 0</pose>
+      <pose>0.7 0 0.5 0 0 0</pose>
       <cylinder>
-        <radius>0.5</radius>
-        <length>0.3</length>
+        <radius>0.1</radius>
+        <length>0.159</length>
       </cylinder>
-      <xacro:cylinder_inertial mass="5" r="0.5" l="0.3" />
+      <xacro:cylinder_inertial mass="2" r="0.1" l="0.159" />
     </xacro:basic_shape>
 
     <!-- test_2: basic shape drop test | rotation -->
     <xacro:basic_shape name="2_box" static="false">
-      <pose>0 2 2 1.0 0 0</pose>
+      <pose>0.1 0.5 0.5 1.0 0 0</pose>
       <box>
-        <size>1 1 1</size>
+        <size>0.171 0.171 0.171</size>
       </box>
-      <xacro:box_inertial mass="5" x="1" y="1" z="1"/>
+      <xacro:box_inertial mass="2" x="0.171" y="0.171" z="0.171"/>
     </xacro:basic_shape>
 
     <xacro:basic_shape name="2_sphere" static="false">
-      <pose>2 2 2 1.0 0 0</pose>
+      <pose>0.4 0.5 0.5 1.0 0 0</pose>
       <sphere>
-        <radius>0.5</radius>
+        <radius>0.106</radius>
       </sphere>
-      <xacro:sphere_inertial mass="5" r="0.5"/>
+      <xacro:sphere_inertial mass="2" r="0.106"/>
     </xacro:basic_shape>
 
     <xacro:basic_shape name="2_cylinder" static="false">
-      <pose>4 2 2 1.0 0 0</pose>
+      <pose>0.7 0.5 0.5 1.0 0 0</pose>
       <cylinder>
-        <radius>0.5</radius>
-        <length>0.3</length>
+        <radius>0.1</radius>
+        <length>0.159</length>
       </cylinder>
-      <xacro:cylinder_inertial mass="5" r="0.5" l="0.3" />
+      <xacro:cylinder_inertial mass="2" r="0.1" l="0.159" />
     </xacro:basic_shape>
 
   </world>

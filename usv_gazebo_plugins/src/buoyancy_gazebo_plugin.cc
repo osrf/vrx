@@ -191,6 +191,7 @@ void BuoyancyPlugin::OnUpdate()
       #else
             ignition::math::Vector3d vel= link->GetWorldLinearVel().Ign();
       #endif
+
       double dz = -1.0 * this->fluidDrag * vel.Z() * std::abs(vel.Z());
       ignition::math::Vector3d drag(0, 0, dz);
       buoyancy += drag;
@@ -200,11 +201,8 @@ void BuoyancyPlugin::OnUpdate()
       }
     }
 
-    // rotate buoyancy into the link frame before applying the force.
-    ignition::math::Vector3d buoyancyLinkFrame =
-        linkFrame.Rot().Inverse().RotateVector(buoyancy);
-
-    link->AddForceAtRelativePosition(buoyancy, buoyancyObj.pose.Pos());
+    // apply force
+    link->AddForceAtWorldPosition(buoyancy, volume.centroid);
   }
 }
 
