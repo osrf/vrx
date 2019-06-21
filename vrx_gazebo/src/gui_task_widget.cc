@@ -33,9 +33,9 @@ GUITaskWidget::GUITaskWidget()
   : GUIPlugin(),
     // setup pixmap and painter for wind compass
     // cppcheck-suppress 3;
-    windPixmap(150,150), windPainter(&(this->windPixmap)),
+    windPixmap(150, 150), windPainter(&(this->windPixmap)),
     // setup pixmap and painter for contact
-    contactPixmap(150,150), contactPainter(&(this->contactPixmap)),
+    contactPixmap(150, 150), contactPainter(&(this->contactPixmap)),
     // set the time for most recent contact
     contactTime(ros::Time::now())
 {
