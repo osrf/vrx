@@ -61,13 +61,18 @@
 ///
 /// <task_name>: Required parameter specifying the task name (string type).
 ///
-/// <task_info_topic>: Optional parameter (string type) containing the ROS topic name to
-/// publish the task stats. The default topic name is /vrx/task/info .
+/// <task_info_topic>: Optional parameter (string type)
+/// containing the ROS topic name to publish the task stats. The default
+/// topic name is /vrx/task/info .
 ///
-/// <debug> : optional parameter for debug (if debug topics are being published). default is True
+/// <debug> : optional parameter for debug
+/// (tells weather debug topics are being published).
+/// default is True
 ///
-/// <contact_debug_topic>: Optional parameter (string type) containing the ROS topic name to
-/// publish every instant a collision with the wamv is happening. Default is /vrx/debug/contact.
+/// <contact_debug_topic>: Optional parameter (string type)
+/// containing the ROS topic name to
+/// publish every instant a collision with the wamv is happening.
+/// Default is /vrx/debug/contact.
 ///
 /// <initial_state_duration>: Optional parameter (double type) specifying the
 /// amount of seconds that the plugin will be in the "initial" state.
@@ -215,7 +220,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Topic where the task stats are published.
   private: std::string taskInfoTopic = "/vrx/task/info";
 
-  // \breif Bool flag for debug. True by default 
+  // \breif Bool flag for debug. True by default
   private: bool debug = true;
 
   /// \brief Topic where debug collision is published.
@@ -278,7 +283,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief The next task message to be published.
   private: vrx_gazebo::Task taskMsg;
 
-  /// \brief ROS Contact Msg. 
+  /// \brief ROS Contact Msg.
   private: vrx_gazebo::Contact contactMsg;
 
   /// \brief The name of the joints to be dettached during ReleaseVehicle().

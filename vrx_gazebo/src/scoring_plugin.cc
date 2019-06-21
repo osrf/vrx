@@ -54,8 +54,10 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   // Initialize ROS transport.
   this->rosNode.reset(new ros::NodeHandle());
-  this->taskPub = this->rosNode->advertise<vrx_gazebo::Task>(this->taskInfoTopic, 100);
-  this->contactPub = this->rosNode->advertise<vrx_gazebo::Contact>(this->contactDebugTopic, 100);
+  this->taskPub = this->rosNode->advertise<vrx_gazebo::Task>
+    (this->taskInfoTopic, 100);
+  this->contactPub = this->rosNode->advertise<vrx_gazebo::Contact>
+    (this->contactDebugTopic, 100);
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScoringPlugin::Update, this));
@@ -271,7 +273,6 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
     }
 
     if (isWamvHit && isHitBufferPassed) {
-
       this->collisionCounter++;
       gzmsg << "[" << this->collisionCounter
             << "] New collision counted between ["
@@ -322,7 +323,8 @@ bool ScoringPlugin::ParseSDFParameters()
 
   // This is an optional element.
   if (this->sdf->HasElement("contact_debug_topic"))
-    this->contactDebugTopic = this->sdf->Get<std::string>("contact_debug_topic");
+    this->contactDebugTopic = this->sdf->Get<std::string>
+      ("contact_debug_topic");
 
   // This is an optional element.
   if (this->sdf->HasElement("initial_state_duration"))

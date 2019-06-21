@@ -14,11 +14,14 @@
  * limitations under the License.
  *
 */
-#include <sstream>
-#include <gazebo/msgs/msgs.hh>
 #include "gui_task_widget.hh"
+
 #include <tf/tf.h>
 #include <math.h>
+
+#include <gazebo/msgs/msgs.hh>
+
+#include <sstream>
 
 using namespace gazebo;
 
@@ -27,10 +30,16 @@ GZ_REGISTER_GUI_PLUGIN(GUITaskWidget)
 
 /////////////////////////////////////////////////
 GUITaskWidget::GUITaskWidget()
-  : GUIPlugin(), windPixmap(150,150), windPainter(&(this->windPixmap)),
+  : GUIPlugin(),
+    // setup pixmap and painter for wind compass
+    // cppcheck-suppress 3;
+    windPixmap(150,150), windPainter(&(this->windPixmap)),
+    // setup pixmap and painter for contact
     contactPixmap(150,150), contactPainter(&(this->contactPixmap)),
-	contactTime(ros::Time::now())
+    // set the time for most recent contact
+    contactTime(ros::Time::now())
 {
+  // initialize ros if that hasnt happened yet
   if (!ros::isInitialized())
   {
     int argc = 0;
@@ -55,27 +64,27 @@ GUITaskWidget::GUITaskWidget()
 
   // Task info Block
   // Create a time label
-  QLabel *taskInfo = new QLabel; 
+  QLabel *taskInfo = new QLabel;
   // Add the label to the frame's layout
   InfoLayout->addWidget(taskInfo);
   connect(this, SIGNAL(SetTaskInfo(QString)),
-      taskInfo, SLOT(setText(QString)), Qt::QueuedConnection); 
+      taskInfo, SLOT(setText(QString)), Qt::QueuedConnection);
 
   // Wind direction block
   // Create a time label
-  QLabel *windDirection = new QLabel; 
+  QLabel *windDirection = new QLabel;
   // Add the label to the frame's layout
   InfoLayout->addWidget(windDirection);
   connect(this, SIGNAL(SetWindDirection(QPixmap)),
-      windDirection, SLOT(setPixmap(QPixmap)), Qt::QueuedConnection); 
+      windDirection, SLOT(setPixmap(QPixmap)), Qt::QueuedConnection);
 
   // Contact block
   // Create a time label
-  QLabel *contact = new QLabel; 
+  QLabel *contact = new QLabel;
   // Add the label to the frame's layout
   InfoLayout->addWidget(contact);
   connect(this, SIGNAL(SetContact(QPixmap)),
-      contact, SLOT(setPixmap(QPixmap)), Qt::QueuedConnection); 
+      contact, SLOT(setPixmap(QPixmap)), Qt::QueuedConnection);
 
   // Add frameLayout to the frame
   mainFrame->setLayout(InfoLayout);
@@ -87,16 +96,20 @@ GUITaskWidget::GUITaskWidget()
   this->move(10, 10);
   this->resize(600, 170);
 
-  // Subscribe to tasks topic (ROS)
   this->node.reset(new ros::NodeHandle);
+  // Subscribe to tasks topic (ROS)
   this->taskSub = this->node->subscribe("/vrx/task/info", 1,
       &GUITaskWidget::OnTaskInfo, this);
+  // Subscribe to wind speed topic (ROS)
   this->windSpeedSub = this->node->subscribe("/vrx/debug/wind/speed", 1,
       &GUITaskWidget::OnWindSpeed, this);
+  // Subscribe to wind direction topic (ROS)
   this->windDirectionSub = this->node->subscribe("/vrx/debug/wind/direction", 1,
       &GUITaskWidget::OnWindDirection, this);
+  // Subscribe to link states topic (ROS)
   this->linkStateSub = this->node->subscribe("/gazebo/link_states", 1,
       &GUITaskWidget::OnLinkStates, this);
+  // Subscribe to contact topic (ROS)
   this->contactSub = this->node->subscribe("/vrx/debug/contact", 1,
       &GUITaskWidget::OnContact, this);
 }
@@ -109,35 +122,45 @@ GUITaskWidget::~GUITaskWidget()
 /////////////////////////////////////////////////
 void GUITaskWidget::OnContact(const vrx_gazebo::Contact::ConstPtr &_msg)
 {
+  // put red over anything preivously present
+  // as to write on a red back ground
   this->contactPixmap.fill(Qt::red);
   this->contactPainter.setBrush(Qt::NoBrush);
   this->pen.setColor(Qt::black);
   this->pen.setWidth(10);
   this->contactPainter.setPen(this->pen);
+  // Write Contact
   this->contactPainter.drawText(QPoint(10, 15), QString("CONTACT WITH:"));
-  this->contactPainter.drawText(QPoint(10, 30), QString::fromStdString(_msg->collision2));
- 
+  // Write what the wamv is in contact with
+  this->contactPainter.drawText(QPoint(10, 30),
+    QString::fromStdString(_msg->collision2));
+  // update time of last contact
   this->contactTime = ros::Time::now();
-
+  // send pixmap to gzserver
   this->SetContact(this->contactPixmap);
 }
 /////////////////////////////////////////////////
 void GUITaskWidget::OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg)
 {
+  // find wamv base_link in all the links reported
   unsigned int c = 0;
-  for(auto& i : _msg->name)
+  for (auto& i : _msg->name)
   {
     if (i == "wamv::base_link")
       break;
     ++c;
   }
+  // get yaw (heading) of wamv
   tf::Quaternion q(_msg->pose[c].orientation.x,
                    _msg->pose[c].orientation.y,
                    _msg->pose[c].orientation.z,
                    _msg->pose[c].orientation.w);
   tf::Matrix3x3 m(q);
   double roll, pitch;
+  // update wamvHeading
   m.getRPY(roll, pitch, this->wamvHeading);
+  // if the last collision was greater than 1 sec ago,
+  // make contact widget all gray
   if ((ros::Time::now() - this->contactTime) > ros::Duration(1))
   {
     this->contactPixmap.fill(Qt::gray);
@@ -148,43 +171,42 @@ void GUITaskWidget::OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg)
 /////////////////////////////////////////////////
 void GUITaskWidget::OnWindDirection(const std_msgs::Float64::ConstPtr &_msg)
 {
+  // draw gray background
   this->windPixmap.fill(Qt::gray);
+  // draw black circle
   this->windPainter.setBrush(Qt::NoBrush);
   this->pen.setColor(Qt::black);
   this->pen.setWidth(10);
   this->windPainter.setPen(this->pen);
   this->windPainter.drawEllipse(5, 5, 140, 140);
+  // draw the N for North
   this->windPainter.setPen(Qt::red);
   this->windPainter.drawText(QRect(71, -2, 20, 20), 0, tr("N"), nullptr);
-  this->pen.setColor(Qt::red);
-  this->pen.setWidth(5);
-  this->windPainter.setPen(this->pen);
-  
+
+  // draw the wind hand
   const double pi = 3.14159265;
-  double scale = .3*(pow(this->windSpeed,2));
+  double scale = .3*(pow(this->windSpeed, 2));
   double x = scale*cos((pi/-180)*(_msg->data)) + 75;
   double y = scale*sin((pi/-180)*(_msg->data)) + 75;
   this->pen.setWidth(10);
+  this->pen.setColor(Qt::red);
   this->windPainter.setPen(this->pen);
-  this->windPainter.drawLine(QLine(75,75,x,y));
-
+  this->windPainter.drawLine(QLine(75, 75, x, y));
+  // draw the wamv hand
   this->pen.setWidth(6);
   this->pen.setColor(Qt::blue);
   this->windPainter.setPen(this->pen);
   x = (-40*cos(this->wamvHeading + pi)) + 75;
   y = (40*sin(this->wamvHeading + pi)) + 75;
-  this->windPainter.drawLine(QLine(75,75,x,y));
-
+  this->windPainter.drawLine(QLine(75, 75, x, y));
+  // send the compass to gzserver
   this->SetWindDirection(this->windPixmap);
 }
 
 /////////////////////////////////////////////////
 void GUITaskWidget::OnWindSpeed(const std_msgs::Float64::ConstPtr &_msg)
-{ 
-  std::ostringstream windSpeedStream;
-  windSpeedStream.str("");
-  windSpeedStream << "Wind Speed: " << _msg->data << "\n";
-  //this->SetWindSpeedInfo(QString::fromStdString(windSpeedStream.str()));
+{
+  // update windSpeed
   this->windSpeed = _msg->data;
 }
 
@@ -205,8 +227,10 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream << "Remaining Time: " <<
     this->FormatTime(_msg->remaining_time.toSec()) << "\n";
   taskInfoStream << "Timed out: ";
-  if (_msg->timed_out) taskInfoStream << "true" << "\n";
-  else taskInfoStream << "false" << "\n";
+  if (_msg->timed_out)
+    taskInfoStream << "true" << "\n";
+  else
+    taskInfoStream << "false" << "\n";
   taskInfoStream << "Score: " << _msg->score << "\n";
   this->SetTaskInfo(QString::fromStdString(taskInfoStream.str()));
 }
