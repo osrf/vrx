@@ -123,8 +123,8 @@ namespace gazebo
     /// \brief The height of the fluid/air interface [m]. Defaults to 0.
     protected: double fluidLevel;
 
-    /// \brief Quadratic drag generally applied to Z velocity. Defaults to 0.
-    protected: double fluidDrag;
+    /// \brief linear drag. Defaults to 0.
+    protected: double linearDrag;
 
     /// \brief list of buoyancy objects for model
     protected: std::vector<buoyancy::BuoyancyObject> buoyancyObjects;

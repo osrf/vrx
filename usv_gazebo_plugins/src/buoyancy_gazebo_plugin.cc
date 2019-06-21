@@ -104,7 +104,7 @@ std::string BuoyancyObject::disp() {
 BuoyancyPlugin::BuoyancyPlugin()
   : fluidDensity(999.1026),
     fluidLevel(0.0),
-    fluidDrag(0.0)
+    linearDrag(0.0)
 {
 }
 
@@ -126,9 +126,9 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     this->fluidLevel = _sdf->Get<double>("fluid_level");
   }
-  if (_sdf->HasElement("fluid_drag"))
+  if (_sdf->HasElement("linear_drag"))
   {
-    this->fluidDrag = _sdf->Get<double>("fluid_drag");
+    this->linearDrag = _sdf->Get<double>("linear_drag");
   }
 
   if (_sdf->HasElement("buoyancy"))
@@ -146,9 +146,12 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         {
           linkMap[buoyObj.linkId] = _model->GetLink(buoyObj.linkName);
         }
+
+        // get mass
         buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->Mass();
+
+        // add buoyancy object to list and display stats
         gzmsg << buoyObj.disp() << std::endl;
-        // add buoyancy object to list
         buoyancyObjects.push_back(std::move(buoyObj));
       }
       catch (const std::exception& e)
@@ -192,13 +195,17 @@ void BuoyancyPlugin::OnUpdate()
     if (volume.volume > 1e-6)
     {
       #if GAZEBO_MAJOR_VERSION >= 8
-            ignition::math::Vector3d vel = link->WorldLinearVel();
+            ignition::math::Vector3d linVel = link->WorldLinearVel();
       #else
-            ignition::math::Vector3d vel= link->GetWorldLinearVel().Ign();
+            ignition::math::Vector3d linVel= link->GetWorldLinearVel().Ign();
       #endif
 
-      double dz = -1.0 * this->fluidDrag * vel.Z() * std::abs(vel.Z());
-      ignition::math::Vector3d drag(0, 0, dz);
+      // linear drag (based on Exact Buoyancy for Polyhedra by Eric Catto)
+      ignition::math::Vector3d drag = linearDrag * buoyancyObj.mass
+          * volume.volume / buoyancyObj.shape->volume * linVel * -1.;
+
+      gzmsg << "drag:" << drag << std::endl;
+
       buoyancy += drag;
       if (buoyancy.Z() < 0.0)
       {

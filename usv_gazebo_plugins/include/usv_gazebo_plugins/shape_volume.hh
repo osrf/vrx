@@ -42,6 +42,9 @@ namespace buoyancy
 
     /// \brief type of shape
     ShapeType type;
+
+    /// \brief full volume of object
+    double volume;
   };
   typedef std::unique_ptr<ShapeVolume> ShapeVolumePtr;
 

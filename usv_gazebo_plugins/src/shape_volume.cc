@@ -101,6 +101,7 @@ BoxVolume::BoxVolume(double x, double y, double z)
       polyhedron_(Polyhedron::makeCube(x, y, z))
 {
   type = ShapeType::Box;
+  volume = x * y * z;
 }
 
 //////////////////////////////////////////////////
@@ -127,6 +128,7 @@ CylinderVolume::CylinderVolume(double r, double h)
       polyhedron_(Polyhedron::makeCylinder(r, h, 20))
 {
   type = ShapeType::Cylinder;
+  volume = M_PI * r * r * h;
 }
 
 /////////////////////////////////////////////////
@@ -151,6 +153,7 @@ SphereVolume::SphereVolume(double r)
     : r(r)
 {
   type = ShapeType::Sphere;
+  volume = 4./3. * M_PI * r * r * r;
 }
 
 //////////////////////////////////////////////////
