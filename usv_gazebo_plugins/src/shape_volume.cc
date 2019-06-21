@@ -169,19 +169,24 @@ Volume SphereVolume::calculateVolume(const ignition::math::Pose3d &pose,
   // Location of bottom of object relative to the fluid surface - assumes
   // origin is at cog of the object.
   double h = fluidLevel - (pose.Pos().Z() - r);
-  // out of water
-  if (h <= 0)
-  {
-    return output;
-  }
-    // at surface
-  else if (h <= 2 * r)
-  {
-    output.volume = (h * h *  r - ::pow(h, 3) / 3.0) * M_PI;
-  }
-  else
-  {
-    output.volume = 4. / 3. * M_PI * ::pow(r, 3);
+
+  // limits of integration
+  double intLimitLower = -r;
+  double intLimitUpper = (-r + h) > r ? r : (-r + h);
+
+  // volume = integral of (R^2 - z^2) dz * pi
+  output.volume = (pow(r, 2) * (intLimitUpper - intLimitLower)
+      - (pow(intLimitUpper, 3)/3.0 - pow(intLimitLower, 3)/3.0)) * M_PI;
+  output.centroid.X() = pose.Pos().X();
+  output.centroid.Y() = pose.Pos().Y();
+
+  if(output.volume > 0) {
+    // z_bar = (integral of (z(R)^2 - z^3) dz) * pi / volume
+    output.centroid.Z() = (pow(r, 2) / 2.0 * (pow(intLimitUpper, 2) - pow(intLimitLower, 2))
+                           - (pow(intLimitUpper, 4) - pow(intLimitLower, 4))/ 4.0)
+                          * M_PI / output.volume;
+    // convert centroid.z to global frame
+    output.centroid.Z() = pose.Pos().Z() + output.centroid.Z();
   }
   return output;
 }

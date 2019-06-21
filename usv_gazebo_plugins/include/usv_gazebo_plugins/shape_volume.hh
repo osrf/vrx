@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <exception>
 #include <memory>
 #include <string>
@@ -32,9 +33,10 @@ namespace buoyancy
     virtual std::string display();
 
     /// \brief calculates volume + centroid of submerged shape
-    /// @param pose: world of buoyancy shape
+    /// if the shape is out of water returns Volume{}
+    /// @param pose: world pose of volume
     /// @param fluidLevel: height of fluid
-    /// @return volume object with volume + centroid
+    /// @return volume object with volume + centroid (relative to world)
     virtual Volume calculateVolume(const ignition::math::Pose3d& pose,
                                    double fluidLevel) = 0;
 

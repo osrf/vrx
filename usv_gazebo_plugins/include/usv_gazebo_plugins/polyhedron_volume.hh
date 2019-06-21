@@ -29,6 +29,9 @@ namespace buoyancy
     /// \brief overloads += for volume object
     Volume& operator+=(const Volume& rhs);
 
+    /// \brief returns true of volume = 0
+    bool isZero();
+
     /// \brief volume
     double volume;
 
@@ -75,7 +78,7 @@ namespace buoyancy
     /// @param x: our position
     /// @param q: our orientation (quaternions)
     /// @param plane: water surface defined as a plane
-    /// @return Volume object with volume and centroid
+    /// @return Volume object with volume and centroid (relative to world)
     Volume submergedVolume(const Vec3& x, const ignition::math::Quaterniond& q,
         Plane& plane);
 

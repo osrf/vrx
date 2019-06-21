@@ -30,6 +30,11 @@ Volume& Volume::operator+=(const Volume &rhs)
 }
 
 //////////////////////////////////////////////////////
+bool Volume::isZero() {
+  return volume == 0;
+}
+
+//////////////////////////////////////////////////////
 Polyhedron Polyhedron::makeCube(double x, double y, double z)
 {
   Polyhedron cube;
