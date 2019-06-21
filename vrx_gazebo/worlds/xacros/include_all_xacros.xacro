@@ -9,5 +9,6 @@
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/dock_2016.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/dock_2018.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scene_macro.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro" />
   </xacro:macro>
 </world>
