@@ -22,7 +22,7 @@
       <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <fluid_drag>5.0</fluid_drag>
+        <fluid_drag>0.0</fluid_drag>
         <buoyancy name="buoyancy">
           <link_name>link</link_name>
           <geometry>
@@ -50,7 +50,7 @@
 
   <xacro:macro name="sphere_inertial" params="mass r">
     <inertial>
-      <mass value="${mass}" />
+      <mass>${mass}</mass>
       <inertia>
         <ixx>${0.4 * mass * r * r}</ixx>
         <ixy>0</ixy>
@@ -64,7 +64,7 @@
 
   <xacro:macro name="cylinder_inertial" params="mass r l">
     <inertial>
-      <mass value="${mass}" />
+      <mass>${mass}</mass>
       <inertia>
         <ixx>${0.0833333 * mass * (3 * r * r + l * l)}</ixx>
         <ixy>0</ixy>

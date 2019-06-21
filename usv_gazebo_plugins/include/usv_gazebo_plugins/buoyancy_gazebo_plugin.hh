@@ -59,6 +59,9 @@ namespace gazebo
       /// \brief pose of buoyancy relative to link
       ignition::math::Pose3d pose;
 
+      /// \brief object mass (from inertial elem)
+      double mass;
+
       /// \brief buoyancy object shape
       ::buoyancy::ShapeVolumePtr shape;
     };

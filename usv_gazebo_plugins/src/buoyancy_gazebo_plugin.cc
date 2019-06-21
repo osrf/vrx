@@ -30,6 +30,7 @@ BuoyancyObject::BuoyancyObject()
   : linkId(-1),
     linkName(""),
     pose(0, 0, 0, 0, 0, 0),
+    mass(0.0),
     shape(nullptr)
 {
 }
@@ -94,7 +95,8 @@ std::string BuoyancyObject::disp() {
   ss << "Buoyancy object\n"
       << "\tlink: " << linkName << "[" << linkId << "]\n"
       << "\tpose: " << pose << '\n'
-      << "\tgeometry " << shape->display();
+      << "\tgeometry " << shape->display() << '\n'
+      << "\tmass " << mass;
   return ss.str();
 }
 
@@ -113,6 +115,8 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   GZ_ASSERT(_sdf != nullptr, "Received NULL SDF pointer");
 
   model = _model;
+
+  _model->GetLink()->GetInertial()->Mass();
 
   if (_sdf->HasElement("fluid_density"))
   {
@@ -136,13 +140,14 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       {
         BuoyancyObject buoyObj = BuoyancyObject();
         buoyObj.load(_model, buoyancyElem);
-        gzmsg << buoyObj.disp() << std::endl;
 
         // add link to linkMap if it is not in the map
         if (linkMap.find(buoyObj.linkId) == linkMap.end())
         {
           linkMap[buoyObj.linkId] = _model->GetLink(buoyObj.linkName);
         }
+        buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->Mass();
+        gzmsg << buoyObj.disp() << std::endl;
         // add buoyancy object to list
         buoyancyObjects.push_back(std::move(buoyObj));
       }
