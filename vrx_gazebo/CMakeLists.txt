@@ -54,9 +54,11 @@ catkin_package(
   CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
 )
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}") 
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} ${QT_USE_FILE})
+
+link_directories(${GAZEBO_LIBRARY_DIRS})
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -153,6 +155,7 @@ target_link_libraries(gui_task_widget
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${PROTOBUF_LIBRARIES}
+  ${QT_LIBRARIES}
 )
 qt5_use_modules(gui_task_widget Widgets)
 add_dependencies(gui_task_widget ${catkin_EXPORTED_TARGETS})
