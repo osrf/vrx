@@ -20,7 +20,7 @@
         </inertia>
       </inertial>
       <collision name="collision">
-        <pose>0.25 -0.25 0 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>2 2 0.4</size>
@@ -28,7 +28,7 @@
         </geometry>
       </collision>
       <visual name="visual">
-        <pose> 0 0 0.2 0 0 0 </pose>
+        <pose>-0.25 0.25 0.2 0 0 0 </pose>
         <geometry>
           <mesh>
             <uri>file://dock_block_4x4/mesh/dock_block_4x4.dae</uri>
