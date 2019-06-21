@@ -39,6 +39,7 @@ GUITaskWidget::GUITaskWidget()
     // set the time for most recent contact
     contactTime(ros::Time::now())
 {
+#if GAZEBO_MAJOR_VERSION >= 8
   // initialize ros if that hasnt happened yet
   if (!ros::isInitialized())
   {
@@ -112,6 +113,7 @@ GUITaskWidget::GUITaskWidget()
   // Subscribe to contact topic (ROS)
   this->contactSub = this->node->subscribe("/vrx/debug/contact", 1,
       &GUITaskWidget::OnContact, this);
+#endif
 }
 
 /////////////////////////////////////////////////
