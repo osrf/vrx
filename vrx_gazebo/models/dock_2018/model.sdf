@@ -5,14 +5,16 @@
 
     <!-- The 2018 dock base -->
     <include>
+      <name>dock_2018_base</name>
       <uri>model://dock_2018_base</uri>
     </include>
     
     
     <!-- Placard #1 -->
     <model name="dock_2018_placard1">
+      <static>false</static>
       <include>
-        <pose>7.75 2.75 2.5 0 0 1.5707963267948966</pose>
+        <pose>7.75 2.75 1.6 0 0 1.5707963267948966</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
@@ -68,13 +70,21 @@
           <transparency>1</transparency>
         </visual>
       </link>
+
+      <joint name="placard_to_visual" type="fixed">
+        <pose> 0 0 0 0 0 0 </pose>
+        <parent>placard::link</parent>
+        <child>link_symbols</child>
+      </joint>
+
     </model>
     
     
     <!-- Placard #2 -->
     <model name="dock_2018_placard2">
+      <static>false</static>
       <include>
-        <pose>6.75 2.75 2.5 0 0 1.5707963267948966</pose>
+        <pose>6.75 2.75 1.6 0 0 1.5707963267948966</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
@@ -130,8 +140,30 @@
           <transparency>1</transparency>
         </visual>
       </link>
+
+      <joint name="placard_to_visual" type="fixed">
+        <pose> 0 0 0 0 0 0 </pose>
+        <parent>placard::link</parent>
+        <child>link_symbols</child>
+      </joint>
+
     </model>
     
     
+  
+    <joint name = "joint_placard1" type="fixed">
+      <pose>0 0 3 0 0 0 </pose>
+      <parent>dock_2018_placard1::placard::link</parent>
+      <child>dock_2018_base::dock_block_4_1::link</child>
+    </joint>
+
+    <joint name = "joint_placard2" type="fixed">
+      <pose>0 0 3 0 0 0 </pose>
+      <parent>dock_2018_placard2::placard::link</parent>
+      <child>dock_2018_base::dock_block_3_1::link</child>
+    </joint>
+
   </model>
+
+
 </sdf>
