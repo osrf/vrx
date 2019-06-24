@@ -144,26 +144,27 @@ install(TARGETS scan_dock_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-# Plugin for Task Info GUI Overlay
-add_library(gui_task_widget SHARED ${headers_MOC}
-       	src/gui_task_widget.cc
-)
+if("${GAZEBO_MAJOR_VERSION}" GREATER "7")
+  message("compiliing gui plugin")
+  # Plugin for Task Info GUI Overlay
+  add_library(gui_task_widget SHARED ${headers_MOC}
+         	src/gui_task_widget.cc
+  )
 
-message("gazebo libraries ${GAZEBO_LIBRARIES}    ====")
-
-target_link_libraries(gui_task_widget 
-  ${catkin_LIBRARIES}
-  ${GAZEBO_LIBRARIES}
-  ${PROTOBUF_LIBRARIES}
-  ${QT_LIBRARIES}
-)
-qt5_use_modules(gui_task_widget Widgets)
-add_dependencies(gui_task_widget ${catkin_EXPORTED_TARGETS})
-install(TARGETS gui_task_widget
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+  target_link_libraries(gui_task_widget 
+    ${catkin_LIBRARIES}
+    ${GAZEBO_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${QT_LIBRARIES}
+  )
+  qt5_use_modules(gui_task_widget Widgets)
+  add_dependencies(gui_task_widget ${catkin_EXPORTED_TARGETS})
+  install(TARGETS gui_task_widget
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+endif()
 
 # Plugin for scoring the perception task.
 add_library(perception_scoring_plugin src/perception_scoring_plugin.cc)
