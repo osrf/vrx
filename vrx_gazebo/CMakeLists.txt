@@ -145,7 +145,6 @@ install(TARGETS scan_dock_scoring_plugin
 )
 
 if("${GAZEBO_MAJOR_VERSION}" GREATER "7")
-  message("compiliing gui plugin")
   # Plugin for Task Info GUI Overlay
   add_library(gui_task_widget SHARED ${headers_MOC}
          	src/gui_task_widget.cc
