@@ -2,12 +2,16 @@
 <sdf version="1.6">
   <!-- Reference: https://www.polyformus.com/buoys/a-series -->
   <model name="polyform_a3">
-    <static>true</static>
+    <static>false</static>
     <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
+			 <velocity_decay>
+        <linear>0.002</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
       <inertial>
         <!-- Reference: https://www.sailrite.com/PDF/Polyform-Buoys-Fenders-Accessories.pdf, page 8 -->
-        <mass>3.0844</mass>
+        <mass>3.1</mass>
       </inertial>
       <visual name="visual">
         <geometry>
@@ -26,5 +30,17 @@
         </geometry>
       </collision>
     </link>
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <wave_model>ocean_waves</wave_model>
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <fluid_drag>0.0</fluid_drag>
+      <link name="link">
+        <name>base_link</name>
+        <center_of_volume>0 0 0</center_of_volume>
+        <area>0.1466</area>
+        <height>0.432</height>
+      </link>
+    </plugin>
   </model>
 </sdf>

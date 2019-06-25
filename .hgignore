@@ -1,9 +1,10 @@
 syntax: glob
-vmrc_gazebo/models/dock_2016_base/model.sdf
-vmrc_gazebo/models/dock_2016/model.sdf
-vmrc_gazebo/models/dock_2018_base/model.sdf
-vmrc_gazebo/models/dock_2018/model.sdf
-vmrc_gazebo/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
+vrx_gazebo/models/dock_2016_base/model.sdf
+vrx_gazebo/models/dock_2016/model.sdf
+vrx_gazebo/models/dock_2018_base/model.sdf
+vrx_gazebo/models/dock_2018/model.sdf
+vrx_gazebo/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
+wave_gazebo/world_models/ocean_waves/model.sdf
 build
 build_*
 .DS_Store

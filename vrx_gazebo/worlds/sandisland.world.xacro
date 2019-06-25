@@ -11,7 +11,7 @@
         <wind_obj>
           <name>wamv</name>
           <link_name>base_link</link_name>
-          <coeff_vector>.5 .5 .33</coeff_vector>
+          <coeff_vector>0.5 0.5 0.33</coeff_vector>
 	</wind_obj>
       </wind_objs>
     </xacro:usv_wind_gazebo>
