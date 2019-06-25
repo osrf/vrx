@@ -45,6 +45,10 @@ namespace buoyancy
 
     /// \brief full volume of object
     double volume;
+
+    /// \brief average length of object
+    /// estimate used for drag torque calculation
+    double averageLength;
   };
   typedef std::unique_ptr<ShapeVolume> ShapeVolumePtr;
 

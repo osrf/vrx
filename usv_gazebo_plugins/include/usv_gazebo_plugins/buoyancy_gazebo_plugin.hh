@@ -67,37 +67,35 @@ namespace gazebo
     };
   } // end of buoyancy namespace
 
-  /// \brief A plugin that simulates buoyancy of an object immersed in fluid.
-  /// All SDF parameters are optional.
+  /// \brief This plugin simulates buoyancy of an object in fluid.
   ///   <fluid_density>: Sets the density of the fluid that surrounds the
   ///                    buoyant object [kg/m^3].
-  ///                    This paramater is optional.
+  ///                    This parameter is optional (default value 997 kg/m^3).
   ///
   ///   <fluid_level>:   The height of the fluid/air interface [m].
+  ///                    This parameter is optional (default value 0m).
+  ///
+  ///   <linear_drag>:   Linear drag coeffient.
   ///                    This parameter is optional.
   ///
-  ///   <fluid_drag>:    Quadratic drag generally applied to Z velocity.
+  ///   <angular_drag>:  Angular drag coeffient.
   ///                    This parameter is optional.
   ///
-  ///   <link>:          Describe the volume properties of individual links in
-  ///                    the model.
+  ///   <buoyancy>:      Describes the volume properties
   ///                    For example:
   ///
-  ///                    <link name="body">
-  ///                      <center_of_volume>1 2 3</center_of_volume>
-  ///                      <area>10</volume>
-  ///                      <height>5</height>
-  ///                    </link>
+  ///                    <buoyancy name="buoyancy1">
+  ///                      <link_name>link</link_name>
+  ///                      <geometry>
+  ///                        ...
+  ///                      </geometry>
+  ///                    </buoyancy>
   ///
-  ///     <center_of_volume>: A point representing the volumetric center of the
-  ///                         link in the link frame. This is where the buoyancy
-  ///                         force will be applied. This field is required.
+  ///     <link>:        Name of associated link element
   ///
-  ///     <area>:             Horizontal area of this link.
-  ///                         This field is required
-  ///
-  ///     <height>:           Vertical height of this link.
-  ///                         This field is required.
+  ///     <geometry>:    Geometry element specifying buoyancy object's
+  ///                    volume properties.
+  ///                    Supported shapes: box, sphere, cylinder
   class BuoyancyPlugin : public ModelPlugin
   {
     /// \brief Constructor.
@@ -125,6 +123,9 @@ namespace gazebo
 
     /// \brief linear drag. Defaults to 0.
     protected: double linearDrag;
+
+    /// \brief angular drag. Defaults to 0.
+    protected: double angularDrag;
 
     /// \brief list of buoyancy objects for model
     protected: std::vector<buoyancy::BuoyancyObject> buoyancyObjects;

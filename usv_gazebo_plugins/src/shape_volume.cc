@@ -102,6 +102,7 @@ BoxVolume::BoxVolume(double x, double y, double z)
 {
   type = ShapeType::Box;
   volume = x * y * z;
+  averageLength = (x + y + z) / 3.0;
 }
 
 //////////////////////////////////////////////////
@@ -129,6 +130,7 @@ CylinderVolume::CylinderVolume(double r, double h)
 {
   type = ShapeType::Cylinder;
   volume = M_PI * r * r * h;
+  averageLength = (2 * r + h) / 2.0;
 }
 
 /////////////////////////////////////////////////
@@ -154,6 +156,7 @@ SphereVolume::SphereVolume(double r)
 {
   type = ShapeType::Sphere;
   volume = 4./3. * M_PI * r * r * r;
+  averageLength = 2 * r;
 }
 
 //////////////////////////////////////////////////

@@ -40,6 +40,7 @@ BuoyancyObject::BuoyancyObject(BuoyancyObject &&obj) noexcept
   : linkId(obj.linkId),
     linkName(obj.linkName),
     pose(obj.pose),
+    mass(obj.mass),
     shape(std::move(obj.shape))
 {
 }
@@ -102,9 +103,10 @@ std::string BuoyancyObject::disp() {
 
 /////////////////////////////////////////////////
 BuoyancyPlugin::BuoyancyPlugin()
-  : fluidDensity(999.1026),
+  : fluidDensity(997),
     fluidLevel(0.0),
-    linearDrag(0.0)
+    linearDrag(0.0),
+    angularDrag(0.0)
 {
 }
 
@@ -129,6 +131,10 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("linear_drag"))
   {
     this->linearDrag = _sdf->Get<double>("linear_drag");
+  }
+  if (_sdf->HasElement("angular_drag"))
+  {
+    this->angularDrag = _sdf->Get<double>("angular_drag");
   }
 
   if (_sdf->HasElement("buoyancy"))
@@ -191,30 +197,36 @@ void BuoyancyPlugin::OnUpdate()
     // object_density = mass/volume, so the mass term cancels.
     ignition::math::Vector3d buoyancy = -this->fluidDensity * volume.volume * model->GetWorld()->Gravity();
 
-    // Add some drag
+    // apply buoyancy and drag forces
     if (volume.volume > 1e-6)
     {
       #if GAZEBO_MAJOR_VERSION >= 8
             ignition::math::Vector3d linVel = link->WorldLinearVel();
+            ignition::math::Vector3d angVel = link->RelativeAngularVel();
       #else
             ignition::math::Vector3d linVel= link->GetWorldLinearVel().Ign();
+            ignition::math::Vector3d angVel = link->RelativeAngularVel().Ign();
       #endif
 
-      // linear drag (based on Exact Buoyancy for Polyhedra by Eric Catto)
-      ignition::math::Vector3d drag = linearDrag * buoyancyObj.mass
-          * volume.volume / buoyancyObj.shape->volume * linVel * -1.;
+      // partial mass = total_mass * submerged_vol / total_vol
+      float partialMass = 2 * volume.volume / buoyancyObj.shape->volume;
 
-      gzmsg << "drag:" << drag << std::endl;
-
-      buoyancy += drag;
+      // drag (based on Exact Buoyancy for Polyhedra by Eric Catto)
+      // linear drag
+      ignition::math::Vector3d dragForce = linearDrag * partialMass * -linVel;
+      buoyancy += dragForce;
       if (buoyancy.Z() < 0.0)
       {
         buoyancy.Z() = 0.0;
       }
-    }
+      // apply force
+      link->AddForceAtWorldPosition(buoyancy, volume.centroid);
 
-    // apply force
-    link->AddForceAtWorldPosition(buoyancy, volume.centroid);
+      // drag torque
+      double averageLength2 = ::pow(buoyancyObj.shape->averageLength, 2);
+      ignition::math::Vector3d dragTorque = (-partialMass * angularDrag * averageLength2) * angVel;
+      link->AddRelativeTorque(dragTorque);
+    }
   }
 }
 
