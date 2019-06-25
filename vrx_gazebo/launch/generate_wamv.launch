@@ -14,6 +14,12 @@
 
     <param name="wamv_gazebo" value="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
 
+    <param name="sensors_dir" value="$(find wamv_gazebo)/urdf/sensors"/>
+    
+    <param name="thrusters_dir" value="$(find wamv_description)/urdf/thrusters"/>
+
+    <param name="compliance_dir" value="$(find vrx_gazebo)/src/vrx_gazebo_python/generator_scripts/wamv_config"/>
+
     <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv" output="screen"/>
   </group>
 </launch>
