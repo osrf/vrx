@@ -100,7 +100,7 @@
     <!-- water level for visual reference at z = 0-->
     <model name="plane">
       <static>true</static>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>0.8 0.8 0 0 0 0</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
@@ -194,6 +194,78 @@
       </cylinder>
       <xacro:cylinder_inertial mass="2" r="0.1" l="0.159" />
     </xacro:basic_shape>
+
+    <!-- test_4: complex object -->
+    <model name="4_complex">
+      <pose>0.1 1.5 0.5 0 0 0</pose>
+
+      <link name="link_cylinder">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.1</radius>
+              <length>0.3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.1</radius>
+              <length>0.3</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <xacro:cylinder_inertial mass="5" r="0.1" l="0.3" />
+      </link>
+      <link name="link_box">
+        <pose>0 0.2 0.15 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.171 0.3 0.171</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.171 0.3 0.171</size>
+            </box>
+          </geometry>
+        </collision>
+        <xacro:box_inertial mass="10" x="0.171" y="0.3" z="0.171"/>
+      </link>
+
+      <joint name="joint" type="fixed">
+        <parent>link_box</parent>
+        <child>link_cylinder</child>
+      </joint>
+
+      <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>5.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_cylinder">
+          <link_name>link_cylinder</link_name>
+          <geometry>
+            <cylinder>
+              <radius>0.1</radius>
+              <length>0.3</length>
+            </cylinder>
+          </geometry>
+        </buoyancy>
+        <buoyancy name="buoyancy_box">
+          <link_name>link_box</link_name>
+          <geometry>
+            <box>
+              <size>0.171 0.3 0.171</size>
+            </box>
+          </geometry>
+        </buoyancy>
+      </plugin>
+    </model>
 
   </world>
 </sdf>

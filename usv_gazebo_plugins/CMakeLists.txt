@@ -77,19 +77,19 @@ target_link_libraries(usv_gazebo_wind_plugin
   ${Eigen_LIBRARIES}
 )
 
-#if(CATKIN_ENABLE_TESTING)
-# Generate test world files from xacro and install
+# Generate demo world files from xacro and install
 xacro_add_files(
-  test/worlds/buoyancy_plugin_test.world.xacro
+  worlds/buoyancy_plugin_demo.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
-install(DIRECTORY test/worlds/
+install(DIRECTORY worlds/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
 
-# buoyancy plugin test
-catkin_add_gtest(buoyancy_plugin_test test/buoyancy_test.cc)
-target_link_libraries(buoyancy_plugin_test gazebo_test_fixture buoyancy_gazebo_plugin)
-#endif()
+if(CATKIN_ENABLE_TESTING)
+  # buoyancy plugin test
+  catkin_add_gtest(buoyancy_plugin_test test/buoyancy_test.cc)
+  target_link_libraries(buoyancy_plugin_test buoyancy_gazebo_plugin)
+endif()
 
 install(TARGETS usv_gazebo_wind_plugin
   ARCHIVE DESTINATION lib

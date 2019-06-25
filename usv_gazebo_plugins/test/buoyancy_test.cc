@@ -1,26 +1,8 @@
 #include <gtest/gtest.h>
-#include <gazebo/test/ServerFixture.hh>
 #include "usv_gazebo_plugins/polyhedron_volume.hh"
 #include "usv_gazebo_plugins/shape_volume.hh"
 
-using namespace gazebo;
 using namespace buoyancy;
-
-class BuoyancyPluginTest : public ServerFixture {
-public:
-  BuoyancyPluginTest() {
-    Load("test/worlds/buoyancy_plugin_test.world", true);
-  }
-};
-
-/////////////////////////////////////////////////
-//TEST_F(BuoyancyPluginTest, FloatingBox) {
-//  physics::WorldPtr world = physics::get_world("buoyancy_test");
-//  ASSERT_TRUE(world != nullptr);
-//
-//  physics::ModelPtr model = world->ModelByName("1_box");
-//  ASSERT_TRUE(model != nullptr);
-//}
 
 /////////////////////////////////////////////////
 TEST(PolyhedronTest, CubeTotalVolume)
@@ -353,8 +335,6 @@ TEST(ShapeVolumeTest, Sphere) {
     EXPECT_NEAR(vol.centroid.Z(), expectedResult[i][3], 0.001);
   }
 }
-/////////////////////////////////////////////////
-
 
 /////////////////////////////////////////////////
 /// Main
