@@ -20,10 +20,10 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <std_msgs/Float64.h>
 #include <functional>
 #include <string>
 #include <gazebo/common/Console.hh>
-
 #include "usv_gazebo_plugins/usv_gazebo_wind_plugin.hh"
 
 using namespace gazebo;
@@ -34,53 +34,66 @@ UsvWindPlugin::UsvWindPlugin()
 }
 
 //////////////////////////////////////////////////
-void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
+void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 {
-  std::string linkName;
-  physics::ModelPtr model = _parent;
-  this->world = _parent->GetWorld();
-
-  // Retrieve model parameters from SDF
-  if (!_sdf->HasElement("bodyName") ||
-      !_sdf->GetElement("bodyName")->GetValue())
+  this->world = _parent;
+  // Retrieve models' parameters from SDF
+  if (!_sdf->HasElement("wind_obj") ||
+      !_sdf->GetElement("wind_obj"))
   {
-    this->link = model->GetLink();
-    linkName = this->link->GetName();
-    gzerr << "Did not find SDF parameter bodyName" << std::endl;
+    gzerr << "Did not find SDF parameter wind_obj" << std::endl;
   }
   else
   {
-    linkName = _sdf->GetElement("bodyName")->Get<std::string>();
-    this->link = model->GetLink(linkName);
+    sdf::ElementPtr windObjSDF = _sdf->GetElement("wind_obj");
+    while (windObjSDF)
+    {
+      UsvWindPlugin::WindObj obj;
+      if (!windObjSDF->HasElement("name") ||
+          !windObjSDF->GetElement("name")->GetValue())
+      {
+        gzerr << ("Did not find SDF parameter name") << std::endl;
+      }
+      else
+      {
+        obj.modelName = windObjSDF->GetElement("name")->Get<std::string>();
+      }
 
-    gzmsg << "Found SDF parameter bodyName as [" << linkName << "]"
-          << std::endl;
-  }
-  if (!this->link)
-  {
-    gzerr << "usv_gazebo_wind_plugin error: bodyName: [" << linkName << "] does"
-          << " not exist" << std::endl;
-    return;
-  }
+      if (!windObjSDF->HasElement("link_name") ||
+          !windObjSDF->GetElement("link_name")->GetValue())
+      {
+        gzerr << ("Did not find SDF parameter link_name") << std::endl;
+      }
+      else
+      {
+        obj.linkName = windObjSDF->GetElement("link_name")->Get<std::string>();
+      }
 
-  gzmsg << "USV Model Link Name = " << linkName << std::endl;
+      if (!windObjSDF->HasElement("coeff_vector") ||
+          !windObjSDF->GetElement("coeff_vector")->GetValue())
+      {
+        gzerr << ("Did not find SDF parameter coeff_vector") << std::endl;
+      }
+      else
+      {
+        obj.windCoeff = windObjSDF->GetElement("coeff_vector")->
+          Get<ignition::math::Vector3d>();
+      }
+      this->windObjs.push_back(obj);
+      gzdbg << obj.modelName << " loaded" << std::endl;
+      windObjSDF = windObjSDF->GetNextElement("wind_obj");
+    }
+  }
 
   if (_sdf->HasElement("wind_direction"))
   {
-    this->windDirection =
-      _sdf->GetElement("wind_direction")->Get<ignition::math::Vector3d>();
-    this->windDirection = this->windDirection.Normalize();
+    double windAngle = _sdf->GetElement("wind_direction")->Get<double>();
+    this->windDirection.X(cos(windAngle * M_PI / 180));
+    this->windDirection.Y(sin(windAngle * M_PI / 180));
+    this->windDirection.Z(0);
   }
 
   gzmsg << "Wind direction unit vector = " << this->windDirection << std::endl;
-
-  if (_sdf->HasElement("wind_coeff_vector"))
-  {
-    windCoeff =
-      _sdf->GetElement("wind_coeff_vector")->Get<ignition::math::Vector3d>();
-  }
-
-  gzmsg << "Wind coefficient vector = " << this->windCoeff << std::endl;
 
   if (_sdf->HasElement("wind_mean_velocity"))
   {
@@ -106,6 +119,14 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   gzmsg << "var wind time constants = " << this->timeConstant << std::endl;
 
+  if (_sdf->HasElement("update_rate"))
+  {
+    this->updateRate =
+      _sdf->GetElement("update_rate")->Get<double>();
+  }
+
+  gzmsg << "update rate  = " << this->updateRate << std::endl;
+
   // setting seed for ignition::math::Rand
   if (_sdf->HasElement("random_seed") &&
     _sdf->GetElement("random_seed")->Get<int>() != 0)
@@ -113,7 +134,8 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ignition::math::Rand::Seed(
       _sdf->GetElement("random_seed")->Get<int>());
   }
-  else{
+  else
+  {
     common::Time currentWallTime;
     currentWallTime.SetToWallTime();
     ignition::math::Rand::Seed(currentWallTime.sec);
@@ -129,6 +151,13 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 #endif
   this->previousVarVel = 0;
 
+  // Initialize ROS transport.
+  this->rosNode.reset(new ros::NodeHandle());
+  this->windSpeedPub =
+      this->rosNode->advertise<std_msgs::Float64>(this->topicWindSpeed, 100);
+  this->windDirectionPub = this->rosNode->advertise<std_msgs::Float64>(
+      this->topicWindDirection, 100);
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -138,13 +167,42 @@ void UsvWindPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void UsvWindPlugin::Update()
 {
-
+  // Look for the missing models if not all of them have been initialized
+  if (!this->windObjsInit)
+  {
+    for (auto& i : this->windObjs)
+    {
+#if GAZEBO_MAJOR_VERSION >= 8
+      if ((!i.init) && (this->world->ModelByName(i.modelName)))
+      {
+#else
+      if ((!i.init) && (this->world->GetModel(i.modelName)))
+      {
+#endif
+        gzdbg << i.modelName << " initialized" << std::endl;
+        ++this->windObjsInitCount;
+        i.init = true;
+#if GAZEBO_MAJOR_VERSION >= 8
+        i.model = this->world->ModelByName(i.modelName);
+#else
+        i.model = this->world->GetModel(i.modelName);
+#endif
+        i.link = i.model->GetLink(i.linkName);
+        if (!i.link)
+        {
+          gzdbg << i.modelName << "'s link name: " << i.linkName
+                << " is invalid" << std::endl;
+        }
+      }
+    }
+    if (windObjsInitCount == windObjs.size())
+      this->windObjsInit = true;
+  }
 #if GAZEBO_MAJOR_VERSION >= 8
   double currentTime = this->world->SimTime().Double();
 #else
   double currentTime = this->world->GetSimTime().Double();
 #endif
-
   double dT= currentTime - this->previousTime;
   double randomDist = ignition::math::Rand::DblNormal(0, 1);
   // calculate current variable wind velocity
@@ -153,42 +211,72 @@ void UsvWindPlugin::Update()
   // calculate current wind velocity
   double velocity = currentVarVel + this->windMeanVelocity;
 
-  // Transform wind from world coordinates to body coordinates
+  for (auto& windObj : this->windObjs)
+  {
+    // Apply the forces of the wind to all wind objects only if they have been
+    // initialized
+    if (!windObj.init || !windObj.link)
+      continue;
+
+    // Transform wind from world coordinates to body coordinates
 #if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Vector3d relativeWind =
-    this->link->WorldPose().Rot().Inverse().RotateVector(
-      this->windDirection*velocity);
+    ignition::math::Vector3d relativeWind =
+      windObj.link->WorldPose().Rot().Inverse().RotateVector(
+        this->windDirection*velocity);
 #else
-  ignition::math::Vector3d relativeWind =
-    this->link->GetWorldPose().rot.Ign().Inverse().RotateVector(
-    this->windDirection*velocity);
+      ignition::math::Vector3d relativeWind =
+        windObj.link->GetWorldPose().rot.Ign().Inverse().RotateVector(
+        this->windDirection*velocity);
 #endif
-  // Calculate apparent wind
+    // Calculate apparent wind
 #if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Vector3d apparentWind =
-    relativeWind - this->link->RelativeLinearVel();
+    ignition::math::Vector3d apparentWind =
+      relativeWind - windObj.link->RelativeLinearVel();
 #else
-  ignition::math::Vector3d apparentWind = relativeWind
-    - this->link->GetRelativeLinearVel().Ign();
+    ignition::math::Vector3d apparentWind = relativeWind
+      - windObj.link->GetRelativeLinearVel().Ign();
 #endif
-  // gzdbg << "Relative wind: " << relativeWind << std::endl;
-  // gzdbg << "Apparent wind: " << apparentWind << std::endl;
 
-  // Calculate wind force - body coordinates
-  ignition::math::Vector3d windForce(
-    windCoeff.X() * relativeWind.X() * abs(relativeWind.X()),
-    windCoeff.Y() * relativeWind.Y() * abs(relativeWind.Y()),
-    -2.0 * windCoeff.Z() * relativeWind.X() * relativeWind.Y());
+    // gzdbg << "Relative wind: " << relativeWind << std::endl;
+    // gzdbg << "Apparent wind: " << apparentWind << std::endl;
 
-  // Add forces/torques to link at CG
-  this->link->AddRelativeForce(
-    ignition::math::Vector3d(windForce.X(), windForce.Y(), 0.0));
-  this->link->AddRelativeTorque(
-    ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
+    // Calculate wind force - body coordinates
+    ignition::math::Vector3d windForce(
+      windObj.windCoeff.X() * relativeWind.X() * abs(relativeWind.X()),
+      windObj.windCoeff.Y() * relativeWind.Y() * abs(relativeWind.Y()),
+      -2.0 * windObj.windCoeff.Z() * relativeWind.X() * relativeWind.Y());
 
+    // Add forces/torques to link at CG
+    windObj.link->AddRelativeForce(
+      ignition::math::Vector3d(windForce.X(), windForce.Y(), 0.0));
+    windObj.link->AddRelativeTorque(
+      ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
+  }
   // Moving the previous time and velocity one step forward.
   this->previousVarVel = currentVarVel;
   this->previousTime = currentTime;
+
+  double publishingBuffer = 1/this->updateRate;
+  if (this->updateRate >= 0)
+  {
+    publishingBuffer = 1/this->updateRate;
+  }
+  else
+  {
+    publishingBuffer = -1;
+  }
+  // Publishing the wind speed and direction
+  if (currentTime - this->lastPublishTime > publishingBuffer)
+  {
+    std_msgs::Float64 windSpeedMsg;
+    std_msgs::Float64 windDirectionMsg;
+    windSpeedMsg.data = velocity;
+    windDirectionMsg.data =
+        atan2(this->windDirection[1], this->windDirection[0]) * 180 / M_PI;
+    this->windSpeedPub.publish(windSpeedMsg);
+    this->windDirectionPub.publish(windDirectionMsg);
+    this->lastPublishTime = currentTime;
+  }
 }
 
-GZ_REGISTER_MODEL_PLUGIN(UsvWindPlugin);
+GZ_REGISTER_WORLD_PLUGIN(UsvWindPlugin);

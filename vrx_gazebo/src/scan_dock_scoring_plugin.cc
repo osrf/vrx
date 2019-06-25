@@ -333,7 +333,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
         new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
           this->world->GetName(), ns, announceSymbol));
     #endif
-    
+
     // Add the dock checker.
     this->dockCheckers.push_back(std::move(dockChecker));
 

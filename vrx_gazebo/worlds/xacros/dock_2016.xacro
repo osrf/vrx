@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="dock_2016" params=" name x:=72 y:=22 z:=0 R:=0 P:=0 Y:=-2.78">
+    <include>
+      <name>${name}</name>
+      <uri>model://dock_2016</uri>
+      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose> 
+    </include>
+  </xacro:macro>
+</world>

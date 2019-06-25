@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_dev
   geographic_msgs
   std_msgs
+  rospy
 )
 
 ########################
@@ -29,6 +30,9 @@ add_service_files(
   FILES
   ColorSequence.srv
 )
+
+# Python scripts setup
+catkin_python_setup()
 
 generate_messages()
 
@@ -191,6 +195,7 @@ xacro_add_files(
   worlds/scan_and_dock_b.world.xacro
   worlds/stationkeeping_task.world.xacro
   worlds/wayfinding_task.world.xacro
+  worlds/wind_test.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 
@@ -225,3 +230,9 @@ if (CATKIN_ENABLE_TESTING)
                     test/sandisland.cc)
   target_link_libraries(sandisland_test ${catkin_LIBRARIES})
 endif()
+
+# Python Scripts
+catkin_install_python(PROGRAMS bin/generate_wamv
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+
