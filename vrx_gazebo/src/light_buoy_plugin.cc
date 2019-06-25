@@ -77,7 +77,6 @@ void LightBuoyPlugin::InitializeAllPatterns()
 LightBuoyPlugin::LightBuoyPlugin() :
   gzNode(new gazebo::transport::Node())
 {
-  gzNode->Init();
 }
 
 void LightBuoyPlugin::ChangePatternTo(const gazebo::ConstLightBuoyColorsPtr &_msg)
@@ -86,7 +85,12 @@ void LightBuoyPlugin::ChangePatternTo(const gazebo::ConstLightBuoyColorsPtr &_ms
   gzdbg << "color1: " << _msg->color_1() << std::endl;
   gzdbg << "color2: " << _msg->color_2() << std::endl;
   gzdbg << "color3: " << _msg->color_3() << std::endl;
-  
+ 
+  pattern[0] = IndexFromColor(_msg->color_1());
+  pattern[1] = IndexFromColor(_msg->color_2());
+  pattern[2] = IndexFromColor(_msg->color_3());
+  pattern[3] = IndexFromColor("off");
+
   return;
 }
 
@@ -125,6 +129,7 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&LightBuoyPlugin::Update, this));
   
+  gzNode->Init();
   this->colorSub = this->gzNode->Subscribe(this->gzColorsTopic, &LightBuoyPlugin::ChangePatternTo, this);
 }
 
@@ -196,7 +201,7 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
   // optional gzColorsTopic
   if (!_sdf->HasElement("gz_colors_topic"))
   {
-    this->gzColorsTopic = "gazebo/light_buoy/new_pattern";
+    this->gzColorsTopic = "/vrx/light_buoy/new_pattern";
   }
   else
   {

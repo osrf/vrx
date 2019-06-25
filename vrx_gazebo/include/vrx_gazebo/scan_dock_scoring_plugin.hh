@@ -182,7 +182,7 @@ class DockChecker
 /// <color_sequence_service>: Optional paramter with the ROS service used to
 /// receive the color submission.
 /// <color_topic>: Optional gazebo topic used to publish the color sequence
-///   defaults to gazebo/light_buoy/new_pattern
+///   defaults to /vrx/light_buoy/new_pattern
 /// <color_1>: Expected first color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_2>: Expected second color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_3>: Expected third color of the sequence (RED, GREEN, BLUE, YELLOW).

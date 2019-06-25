@@ -52,7 +52,7 @@ namespace gazebo
 ///                   as namespace unless a value is specified.
 /// <ros_shuffle_topic>: The ROS topic used to request color changes.
 /// <gz_colors_topic>: The gazebo topic used to request specific color changes.
-//    defaults to gazebo/light_buoy/new_pattern
+//    defaults to /vrx/light_buoy/new_pattern
 /// <visuals>: The collection of visuals that change in color. It accepts N
 ///            elements of <visual> elements.
 ///
