@@ -21,8 +21,10 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <boost/algorithm/clamp.hpp>
 #include <ros/time.h>
 
+#include <cmath>
 #include <functional>
 
 #include "usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh"
@@ -32,22 +34,17 @@ using namespace gazebo;
 //////////////////////////////////////////////////
 Thruster::Thruster(UsvThrust *_parent)
 {
-  // Set some defaults
-  this->cmdTopic = "thruster_default_cmdTopic";
-  this->maxCmd = 1.0;
-  this->maxForceFwd = 100.0;
-  this->maxForceRev = -100.0;
-  this->mappingType = 0;
+  // Initialize fields
   this->plugin = _parent;
-
-  // Initialize some things
+  this->engineJointPID.Init(300, 0.0, 20);
   this->currCmd = 0.0;
+  this->desiredAngle = 0.0;
+
   #if GAZEBO_MAJOR_VERSION >= 8
     this->lastCmdTime = this->plugin->world->SimTime();
   #else
     this->lastCmdTime = this->plugin->world->GetSimTime();
   #endif
-  
 }
 
 //////////////////////////////////////////////////
@@ -62,6 +59,16 @@ void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
     this->lastCmdTime = this->plugin->world->GetSimTime();
   #endif
   this->currCmd = _msg->data;
+}
+
+//////////////////////////////////////////////////
+void Thruster::OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg)
+{
+  // When we get a new thrust angle!
+  ROS_DEBUG_STREAM("New thrust angle! " << _msg->data);
+  std::lock_guard<std::mutex> lock(this->plugin->mutex);
+  this->desiredAngle = boost::algorithm::clamp(_msg->data, -this->maxAngle,
+                                               this->maxAngle);
 }
 
 //////////////////////////////////////////////////
@@ -111,12 +118,13 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
       ROS_DEBUG_STREAM("Thruster #" << thrusterCounter);
 
+      // REQUIRED PARAMETERS
       // Find link by name in SDF
       if (thrusterSDF->HasElement("linkName"))
       {
         std::string linkName = thrusterSDF->Get<std::string>("linkName");
         thruster.link = this->model->GetLink(linkName);
-        if (thruster.link == nullptr)
+        if (!thruster.link)
         {
           ROS_ERROR_STREAM("Could not find a link by the name <" << linkName
             << "> in the model!");
@@ -137,10 +145,10 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         std::string propName =
           thrusterSDF->GetElement("propJointName")->Get<std::string>();
         thruster.propJoint = this->model->GetJoint(propName);
-        if (thruster.propJoint == nullptr)
+        if (!thruster.propJoint)
         {
-          ROS_WARN_STREAM("Could not find a propellor joint by the name of <" <<
-            propName << "> in the model!");
+          ROS_ERROR_STREAM("Could not find a propellor joint by the name of <"
+            << propName << "> in the model!");
         }
         else
         {
@@ -150,16 +158,68 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
       else
       {
-        ROS_WARN_STREAM("No propJointName SDF parameter for thruster #"
+        ROS_ERROR_STREAM("No propJointName SDF parameter for thruster #"
           << thrusterCounter);
       }
 
+      // Parse out engine joint name
+      if (thrusterSDF->HasElement("engineJointName"))
+      {
+        std::string engineName =
+          thrusterSDF->GetElement("engineJointName")->Get<std::string>();
+        thruster.engineJoint = this->model->GetJoint(engineName);
+        if (!thruster.engineJoint)
+        {
+          ROS_ERROR_STREAM("Could not find a engine joint by the name of <" <<
+            engineName << "> in the model!");
+        }
+        else
+        {
+          ROS_DEBUG_STREAM("Engine joint <" << engineName <<
+            "> added to thruster");
+        }
+      }
+      else
+      {
+        ROS_ERROR_STREAM("No engineJointName SDF parameter for thruster #"
+          << thrusterCounter);
+      }
+
+      // Parse for cmd subscription topic
+      if (thrusterSDF->HasElement("cmdTopic"))
+      {
+        thruster.cmdTopic = thrusterSDF->Get<std::string>("cmdTopic");
+      }
+      else
+      {
+        ROS_ERROR_STREAM("Please specify a cmdTopic (for ROS subscription) "
+          "for each thruster!");
+      }
+
+      // Parse for angle subscription topic
+      if (thrusterSDF->HasElement("angleTopic"))
+      {
+        thruster.angleTopic = thrusterSDF->Get<std::string>("angleTopic");
+      }
+      else
+      {
+        ROS_ERROR_STREAM("Please specify a angleTopic (for ROS subscription) "
+          "for each thruster!");
+      }
+
+      // Parse for enableAngle bool
+      if (thrusterSDF->HasElement("enableAngle"))
+      {
+        thruster.enableAngle = thrusterSDF->Get<bool>("enableAngle");
+      }
+      else
+      {
+        ROS_ERROR_STREAM("Please specify for each thruster if it should enable "
+          "angle adjustment (for ROS subscription)!");
+      }
+
+      // OPTIONAL PARAMETERS
       // Parse individual thruster SDF parameters
-      thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd", 1.0);
-      thruster.maxForceFwd =
-        this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
-      thruster.maxForceRev =
-        this->SdfParamDouble(thrusterSDF, "maxForceRev", -100.0);
       if (thrusterSDF->HasElement("mappingType"))
       {
         thruster.mappingType = thrusterSDF->Get<int>("mappingType");
@@ -173,16 +233,13 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
           "Using default value of <" << thruster.mappingType << ">.");
       }
 
-      // Parse for subscription topic
-      if (thrusterSDF->HasElement("cmdTopic"))
-      {
-        thruster.cmdTopic = thrusterSDF->Get<std::string>("cmdTopic");
-      }
-      else
-      {
-        ROS_ERROR_STREAM("Please specify a cmdTopic (for ROS subscription) "
-          "for each thruster!");
-      }
+      thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd", 1.0);
+      thruster.maxForceFwd =
+        this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
+      thruster.maxForceRev =
+        this->SdfParamDouble(thrusterSDF, "maxForceRev", -100.0);
+      thruster.maxAngle = this->SdfParamDouble(thrusterSDF, "maxAngle",
+                                               M_PI / 2);
 
       // Push to vector and increment
       this->thrusters.push_back(thruster);
@@ -218,6 +275,14 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->thrusters[i].cmdSub = this->rosnode->subscribe(
       this->thrusters[i].cmdTopic, 1, &Thruster::OnThrustCmd,
       &this->thrusters[i]);
+
+    // Subscribe to angles for each thruster.
+    if (this->thrusters[i].enableAngle)
+    {
+      this->thrusters[i].angleSub = this->rosnode->subscribe(
+        this->thrusters[i].angleTopic, 1, &Thruster::OnThrustAngle,
+        &this->thrusters[i]);
+    }
   }
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -290,6 +355,23 @@ void UsvThrust::Update()
         ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "] Cmd Timeout");
       }
 
+      // Adjust thruster engine joint angle with PID
+      common::Time stepTime = now - this->thrusters[i].lastAngleUpdateTime;
+      double desiredAngle = this->thrusters[i].desiredAngle;
+      #if GAZEBO_MAJOR_VERSION >= 8
+        double currAngle = this->thrusters[i].engineJoint->Position(0);
+      #else
+        double currAngle = this->thrusters[i].engineJoint->GetAngle(0).Radian();
+      #endif
+      double angleError = currAngle - desiredAngle;
+
+      double effort = this->thrusters[i].engineJointPID.Update(angleError,
+                                                               stepTime);
+      this->thrusters[i].engineJoint->SetForce(0, effort);
+
+      // Store last update time
+      this->thrusters[i].lastAngleUpdateTime = now;
+
       // Apply the thrust mapping
       ignition::math::Vector3d tforcev(0, 0, 0);
       switch (this->thrusters[i].mappingType)
@@ -343,7 +425,7 @@ void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
   _propeller->SetForce(0, effort);
 
   // Get index in joint state message for this propeller
-  uint8_t index = -1;
+  int8_t index = -1;
   for (int i = 0; i < this->thrusters.size(); ++i)
   {
     if (_propeller->GetName() == this->jointStateMsg.name[i])

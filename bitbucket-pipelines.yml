@@ -5,7 +5,10 @@ pipelines:
         - step:
             image: osrf/vrx:current
             script:
-              # VRX
+              # Code style
+              - sudo apt-get -y install cppcheck
+              - sh tools/code_check.sh
+              # Set up workspace
               - mkdir -p /tmp/vrx_ws/src
               - ln -s `pwd` /tmp/vrx_ws/src
               - cd /tmp/vrx_ws
@@ -16,7 +19,10 @@ pipelines:
         - step:
             image: osrf/vrx:test_gaz7
             script:
-              # VRX
+              # Code style
+              - sudo apt-get -y install cppcheck
+              - sh tools/code_check.sh
+              # Set up workspace
               - mkdir -p /tmp/vrx_ws/src
               - ln -s `pwd` /tmp/vrx_ws/src
               - cd /tmp/vrx_ws

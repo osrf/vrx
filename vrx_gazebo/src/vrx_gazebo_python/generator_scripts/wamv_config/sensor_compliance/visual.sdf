@@ -1,0 +1,26 @@
+<sdf version='1.6>
+<visual name='sensor_compliance_visual_for'>
+  <pose frame = ''> 0.8 0 1.8 0 0 0</pose>
+  <geometry>
+    <box> <size> 1 1 1 </size></box>
+  </geometry>
+  <material>
+    <ambient> 0 .5 0 .5 </ambient>
+    <diffuse> 0 .5 0 .5 </diffuse>
+    <specular> 0 .5 0 .5 </specular>
+    <emissive> 0 .5 0 .5 </emissive>
+  </material>
+</visual>
+<visual name='sensor_compliance_visual_aft'>
+  <pose frame = ''> -0.9 0 1.8 0 0 0</pose>
+  <geometry>
+    <box> <size> 0.5 1 1 </size></box>
+  </geometry>
+  <material>
+    <ambient> 0 .5 0 .5 </ambient>
+    <diffuse> 0 .5 0 .5 </diffuse>
+    <specular> 0 .5 0 .5 </specular>
+    <emissive> 0 .5 0 .5 </emissive>
+  </material>
+</visual>
+</sdf>

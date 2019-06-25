@@ -30,8 +30,8 @@
       <!-- Parameters for ScoringPlugin base class -->
       <vehicle>wamv</vehicle>
       <task_name>perception</task_name>
-      <initial_state_duration>1</initial_state_duration>
-      <ready_state_duration>1</ready_state_duration>
+      <initial_state_duration>10.0</initial_state_duration>
+      <ready_state_duration>10.0</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <!-- Parameters for PopulationPlugin -->
       <loop_forever>false</loop_forever>

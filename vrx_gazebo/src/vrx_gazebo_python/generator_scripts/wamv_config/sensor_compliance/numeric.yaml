@@ -1,0 +1,52 @@
+wamv_camera: 
+    num: 3
+    allowed_params:
+        x
+        y
+        z
+        R
+        P
+        Y
+        name
+        post_Y
+
+wamv_gps:
+    num: 1
+    allowed_params:
+        x
+        y
+        z
+        R
+        P
+        Y
+        name
+        post_Y
+
+wamv_imu:
+    num: 1
+    allowed_params:
+        x
+        y
+        z
+        R
+        P
+        Y
+        name
+        post_Y
+
+wamv_3d_lidar:
+    num: 1
+    allowed_params:
+        x
+        y
+        z
+        R
+        P
+        Y
+        name
+        post_Y
+
+wamv_p3d:
+    num: 1
+    allowed_params:
+        name

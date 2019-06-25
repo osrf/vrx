@@ -1,0 +1,60 @@
+<visual name='thruster_compliance_visual_port_aft'>
+  <pose frame = ''> -2.25 1 0 0 0 0</pose>
+  <geometry>
+    <box> <size> 1 1 1.2 </size></box>
+  </geometry>
+  <material>
+    <ambient> .5 0 0 .5 </ambient>
+    <diffuse> .5 0 0 .5 </diffuse>
+    <specular> .5 0 0 .5 </specular>
+    <emissive> .5 0 0 .5 </emissive>
+  </material>
+</visual>
+<visual name='thruster_compliance_visual_star_aft'>
+  <pose frame = ''> -2.25 -1 0 0 0 0</pose>
+  <geometry>
+    <box> <size> 1 1 1.2 </size></box>
+  </geometry>
+  <material>
+    <ambient> .5 0 0 .5 </ambient>
+    <diffuse> .5 0 0 .5 </diffuse>
+    <specular> .5 0 0 .5 </specular>
+    <emissive> .5 0 0 .5 </emissive>
+  </material>
+</visual>
+<visual name='thruster_compliance_visual_port_for'>
+  <pose frame = ''> 1 1 0 0 0 0</pose>
+  <geometry>
+    <box> <size> 1 1 1.2 </size></box>
+  </geometry>
+  <material>
+    <ambient> .5 0 0 .5 </ambient>
+    <diffuse> .5 0 0 .5 </diffuse>
+    <specular> .5 0 0 .5 </specular>
+    <emissive> .5 0 0 .5 </emissive>
+  </material>
+</visual>
+<visual name='thruster_compliance_visual_star_for'>
+  <pose frame = ''> 1 -1 0 0 0 0</pose>
+  <geometry>
+    <box> <size> 1 1 1.2 </size></box>
+  </geometry>
+  <material>
+    <ambient> .5 0 0 .5 </ambient>
+    <diffuse> .5 0 0 .5 </diffuse>
+    <specular> .5 0 0 .5 </specular>
+    <emissive> .5 0 0 .5 </emissive>
+  </material>
+</visual>
+<visual name='thruster_compliance_visual_middle'>
+  <pose frame = ''> -.6 0 0 0 0 0</pose>
+  <geometry>
+    <box> <size> 4.2 1 1.2 </size></box>
+  </geometry>
+  <material>
+    <ambient> .5 0 0 .5 </ambient>
+    <diffuse> .5 0 0 .5 </diffuse>
+    <specular> .5 0 0 .5 </specular>
+    <emissive> .5 0 0 .5 </emissive>
+  </material>
+</visual>
