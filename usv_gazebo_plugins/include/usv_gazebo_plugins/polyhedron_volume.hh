@@ -18,6 +18,7 @@
 #pragma once
 
 #include <cassert>
+#include <vector>
 #include <ignition/math/Vector3.hh>
 #include <ignition/math/Quaternion.hh>
 
@@ -41,7 +42,7 @@ namespace buoyancy
   /// \brief Represents output volume with centroid
   struct Volume
   {
-    Volume ();
+    Volume();
 
     /// \brief overloads += for volume object
     Volume& operator+=(const Volume& rhs);
@@ -60,7 +61,7 @@ namespace buoyancy
   /// based on: Exact Buoyancy for Polyhedra by Eric Catto
   class Polyhedron
   {
-  public:
+    public:
 
     /// \brief Store vertex index for a triangular face
     struct Face
@@ -99,7 +100,7 @@ namespace buoyancy
     Volume submergedVolume(const Vec3& x, const ignition::math::Quaterniond& q,
         Plane& plane);
 
-  private:
+    private:
     /// \brief computes volume and centroid of tetrahedron
     /// tetrahedron formed by triangle + arbitrary point
     /// @param v1: point on triangle
@@ -108,7 +109,7 @@ namespace buoyancy
     /// @param p: arbitrary point
     /// @return Volume object with volume and centroid
     static Volume tetrahedronVolume(const Vec3& v1, const Vec3& v2,
-        const Vec3& v3, const Vec3& p = Vec3({0.,0.,0.}));
+        const Vec3& v3, const Vec3& p = Vec3({0., 0., 0.}));
 
     /// \brief clips a partially submerged triangle
     /// @param v1: point on triangle
@@ -120,7 +121,7 @@ namespace buoyancy
     /// @return Volume object for clipped tetrahedron
     static Volume clipTriangle(const Vec3& v1, const Vec3& v2,
         const Vec3& v3, double d1, double d2, double d3,
-        const Vec3& p = Vec3({0.,0.,0.}));
+        const Vec3& p = Vec3({0., 0., 0.}));
 
     /// \brief object vertices
     std::vector<Vec3> vertices;
@@ -130,7 +131,6 @@ namespace buoyancy
 
     /// \brief values below this are zeroed out
     const double EPSILON = 1e-6;
+  };  // class Polyhedron
 
-  }; // class Polyhedron
-
-} // namespace buoyancy
+}
