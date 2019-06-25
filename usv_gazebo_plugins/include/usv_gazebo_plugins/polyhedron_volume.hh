@@ -19,6 +19,7 @@
 
 #include <cassert>
 #include <vector>
+#include <gazebo/common/common.hh>
 #include <ignition/math/Vector3.hh>
 #include <ignition/math/Quaternion.hh>
 

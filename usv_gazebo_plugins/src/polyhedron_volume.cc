@@ -280,12 +280,21 @@ Volume Polyhedron::submergedVolume(const Vec3 &x,
   // transform the centroid into world coordinates
   output.centroid = x + q.RotateVector(output.centroid);
   // if centroid is very small make it zero
-  output.centroid[0] = ::fabs(output.centroid[0]) < EPSILON ?
-      0 : output.centroid[0];
-  output.centroid[1] = ::fabs(output.centroid[1]) < EPSILON ?
-      0 : output.centroid[1];
-  output.centroid[2] = ::fabs(output.centroid[2]) < EPSILON ?
-      0 : output.centroid[2];
 
+  #if GAZEBO_MAJOR_VERSION >= 8
+    output.centroid.X() = ::fabs(output.centroid[0]) < EPSILON ?
+        0 : output.centroid.X();
+    output.centroid.Y() = ::fabs(output.centroid[1]) < EPSILON ?
+        0 : output.centroid.Y();
+    output.centroid.Z() = ::fabs(output.centroid[2]) < EPSILON ?
+        0 : output.centroid.Z();
+  #else
+    output.centroid.x = ::fabs(output.centroid[0]) < EPSILON ?
+        0 : output.centroid.x;
+    output.centroid.y = ::fabs(output.centroid[1]) < EPSILON ?
+        0 : output.centroid.y;
+    output.centroid.z = ::fabs(output.centroid[2]) < EPSILON ?
+        0 : output.centroid.z;
+  #endif
   return output;
 }
