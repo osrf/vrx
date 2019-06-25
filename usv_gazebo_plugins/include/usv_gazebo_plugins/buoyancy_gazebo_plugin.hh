@@ -40,7 +40,7 @@ namespace gazebo
       BuoyancyObject();
 
       /// \brief Default move constructor
-      BuoyancyObject(BuoyancyObject&& obj) noexcept;
+      BuoyancyObject(BuoyancyObject&& obj) noexcept; // NOLINT
 
       /// \brief no copy constructor
       BuoyancyObject(BuoyancyObject& obj) = delete;

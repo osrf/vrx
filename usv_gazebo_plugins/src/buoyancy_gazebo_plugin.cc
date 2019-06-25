@@ -36,7 +36,7 @@ BuoyancyObject::BuoyancyObject()
 }
 
 ///////////////////////////////////////////////////
-BuoyancyObject::BuoyancyObject(BuoyancyObject &&obj) noexcept
+BuoyancyObject::BuoyancyObject(BuoyancyObject &&obj) noexcept // NOLINT
   : linkId(obj.linkId),
     linkName(obj.linkName),
     pose(obj.pose),
