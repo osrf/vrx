@@ -74,6 +74,23 @@ void LightBuoyPlugin::InitializeAllPatterns()
   }
 }
 
+LightBuoyPlugin::LightBuoyPlugin() :
+  gzNode(new gazebo::transport::Node())
+{
+  gzNode->Init();
+}
+
+void LightBuoyPlugin::ChangePatternTo(const gazebo::ConstLightBuoyColorsPtr &_msg)
+{
+  gzdbg << "new Colors:" << std::endl;
+  gzdbg << "color1: " << _msg->color_1() << std::endl;
+  gzdbg << "color2: " << _msg->color_2() << std::endl;
+  gzdbg << "color3: " << _msg->color_3() << std::endl;
+  
+  return;
+}
+
+
 //////////////////////////////////////////////////
 void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   sdf::ElementPtr _sdf)
@@ -100,13 +117,15 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   {
     this->nh = ros::NodeHandle(this->ns);
     this->changePatternSub = this->nh.subscribe(
-      this->topic, 1, &LightBuoyPlugin::ChangePattern, this);
+      this->rosShuffleTopic, 1, &LightBuoyPlugin::ChangePattern, this);
   }
 
   this->nextUpdateTime = this->scene->SimTime();
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&LightBuoyPlugin::Update, this));
+  
+  this->colorSub = this->gzNode->Subscribe(this->gzColorsTopic, &LightBuoyPlugin::ChangePatternTo, this);
 }
 
 //////////////////////////////////////////////////
@@ -167,13 +186,22 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     this->shuffleEnabled = _sdf->GetElement("shuffle")->Get<bool>();
 
     // Required if shuffle enabled: ROS topic.
-    if (!_sdf->HasElement("topic"))
+    if (!_sdf->HasElement("ros_shuffle_topic"))
     {
-      ROS_ERROR("<topic> missing");
+      ROS_ERROR("<ros_shuffle_topic> missing");
     }
-    this->topic = _sdf->GetElement("topic")->Get<std::string>();
+    this->rosShuffleTopic = _sdf->GetElement("ros_shuffle_topic")->Get<std::string>();
   }
 
+  // optional gzColorsTopic
+  if (!_sdf->HasElement("gz_colors_topic"))
+  {
+    this->gzColorsTopic = "gazebo/light_buoy/new_pattern";
+  }
+  else
+  {
+    this->gzColorsTopic = _sdf->GetElement("gz_colors_topic")->Get<std::string>();
+  }
   // Optional: ROS namespace.
   if (_sdf->HasElement("robot_namespace"))
     this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();

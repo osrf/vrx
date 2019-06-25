@@ -80,6 +80,10 @@
 /// <release_joints>: Optional element specifying the collection of joints that
 /// should be dettached when transitioning to the "ready" state.
 ///
+/// <color_1>: Required first color of light buoy sequence
+/// <color_2>: Required second color of light buoy sequence
+/// <color_3>: Required third color of light buoy sequence
+///
 ///   This block should contain at least one of these blocks:
 ///   <joint>: This block should contain a <name> element with the name of the
 ///   joint to release.
@@ -100,7 +104,12 @@
 ///       <name>wamv_external_riser</name>
 ///     </joint>
 ///   </release_joints>
-/// </plugin>
+/// 
+///  </plugin>
+
+
+
+
 class ScoringPlugin : public gazebo::WorldPlugin
 {
   /// \brief Class constructor.
@@ -197,7 +206,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Last collision time.
   protected: gazebo::common::Time lastCollisionTime;
 
-  /// \brief Collision detection node pointer
+  /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr collisionNode;
 
   /// \brief Collision detection node subscriber

@@ -20,6 +20,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include "light_buoy_colors.pb.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -40,7 +41,6 @@ class ColorSequenceChecker
   public: ColorSequenceChecker(const std::vector<std::string> &_expectedColors,
                                const std::string &_rosNameSpace,
                                const std::string &_rosColorSequenceService);
-
   /// \brief Enable the ROS submission service.
   public: void Enable();
 
@@ -181,6 +181,8 @@ class DockChecker
 /// <robot_namespace>: Optional parameter with the ROS namespace.
 /// <color_sequence_service>: Optional paramter with the ROS service used to
 /// receive the color submission.
+/// <color_topic>: Optional gazebo topic used to publish the color sequence
+///   defaults to gazebo/light_buoy/new_pattern
 /// <color_1>: Expected first color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_2>: Expected second color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_3>: Expected third color of the sequence (RED, GREEN, BLUE, YELLOW).
@@ -272,6 +274,12 @@ class ScanDockScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
+  /// \brief gazebo Node  
+  private: gazebo::transport::NodePtr node;  
+  
+  /// \brief Publish the color sequence
+  private: gazebo::transport::PublisherPtr lightBuoySequencePub;
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
@@ -295,6 +303,11 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// \brief Points granted when the vehicle successfully
   /// dock-and-undock in the specified bay.
   private: double correctDockBonusPoints = 10.0;
+
+  /// \brief Name of colorTopic for the light buoy
+  private: std::string colorTopic;
+
+  private: std::vector<std::string> expectedSequence;
 };
 
 #endif

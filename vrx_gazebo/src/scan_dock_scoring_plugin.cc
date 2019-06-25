@@ -34,7 +34,6 @@ ColorSequenceChecker::ColorSequenceChecker(
     ROS_ERROR("ROS was not initialized.");
     return;
   }
-
   this->nh = ros::NodeHandle(this->ns);
 }
 
@@ -196,8 +195,11 @@ void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-ScanDockScoringPlugin::ScanDockScoringPlugin()
+ScanDockScoringPlugin::ScanDockScoringPlugin() :
+  node(new gazebo::transport::Node())
 {
+  this->node->Init();
+  this->lightBuoySequencePub = this->node->Advertise<light_buoy_colors_msgs::msgs::LightBuoyColors>(this->colorTopic);
   gzmsg << "scan and dock scoring plugin loaded" << std::endl;
 }
 
@@ -214,6 +216,7 @@ void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScanDockScoringPlugin::Update, this));
+
 }
 
 //////////////////////////////////////////////////
@@ -233,7 +236,6 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
   }
 
   // Required: The expected color pattern.
-  std::vector<std::string> expectedSequence;
   for (auto colorIndex : {"color_1", "color_2", "color_3"})
   {
     if (!_sdf->HasElement(colorIndex))
@@ -252,8 +254,16 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
       ROS_ERROR("Invalid color [%s]", color.c_str());
       return false;
     }
+    this->expectedSequence.push_back(color);
+  }
 
-    expectedSequence.push_back(color);
+  if(!_sdf->HasElement("color_topic"))
+  {
+    this->colorTopic = "gazebo/light_buoy/new_pattern";
+  }
+  else
+  {
+    this->colorTopic = _sdf->GetElement("color_topic")->Get<std::string>();
   }
 
   // Optional: the points granted when reported the correct color sequence.
@@ -265,7 +275,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
 
   // Instantiate the color checker.
   this->colorChecker.reset(
-    new ColorSequenceChecker(expectedSequence, ns, colorSequenceService));
+    new ColorSequenceChecker(this->expectedSequence, ns, colorSequenceService));
 
   // Required: Parse the bays.
   if (!_sdf->HasElement("bays"))
@@ -402,6 +412,13 @@ void ScanDockScoringPlugin::Update()
 //////////////////////////////////////////////////
 void ScanDockScoringPlugin::OnReady()
 {
+  light_buoy_colors_msgs::msgs::LightBuoyColors colors;
+  colors.set_color_1(this->expectedSequence[0]);
+  colors.set_color_2(this->expectedSequence[1]);
+  colors.set_color_3(this->expectedSequence[2]);
+  lightBuoySequencePub->Publish(colors);
+  gzdbg << "published" << std::endl;
+  
   // Announce the symbol if needed.
   for (auto &dockChecker : this->dockCheckers)
     dockChecker->AnnounceSymbol();

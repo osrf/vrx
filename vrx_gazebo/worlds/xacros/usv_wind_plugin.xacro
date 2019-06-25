@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-	<xacro:macro name="usv_wind_gazebo" params="**wind_objs
+  <xacro:macro name="usv_wind_gazebo" params="**wind_objs
 						    direction:=270
 						    mean_vel:=10
 						    var_gain:=100

@@ -43,12 +43,23 @@ catkin_package(
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS}i
+  ${GAZEBO_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_BINARY_DIR}/msgs
+)
+
+link_directories(${GAZEBO_LIBRARY_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/msgs)
+add_subdirectory(msgs)
 
 # Plugin for setting color of light buoy.
 add_library(light_buoy_plugin src/light_buoy_plugin.cc)
-target_link_libraries(light_buoy_plugin ${catkin_LIBRARIES})
-add_dependencies(light_buoy_plugin ${catkin_EXPORTED_TARGETS})
+target_link_libraries(light_buoy_plugin
+  ${catkin_LIBRARIES} 
+  light_buoy_colors_msgs
+)
+add_dependencies(light_buoy_plugin ${catkin_EXPORTED_TARGETS}
+  light_buoy_colors_msgs
+)
 install(TARGETS light_buoy_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -67,11 +78,15 @@ install(TARGETS placard_plugin
 
 # A generic scoring plugin.
 add_library(scoring_plugin src/scoring_plugin.cc)
-target_link_libraries(scoring_plugin ${catkin_LIBRARIES})
+target_link_libraries(scoring_plugin
+  ${catkin_LIBRARIES}
+  light_buoy_colors_msgs
+)
 add_dependencies(scoring_plugin
   ${catkin_EXPORTED_TARGETS}
   vrx_gazebo_generate_messages_cpp
   vrx_gazebo_generate_services_cpp
+  light_buoy_colors_msgs
 )
 install(TARGETS scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
