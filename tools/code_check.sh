@@ -64,6 +64,7 @@ else
   CHECK_DIRS=" \
     ./usv_gazebo_plugins/src ./usv_gazebo_plugins/include \
     ./vrx_gazebo/src ./vrx_gazebo/include \
+    ./wave_gazebo_plugins/src ./wave_gazebo_plugins/include \
   "
   if [ $CPPCHECK_LT_157 -eq 1 ]; then
     # cppcheck is older than 1.57, so don't check header files (issue #907)

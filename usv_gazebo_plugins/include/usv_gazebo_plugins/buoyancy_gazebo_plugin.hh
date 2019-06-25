@@ -19,12 +19,18 @@
 #define USV_GAZEBO_PLUGINS_BUOYANCY_GAZEBO_PLUGIN_HH_
 
 #include <map>
+#include <string>
+#include <vector>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
+
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
 
 namespace gazebo
 {
@@ -96,6 +102,15 @@ namespace gazebo
     /// \brief Connection to World Update events.
     protected: event::ConnectionPtr updateConnection;
 
+    /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
+    protected: physics::WorldPtr world;
+
+    /// \brief Pointer to the model
+    protected: physics::ModelPtr model;
+
+    /// \brief The name of the wave model
+    protected: std::string waveModelName;
+
     /// \brief The density of the fluid in which the object is submerged in
     /// kg/m^3. Defaults to 1000, the fluid density of water at 15 Celsius.
     protected: double fluidDensity;
@@ -113,6 +128,15 @@ namespace gazebo
     /// \brief Vector of links in the model for which we will apply buoyancy
     /// forces.
     protected: physics::Link_V buoyancyLinks;
+
+    /// \brief Vector of water height at each link from previous timestep
+    protected: std::vector<double> buoyancyHeights;
+
+    /// \brief Previous update time
+    protected: double lastSimTime;
+
+    /// \brief The wave parameters.
+    protected: std::shared_ptr<const asv::WaveParameters> waveParams;
   };
 }
 

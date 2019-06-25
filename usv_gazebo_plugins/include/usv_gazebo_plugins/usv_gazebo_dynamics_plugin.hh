@@ -1,24 +1,18 @@
 /*
-
-Copyright (c) 2017, Brian Bingham
-All rights reserved
-
-This file is part of the usv_gazebo_dynamics_plugin package,
-known as this Package.
-
-This Package free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This Package s distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
-
+ * Copyright (C) 2017  Brian Bingham
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
 */
 
 #ifndef USV_GAZEBO_PLUGINS_DYNAMICS_PLUGIN_HH_
@@ -32,6 +26,10 @@ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #include <ignition/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
 #include <sdf/sdf.hh>
+
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
 
 namespace gazebo
 {
@@ -168,20 +166,26 @@ namespace gazebo
     /// \brief Added mass matrix, 6x6.
     private: Eigen::MatrixXd Ma;
 
-    /// \brief Wave parameters.
-    private: int paramWaveN;
+    /// \brief The name of the wave model
+    protected: std::string waveModelName;
 
-    /// \brief Wave amplitude values for N components.
-    private: std::vector<float> paramWaveAmps;
+    // /// \brief Wave parameters.
+    // private: int paramWaveN;
 
-    /// \brief Wave period values for N components.
-    private: std::vector<float> paramWavePeriods;
+    // /// \brief Wave amplitude values for N components.
+    // private: std::vector<float> paramWaveAmps;
 
-    /// \brief Wave direction values for N components.
-    private: std::vector<std::vector<float>> paramWaveDirections;
+    // /// \brief Wave period values for N components.
+    // private: std::vector<float> paramWavePeriods;
+
+    // /// \brief Wave direction values for N components.
+    // private: std::vector<std::vector<float>> paramWaveDirections;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    /// \brief The wave parameters.
+    private: std::shared_ptr<const asv::WaveParameters> waveParams;
   };
 }
 
