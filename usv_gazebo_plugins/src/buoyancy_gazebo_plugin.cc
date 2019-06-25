@@ -118,8 +118,6 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   model = _model;
 
-  _model->GetLink()->GetInertial()->Mass();
-
   if (_sdf->HasElement("fluid_density"))
   {
     this->fluidDensity = _sdf->Get<double>("fluid_density");
@@ -156,7 +154,12 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         }
 
         // get mass
-        buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->Mass();
+        #if GAZEBO_MAJOR_VERSION >= 8
+          buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->Mass();
+        #else
+          buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->GetMass();
+        #endif
+
 
         // add buoyancy object to list and display stats
         gzmsg << buoyObj.disp() << std::endl;
@@ -206,11 +209,11 @@ void BuoyancyPlugin::OnUpdate()
     if (volume.volume > 1e-6)
     {
       #if GAZEBO_MAJOR_VERSION >= 8
-            ignition::math::Vector3d linVel = link->WorldLinearVel();
-            ignition::math::Vector3d angVel = link->RelativeAngularVel();
+        ignition::math::Vector3d linVel = link->WorldLinearVel();
+        ignition::math::Vector3d angVel = link->RelativeAngularVel();
       #else
-            ignition::math::Vector3d linVel= link->GetWorldLinearVel().Ign();
-            ignition::math::Vector3d angVel = link->RelativeAngularVel().Ign();
+        ignition::math::Vector3d linVel= link->GetWorldLinearVel().Ign();
+        ignition::math::Vector3d angVel = link->GetRelativeAngularVel().Ign();
       #endif
 
       // partial mass = total_mass * submerged_vol / total_vol
