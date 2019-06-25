@@ -2,10 +2,6 @@
 <sdf version="1.6">
   <model name="surmark950410">
     <link name="link">
-      <velocity_decay>
-        <linear>0.001</linear>
-        <angular>0.001</angular>
-      </velocity_decay>
       <inertial>
         <pose>0 0 -10 0 0 0</pose>
         <mass>20.86</mass>
@@ -48,16 +44,43 @@
         </material>
       </visual>
     </link>
+
     <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
-      <fluid_drag>5.0</fluid_drag>
-      <link>
-        <name>link</name>
-        <center_of_volume>0 0 0.5</center_of_volume>
-        <area>0.63</area>
-        <height>1.05</height>
-      </link>
+      <linear_drag>10.0</linear_drag>
+      <angular_drag>2.0</angular_drag>
+      <buoyancy name="buoyancy_inner_top">
+        <link_name>link</link_name>
+        <pose>0 0 0.09 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.14</radius>
+            <length>1.00</length>
+          </cylinder>
+        </geometry>
+      </buoyancy>
+      <buoyancy name="buoyancy_inner_bottom">
+        <link_name>link</link_name>
+        <pose>0 0 -0.595 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.14</radius>
+            <length>0.07</length>
+          </cylinder>
+        </geometry>
+      </buoyancy>
+      <buoyancy name="buoyancy_outer">
+        <link_name>link</link_name>
+        <pose>0 0 -0.488 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.23</radius>
+            <length>0.15</length>
+          </cylinder>
+        </geometry>
+      </buoyancy>
     </plugin>
+
   </model>
 </sdf>
