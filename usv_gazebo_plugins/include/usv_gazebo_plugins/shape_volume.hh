@@ -27,7 +27,7 @@
 
 namespace buoyancy
 {
-  /// \brief type of geometry shape
+  /// \brief Type of geometry shape
   enum class ShapeType
   {
     None,
@@ -36,19 +36,19 @@ namespace buoyancy
     Cylinder
   };
 
-  /// \brief parent shape object for volume objects
+  /// \brief Parent shape object for volume objects
   struct ShapeVolume
   {
     /// \brief Default destructor
     virtual ~ShapeVolume() = default;
 
-    /// \brief factory method for shape. Parses a shape object from sdf data
+    /// \brief Factory method for shape. Parses a shape object from sdf data
     static std::unique_ptr<ShapeVolume> makeShape(const sdf::ElementPtr sdf);
 
-    /// \brief display string for shape object
+    /// \brief Display string for shape object
     virtual std::string display();
 
-    /// \brief calculates volume + centroid of submerged shape
+    /// \brief Calculates volume + centroid of submerged shape
     /// if the shape is out of water returns Volume{}
     /// @param pose: world pose of volume
     /// @param fluidLevel: height of fluid
@@ -56,19 +56,19 @@ namespace buoyancy
     virtual Volume calculateVolume(const ignition::math::Pose3d& pose,
                                    double fluidLevel) = 0;
 
-    /// \brief type of shape
+    /// \brief Type of shape
     ShapeType type;
 
-    /// \brief full volume of object
+    /// \brief Full volume of object
     double volume;
 
-    /// \brief average length of object
+    /// \brief Average length of object
     /// estimate used for drag torque calculation
     double averageLength;
   };
   typedef std::unique_ptr<ShapeVolume> ShapeVolumePtr;
 
-  /// \brief box shape volume
+  /// \brief Box shape volume
   struct BoxVolume : public ShapeVolume
   {
     /// \brief Default constructor
@@ -77,28 +77,28 @@ namespace buoyancy
     /// @param z: height
     explicit BoxVolume(double x, double y, double z);
 
-    /// \brief display string for box shape
+    /// \brief Display string for box shape
     std::string display() override;
 
     // Documentation inherited.
     Volume calculateVolume(const ignition::math::Pose3d& pose,
                            double fluidLevel) override;
 
-    /// \brief length
+    /// \brief Length
     double x;
 
-    /// \brief width
+    /// \brief Width
     double y;
 
-    /// \brief height
+    /// \brief Height
     double z;
 
     private:
-    /// \brief polyhedron defining a box
+    /// \brief Polyhedron defining a box
     Polyhedron polyhedron_;
   };
 
-  /// \brief cylinder shape volume
+  /// \brief Cylinder shape volume
   struct CylinderVolume : public ShapeVolume
   {
     /// \brief Default constructor
@@ -106,43 +106,43 @@ namespace buoyancy
     /// @param l: length
     explicit CylinderVolume(double r, double l);
 
-    /// \brief display string for cylinder shape
+    /// \brief Display string for cylinder shape
     std::string display() override;
 
     // Documentation inherited.
     Volume calculateVolume(const ignition::math::Pose3d& pose,
                            double fluidLevel) override;
 
-    /// \brief radius of cylinder
+    /// \brief Radius of cylinder
     double r;
 
-    /// \brief height of cylinder
+    /// \brief Height of cylinder
     double h;
 
     private:
-    /// \brief polyhedron defining a cylinder
+    /// \brief Polyhedron defining a cylinder
     Polyhedron polyhedron_;
   };
 
-  /// \brief sphere shape volume
+  /// \brief Sphere shape volume
   struct SphereVolume : public ShapeVolume
   {
     /// \brief Default constructor
     /// @param r: radius
     explicit SphereVolume(double r);
 
-    /// \brief display string for sphere shape
+    /// \brief Display string for sphere shape
     std::string display() override;
 
     // Documentation inherited.
     Volume calculateVolume(const ignition::math::Pose3d& pose,
                            double fluidLevel) override;
 
-    /// \brief radius of sphere
+    /// \brief Radius of sphere
     double r;
   };
 
-  /// \brief custom exception for parsing errors
+  /// \brief Custom exception for parsing errors
   struct ParseException : public std::exception
   {
     ParseException(const char* shape, const char* message)
@@ -161,6 +161,4 @@ namespace buoyancy
     private:
     std::string output_;
   };
-
-
 }

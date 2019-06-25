@@ -42,28 +42,28 @@ namespace gazebo
       /// \brief Default move constructor
       BuoyancyObject(BuoyancyObject&& obj) noexcept; // NOLINT
 
-      /// \brief no copy constructor
+      /// \brief No copy constructor
       BuoyancyObject(BuoyancyObject& obj) = delete;
 
-      /// \brief loads buoyancy object from sdf
+      /// \brief Loads buoyancy object from SDF
       void load(const physics::ModelPtr model, const sdf::ElementPtr elem);
 
-      /// \brief display string for buoyancy object
+      /// \brief Display string for buoyancy object
       std::string disp();
 
-      /// \brief associated link ID
+      /// \brief Associated link ID
       int linkId;
 
-      /// \brief associated link name
+      /// \brief Associated link name
       std::string linkName;
 
-      /// \brief pose of buoyancy relative to link
+      /// \brief Pose of buoyancy relative to link
       ignition::math::Pose3d pose;
 
-      /// \brief object mass (from inertial elem)
+      /// \brief Object mass (from inertial elem)
       double mass;
 
-      /// \brief buoyancy object shape
+      /// \brief Buoyancy object's shape properties
       ::buoyancy::ShapeVolumePtr shape;
     };
   }  // end of buoyancy namespace
@@ -122,13 +122,13 @@ namespace gazebo
     /// \brief The height of the fluid/air interface [m]. Defaults to 0.
     protected: double fluidLevel;
 
-    /// \brief linear drag. Defaults to 0.
+    /// \brief Linear drag coefficient. Defaults to 0.
     protected: double linearDrag;
 
-    /// \brief angular drag. Defaults to 0.
+    /// \brief Angular drag coefficient. Defaults to 0.
     protected: double angularDrag;
 
-    /// \brief list of buoyancy objects for model
+    /// \brief List of buoyancy objects for model
     protected: std::vector<buoyancy::BuoyancyObject> buoyancyObjects;
 
     /// \brief Map of <link ID, link pointer>

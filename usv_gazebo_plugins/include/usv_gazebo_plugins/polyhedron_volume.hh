@@ -27,16 +27,16 @@ namespace buoyancy
 {
   using Vec3 = ignition::math::Vector3d;
 
-  /// \brief represents a plane as a normal and offset
+  /// \brief Represents a plane as a normal and offset
   struct Plane
   {
-    /// \brief initializes plane at z=0
+    /// \brief Initializes plane at z=0
     Plane();
 
-    /// \brief vector3 normal to plane
+    /// \brief Vector3 normal to plane
     Vec3 normal;
 
-    /// \brief offset w.r.t. normal
+    /// \brief Offset w.r.t. normal
     float offset;
   };
 
@@ -45,16 +45,13 @@ namespace buoyancy
   {
     Volume();
 
-    /// \brief overloads += for volume object
+    /// \brief Overloads += for volume object
     Volume& operator+=(const Volume& rhs);
 
-    /// \brief returns true of volume = 0
-    bool isZero();
-
-    /// \brief volume
+    /// \brief Submerged volume of shape
     double volume;
 
-    /// \brief vector3 representing volume centroid
+    /// \brief Vector3 representing volume centroid
     Vec3 centroid;
   };
 
@@ -71,29 +68,29 @@ namespace buoyancy
 
       Face(int i1, int i2, int i3);
 
-      /// \brief index of vertices
+      /// \brief Index of vertices
       int i1, i2, i3;
     };
 
-    /// \brief generate a cube polyhedron centered at origin
+    /// \brief Generate a cube polyhedron centered at origin
     /// @param x: length of cube
     /// @param y: width of cube
     /// @param z: height of cube
     /// @return Polyhedron object
     static Polyhedron makeCube(double x, double y, double z);
 
-    /// \brief generate a cylinder polyhedron centered at origin
+    /// \brief Generate a cylinder polyhedron centered at origin
     /// @param r: radius of cylinder
     /// @param l: length of cylinder
     /// @param n: number of segments
     /// @return Polyhedron object
     static Polyhedron makeCylinder(double r, double l, int n);
 
-    /// \brief compute full volume and center of buoyancy of the polyhedron
+    /// \brief Compute full volume and center of buoyancy of the polyhedron
     /// @return Volume object with volume and centroid
     Volume computeFullVolume();
 
-    /// \brief compute submerge volume and center of buoyancy of a polyhedron
+    /// \brief Compute submerge volume and center of buoyancy of a polyhedron
     /// @param x: our position
     /// @param q: our orientation (quaternions)
     /// @param plane: water surface defined as a plane
@@ -102,7 +99,7 @@ namespace buoyancy
         Plane& plane);
 
     private:
-    /// \brief computes volume and centroid of tetrahedron
+    /// \brief Computes volume and centroid of tetrahedron
     /// tetrahedron formed by triangle + arbitrary point
     /// @param v1: point on triangle
     /// @param v2: point on triangle
@@ -112,7 +109,7 @@ namespace buoyancy
     static Volume tetrahedronVolume(const Vec3& v1, const Vec3& v2,
         const Vec3& v3, const Vec3& p = Vec3({0., 0., 0.}));
 
-    /// \brief clips a partially submerged triangle
+    /// \brief Clips a partially submerged triangle
     /// @param v1: point on triangle
     /// @param v2: point on triangle
     /// @param v3: point on triangle
@@ -124,13 +121,13 @@ namespace buoyancy
         const Vec3& v3, double d1, double d2, double d3,
         const Vec3& p = Vec3({0., 0., 0.}));
 
-    /// \brief object vertices
+    /// \brief Object vertices
     std::vector<Vec3> vertices;
 
-    /// \brief object faces
+    /// \brief Object faces
     std::vector<Face> faces;
 
-    /// \brief values below this are zeroed out
+    /// \brief Values below this are zeroed out
     const double EPSILON = 1e-6;
   };  // class Polyhedron
 
