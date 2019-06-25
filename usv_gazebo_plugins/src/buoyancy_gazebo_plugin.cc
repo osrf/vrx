@@ -139,8 +139,10 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   if (_sdf->HasElement("buoyancy"))
   {
-    gzmsg << "Found buoyancy element(s), looking at each element..." << std::endl;
-    for (sdf::ElementPtr buoyancyElem = _sdf->GetElement("buoyancy"); buoyancyElem;
+    gzmsg << "Found buoyancy element(s), looking at each element..."
+          << std::endl;
+    for (sdf::ElementPtr buoyancyElem = _sdf->GetElement("buoyancy");
+        buoyancyElem;
         buoyancyElem = buoyancyElem->GetNextElement("buoyancy")) {
       try
       {
@@ -188,14 +190,17 @@ void BuoyancyPlugin::OnUpdate()
     #endif
     linkFrame = linkFrame * buoyancyObj.pose;
 
-    auto volume = buoyancyObj.shape->calculateVolume(linkFrame, this->fluidLevel);
+    auto volume = buoyancyObj.shape->calculateVolume(linkFrame,
+        this->fluidLevel);
 
-    GZ_ASSERT(volume.volume >= 0, "Non-positive volume found in volume properties!");
+    GZ_ASSERT(volume.volume >= 0,
+        "Non-positive volume found in volume properties!");
 
     // By Archimedes' principle,
     // buoyancy = -(mass*gravity)*fluid_density/object_density
     // object_density = mass/volume, so the mass term cancels.
-    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume.volume * model->GetWorld()->Gravity();
+    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume.volume
+        * model->GetWorld()->Gravity();
 
     // apply buoyancy and drag forces
     if (volume.volume > 1e-6)
@@ -224,7 +229,8 @@ void BuoyancyPlugin::OnUpdate()
 
       // drag torque
       double averageLength2 = ::pow(buoyancyObj.shape->averageLength, 2);
-      ignition::math::Vector3d dragTorque = (-partialMass * angularDrag * averageLength2) * angVel;
+      ignition::math::Vector3d dragTorque = (-partialMass * angularDrag
+          * averageLength2) * angVel;
       link->AddRelativeTorque(dragTorque);
     }
   }

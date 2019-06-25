@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
 #pragma once
 
 #include <cmath>
@@ -22,7 +39,6 @@ namespace buoyancy
   /// \brief parent shape object for volume objects
   struct ShapeVolume
   {
-
     /// \brief Default destructor
     virtual ~ShapeVolume() = default;
 
@@ -55,7 +71,6 @@ namespace buoyancy
   /// \brief box shape volume
   struct BoxVolume : public ShapeVolume
   {
-
     /// \brief Default constructor
     /// @param x: length
     /// @param y: width
@@ -78,7 +93,7 @@ namespace buoyancy
     /// \brief height
     double z;
 
-  private:
+    private:
     /// \brief polyhedron defining a box
     Polyhedron polyhedron_;
   };
@@ -86,7 +101,6 @@ namespace buoyancy
   /// \brief cylinder shape volume
   struct CylinderVolume : public ShapeVolume
   {
-
     /// \brief Default constructor
     /// @param r: radius
     /// @param l: length
@@ -105,7 +119,7 @@ namespace buoyancy
     /// \brief height of cylinder
     double h;
 
-  private:
+    private:
     /// \brief polyhedron defining a cylinder
     Polyhedron polyhedron_;
   };
@@ -113,7 +127,6 @@ namespace buoyancy
   /// \brief sphere shape volume
   struct SphereVolume : public ShapeVolume
   {
-
     /// \brief Default constructor
     /// @param r: radius
     explicit SphereVolume(double r);
@@ -133,6 +146,7 @@ namespace buoyancy
   struct ParseException : public std::exception
   {
     ParseException(const char* shape, const char* message)
+      : output_("")
     {
       std::stringstream ss;
       ss << "Parse error for <" << shape << ">: " << message;
@@ -144,9 +158,9 @@ namespace buoyancy
       return output_.c_str();
     }
 
-  private:
+    private:
     std::string output_;
   };
 
 
-} // namespace buoyancy
+}  // namespace buoyancy

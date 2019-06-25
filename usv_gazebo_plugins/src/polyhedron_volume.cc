@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
 #include "usv_gazebo_plugins/polyhedron_volume.hh"
 
 using namespace buoyancy;
@@ -17,7 +34,7 @@ Polyhedron::Face::Face(int _i1, int _i2, int _i3)
 
 //////////////////////////////////////////////////////
 Volume::Volume()
-  : volume(0.0), centroid(Vec3({0,0,0}))
+  : volume(0.0), centroid(Vec3({0, 0, 0}))
 {
 }
 
@@ -39,29 +56,30 @@ Polyhedron Polyhedron::makeCube(double x, double y, double z)
 {
   Polyhedron cube;
   // generate vertices
-  for(int i=0; i<2; i++)
+  for (int i = 0; i < 2; i++)
   {
-    for(int j=0; j<2; j++)
+    for (int j = 0; j < 2; j++)
     {
-      for(int k=0; k<2; k++)
+      for (int k = 0; k < 2; k++)
       {
-        cube.vertices.emplace_back(Vec3(i * x - x / 2.0, j * y - y / 2.0, k * z - z / 2.0));
+        cube.vertices.emplace_back(
+            Vec3(i * x - x / 2.0, j * y - y / 2.0, k * z - z / 2.0));
       }
     }
   }
   // generate faces
-  cube.faces.emplace_back(Face(0,6,4));
-  cube.faces.emplace_back(Face(0,2,6));
-  cube.faces.emplace_back(Face(0,3,2));
-  cube.faces.emplace_back(Face(0,1,3));
-  cube.faces.emplace_back(Face(2,7,6));
-  cube.faces.emplace_back(Face(2,3,7));
-  cube.faces.emplace_back(Face(4,6,7));
-  cube.faces.emplace_back(Face(4,7,5));
-  cube.faces.emplace_back(Face(0,4,5));
-  cube.faces.emplace_back(Face(0,5,1));
-  cube.faces.emplace_back(Face(1,5,7));
-  cube.faces.emplace_back(Face(1,7,3));
+  cube.faces.emplace_back(Face(0, 6, 4));
+  cube.faces.emplace_back(Face(0, 2, 6));
+  cube.faces.emplace_back(Face(0, 3, 2));
+  cube.faces.emplace_back(Face(0, 1, 3));
+  cube.faces.emplace_back(Face(2, 7, 6));
+  cube.faces.emplace_back(Face(2, 3, 7));
+  cube.faces.emplace_back(Face(4, 6, 7));
+  cube.faces.emplace_back(Face(4, 7, 5));
+  cube.faces.emplace_back(Face(0, 4, 5));
+  cube.faces.emplace_back(Face(0, 5, 1));
+  cube.faces.emplace_back(Face(1, 5, 7));
+  cube.faces.emplace_back(Face(1, 7, 3));
 
   return cube;
 }
@@ -77,8 +95,8 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
   double angle_step = 2.0 * M_PI / n;
   double l_2 = l / 2.0;
   cylinder.vertices.resize(2*n+2);
-  cylinder.vertices[0] = Vec3{0,0,-l_2};
-  for(int i=1; i<=n; i++)
+  cylinder.vertices[0] = Vec3{0, 0, -l_2};
+  for (int i = 1; i <= n; i++)
   {
     double x = r * ::sin(angle_step * (i-1));
     double y = r * ::cos(angle_step * (i-1));
@@ -87,19 +105,19 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
     // top plate
     cylinder.vertices[i+n] = Vec3{x, y, l_2};
   }
-  cylinder.vertices[2*n+1] = Vec3{0,0,l_2};
+  cylinder.vertices[2*n+1] = Vec3{0, 0, l_2};
 
   // generate all faces
-  for(int i=1; i<=n; i++)
+  for (int i = 1; i <= n; i++)
   { // bottom plate
     cylinder.faces.emplace_back(Face(0, i, (i%n)+1));
   }
-  for(int i=1; i<=n; i++)
+  for (int i = 1; i <= n; i++)
   { // walls
     cylinder.faces.emplace_back(Face(i+1, i, n+i));
     cylinder.faces.emplace_back(Face((i%n)+n, (i%n)+n+1, (i%n)+1));
   }
-  for(int i=1; i<=n; i++)
+  for (int i = 1; i <= n; i++)
   { // top plate
     cylinder.faces.emplace_back(Face(i+n, 2*n+1, (i%n)+n+1));
   }
@@ -129,7 +147,7 @@ Volume Polyhedron::computeFullVolume()
 {
   Volume output;
   // Compute the contribution of each triangle face
-  for(const auto& face : faces)
+  for (const auto& face : faces)
   {
     Vec3 v1 = vertices[face.i1];
     Vec3 v2 = vertices[face.i2];
@@ -198,7 +216,7 @@ Volume Polyhedron::submergedVolume(const Vec3 &x,
   std::vector<double> ds(vertices.size());
   int numSubmerged = 0;
   int sampleVert = 0;
-  for (size_t i=0; i<vertices.size(); ++i)
+  for (size_t i = 0; i < vertices.size(); ++i)
   {
     ds[i] = normal.Dot(vertices[i]) - offset;
     if (ds[i] < -EPSILON)
@@ -262,9 +280,12 @@ Volume Polyhedron::submergedVolume(const Vec3 &x,
   // transform the centroid into world coordinates
   output.centroid = x + q.RotateVector(output.centroid);
   // if centroid is very small make it zero
-  output.centroid[0] = ::fabs(output.centroid[0]) < EPSILON ? 0 : output.centroid[0];
-  output.centroid[1] = ::fabs(output.centroid[1]) < EPSILON ? 0 : output.centroid[1];
-  output.centroid[2] = ::fabs(output.centroid[2]) < EPSILON ? 0 : output.centroid[2];
+  output.centroid[0] = ::fabs(output.centroid[0]) < EPSILON ?
+      0 : output.centroid[0];
+  output.centroid[1] = ::fabs(output.centroid[1]) < EPSILON ?
+      0 : output.centroid[1];
+  output.centroid[2] = ::fabs(output.centroid[2]) < EPSILON ?
+      0 : output.centroid[2];
 
   return output;
 }

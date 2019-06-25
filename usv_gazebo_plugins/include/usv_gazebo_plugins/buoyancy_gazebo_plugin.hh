@@ -20,6 +20,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Event.hh>
@@ -33,7 +34,7 @@ namespace gazebo
   namespace buoyancy {
     /// \brief A class for storing buoyancy object properties
     class BuoyancyObject {
-    public:
+      public:
 
       /// \brief Default constructor
       BuoyancyObject();
@@ -65,7 +66,7 @@ namespace gazebo
       /// \brief buoyancy object shape
       ::buoyancy::ShapeVolumePtr shape;
     };
-  } // end of buoyancy namespace
+  }  // end of buoyancy namespace
 
   /// \brief This plugin simulates buoyancy of an object in fluid.
   ///   <fluid_density>: Sets the density of the fluid that surrounds the

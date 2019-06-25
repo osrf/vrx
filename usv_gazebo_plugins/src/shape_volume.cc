@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+*/
+
 #include "usv_gazebo_plugins/shape_volume.hh"
 
 using namespace buoyancy;
@@ -18,7 +35,8 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
           ->Get<ignition::math::Vector3d>();
       if (dim[0] > epsilon && dim[1] > epsilon && dim[2] > epsilon)
       {
-        shape = dynamic_cast<ShapeVolume*>(new BoxVolume(dim[0], dim[1], dim[2]));
+        shape = dynamic_cast<ShapeVolume*>(
+            new BoxVolume(dim[0], dim[1], dim[2]));
       }
       else
       {
@@ -53,7 +71,8 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
   else if (sdf->HasElement("cylinder"))
   {
     auto cylinderElem = sdf->GetElement("cylinder");
-    if (cylinderElem->HasElement("radius") && cylinderElem->HasElement("length"))
+    if (cylinderElem->HasElement("radius") &&
+        cylinderElem->HasElement("length"))
     {
       auto r = cylinderElem->GetElement("radius")->Get<double>();
       auto l = cylinderElem->GetElement("length")->Get<double>();
@@ -70,8 +89,11 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
     {
       throw ParseException("cylinder", "missing <radius> or <length> element");
     }
-  } else {
-    throw ParseException("geometry", "missing <box>, <cylinder> or <sphere> element");
+  }
+  else
+  {
+    throw ParseException(
+        "geometry", "missing <box>, <cylinder> or <sphere> element");
   }
 
   return std::unique_ptr<ShapeVolume>(shape);
@@ -80,7 +102,7 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
 /////////////////////////////////////////////////
 std::string ShapeVolume::display()
 {
-  switch(type)
+  switch (type)
   {
     case ShapeType::None:
       return "None";
@@ -176,7 +198,7 @@ Volume SphereVolume::calculateVolume(const ignition::math::Pose3d &pose,
   // origin is at cog of the object.
   double h = fluidLevel - (pose.Pos().Z() - r);
 
-  if(h <= 0) {
+  if (h <= 0) {
     return output;
   }
 
@@ -190,14 +212,15 @@ Volume SphereVolume::calculateVolume(const ignition::math::Pose3d &pose,
   output.centroid.X() = pose.Pos().X();
   output.centroid.Y() = pose.Pos().Y();
 
-  if(output.volume > 0) {
+  if (output.volume > 0) {
     // centroid is always centered to object in X and Y plane
     output.centroid.X() = pose.Pos().X();
     output.centroid.Y() = pose.Pos().Y();
     // z_bar = (integral of (z(R)^2 - z^3) dz) * pi / volume
-    output.centroid.Z() = (pow(r, 2) / 2.0 * (pow(intLimitUpper, 2) - pow(intLimitLower, 2))
-                           - (pow(intLimitUpper, 4) - pow(intLimitLower, 4))/ 4.0)
-                          * M_PI / output.volume;
+    output.centroid.Z() = (pow(r, 2) / 2.0 *
+        (pow(intLimitUpper, 2) - pow(intLimitLower, 2)) -
+        (pow(intLimitUpper, 4) - pow(intLimitLower, 4))/ 4.0)
+            * M_PI / output.volume;
     // convert centroid.z to global frame
     output.centroid.Z() = pose.Pos().Z() + output.centroid.Z();
   }
