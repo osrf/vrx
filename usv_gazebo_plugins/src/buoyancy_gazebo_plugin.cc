@@ -127,6 +127,12 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     this->waveModelName = _sdf->Get<std::string>("wave_model");
   }
+  else
+  {
+    gzerr << "BuoyancyPlugin missing required <wave_model> parameters!" 
+          << std::endl;
+
+  }
   this->waveParams = nullptr;
 
   if (_sdf->HasElement("fluid_density"))

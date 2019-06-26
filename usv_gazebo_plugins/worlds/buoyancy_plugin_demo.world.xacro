@@ -20,6 +20,7 @@
         <xacro:insert_block name="inertial" />
       </link>
       <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+        <wave_model>ocean_waves</wave_model>
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>10.0</linear_drag>
@@ -97,7 +98,13 @@
       </camera>
     </gui>
 
+    <!-- World model of ocean - where seastate is defined -->
+    <include>
+      <uri>model://ocean_waves</uri>
+    </include>
+    
     <!-- water level for visual reference at z = 0-->
+    <!--
     <model name="plane">
       <static>true</static>
       <pose>0.8 0.8 0 0 0 0</pose>
@@ -115,6 +122,7 @@
         </visual>
       </link>
     </model>
+    -->
 
     <!-- test_1: basic shape drop test | no rotation -->
     <!-- density ~ 400 kg/m^3 (wood) | mass = 2kg | volume = 0.005m^3-->
@@ -243,6 +251,7 @@
       </joint>
 
       <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+        <wave_model>ocean_waves</wave_model>
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>5.0</linear_drag>
