@@ -30,6 +30,12 @@ std::map<std::string, std_msgs::ColorRGBA> PlacardPlugin::kColors =
 std::vector<std::string> PlacardPlugin::kShapes =
   {"circle", "cross", "triangle"};
 
+/////////////////////////////////////////////////
+PlacardPlugin::PlacardPlugin():
+  gzNode(new gazebo::transport::Node())
+{
+}
+
 //////////////////////////////////////////////////
 std_msgs::ColorRGBA PlacardPlugin::CreateColor(const double _r,
   const double _g, const double _b, const double _a)
@@ -75,14 +81,28 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
   {
     this->nh = ros::NodeHandle(this->ns);
     this->changeSymbolSub = this->nh.subscribe(
-      this->topic, 1, &PlacardPlugin::ChangeSymbol, this);
+      this->rosShuffleTopic, 1, &PlacardPlugin::ChangeSymbol, this);
   }
 
   this->nextUpdateTime = this->scene->SimTime();
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&PlacardPlugin::Update, this));
+  
+  gzNode->Init();
+  this->symbolSub = gzNode->Subscribe(symbolSubTopic, &PlacardPlugin::ChangeSymbolTo, this);
+  gzdbg << "inited" << std::endl;
 }
+
+void PlacardPlugin::ChangeSymbolTo(gazebo::ConstDockPlacardPtr &_msg)
+{
+  gzdbg << "new symbol for " << this->ns << std::endl;
+  gzdbg << "shape: " << _msg->shape() << std::endl;
+  gzdbg << "color: " << _msg->color() << std::endl;
+  this->shape = _msg->shape();
+  this->color = _msg->color();
+}
+
 
 //////////////////////////////////////////////////
 bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
@@ -153,17 +173,28 @@ bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
     this->shuffleEnabled = _sdf->GetElement("shuffle")->Get<bool>();
 
     // Required if shuffle enabled: ROS topic.
-    if (!_sdf->HasElement("topic"))
+    if (!_sdf->HasElement("ros_shuffle_topic"))
     {
-      ROS_ERROR("<topic> missing");
+      ROS_ERROR("<ros_shuffle_topic> missing");
     }
-    this->topic = _sdf->GetElement("topic")->Get<std::string>();
+    this->rosShuffleTopic = _sdf->GetElement("ros_shuffle_topic")->Get<std::string>();
   }
 
-  // Optional: ROS namespace.
-  if (_sdf->HasElement("robot_namespace"))
-    this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
-
+  // Required: namespace.
+  if (!_sdf->HasElement("robot_namespace"))
+  {
+    ROS_ERROR("<robot_namespace> missing");
+  }
+  this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
+  if (!_sdf->HasElement("gz_symbol_topic"))
+  {
+    this->symbolSubTopic = "/" + this->ns + "/symbol";
+    gzdbg << this->symbolSubTopic << std::endl;
+  }
+  else
+  {
+    this->symbolSubTopic = _sdf->GetElement("gz_symbol_topic")->Get<std::string>();
+  }
   return true;
 }
 
@@ -204,10 +235,8 @@ void PlacardPlugin::Update()
     #endif
     auto delim = name.rfind("/");
     auto shortName = name.substr(delim + 1);
-
     if (shortName.find(this->shape) != std::string::npos)
       color = this->kColors[this->color];
-
     #if GAZEBO_MAJOR_VERSION >= 8
       ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
     #else

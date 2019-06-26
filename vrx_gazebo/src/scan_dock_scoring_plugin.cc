@@ -155,7 +155,18 @@ bool DockChecker::Allowed() const
 /////////////////////////////////////////////////
 void DockChecker::AnnounceSymbol()
 {
-  if (!this->announceSymbol.data.empty())
+  std::string gzTopicName = "/vrx/dock_2018_placard";
+  gzTopicName += this->name.back();
+  gzTopicName += "/symbol";
+ 
+  this->dockPlacardPub = this->node->Advertise<dock_placard_msgs::msgs::DockPlacard>(gzTopicName);
+  dock_placard_msgs::msgs::DockPlacard symbol;
+  symbol.set_color(announceSymbol.data.substr(0,announceSymbol.data.find("_")));
+  symbol.set_shape(announceSymbol.data.substr(announceSymbol.data.find("_")+1));
+  dockPlacardPub->Publish(symbol);
+  gzdbg << gzTopicName << " is " << announceSymbol.data << std::endl;
+    
+  if (this->dockAllowed)
   {
     // Initialize ROS transport.
     this->nh.reset(new ros::NodeHandle());
@@ -194,18 +205,16 @@ void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
         << _msg->data() << std::endl;
 }
 
-/////////////////////////////////////////////////
-ScanDockScoringPlugin::ScanDockScoringPlugin() :
-  node(new gazebo::transport::Node())
+ScanDockScoringPlugin::ScanDockScoringPlugin():
+  node (new gazebo::transport::Node())
 {
-  this->node->Init();
-  gzmsg << "scan and dock scoring plugin loaded" << std::endl;
 }
 
 /////////////////////////////////////////////////
 void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
+  this->node->Init();
   ScoringPlugin::Load(_world, _sdf);
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
@@ -328,11 +337,13 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     bool dockAllowed = bayElem->Get<bool>("dock_allowed");
 
     std::string announceSymbol = "";
-    if (bayElem->HasElement("announce_symbol"))
+    if (!bayElem->HasElement("symbol"))
     {
-      announceSymbol =
-        bayElem->GetElement("announce_symbol")->Get<std::string>();
+      ROS_ERROR("<symbol> not found");
     }
+    announceSymbol =
+      bayElem->GetElement("symbol")->Get<std::string>();
+
 
     // Create a new dock checker.
     #if GAZEBO_MAJOR_VERSION >= 8

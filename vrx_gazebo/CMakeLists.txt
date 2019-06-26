@@ -68,8 +68,14 @@ install(TARGETS light_buoy_plugin
 
 # Plugin for setting color and shape of a placard.
 add_library(placard_plugin src/placard_plugin.cc)
-target_link_libraries(placard_plugin ${catkin_LIBRARIES})
-add_dependencies(placard_plugin ${catkin_EXPORTED_TARGETS})
+target_link_libraries(placard_plugin
+  ${catkin_LIBRARIES}
+  dock_placard_msgs
+)
+add_dependencies(placard_plugin
+  ${catkin_EXPORTED_TARGETS}
+  dock_placard_msgs
+)
 install(TARGETS placard_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -80,13 +86,11 @@ install(TARGETS placard_plugin
 add_library(scoring_plugin src/scoring_plugin.cc)
 target_link_libraries(scoring_plugin
   ${catkin_LIBRARIES}
-  light_buoy_colors_msgs
 )
 add_dependencies(scoring_plugin
   ${catkin_EXPORTED_TARGETS}
   vrx_gazebo_generate_messages_cpp
   vrx_gazebo_generate_services_cpp
-  light_buoy_colors_msgs
 )
 install(TARGETS scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -134,8 +138,15 @@ install(TARGETS wayfinding_scoring_plugin
 add_library(scan_dock_scoring_plugin src/scan_dock_scoring_plugin.cc)
 target_link_libraries(scan_dock_scoring_plugin
   ${catkin_LIBRARIES}
-  scoring_plugin)
-add_dependencies(scan_dock_scoring_plugin ${catkin_EXPORTED_TARGETS})
+  scoring_plugin 
+  light_buoy_colors_msgs
+  dock_placard_msgs
+  )
+add_dependencies(scan_dock_scoring_plugin
+  ${catkin_EXPORTED_TARGETS}
+  light_buoy_colors_msgs
+  dock_placard_msgs
+)
 install(TARGETS scan_dock_scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

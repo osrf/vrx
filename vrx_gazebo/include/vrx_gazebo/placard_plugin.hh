@@ -21,7 +21,7 @@
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/Empty.h>
-
+#include "dock_placard.pb.h"
 #include <array>
 #include <cstdint>
 #include <map>
@@ -31,6 +31,12 @@
 #include <vector>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
+namespace gazebo
+{
+  typedef const boost::shared_ptr<
+    const dock_placard_msgs::msgs::DockPlacard>
+      ConstDockPlacardPtr;
+}
 
 /// \brief Controls the shape and color of a symbol.
 ///
@@ -45,7 +51,9 @@
 ///   <shuffle>: True if the topic for shuffling the sequence is enabled.
 ///   <robot_namespace> ROS namespace of Node, can be used to have multiple
 ///                    plugins.
-///   <topic>: The ROS topic used to request color changes.
+///   <ros_shuffle_topic>: The ROS topic used to request color changes.
+///   <gz_symbol_topic>: The gazebo topic used to request specific symbol changes
+///     defaults to /<robot_namespace>/symbol
 ///   <visuals>: The set of visual symbols. It contains at least one visual:
 ///     <visual>: A visual displaying a shape.
 ///
@@ -66,6 +74,8 @@
 class PlacardPlugin : public gazebo::VisualPlugin
 {
   // Documentation inherited.
+  public: PlacardPlugin();
+
   public: void Load(gazebo::rendering::VisualPtr _parent,
                     sdf::ElementPtr _sdf);
 
@@ -93,6 +103,8 @@ class PlacardPlugin : public gazebo::VisualPlugin
   /// \brief Callback for changing a symbol and its color.
   /// \param[in] _msg Not used.
   private: void ChangeSymbol(const std_msgs::Empty::ConstPtr &_msg);
+
+  private: void ChangeSymbolTo(gazebo::ConstDockPlacardPtr &_msg);
 
   /// \brief List of the color options (red, green, blue, and no color)
   /// with their string name for logging.
@@ -133,7 +145,16 @@ class PlacardPlugin : public gazebo::VisualPlugin
   private: std::string ns;
 
   /// \brief ROS topic.
-  private: std::string topic;
+  private: std::string rosShuffleTopic;
+
+  /// \brief gazebo Node
+  private: gazebo::transport::NodePtr gzNode;
+
+  /// \brief gazebo symbol sub topic
+  private: std::string symbolSubTopic;
+
+  /// \breif symbol subscriber
+  private: gazebo::transport::SubscriberPtr symbolSub;
 
   /// Pointer to the scene node.
   private: gazebo::rendering::ScenePtr scene;

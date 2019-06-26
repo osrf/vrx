@@ -81,11 +81,6 @@ LightBuoyPlugin::LightBuoyPlugin() :
 
 void LightBuoyPlugin::ChangePatternTo(const gazebo::ConstLightBuoyColorsPtr &_msg)
 {
-  gzdbg << "new Colors:" << std::endl;
-  gzdbg << "color1: " << _msg->color_1() << std::endl;
-  gzdbg << "color2: " << _msg->color_2() << std::endl;
-  gzdbg << "color3: " << _msg->color_3() << std::endl;
- 
   pattern[0] = IndexFromColor(_msg->color_1());
   pattern[1] = IndexFromColor(_msg->color_2());
   pattern[2] = IndexFromColor(_msg->color_3());

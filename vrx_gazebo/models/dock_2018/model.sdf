@@ -39,7 +39,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2018_placard1</robot_namespace>
-            <topic>shuffle</topic>
+            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
@@ -101,7 +101,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2018_placard2</robot_namespace>
-            <topic>shuffle</topic>
+            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">

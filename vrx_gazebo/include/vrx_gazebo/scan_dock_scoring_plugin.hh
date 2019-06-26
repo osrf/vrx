@@ -21,6 +21,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include "light_buoy_colors.pb.h"
+#include "dock_placard.pb.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -171,6 +172,9 @@ class DockChecker
 
   /// \brief ROS topic where the target symbol will be published.
   private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
+  
+  /// \brief Publish the placard symbols 
+  private: gazebo::transport::PublisherPtr dockPlacardPub;
 };
 
 /// \brief A plugin for computing the score of the scan and dock task.
@@ -203,7 +207,7 @@ class DockChecker
 /// <correct_dock_bonus_points>: Points granted when the vehicle successfully
 /// dock-and-undock in the specified bay.
 /// Default value is 10.
-/// <announce_symbol>: Optional string with format <COLOR>_<SHAPE>, where
+/// <symbol>: Required string with format <COLOR>_<SHAPE>, where
 /// color can be "red", "green", "blue", "yellow" and color can be "triangle",
 /// "circle", "cross". If this parameter is present, a ROS message will be
 /// sent in OnReady(). The vehicle should dock in the bay matching this color
@@ -248,16 +252,15 @@ class DockChecker
 ///       <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>true</dock_allowed>
-///       <announce_symbol>red_circle</announce_symbol>
+///       <symbol>red_circle</symbol>
 ///     </bay>
 ///   </bays>
 /// </plugin>
 class ScanDockScoringPlugin : public ScoringPlugin
 {
-  // Constructor.
+  // Documentation inherited.
   public: ScanDockScoringPlugin();
 
-  // Documentation inherited.
   private: void Load(gazebo::physics::WorldPtr _world,
                      sdf::ElementPtr _sdf);
 
