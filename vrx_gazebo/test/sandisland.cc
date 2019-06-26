@@ -48,7 +48,7 @@ TEST_F(SandislandTest, SandislandExists)
 /// \brief Tests that the ocean model exists.
 TEST_F(SandislandTest, OceanExists)
 {
-  EXPECT_TRUE(ModelExists("ocean"));
+  EXPECT_TRUE(ModelExists("ocean_waves"));
 }
 
 /////////////////////////////////////////////////

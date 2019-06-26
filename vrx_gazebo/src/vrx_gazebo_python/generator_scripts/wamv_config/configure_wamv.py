@@ -11,6 +11,7 @@ from .. utils import add_gazebo_thruster_config
 
 def main():
 
+    rospy.init_node("wamv_generator", anonymous=True)
     # Check if yaml files were given
     received_thruster_yaml = len(rospy.get_param('thruster_yaml')) > 0
     received_sensor_yaml = len(rospy.get_param('sensor_yaml')) > 0

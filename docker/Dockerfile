@@ -66,6 +66,8 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
     ros-${DIST}-teleop-tools \
     ros-${DIST}-teleop-twist-keyboard \
     ros-${DIST}-velodyne-simulator \
+    ros-${DIST}-rqt \
+    ros-${DIST}-rqt-common-plugins \
  && rosdep init \
  && apt clean
 
