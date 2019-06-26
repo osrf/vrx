@@ -98,6 +98,7 @@
     </link>
 
     <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
       <linear_drag>1000.0</linear_drag>

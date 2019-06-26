@@ -45,7 +45,7 @@
     plugin configurations -->
     <include>
       <pose> 0 0 0 0 0 0 </pose>
-      <uri>model://ocean</uri>
+      <uri>model://ocean_waves</uri>
     </include>
 
     <!-- The posts for securing the WAM-V -->

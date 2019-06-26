@@ -33,6 +33,7 @@
         </geometry>
       </collision>
       <visual name="visual">
+				<pose>0 0 -0.15 0 0 0 </pose>
         <geometry>
 	        <mesh><uri>model://surmark950400/mesh/surmark950400.dae</uri></mesh>
         </geometry>
@@ -46,6 +47,7 @@
     </link>
 
     <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
       <linear_drag>10.0</linear_drag>

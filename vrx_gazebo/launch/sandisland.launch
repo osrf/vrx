@@ -7,7 +7,8 @@
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
   <arg name="verbose" default="false"/>
-
+  <!-- If true, start in paused state -->
+  <arg name="paused"  default="false"/>
   <!-- Initial USV location and attitude-->
   <arg name="x" default="158" />
   <arg name="y" default="108" />
@@ -33,7 +34,7 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name"   value="$(arg world)"/>
     <arg name="verbose"      value="$(arg verbose)"/>
-    <arg name="paused"       value="false"/>
+    <arg name="paused"       value="$(arg paused)"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui"          value="$(arg gui)" />
   </include>

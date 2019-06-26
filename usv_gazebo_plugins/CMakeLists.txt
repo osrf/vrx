@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(usv_gazebo_plugins)
-find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation xacro)
+find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation xacro wave_gazebo_plugins)
 find_package(Eigen3 REQUIRED)
 
 ###################################
@@ -9,7 +9,7 @@ find_package(Eigen3 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS message_runtime gazebo_dev roscpp
+  CATKIN_DEPENDS message_runtime gazebo_dev roscpp wave_gazebo_plugins
 )
 
 # Plugins require c++11

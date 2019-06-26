@@ -29,6 +29,10 @@
 #include <ignition/math/Vector3.hh>
 #include "usv_gazebo_plugins/shape_volume.hh"
 
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/WavefieldEntity.hh"
+#include "wave_gazebo_plugins/WavefieldModelPlugin.hh"
+
 namespace gazebo
 {
   namespace buoyancy {
@@ -136,6 +140,22 @@ namespace gazebo
 
     /// \brief Pointer to base model
     protected: physics::ModelPtr model;
+
+    /// \brief Pointer to the Gazebo world
+    /// Retrieved when the model is loaded.
+    protected: physics::WorldPtr world;
+
+    /// \brief The name of the wave model
+    protected: std::string waveModel;
+
+    /// \brief Vector of water height at each link from previous timestep
+    protected: std::vector<double> buoyancyHeights;
+
+    /// \brief Previous update time
+    protected: double lastSimTime;
+
+    /// \brief The wave parameters.
+    protected: std::shared_ptr<const asv::WaveParameters> waveParams;
   };
 }
 

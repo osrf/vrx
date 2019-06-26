@@ -5,7 +5,7 @@ DVIPS = dvips
 PS2PDF = ps2pdf
 VIEWPDF = okular
 
-BASE_NAME = theory_of_operation
+BASE_NAME = wave_generation  # theory_of_operation
 
 all: $(BASE_NAME).pdf
 
