@@ -146,10 +146,13 @@ namespace gazebo
     protected: physics::WorldPtr world;
 
     /// \brief The name of the wave model
-    protected: std::string waveModel;
+    protected: std::string waveModelName;
 
-    /// \brief Vector of water height at each link from previous timestep
-    protected: std::vector<double> buoyancyHeights;
+    /// \brief Map of water height at each link from previous timestep
+    protected: std::map<gazebo::physics::LinkPtr, double> linkHeights;
+
+    /// \brief Map of water velocity at each link
+    protected: std::map<gazebo::physics::LinkPtr, double> linkHeightDots;
 
     /// \brief Previous update time
     protected: double lastSimTime;

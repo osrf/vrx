@@ -107,7 +107,8 @@ BuoyancyPlugin::BuoyancyPlugin()
   : fluidDensity(997),
     fluidLevel(0.0),
     linearDrag(0.0),
-    angularDrag(0.0)
+    angularDrag(0.0),
+    lastSimTime(0.0)
 {
 }
 
@@ -161,10 +162,9 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         if (linkMap.find(buoyObj.linkId) == linkMap.end())
         {
           linkMap[buoyObj.linkId] = _model->GetLink(buoyObj.linkName);
+          // initialize link height
+          linkHeights[linkMap[buoyObj.linkId]] = this->fluidLevel;
         }
-
-        // Also populate a the vector holding the depths
-        // this->buoyancyHeights.push_back(this->fluidLevel);
 
         // get mass
         #if GAZEBO_MAJOR_VERSION >= 8
@@ -172,7 +172,6 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         #else
           buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->GetMass();
         #endif
-
 
         // add buoyancy object to list and display stats
         gzmsg << buoyObj.disp() << std::endl;
@@ -220,21 +219,24 @@ void BuoyancyPlugin::OnUpdate()
   double dt = simTime - this->lastSimTime;
   this->lastSimTime = simTime;
 
-  // TODO: for each link get wave height
-  /*
-  // Compute the wave displacement at the centre of the link frame.
-  // Wavefield height at the link, relative to the mean water level.
-  // double waveHeight = WavefieldSampler::ComputeDepthDirectly(
-  //  *waveParams, linkFrame.Pos(), simTime);
-  double waveHeight = WavefieldSampler::ComputeDepthSimply(
-      *waveParams, linkFrame.Pos(), simTime);
-  // Absolute water height at link
-  double linkHeight = waveHeight + this->fluidLevel;
-  double linkFluidLevel = linkHeight;  // + linkFrame.Pos().Z();
-  // Estimate the rate of change of the fluid level
-  double heightdot = (waveHeight - this->buoyancyHeights[ii])/dt;
-  this->buoyancyHeights[ii]=waveHeight;
-  */
+  // get wave height for each link
+  for (auto& link : linkMap) {
+    auto linkPtr = link.second;
+    #if GAZEBO_MAJOR_VERSION >= 8
+      ignition::math::Pose3d linkFrame = linkPtr->WorldPose();
+    #else
+      ignition::math::Pose3d linkFrame = linkPtr->GetWorldPose().Ign();
+    #endif
+
+    // Compute the wave displacement at the centre of the link frame.
+    // Wave field height at the link, relative to the mean water level.
+    double waveHeight = WavefieldSampler::ComputeDepthSimply(
+        *waveParams, linkFrame.Pos(), simTime);
+
+    this->linkHeightDots[linkPtr] =
+        (waveHeight - this->linkHeights[linkPtr]) / dt;
+    this->linkHeights[linkPtr] = waveHeight;
+  }
 
   for (auto& buoyancyObj : this->buoyancyObjects)
   {
@@ -247,7 +249,7 @@ void BuoyancyPlugin::OnUpdate()
     linkFrame = linkFrame * buoyancyObj.pose;
 
     auto volume = buoyancyObj.shape->calculateVolume(linkFrame,
-        this->fluidLevel);
+        this->linkHeights[link] + this->fluidLevel);
 
     GZ_ASSERT(volume.volume >= 0,
         "Non-positive volume found in volume properties!");
@@ -274,9 +276,9 @@ void BuoyancyPlugin::OnUpdate()
 
       // drag (based on Exact Buoyancy for Polyhedra by Eric Catto)
       // linear drag
-      // TODO: Relative velocity of link w.r.t. water
-      // double relV = vel.Z() - heightdot;
-      ignition::math::Vector3d dragForce = linearDrag * partialMass * -linVel;
+      ignition::math::Vector3d relVel =
+          ignition::math::Vector3d(0, 0, this->linkHeightDots[link]) - linVel;
+      ignition::math::Vector3d dragForce = linearDrag * partialMass * relVel;
       buoyancy += dragForce;
       if (buoyancy.Z() < 0.0)
       {
