@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Open Source Robotics Foundation
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,17 +73,23 @@ namespace gazebo
   }  // end of buoyancy namespace
 
   /// \brief This plugin simulates buoyancy of an object in fluid.
+  ///   <wave_model>:    Name of the wave model object (required)
+  ///
   ///   <fluid_density>: Sets the density of the fluid that surrounds the
   ///                    buoyant object [kg/m^3].
   ///                    This parameter is optional (default value 997 kg/m^3).
   ///
   ///   <fluid_level>:   The height of the fluid/air interface [m].
-  ///                    This parameter is optional (default value 0m).
+  ///                    This parameter is optional (default value 0 m).
   ///
-  ///   <linear_drag>:   Linear drag coeffient.
+  ///   <linear_drag>:   Linear drag coefficent [N/(m/s)].
+  ///                    Translational drag implement as linear function
+  ///                    of velocity.
   ///                    This parameter is optional.
   ///
-  ///   <angular_drag>:  Angular drag coeffient.
+  ///   <angular_drag>:  Angular drag coefficent [(Nm)/(rad/s)].
+  ///                    Rotational drag implemented as linear function
+  ///                    of velocity.
   ///                    This parameter is optional.
   ///
   ///   <buoyancy>:      Describes the volume properties
