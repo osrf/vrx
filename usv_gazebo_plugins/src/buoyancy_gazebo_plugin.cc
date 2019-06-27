@@ -53,13 +53,13 @@ void BuoyancyObject::load(const physics::ModelPtr model,
   // parse link
   if (elem->HasElement("link_name"))
   {
-    linkName = elem->GetElement("link_name")->Get<std::string>();
+    this->linkName = elem->GetElement("link_name")->Get<std::string>();
     physics::LinkPtr link = model->GetLink(linkName);
     if (!link)
     {
       throw ParseException("link_name", "invalid link name");
     }
-    linkId = link->GetId();
+    this->linkId = link->GetId();
   }
   else
   {
@@ -69,7 +69,7 @@ void BuoyancyObject::load(const physics::ModelPtr model,
   // parse pose (optional)
   if (elem->HasElement("pose"))
   {
-    pose = elem->GetElement("pose")->Get<ignition::math::Pose3d>();
+    this->pose = elem->GetElement("pose")->Get<ignition::math::Pose3d>();
   }
 
   // parse geometry
@@ -78,7 +78,7 @@ void BuoyancyObject::load(const physics::ModelPtr model,
     sdf::ElementPtr geometry = elem->GetElement("geometry");
     try
     {
-      shape = std::move(ShapeVolume::makeShape(geometry));
+      this->shape = std::move(ShapeVolume::makeShape(geometry));
     }
     catch (...)
     {
@@ -159,18 +159,19 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         buoyObj.load(_model, buoyancyElem);
 
         // add link to linkMap if it is not in the map
-        if (linkMap.find(buoyObj.linkId) == linkMap.end())
+        if (this->linkMap.find(buoyObj.linkId) == this->linkMap.end())
         {
-          linkMap[buoyObj.linkId] = _model->GetLink(buoyObj.linkName);
+          this->linkMap[buoyObj.linkId] = _model->GetLink(buoyObj.linkName);
           // initialize link height
-          linkHeights[linkMap[buoyObj.linkId]] = this->fluidLevel;
+          this->linkHeights[linkMap[buoyObj.linkId]] = this->fluidLevel;
         }
 
         // get mass
         #if GAZEBO_MAJOR_VERSION >= 8
-          buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->Mass();
+          buoyObj.mass = this->linkMap[buoyObj.linkId]->GetInertial()->Mass();
         #else
-          buoyObj.mass = linkMap[buoyObj.linkId]->GetInertial()->GetMass();
+          buoyObj.mass =
+              this->linkMap[buoyObj.linkId]->GetInertial()->GetMass();
         #endif
 
         // add buoyancy object to list and display stats
@@ -220,7 +221,7 @@ void BuoyancyPlugin::OnUpdate()
   this->lastSimTime = simTime;
 
   // get wave height for each link
-  for (auto& link : linkMap) {
+  for (auto& link : this->linkMap) {
     auto linkPtr = link.second;
     #if GAZEBO_MAJOR_VERSION >= 8
       ignition::math::Pose3d linkFrame = linkPtr->WorldPose();
@@ -240,7 +241,7 @@ void BuoyancyPlugin::OnUpdate()
 
   for (auto& buoyancyObj : this->buoyancyObjects)
   {
-    auto link = linkMap[buoyancyObj.linkId];
+    auto link = this->linkMap[buoyancyObj.linkId];
     #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Pose3d linkFrame = link->WorldPose();
     #else
@@ -248,21 +249,21 @@ void BuoyancyPlugin::OnUpdate()
     #endif
     linkFrame = linkFrame * buoyancyObj.pose;
 
-    auto volume = buoyancyObj.shape->calculateVolume(linkFrame,
+    auto submergedVolume = buoyancyObj.shape->calculateVolume(linkFrame,
         this->linkHeights[link] + this->fluidLevel);
 
-    GZ_ASSERT(volume.volume >= 0,
+    GZ_ASSERT(submergedVolume.volume >= 0,
         "Non-positive volume found in volume properties!");
 
-    // By Archimedes' principle,
-    // buoyancy = -(mass*gravity)*fluid_density/object_density
-    // object_density = mass/volume, so the mass term cancels.
-    ignition::math::Vector3d buoyancy = -this->fluidDensity * volume.volume
-        * model->GetWorld()->Gravity();
-
-    // apply buoyancy and drag forces
-    if (volume.volume > 1e-6)
+    // calculate buoyancy and drag forces
+    if (submergedVolume.volume > 1e-6)
     {
+      // By Archimedes' principle,
+      // buoyancy = -(mass*gravity)*fluid_density/object_density
+      // object_density = mass/volume, so the mass term cancels.
+      ignition::math::Vector3d buoyancy = -this->fluidDensity
+          * submergedVolume.volume * model->GetWorld()->Gravity();
+
       #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Vector3d linVel = link->WorldLinearVel();
         ignition::math::Vector3d angVel = link->RelativeAngularVel();
@@ -272,7 +273,8 @@ void BuoyancyPlugin::OnUpdate()
       #endif
 
       // partial mass = total_mass * submerged_vol / total_vol
-      float partialMass = 2 * volume.volume / buoyancyObj.shape->volume;
+      float partialMass = buoyancyObj.mass * submergedVolume.volume
+          / buoyancyObj.shape->volume;
 
       // drag (based on Exact Buoyancy for Polyhedra by Eric Catto)
       // linear drag
@@ -285,7 +287,7 @@ void BuoyancyPlugin::OnUpdate()
         buoyancy.Z() = 0.0;
       }
       // apply force
-      link->AddForceAtWorldPosition(buoyancy, volume.centroid);
+      link->AddForceAtWorldPosition(buoyancy, submergedVolume.centroid);
 
       // drag torque
       double averageLength2 = ::pow(buoyancyObj.shape->averageLength, 2);

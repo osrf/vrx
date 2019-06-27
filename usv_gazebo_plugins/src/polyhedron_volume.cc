@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Open Source Robotics Foundation
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ Polyhedron::Face::Face(int _i1, int _i2, int _i3)
 
 //////////////////////////////////////////////////////
 Volume::Volume()
-  : volume(0.0), centroid(Vec3({0, 0, 0}))
+  : volume(0.0), centroid(ignition::math::Vector3d({0, 0, 0}))
 {
 }
 
@@ -51,14 +51,15 @@ Polyhedron Polyhedron::makeCube(double x, double y, double z)
 {
   Polyhedron cube;
   // generate vertices
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
-    for (int j = 0; j < 2; j++)
+    for (int j = 0; j < 2; ++j)
     {
-      for (int k = 0; k < 2; k++)
+      for (int k = 0; k < 2; ++k)
       {
         cube.vertices.emplace_back(
-            Vec3(i * x - x / 2.0, j * y - y / 2.0, k * z - z / 2.0));
+            ignition::math::Vector3d(i * x - x / 2.0,
+                j * y - y / 2.0, k * z - z / 2.0));
       }
     }
   }
@@ -90,29 +91,29 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
   double angle_step = 2.0 * M_PI / n;
   double l_2 = l / 2.0;
   cylinder.vertices.resize(2*n+2);
-  cylinder.vertices[0] = Vec3{0, 0, -l_2};
-  for (int i = 1; i <= n; i++)
+  cylinder.vertices[0] = ignition::math::Vector3d{0, 0, -l_2};
+  for (int i = 1; i <= n; ++i)
   {
     double x = r * ::sin(angle_step * (i-1));
     double y = r * ::cos(angle_step * (i-1));
     // bottom plate
-    cylinder.vertices[i] = Vec3{x, y, -l_2};
+    cylinder.vertices[i] = ignition::math::Vector3d{x, y, -l_2};
     // top plate
-    cylinder.vertices[i+n] = Vec3{x, y, l_2};
+    cylinder.vertices[i+n] = ignition::math::Vector3d{x, y, l_2};
   }
-  cylinder.vertices[2*n+1] = Vec3{0, 0, l_2};
+  cylinder.vertices[2*n+1] = ignition::math::Vector3d{0, 0, l_2};
 
   // generate all faces
-  for (int i = 1; i <= n; i++)
+  for (int i = 1; i <= n; ++i)
   { // bottom plate
     cylinder.faces.emplace_back(Face(0, i, (i%n)+1));
   }
-  for (int i = 1; i <= n; i++)
+  for (int i = 1; i <= n; ++i)
   { // walls
     cylinder.faces.emplace_back(Face(i+1, i, n+i));
     cylinder.faces.emplace_back(Face((i%n)+n, (i%n)+n+1, (i%n)+1));
   }
-  for (int i = 1; i <= n; i++)
+  for (int i = 1; i <= n; ++i)
   { // top plate
     cylinder.faces.emplace_back(Face(i+n, 2*n+1, (i%n)+n+1));
   }
@@ -124,12 +125,13 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
 }
 
 //////////////////////////////////////////////////////
-Volume Polyhedron::tetrahedronVolume(const Vec3 &v1,
-    const Vec3 &v2, const Vec3 &v3, const Vec3 &p)
+Volume Polyhedron::tetrahedronVolume(const ignition::math::Vector3d &v1,
+    const ignition::math::Vector3d &v2, const ignition::math::Vector3d &v3,
+    const ignition::math::Vector3d &p)
 {
-  Vec3 a = v2 - v1;
-  Vec3 b = v3 - v1;
-  Vec3 r = p - v1;
+  ignition::math::Vector3d a = v2 - v1;
+  ignition::math::Vector3d b = v3 - v1;
+  ignition::math::Vector3d r = p - v1;
 
   Volume output;
   output.volume = (1/6.) * (b.Cross(a)).Dot(r);
@@ -144,23 +146,25 @@ Volume Polyhedron::computeFullVolume()
   // Compute the contribution of each triangle face
   for (const auto& face : faces)
   {
-    Vec3 v1 = vertices[face.i1];
-    Vec3 v2 = vertices[face.i2];
-    Vec3 v3 = vertices[face.i3];
+    ignition::math::Vector3d v1 = vertices[face.i1];
+    ignition::math::Vector3d v2 = vertices[face.i2];
+    ignition::math::Vector3d v3 = vertices[face.i3];
     output += tetrahedronVolume(v1, v2, v3);
   }
   return output;
 }
 
 //////////////////////////////////////////////////////
-Volume Polyhedron::clipTriangle(const Vec3 &v1, const Vec3 &v2,
-    const Vec3 &v3, double d1, double d2, double d3, const Vec3 &p)
+Volume Polyhedron::clipTriangle(const ignition::math::Vector3d &v1,
+    const ignition::math::Vector3d &v2,
+    const ignition::math::Vector3d &v3, double d1, double d2, double d3,
+    const ignition::math::Vector3d &p)
 {
   assert(d1 * d2 < 0);
   Volume output;
 
   // calculate the intersection point from a to b
-  Vec3 ab = v1 + (d1/(d1 - d2))*(v2 - v1);
+  ignition::math::Vector3d ab = v1 + (d1/(d1 - d2))*(v2 - v1);
   if (d1 < 0)
   {
     // b to c crosses the clipping plane
@@ -168,14 +172,14 @@ Volume Polyhedron::clipTriangle(const Vec3 &v1, const Vec3 &v2,
     {
       // Case B - a quadrilateral or two triangles
       // Calculate intersection point from b to c.
-      Vec3 bc = v2 + (d2/(d2 - d3))*(v3 - v2);
+      ignition::math::Vector3d bc = v2 + (d2/(d2 - d3))*(v3 - v2);
       output += tetrahedronVolume(ab, bc, v1, p);
       output += tetrahedronVolume(bc, v3, v1, p);
     }
     else
     {
       // Case A - a single triangle.
-      Vec3 ac = v1 + (d1/(d1 - d3))*(v3 - v1);
+      ignition::math::Vector3d ac = v1 + (d1/(d1 - d3))*(v3 - v1);
       output += tetrahedronVolume(ab, ac, v1, p);
     }
   }
@@ -184,14 +188,14 @@ Volume Polyhedron::clipTriangle(const Vec3 &v1, const Vec3 &v2,
     if (d3 < 0)
     {
       // Case B
-      Vec3 ac = v1 + (d1/(d1 - d3))*(v3 - v1);
+      ignition::math::Vector3d ac = v1 + (d1/(d1 - d3))*(v3 - v1);
       output += tetrahedronVolume(ab, v2, v3, p);
       output += tetrahedronVolume(ab, v3, ac, p);
     }
     else
     {
       // Case A
-      Vec3 bc = v2 + (d2/(d2 - d3))*(v3 - v2);
+      ignition::math::Vector3d bc = v2 + (d2/(d2 - d3))*(v3 - v2);
       output += tetrahedronVolume(ab, v2, bc, p);
     }
   }
@@ -199,7 +203,7 @@ Volume Polyhedron::clipTriangle(const Vec3 &v1, const Vec3 &v2,
 }
 
 //////////////////////////////////////////////////////
-Volume Polyhedron::submergedVolume(const Vec3 &x,
+Volume Polyhedron::submergedVolume(const ignition::math::Vector3d &x,
     const ignition::math::Quaterniond &q, Plane &plane)
 {
   // transform the plane into the polyhedron frame
@@ -232,15 +236,15 @@ Volume Polyhedron::submergedVolume(const Vec3 &x,
   // computing all the tetrahedron volumes. Since this point is on the
   // surface, all of the surface faces get zero volume tetrahedrons.
   // This way the surface polygon does not need to be considered.
-  Vec3 p = vertices[sampleVert] - ds[sampleVert] * normal;
+  ignition::math::Vector3d p = vertices[sampleVert] - ds[sampleVert] * normal;
 
   // compute the contribution of each triangle
   Volume output;
   for (const auto& face : faces)
   {
-    Vec3 v1 = vertices[face.i1];
-    Vec3 v2 = vertices[face.i2];
-    Vec3 v3 = vertices[face.i3];
+    ignition::math::Vector3d v1 = vertices[face.i1];
+    ignition::math::Vector3d v2 = vertices[face.i2];
+    ignition::math::Vector3d v3 = vertices[face.i3];
     double d1 = ds[face.i1];
     double d2 = ds[face.i2];
     double d3 = ds[face.i3];

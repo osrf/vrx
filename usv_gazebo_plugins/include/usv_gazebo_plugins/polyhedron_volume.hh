@@ -25,8 +25,6 @@
 
 namespace buoyancy
 {
-  using Vec3 = ignition::math::Vector3d;
-
   /// \brief Represents a plane as a normal and offset
   struct Plane
   {
@@ -34,7 +32,7 @@ namespace buoyancy
     Plane();
 
     /// \brief Vector3 normal to plane
-    Vec3 normal;
+    ignition::math::Vector3d normal;
 
     /// \brief Offset w.r.t. normal
     float offset;
@@ -52,7 +50,7 @@ namespace buoyancy
     double volume;
 
     /// \brief Vector3 representing volume centroid
-    Vec3 centroid;
+    ignition::math::Vector3d centroid;
   };
 
   /// \brief Submerged volume calculation using polyhedron
@@ -95,8 +93,8 @@ namespace buoyancy
     /// @param q: our orientation (quaternions)
     /// @param plane: water surface defined as a plane
     /// @return Volume object with volume and centroid (relative to world)
-    Volume submergedVolume(const Vec3& x, const ignition::math::Quaterniond& q,
-        Plane& plane);
+    Volume submergedVolume(const ignition::math::Vector3d& x,
+        const ignition::math::Quaterniond& q, Plane& plane);
 
     private:
     /// \brief Computes volume and centroid of tetrahedron
@@ -106,8 +104,11 @@ namespace buoyancy
     /// @param v3: point on triangle
     /// @param p: arbitrary point
     /// @return Volume object with volume and centroid
-    static Volume tetrahedronVolume(const Vec3& v1, const Vec3& v2,
-        const Vec3& v3, const Vec3& p = Vec3({0., 0., 0.}));
+    static Volume tetrahedronVolume(const ignition::math::Vector3d& v1,
+        const ignition::math::Vector3d& v2,
+        const ignition::math::Vector3d& v3,
+        const ignition::math::Vector3d& p =
+            ignition::math::Vector3d({0., 0., 0.}));
 
     /// \brief Clips a partially submerged triangle
     /// @param v1: point on triangle
@@ -117,12 +118,14 @@ namespace buoyancy
     /// @param d2: distance of point v2 to the splitting plane
     /// @param d3: distance of point v3 to the splitting plane
     /// @return Volume object for clipped tetrahedron
-    static Volume clipTriangle(const Vec3& v1, const Vec3& v2,
-        const Vec3& v3, double d1, double d2, double d3,
-        const Vec3& p = Vec3({0., 0., 0.}));
+    static Volume clipTriangle(const ignition::math::Vector3d& v1,
+        const ignition::math::Vector3d& v2,
+        const ignition::math::Vector3d& v3, double d1, double d2, double d3,
+        const ignition::math::Vector3d& p =
+            ignition::math::Vector3d({0., 0., 0.}));
 
     /// \brief Object vertices
-    std::vector<Vec3> vertices;
+    std::vector<ignition::math::Vector3d> vertices;
 
     /// \brief Object faces
     std::vector<Face> faces;
