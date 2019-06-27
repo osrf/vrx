@@ -9,8 +9,7 @@
   <arg name="verbose" default="false"/>
   <!-- If true, start in paused state -->
   <arg name="paused"  default="false"/>
-  <!-- If true, records gazebo logs for playback -->
-  <arg name="recording" default="false"/>
+  <!-- Set various other gazebo arguments-->
   <arg name="extra_gazebo_args" default=""/>
 
   <!-- Initial USV location and attitude-->
@@ -41,7 +40,6 @@
     <arg name="paused"       value="$(arg paused)"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui"          value="$(arg gui)" />
-    <arg name="recording"    value="$(arg recording)"/>
     <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
   </include>
 
