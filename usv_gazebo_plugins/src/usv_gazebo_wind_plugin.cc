@@ -38,9 +38,15 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 {
 
   if (char* env_dbg = std::getenv("VRX_DEBUG"))
-    if (std::string(env_dbg) == "true")
-      this->debug = true;
-
+  {
+    gzdbg << std::string(env_dbg) <<std::endl;
+    if (std::string(env_dbg) == "false")
+      this->debug = false;
+  }
+  else
+  {
+    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to false" << std::endl;
+  }
   this->world = _parent;
   // Retrieve models' parameters from SDF
   if (!_sdf->HasElement("wind_obj") ||

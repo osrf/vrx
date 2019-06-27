@@ -216,8 +216,8 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Topic where the task stats are published.
   private: std::string taskInfoTopic = "/vrx/task/info";
 
-  // \breif Bool flag for debug. True by default
-  private: bool debug = false;
+  /// \brief Bool flag for debug.
+  private: bool debug = true;
 
   /// \brief Topic where debug collision is published.
   private: std::string contactDebugTopic = "/vrx/debug/contact";

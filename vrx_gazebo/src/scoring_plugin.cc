@@ -300,8 +300,8 @@ bool ScoringPlugin::ParseSDFParameters()
   if (char* env_dbg = std::getenv("VRX_DEBUG"))
   {
     gzdbg << std::string(env_dbg) <<std::endl;
-    if (std::string(env_dbg) == "true")
-      this->debug = true;
+    if (std::string(env_dbg) == "false")
+      this->debug = false;
   }
   else
   {

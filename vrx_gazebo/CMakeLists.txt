@@ -9,7 +9,6 @@ endif()
 
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTOUIC ON)
-set (ENV{VRX_DEBUG} "true")
 
 find_package (Qt5Widgets REQUIRED)
 find_package (Qt5Core REQUIRED)
