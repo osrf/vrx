@@ -305,7 +305,8 @@ bool ScoringPlugin::ParseSDFParameters()
   }
   else
   {
-    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to false" << std::endl;
+    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to true"
+      << std::endl;
   }
   // This is a required element.
   if (!this->sdf->HasElement("vehicle"))

@@ -116,10 +116,10 @@ namespace gazebo
     private: QPen pen;
 
     /// \breif last reported windspeed
-    private: double windSpeed;
+    private: double windSpeed = 0;
 
     /// \brief last reported wamvHeading(yaw)
-    private: double wamvHeading;
+    private: double wamvHeading = 0;
   };
 }
 
