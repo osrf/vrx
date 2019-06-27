@@ -35,7 +35,7 @@ wamv_imu:
         post_Y
 
 lidar:
-    num: 1
+    num: 2
     allowed_params:
         x
         y
