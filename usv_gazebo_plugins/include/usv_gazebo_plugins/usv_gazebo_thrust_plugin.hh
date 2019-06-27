@@ -237,6 +237,12 @@ namespace gazebo
                                  const double _maxPos,
                                  const double _maxNeg) const;
 
+    /// \brief Rotate engine using engine joint PID
+    /// \param[in] _i Index of thruster engine to rotate
+    /// \param[in] _stepTime common::Time since last rotation
+    private: void RotateEngine(size_t _i,
+                               common::Time _stepTime);
+
     /// \brief Spin a propeller based on its input
     /// \param[in] _propeller Pointer to the propeller joint to spin
     /// \param[in] _input Last input received for this propeller
