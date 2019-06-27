@@ -379,8 +379,7 @@ void UsvThrust::Update()
       this->thrusters[i].link->AddLinkForce(tforcev);
 
       // Spin the propellers
-      this->SpinPropeller(this->thrusters[i].propJoint,
-        this->thrusters[i].currCmd);
+      this->SpinPropeller(i);
     }
   }
 
@@ -423,50 +422,31 @@ void UsvThrust::RotateEngine(size_t _i, common::Time _stepTime)
 }
 
 //////////////////////////////////////////////////
-void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
-    const double _input)
+void UsvThrust::SpinPropeller(size_t _i)
 {
-  if (!_propeller)
-    return;
-
   const double kMinInput = 0.1;
   const double kMaxInput = 1.0;
   const double kMaxEffort = 2.0;
   double effort = 0.0;
 
-  if (std::abs(_input) > kMinInput)
-    effort = (_input / kMaxInput) * kMaxEffort;
+  physics::JointPtr propeller = this->thrusters[_i].propJoint;
 
-  _propeller->SetForce(0, effort);
+  // Calculate effort on propeller joint
+  if (std::abs(this->thrusters[_i].currCmd) > kMinInput)
+    effort = (this->thrusters[_i].currCmd / kMaxInput) * kMaxEffort;
 
-  // Get index in joint state message for this propeller
-  int8_t index = -1;
-  for (int i = 0; i < 2 * this->thrusters.size(); ++i)
-  {
-    if (_propeller->GetName() == this->jointStateMsg.name[i])
-    {
-      index = i;
-      break;
-    }
-  }
-  if (index < 0)
-  {
-    ROS_WARN("Propeller %s cannot be associated with a joint, "
-             "skipping message.", _propeller->GetName().c_str());
-    return;
-  }
+  propeller->SetForce(0, effort);
 
   // Set position, velocity, and effort of joint from gazebo
-
   #if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Angle position = _propeller->Position(0);
+    ignition::math::Angle position = propeller->Position(0);
   #else
-    gazebo::math::Angle position = _propeller->GetAngle(0);
+    gazebo::math::Angle position = propeller->GetAngle(0);
   #endif
   position.Normalize();
-  this->jointStateMsg.position[index] = position.Radian();
-  this->jointStateMsg.velocity[index] = _propeller->GetVelocity(0);
-  this->jointStateMsg.effort[index] = effort;
+  this->jointStateMsg.position[2 * _i + 1] = position.Radian();
+  this->jointStateMsg.velocity[2 * _i + 1] = propeller->GetVelocity(0);
+  this->jointStateMsg.effort[2 * _i + 1] = effort;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvThrust);

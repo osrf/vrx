@@ -238,16 +238,14 @@ namespace gazebo
                                  const double _maxNeg) const;
 
     /// \brief Rotate engine using engine joint PID
-    /// \param[in] _i Index of thruster engine to rotate
+    /// \param[in] _i Index of thruster whose engine will be rotated
     /// \param[in] _stepTime common::Time since last rotation
     private: void RotateEngine(size_t _i,
                                common::Time _stepTime);
 
-    /// \brief Spin a propeller based on its input
-    /// \param[in] _propeller Pointer to the propeller joint to spin
-    /// \param[in] _input Last input received for this propeller
-    private: void SpinPropeller(physics::JointPtr &_propeller,
-                                const double _input);
+    /// \brief Spin a propeller based on its current command
+    /// \param[in] _i Index of thruster whose propeller will be spun
+    private: void SpinPropeller(size_t _i);
 
     /// \brief A mutex to protect member variables accessed during
     /// OnThustCmd() and Update().
