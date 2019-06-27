@@ -7,7 +7,7 @@
 
     <!--wind for the wamv-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
-    <xacro:usv_wind_gazebo direction = "270" ros_update_rate="10" mean_vel="0">
+    <xacro:usv_wind_gazebo direction = "270" ros_update_rate="10" mean_vel="3">
       <wind_objs>
         <wind_obj>
           <name>wamv</name>
@@ -24,16 +24,6 @@
       <pose>130 100 0 0 0 0</pose>
     </include>
 
-    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
-    <xacro:usv_wind_gazebo>
-      <wind_objs>
-        <wind_obj>
-  	  <name>wamv</name>
-	  <link_name>base_link</link_name>
-	  <coeff_vector>.5 .5 .33</coeff_vector>
-        </wind_obj>
-      </wind_objs>
-    </xacro:usv_wind_gazebo>
 
     <!-- The scoring plugin -->
     <plugin name="navigation_scoring_plugin"

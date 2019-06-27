@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find vrx_gazebo)/launch/navigation_task.launch"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+  <node type="rviz" name="rviz" pkg="rviz"/>
+  <include file="$(find vrx_gazebo)/launch/usv_joydrive.launch"/>
+</launch>
