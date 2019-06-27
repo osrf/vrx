@@ -297,6 +297,16 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
 //////////////////////////////////////////////////
 bool ScoringPlugin::ParseSDFParameters()
 {
+  if (char* env_dbg = std::getenv("VRX_DEBUG"))
+  {
+    gzdbg << std::string(env_dbg) <<std::endl;
+    if (std::string(env_dbg) == "true")
+      this->debug = true;
+  }
+  else
+  {
+    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to false" << std::endl;
+  }
   // This is a required element.
   if (!this->sdf->HasElement("vehicle"))
   {
@@ -316,10 +326,6 @@ bool ScoringPlugin::ParseSDFParameters()
   // This is an optional element.
   if (this->sdf->HasElement("task_info_topic"))
     this->taskInfoTopic = this->sdf->Get<std::string>("task_info_topic");
-
-  // This is an optional element.
-  if (this->sdf->HasElement("debug"))
-    this->debug = this->sdf->Get<bool>("debug");
 
   // This is an optional element.
   if (this->sdf->HasElement("contact_debug_topic"))

@@ -65,10 +65,6 @@
 /// containing the ROS topic name to publish the task stats. The default
 /// topic name is /vrx/task/info .
 ///
-/// <debug> : optional parameter for debug
-/// (tells weather debug topics are being published).
-/// default is True
-///
 /// <contact_debug_topic>: Optional parameter (string type)
 /// containing the ROS topic name to
 /// publish every instant a collision with the wamv is happening.
@@ -221,7 +217,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::string taskInfoTopic = "/vrx/task/info";
 
   // \breif Bool flag for debug. True by default
-  private: bool debug = true;
+  private: bool debug = false;
 
   /// \brief Topic where debug collision is published.
   private: std::string contactDebugTopic = "/vrx/debug/contact";

@@ -36,6 +36,11 @@ UsvWindPlugin::UsvWindPlugin()
 //////////////////////////////////////////////////
 void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 {
+
+  if (char* env_dbg = std::getenv("VRX_DEBUG"))
+    if (std::string(env_dbg) == "true")
+      this->debug = true;
+
   this->world = _parent;
   // Retrieve models' parameters from SDF
   if (!_sdf->HasElement("wind_obj") ||
@@ -266,7 +271,7 @@ void UsvWindPlugin::Update()
     publishingBuffer = -1;
   }
   // Publishing the wind speed and direction
-  if (currentTime - this->lastPublishTime > publishingBuffer)
+  if ((currentTime - this->lastPublishTime > publishingBuffer) && this->debug)
   {
     std_msgs::Float64 windSpeedMsg;
     std_msgs::Float64 windDirectionMsg;

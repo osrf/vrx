@@ -149,6 +149,9 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    /// \breif Bool debug set by environment var VRX_DEBUG
+    private: bool debug = false;
   };
 }
 
