@@ -62,6 +62,7 @@ namespace gazebo
     struct WindObj
     {
       /// \Bool to show weather the model and link pointers have been set
+      // cppcheck-suppress unusedStructMember
       bool init = false;
       /// \name of model as it will be looked by in the world
       std::string modelName;
@@ -129,10 +130,10 @@ namespace gazebo
     private: ros::Publisher windDirectionPub;
 
     /// \brief Topic where the wind speed is published.
-    private: std::string topicWindSpeed = "/wind_speed";
+    private: std::string topicWindSpeed = "/vrx/debug/wind/speed";
 
     /// \brief Topic where the wind direction is published.
-    private: std::string topicWindDirection = "/wind_direction";
+    private: std::string topicWindDirection = "/vrx/debug/wind/direction";
 
     /// \brief Last time wind speed and direction was published.
     private: double lastPublishTime = 0;

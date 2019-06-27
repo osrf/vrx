@@ -19,11 +19,12 @@
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include "vrx_gazebo/navigation_scoring_plugin.hh"
+#include <gazebo/physics/Link.hh>
 
 /////////////////////////////////////////////////
 NavigationScoringPlugin::Gate::Gate(
-    const gazebo::physics::ModelPtr _leftMarkerModel,
-    const gazebo::physics::ModelPtr _rightMarkerModel)
+    const gazebo::physics::LinkPtr _leftMarkerModel,
+    const gazebo::physics::LinkPtr _rightMarkerModel)
   : leftMarkerModel(_leftMarkerModel),
     rightMarkerModel(_rightMarkerModel)
 {
@@ -37,7 +38,7 @@ void NavigationScoringPlugin::Gate::Update()
     return;
 
   // The pose of the markers delimiting the gate.
-  #if GAZEBO_MAJOR_VERSION >= 8
+  #if GAZEBO_MAJOR_VERSION >= 8 
     const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
     const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
   #else
@@ -99,6 +100,23 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 {
   ScoringPlugin::Load(_world, _sdf);
 
+  // This is a required element.
+  if (!_sdf->HasElement("course_name"))
+  {
+    gzerr << "Unable to find <course_name> element in SDF." << std::endl;
+    return;
+  }
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->course =
+      this->world->ModelByName(_sdf->Get<std::string>("course_name"));
+  #else
+    this->course =
+      this->world->GetModel(_sdf->Get<std::string>("course_name"));
+  #endif
+  if (!this->course)
+  {
+	  gzerr << "could not find " << _sdf->Get<std::string>("course_name") << std::endl;
+  }
   // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
@@ -171,13 +189,8 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
 bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     const std::string &_rightMarkerName)
 {
-  #if GAZEBO_MAJOR_VERSION >= 8
-    gazebo::physics::ModelPtr leftMarkerModel =
-      this->world->ModelByName(_leftMarkerName);
-  #else
-    gazebo::physics::ModelPtr leftMarkerModel =
-      this->world->GetModel(_leftMarkerName);
-  #endif
+    gazebo::physics::LinkPtr leftMarkerModel =
+      this->course->GetLink(this->course->GetName() + "::" + _leftMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!leftMarkerModel)
@@ -186,13 +199,8 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     return false;
   }
 
-  #if GAZEBO_MAJOR_VERSION >= 8
-    gazebo::physics::ModelPtr rightMarkerModel =
-      this->world->ModelByName(_rightMarkerName);
-  #else
-    gazebo::physics::ModelPtr rightMarkerModel =
-      this->world->GetModel(_rightMarkerName);
-  #endif
+    gazebo::physics::LinkPtr rightMarkerModel =
+      this->course->GetLink(this->course->GetName() + "::" + _rightMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!rightMarkerModel)
@@ -221,6 +229,7 @@ void NavigationScoringPlugin::Update()
     if (!this->vehicleModel)
       return;
   }
+  
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
@@ -244,7 +253,8 @@ void NavigationScoringPlugin::Update()
         gate.state   == GateState::VEHICLE_BEFORE)
     {
       currentState = GateState::CROSSED;
-      gzmsg << "New gate crossed!" << std::endl;
+      gzdbg << "New gate crossed!" << std::endl;
+      this->ScoringPlugin::SetScore((this->ScoringPlugin::Score())+2);
     }
     // Just checking: did we go backward through the gate?
     else if (currentState == GateState::VEHICLE_BEFORE &&
@@ -258,6 +268,12 @@ void NavigationScoringPlugin::Update()
     gate.state = currentState;
   }
 }
+
+void NavigationScoringPlugin::OnCollision()
+{
+  this->ScoringPlugin::SetScore((this->ScoringPlugin::Score())-1);
+}
+
 
 //////////////////////////////////////////////////
 void NavigationScoringPlugin::OnReady()
