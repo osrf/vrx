@@ -73,7 +73,7 @@ namespace gazebo
   }  // end of buoyancy namespace
 
   /// \brief This plugin simulates buoyancy of an object in fluid.
-  ///   <wave_model>:    Name of the wave model object (required)
+  ///   <wave_model>:    Name of the wave model object (optional)
   ///
   ///   <fluid_density>: Sets the density of the fluid that surrounds the
   ///                    buoyant object [kg/m^3].

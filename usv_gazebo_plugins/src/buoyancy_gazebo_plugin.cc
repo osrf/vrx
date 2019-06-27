@@ -108,6 +108,7 @@ BuoyancyPlugin::BuoyancyPlugin()
     fluidLevel(0.0),
     linearDrag(0.0),
     angularDrag(0.0),
+    waveModelName(""),
     lastSimTime(0.0)
 {
 }
@@ -163,7 +164,16 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         {
           this->linkMap[buoyObj.linkId] = _model->GetLink(buoyObj.linkName);
           // initialize link height
-          this->linkHeights[linkMap[buoyObj.linkId]] = this->fluidLevel;
+          if (!this->waveModelName.empty())
+          {
+            this->linkHeights[linkMap[buoyObj.linkId]] = this->fluidLevel;
+          }
+          else
+          {
+            this->linkHeights[linkMap[buoyObj.linkId]] = 0;
+          }
+          // initialize link height velocity
+          this->linkHeightDots[linkMap[buoyObj.linkId]] = 0;
         }
 
         // get mass
@@ -203,40 +213,45 @@ void BuoyancyPlugin::Init()
 /////////////////////////////////////////////////
 void BuoyancyPlugin::OnUpdate()
 {
-  // If we haven't yet, retrieve the wave parameters from ocean model plugin.
-  if (waveParams == nullptr)
+  // update wave height if wave model specified
+  if (!this->waveModelName.empty())
   {
-    gzmsg << "usv_gazebo_dynamics_plugin: waveParams is null. "
-          << "Trying to get wave parameters from ocean model" << std::endl;
-    this->waveParams = WavefieldModelPlugin::GetWaveParams(
-        this->world, this->waveModelName);
-  }
+    // If we haven't yet, retrieve the wave parameters from ocean model plugin.
+    if (waveParams == nullptr)
+    {
+      gzmsg << "usv_gazebo_dynamics_plugin: waveParams is null. "
+            << "Trying to get wave parameters from ocean model" << std::endl;
+      this->waveParams = WavefieldModelPlugin::GetWaveParams(
+          this->world, this->waveModelName);
+    }
 
-  #if GAZEBO_MAJOR_VERSION >= 8
-    double simTime = this->world->SimTime().Double();
-  #else
-    double simTime = this->world->GetSimTime().Double();
-  #endif
-  double dt = simTime - this->lastSimTime;
-  this->lastSimTime = simTime;
-
-  // get wave height for each link
-  for (auto& link : this->linkMap) {
-    auto linkPtr = link.second;
     #if GAZEBO_MAJOR_VERSION >= 8
-      ignition::math::Pose3d linkFrame = linkPtr->WorldPose();
+      double simTime = this->world->SimTime().Double();
     #else
-      ignition::math::Pose3d linkFrame = linkPtr->GetWorldPose().Ign();
+      double simTime = this->world->GetSimTime().Double();
     #endif
 
-    // Compute the wave displacement at the centre of the link frame.
-    // Wave field height at the link, relative to the mean water level.
-    double waveHeight = WavefieldSampler::ComputeDepthSimply(
-        *waveParams, linkFrame.Pos(), simTime);
+    double dt = simTime - this->lastSimTime;
+    this->lastSimTime = simTime;
 
-    this->linkHeightDots[linkPtr] =
-        (waveHeight - this->linkHeights[linkPtr]) / dt;
-    this->linkHeights[linkPtr] = waveHeight;
+    // get wave height for each link
+    for (auto& link : this->linkMap) {
+      auto linkPtr = link.second;
+      #if GAZEBO_MAJOR_VERSION >= 8
+        ignition::math::Pose3d linkFrame = linkPtr->WorldPose();
+      #else
+        ignition::math::Pose3d linkFrame = linkPtr->GetWorldPose().Ign();
+      #endif
+
+      // Compute the wave displacement at the centre of the link frame.
+      // Wave field height at the link, relative to the mean water level.
+      double waveHeight = WavefieldSampler::ComputeDepthSimply(
+          *waveParams, linkFrame.Pos(), simTime);
+
+      this->linkHeightDots[linkPtr] =
+          (waveHeight - this->linkHeights[linkPtr]) / dt;
+      this->linkHeights[linkPtr] = waveHeight;
+    }
   }
 
   for (auto& buoyancyObj : this->buoyancyObjects)
