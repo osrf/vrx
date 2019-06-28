@@ -43,7 +43,7 @@ catkin_package(
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
-include_directories(include ${catkin_INCLUDE_DIRS}i
+include_directories(include ${catkin_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}/msgs
 )
