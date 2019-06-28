@@ -172,7 +172,7 @@ class NavigationScoringPlugin : public ScoringPlugin
 
   // Documentation inherited.
   private: void OnCollision() override;
-  
+
   // Name of Course
   private: gazebo::physics::ModelPtr course;
 

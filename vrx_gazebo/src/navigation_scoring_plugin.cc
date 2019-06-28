@@ -15,10 +15,10 @@
  *
 */
 
+#include "vrx_gazebo/navigation_scoring_plugin.hh"
 #include <cmath>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
-#include "vrx_gazebo/navigation_scoring_plugin.hh"
 #include <gazebo/physics/Link.hh>
 
 /////////////////////////////////////////////////
@@ -38,7 +38,7 @@ void NavigationScoringPlugin::Gate::Update()
     return;
 
   // The pose of the markers delimiting the gate.
-  #if GAZEBO_MAJOR_VERSION >= 8 
+  #if GAZEBO_MAJOR_VERSION >= 8
     const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
     const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
   #else
@@ -115,7 +115,8 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   #endif
   if (!this->course)
   {
-	  gzerr << "could not find " << _sdf->Get<std::string>("course_name") << std::endl;
+    gzerr << "could not find " <<
+      _sdf->Get<std::string>("course_name") << std::endl;
   }
   // This is a required element.
   if (!_sdf->HasElement("gates"))
@@ -190,7 +191,8 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     const std::string &_rightMarkerName)
 {
     gazebo::physics::LinkPtr leftMarkerModel =
-      this->course->GetLink(this->course->GetName() + "::" + _leftMarkerName + "::link");
+      this->course->GetLink(this->course->GetName() + "::" +
+        _leftMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!leftMarkerModel)
@@ -200,7 +202,8 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
   }
 
     gazebo::physics::LinkPtr rightMarkerModel =
-      this->course->GetLink(this->course->GetName() + "::" + _rightMarkerName + "::link");
+      this->course->GetLink(this->course->GetName() + "::" +
+        _rightMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!rightMarkerModel)
@@ -229,7 +232,7 @@ void NavigationScoringPlugin::Update()
     if (!this->vehicleModel)
       return;
   }
-  
+
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
