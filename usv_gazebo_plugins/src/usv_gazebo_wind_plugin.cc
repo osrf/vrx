@@ -44,7 +44,7 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
   }
   else
   {
-    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to true"
+    gzwarn << "VRX_DEBUG environment variable not set, defaulting to true"
       << std::endl;
   }
   this->world = _parent;
