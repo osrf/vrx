@@ -114,12 +114,14 @@ bool ColorSequenceChecker::OnColorSequence(
 DockChecker::DockChecker(const std::string &_name,
   const std::string &_activationTopic, const double _minDockTime,
   const bool _dockAllowed, const std::string &_worldName,
-  const std::string &_rosNameSpace, const std::string &_announceSymbol)
+  const std::string &_rosNameSpace, const std::string &_announceSymbol,
+  const std::string &_gzSymbolTopic)
   : name(_name),
     activationTopic(_activationTopic),
     minDockTime(_minDockTime),
     dockAllowed(_dockAllowed),
-    ns(_rosNameSpace)
+    ns(_rosNameSpace),
+    gzSymbolTopic(_gzSymbolTopic)
 {
   this->timer.Stop();
   this->timer.Reset();
@@ -128,7 +130,7 @@ DockChecker::DockChecker(const std::string &_name,
 
   // Subscriber to receive world updates (e.g.: a notification after a cloning).
   this->node.reset(new gazebo::transport::Node());
-  this->node->Init(_worldName);
+  this->node->Init();
 
   this->containSub = this->node->Subscribe(this->activationTopic,
     &DockChecker::OnActivationEvent, this);
@@ -155,17 +157,13 @@ bool DockChecker::Allowed() const
 /////////////////////////////////////////////////
 void DockChecker::AnnounceSymbol()
 {
-  std::string gzTopicName = "/vrx/dock_2018_placard";
-  gzTopicName += this->name.back();
-  gzTopicName += "/symbol";
- 
-  this->dockPlacardPub = this->node->Advertise<dock_placard_msgs::msgs::DockPlacard>(gzTopicName);
+  // Override the sdf parameters for the dock and replace with those specified here
+  this->dockPlacardPub = this->node->Advertise<dock_placard_msgs::msgs::DockPlacard>(gzSymbolTopic);
   dock_placard_msgs::msgs::DockPlacard symbol;
   symbol.set_color(announceSymbol.data.substr(0,announceSymbol.data.find("_")));
   symbol.set_shape(announceSymbol.data.substr(announceSymbol.data.find("_")+1));
-  dockPlacardPub->Publish(symbol);
-  gzdbg << gzTopicName << " is " << announceSymbol.data << std::endl;
-    
+  this->dockPlacardPub->Publish(symbol);
+  
   if (this->dockAllowed)
   {
     // Initialize ROS transport.
@@ -266,7 +264,8 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     }
     this->expectedSequence.push_back(color);
   }
-
+  
+  //Optional: the gazebo transport topic where the light buoy sequence is publishe
   if(!_sdf->HasElement("color_topic"))
   {
     this->colorTopic = "/vrx/light_buoy/new_pattern";
@@ -312,13 +311,21 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     }
     std::string bayName = bayElem->Get<std::string>("name");
 
-    // Required: bay name.
+    // Required: activation topic.
     if (!bayElem->GetElement("activation_topic"))
     {
       ROS_ERROR("<gates::gate::activation_topic> missing");
       return false;
     }
     std::string activationTopic = bayElem->Get<std::string>("activation_topic");
+
+    // Required: gazebo symbol topic.
+    if (!bayElem->GetElement("symbol_topic"))
+    {
+      ROS_ERROR("<gates::gate::symbol_topic> missing");
+      return false;
+    }
+    std::string symbolTopic = bayElem->Get<std::string>("symbol_topic");
 
     // Required: minimum time to be considered "docked".
     if (!bayElem->GetElement("min_dock_time"))
@@ -344,16 +351,16 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     announceSymbol =
       bayElem->GetElement("symbol")->Get<std::string>();
 
-
+    
     // Create a new dock checker.
     #if GAZEBO_MAJOR_VERSION >= 8
       std::unique_ptr<DockChecker> dockChecker(
         new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
-          this->world->Name(), ns, announceSymbol));
+          this->world->Name(), ns, announceSymbol, symbolTopic));
     #else
       std::unique_ptr<DockChecker> dockChecker(
         new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
-          this->world->GetName(), ns, announceSymbol));
+          this->world->GetName(), ns, announceSymbol, symbolTopic));
     #endif
 
     // Add the dock checker.
@@ -439,6 +446,9 @@ void ScanDockScoringPlugin::OnRunning()
   lightBuoySequencePub->Publish(colors);
   
   this->colorChecker->Enable();
+  // Announce the symbol if needed.
+  for (auto &dockChecker : this->dockCheckers)
+    dockChecker->AnnounceSymbol();
 }
 
 // Register plugin with gazebo

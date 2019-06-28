@@ -105,7 +105,8 @@ class DockChecker
                       const bool _dockAllowed,
                       const std::string &_worldName,
                       const std::string &_rosNameSpace,
-                      const std::string &_announceSymbol);
+                      const std::string &_announceSymbol,
+		      const std::string &_gzSymbolTopic);
 
   /// \brief Whether the robot has been successfully docked in this bay or not.
   /// \return True when the robot has been docked or false otherwise.
@@ -135,6 +136,9 @@ class DockChecker
   /// \brief The gazebo topic used to receive notifications
   /// from the "contain" plugin.
   private: std::string activationTopic;
+
+  /// \brief The gazebo topic used to publish symbols to the placards
+  private: std::string gzSymbolTopic;
 
   /// \brief Minimum amount of seconds to stay docked to be
   /// considered a fully successfull dock.
