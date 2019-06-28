@@ -28,6 +28,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
+      <course_name>vrx_navigation_course</course_name>
       <gates>
         <gate>
           <left_marker>red_bound_0</left_marker>

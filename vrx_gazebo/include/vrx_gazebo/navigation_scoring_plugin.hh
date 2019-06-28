@@ -50,6 +50,7 @@
 ///         filename="libnavigation_scoring_plugin.so">
 ///   <vehicle>wamv</vehicle>
 ///   <task_name>navigation_scoring_plugin</task_name>
+///   <course_name>vrx_navigation_course</course_name>
 ///   <gates>
 ///     <gate>
 ///       <left_marker>red_bound_0</left_marker>
@@ -108,8 +109,8 @@ class NavigationScoringPlugin : public ScoringPlugin
     /// \brief Constructor.
     /// \param[in] _leftMarkerName The left marker's model.
     /// \param[in] _rightMarkerName The right marker's model.
-    public: Gate(const gazebo::physics::ModelPtr _leftMarkerModel,
-                 const gazebo::physics::ModelPtr _rightMarkerModel);
+    public: Gate(const gazebo::physics::LinkPtr _leftMarkerModel,
+                 const gazebo::physics::LinkPtr _rightMarkerModel);
 
     /// \brief Where is the given robot pose with respect to the gate?
     /// \param _robotWorldPose Pose of the robot, in the world frame.
@@ -121,10 +122,10 @@ class NavigationScoringPlugin : public ScoringPlugin
     public: void Update();
 
     /// \brief The left marker model.
-    public: gazebo::physics::ModelPtr leftMarkerModel;
+    public: gazebo::physics::LinkPtr leftMarkerModel;
 
     /// \brief The right marker model.
-    public: gazebo::physics::ModelPtr rightMarkerModel;
+    public: gazebo::physics::LinkPtr rightMarkerModel;
 
     /// \brief The center of the gate in the world frame. Note that the roll and
     /// pitch are ignored. Only yaw is relevant and it points into the direction
@@ -169,6 +170,12 @@ class NavigationScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnFinished() override;
 
+  // Documentation inherited.
+  private: void OnCollision() override;
+  
+  // Name of Course
+  private: gazebo::physics::ModelPtr course;
+
   /// \brief All the gates.
   private: std::vector<Gate> gates;
 
@@ -177,3 +184,4 @@ class NavigationScoringPlugin : public ScoringPlugin
 };
 
 #endif
+
