@@ -6,7 +6,7 @@ pipelines:
             image: osrf/vrx:current
             script:
               # Code style
-              - sudo apt-get -y install cppcheck
+              - sudo apt-get -y install cppcheck protobuf-compiler
               - sh tools/code_check.sh
               # Set up workspace
               - mkdir -p /tmp/vrx_ws/src
@@ -20,7 +20,7 @@ pipelines:
             image: osrf/vrx:test_gaz7
             script:
               # Code style
-              - sudo apt-get -y install cppcheck
+              - sudo apt-get -y install cppcheck protobuf-compiler
               - sh tools/code_check.sh
               # Set up workspace
               - mkdir -p /tmp/vrx_ws/src
