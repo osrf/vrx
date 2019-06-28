@@ -1,24 +1,18 @@
 /*
-
-Copyright (c) 2017, Brian Bingham
-All rights reserved
-
-This file is part of the usv_gazebo_dynamics_plugin package,
-known as this Package.
-
-This Package free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This Package s distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this package.  If not, see <http://www.gnu.org/licenses/>.
-
+ * Copyright (C) 2017  Brian Bingham
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
 */
 
 #include <boost/algorithm/clamp.hpp>
@@ -256,20 +250,22 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Initialize the ROS node and subscribe to cmd_drive
   this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
 
-  // Advertise joint state publisher to view propellers in rviz
+  // Advertise joint state publisher to view engines and propellers in rviz
   // TODO: consider throttling joint_state pub for performance
   // (every OnUpdate may be too frequent).
   this->jointStatePub =
     this->rosnode->advertise<sensor_msgs::JointState>("joint_states", 1);
-  this->jointStateMsg.name.resize(thrusters.size());
-  this->jointStateMsg.position.resize(thrusters.size());
-  this->jointStateMsg.velocity.resize(thrusters.size());
-  this->jointStateMsg.effort.resize(thrusters.size());
+  this->jointStateMsg.name.resize(2 * thrusters.size());
+  this->jointStateMsg.position.resize(2 * thrusters.size());
+  this->jointStateMsg.velocity.resize(2 * thrusters.size());
+  this->jointStateMsg.effort.resize(2 * thrusters.size());
 
   for (size_t i = 0; i < this->thrusters.size(); ++i)
   {
-    // Prefill the joint state message with the propeller joint.
-    this->jointStateMsg.name[i] = this->thrusters[i].propJoint->GetName();
+    // Prefill the joint state message with the engine and propeller joint.
+    this->jointStateMsg.name[2 * i] = this->thrusters[i].engineJoint->GetName();
+    this->jointStateMsg.name[2 * i + 1] =
+      this->thrusters[i].propJoint->GetName();
 
     // Subscribe to commands for each thruster.
     this->thrusters[i].cmdSub = this->rosnode->subscribe(
@@ -356,21 +352,7 @@ void UsvThrust::Update()
       }
 
       // Adjust thruster engine joint angle with PID
-      common::Time stepTime = now - this->thrusters[i].lastAngleUpdateTime;
-      double desiredAngle = this->thrusters[i].desiredAngle;
-      #if GAZEBO_MAJOR_VERSION >= 8
-        double currAngle = this->thrusters[i].engineJoint->Position(0);
-      #else
-        double currAngle = this->thrusters[i].engineJoint->GetAngle(0).Radian();
-      #endif
-      double angleError = currAngle - desiredAngle;
-
-      double effort = this->thrusters[i].engineJointPID.Update(angleError,
-                                                               stepTime);
-      this->thrusters[i].engineJoint->SetForce(0, effort);
-
-      // Store last update time
-      this->thrusters[i].lastAngleUpdateTime = now;
+      this->RotateEngine(i, now - this->thrusters[i].lastAngleUpdateTime);
 
       // Apply the thrust mapping
       ignition::math::Vector3d tforcev(0, 0, 0);
@@ -397,8 +379,7 @@ void UsvThrust::Update()
       this->thrusters[i].link->AddLinkForce(tforcev);
 
       // Spin the propellers
-      this->SpinPropeller(this->thrusters[i].propJoint,
-        this->thrusters[i].currCmd);
+      this->SpinPropeller(i);
     }
   }
 
@@ -408,50 +389,64 @@ void UsvThrust::Update()
 }
 
 //////////////////////////////////////////////////
-void UsvThrust::SpinPropeller(physics::JointPtr &_propeller,
-    const double _input)
+void UsvThrust::RotateEngine(size_t _i, common::Time _stepTime)
 {
-  if (!_propeller)
-    return;
+  // Calculate angleError for PID calculation
+  double desiredAngle = this->thrusters[_i].desiredAngle;
+  #if GAZEBO_MAJOR_VERSION >= 8
+    double currAngle = this->thrusters[_i].engineJoint->Position(0);
+  #else
+    double currAngle = this->thrusters[_i].engineJoint->GetAngle(0).Radian();
+  #endif
+  double angleError = currAngle - desiredAngle;
 
+  double effort = this->thrusters[_i].engineJointPID.Update(angleError,
+                                                           _stepTime);
+  this->thrusters[_i].engineJoint->SetForce(0, effort);
+
+  // Set position, velocity, and effort of joint from gazebo
+  #if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Angle position =
+      this->thrusters[_i].engineJoint->Position(0);
+  #else
+    gazebo::math::Angle position = this->thrusters[_i].engineJoint->GetAngle(0);
+  #endif
+  position.Normalize();
+  this->jointStateMsg.position[2 * _i] = position.Radian();
+  this->jointStateMsg.velocity[2 * _i] =
+    this->thrusters[_i].engineJoint->GetVelocity(0);
+  this->jointStateMsg.effort[2 * _i] = effort;
+
+  // Store last update time
+  this->thrusters[_i].lastAngleUpdateTime += _stepTime;
+}
+
+//////////////////////////////////////////////////
+void UsvThrust::SpinPropeller(size_t _i)
+{
   const double kMinInput = 0.1;
   const double kMaxInput = 1.0;
   const double kMaxEffort = 2.0;
   double effort = 0.0;
 
-  if (std::abs(_input) > kMinInput)
-    effort = (_input / kMaxInput) * kMaxEffort;
+  physics::JointPtr propeller = this->thrusters[_i].propJoint;
 
-  _propeller->SetForce(0, effort);
+  // Calculate effort on propeller joint
+  if (std::abs(this->thrusters[_i].currCmd) > kMinInput)
+    effort = (this->thrusters[_i].currCmd / kMaxInput) * kMaxEffort;
 
-  // Get index in joint state message for this propeller
-  int8_t index = -1;
-  for (int i = 0; i < this->thrusters.size(); ++i)
-  {
-    if (_propeller->GetName() == this->jointStateMsg.name[i])
-    {
-      index = i;
-      break;
-    }
-  }
-  if (index < 0)
-  {
-    ROS_WARN("Propeller %s cannot be associated with a joint, "
-             "skipping message.", _propeller->GetName().c_str());
-    return;
-  }
+  propeller->SetForce(0, effort);
 
   // Set position, velocity, and effort of joint from gazebo
-
   #if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Angle position = _propeller->Position(0);
+    ignition::math::Angle position = propeller->Position(0);
   #else
-    gazebo::math::Angle position = _propeller->GetAngle(0);
+    gazebo::math::Angle position = propeller->GetAngle(0);
   #endif
   position.Normalize();
-  this->jointStateMsg.position[index] = position.Radian();
-  this->jointStateMsg.velocity[index] = _propeller->GetVelocity(0);
-  this->jointStateMsg.effort[index] = effort;
+  this->jointStateMsg.position[2 * _i + 1] = position.Radian();
+  this->jointStateMsg.velocity[2 * _i + 1] = propeller->GetVelocity(0);
+  this->jointStateMsg.effort[2 * _i + 1] = effort;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvThrust);
