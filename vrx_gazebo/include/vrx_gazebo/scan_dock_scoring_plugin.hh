@@ -20,8 +20,8 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
-#include "light_buoy_colors.pb.h"
-#include "dock_placard.pb.h"
+#include <light_buoy_colors.pb.h>
+#include <dock_placard.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -106,7 +106,7 @@ class DockChecker
                       const std::string &_worldName,
                       const std::string &_rosNameSpace,
                       const std::string &_announceSymbol,
-		      const std::string &_gzSymbolTopic);
+                      const std::string &_gzSymbolTopic);
 
   /// \brief Whether the robot has been successfully docked in this bay or not.
   /// \return True when the robot has been docked or false otherwise.
@@ -176,8 +176,8 @@ class DockChecker
 
   /// \brief ROS topic where the target symbol will be published.
   private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
-  
-  /// \brief Publish the placard symbols 
+
+  /// \brief Publish the placard symbols
   private: gazebo::transport::PublisherPtr dockPlacardPub;
 };
 
@@ -281,9 +281,9 @@ class ScanDockScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
-  /// \brief gazebo Node  
-  private: gazebo::transport::NodePtr node;  
-  
+  /// \brief gazebo Node
+  private: gazebo::transport::NodePtr node;
+
   /// \brief Publish the color sequence
   private: gazebo::transport::PublisherPtr lightBuoySequencePub;
 

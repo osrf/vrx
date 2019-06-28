@@ -79,7 +79,8 @@ LightBuoyPlugin::LightBuoyPlugin() :
 {
 }
 
-void LightBuoyPlugin::ChangePatternTo(const gazebo::ConstLightBuoyColorsPtr &_msg)
+void LightBuoyPlugin::ChangePatternTo(
+  const gazebo::ConstLightBuoyColorsPtr &_msg)
 {
   pattern[0] = IndexFromColor(_msg->color_1());
   pattern[1] = IndexFromColor(_msg->color_2());
@@ -123,9 +124,10 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&LightBuoyPlugin::Update, this));
-  
+
   gzNode->Init();
-  this->colorSub = this->gzNode->Subscribe(this->gzColorsTopic, &LightBuoyPlugin::ChangePatternTo, this);
+  this->colorSub = this->gzNode->Subscribe
+    (this->gzColorsTopic, &LightBuoyPlugin::ChangePatternTo, this);
 }
 
 //////////////////////////////////////////////////
@@ -190,7 +192,8 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     {
       ROS_ERROR("<ros_shuffle_topic> missing");
     }
-    this->rosShuffleTopic = _sdf->GetElement("ros_shuffle_topic")->Get<std::string>();
+    this->rosShuffleTopic = _sdf->GetElement
+      ("ros_shuffle_topic")->Get<std::string>();
   }
 
   // optional gzColorsTopic
@@ -200,7 +203,8 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
   }
   else
   {
-    this->gzColorsTopic = _sdf->GetElement("gz_colors_topic")->Get<std::string>();
+    this->gzColorsTopic = _sdf->GetElement
+      ("gz_colors_topic")->Get<std::string>();
   }
   // Optional: ROS namespace.
   if (_sdf->HasElement("robot_namespace"))

@@ -21,8 +21,7 @@
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/Empty.h>
-#include "light_buoy_colors.pb.h"
-
+#include <light_buoy_colors.pb.h>
 #include <array>
 #include <cstdint>
 #include <mutex>
@@ -107,7 +106,7 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: void ChangePattern(const std_msgs::Empty::ConstPtr &_msg);
 
   // \brief Callback for changing light patter to a specific pattern
-  private: void ChangePatternTo(gazebo::ConstLightBuoyColorsPtr &_msg); 
+  private: void ChangePatternTo(gazebo::ConstLightBuoyColorsPtr &_msg);
 
   /// \brief Display the next color in the sequence, or start over if at the end
   private: void Update();

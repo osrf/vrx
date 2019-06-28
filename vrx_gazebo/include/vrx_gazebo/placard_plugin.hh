@@ -21,7 +21,7 @@
 #include <ros/ros.h>
 #include <std_msgs/ColorRGBA.h>
 #include <std_msgs/Empty.h>
-#include "dock_placard.pb.h"
+#include <dock_placard.pb.h>
 #include <array>
 #include <cstdint>
 #include <map>
@@ -52,7 +52,7 @@ namespace gazebo
 ///   <robot_namespace> ROS namespace of Node, can be used to have multiple
 ///                    plugins.
 ///   <ros_shuffle_topic>: The ROS topic used to request color changes.
-///   <gz_symbol_topic>: The gazebo topic used to request specific symbol changes
+///   <gz_symbol_topic>: The gazebo topic subscribed to set symbol changes
 ///     defaults to /<robot_namespace>/symbol
 ///   <visuals>: The set of visual symbols. It contains at least one visual:
 ///     <visual>: A visual displaying a shape.

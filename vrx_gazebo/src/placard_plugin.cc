@@ -88,27 +88,23 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&PlacardPlugin::Update, this));
-  
+
   this->gzNode->Init();
-  this->symbolSub = gzNode->Subscribe(this->symbolSubTopic, &PlacardPlugin::ChangeSymbolTo, this);
+  this->symbolSub = gzNode->Subscribe(this->symbolSubTopic,
+    &PlacardPlugin::ChangeSymbolTo, this);
 }
 
 void PlacardPlugin::ChangeSymbolTo(gazebo::ConstDockPlacardPtr &_msg)
 {
-
   std::lock_guard<std::mutex> lock(this->mutex);
   this->shape = _msg->shape();
   this->color = _msg->color();
-  gzdbg << this->symbolSubTopic << std::endl;
-  gzdbg << this->shape << std::endl;
-  gzdbg << this->color << std::endl;
 }
 
 
 //////////////////////////////////////////////////
 bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
 {
-  gzdbg << "we be parsin" << std::endl;
   // We initialize it with a random shape and color.
   this->ChangeSymbol(std_msgs::Empty::ConstPtr());
 
@@ -179,7 +175,8 @@ bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
     {
       ROS_ERROR("<ros_shuffle_topic> missing");
     }
-    this->rosShuffleTopic = _sdf->GetElement("ros_shuffle_topic")->Get<std::string>();
+    this->rosShuffleTopic = _sdf->GetElement
+      ("ros_shuffle_topic")->Get<std::string>();
   }
 
   // Required: namespace.
@@ -194,7 +191,8 @@ bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)
   }
   else
   {
-    this->symbolSubTopic = _sdf->GetElement("gz_symbol_topic")->Get<std::string>();
+    this->symbolSubTopic = _sdf->GetElement
+      ("gz_symbol_topic")->Get<std::string>();
   }
   return true;
 }
@@ -240,9 +238,6 @@ void PlacardPlugin::Update()
     {
       color = this->kColors[this->color];
     }
-    //gzdbg << "makeing the " << visual->Name() << " " << this->color << std::endl;
-    //gzdbg << color << std::endl;
-
     #if GAZEBO_MAJOR_VERSION >= 8
       ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
     #else
@@ -257,7 +252,6 @@ void PlacardPlugin::Update()
 //////////////////////////////////////////////////
 void PlacardPlugin::ChangeSymbol(const std_msgs::Empty::ConstPtr &_msg)
 {
-  gzdbg << "we be shufflin" << std::endl;
   {
     std::lock_guard<std::mutex> lock(this->mutex);
     this->color = this->allPatterns[this->allPatternsIdx].at(0);

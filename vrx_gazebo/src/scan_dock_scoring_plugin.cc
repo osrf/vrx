@@ -157,13 +157,16 @@ bool DockChecker::Allowed() const
 /////////////////////////////////////////////////
 void DockChecker::AnnounceSymbol()
 {
-  // Override the sdf parameters for the dock and replace with those specified here
-  this->dockPlacardPub = this->node->Advertise<dock_placard_msgs::msgs::DockPlacard>(gzSymbolTopic);
+  // Override the docks own sdf parameters
+  this->dockPlacardPub = this->node->Advertise
+    <dock_placard_msgs::msgs::DockPlacard>(gzSymbolTopic);
   dock_placard_msgs::msgs::DockPlacard symbol;
-  symbol.set_color(announceSymbol.data.substr(0,announceSymbol.data.find("_")));
-  symbol.set_shape(announceSymbol.data.substr(announceSymbol.data.find("_")+1));
+  symbol.set_color(announceSymbol.data.substr
+    (0, announceSymbol.data.find("_")));
+  symbol.set_shape(announceSymbol.data.substr
+    (announceSymbol.data.find("_")+1));
   this->dockPlacardPub->Publish(symbol);
-  
+
   if (this->dockAllowed)
   {
     // Initialize ROS transport.
@@ -222,9 +225,9 @@ void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScanDockScoringPlugin::Update, this));
-  
-  this->lightBuoySequencePub = this->node->Advertise<light_buoy_colors_msgs::msgs::LightBuoyColors>(this->colorTopic);
 
+  this->lightBuoySequencePub = this->node->Advertise
+    <light_buoy_colors_msgs::msgs::LightBuoyColors>(this->colorTopic);
 }
 
 //////////////////////////////////////////////////
@@ -264,9 +267,9 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     }
     this->expectedSequence.push_back(color);
   }
-  
-  //Optional: the gazebo transport topic where the light buoy sequence is publishe
-  if(!_sdf->HasElement("color_topic"))
+
+  // Optional: gazebo topic where light buoy sequence is published
+  if (!_sdf->HasElement("color_topic"))
   {
     this->colorTopic = "/vrx/light_buoy/new_pattern";
   }
@@ -351,7 +354,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     announceSymbol =
       bayElem->GetElement("symbol")->Get<std::string>();
 
-    
+
     // Create a new dock checker.
     #if GAZEBO_MAJOR_VERSION >= 8
       std::unique_ptr<DockChecker> dockChecker(
@@ -444,7 +447,7 @@ void ScanDockScoringPlugin::OnRunning()
   colors.set_color_2(this->expectedSequence[1]);
   colors.set_color_3(this->expectedSequence[2]);
   lightBuoySequencePub->Publish(colors);
-  
+
   this->colorChecker->Enable();
   // Announce the symbol if needed.
   for (auto &dockChecker : this->dockCheckers)
