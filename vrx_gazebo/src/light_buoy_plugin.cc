@@ -68,7 +68,9 @@ void LightBuoyPlugin::InitializeAllPatterns()
         if (k == j)
           continue;
 
-        this->allPatterns.push_back({i, j, k, this->IndexFromColor("off")});
+        // The last two colors are always OFF.
+        this->allPatterns.push_back({i, j, k,
+          this->IndexFromColor("off"), this->IndexFromColor("off")});
       }
     }
   }
@@ -88,6 +90,7 @@ void LightBuoyPlugin::ChangePatternTo(
   pattern[1] = IndexFromColor(_msg->color_2());
   pattern[2] = IndexFromColor(_msg->color_3());
   pattern[3] = IndexFromColor("off");
+  pattern[4] = IndexFromColor("off");
 
   return;
 }
@@ -158,8 +161,9 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     this->pattern[i++] = IndexFromColor(color);
   }
 
-  // The last color of the pattern is always black.
+  // The last two colors of the pattern are always black.
   this->pattern[3] = IndexFromColor("off");
+  this->pattern[4] = IndexFromColor("off");
 
   // Required: visuals.
   if (!_sdf->HasElement("visuals"))
@@ -238,7 +242,7 @@ void LightBuoyPlugin::Update()
   std::lock_guard<std::mutex> lock(this->mutex);
 
   // Start over if at end of pattern
-  if (this->state > 3)
+  if (this->state > 4)
     this->state = 0;
 
   auto color = this->kColors[this->pattern[this->state]].first;

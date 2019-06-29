@@ -118,8 +118,9 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: using Colors_t = std::pair<std_msgs::ColorRGBA, std::string>;
 
   /// \def Pattern_t
-  /// \brief The current pattern to display, pattern_[3] is always OFF.
-  private: using Pattern_t = std::array<uint8_t, 4>;
+  /// \brief The current pattern to display, pattern[3] and pattern[4]
+  /// are always OFF.
+  private: using Pattern_t = std::array<uint8_t, 5>;
 
   /// \brief List of the color options (red, green, blue, yellow and no color)
   /// with their string name for logging.
