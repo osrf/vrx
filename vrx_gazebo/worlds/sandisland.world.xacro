@@ -6,7 +6,7 @@
     <xacro:sandisland /> 
     <!--wind for the wamv-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
-    <xacro:usv_wind_gazebo>
+    <xacro:usv_wind_gazebo mean_vel="1">
       <wind_objs>
         <wind_obj>
           <name>wamv</name>

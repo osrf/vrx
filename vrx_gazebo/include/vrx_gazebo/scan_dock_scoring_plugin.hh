@@ -20,6 +20,8 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <light_buoy_colors.pb.h>
+#include <dock_placard.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -40,7 +42,6 @@ class ColorSequenceChecker
   public: ColorSequenceChecker(const std::vector<std::string> &_expectedColors,
                                const std::string &_rosNameSpace,
                                const std::string &_rosColorSequenceService);
-
   /// \brief Enable the ROS submission service.
   public: void Enable();
 
@@ -104,7 +105,8 @@ class DockChecker
                       const bool _dockAllowed,
                       const std::string &_worldName,
                       const std::string &_rosNameSpace,
-                      const std::string &_announceSymbol);
+                      const std::string &_announceSymbol,
+                      const std::string &_gzSymbolTopic);
 
   /// \brief Whether the robot has been successfully docked in this bay or not.
   /// \return True when the robot has been docked or false otherwise.
@@ -134,6 +136,9 @@ class DockChecker
   /// \brief The gazebo topic used to receive notifications
   /// from the "contain" plugin.
   private: std::string activationTopic;
+
+  /// \brief The gazebo topic used to publish symbols to the placards
+  private: std::string gzSymbolTopic;
 
   /// \brief Minimum amount of seconds to stay docked to be
   /// considered a fully successfull dock.
@@ -171,6 +176,9 @@ class DockChecker
 
   /// \brief ROS topic where the target symbol will be published.
   private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
+
+  /// \brief Publish the placard symbols
+  private: gazebo::transport::PublisherPtr dockPlacardPub;
 };
 
 /// \brief A plugin for computing the score of the scan and dock task.
@@ -181,6 +189,8 @@ class DockChecker
 /// <robot_namespace>: Optional parameter with the ROS namespace.
 /// <color_sequence_service>: Optional paramter with the ROS service used to
 /// receive the color submission.
+/// <color_topic>: Optional gazebo topic used to publish the color sequence
+///   defaults to /vrx/light_buoy/new_pattern
 /// <color_1>: Expected first color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_2>: Expected second color of the sequence (RED, GREEN, BLUE, YELLOW).
 /// <color_3>: Expected third color of the sequence (RED, GREEN, BLUE, YELLOW).
@@ -201,7 +211,7 @@ class DockChecker
 /// <correct_dock_bonus_points>: Points granted when the vehicle successfully
 /// dock-and-undock in the specified bay.
 /// Default value is 10.
-/// <announce_symbol>: Optional string with format <COLOR>_<SHAPE>, where
+/// <symbol>: Required string with format <COLOR>_<SHAPE>, where
 /// color can be "red", "green", "blue", "yellow" and color can be "triangle",
 /// "circle", "cross". If this parameter is present, a ROS message will be
 /// sent in OnReady(). The vehicle should dock in the bay matching this color
@@ -246,13 +256,13 @@ class DockChecker
 ///       <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>true</dock_allowed>
-///       <announce_symbol>red_circle</announce_symbol>
+///       <symbol>red_circle</symbol>
 ///     </bay>
 ///   </bays>
 /// </plugin>
 class ScanDockScoringPlugin : public ScoringPlugin
 {
-  // Constructor.
+  // Documentation inherited.
   public: ScanDockScoringPlugin();
 
   // Documentation inherited.
@@ -271,6 +281,12 @@ class ScanDockScoringPlugin : public ScoringPlugin
 
   // Documentation inherited.
   private: void OnRunning() override;
+
+  /// \brief gazebo Node
+  private: gazebo::transport::NodePtr node;
+
+  /// \brief Publish the color sequence
+  private: gazebo::transport::PublisherPtr lightBuoySequencePub;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -295,6 +311,12 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// \brief Points granted when the vehicle successfully
   /// dock-and-undock in the specified bay.
   private: double correctDockBonusPoints = 10.0;
+
+  /// \brief Name of colorTopic for the light buoy
+  private: std::string colorTopic;
+
+  /// \brief Expected color sequence.
+  private: std::vector<std::string> expectedSequence;
 };
 
 #endif

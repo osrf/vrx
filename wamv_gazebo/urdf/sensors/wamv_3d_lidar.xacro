@@ -24,10 +24,10 @@
                                             x:=0.7 y:=0 z:=1.8
                                             R:=0 P:=0 Y:=0
                                             post_Y:=0
-                                            update_rate:=10 vertical_lasers:=16 samples:=1800 resolution:=0.1
+                                            update_rate:=10 vertical_lasers:=16 samples:=1875 resolution:=0.1
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
-                                            max_range:=100 noise_stddev:=0.01">
+                                            max_range:=130 noise_stddev:=0.01">
     <!-- Define length variables for link positioning -->
     <xacro:property name="platform_z" value="1.2965"/>
     <xacro:property name="post_to_post_arm_x" value="0.03"/>
