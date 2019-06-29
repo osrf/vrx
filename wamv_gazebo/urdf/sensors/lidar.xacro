@@ -11,12 +11,15 @@
                            x="${x}" y="${y}" z="${z}"
                            R="${R}" P="${P}" Y="${Y}"
 			   vertical_lasers="16"/>
+      <!--specs for 16 beam lidar are implimneted by default. See wamv_3d_lidar for those-->
     </xacro:if>
     <xacro:if value="${type == '32_beam'}">
       <xacro:wamv_3d_lidar name="${name}"
                            x="${x}" y="${y}" z="${z}"
                            R="${R}" P="${P}" Y="${Y}"
-			   vertical_lasers="32"/>
+			   vertical_lasers="32"
+			   samples="2187"
+			   min_vertical_angle="0.54" max_vertical_angle="-0.186"/>
     </xacro:if>
   </xacro:macro>
 </robot>
