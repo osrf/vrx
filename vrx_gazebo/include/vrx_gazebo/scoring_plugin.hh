@@ -101,6 +101,7 @@
 ///     </joint>
 ///   </release_joints>
 /// </plugin>
+
 class ScoringPlugin : public gazebo::WorldPlugin
 {
   /// \brief Class constructor.
@@ -197,7 +198,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Last collision time.
   protected: gazebo::common::Time lastCollisionTime;
 
-  /// \brief Collision detection node pointer
+  /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr collisionNode;
 
   /// \brief Collision detection node subscriber
