@@ -233,6 +233,12 @@ void NavigationScoringPlugin::Update()
       return;
   }
 
+  // Skip if we're not in running mode.
+  if (this->TaskState() != "running")
+    return;
+
+  this->ScoringPlugin::SetScore(std::max(0.0, this->RemainingTime().Double() -
+    this->numCollisions * 10));
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
@@ -241,11 +247,10 @@ void NavigationScoringPlugin::Update()
   #endif
 
   // Update the state of all gates.
-  for (auto &gate : this->gates)
+  auto iter = std::begin(this->gates);
+  while (iter != std::end(this->gates))
   {
-    // Ignore all gates that have been crossed or are invalid.
-    if (gate.state == GateState::CROSSED || gate.state == GateState::INVALID)
-      continue;
+    Gate &gate = *iter;
 
     // Update this gate (in case it moved).
     gate.Update();
@@ -257,7 +262,15 @@ void NavigationScoringPlugin::Update()
     {
       currentState = GateState::CROSSED;
       gzmsg << "New gate crossed!" << std::endl;
-      this->ScoringPlugin::SetScore((this->ScoringPlugin::Score())+2);
+
+      // We need to cross all gates in order.
+      if (iter != this->gates.begin())
+      {
+        this->Fail();
+        return;
+      }
+
+      this->gates.erase(iter);
     }
     // Just checking: did we go backward through the gate?
     else if (currentState == GateState::VEHICLE_BEFORE &&
@@ -266,17 +279,31 @@ void NavigationScoringPlugin::Update()
       currentState = GateState::INVALID;
       gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
             << std::endl;
+      this->Fail();
+      return;
     }
 
     gate.state = currentState;
+    ++iter;
   }
+
+  // Course completed!
+  if (this->gates.empty())
+    this->Finish();
 }
 
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::Fail()
+{
+  this->SetScore(0.0);
+  this->Finish();
+}
+
+//////////////////////////////////////////////////
 void NavigationScoringPlugin::OnCollision()
 {
-  this->ScoringPlugin::SetScore((this->ScoringPlugin::Score())-1);
+  this->numCollisions++;
 }
-
 
 //////////////////////////////////////////////////
 void NavigationScoringPlugin::OnReady()

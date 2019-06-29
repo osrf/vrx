@@ -161,6 +161,9 @@ class NavigationScoringPlugin : public ScoringPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
+  /// \brief Set the score to 0 and change to state to "finish".
+  private: void Fail();
+
   // Documentation inherited.
   private: void OnReady() override;
 
@@ -181,6 +184,9 @@ class NavigationScoringPlugin : public ScoringPlugin
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
+
+  /// \brief The number of WAM-V collisions.
+  private: unsigned int numCollisions = 0;
 };
 
 #endif
