@@ -62,6 +62,7 @@ namespace gazebo
     struct WindObj
     {
       /// \Bool to show weather the model and link pointers have been set
+      // cppcheck-suppress unusedStructMember
       bool init = false;
       /// \name of model as it will be looked by in the world
       std::string modelName;
