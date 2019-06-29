@@ -206,6 +206,7 @@ void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
         << _msg->data() << std::endl;
 }
 
+//////////////////////////////////////////////////
 ScanDockScoringPlugin::ScanDockScoringPlugin():
   node (new gazebo::transport::Node())
 {

@@ -31,6 +31,7 @@
 #include <vector>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
+
 namespace gazebo
 {
   typedef const boost::shared_ptr<
@@ -100,10 +101,12 @@ class PlacardPlugin : public gazebo::VisualPlugin
   /// \brief Display the symbol in the placard
   private: void Update();
 
-  /// \brief Callback for changing a symbol and its color.
+  /// \brief ROS callback for changing a symbol and its color.
   /// \param[in] _msg Not used.
   private: void ChangeSymbol(const std_msgs::Empty::ConstPtr &_msg);
 
+  /// \brief Gazebo callback for changing light to a specific color pattern.
+  /// \param[in] _msg New symbol.
   private: void ChangeSymbolTo(gazebo::ConstDockPlacardPtr &_msg);
 
   /// \brief List of the color options (red, green, blue, and no color)

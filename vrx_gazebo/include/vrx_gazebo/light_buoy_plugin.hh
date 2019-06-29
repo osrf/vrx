@@ -30,6 +30,7 @@
 #include <vector>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
+
 namespace gazebo
 {
   typedef const boost::shared_ptr<
@@ -101,11 +102,12 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   /// \param[in] _sdf SDF elements.
   private: bool ParseSDF(sdf::ElementPtr _sdf);
 
-  /// \brief Callback for generating a new color pattern.
+  /// \brief ROS callback for generating a new color pattern.
   /// \param[in] _msg Not used.
   private: void ChangePattern(const std_msgs::Empty::ConstPtr &_msg);
 
-  // \brief Callback for changing light patter to a specific pattern
+  /// \brief Gazebo callback for changing light to a specific color pattern.
+  /// \param[in] _msg New color sequence.
   private: void ChangePatternTo(gazebo::ConstLightBuoyColorsPtr &_msg);
 
   /// \brief Display the next color in the sequence, or start over if at the end

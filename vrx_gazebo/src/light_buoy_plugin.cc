@@ -74,11 +74,13 @@ void LightBuoyPlugin::InitializeAllPatterns()
   }
 }
 
+//////////////////////////////////////////////////
 LightBuoyPlugin::LightBuoyPlugin() :
   gzNode(new gazebo::transport::Node())
 {
 }
 
+//////////////////////////////////////////////////
 void LightBuoyPlugin::ChangePatternTo(
   const gazebo::ConstLightBuoyColorsPtr &_msg)
 {
@@ -89,7 +91,6 @@ void LightBuoyPlugin::ChangePatternTo(
 
   return;
 }
-
 
 //////////////////////////////////////////////////
 void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,

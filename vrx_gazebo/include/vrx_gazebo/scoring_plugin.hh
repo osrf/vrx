@@ -100,7 +100,7 @@
 ///       <name>wamv_external_riser</name>
 ///     </joint>
 ///   </release_joints>
-///  </plugin>
+/// </plugin>
 
 class ScoringPlugin : public gazebo::WorldPlugin
 {

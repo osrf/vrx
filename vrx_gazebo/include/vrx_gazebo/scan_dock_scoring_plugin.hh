@@ -265,6 +265,7 @@ class ScanDockScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   public: ScanDockScoringPlugin();
 
+  // Documentation inherited.
   private: void Load(gazebo::physics::WorldPtr _world,
                      sdf::ElementPtr _sdf);
 
@@ -314,6 +315,7 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// \brief Name of colorTopic for the light buoy
   private: std::string colorTopic;
 
+  /// \brief Expected color sequence.
   private: std::vector<std::string> expectedSequence;
 };
 
