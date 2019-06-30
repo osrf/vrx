@@ -91,7 +91,7 @@
           <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
 	        <dock_allowed>true</dock_allowed>
-	        <symbol>red_triangle</symbol>
+	        <symbol>blue_circle</symbol>
         </bay>
       </bays>
     </plugin>
