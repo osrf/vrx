@@ -29,6 +29,7 @@ RUN apt update \
         wget \
         libeigen3-dev \
         pkg-config \
+        protobuf-compiler \
  && apt clean
 
 RUN export DEBIAN_FRONTEND=noninteractive \
