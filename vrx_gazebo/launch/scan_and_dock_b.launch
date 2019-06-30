@@ -50,7 +50,7 @@
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
-  args="-x $(arg x) -y $(arg y) -z $(arg z)
-        -R $(arg R) -P $(arg P) -Y $(arg Y)
-        -urdf -param robot_description -model wamv"/>
+        args="-x $(arg x) -y $(arg y) -z $(arg z)
+              -R $(arg R) -P $(arg P) -Y $(arg Y)
+              -urdf -param robot_description -model wamv"/>
 </launch>
