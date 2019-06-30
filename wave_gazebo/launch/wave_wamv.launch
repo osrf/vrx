@@ -14,13 +14,13 @@
   <arg name="R" default="0" />
   <arg name="Y" default="0" />
 
- <!-- Allow user specified thruster configurations
-   		    H = stern trusters on each hull
+  <!-- Allow user specified thruster configurations
+       H = stern trusters on each hull
        T = H with a lateral thruster
        X = "holonomic" configuration -->
   <arg name="thrust_config" default="H" />
 
-<!-- Do you want to enable sensors? -->
+  <!-- Do you want to enable sensors? -->
   <arg name="camera_enabled"       default="true" />
   <arg name="gps_enabled"          default="true" />
   <arg name="imu_enabled"          default="true" />
@@ -53,20 +53,20 @@
         -R $(arg R) -P $(arg P) -Y $(arg Y)
         -urdf -param robot_description -model wam -robot_namespace wamv0"/>
 
-	  <!-- Spawn WAMV model in Gazebo -->
+  <!-- Spawn WAMV model in Gazebo -->
   <node name="spawn_model_wamv2" pkg="gazebo_ros" type="spawn_model"
   args="-x $(arg x) -y 6 -z $(arg z)
         -R $(arg R) -P $(arg P) -Y 1.57
         -urdf -param robot_description -model wamv2 -robot_namespace wamv1"/>
 
-	<!-- Spawn a wave gauge 
-	<arg name="sdf_file" default="$(find vrx_gazebo/models/wavegauge/model.sdf"/>
-	<arg name="args" value="-x 0 -y 0 -z 0 -sdf -file $(arg sdf_file) -model wave_gauge"/>
-	<node name="spawn_model_wg" pkg="gazebo_ros" type="spawn_model"
-				args="$(arg args)"/>-->
+  <!-- Spawn a wave gauge
+  <arg name="sdf_file" default="$(find vrx_gazebo/models/wavegauge/model.sdf"/>
+  <arg name="args" value="-x 0 -y 0 -z 0 -sdf -file $(arg sdf_file) -model wave_gauge"/>
+  <node name="spawn_model_wg" pkg="gazebo_ros" type="spawn_model"
+        args="$(arg args)"/>-->
 
 
-	<node name="rqt_cameras" pkg="rqt_gui" type="rqt_gui" output="screen"
-				args="--perspective-file $(find wave_gazebo)/config/wamv_wave.perspective"/>
+  <node name="rqt_cameras" pkg="rqt_gui" type="rqt_gui" output="screen"
+        args="--perspective-file $(find wave_gazebo)/config/wamv_wave.perspective"/>
 
 </launch>
