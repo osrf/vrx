@@ -32,6 +32,7 @@
 /// plugin for other required SDF elements.
 /// This plugin requires the following SDF parameters:
 ///
+/// <obstacle_penalty>: Specifies how many points are deducted per collision.
 /// <gates>: Specifies the collection of gates delimiting the course.
 ///
 ///   Each gate accepts the following elements:
@@ -51,6 +52,7 @@
 ///   <vehicle>wamv</vehicle>
 ///   <task_name>navigation_scoring_plugin</task_name>
 ///   <course_name>vrx_navigation_course</course_name>
+///   <obstacle_penalty>10</obstable_penalty>
 ///   <gates>
 ///     <gate>
 ///       <left_marker>red_bound_0</left_marker>
@@ -187,6 +189,9 @@ class NavigationScoringPlugin : public ScoringPlugin
 
   /// \brief The number of WAM-V collisions.
   private: unsigned int numCollisions = 0;
+
+  /// \brief Number of points deducted per collision.
+  private: double obstaclePenalty = 10.0;
 };
 
 #endif

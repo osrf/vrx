@@ -118,6 +118,11 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     gzerr << "could not find " <<
       _sdf->Get<std::string>("course_name") << std::endl;
   }
+
+  // Optional.
+  if (_sdf->HasElement("obstacle_penalty"))
+    this->obstaclePenalty = _sdf->Get<double>("obstacle_penalty");
+
   // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
@@ -238,7 +243,7 @@ void NavigationScoringPlugin::Update()
     return;
 
   this->ScoringPlugin::SetScore(std::max(0.0, this->RemainingTime().Double() -
-    this->numCollisions * 10));
+    this->numCollisions * this->obstaclePenalty));
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
@@ -266,11 +271,12 @@ void NavigationScoringPlugin::Update()
       // We need to cross all gates in order.
       if (iter != this->gates.begin())
       {
+        gzmsg << "Gate crossed in the wrong order" << std::endl;
         this->Fail();
         return;
       }
 
-      this->gates.erase(iter);
+      iter = this->gates.erase(iter);
     }
     // Just checking: did we go backward through the gate?
     else if (currentState == GateState::VEHICLE_BEFORE &&
@@ -282,14 +288,18 @@ void NavigationScoringPlugin::Update()
       this->Fail();
       return;
     }
+    else
+      ++iter;
 
     gate.state = currentState;
-    ++iter;
   }
 
   // Course completed!
   if (this->gates.empty())
+  {
+    gzmsg << "Course completed!" << std::endl;
     this->Finish();
+  }
 }
 
 //////////////////////////////////////////////////

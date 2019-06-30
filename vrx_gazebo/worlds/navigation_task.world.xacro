@@ -29,6 +29,7 @@
         </joint>
       </release_joints>
       <course_name>vrx_navigation_course</course_name>
+      <obstacle_penalty>10.0</obstacle_penalty>
       <gates>
         <gate>
           <left_marker>red_bound_0</left_marker>
