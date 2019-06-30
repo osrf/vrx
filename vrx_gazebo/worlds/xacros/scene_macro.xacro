@@ -4,7 +4,7 @@
       <sky>
       <time>${time}</time>
       <clouds>
-	    <speed>${cloud_speed}</speed>
+      <speed>${cloud_speed}</speed>
       </clouds>
       </sky>
       <grid>0</grid>
