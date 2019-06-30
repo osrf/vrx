@@ -34,8 +34,8 @@ wamv_imu:
         name
         post_Y
 
-wamv_3d_lidar:
-    num: 1
+lidar:
+    num: 2
     allowed_params:
         x
         y
@@ -45,6 +45,7 @@ wamv_3d_lidar:
         Y
         name
         post_Y
+        type
 
 wamv_p3d:
     num: 1

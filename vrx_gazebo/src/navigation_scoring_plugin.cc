@@ -15,15 +15,16 @@
  *
 */
 
+#include "vrx_gazebo/navigation_scoring_plugin.hh"
 #include <cmath>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
-#include "vrx_gazebo/navigation_scoring_plugin.hh"
+#include <gazebo/physics/Link.hh>
 
 /////////////////////////////////////////////////
 NavigationScoringPlugin::Gate::Gate(
-    const gazebo::physics::ModelPtr _leftMarkerModel,
-    const gazebo::physics::ModelPtr _rightMarkerModel)
+    const gazebo::physics::LinkPtr _leftMarkerModel,
+    const gazebo::physics::LinkPtr _rightMarkerModel)
   : leftMarkerModel(_leftMarkerModel),
     rightMarkerModel(_rightMarkerModel)
 {
@@ -100,6 +101,29 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   ScoringPlugin::Load(_world, _sdf);
 
   // This is a required element.
+  if (!_sdf->HasElement("course_name"))
+  {
+    gzerr << "Unable to find <course_name> element in SDF." << std::endl;
+    return;
+  }
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->course =
+      this->world->ModelByName(_sdf->Get<std::string>("course_name"));
+  #else
+    this->course =
+      this->world->GetModel(_sdf->Get<std::string>("course_name"));
+  #endif
+  if (!this->course)
+  {
+    gzerr << "could not find " <<
+      _sdf->Get<std::string>("course_name") << std::endl;
+  }
+
+  // Optional.
+  if (_sdf->HasElement("obstacle_penalty"))
+    this->obstaclePenalty = _sdf->Get<double>("obstacle_penalty");
+
+  // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
     gzerr << "Unable to find <gates> element in SDF." << std::endl;
@@ -171,13 +195,9 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
 bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     const std::string &_rightMarkerName)
 {
-  #if GAZEBO_MAJOR_VERSION >= 8
-    gazebo::physics::ModelPtr leftMarkerModel =
-      this->world->ModelByName(_leftMarkerName);
-  #else
-    gazebo::physics::ModelPtr leftMarkerModel =
-      this->world->GetModel(_leftMarkerName);
-  #endif
+    gazebo::physics::LinkPtr leftMarkerModel =
+      this->course->GetLink(this->course->GetName() + "::" +
+        _leftMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!leftMarkerModel)
@@ -186,13 +206,9 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     return false;
   }
 
-  #if GAZEBO_MAJOR_VERSION >= 8
-    gazebo::physics::ModelPtr rightMarkerModel =
-      this->world->ModelByName(_rightMarkerName);
-  #else
-    gazebo::physics::ModelPtr rightMarkerModel =
-      this->world->GetModel(_rightMarkerName);
-  #endif
+    gazebo::physics::LinkPtr rightMarkerModel =
+      this->course->GetLink(this->course->GetName() + "::" +
+        _rightMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!rightMarkerModel)
@@ -222,6 +238,13 @@ void NavigationScoringPlugin::Update()
       return;
   }
 
+  // Skip if we're not in running mode.
+  if (this->TaskState() != "running")
+    return;
+
+  this->ScoringPlugin::SetScore(std::max(0.0, this->RemainingTime().Double() -
+    this->numCollisions * this->obstaclePenalty));
+
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
   #else
@@ -229,11 +252,10 @@ void NavigationScoringPlugin::Update()
   #endif
 
   // Update the state of all gates.
-  for (auto &gate : this->gates)
+  auto iter = std::begin(this->gates);
+  while (iter != std::end(this->gates))
   {
-    // Ignore all gates that have been crossed or are invalid.
-    if (gate.state == GateState::CROSSED || gate.state == GateState::INVALID)
-      continue;
+    Gate &gate = *iter;
 
     // Update this gate (in case it moved).
     gate.Update();
@@ -245,6 +267,16 @@ void NavigationScoringPlugin::Update()
     {
       currentState = GateState::CROSSED;
       gzmsg << "New gate crossed!" << std::endl;
+
+      // We need to cross all gates in order.
+      if (iter != this->gates.begin())
+      {
+        gzmsg << "Gate crossed in the wrong order" << std::endl;
+        this->Fail();
+        return;
+      }
+
+      iter = this->gates.erase(iter);
     }
     // Just checking: did we go backward through the gate?
     else if (currentState == GateState::VEHICLE_BEFORE &&
@@ -253,10 +285,34 @@ void NavigationScoringPlugin::Update()
       currentState = GateState::INVALID;
       gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
             << std::endl;
+      this->Fail();
+      return;
     }
+    else
+      ++iter;
 
     gate.state = currentState;
   }
+
+  // Course completed!
+  if (this->gates.empty())
+  {
+    gzmsg << "Course completed!" << std::endl;
+    this->Finish();
+  }
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::Fail()
+{
+  this->SetScore(0.0);
+  this->Finish();
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::OnCollision()
+{
+  this->numCollisions++;
 }
 
 //////////////////////////////////////////////////

@@ -45,7 +45,6 @@
             <visual>robotx_light_buoy::base_link::panel_2</visual>
             <visual>robotx_light_buoy::base_link::panel_3</visual>
           </visuals>
-          <shuffle>true</shuffle>
           <robot_namespace>vrx</robot_namespace>
           <topic>light_buoy/shuffle</topic>
         </plugin>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Extra gazebo arguments -->
+  <arg name="log_file"/>
+
+  <!-- Start Gazebo with the recorded log file -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="extra_gazebo_args" value="-p $(arg log_file)"/>
+  </include>
+
+</launch>
+
