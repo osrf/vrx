@@ -2,6 +2,9 @@
 
 ### Forthcoming
 
+1. GUI overlay plugin (prototype):
+    * [Pull request 116](https://bitbucket.org/osrf/vrx/pull-requests/116)
+
 1. Randomized wind speed in the wind plugin:
     * [Pull request 86](https://bitbucket.org/osrf/vrx/pull-requests/86)
 
@@ -13,7 +16,7 @@
 
 1. Add sand island basic mesh and texture:
     * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
-    
+
 1. Added ground station tents, tables and antenna:
     * [Pull request 96](https://bitbucket.org/osrf/vrx/pull-requests/96)
 
