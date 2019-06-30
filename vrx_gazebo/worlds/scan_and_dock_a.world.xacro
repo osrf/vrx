@@ -85,11 +85,11 @@
           <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>true</dock_allowed>
-          <announce_symbol>red_triangle</announce_symbol>
-          <symbol>red_triangle</symbol>
+          <announce_symbol>red_cross</announce_symbol>
+          <symbol>red_cross</symbol>
         </bay>
       </bays>
-      <placard_color_shape>red_triangle</placard_color_shape>
+      <placard_color_shape>red_cross</placard_color_shape>
     </plugin>
 
     <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
