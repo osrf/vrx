@@ -7,6 +7,14 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTOUIC ON)
+
+find_package (Qt5Widgets REQUIRED)
+find_package (Qt5Core REQUIRED)
+find_package (Protobuf REQUIRED)
+find_package (gazebo REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   message_generation
   wamv_gazebo
@@ -15,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   geographic_msgs
   std_msgs
   rospy
+  roscpp
 )
 
 ########################
@@ -24,6 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   Task.msg
+  Contact.msg
 )
 
 add_service_files(
@@ -34,22 +44,29 @@ add_service_files(
 # Python scripts setup
 catkin_python_setup()
 
-generate_messages()
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
 )
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}") 
 
 include_directories(include ${catkin_INCLUDE_DIRS}
+  ${Qt5Core_INCLUDE_DIRS}
+  ${QT_USE_FILE}
   ${GAZEBO_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}/msgs
 )
 
 link_directories(${GAZEBO_LIBRARY_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/msgs)
 add_subdirectory(msgs)
+
+add_definitions(${QT_DEFINITIONS})
 
 # Plugin for setting color of light buoy.
 add_library(light_buoy_plugin src/light_buoy_plugin.cc)
@@ -152,6 +169,27 @@ install(TARGETS scan_dock_scoring_plugin
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+if("${GAZEBO_MAJOR_VERSION}" GREATER "7")
+  # Plugin for Task Info GUI Overlay
+  add_library(gui_task_widget SHARED ${headers_MOC}
+         	src/gui_task_widget.cc
+  )
+
+  target_link_libraries(gui_task_widget 
+    ${catkin_LIBRARIES}
+    ${GAZEBO_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${QT_LIBRARIES}
+  )
+  qt5_use_modules(gui_task_widget Widgets)
+  add_dependencies(gui_task_widget ${catkin_EXPORTED_TARGETS})
+  install(TARGETS gui_task_widget
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+endif()
 
 # Plugin for scoring the perception task.
 add_library(perception_scoring_plugin src/perception_scoring_plugin.cc)

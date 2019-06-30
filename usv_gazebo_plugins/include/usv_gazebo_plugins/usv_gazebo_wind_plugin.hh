@@ -130,10 +130,10 @@ namespace gazebo
     private: ros::Publisher windDirectionPub;
 
     /// \brief Topic where the wind speed is published.
-    private: std::string topicWindSpeed = "/wind_speed";
+    private: std::string topicWindSpeed = "/vrx/debug/wind/speed";
 
     /// \brief Topic where the wind direction is published.
-    private: std::string topicWindDirection = "/wind_direction";
+    private: std::string topicWindDirection = "/vrx/debug/wind/direction";
 
     /// \brief Last time wind speed and direction was published.
     private: double lastPublishTime = 0;
@@ -143,6 +143,9 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    /// \breif Bool debug set by environment var VRX_DEBUG
+    private: bool debug = true;
   };
 }
 
