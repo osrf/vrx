@@ -35,40 +35,41 @@
 
 namespace gazebo
 {
-  namespace buoyancy {
+  namespace buoyancy
+  {
     /// \brief A class for storing buoyancy object properties
-    class BuoyancyObject {
-      public:
-
+    class BuoyancyObject
+    {
       /// \brief Default constructor
-      BuoyancyObject();
+      public: BuoyancyObject();
 
       /// \brief Default move constructor
-      BuoyancyObject(BuoyancyObject&& obj) noexcept; // NOLINT
+      public: BuoyancyObject(BuoyancyObject&& obj) noexcept; // NOLINT
 
       /// \brief No copy constructor
-      BuoyancyObject(BuoyancyObject& obj) = delete;
+      public: BuoyancyObject(BuoyancyObject& obj) = delete;
 
       /// \brief Loads buoyancy object from SDF
-      void load(const physics::ModelPtr model, const sdf::ElementPtr elem);
+      public: void Load(const physics::ModelPtr model,
+                        const sdf::ElementPtr elem);
 
       /// \brief Display string for buoyancy object
-      std::string disp();
+      public: std::string Disp();
 
       /// \brief Associated link ID
-      int linkId;
+      public: int linkId;
 
       /// \brief Associated link name
-      std::string linkName;
+      public: std::string linkName;
 
       /// \brief Pose of buoyancy relative to link
-      ignition::math::Pose3d pose;
+      public: ignition::math::Pose3d pose;
 
       /// \brief Object mass (from inertial elem)
-      double mass;
+      public:double mass;
 
       /// \brief Buoyancy object's shape properties
-      ::buoyancy::ShapeVolumePtr shape;
+      public: ::buoyancy::ShapeVolumePtr shape;
     };
   }  // end of buoyancy namespace
 

@@ -100,7 +100,7 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
 }
 
 /////////////////////////////////////////////////
-std::string ShapeVolume::display()
+std::string ShapeVolume::Display()
 {
   switch (type)
   {
@@ -128,20 +128,20 @@ BoxVolume::BoxVolume(double x, double y, double z)
 }
 
 //////////////////////////////////////////////////
-std::string BoxVolume::display()
+std::string BoxVolume::Display()
 {
   std::stringstream ss;
-  ss << ShapeVolume::display() << ":" << x << "," << y << "," << z;
+  ss << ShapeVolume::Display() << ":" << x << "," << y << "," << z;
   return ss.str();
 }
 
 //////////////////////////////////////////////////
-Volume BoxVolume::calculateVolume(const ignition::math::Pose3d &pose,
-                                 double fluidLevel)
+Volume BoxVolume::CalculateVolume(const ignition::math::Pose3d &pose,
+                                  double fluidLevel)
 {
   Plane waterSurface;
   waterSurface.offset = fluidLevel;
-  return polyhedron_.submergedVolume(pose.Pos(), pose.Rot(), waterSurface);
+  return polyhedron_.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
 }
 
 /////////////////////////////////////////////////
@@ -156,20 +156,20 @@ CylinderVolume::CylinderVolume(double r, double h)
 }
 
 /////////////////////////////////////////////////
-std::string CylinderVolume::display()
+std::string CylinderVolume::Display()
 {
   std::stringstream ss;
-  ss << ShapeVolume::display() << ":" << r << "," << h;
+  ss << ShapeVolume::Display() << ":" << r << "," << h;
   return ss.str();
 }
 
 /////////////////////////////////////////////////
-Volume CylinderVolume::calculateVolume(const ignition::math::Pose3d &pose,
-                                      double fluidLevel)
+Volume CylinderVolume::CalculateVolume(const ignition::math::Pose3d &pose,
+                                       double fluidLevel)
 {
   Plane waterSurface;
   waterSurface.offset = fluidLevel;
-  return polyhedron_.submergedVolume(pose.Pos(), pose.Rot(), waterSurface);
+  return polyhedron_.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
 }
 
 //////////////////////////////////////////////////
@@ -182,16 +182,16 @@ SphereVolume::SphereVolume(double r)
 }
 
 //////////////////////////////////////////////////
-std::string SphereVolume::display()
+std::string SphereVolume::Display()
 {
   std::stringstream ss;
-  ss << ShapeVolume::display() << ":" << r;
+  ss << ShapeVolume::Display() << ":" << r;
   return ss.str();
 }
 
 //////////////////////////////////////////////////
-Volume SphereVolume::calculateVolume(const ignition::math::Pose3d &pose,
-                                    double fluidLevel)
+Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
+                                     double fluidLevel)
 {
   Volume output{};
   // Location of bottom of object relative to the fluid surface - assumes

@@ -47,7 +47,7 @@ BuoyancyObject::BuoyancyObject(BuoyancyObject &&obj) noexcept // NOLINT
 }
 
 ///////////////////////////////////////////////////
-void BuoyancyObject::load(const physics::ModelPtr model,
+void BuoyancyObject::Load(const physics::ModelPtr model,
     const sdf::ElementPtr elem)
 {
   // parse link
@@ -92,12 +92,12 @@ void BuoyancyObject::load(const physics::ModelPtr model,
 }
 
 //////////////////////////////////////////////////
-std::string BuoyancyObject::disp() {
+std::string BuoyancyObject::Disp() {
   std::stringstream ss;
   ss << "Buoyancy object\n"
       << "\tlink: " << linkName << "[" << linkId << "]\n"
       << "\tpose: " << pose << '\n'
-      << "\tgeometry " << shape->display() << '\n'
+      << "\tgeometry " << shape->Display() << '\n'
       << "\tmass " << mass;
   return ss.str();
 }
@@ -157,7 +157,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       try
       {
         BuoyancyObject buoyObj = BuoyancyObject();
-        buoyObj.load(_model, buoyancyElem);
+        buoyObj.Load(_model, buoyancyElem);
 
         // add link to linkMap if it is not in the map
         if (this->linkMap.find(buoyObj.linkId) == this->linkMap.end())
@@ -185,7 +185,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         #endif
 
         // add buoyancy object to list and display stats
-        gzmsg << buoyObj.disp() << std::endl;
+        gzmsg << buoyObj.Disp() << std::endl;
         buoyancyObjects.push_back(std::move(buoyObj));
       }
       catch (const std::exception& e)
@@ -264,7 +264,7 @@ void BuoyancyPlugin::OnUpdate()
     #endif
     linkFrame = linkFrame * buoyancyObj.pose;
 
-    auto submergedVolume = buoyancyObj.shape->calculateVolume(linkFrame,
+    auto submergedVolume = buoyancyObj.shape->CalculateVolume(linkFrame,
         this->linkHeights[link] + this->fluidLevel);
 
     GZ_ASSERT(submergedVolume.volume >= 0,

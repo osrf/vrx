@@ -46,14 +46,14 @@ namespace buoyancy
     static std::unique_ptr<ShapeVolume> makeShape(const sdf::ElementPtr sdf);
 
     /// \brief Display string for shape object
-    virtual std::string display();
+    virtual std::string Display();
 
     /// \brief Calculates volume + centroid of submerged shape
     /// if the shape is out of water returns Volume{}
     /// @param pose: world pose of volume
     /// @param fluidLevel: height of fluid
     /// @return volume object with volume + centroid (relative to world)
-    virtual Volume calculateVolume(const ignition::math::Pose3d& pose,
+    virtual Volume CalculateVolume(const ignition::math::Pose3d& pose,
                                    double fluidLevel) = 0;
 
     /// \brief Type of shape
@@ -78,10 +78,10 @@ namespace buoyancy
     explicit BoxVolume(double x, double y, double z);
 
     /// \brief Display string for box shape
-    std::string display() override;
+    std::string Display() override;
 
     // Documentation inherited.
-    Volume calculateVolume(const ignition::math::Pose3d& pose,
+    Volume CalculateVolume(const ignition::math::Pose3d& pose,
                            double fluidLevel) override;
 
     /// \brief Length
@@ -107,10 +107,10 @@ namespace buoyancy
     explicit CylinderVolume(double r, double l);
 
     /// \brief Display string for cylinder shape
-    std::string display() override;
+    std::string Display() override;
 
     // Documentation inherited.
-    Volume calculateVolume(const ignition::math::Pose3d& pose,
+    Volume CalculateVolume(const ignition::math::Pose3d& pose,
                            double fluidLevel) override;
 
     /// \brief Radius of cylinder
@@ -132,10 +132,10 @@ namespace buoyancy
     explicit SphereVolume(double r);
 
     /// \brief Display string for sphere shape
-    std::string display() override;
+    std::string Display() override;
 
     // Documentation inherited.
-    Volume calculateVolume(const ignition::math::Pose3d& pose,
+    Volume CalculateVolume(const ignition::math::Pose3d& pose,
                            double fluidLevel) override;
 
     /// \brief Radius of sphere
@@ -150,15 +150,15 @@ namespace buoyancy
     {
       std::stringstream ss;
       ss << "Parse error for <" << shape << ">: " << message;
-      output_ = ss.str();
+      // cppcheck-suppress useInitializationList
+      this->output_ = ss.str();
     }
 
     const char* what() const throw()
     {
-      return output_.c_str();
+      return this->output_.c_str();
     }
 
-    private:
-    std::string output_;
+    private: std::string output_;
   };
 }

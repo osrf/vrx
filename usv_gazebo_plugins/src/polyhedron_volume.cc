@@ -140,7 +140,7 @@ Volume Polyhedron::tetrahedronVolume(const ignition::math::Vector3d &v1,
 }
 
 //////////////////////////////////////////////////////
-Volume Polyhedron::computeFullVolume()
+Volume Polyhedron::ComputeFullVolume()
 {
   Volume output;
   // Compute the contribution of each triangle face
@@ -203,7 +203,7 @@ Volume Polyhedron::clipTriangle(const ignition::math::Vector3d &v1,
 }
 
 //////////////////////////////////////////////////////
-Volume Polyhedron::submergedVolume(const ignition::math::Vector3d &x,
+Volume Polyhedron::SubmergedVolume(const ignition::math::Vector3d &x,
     const ignition::math::Quaterniond &q, Plane &plane)
 {
   // transform the plane into the polyhedron frame

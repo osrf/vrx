@@ -44,6 +44,9 @@
 1. Add ability to playback simulations and add extra_gazebo_args argument to allow for recording:
     * [Pull request 121](https://bitbucket.org/osrf/vrx/pull-requests/121)
 
+1. Improved buoyancy model:
+    * [Pull request 122](https://bitbucket.org/osrf/vrx/pull-requests/122)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:

@@ -57,10 +57,8 @@ namespace buoyancy
   /// based on: Exact Buoyancy for Polyhedra by Eric Catto
   class Polyhedron
   {
-    public:
-
     /// \brief Store vertex index for a triangular face
-    struct Face
+    public: struct Face
     {
       Face() = default;
 
@@ -75,28 +73,32 @@ namespace buoyancy
     /// @param y: width of cube
     /// @param z: height of cube
     /// @return Polyhedron object
-    static Polyhedron makeCube(double x, double y, double z);
+    public: static Polyhedron makeCube(double x,
+                                       double y,
+                                       double z);
 
     /// \brief Generate a cylinder polyhedron centered at origin
     /// @param r: radius of cylinder
     /// @param l: length of cylinder
     /// @param n: number of segments
     /// @return Polyhedron object
-    static Polyhedron makeCylinder(double r, double l, int n);
+    public: static Polyhedron makeCylinder(double r,
+                                           double l,
+                                           int n);
 
     /// \brief Compute full volume and center of buoyancy of the polyhedron
     /// @return Volume object with volume and centroid
-    Volume computeFullVolume();
+    public: Volume ComputeFullVolume();
 
     /// \brief Compute submerge volume and center of buoyancy of a polyhedron
     /// @param x: our position
     /// @param q: our orientation (quaternions)
     /// @param plane: water surface defined as a plane
     /// @return Volume object with volume and centroid (relative to world)
-    Volume submergedVolume(const ignition::math::Vector3d& x,
-        const ignition::math::Quaterniond& q, Plane& plane);
+    public: Volume SubmergedVolume(const ignition::math::Vector3d &x,
+                                   const ignition::math::Quaterniond &q,
+                                   Plane &plane);
 
-    private:
     /// \brief Computes volume and centroid of tetrahedron
     /// tetrahedron formed by triangle + arbitrary point
     /// @param v1: point on triangle
@@ -104,11 +106,11 @@ namespace buoyancy
     /// @param v3: point on triangle
     /// @param p: arbitrary point
     /// @return Volume object with volume and centroid
-    static Volume tetrahedronVolume(const ignition::math::Vector3d& v1,
-        const ignition::math::Vector3d& v2,
-        const ignition::math::Vector3d& v3,
-        const ignition::math::Vector3d& p =
-            ignition::math::Vector3d({0., 0., 0.}));
+    private: static Volume tetrahedronVolume(const ignition::math::Vector3d& v1,
+                                             const ignition::math::Vector3d& v2,
+                                             const ignition::math::Vector3d& v3,
+                                             const ignition::math::Vector3d& p =
+                                        ignition::math::Vector3d({0., 0., 0.}));
 
     /// \brief Clips a partially submerged triangle
     /// @param v1: point on triangle
@@ -118,20 +120,22 @@ namespace buoyancy
     /// @param d2: distance of point v2 to the splitting plane
     /// @param d3: distance of point v3 to the splitting plane
     /// @return Volume object for clipped tetrahedron
-    static Volume clipTriangle(const ignition::math::Vector3d& v1,
-        const ignition::math::Vector3d& v2,
-        const ignition::math::Vector3d& v3, double d1, double d2, double d3,
-        const ignition::math::Vector3d& p =
-            ignition::math::Vector3d({0., 0., 0.}));
+    private: static Volume clipTriangle(const ignition::math::Vector3d& v1,
+                                        const ignition::math::Vector3d& v2,
+                                        const ignition::math::Vector3d& v3,
+                                        double d1,
+                                        double d2,
+                                        double d3,
+                                        const ignition::math::Vector3d& p =
+                                      ignition::math::Vector3d({0., 0., 0.}));
 
     /// \brief Object vertices
-    std::vector<ignition::math::Vector3d> vertices;
+    private: std::vector<ignition::math::Vector3d> vertices;
 
     /// \brief Object faces
-    std::vector<Face> faces;
+    private: std::vector<Face> faces;
 
     /// \brief Values below this are zeroed out
-    const double EPSILON = 1e-6;
+    private: const double EPSILON = 1e-6;
   };  // class Polyhedron
-
 }
