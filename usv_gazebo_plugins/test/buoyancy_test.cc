@@ -8,7 +8,7 @@ using namespace buoyancy;
 TEST(PolyhedronTest, CubeTotalVolume)
 {
   auto cube = Polyhedron::makeCube(2,2,2);
-  auto volume = cube.computeFullVolume();
+  auto volume = cube.ComputeFullVolume();
   EXPECT_FLOAT_EQ(volume.volume, 8.0);
   EXPECT_FLOAT_EQ(volume.centroid.X(), 0.0);
   EXPECT_FLOAT_EQ(volume.centroid.Y(), 0.0);
@@ -19,7 +19,7 @@ TEST(PolyhedronTest, CubeTotalVolume)
 TEST(PolyhedronTest, CylinderTotalVolume)
 {
   auto cylinder = Polyhedron::makeCylinder(0.5,2,100);
-  auto volume = cylinder.computeFullVolume();
+  auto volume = cylinder.ComputeFullVolume();
   EXPECT_NEAR(volume.volume, 1.57, 0.01);
   EXPECT_NEAR(volume.centroid.X(), 0.0, 1e-10);
   EXPECT_NEAR(volume.centroid.Y(), 0.0, 1e-10);
@@ -33,7 +33,7 @@ TEST(PolyhedronTest, CubeNotSubmerged)
   // water surface at z = 0
   buoyancy::Plane waterSurface;
 
-  auto volume = cube.submergedVolume(ignition::math::Vector3d{0,0,2},
+  auto volume = cube.SubmergedVolume(ignition::math::Vector3d{0,0,2},
       ignition::math::Quaterniond{1,0,0,0},
       waterSurface);
 
@@ -50,7 +50,7 @@ TEST(PolyhedronTest, CylinderNotSubmerged)
   // water surface at z = 0
   buoyancy::Plane waterSurface;
 
-  auto volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,2},
+  auto volume = cylinder.SubmergedVolume(ignition::math::Vector3d{0,0,2},
       ignition::math::Quaterniond{1,0,0,0},
       waterSurface);
 
@@ -71,7 +71,7 @@ TEST(PolyhedronTest, CubeSubmerged)
   //        -----
   // -------|   |--------
   //        -----
-  auto volume = cube.submergedVolume(ignition::math::Vector3d{0,0,0},
+  auto volume = cube.SubmergedVolume(ignition::math::Vector3d{0,0,0},
       ignition::math::Quaterniond{1,0,0,0},
       waterSurface);
   EXPECT_FLOAT_EQ(volume.volume, 0.5);
@@ -84,7 +84,7 @@ TEST(PolyhedronTest, CubeSubmerged)
   //        -----
   //        |   |
   //        -----
-  volume = cube.submergedVolume(ignition::math::Vector3d{0,0,-2},
+  volume = cube.SubmergedVolume(ignition::math::Vector3d{0,0,-2},
       ignition::math::Quaterniond{1,0,0,0},
       waterSurface);
   EXPECT_FLOAT_EQ(volume.volume, 1.0);
@@ -97,7 +97,7 @@ TEST(PolyhedronTest, CubeSubmerged)
   //      /  \
   // -----\  /---------
   //       \/
-  volume = cube.submergedVolume(ignition::math::Vector3d{0,0,0.25},
+  volume = cube.SubmergedVolume(ignition::math::Vector3d{0,0,0.25},
       ignition::math::Quaterniond{0.9238795, 0.3826834, 0, 0},
       waterSurface);
   EXPECT_NEAR(volume.volume, 0.21, 0.01);
@@ -117,7 +117,7 @@ TEST(PolyhedronTest, CylinderSubmerged)
   //        ---
   // -------| |--------
   //        ---
-  auto volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,0.0},
+  auto volume = cylinder.SubmergedVolume(ignition::math::Vector3d{0,0,0.0},
       ignition::math::Quaterniond{1,0,0,0},
       waterSurface);
   EXPECT_NEAR(volume.volume, 0.785, 0.001);
@@ -130,7 +130,7 @@ TEST(PolyhedronTest, CylinderSubmerged)
   //        ---
   //        | |
   //        ---
-  volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,-4},
+  volume = cylinder.SubmergedVolume(ignition::math::Vector3d{0,0,-4},
       ignition::math::Quaterniond{1,0,0,0},
       waterSurface);
   EXPECT_NEAR(volume.volume, 1.57, 0.01);
@@ -142,7 +142,7 @@ TEST(PolyhedronTest, CylinderSubmerged)
   //     --------
   // ----|      |------
   //     --------
-  volume = cylinder.submergedVolume(ignition::math::Vector3d{0,0,0},
+  volume = cylinder.SubmergedVolume(ignition::math::Vector3d{0,0,0},
       ignition::math::Quaterniond{0.707,0.707,0,0},
       waterSurface);
   EXPECT_NEAR(volume.volume, 0.785, 0.001);
@@ -195,7 +195,7 @@ TEST(ShapeVolumeTest, CubeNoRotation)
     pose.Pos().X() = poses[i][0];
     pose.Pos().Y() = poses[i][1];
     pose.Pos().Z() = poses[i][2];
-    auto vol = box->calculateVolume(pose, fluidLevel);
+    auto vol = box->CalculateVolume(pose, fluidLevel);
     EXPECT_FLOAT_EQ(vol.volume, expectedResult[i][0]);
     EXPECT_FLOAT_EQ(vol.centroid.X(), expectedResult[i][1]);
     EXPECT_FLOAT_EQ(vol.centroid.Y(), expectedResult[i][2]);
@@ -230,7 +230,7 @@ TEST(ShapeVolumeTest, CubeRotation)
     pose.Pos().X() = poses[i][0];
     pose.Pos().Y() = poses[i][1];
     pose.Pos().Z() = poses[i][2];
-    auto vol = box->calculateVolume(pose, fluidLevel);
+    auto vol = box->CalculateVolume(pose, fluidLevel);
     EXPECT_NEAR(vol.volume, expectedResult[i][0], 0.001);
     EXPECT_FLOAT_EQ(vol.centroid.X(), expectedResult[i][1]);
     EXPECT_FLOAT_EQ(vol.centroid.Y(), expectedResult[i][2]);
@@ -264,7 +264,7 @@ TEST(ShapeVolumeTest, CylinderNoRotation)
     pose.Pos().X() = poses[i][0];
     pose.Pos().Y() = poses[i][1];
     pose.Pos().Z() = poses[i][2];
-    auto vol = cylinder->calculateVolume(pose, fluidLevel);
+    auto vol = cylinder->CalculateVolume(pose, fluidLevel);
     EXPECT_NEAR(vol.volume, expectedResult[i][0], 0.01);
     EXPECT_FLOAT_EQ(vol.centroid.X(), expectedResult[i][1]);
     EXPECT_FLOAT_EQ(vol.centroid.Y(), expectedResult[i][2]);
@@ -294,7 +294,7 @@ TEST(ShapeVolumeTest, CylinderRotation)
     pose.Pos().X() = poses[i][0];
     pose.Pos().Y() = poses[i][1];
     pose.Pos().Z() = poses[i][2];
-    auto vol = cylinder->calculateVolume(pose, fluidLevel);
+    auto vol = cylinder->CalculateVolume(pose, fluidLevel);
     EXPECT_NEAR(vol.volume, expectedResult[i][0], 0.01);
     EXPECT_FLOAT_EQ(vol.centroid.X(), expectedResult[i][1]);
     EXPECT_FLOAT_EQ(vol.centroid.Y(), expectedResult[i][2]);
@@ -328,7 +328,7 @@ TEST(ShapeVolumeTest, Sphere) {
     pose.Pos().X() = poses[i][0];
     pose.Pos().Y() = poses[i][1];
     pose.Pos().Z() = poses[i][2];
-    auto vol = sphere->calculateVolume(pose, fluidLevel);
+    auto vol = sphere->CalculateVolume(pose, fluidLevel);
     EXPECT_NEAR(vol.volume, expectedResult[i][0], 0.001);
     EXPECT_FLOAT_EQ(vol.centroid.X(), expectedResult[i][1]);
     EXPECT_FLOAT_EQ(vol.centroid.Y(), expectedResult[i][2]);
