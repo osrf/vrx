@@ -413,7 +413,7 @@ void PerceptionScoringPlugin::OnUpdate()
     }
   }
 
-  // Check whether move the next object in the list.
+  // Check whether to move to the next object in the list.
   #if GAZEBO_MAJOR_VERSION >= 8
     auto elapsedTime = this->dataPtr->world->SimTime() -
                        this->dataPtr->lastUpdateTime;
