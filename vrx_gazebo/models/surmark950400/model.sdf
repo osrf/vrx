@@ -3,15 +3,18 @@
   <model name="surmark950400">
     <link name="link">
       <inertial>
-        <pose>0 0 -10 0 0 0</pose>
-        <mass>20.86</mass>
+        <pose>0 0 -2 0 0 0</pose>
+        <!-- Mass determined based on buoyancy geometry so object 
+             floats at mid-point of sphere -->
+        <mass>25</mass>
+        <!-- Mark only - based on cylinder -->
         <inertia>
-          <ixx>3.042</ixx>
+          <ixx>1.0</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>3.042</iyy>
+          <iyy>1.0</iyy>
           <iyz>0</iyz>
-          <izz>0.651875</izz>
+          <izz>0.1</izz>
         </inertia>
       </inertial>
       <collision name="collision_inner">
@@ -51,34 +54,13 @@
       <fluid_level>0.0</fluid_level>
       <linear_drag>25.0</linear_drag>
       <angular_drag>2.0</angular_drag>
-      <buoyancy name="buoyancy_inner_top">
-        <link_name>link</link_name>
-        <pose>0 0 0.18 0 0 0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.13</radius>
-            <length>0.77</length>
-          </cylinder>
-        </geometry>
-      </buoyancy>
-      <buoyancy name="buoyancy_inner_bottom">
-        <link_name>link</link_name>
-        <pose>0 0 -0.52 0 0 0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.13</radius>
-            <length>0.2</length>
-          </cylinder>
-        </geometry>
-      </buoyancy>
-      <buoyancy name="buoyancy_outer">
+      <buoyancy name="buoyancy_sphere">
         <link_name>link</link_name>
         <pose>0 0 -0.31 0 0 0</pose>
         <geometry>
-          <cylinder>
-            <radius>0.225</radius>
-            <length>0.2</length>
-          </cylinder>
+          <sphere>
+            <radius>0.23</radius>
+          </sphere>
         </geometry>
       </buoyancy>
     </plugin>
