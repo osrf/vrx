@@ -217,7 +217,7 @@ void BuoyancyPlugin::OnUpdate()
   if (!this->waveModelName.empty())
   {
     // If we haven't yet, retrieve the wave parameters from ocean model plugin.
-    if (waveParams == nullptr)
+    if (!this->waveParams)
     {
       gzmsg << "usv_gazebo_dynamics_plugin: waveParams is null. "
             << "Trying to get wave parameters from ocean model" << std::endl;

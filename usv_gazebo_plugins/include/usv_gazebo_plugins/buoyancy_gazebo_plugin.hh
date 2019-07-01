@@ -26,6 +26,7 @@
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
+#include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 #include "usv_gazebo_plugins/shape_volume.hh"
 
@@ -49,7 +50,7 @@ namespace gazebo
       /// \brief No copy constructor
       public: BuoyancyObject(BuoyancyObject& obj) = delete;
 
-      /// \brief Loads buoyancy object from SDF
+      /// \brief Load buoyancy object from SDF
       public: void Load(const physics::ModelPtr model,
                         const sdf::ElementPtr elem);
 
