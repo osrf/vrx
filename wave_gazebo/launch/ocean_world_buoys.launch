@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- 
+  <!--
     These are the arguments you can pass this launch file.
     See: gazebo_ros/launch/empty_world.launch for details.
   -->
@@ -32,7 +32,6 @@
   <arg name="imu_enabled"          default="true" />
   <arg name="lidar_enabled"        default="true" />
   <arg name="ground_truth_enabled" default="true" />
-
 
   <!-- Resume the logic in empty_world.launch, over-riding a number of arguments -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
