@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2019-07-01)
+------------------
 * Merged in issue#94-buoyancy (pull request #122)
   Issue#94 buoyancy
   Approved-by: Carlos Agüero <cen.aguero@gmail.com>

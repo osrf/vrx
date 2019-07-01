@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2019-07-01)
+------------------
 * Generate changelog for new packages
 * Merged in wave_visualization_refactor (pull request #114)
   Wave visual / physics refactor

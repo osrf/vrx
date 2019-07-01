@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2019-07-01)
+------------------
 * Generate changelog for new packages
 * merge with default
 * changing buoy buoyancy to sphere, adding feature to generator

@@ -2,8 +2,8 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2019-07-01)
+------------------
 * added dummy link for robot state publisher
 * functional. no recording
 * linting

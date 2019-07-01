@@ -2,8 +2,8 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2019-07-01)
+------------------
 * Refactor SpinPropeller to be more clear and match style of RotateEngine
 * Publish joint state for chassis engine joint to fix tf tree issue
 * addressed Brian's comments
