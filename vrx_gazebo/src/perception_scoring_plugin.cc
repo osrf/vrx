@@ -414,15 +414,8 @@ void PerceptionScoringPlugin::OnUpdate()
   }
 
   // Check whether move the next object in the list.
-  #if GAZEBO_MAJOR_VERSION >= 8
-    auto elapsedTime = this->dataPtr->world->SimTime() -
-                       this->dataPtr->lastUpdateTime;
-  #else
-    auto elapsedTime = this->dataPtr->world->GetSimTime() -
-                       this->dataPtr->lastUpdateTime;
-  #endif
 
-  if (elapsedTime >= this->dataPtr->objects.front().time)
+  if (this->ElapsedTime() >= this->dataPtr->objects.front().time)
   {
     gzmsg << "PerceptionScoringPlugin: spawn next object." << std::endl;
     auto obj = this->dataPtr->objects.front();
