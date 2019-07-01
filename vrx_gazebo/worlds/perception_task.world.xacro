@@ -47,13 +47,13 @@
             <pose>8 0 1 0 0 0</pose>
         </object>
         <object>
-          <time>5.0</time>
+          <time>10.0</time>
           <type>green</type>
           <name>green_mark</name>
           <pose>8 2 1 0 0 0</pose>
         </object>
         <object>
-          <time>5.0</time>
+          <time>15.0</time>
           <type>black</type>
           <name>black_totem</name>
           <pose>8 -2 1 0 0 0</pose>
