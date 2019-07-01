@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Open Source Robotics Foundation
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@
 #include <map>
 #include <string>
 #include <vector>
+
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Event.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
-#include <sdf/sdf.hh>
+#include "usv_gazebo_plugins/shape_volume.hh"
 
 #include "wave_gazebo_plugins/Wavefield.hh"
 #include "wave_gazebo_plugins/WavefieldEntity.hh"
@@ -34,56 +35,79 @@
 
 namespace gazebo
 {
-  /// \brief A class for storing the volume properties of a link.
-  class VolumeProperties
+  namespace buoyancy
   {
-    /// \brief Default constructor.
-    public: VolumeProperties()
-      : area(0), height(0)
+    /// \brief A class for storing buoyancy object properties
+    class BuoyancyObject
     {
-    }
+      /// \brief Default constructor
+      public: BuoyancyObject();
 
-    /// \brief Center of volume in the link frame.
-    public: ignition::math::Vector3d cov;
+      /// \brief Default move constructor
+      public: BuoyancyObject(BuoyancyObject&& obj) noexcept; // NOLINT
 
-    /// \brief Horizontal area of this link.
-    public: double area;
+      /// \brief No copy constructor
+      public: BuoyancyObject(BuoyancyObject& obj) = delete;
 
-    /// \brief Vertical height for this link.
-    public: double height;
-  };
+      /// \brief Loads buoyancy object from SDF
+      public: void Load(const physics::ModelPtr model,
+                        const sdf::ElementPtr elem);
 
-  /// \brief A plugin that simulates buoyancy of an object immersed in fluid.
-  /// All SDF parameters are optional.
+      /// \brief Display string for buoyancy object
+      public: std::string Disp();
+
+      /// \brief Associated link ID
+      public: int linkId;
+
+      /// \brief Associated link name
+      public: std::string linkName;
+
+      /// \brief Pose of buoyancy relative to link
+      public: ignition::math::Pose3d pose;
+
+      /// \brief Object mass (from inertial elem)
+      public:double mass;
+
+      /// \brief Buoyancy object's shape properties
+      public: ::buoyancy::ShapeVolumePtr shape;
+    };
+  }  // end of buoyancy namespace
+
+  /// \brief This plugin simulates buoyancy of an object in fluid.
+  ///   <wave_model>:    Name of the wave model object (optional)
+  ///
   ///   <fluid_density>: Sets the density of the fluid that surrounds the
   ///                    buoyant object [kg/m^3].
-  ///                    This paramater is optional.
+  ///                    This parameter is optional (default value 997 kg/m^3).
   ///
   ///   <fluid_level>:   The height of the fluid/air interface [m].
+  ///                    This parameter is optional (default value 0 m).
+  ///
+  ///   <linear_drag>:   Linear drag coefficent [N/(m/s)].
+  ///                    Translational drag implement as linear function
+  ///                    of velocity.
   ///                    This parameter is optional.
   ///
-  ///   <fluid_drag>:    Quadratic drag generally applied to Z velocity.
+  ///   <angular_drag>:  Angular drag coefficent [(Nm)/(rad/s)].
+  ///                    Rotational drag implemented as linear function
+  ///                    of velocity.
   ///                    This parameter is optional.
   ///
-  ///   <link>:          Describe the volume properties of individual links in
-  ///                    the model.
+  ///   <buoyancy>:      Describes the volume properties
   ///                    For example:
   ///
-  ///                    <link name="body">
-  ///                      <center_of_volume>1 2 3</center_of_volume>
-  ///                      <area>10</volume>
-  ///                      <height>5</height>
-  ///                    </link>
+  ///                    <buoyancy name="buoyancy1">
+  ///                      <link_name>link</link_name>
+  ///                      <geometry>
+  ///                        ...
+  ///                      </geometry>
+  ///                    </buoyancy>
   ///
-  ///     <center_of_volume>: A point representing the volumetric center of the
-  ///                         link in the link frame. This is where the buoyancy
-  ///                         force will be applied. This field is required.
+  ///     <link>:        Name of associated link element
   ///
-  ///     <area>:             Horizontal area of this link.
-  ///                         This field is required
-  ///
-  ///     <height>:           Vertical height of this link.
-  ///                         This field is required.
+  ///     <geometry>:    Geometry element specifying buoyancy object's
+  ///                    volume properties.
+  ///                    Supported shapes: box, sphere, cylinder
   class BuoyancyPlugin : public ModelPlugin
   {
     /// \brief Constructor.
@@ -102,15 +126,6 @@ namespace gazebo
     /// \brief Connection to World Update events.
     protected: event::ConnectionPtr updateConnection;
 
-    /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
-    protected: physics::WorldPtr world;
-
-    /// \brief Pointer to the model
-    protected: physics::ModelPtr model;
-
-    /// \brief The name of the wave model
-    protected: std::string waveModelName;
-
     /// \brief The density of the fluid in which the object is submerged in
     /// kg/m^3. Defaults to 1000, the fluid density of water at 15 Celsius.
     protected: double fluidDensity;
@@ -118,19 +133,33 @@ namespace gazebo
     /// \brief The height of the fluid/air interface [m]. Defaults to 0.
     protected: double fluidLevel;
 
-    /// \brief Quadratic drag generally applied to Z velocity. Defaults to 0.
-    protected: double fluidDrag;
+    /// \brief Linear drag coefficient. Defaults to 0.
+    protected: double linearDrag;
 
-    /// \brief Map of <link ID, point> pairs mapping link IDs to the CoV
-    /// (center of volume) and volume of the link.
-    protected: std::map<int, VolumeProperties> volPropsMap;
+    /// \brief Angular drag coefficient. Defaults to 0.
+    protected: double angularDrag;
 
-    /// \brief Vector of links in the model for which we will apply buoyancy
-    /// forces.
-    protected: physics::Link_V buoyancyLinks;
+    /// \brief List of buoyancy objects for model
+    protected: std::vector<buoyancy::BuoyancyObject> buoyancyObjects;
 
-    /// \brief Vector of water height at each link from previous timestep
-    protected: std::vector<double> buoyancyHeights;
+    /// \brief Map of <link ID, link pointer>
+    protected: std::map<int, gazebo::physics::LinkPtr> linkMap;
+
+    /// \brief Pointer to base model
+    protected: physics::ModelPtr model;
+
+    /// \brief Pointer to the Gazebo world
+    /// Retrieved when the model is loaded.
+    protected: physics::WorldPtr world;
+
+    /// \brief The name of the wave model
+    protected: std::string waveModelName;
+
+    /// \brief Map of water height at each link from previous timestep
+    protected: std::map<gazebo::physics::LinkPtr, double> linkHeights;
+
+    /// \brief Map of water velocity at each link
+    protected: std::map<gazebo::physics::LinkPtr, double> linkHeightDots;
 
     /// \brief Previous update time
     protected: double lastSimTime;

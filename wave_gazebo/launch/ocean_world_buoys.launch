@@ -58,7 +58,7 @@
 
   <!-- Spawn WAMV model in Gazebo -->
   <node name="spawn_model_wamv" pkg="gazebo_ros" type="spawn_model"
-        args="-x $(arg x) -y $(arg y) -z $(arg z)
-              -R $(arg R) -P $(arg P) -Y $(arg Y)
-              -urdf -param robot_description -model wam -robot_namespace wamv0"/>
+  args="-x $(arg x) -y $(arg y) -z $(arg z)
+        -R $(arg R) -P $(arg P) -Y $(arg Y)
+        -urdf -param robot_description -model wamv"/>
 </launch>

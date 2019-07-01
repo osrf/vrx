@@ -1,21 +1,20 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
   <model name="surmark950410">
-    <link name="link">
-      <velocity_decay>
-        <linear>0.001</linear>
-        <angular>0.001</angular>
-      </velocity_decay>
+    <link name="link">      
       <inertial>
-        <pose>0 0 -10 0 0 0</pose>
-        <mass>20.86</mass>
+        <pose>0 0 -2 0 0 0</pose>
+        <!-- Mass determined based on buoyancy geometry so object 
+             floats at mid-point of sphere -->
+        <mass>25</mass>
+        <!-- Mark only - based on cylinder -->
         <inertia>
-          <ixx>3.042</ixx>
+          <ixx>1.0</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>3.042</iyy>
+          <iyy>1.0</iyy>
           <iyz>0</iyz>
-          <izz>0.651875</izz>
+          <izz>0.1</izz>
         </inertia>
       </inertial>
       <collision name="collision_inner">
@@ -48,17 +47,23 @@
         </material>
       </visual>
     </link>
+
     <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
       <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
-      <fluid_drag>0.0</fluid_drag>
-      <link>
-        <name>link</name>
-        <center_of_volume>0 0 0.6</center_of_volume>
-        <area>0.63</area>
-        <height>1.05</height>
-      </link>
+      <linear_drag>25.0</linear_drag>
+      <angular_drag>2.0</angular_drag>
+      <buoyancy name="buoyancy_sphere">
+        <link_name>link</link_name>
+        <pose>0 0 -0.48 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.23</radius>
+          </sphere>
+        </geometry>
+      </buoyancy>
     </plugin>
+
   </model>
 </sdf>
