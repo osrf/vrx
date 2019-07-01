@@ -36,6 +36,10 @@
         <bodyName>${name}_link</bodyName>
         <frameId>${name}_link</frameId>
         <topicName>gps/fix</topicName>
+        <!-- Note that the hector_gazebo_ros_gps plugin uses NWU coordinates
+             for reporting velocities.  This may cause problems if localization
+             requires velocity in ENU.  
+             See Issue #64 in VRX projecto for details -->
         <velocityTopicName>gps/fix_velocity</velocityTopicName>
         <!-- Location of origin of Gazebo Sand Island map -->
         <referenceLatitude>21.30996</referenceLatitude>
