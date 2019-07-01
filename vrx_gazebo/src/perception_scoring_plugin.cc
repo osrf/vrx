@@ -64,7 +64,7 @@ void ObjectChecker::NewTrial(const std::string &_objectName,
   this->trueName = _objectName;
   this->currObject = _object;
 
-  ROS_INFO_NAMED("ObjectChecker", "Intiating new trial");
+  ROS_INFO_NAMED("ObjectChecker", "Initiating new trial");
 }
 
 //////////////////////////////////////////////////
@@ -413,7 +413,7 @@ void PerceptionScoringPlugin::OnUpdate()
     }
   }
 
-  // Check whether move the next object in the list.
+  // Check whether to move to the next object in the list.
   #if GAZEBO_MAJOR_VERSION >= 8
     auto elapsedTime = this->dataPtr->world->SimTime() -
                        this->dataPtr->lastUpdateTime;
@@ -530,5 +530,7 @@ void PerceptionScoringPlugin::OnUpdate()
 //////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnRunning()
 {
+  gzmsg << "OnRunning" << std::endl;
+
   this->dataPtr->objectChecker->Enable();
 }

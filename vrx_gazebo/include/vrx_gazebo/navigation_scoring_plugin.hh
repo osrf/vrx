@@ -167,15 +167,6 @@ class NavigationScoringPlugin : public ScoringPlugin
   private: void Fail();
 
   // Documentation inherited.
-  private: void OnReady() override;
-
-  // Documentation inherited.
-  private: void OnRunning() override;
-
-  // Documentation inherited.
-  private: void OnFinished() override;
-
-  // Documentation inherited.
   private: void OnCollision() override;
 
   // Name of Course
