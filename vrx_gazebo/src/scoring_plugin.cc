@@ -229,16 +229,19 @@ void ScoringPlugin::ReleaseVehicle()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
+  gzmsg << "OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
+  gzmsg << "OnRunning" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
+  gzmsg << "OnFinished" << std::endl;
 }
 
 //////////////////////////////////////////////////

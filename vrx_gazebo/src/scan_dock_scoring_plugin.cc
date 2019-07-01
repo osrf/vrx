@@ -435,6 +435,7 @@ void ScanDockScoringPlugin::Update()
 //////////////////////////////////////////////////
 void ScanDockScoringPlugin::OnReady()
 {
+  gzmsg << "OnReady" << std::endl;
   // Announce the symbol if needed.
   for (auto &dockChecker : this->dockCheckers)
     dockChecker->AnnounceSymbol();
@@ -443,6 +444,7 @@ void ScanDockScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void ScanDockScoringPlugin::OnRunning()
 {
+  gzmsg << "OnRunning" << std::endl;
   light_buoy_colors_msgs::msgs::LightBuoyColors colors;
   colors.set_color_1(this->expectedSequence[0]);
   colors.set_color_2(this->expectedSequence[1]);

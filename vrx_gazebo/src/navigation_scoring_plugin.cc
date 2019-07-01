@@ -315,23 +315,7 @@ void NavigationScoringPlugin::OnCollision()
   this->numCollisions++;
 }
 
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::OnReady()
-{
-  gzmsg << "OnReady" << std::endl;
-}
 
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::OnRunning()
-{
-  gzmsg << "OnRunning" << std::endl;
-}
-
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::OnFinished()
-{
-  gzmsg << "OnFinished" << std::endl;
-}
 
 // Register plugin with gazebo
 GZ_REGISTER_WORLD_PLUGIN(NavigationScoringPlugin)
