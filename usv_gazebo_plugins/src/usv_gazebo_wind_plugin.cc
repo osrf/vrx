@@ -153,7 +153,7 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
   }
 
   gzmsg << "Random seed value = " << this->timeConstant << std::endl;
-  
+
   // Calculate filter constant
   this->filterGain = this->gainConstant*sqrt(2.0*this->timeConstant);
   gzmsg << "Var wind filter gain = " << this->filterGain << std::endl;
