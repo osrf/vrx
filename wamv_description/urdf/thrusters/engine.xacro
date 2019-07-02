@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v-two-engines">
   <!-- Macro for inserting an engine with its propeller. -->
-  <xacro:macro name="engine" params="prefix position:='0 0 0' orientation:='0 0 0'">
+  <xacro:macro name="engine" params="prefix position:='0 0 0' orientation:='0 0 0' namespace:='' thruster_namespace:=''">
     <link name="${prefix}_engine_link">
       <visual>
         <geometry>

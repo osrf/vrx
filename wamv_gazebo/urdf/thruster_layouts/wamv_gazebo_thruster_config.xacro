@@ -6,8 +6,8 @@
       <linkName>${name}_propeller_link</linkName>
       <propJointName>${name}_engine_propeller_joint</propJointName>
       <engineJointName>${name}_chasis_engine_joint</engineJointName>
-      <cmdTopic>${name}_thrust_cmd</cmdTopic>
-      <angleTopic>${name}_thrust_angle</angleTopic>
+      <cmdTopic>${namespace}${thruster_namespace}/${name}_thrust_cmd</cmdTopic>
+      <angleTopic>${namespace}${thruster_namespace}/${name}_thrust_angle</angleTopic>
       <enableAngle>true</enableAngle>
 
       <!-- Optional Parameters -->
