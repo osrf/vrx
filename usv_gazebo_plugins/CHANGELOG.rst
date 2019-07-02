@@ -2,8 +2,8 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.1 (2019-07-03)
+------------------
 * Reinterpret the wind 'gain' parameter.  Set defaults to zero
 * updated style for buoyancy plugin
 * Contributors: Brian Bingham <briansbingham@gmail.com>, Rumman Waqar <rumman.waqar05@gmail.com>

@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.1 (2019-07-03)
+------------------
 * Missing ruby in build depend for wave_gazebo
 * Contributors: Jose Luis Rivero <jrivero@osrfoundation.org>
 
