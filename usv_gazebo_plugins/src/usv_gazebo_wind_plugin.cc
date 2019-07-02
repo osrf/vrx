@@ -153,14 +153,18 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
   }
 
   gzmsg << "Random seed value = " << this->timeConstant << std::endl;
+  
+  // Calculate filter constant
+  this->filterGain = this->gainConstant*sqrt(2.0*this->timeConstant);
+  gzmsg << "Var wind filter gain = " << this->filterGain << std::endl;
 
-  // initialize previous time and previous velocity
+  // Initialize previous time and previous velocity
 #if GAZEBO_MAJOR_VERSION >= 8
   this->previousTime = this->world->SimTime().Double();
 #else
   this->previousTime = this->world->GetSimTime().Double();
 #endif
-  this->previousVarVel = 0;
+  this->varVel = 0;
 
   // Initialize ROS transport.
   this->rosNode.reset(new ros::NodeHandle());
@@ -216,11 +220,11 @@ void UsvWindPlugin::Update()
 #endif
   double dT= currentTime - this->previousTime;
   double randomDist = ignition::math::Rand::DblNormal(0, 1);
-  // calculate current variable wind velocity
-  double currentVarVel = this->previousVarVel + (-1/this->timeConstant*
-    (this->previousVarVel+this->gainConstant*randomDist))*dT;
-  // calculate current wind velocity
-  double velocity = currentVarVel + this->windMeanVelocity;
+  // Current variable wind velocity
+  this->varVel += 1.0/this->timeConstant*
+    (-1.0*this->varVel+this->filterGain/sqrt(dT)*randomDist)*dT;
+  // Current wind velocity
+  double velocity = this->varVel + this->windMeanVelocity;
 
   for (auto& windObj : this->windObjs)
   {
@@ -263,8 +267,7 @@ void UsvWindPlugin::Update()
     windObj.link->AddRelativeTorque(
       ignition::math::Vector3d(0.0, 0.0, windForce.Z()));
   }
-  // Moving the previous time and velocity one step forward.
-  this->previousVarVel = currentVarVel;
+  // Moving the previous time one step forward.
   this->previousTime = currentTime;
 
   double publishingBuffer = 1/this->updateRate;

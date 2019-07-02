@@ -4,9 +4,9 @@
   <world name="sandisland">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
-    <!--wind for the wamv-->
+    <!--Wind for the WAM-V. Note, wind parameters are set in the plug.-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
-    <xacro:usv_wind_gazebo mean_vel="1">
+    <xacro:usv_wind_gazebo>
       <wind_objs>
         <wind_obj>
           <name>wamv</name>
