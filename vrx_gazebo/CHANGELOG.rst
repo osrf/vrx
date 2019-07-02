@@ -2,6 +2,12 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Reinterpret the wind 'gain' parameter.  Set defaults to zero
+* Add replaces cluase to vrx_gazebo
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Jose Luis Rivero <jrivero@osrfoundation.org>
+
 1.1.0 (2019-07-01)
 ------------------
 * Merged in issue#94-buoyancy (pull request #122)

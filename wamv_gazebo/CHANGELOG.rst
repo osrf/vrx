@@ -2,6 +2,9 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.0 (2019-07-01)
 ------------------
 * wamv_gps.xacro edited online with Bitbucket
