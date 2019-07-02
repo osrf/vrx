@@ -38,6 +38,9 @@
 1. Support the ability to customize WAM-V thruster and sensor location via YAML:
     * [Pull request 104](https://bitbucket.org/osrf/vrx/pull-requests/104)
 
+1. Add ability to playback simulations and add extra_gazebo_args argument to allow for recording:
+    * [Pull request 121](https://bitbucket.org/osrf/vrx/pull-requests/121)
+
 ### VRX 1.0.1
 
 1. Refactor Docker layout:
