@@ -43,6 +43,7 @@ namespace buoyancy
     virtual ~ShapeVolume() = default;
 
     /// \brief Factory method for shape. Parses a shape object from sdf data
+    /// \param sdf geometry SDF element
     static std::unique_ptr<ShapeVolume> makeShape(const sdf::ElementPtr sdf);
 
     /// \brief Display string for shape object
@@ -95,7 +96,7 @@ namespace buoyancy
 
     private:
     /// \brief Polyhedron defining a box
-    Polyhedron polyhedron_;
+    Polyhedron polyhedron;
   };
 
   /// \brief Cylinder shape volume
@@ -121,7 +122,7 @@ namespace buoyancy
 
     private:
     /// \brief Polyhedron defining a cylinder
-    Polyhedron polyhedron_;
+    Polyhedron polyhedron;
   };
 
   /// \brief Sphere shape volume
