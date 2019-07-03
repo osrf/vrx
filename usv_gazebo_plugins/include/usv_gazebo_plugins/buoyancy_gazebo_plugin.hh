@@ -51,6 +51,8 @@ namespace gazebo
       public: BuoyancyObject(BuoyancyObject& obj) = delete;
 
       /// \brief Load buoyancy object from SDF
+      /// @param model model associated with buoyancy object
+      /// @param elem sdf for buoyancy element
       public: void Load(const physics::ModelPtr model,
                         const sdf::ElementPtr elem);
 

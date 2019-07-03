@@ -43,7 +43,7 @@ namespace buoyancy
     virtual ~ShapeVolume() = default;
 
     /// \brief Factory method for shape. Parses a shape object from sdf data
-    /// \param geometry SDF element
+    /// \param sdf geometry SDF element
     static std::unique_ptr<ShapeVolume> makeShape(const sdf::ElementPtr sdf);
 
     /// \brief Display string for shape object
