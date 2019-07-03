@@ -111,7 +111,7 @@ namespace gazebo
     /// \brief User specified gain constant.
     private: double gainConstant;
 
-    /// \brief Calcualted fitler ain constant.
+    /// \brief Calculated fitler gain constant.
     private: double filterGain;
 
     /// \brief Time constant.
