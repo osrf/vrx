@@ -120,7 +120,7 @@ BoxVolume::BoxVolume(double x, double y, double z)
     : x(x),
       y(y),
       z(z),
-      polyhedron_(Polyhedron::makeCube(x, y, z))
+      polyhedron(Polyhedron::makeCube(x, y, z))
 {
   type = ShapeType::Box;
   volume = x * y * z;
@@ -141,14 +141,14 @@ Volume BoxVolume::CalculateVolume(const ignition::math::Pose3d &pose,
 {
   Plane waterSurface;
   waterSurface.offset = fluidLevel;
-  return polyhedron_.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
+  return this->polyhedron.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
 }
 
 /////////////////////////////////////////////////
 CylinderVolume::CylinderVolume(double r, double h)
     : r(r),
       h(h),
-      polyhedron_(Polyhedron::makeCylinder(r, h, 20))
+      polyhedron(Polyhedron::makeCylinder(r, h, 20))
 {
   type = ShapeType::Cylinder;
   volume = M_PI * r * r * h;
@@ -169,7 +169,7 @@ Volume CylinderVolume::CalculateVolume(const ignition::math::Pose3d &pose,
 {
   Plane waterSurface;
   waterSurface.offset = fluidLevel;
-  return polyhedron_.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
+  return this->polyhedron.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
 }
 
 //////////////////////////////////////////////////

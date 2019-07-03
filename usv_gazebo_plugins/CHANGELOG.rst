@@ -2,6 +2,12 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2019-07-03)
+------------------
+* Reinterpret the wind 'gain' parameter.  Set defaults to zero
+* updated style for buoyancy plugin
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Rumman Waqar <rumman.waqar05@gmail.com>
+
 1.1.0 (2019-07-01)
 ------------------
 * Refactor SpinPropeller to be more clear and match style of RotateEngine
