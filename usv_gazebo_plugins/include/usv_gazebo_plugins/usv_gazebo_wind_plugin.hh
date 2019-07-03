@@ -108,8 +108,11 @@ namespace gazebo
     /// \brief Average wind velocity.
     private: double windMeanVelocity;
 
-    /// \brief Gain constant.
+    /// \brief User specified gain constant.
     private: double gainConstant;
+
+    /// \brief Calculated filter gain constant.
+    private: double filterGain;
 
     /// \brief Time constant.
     private: double timeConstant;
@@ -117,8 +120,8 @@ namespace gazebo
     /// \brief Previous time.
     private: double previousTime;
 
-    /// \brief Velocity at previous time.
-    private: double previousVarVel;
+    /// \brief Variable velocity component.
+    private: double varVel;
 
     /// \brief ROS node handle.
     private: std::unique_ptr<ros::NodeHandle> rosNode;

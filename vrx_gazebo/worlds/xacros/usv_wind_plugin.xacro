@@ -3,11 +3,11 @@
   <xacro:macro name="usv_wind_gazebo"
                params="**wind_objs
                          direction:=270
-                         mean_vel:=10
-                         var_gain:=100
-                         var_time:=5
+                         mean_vel:=0
+                         var_gain:=0
+                         var_time:=1
                          seed:=''
-                         ros_update_rate:=1
+                         ros_update_rate:=10
                          " >
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <plugin name="wind" filename="libusv_gazebo_wind_plugin.so">
