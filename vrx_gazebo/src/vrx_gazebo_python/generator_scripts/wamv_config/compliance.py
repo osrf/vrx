@@ -48,7 +48,7 @@ class Sensor_Compliance:
             rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
                          (sensor_type, params['name'],
                           xyz[0], xyz[1], xyz[2],
-                          'must fit in at least one of the following boxes:'))
+                          'must fit in at least one of the following boxes with remaining space:'))
             for box in self.boxes:
                 rospy.logerr('  %s' % str(box))
             return False

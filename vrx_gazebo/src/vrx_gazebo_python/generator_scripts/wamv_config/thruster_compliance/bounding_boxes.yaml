@@ -15,6 +15,6 @@ thruster_compliance_star_for:
         size: '1 1 1.2'
         capacity: '1'
 thruster_compliance_middle:
-        pose: -.6 0 0 0 0 0
-        size: '4.2 1 1.2'
+        pose: 0.25 0 0 0 0 0
+        size: '2.5 1 1.2'
         capacity: '1'
