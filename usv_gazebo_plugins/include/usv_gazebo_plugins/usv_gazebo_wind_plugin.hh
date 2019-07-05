@@ -62,6 +62,7 @@ namespace gazebo
     struct WindObj
     {
       /// \Bool to show weather the model and link pointers have been set
+      // cppcheck-suppress unusedStructMember
       bool init = false;
       /// \name of model as it will be looked by in the world
       std::string modelName;
@@ -107,8 +108,11 @@ namespace gazebo
     /// \brief Average wind velocity.
     private: double windMeanVelocity;
 
-    /// \brief Gain constant.
+    /// \brief User specified gain constant.
     private: double gainConstant;
+
+    /// \brief Calculated filter gain constant.
+    private: double filterGain;
 
     /// \brief Time constant.
     private: double timeConstant;
@@ -116,8 +120,8 @@ namespace gazebo
     /// \brief Previous time.
     private: double previousTime;
 
-    /// \brief Velocity at previous time.
-    private: double previousVarVel;
+    /// \brief Variable velocity component.
+    private: double varVel;
 
     /// \brief ROS node handle.
     private: std::unique_ptr<ros::NodeHandle> rosNode;
@@ -129,10 +133,10 @@ namespace gazebo
     private: ros::Publisher windDirectionPub;
 
     /// \brief Topic where the wind speed is published.
-    private: std::string topicWindSpeed = "/wind_speed";
+    private: std::string topicWindSpeed = "/vrx/debug/wind/speed";
 
     /// \brief Topic where the wind direction is published.
-    private: std::string topicWindDirection = "/wind_direction";
+    private: std::string topicWindDirection = "/vrx/debug/wind/direction";
 
     /// \brief Last time wind speed and direction was published.
     private: double lastPublishTime = 0;
@@ -142,6 +146,9 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    /// \breif Bool debug set by environment var VRX_DEBUG
+    private: bool debug = true;
   };
 }
 

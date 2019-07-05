@@ -72,7 +72,7 @@
           iyz="0"/>
       </inertial>
     </link>
-    
+
     <!-- Sensor post arm -->
     <link name="${name}_post_arm_link">
       <visual name="${name}_post_arm_visual">
@@ -99,7 +99,7 @@
           iyz="0"/>
       </inertial>
     </link>
-    
+
     <!-- Base to sensor post joint -->
     <xacro:property name="post_z" value="${platform_z+post_length/2}"/>
     <xacro:property name="post_to_camera_x" value="${post_to_post_arm_x+post_arm_to_camera_x}"/>
@@ -130,8 +130,8 @@
         <camera name="${name}_camera">
           <horizontal_fov>1.3962634</horizontal_fov>
           <image>
-            <width>800</width>
-            <height>800</height>
+            <width>1280</width>
+            <height>720</height>
             <format>R8G8B8</format>
           </image>
           <clip>

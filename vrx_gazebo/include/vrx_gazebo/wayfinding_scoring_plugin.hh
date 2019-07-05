@@ -70,9 +70,6 @@ class WayfindingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
-  // Documentation inherited.
-  private: void OnFinished() override;
-
   /// \brief Publish the waypoints through which the vehicle must navigate.
   private: void PublishWaypoints();
 

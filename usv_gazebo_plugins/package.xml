@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>usv_gazebo_plugins</name>
-  <version>1.0.1</version>
+  <version>1.1.1</version>
   <description>
     Gazebo plugins for simulating Unmanned Surface Vehicles
     Originaly copied from https://github.com/bsb808/usv_gazebo_plugins
@@ -19,6 +19,7 @@
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
   <depend>eigen</depend>
+  <depend>xacro</depend>
   <depend>wave_gazebo_plugins</depend>
   <exec_depend>message_runtime</exec_depend>
 </package>

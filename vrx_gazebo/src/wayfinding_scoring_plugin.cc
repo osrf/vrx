@@ -232,11 +232,6 @@ void WayfindingScoringPlugin::OnRunning()
   this->timer.Start();
 }
 
-//////////////////////////////////////////////////
-void WayfindingScoringPlugin::OnFinished()
-{
-  gzmsg << "OnFinished" << std::endl;
-}
 
 // Register plugin with gazebo
 GZ_REGISTER_WORLD_PLUGIN(WayfindingScoringPlugin)

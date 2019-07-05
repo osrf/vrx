@@ -77,6 +77,8 @@ if __name__ == '__main__':
                         help="Number of a7 buoys to include in challenge")
     parser.add_argument('--surmark46104', type=int, default=5,
                         help="Number of surmark46104 buoys to include in challenge")
+    parser.add_argument('--N', type=int, default=0,
+                        help="Generates N markers of each type")
     parser.add_argument('--L', type=float, default=40,
                         help="Size of box used for generation (LxL)")
     args = parser.parse_args()
@@ -107,6 +109,17 @@ if __name__ == '__main__':
         surmark46104_xml = get_models_xml(arr[args.a3 + args.a5 + args.a7: total, :], "surmark46104")
     else:
         surmark46104_xml = ""
+
+
+    # Generate a separate course for the N markers  
+    N_xml = ""
+    if args.N > 0:
+        objs = ["surmark46104","surmark950400","surmark950410","black_totem",
+                "blue_totem","green_totem","red_totem"]
+        for obj in objs:
+            arrN = generate_obstacle_course(np.array([args.L, args.L]), args.N, 5.0, ul=np.array([-args.L/2.0, -args.L/2.0])) 
+            N_xml += get_models_xml(arrN,obj)
+
     # Assemble full sdf
-    print HEADER + a3_xml + a5_xml + a7_xml + surmark46104_xml + FOOTER
+    print HEADER + a3_xml + a5_xml + a7_xml + surmark46104_xml + N_xml + FOOTER
 

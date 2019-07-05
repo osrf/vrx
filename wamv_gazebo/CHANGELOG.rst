@@ -2,6 +2,102 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2019-07-03)
+------------------
+
+1.1.0 (2019-07-01)
+------------------
+* wamv_gps.xacro edited online with Bitbucket
+* Update camera resolution
+* Using 16 beam lasers
+* default urdf is now 32 beam lidar
+* completed lidar specs
+* ready for detailed lidar spec input
+* added rviz config
+* Merged default into issue#94-buoyancy
+* merging with default - need to check wind
+* Added allowences for post_Y and moved wamv_imu, wamv_gps default locations to be within compliance
+* temporary branch for comparing with wave_visualization
+* Merged in Issue#100-wind-plugin (pull request #106)
+  Issue#100 wind plugin moved to world plugin
+  Approved-by: Carlos Agüero <cen.aguero@gmail.com>
+* Put required parameters together and make it obvious which are required
+* Add <enableAngle> bool parameter that controls if angle is adjustable or not
+* filled out the SensorCompliance. It is formatted by the sensors_compliance files
+* Implement turnable thruster joint
+* Basic implementation of angle adjustable thrusters, still need to test, add joints, and change visuals
+* merged. expanded xacro capabilities
+* changing the interface from timePeriod to frequency
+* adding ROS API to probe for wind speed
+* enabling the user to input only the angle for wind direction
+* Make thruster config with yaml work without affecting use of sensor yaml config, still need to clean up
+* Move engine.xacro to thrusters directory to allow for different types of thrusters
+* Merged default into Issue#97-yaml-thruster-configuration
+* Clarify link relative position calculation
+* Implement varying length lidar pole
+* Change post angle for right camera
+* Vary post mass as length changes
+* Fix camera seeing itself by increasing clip distance
+* incremental(basic testing passed)
+* Fix post color issue by removing <visual> tag name
+* Add gazebo tag for color, still not working
+* Update wamv_gazebo.urdf.xacro file to use thruster yaml file if given
+* Initial testing of random seed with print statements
+* Change from visual mesh to cylinder, but color not working. Stil showing white
+* Define positioning variables for improved clarity
+* Scale post length to better match camera height
+* Simplify all transformations: base->post->arm->camera
+* Tweaked comments.
+* Simplify all transformations: base->post->arm->lidar
+* Implement post_Y parameter that allows the post to be rotated in the yaw direction
+* Redo sensor post to lidar joints to cleaner (x,y,z,r,p,y) coordinates
+* Temporary test setting xyz of lidar, next need to change frames to simplify all of this
+* updated readme, changed operation procedure, still not installed
+* Add second adjustment link to perfectly match sensor and base frames
+* Add adjustment link and joint to make the lidar frame better match base frame
+* Add adjustment link and joint to make the camera frame match base frame
+* Integrate sensor post to camera urdf, with height parameter
+* Fix issue with lidar seeing itself and set default lidar angle downwards towards water
+* Add mono_camera mesh to urdf file and onto WAM-V
+* Merged default into Issue#86-add-3d-lidar-mesh
+* Add sensor_post_arm.dae
+* Add sensor post to 3d lidar on WAM-V, including height parameter
+* Fix default 3d lidar pose
+* Add CPU cases only in VRX configuration + remove redundant pose info
+* Move boxes forward to prevent collision with gps
+* Add 3D Lidar mesh and put it on WAM-V
+* Add CPU case model to WAM-V
+* Added script to interpret a yaml and auto generate appropriate xacro macro file while checking for compliance
+* Added Batteries to vrx_gazebo/models(sdf format) and macro(urdf format) to place on wamv
+* Lower mast.
+* turning wind off to better test - tweaking waypoints in wayfinding task example
+* Tweak names.
+* Adding gps mesh, collisions and inertia.
+* Tweaking positions and adding post and navigation course.
+* Restoring cameras and laser visuals and creating demo.launch
+* Sandisland texture, sensor meshes and extra objects.
+* Implemented changed after PR is reviewed - V1
+  Remove Ros dependency (regarding time)
+  fixed typoes
+  fixed wrong comments
+  Exposed seed value to user
+  Updated purpose of SDF params in the header file
+  lines are now shorted than 80 chars
+  added comments around explaining the calculations done
+* made wind speed randomized
+* Modify velodyne configuration to set intensity filtering
+  Alter ocean laser retro to be filtered by the lidar sensor
+* Setting wave parameters by hand in source for testing
+* setting default wind to zero
+* Issue #23: Coordinate the physics and visualization of the wave field
+  1. Use the asv_wave_sim_gazebo_plugins package for wave field visualisation and depth calculation.
+  2. Update the buoyancy and dynamics plugins for buoyancy calculations.
+  3. Update sdf and xacro for models that require buoyancy.
+  4. Replace the ocean model with ocean_waves in the sandisland world.
+* Red placards and rearrange a bit the sensors.
+* Port to VRX code using Gazebo9.
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Aguero <caguero@osrfoundation.org>, Carlos Agüero <cen.aguero@gmail.com>, Jonathan Wheare <jonathan.wheare@flinders.edu.au>, MarshallRawson, Rhys Mainwaring <rhys.mainwaring@me.com>, Rumman Waqar <rumman.waqar05@gmail.com>, Tyler Lum <tylergwlum@gmail.com>, Youssef Khaky <youssefkhaky@hotmail.com>, YoussefKhaky <youssefkhaky@hotmail.com.com>
+
 1.0.1 (2019-03-01)
 ------------------
 * changed rviz camera topic

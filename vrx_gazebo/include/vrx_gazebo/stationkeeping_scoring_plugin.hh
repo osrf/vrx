@@ -66,9 +66,6 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
-  // Documentation inherited.
-  private: void OnFinished() override;
-
   /// \brief Publish the goal pose.
   private: void PublishGoal();
 

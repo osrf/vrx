@@ -29,6 +29,7 @@
 #include <sdf/sdf.hh>
 #include <gazebo/transport/transport.hh>
 #include "vrx_gazebo/Task.h"
+#include "vrx_gazebo/Contact.h"
 
 /// \brief A plugin that provides common functionality to any scoring plugin.
 /// This plugin defines four different task states:
@@ -60,8 +61,14 @@
 ///
 /// <task_name>: Required parameter specifying the task name (string type).
 ///
-/// <topic>: Optional parameter (string type) containing the ROS topic name to
-/// publish the task stats. The default topic name is /vrx/task/info .
+/// <task_info_topic>: Optional parameter (string type)
+/// containing the ROS topic name to publish the task stats. The default
+/// topic name is /vrx/task/info .
+///
+/// <contact_debug_topic>: Optional parameter (string type)
+/// containing the ROS topic name to
+/// publish every instant a collision with the wamv is happening.
+/// Default is /vrx/debug/contact.
 ///
 /// <initial_state_duration>: Optional parameter (double type) specifying the
 /// amount of seconds that the plugin will be in the "initial" state.
@@ -101,6 +108,7 @@
 ///     </joint>
 ///   </release_joints>
 /// </plugin>
+
 class ScoringPlugin : public gazebo::WorldPlugin
 {
   /// \brief Class constructor.
@@ -197,7 +205,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Last collision time.
   protected: gazebo::common::Time lastCollisionTime;
 
-  /// \brief Collision detection node pointer
+  /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr collisionNode;
 
   /// \brief Collision detection node subscriber
@@ -207,7 +215,13 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: gazebo::event::ConnectionPtr updateConnection;
 
   /// \brief Topic where the task stats are published.
-  private: std::string topic = "/vrx/task/info";
+  private: std::string taskInfoTopic = "/vrx/task/info";
+
+  /// \brief Bool flag for debug.
+  private: bool debug = true;
+
+  /// \brief Topic where debug collision is published.
+  private: std::string contactDebugTopic = "/vrx/debug/contact";
 
   /// \brief The score.
   private: double score = 0.0;
@@ -266,6 +280,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief The next task message to be published.
   private: vrx_gazebo::Task taskMsg;
 
+  /// \brief ROS Contact Msg.
+  private: vrx_gazebo::Contact contactMsg;
+
   /// \brief The name of the joints to be dettached during ReleaseVehicle().
   private: std::vector<std::string> lockJointNames;
 
@@ -274,6 +291,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Publisher for the task state.
   private: ros::Publisher taskPub;
+
+  /// \brief Publisher for the collision.
+  private: ros::Publisher contactPub;
 };
 
 #endif

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0.5 z:=1.3 R:=0 P:=0 Y:=0">
+  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3 R:=0 P:=0 Y:=0">
     <link name="${name}_link">
       <visual name="${name}_visual">
         <geometry>
@@ -36,6 +36,11 @@
         <bodyName>${name}_link</bodyName>
         <frameId>${name}_link</frameId>
         <topicName>${sensor_namespace}/gps/fix</topicName>
+        <!-- Note that the hector_gazebo_ros_gps plugin uses NWU coordinates
+             for reporting velocities.  This may cause problems if localization
+             requires velocity in ENU.  
+             See Issue #64 in VRX project for details
+             https://bitbucket.org/osrf/vrx/issues/64 -->
         <velocityTopicName>${sensor_namespace}/gps/fix_velocity</velocityTopicName>
         <!-- Location of origin of Gazebo Sand Island map -->
         <referenceLatitude>21.30996</referenceLatitude>

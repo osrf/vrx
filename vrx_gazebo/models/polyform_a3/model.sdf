@@ -5,10 +5,6 @@
     <static>false</static>
     <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
-			 <velocity_decay>
-        <linear>0.002</linear>
-        <angular>0.002</angular>
-      </velocity_decay>
       <inertial>
         <!-- Reference: https://www.sailrite.com/PDF/Polyform-Buoys-Fenders-Accessories.pdf, page 8 -->
         <mass>3.1</mass>
@@ -30,17 +26,20 @@
         </geometry>
       </collision>
     </link>
+
     <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
       <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
-      <fluid_drag>0.0</fluid_drag>
-      <link name="link">
-        <name>base_link</name>
-        <center_of_volume>0 0 0</center_of_volume>
-        <area>0.1466</area>
-        <height>0.432</height>
-      </link>
+      <linear_drag>20.0</linear_drag>
+      <angular_drag>2.0</angular_drag>
+      <buoyancy name="buoyancy">
+        <link_name>base_link</link_name>
+        <geometry>
+          <sphere><radius>0.216</radius></sphere>
+        </geometry>
+      </buoyancy>
     </plugin>
+
   </model>
 </sdf>

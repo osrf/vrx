@@ -6,7 +6,7 @@
 
   <!-- Kalman filter fusing imu and gps into combined odometry/tf -->
   <node pkg="robot_localization" type="ekf_localization_node"
-     name="ekf_localization" clear_params="false">
+        name="ekf_localization" clear_params="false">
     <param name="sensor_timeout" value="2.0"/>
     <param name="two_d_mode" value="false"/>
     <param name="map_frame" value="map"/>
@@ -39,7 +39,7 @@
 
   <!-- Produces local odometry from GPS to be used in Kalman filter -->
   <node pkg="robot_localization" type="navsat_transform_node"
-      name="navsat_transform_node" respawn="true" output="screen">
+        name="navsat_transform_node" respawn="true" output="screen">
     <param name="frequency" value="60"/>
     <param name="magnetic_declination_radians" value="0"/>
     <param name="broadcast_utm_transform" value="true"/>

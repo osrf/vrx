@@ -1,5 +1,6 @@
+<?xml version="1.0"?>
 <launch>
-  <!-- 
+  <!--
     These are the arguments you can pass this launch file.
     See: gazebo_ros/launch/empty_world.launch for details.
   -->

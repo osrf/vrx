@@ -2,7 +2,7 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vrx_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find vrx_gazebo)/worlds/scan_and_dock_b.world" />
+  <arg name="world" default="$(find vrx_gazebo)/worlds/scan_and_dock.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
@@ -50,7 +50,7 @@
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
-  args="-x $(arg x) -y $(arg y) -z $(arg z)
-        -R $(arg R) -P $(arg P) -Y $(arg Y)
-        -urdf -param robot_description -model wamv"/>
+        args="-x $(arg x) -y $(arg y) -z $(arg z)
+              -R $(arg R) -P $(arg P) -Y $(arg Y)
+              -urdf -param robot_description -model wamv"/>
 </launch>

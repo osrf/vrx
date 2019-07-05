@@ -2,6 +2,50 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2019-07-03)
+------------------
+
+1.1.0 (2019-07-01)
+------------------
+* added dummy link for robot state publisher
+* functional. no recording
+* linting
+* Merged default into issue#94-buoyancy
+* merge
+* merging default
+* Merge from default, conflicts and style.
+* Refix engine.xacro to have revolute joint
+* Remove old engine.xacro file
+* Merged in Issue#90_YAML_world_genreation (pull request #102)
+  Issue#90 YAML world generation
+  Approved-by: Carlos Agüero <cen.aguero@gmail.com>
+* merge for api update
+* Implement turnable thruster joint
+* Remove unnecessary files
+* Add namespace to thruster config parameters and look in thrusters directory for valid engine types
+* merge
+* merge
+* incremental
+* incremental
+* updated readme, changed operation procedure, still not installed
+* fixed styling problems with flake8, updated readme
+* changed directory, added launch file support
+* incremental, now supports macros with no parameters
+* Change cpu case collision box from 1 box to 2 boxes
+* Move boxes forward to prevent collision with gps
+* Tweak indentation.
+* added a variance function parameter and fixed some bugs
+* incremental
+* incremental
+* Fix formatting (tab->spaces, etc.)
+* Add CPU case model to WAM-V
+* incremental
+* incremental
+* Added script to interpret a yaml and auto generate appropriate xacro macro file while checking for compliance
+* Added Batteries to vrx_gazebo/models(sdf format) and macro(urdf format) to place on wamv
+* Sandisland texture, sensor meshes and extra objects.
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, MarshallRawson, Rumman Waqar <rumman.waqar05@gmail.com>, Tyler Lum <tylergwlum@gmail.com>
+
 1.0.1 (2019-03-01)
 ------------------
 * Merged in wamv_meshes_meters (pull request #75)

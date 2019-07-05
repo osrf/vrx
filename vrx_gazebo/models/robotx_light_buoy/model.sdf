@@ -3,12 +3,8 @@
   <model name="robotx_light_buoy">
     <pose>0 0 -0.0762 0 0 0</pose>
     <link name="base_link">
-      <velocity_decay>
-        <linear>0.001</linear>
-        <angular>0.001</angular>
-      </velocity_decay>
       <inertial>
-        <pose>0 0 -10 0 0 0</pose>
+        <pose>0 0 -0.2 0 0 0</pose>
         <!-- 6.35 Kg. (dock block) x 9 (num blocks) + 10 Kg (estimated). -->
         <mass>67.15</mass>
         <inertia>
@@ -49,7 +45,6 @@
             <visual>robotx_light_buoy::base_link::panel_2</visual>
             <visual>robotx_light_buoy::base_link::panel_3</visual>
           </visuals>
-          <shuffle>true</shuffle>
           <robot_namespace>vrx</robot_namespace>
           <topic>light_buoy/shuffle</topic>
         </plugin>
@@ -100,17 +95,33 @@
         </geometry>
       </collision>
     </link>
+
     <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
       <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
-      <fluid_drag>5.0</fluid_drag>
-      <link>
-        <name>base_link</name>
-        <center_of_volume>0 0 0.5</center_of_volume>
-        <area>2.25</area>
-        <height>0.70</height>
-      </link>
+      <linear_drag>1000.0</linear_drag>
+      <angular_drag>200.0</angular_drag>
+      <buoyancy name="buoyancy_base">
+        <link_name>base_link</link_name>
+        <pose>0 0 -0.2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.5 1.5 0.4</size>
+          </box>
+        </geometry>
+      </buoyancy>
+      <buoyancy name="buoyancy_body">
+        <link_name>base_link</link_name>
+        <pose>0 0 0.8 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.2</radius>
+            <length>0.15</length>
+          </cylinder>
+        </geometry>
+      </buoyancy>
     </plugin>
+
   </model>
 </sdf>
