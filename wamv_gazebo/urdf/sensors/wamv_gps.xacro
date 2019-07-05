@@ -35,8 +35,8 @@
         <alwaysOn>true</alwaysOn>
         <bodyName>${name}_link</bodyName>
         <frameId>${name}_link</frameId>
-        <topicName>${namespace}${sensor_namespace}/gps/fix</topicName>
-        <velocityTopicName>${namespace}${sensor_namespace}/gps/fix_velocity</velocityTopicName>
+        <topicName>${sensor_namespace}/gps/fix</topicName>
+        <velocityTopicName>${sensor_namespace}/gps/fix_velocity</velocityTopicName>
         <!-- Location of origin of Gazebo Sand Island map -->
         <referenceLatitude>21.30996</referenceLatitude>
         <referenceLongitude>-157.8901</referenceLongitude>

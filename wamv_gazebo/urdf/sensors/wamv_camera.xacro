@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_camera" params="name x:=0.5 y:=0 z:=1.5 R:=0 P:=0 Y:=0 post_Y:=0 ">
+  <xacro:macro name="wamv_camera" params="name x:=0.5 y:=0 z:=1.5 R:=0 P:=0 Y:=0 post_Y:=0">
     <!-- Define length variables for link positioning -->
     <xacro:property name="platform_z" value="1.2965"/>
     <xacro:property name="post_to_post_arm_x" value="0.03"/>
@@ -150,7 +150,7 @@
         <plugin name="camera_plugin_${name}" filename="libgazebo_ros_camera.so">
           <alwaysOn>true</alwaysOn>
           <updateRate>0.0</updateRate>
-          <cameraName>${namespace}${camera_namespace}/${name}</cameraName>
+          <cameraName>${camera_namespace}/${name}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${name}_link_optical</frameName>
