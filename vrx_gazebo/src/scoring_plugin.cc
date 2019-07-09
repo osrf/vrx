@@ -54,7 +54,10 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   // Initialize ROS transport.
   this->rosNode.reset(new ros::NodeHandle());
-  this->taskPub = this->rosNode->advertise<vrx_gazebo::Task>(this->topic, 100);
+  this->taskPub = this->rosNode->advertise<vrx_gazebo::Task>
+    (this->taskInfoTopic, 100);
+  this->contactPub = this->rosNode->advertise<vrx_gazebo::Contact>
+    (this->contactDebugTopic, 100);
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScoringPlugin::Update, this));
@@ -226,16 +229,19 @@ void ScoringPlugin::ReleaseVehicle()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
+  gzmsg << "OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
+  gzmsg << "OnRunning" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
+  gzmsg << "OnFinished" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -260,6 +266,14 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
         wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_";
     bool isHitBufferPassed = this->currentTime - this->lastCollisionTime >
                              gazebo::common::Time(CollisionBuffer, 0);
+
+    // publish a Contact MSG
+    if (isWamvHit && this->debug) {
+      this->contactMsg.header.stamp = ros::Time::now();
+      this->contactMsg.collision1 = _contacts->contact(i).collision1();
+      this->contactMsg.collision2 = _contacts->contact(i).collision2();
+      this->contactPub.publish(this->contactMsg);
+    }
 
     if (isWamvHit && isHitBufferPassed) {
       this->collisionCounter++;
@@ -286,6 +300,17 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
 //////////////////////////////////////////////////
 bool ScoringPlugin::ParseSDFParameters()
 {
+  if (char* env_dbg = std::getenv("VRX_DEBUG"))
+  {
+    gzdbg << std::string(env_dbg) <<std::endl;
+    if (std::string(env_dbg) == "false")
+      this->debug = false;
+  }
+  else
+  {
+    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to true"
+      << std::endl;
+  }
   // This is a required element.
   if (!this->sdf->HasElement("vehicle"))
   {
@@ -303,8 +328,13 @@ bool ScoringPlugin::ParseSDFParameters()
   this->taskName = this->sdf->Get<std::string>("task_name");
 
   // This is an optional element.
-  if (this->sdf->HasElement("topic"))
-    this->topic = this->sdf->Get<std::string>("topic");
+  if (this->sdf->HasElement("task_info_topic"))
+    this->taskInfoTopic = this->sdf->Get<std::string>("task_info_topic");
+
+  // This is an optional element.
+  if (this->sdf->HasElement("contact_debug_topic"))
+    this->contactDebugTopic = this->sdf->Get<std::string>
+      ("contact_debug_topic");
 
   // This is an optional element.
   if (this->sdf->HasElement("initial_state_duration"))

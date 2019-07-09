@@ -68,10 +68,31 @@ void LightBuoyPlugin::InitializeAllPatterns()
         if (k == j)
           continue;
 
-        this->allPatterns.push_back({i, j, k, this->IndexFromColor("off")});
+        // The last two colors are always OFF.
+        this->allPatterns.push_back({i, j, k,
+          this->IndexFromColor("off"), this->IndexFromColor("off")});
       }
     }
   }
+}
+
+//////////////////////////////////////////////////
+LightBuoyPlugin::LightBuoyPlugin() :
+  gzNode(new gazebo::transport::Node())
+{
+}
+
+//////////////////////////////////////////////////
+void LightBuoyPlugin::ChangePatternTo(
+  const gazebo::ConstLightBuoyColorsPtr &_msg)
+{
+  pattern[0] = IndexFromColor(_msg->color_1());
+  pattern[1] = IndexFromColor(_msg->color_2());
+  pattern[2] = IndexFromColor(_msg->color_3());
+  pattern[3] = IndexFromColor("off");
+  pattern[4] = IndexFromColor("off");
+
+  return;
 }
 
 //////////////////////////////////////////////////
@@ -100,13 +121,17 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
   {
     this->nh = ros::NodeHandle(this->ns);
     this->changePatternSub = this->nh.subscribe(
-      this->topic, 1, &LightBuoyPlugin::ChangePattern, this);
+      this->rosShuffleTopic, 1, &LightBuoyPlugin::ChangePattern, this);
   }
 
   this->nextUpdateTime = this->scene->SimTime();
 
   this->updateConnection = gazebo::event::Events::ConnectPreRender(
     std::bind(&LightBuoyPlugin::Update, this));
+
+  gzNode->Init();
+  this->colorSub = this->gzNode->Subscribe
+    (this->gzColorsTopic, &LightBuoyPlugin::ChangePatternTo, this);
 }
 
 //////////////////////////////////////////////////
@@ -136,8 +161,9 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     this->pattern[i++] = IndexFromColor(color);
   }
 
-  // The last color of the pattern is always black.
+  // The last two colors of the pattern are always black.
   this->pattern[3] = IndexFromColor("off");
+  this->pattern[4] = IndexFromColor("off");
 
   // Required: visuals.
   if (!_sdf->HasElement("visuals"))
@@ -167,13 +193,24 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     this->shuffleEnabled = _sdf->GetElement("shuffle")->Get<bool>();
 
     // Required if shuffle enabled: ROS topic.
-    if (!_sdf->HasElement("topic"))
+    if (!_sdf->HasElement("ros_shuffle_topic"))
     {
-      ROS_ERROR("<topic> missing");
+      ROS_ERROR("<ros_shuffle_topic> missing");
     }
-    this->topic = _sdf->GetElement("topic")->Get<std::string>();
+    this->rosShuffleTopic = _sdf->GetElement
+      ("ros_shuffle_topic")->Get<std::string>();
   }
 
+  // optional gzColorsTopic
+  if (!_sdf->HasElement("gz_colors_topic"))
+  {
+    this->gzColorsTopic = "/vrx/light_buoy/new_pattern";
+  }
+  else
+  {
+    this->gzColorsTopic = _sdf->GetElement
+      ("gz_colors_topic")->Get<std::string>();
+  }
   // Optional: ROS namespace.
   if (_sdf->HasElement("robot_namespace"))
     this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
@@ -205,7 +242,7 @@ void LightBuoyPlugin::Update()
   std::lock_guard<std::mutex> lock(this->mutex);
 
   // Start over if at end of pattern
-  if (this->state > 3)
+  if (this->state > 4)
     this->state = 0;
 
   auto color = this->kColors[this->pattern[this->state]].first;

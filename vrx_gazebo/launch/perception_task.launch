@@ -7,6 +7,8 @@
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
   <arg name="verbose" default="false"/>
+  <!-- Set various other gazebo arguments-->
+  <arg name="extra_gazebo_args" default=""/>
 
   <arg name="paused" default="false"/>
 
@@ -37,6 +39,7 @@
     <arg name="paused"       value="$(arg paused)"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui"          value="$(arg gui)" />
+    <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
   </include>
 
   <!-- Load robot model -->
@@ -49,7 +52,7 @@
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
-  args="-x $(arg x) -y $(arg y) -z $(arg z)
-        -R $(arg R) -P $(arg P) -Y $(arg Y)
-        -urdf -param robot_description -model wamv"/>
+        args="-x $(arg x) -y $(arg y) -z $(arg z)
+              -R $(arg R) -P $(arg P) -Y $(arg Y)
+              -urdf -param robot_description -model wamv"/>
 </launch>

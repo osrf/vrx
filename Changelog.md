@@ -1,6 +1,9 @@
 ## VRX 1
 
-### Forthcoming
+### VRX 1.1
+
+1. GUI overlay plugin (prototype):
+    * [Pull request 116](https://bitbucket.org/osrf/vrx/pull-requests/116)
 
 1. Randomized wind speed in the wind plugin:
     * [Pull request 86](https://bitbucket.org/osrf/vrx/pull-requests/86)
@@ -13,7 +16,7 @@
 
 1. Add sand island basic mesh and texture:
     * [Pull request 89](https://bitbucket.org/osrf/vrx/pull-requests/89)
-    
+
 1. Added ground station tents, tables and antenna:
     * [Pull request 96](https://bitbucket.org/osrf/vrx/pull-requests/96)
 
@@ -37,6 +40,12 @@
 
 1. Support the ability to customize WAM-V thruster and sensor location via YAML:
     * [Pull request 104](https://bitbucket.org/osrf/vrx/pull-requests/104)
+
+1. Add ability to playback simulations and add extra_gazebo_args argument to allow for recording:
+    * [Pull request 121](https://bitbucket.org/osrf/vrx/pull-requests/121)
+
+1. Improved buoyancy model:
+    * [Pull request 122](https://bitbucket.org/osrf/vrx/pull-requests/122)
 
 ### VRX 1.0.1
 

@@ -30,8 +30,8 @@
       <!-- Parameters for ScoringPlugin base class -->
       <vehicle>wamv</vehicle>
       <task_name>perception</task_name>
-      <initial_state_duration>1</initial_state_duration>
-      <ready_state_duration>1</ready_state_duration>
+      <initial_state_duration>10.0</initial_state_duration>
+      <ready_state_duration>10.0</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <!-- Parameters for PopulationPlugin -->
       <loop_forever>false</loop_forever>
@@ -47,13 +47,13 @@
             <pose>8 0 1 0 0 0</pose>
         </object>
         <object>
-          <time>5.0</time>
+          <time>10.0</time>
           <type>green</type>
           <name>green_mark</name>
           <pose>8 2 1 0 0 0</pose>
         </object>
         <object>
-          <time>5.0</time>
+          <time>15.0</time>
           <type>black</type>
           <name>black_totem</name>
           <pose>8 -2 1 0 0 0</pose>

@@ -32,6 +32,7 @@
 /// plugin for other required SDF elements.
 /// This plugin requires the following SDF parameters:
 ///
+/// <obstacle_penalty>: Specifies how many points are deducted per collision.
 /// <gates>: Specifies the collection of gates delimiting the course.
 ///
 ///   Each gate accepts the following elements:
@@ -50,6 +51,8 @@
 ///         filename="libnavigation_scoring_plugin.so">
 ///   <vehicle>wamv</vehicle>
 ///   <task_name>navigation_scoring_plugin</task_name>
+///   <course_name>vrx_navigation_course</course_name>
+///   <obstacle_penalty>10</obstable_penalty>
 ///   <gates>
 ///     <gate>
 ///       <left_marker>red_bound_0</left_marker>
@@ -108,8 +111,8 @@ class NavigationScoringPlugin : public ScoringPlugin
     /// \brief Constructor.
     /// \param[in] _leftMarkerName The left marker's model.
     /// \param[in] _rightMarkerName The right marker's model.
-    public: Gate(const gazebo::physics::ModelPtr _leftMarkerModel,
-                 const gazebo::physics::ModelPtr _rightMarkerModel);
+    public: Gate(const gazebo::physics::LinkPtr _leftMarkerModel,
+                 const gazebo::physics::LinkPtr _rightMarkerModel);
 
     /// \brief Where is the given robot pose with respect to the gate?
     /// \param _robotWorldPose Pose of the robot, in the world frame.
@@ -121,10 +124,10 @@ class NavigationScoringPlugin : public ScoringPlugin
     public: void Update();
 
     /// \brief The left marker model.
-    public: gazebo::physics::ModelPtr leftMarkerModel;
+    public: gazebo::physics::LinkPtr leftMarkerModel;
 
     /// \brief The right marker model.
-    public: gazebo::physics::ModelPtr rightMarkerModel;
+    public: gazebo::physics::LinkPtr rightMarkerModel;
 
     /// \brief The center of the gate in the world frame. Note that the roll and
     /// pitch are ignored. Only yaw is relevant and it points into the direction
@@ -160,20 +163,27 @@ class NavigationScoringPlugin : public ScoringPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
-  // Documentation inherited.
-  private: void OnReady() override;
+  /// \brief Set the score to 0 and change to state to "finish".
+  private: void Fail();
 
   // Documentation inherited.
-  private: void OnRunning() override;
+  private: void OnCollision() override;
 
-  // Documentation inherited.
-  private: void OnFinished() override;
+  // Name of Course
+  private: gazebo::physics::ModelPtr course;
 
   /// \brief All the gates.
   private: std::vector<Gate> gates;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
+
+  /// \brief The number of WAM-V collisions.
+  private: unsigned int numCollisions = 0;
+
+  /// \brief Number of points deducted per collision.
+  private: double obstaclePenalty = 10.0;
 };
 
 #endif
+

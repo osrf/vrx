@@ -5,6 +5,7 @@
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
   
+
   <plugin name="stationkeeping_scoring_plugin"
           filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>

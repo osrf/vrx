@@ -27,7 +27,7 @@
           <transparency>1</transparency>
           <plugin name="placard1_plugin" filename="libplacard_plugin.so">
             <!-- Uncomment for setting the shape and color. -->
-            <!-- 
+            <!--
             <shape>cross</shape>
             <color>blue</color>
             -->
@@ -39,7 +39,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2016_placard1</robot_namespace>
-            <topic>shuffle</topic>
+            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
@@ -89,7 +89,7 @@
           <transparency>1</transparency>
           <plugin name="placard2_plugin" filename="libplacard_plugin.so">
             <!-- Uncomment for setting the shape and color. -->
-            <!-- 
+            <!--
             <shape>cross</shape>
             <color>blue</color>
             -->
@@ -101,7 +101,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2016_placard2</robot_namespace>
-            <topic>shuffle</topic>
+            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
@@ -151,7 +151,7 @@
           <transparency>1</transparency>
           <plugin name="placard3_plugin" filename="libplacard_plugin.so">
             <!-- Uncomment for setting the shape and color. -->
-            <!-- 
+            <!--
             <shape>cross</shape>
             <color>blue</color>
             -->
@@ -163,7 +163,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2016_placard3</robot_namespace>
-            <topic>shuffle</topic>
+            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">

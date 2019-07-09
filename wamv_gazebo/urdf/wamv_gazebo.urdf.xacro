@@ -86,6 +86,10 @@
   <xacro:if value="$(arg yaml_sensor_generation)">
     <xacro:include filename="$(arg sensor_xacro_file)"/>
     <xacro:yaml_sensors />
+
+    <!-- Add CPU Cases -->
+    <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
+    <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
   </xacro:if>
   
   <!-- Otherwise, add sensors based on enable variables -->
@@ -107,7 +111,7 @@
     
     <!-- Add 3D LIDAR -->
     <xacro:if value="$(arg lidar_enabled)">
-      <xacro:wamv_3d_lidar name="lidar_wamv" y="-0.3" />
+      <xacro:lidar name="lidar_wamv" y="-0.3" type="16_beam"/>
     </xacro:if>
     
     <!-- Add P3D ground truth -->
@@ -136,7 +140,8 @@
       <xacro:wamv_imu name="imu_wamv" y="-0.2" />
     
       <!-- Add 3D LIDAR -->
-      <xacro:wamv_3d_lidar name="lidar_wamv" P="${radians(8)}" />
+      <xacro:lidar name="lidar_wamv" type="16_beam"/>
+      
     </xacro:if>
   </xacro:unless>
 
