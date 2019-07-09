@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2019-07-10)
+------------------
 * Merged in world-gen-bug-fix (pull request #145)
   world gen bug fix
   Approved-by: Tyler Lum <tylergwlum@gmail.com>
