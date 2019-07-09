@@ -27,7 +27,8 @@
  * some features added after that version in the 2.x series */
 /* There is a bug in versions for ign-math in Bionic that does not
  * define properly IGNITION_MATH_MAJOR_VERSION */
-#if defined(IGNITION_MATH_MAJOR_VERSION) && IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION < 3
+#if defined(IGNITION_MATH_MAJOR_VERSION) && \
+    IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION < 3
   #define ign_math_vector2d_zero ignition::math::Vector2d(0, 0)
   #define ign_math_vector3d_zero ignition::math::Vector3d(0, 0, 0)
   #define _v_length sqrt(std::pow(_v[0], 2) + std::pow(_v[1], 2))
