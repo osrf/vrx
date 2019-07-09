@@ -22,9 +22,9 @@
                            R="${R}" P="${P}" Y="${Y}"
                            post_Y="${post_Y}"
                            vertical_lasers="32"
-                           samples="2187"
-                           min_vertical_angle="0.54"
-                           max_vertical_angle="-0.186"/>
+			   samples="2187"
+                           min_vertical_angle="-0.186"
+                           max_vertical_angle="0.54"/>
     </xacro:if>
   </xacro:macro>
 </robot>
