@@ -84,21 +84,24 @@
     </model>
 
     <!-- The 2016 dock with the three placards -->
+    
     <include>
       <uri>model://dock_2016</uri>
       <pose>20 -15 0.25 0 0 0</pose>
     </include>
+    
 
     <!-- The 2018 dock with the two placards -->
+    
     <include>
       <uri>model://dock_2018</uri>
       <pose>20 15 0.25 0 0 0</pose>
     </include> 
-
+    
     <include>
-       <uri>model://dock_joint_test</uri>
+      <uri>model://dock_joint_test</uri>
       <pose>5 -20 0.25 0 0 0</pose>
     </include> 
-
+    
   </world>
 </sdf>
