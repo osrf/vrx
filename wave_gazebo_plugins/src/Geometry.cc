@@ -17,10 +17,25 @@
 
 #include <cmath>
 
+#include <ignition/math/config.hh>
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
 #include "wave_gazebo_plugins/Geometry.hh"
+
+/* The version of ignition math in Ubuntu Xenial is 2.2.3 and lacks of
+ * some features added after that version in the 2.x series */
+#if IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION > 3
+  #define ign_math_vector2d_zero ignition::math::Vector2d::Zero
+  #define ign_math_vector3d_zero ignition::math::Vector3d::Zero
+  #define _v_length _v.Length()
+  #define n_length n.Length()
+#else
+  #define ign_math_vector2d_zero ignition::math::Vector2d(0, 0)
+  #define ign_math_vector3d_zero ignition::math::Vector3d(0, 0, 0)
+  #define _v_length sqrt(std::pow(_v[0], 2) + std::pow(_v[1], 2))
+  #define n_length sqrt(std::pow(n[0], 2) + std::pow(n[1], 2))
+#endif
 
 namespace asv
 {
@@ -28,20 +43,20 @@ namespace asv
   ignition::math::Vector2d
   Geometry::Normalize(const ignition::math::Vector2d& _v)
   {
-    if (_v == ignition::math::Vector2d::Zero)
+    if (_v == ign_math_vector2d_zero)
       return _v;
     else
-      return _v/_v.Length();
+      return _v/_v_length;
   }
 
   /////////////////////////////////////////////////
   ignition::math::Vector3d
   Geometry::Normalize(const ignition::math::Vector3d& _v)
   {
-    if (_v == ignition::math::Vector3d::Zero)
+    if (_v == ign_math_vector3d_zero)
       return _v;
     else
-      return _v/_v.Length();
+      return _v/_v_length;
   }
 
   /////////////////////////////////////////////////
@@ -52,9 +67,9 @@ namespace asv
   )
   {
     auto n = ignition::math::Vector3d::Normal(_p0, _p1, _p2);
-    if (n == ignition::math::Vector3d::Zero)
+    if (n == ign_math_vector3d_zero)
       return n;
     else
-      return n/n.Length();
+      return n/n_length;
   }
 }

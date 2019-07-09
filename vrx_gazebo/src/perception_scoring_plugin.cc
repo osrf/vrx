@@ -22,6 +22,7 @@
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/Events.hh>
+#include <ignition/math/config.hh>
 #include <ignition/math/Matrix4.hh>
 #include <ignition/math/Pose3.hh>
 #include <gazebo/physics/Link.hh>
@@ -29,6 +30,14 @@
 #include <gazebo/transport/transport.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/perception_scoring_plugin.hh"
+
+/* The version of ignition math in Ubuntu Xenial is 2.2.3 and lacks of
+ * some features added after that version in the 2.x series */
+#if IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION > 3
+  #define ign_math_vector3d_zero ignition::math::Vector3d::Zero
+#else
+  #define ign_math_vector3d_zero ignition::math::Vector3d(0, 0, 0)
+#endif
 
 using namespace gazebo;
 
@@ -502,8 +511,8 @@ void PerceptionScoringPlugin::OnUpdate()
       #endif
       // Move object to the target pose.
       modelPtr->SetWorldPose(obj.pose);
-      modelPtr->SetWorldTwist(ignition::math::Vector3d::Zero,
-        ignition::math::Vector3d::Zero);
+      modelPtr->SetWorldTwist(ign_math_vector3d_zero,
+        ign_math_vector3d_zero);
       gzdbg << "Object [" << modelName << "] spawned" << std::endl;
     }
     else
