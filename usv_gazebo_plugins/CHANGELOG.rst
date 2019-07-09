@@ -2,6 +2,11 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* usv_gazebo_wind_plugin.hh changes
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Agüero <cen.aguero@gmail.com>, Rumman Waqar <rumman.waqar05@gmail.com>
+
 1.1.1 (2019-07-03)
 ------------------
 * Reinterpret the wind 'gain' parameter.  Set defaults to zero

@@ -2,6 +2,20 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merged in world-gen-bug-fix (pull request #145)
+  world gen bug fix
+  Approved-by: Tyler Lum <tylergwlum@gmail.com>
+* Workaround to fix compile errors on Kinetic
+  The version of ign-math2 present in Ubuntu Xenial (2.2.3) lacks
+  of some features (Zero or Length) implemented starting on 2.3.x.
+  This change add some preprocessors defines to workaround the
+  problem. A more elegant solution would be ideal.
+* World generator now imbeds the coordinate with axies specified by the yaml file for easy post gen sorting
+* added a space parameter to the bounding boxes
+* Contributors: Jose Luis Rivero <jrivero@osrfoundation.org>, MarshallRawson, MarshallRawson <marshallrawson@osrfoundation.org>, Tyler Lum <tylergwlum@gmail.com>
+
 1.1.1 (2019-07-03)
 ------------------
 * Reinterpret the wind 'gain' parameter.  Set defaults to zero
