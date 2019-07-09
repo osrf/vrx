@@ -25,16 +25,18 @@
 
 /* The version of ignition math in Ubuntu Xenial is 2.2.3 and lacks of
  * some features added after that version in the 2.x series */
-#if IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION > 3
-  #define ign_math_vector2d_zero ignition::math::Vector2d::Zero
-  #define ign_math_vector3d_zero ignition::math::Vector3d::Zero
-  #define _v_length _v.Length()
-  #define n_length n.Length()
-#else
+/* There is a bug in versions for ign-math in Bionic that does not
+ * define properly IGNITION_MATH_MAJOR_VERSION */
+#if defined(IGNITION_MATH_MAJOR_VERSION) && IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION < 3
   #define ign_math_vector2d_zero ignition::math::Vector2d(0, 0)
   #define ign_math_vector3d_zero ignition::math::Vector3d(0, 0, 0)
   #define _v_length sqrt(std::pow(_v[0], 2) + std::pow(_v[1], 2))
   #define n_length sqrt(std::pow(n[0], 2) + std::pow(n[1], 2))
+#else
+  #define ign_math_vector2d_zero ignition::math::Vector2d::Zero
+  #define ign_math_vector3d_zero ignition::math::Vector3d::Zero
+  #define _v_length _v.Length()
+  #define n_length n.Length()
 #endif
 
 namespace asv

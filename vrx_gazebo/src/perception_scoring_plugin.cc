@@ -33,10 +33,12 @@
 
 /* The version of ignition math in Ubuntu Xenial is 2.2.3 and lacks of
  * some features added after that version in the 2.x series */
-#if IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION > 3
-  #define ign_math_vector3d_zero ignition::math::Vector3d::Zero
-#else
+/* There is a bug in versions for ign-math in Bionic that does not
+ * define properly IGNITION_MATH_MAJOR_VERSION */
+#if defined(IGNITION_MATH_MAJOR_VERSION) && IGNITION_MATH_MAJOR_VERSION == 2 && IGNITION_MATH_MINOR_VERSION < 3
   #define ign_math_vector3d_zero ignition::math::Vector3d(0, 0, 0)
+#else
+  #define ign_math_vector3d_zero ignition::math::Vector3d::Zero
 #endif
 
 using namespace gazebo;
