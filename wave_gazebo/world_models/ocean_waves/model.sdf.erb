@@ -51,7 +51,7 @@
         <number><%= number %></number>
         <scale><%= scale %></scale>
         <gain><%= gain %></gain>
-	<direction><%= direction_x %> <%=direction_y %></direction>
+	    <direction><%= direction_x %> <%=direction_y %></direction>
         <angle><%= angle %></angle>        
         <tau><%= tau %></tau>
         <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
@@ -86,7 +86,7 @@
             <name>WaveSim/GerstnerWaves</name>
           </script>
         </material>
-	<laser_retro>-1</laser_retro>
+	    <laser_retro>-1</laser_retro>
       </visual>
       <visual name="ocean_waves_below_visual">
         <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
@@ -113,8 +113,8 @@
             <uri>model://ocean_waves/materials/scripts/waves.material</uri>
             <name>WaveSim/GerstnerWaves</name>
           </script>
-	</material>
-	<laser_retro>-1</laser_retro>
+        </material>
+        <laser_retro>-1</laser_retro>
       </visual>
     </link>
   </model>
