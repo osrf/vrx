@@ -26,7 +26,7 @@
   # Wave model parameters
   model = "PMS"     # Wave model, must be PMS or CWR
   period = 5        # Peak wave period [s]
-  gain = 0.2        # Multiplider applied to component amplitudes
+  gain = 0.1        # Multiplider applied to component amplitudes
   number = 3        # Number of component waves
   scale = 1.5       # Spectrum sampling scale 
   direction_x = 1.0 # Direction of peak wave component 
@@ -51,7 +51,7 @@
         <number><%= number %></number>
         <scale><%= scale %></scale>
         <gain><%= gain %></gain>
-        <direction><%= direction_x %> <%=direction_y %></direction>
+	<direction><%= direction_x %> <%=direction_y %></direction>
         <angle><%= angle %></angle>        
         <tau><%= tau %></tau>
         <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
@@ -86,6 +86,7 @@
             <name>WaveSim/GerstnerWaves</name>
           </script>
         </material>
+	<laser_retro>-1</laser_retro>
       </visual>
       <visual name="ocean_waves_below_visual">
         <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
@@ -112,7 +113,8 @@
             <uri>model://ocean_waves/materials/scripts/waves.material</uri>
             <name>WaveSim/GerstnerWaves</name>
           </script>
-        </material>
+	</material>
+	<laser_retro>-1</laser_retro>
       </visual>
     </link>
   </model>
