@@ -41,7 +41,7 @@
              requires velocity in ENU.  
              See Issue #64 in VRX project for details
              https://bitbucket.org/osrf/vrx/issues/64 -->
-        <velocityTopicName>${sensor_namespace}/gps/fix_velocity</velocityTopicName>
+        <velocityTopicName>${sensor_namespace}gps/fix_velocity</velocityTopicName>
         <!-- Location of origin of Gazebo Sand Island map -->
         <referenceLatitude>21.30996</referenceLatitude>
         <referenceLongitude>-157.8901</referenceLongitude>
