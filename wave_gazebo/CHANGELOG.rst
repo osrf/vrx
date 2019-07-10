@@ -2,6 +2,11 @@
 Changelog for package wave_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2019-07-10)
+------------------
+* fixed 2016 placard joint issue
+* Contributors: MarshallRawson
+
 1.1.1 (2019-07-03)
 ------------------
 * Missing ruby in build depend for wave_gazebo
