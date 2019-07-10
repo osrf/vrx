@@ -77,6 +77,20 @@ target_link_libraries(usv_gazebo_wind_plugin
   ${Eigen_LIBRARIES}
 )
 
+add_library(force_visual_plugin
+  src/force_visual_plugin.cc
+)
+target_link_libraries(force_visual_plugin
+  ${catkin_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${Eigen_LIBRARIES}
+)
+install(TARGETS force_visual_plugin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 # Generate demo world files from xacro and install
 xacro_add_files(
   worlds/buoyancy_plugin_demo.world.xacro
