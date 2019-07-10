@@ -86,6 +86,10 @@
   <xacro:if value="$(arg yaml_sensor_generation)">
     <xacro:include filename="$(arg sensor_xacro_file)"/>
     <xacro:yaml_sensors />
+
+    <!-- Add CPU Cases -->
+    <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
+    <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
   </xacro:if>
   
   <!-- Otherwise, add sensors based on enable variables -->

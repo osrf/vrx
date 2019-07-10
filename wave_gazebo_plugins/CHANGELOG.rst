@@ -2,6 +2,15 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2019-07-10)
+------------------
+* Workaround to fix compile errors on Kinetic
+  The version of ign-math2 present in Ubuntu Xenial (2.2.3) lacks
+  of some features (Zero or Length) implemented starting on 2.3.x.
+  This change add some preprocessors defines to workaround the
+  problem. A more elegant solution would be ideal.
+* Contributors: Jose Luis Rivero <jrivero@osrfoundation.org>
+
 1.1.1 (2019-07-03)
 ------------------
 

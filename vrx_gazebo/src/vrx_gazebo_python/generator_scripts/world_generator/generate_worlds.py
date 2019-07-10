@@ -23,6 +23,7 @@ def main():
                           boiler_plate_top='<?xml version="1.0" ?>\n' +
                           '<sdf version="1.6" ' +
                           'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
+                          '<!-- COORDINATE: ' + str(i) + ' -->\n' +
                           '<world name="robotx_example_course">\n' +
                           '  <xacro:include filename="$(find vrx_gazebo)' +
                           '/worlds/xacros/include_all_xacros.xacro" />\n' +

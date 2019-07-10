@@ -1,6 +1,6 @@
 ## VRX 1
 
-### Forthcoming
+### VRX 1.1
 
 1. GUI overlay plugin (prototype):
     * [Pull request 116](https://bitbucket.org/osrf/vrx/pull-requests/116)
