@@ -58,9 +58,9 @@
     <model name="dock_block">
       <pose>10 -10 0.25 0 0 0 </pose>
       <include>
-				<uri>model://dock_block</uri>
+        <uri>model://dock_block</uri>
       </include>
-		</model>
+    </model>
 			 
     <model name="dock_block_2x2">
       <pose>10 -5 0.25 0 0 0 </pose>
@@ -96,12 +96,13 @@
     <include>
       <uri>model://dock_2018</uri>
       <pose>20 15 0.25 0 0 0</pose>
-    </include> 
-    
+    </include>
+
     <include>
-      <uri>model://dock_joint_test</uri>
-      <pose>5 -20 0.25 0 0 0</pose>
-    </include> 
+      <uri>model://robotx_light_buoy</uri>
+      <pose>10 10 0.25 0 0 0</pose>
+    </include>
     
+
   </world>
 </sdf>

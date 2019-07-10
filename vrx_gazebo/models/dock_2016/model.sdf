@@ -68,6 +68,13 @@
           <transparency>1</transparency>
         </visual>
       </link>
+      
+      <joint name="placard_to_visual" type="fixed">
+        <pose> 0 0 0 0 0 0 </pose>
+        <parent>placard::link</parent>    
+        <child>link_symbols</child>
+      </joint>
+
     </model>
     
     
@@ -130,6 +137,13 @@
           <transparency>1</transparency>
         </visual>
       </link>
+      
+      <joint name="placard_to_visual" type="fixed">
+        <pose> 0 0 0 0 0 0 </pose>
+        <parent>placard::link</parent>    
+        <child>link_symbols</child>
+      </joint>
+
     </model>
     
     
@@ -192,6 +206,13 @@
           <transparency>1</transparency>
         </visual>
       </link>
+      
+      <joint name="placard_to_visual" type="fixed">
+        <pose> 0 0 0 0 0 0 </pose>
+        <parent>placard::link</parent>    
+        <child>link_symbols</child>
+      </joint>
+
     </model>
     
     

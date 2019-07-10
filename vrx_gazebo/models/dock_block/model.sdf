@@ -40,13 +40,17 @@
       <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0</fluid_level>
-      <fluid_drag>0</fluid_drag>
-      <link name="link">
-        <name>link</name>
-        <center_of_volume>0 0 0.2</center_of_volume>
-        <area>0.25</area>
-        <height>0.4</height>
-      </link>
+      <linear_drag>1000.0</linear_drag>
+      <angular_drag>200.0</angular_drag>
+      <buoyancy name="buoyancy_base">
+        <link_name>link</link_name>
+      	<pose>0 0 -0.2 0 0 0</pose>
+        <geometry>
+          <sphere>
+	    <radius>0.28794119114848615</radius>
+	  </sphere>
+        </geometry>
+      </buoyancy>
     </plugin>
   </model>
 </sdf>
