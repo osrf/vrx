@@ -8,6 +8,7 @@ if(NOT ERB_EXE_PATH)
 endif()
 
 find_package(catkin REQUIRED)
+catkin_package()
 
 # Model files to be processed with erb
 set (model_erb_files
@@ -30,3 +31,7 @@ add_custom_target(model_erb_generation ALL
   DEPENDS
     ${model_files}
 )
+
+# Install all the world files
+install(DIRECTORY world_models/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
