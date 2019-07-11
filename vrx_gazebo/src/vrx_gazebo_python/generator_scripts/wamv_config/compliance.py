@@ -81,6 +81,13 @@ class Thruster_Compliance:
         # ie: given an instance of thruster_type = 'engine'
         # with parameters = params, is this engine in compliance
         # check if the thruster is allowed
+
+        non_compliant_msg = '\nThis sensor and thruster configuration is NOT compliant\
+                               with the (current) VRX constraints. A urdf file will\
+                               still be created, but please note that the above errors\
+                               must be fixed for this to be a valid configuration for\
+                               the VRX competition.\n'
+
         params = params.copy()
         if thruster_type not in self.default_parameters:
             rospy.logerr('%s is not defined anywhere under %s' %

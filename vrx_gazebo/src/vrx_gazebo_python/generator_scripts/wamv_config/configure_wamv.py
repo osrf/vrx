@@ -18,11 +18,11 @@ def main():
 
     # Setup thruster xacro
     if received_thruster_yaml:
-        create_thruster_xacro()
+        thruster_compliant = create_thruster_xacro()
 
     # Setup sensor xacro
     if received_sensor_yaml:
-        create_sensor_xacro()
+        sensor_compliant = create_sensor_xacro()
 
     # Setup command to generate WAM-V urdf file
     wamv_target = rospy.get_param('wamv_target')
@@ -46,9 +46,15 @@ def main():
 
     # Create urdf and print to console
     os.system(create_urdf_command)
+    if not (thruster_compliant and sensor_compliant):
+        rospy.logerr('\nThis sensor/thruster configuration is NOT compliant\
+                      with the (current) VRX constraints. A urdf file will\
+                      still be created, but please note that the above errors\
+                      must be fixed for this to be a valid configuration for\
+                      the VRX competition.\n')
+
     print('WAM-V urdf file sucessfully generated. File location: ' +
           wamv_target)
-
 
 def create_thruster_xacro():
     """
@@ -81,7 +87,7 @@ def create_thruster_xacro():
     thruster_param_test = comp.param_compliance
 
     # Create thruster xacro with thruster macros
-    create_xacro_file(yaml_file=thruster_yaml,
+    compliant = create_xacro_file(yaml_file=thruster_yaml,
                       xacro_target=thruster_xacro_target,
                       boiler_plate_top=thruster_boiler_plate_top,
                       boiler_plate_bot=thruster_boiler_plate_bot,
@@ -106,7 +112,7 @@ def create_thruster_xacro():
                                boiler_plate_top=gz_boiler_plate_top,
                                boiler_plate_bot=gz_boiler_plate_bot,
                                )
-
+    return compliant
 
 def create_sensor_xacro():
     """
@@ -137,7 +143,7 @@ def create_sensor_xacro():
     sensor_param_test = comp.param_compliance
 
     # Create sensor xacro with sensor macros
-    create_xacro_file(yaml_file=sensor_yaml,
+    return create_xacro_file(yaml_file=sensor_yaml,
                       xacro_target=sensor_xacro_target,
                       boiler_plate_top=sensor_boiler_plate_top,
                       boiler_plate_bot=sensor_boiler_plate_bot,
