@@ -8,15 +8,15 @@
         <angular>0.001</angular>
       </velocity_decay>
        <inertial>
-        <pose>0 0 -2 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <mass>160</mass>
         <inertia>
-          <ixx>2.5137</ixx>
+          <ixx>55.467</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>2.5137</iyy>
+          <iyy>55.467</iyy>
           <iyz>0</iyz>
-          <izz>0.5386</izz>
+          <izz>106.67</izz>
         </inertia>
       </inertial>
       <collision name="collision">

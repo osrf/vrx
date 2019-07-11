@@ -74,13 +74,19 @@
     <!-- Placard #<%= i %> -->
     <model name="dock_2018_placard<%= i %>">
       <static>false</static>
+      <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
       <include>
-        <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
+      <pose> 0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
+        <% if i == 1%>
+        <pose> 0 -0.1 0.75 0 0 0 </pose>
+        <% else %>
+        <pose> 0 0.1 0.75 0 0 0 </pose>
+        <% end %>
         <visual name="visual_circle">
-          <pose><%=circle_x %> <%=circle_y%> <%=circle_z%> <%=circle_roll %> <%=circle_pitch%> <%=circle_yaw%></pose>
+          <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -106,7 +112,7 @@
           </plugin>
         </visual>
         <visual name="visual_h_cross">
-          <pose><%=cross_x %> <%=cross_y%> <%=cross_z%> <%=cross_roll %> <%=cross_pitch%> <%=cross_yaw%></pose>
+          <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <box>
               <size>0.99 0.33 0.001</size>
@@ -115,7 +121,7 @@
           <transparency>1</transparency>
         </visual>
         <visual name="visual_v_cross">
-          <pose><%=cross_x %> <%=cross_y%> <%=cross_z%> <%=cross_roll %> <%=cross_pitch%> <%=cross_yaw%></pose>
+          <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <box>
               <size>0.33 0.99 0.001</size>
@@ -124,7 +130,7 @@
           <transparency>1</transparency>
         </visual>
         <visual name="visual_triangle">
-          <pose><%=triangle_x %> <%=triangle_y%> <%=triangle_z%> <%=triangle_roll %> <%=triangle_pitch%> <%=triangle_yaw%></pose>
+          <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
           </geometry>
