@@ -56,6 +56,7 @@ def main():
     print('WAM-V urdf file sucessfully generated. File location: ' +
           wamv_target)
 
+
 def create_thruster_xacro():
     """
     Purpose: Create a thruster xacro file using the given
@@ -88,12 +89,11 @@ def create_thruster_xacro():
 
     # Create thruster xacro with thruster macros
     compliant = create_xacro_file(yaml_file=thruster_yaml,
-                      xacro_target=thruster_xacro_target,
-                      boiler_plate_top=thruster_boiler_plate_top,
-                      boiler_plate_bot=thruster_boiler_plate_bot,
-                      num_test=thruster_num_test,
-                      param_test=thruster_param_test,
-                      )
+                                  xacro_target=thruster_xacro_target,
+                                  boiler_plate_top=thruster_boiler_plate_top,
+                                  boiler_plate_bot=thruster_boiler_plate_bot,
+                                  num_test=thruster_num_test,
+                                  param_test=thruster_param_test)
 
     gz_boiler_plate_top = ('  <gazebo>\n'
                            '    <plugin name="wamv_gazebo_thrust" '
@@ -113,6 +113,7 @@ def create_thruster_xacro():
                                boiler_plate_bot=gz_boiler_plate_bot,
                                )
     return compliant
+
 
 def create_sensor_xacro():
     """
@@ -144,12 +145,11 @@ def create_sensor_xacro():
 
     # Create sensor xacro with sensor macros
     return create_xacro_file(yaml_file=sensor_yaml,
-                      xacro_target=sensor_xacro_target,
-                      boiler_plate_top=sensor_boiler_plate_top,
-                      boiler_plate_bot=sensor_boiler_plate_bot,
-                      num_test=sensor_num_test,
-                      param_test=sensor_param_test,
-                      )
+                             xacro_target=sensor_xacro_target,
+                             boiler_plate_top=sensor_boiler_plate_top,
+                             boiler_plate_bot=sensor_boiler_plate_bot,
+                             num_test=sensor_num_test,
+                             param_test=sensor_param_test)
 
 
 def yaml_to_xacro_extension(string):

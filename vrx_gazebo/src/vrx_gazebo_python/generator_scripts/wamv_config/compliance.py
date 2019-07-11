@@ -7,7 +7,7 @@ from .. import utils
 
 class Sensor_Compliance:
     def __init__(self):
-        # open sensor_compliance/bounding_boxes.yaml and all the boxes defined => boxes
+        # open sensor_compliance/bounding_boxes.yaml and all the boxes defined
         self.boxes = find_boxes('sensor_compliance/bounding_boxes.yaml')
         # look at all sensors in sensors directory and get the default params
         self.sensors_dir = rospy.get_param('sensors_dir') + '/'
@@ -48,7 +48,8 @@ class Sensor_Compliance:
             rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
                          (sensor_type, params['name'],
                           xyz[0], xyz[1], xyz[2],
-                          'must fit in at least one of the following boxes with remaining space:'))
+                          'must fit in at least one of the following boxes\
+                          with remaining space:'))
             for box in self.boxes:
                 rospy.logerr('  %s' % str(box))
             return False
@@ -67,7 +68,7 @@ class Sensor_Compliance:
 
 class Thruster_Compliance:
     def __init__(self):
-        # open thruster_compliance/bounding_boxes.yaml and all the boxes defined => boxes
+        # open thruster_compliance/bounding_boxes.yaml and the boxes defined
         self.boxes = find_boxes('thruster_compliance/bounding_boxes.yaml')
         # look at all sensors in sensors directory and get the default params
         self.thrusters_dir = rospy.get_param('thrusters_dir') + '/'
@@ -81,12 +82,6 @@ class Thruster_Compliance:
         # ie: given an instance of thruster_type = 'engine'
         # with parameters = params, is this engine in compliance
         # check if the thruster is allowed
-
-        non_compliant_msg = '\nThis sensor and thruster configuration is NOT compliant\
-                               with the (current) VRX constraints. A urdf file will\
-                               still be created, but please note that the above errors\
-                               must be fixed for this to be a valid configuration for\
-                               the VRX competition.\n'
 
         params = params.copy()
         if thruster_type not in self.default_parameters:
@@ -118,7 +113,8 @@ class Thruster_Compliance:
         rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
                      (thruster_type, params['prefix'],
                       xyz[0], xyz[1], xyz[2],
-                      'it must fit in at least one of the following boxes with remaining space:'))
+                      'it must fit in at least one of the following boxes\
+                      with remaining space:'))
         for box in self.boxes:
             rospy.logerr('  %s' % str(box))
         return False
@@ -158,15 +154,16 @@ class Box:
             return True
 
     def __str__(self):
-        return '<Box name:%s x:[%s, %s] y:[%s,%s] z:[%s,%s] remaining_space:%s>' % \
-                 (self.name,
-                 (self.pose[0] + self.size[0]/2),
-                 (self.pose[0] - self.size[0]/2),
-                 (self.pose[1] + self.size[1]/2),
-                 (self.pose[1] - self.size[1]/2),
-                 (self.pose[2] + self.size[2]/2),
-                 (self.pose[2] - self.size[2]/2),
-                 self.space)
+        return '<Box name:%s x:[%s, %s] y:[%s,%s] z:[%s,%s]\
+                remaining_space:%s>' % \
+                (self.name,
+                    (self.pose[0] + self.size[0]/2),
+                    (self.pose[0] - self.size[0]/2),
+                    (self.pose[1] + self.size[1]/2),
+                    (self.pose[1] - self.size[1]/2),
+                    (self.pose[2] + self.size[2]/2),
+                    (self.pose[2] - self.size[2]/2),
+                    self.space)
 
 
 def find_boxes(box_yaml):
