@@ -47,11 +47,11 @@ def main():
     # Create urdf and print to console
     os.system(create_urdf_command)
     if not (thruster_compliant and sensor_compliant):
-        rospy.logerr('\nThis sensor/thruster configuration is NOT compliant\
-                      with the (current) VRX constraints. A urdf file will\
-                      still be created, but please note that the above errors\
-                      must be fixed for this to be a valid configuration for\
-                      the VRX competition.\n')
+        rospy.logerr('\nThis sensor/thruster configuration is NOT compliant ' +
+                     'with the (current) VRX constraints. A urdf file will ' +
+                     'be created, but please note that the above errors ' +
+                     'must be fixed for this to be a valid configuration ' +
+                     'for the VRX competition.\n')
 
     print('WAM-V urdf file sucessfully generated. File location: ' +
           wamv_target)

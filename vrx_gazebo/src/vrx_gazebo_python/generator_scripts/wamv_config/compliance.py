@@ -48,8 +48,8 @@ class Sensor_Compliance:
             rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
                          (sensor_type, params['name'],
                           xyz[0], xyz[1], xyz[2],
-                          'must fit in at least one of the following boxes\
-                          with remaining space:'))
+                          'must fit in at least one of the following boxes ' +
+                          'with remaining space:'))
             for box in self.boxes:
                 rospy.logerr('  %s' % str(box))
             return False
@@ -113,8 +113,8 @@ class Thruster_Compliance:
         rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
                      (thruster_type, params['prefix'],
                       xyz[0], xyz[1], xyz[2],
-                      'it must fit in at least one of the following boxes\
-                      with remaining space:'))
+                      'it must fit in at least one of the following boxes ' +
+                      'with remaining space:'))
         for box in self.boxes:
             rospy.logerr('  %s' % str(box))
         return False
