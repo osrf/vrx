@@ -164,7 +164,6 @@ class Box:
 
 def find_boxes(box_yaml):
     addrs = rospy.get_param('compliance_dir') + '/' + box_yaml
-    print addrs
     box_def = yaml.load(open(addrs))
     boxes = []
 

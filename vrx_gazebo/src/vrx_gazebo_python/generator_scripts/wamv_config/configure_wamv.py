@@ -57,6 +57,8 @@ def create_thruster_xacro():
     """
     # Get yaml files for thruster number and pose
     thruster_yaml = rospy.get_param('thruster_yaml')
+    rospy.loginfo('\nUsing %s as the thruster configuration yaml file\n' %
+                  thruster_yaml)
 
     # Set thruster xacro target
     thruster_xacro_target = yaml_to_xacro_extension(thruster_yaml)
@@ -113,6 +115,8 @@ def create_sensor_xacro():
     """
     # Get yaml files for sensor number and pose
     sensor_yaml = rospy.get_param('sensor_yaml')
+    rospy.loginfo('\nUsing %s as the sensor configuration yaml file\n' %
+                  sensor_yaml)
 
     # Set sensor xacro target
     sensor_xacro_target = yaml_to_xacro_extension(sensor_yaml)
