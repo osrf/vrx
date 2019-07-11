@@ -30,11 +30,11 @@
   <arg name="thrust_config" default="H" />
 
   <!-- Do you want to enable sensors? -->
-  <arg name="camera_enabled"       default="true" />
-  <arg name="gps_enabled"          default="true" />
-  <arg name="imu_enabled"          default="true" />
-  <arg name="lidar_enabled"        default="true" />
-  <arg name="ground_truth_enabled" default="true" />
+  <arg name="camera_enabled"       default="false" />
+  <arg name="gps_enabled"          default="false" />
+  <arg name="imu_enabled"          default="false" />
+  <arg name="lidar_enabled"        default="false" />
+  <arg name="ground_truth_enabled" default="false" />
 
 
   <!-- Resume the logic in empty_world.launch, over-riding a number of arguments -->
