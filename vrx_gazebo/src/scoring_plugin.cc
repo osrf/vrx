@@ -72,7 +72,7 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     std::string("/gazebo/") + worldName + std::string("/physics/contacts");
   collisionSub = gzNode->Subscribe(collisionTopic,
                                           &ScoringPlugin::OnCollisionMsg, this);
-  
+
   if (char* env_dbg = std::getenv("VRX_DEBUG"))
   {
     if (std::string(env_dbg) == "false")
@@ -84,7 +84,8 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
       << std::endl;
   }
   this->serverControlPub =
-    this->gzNode->Advertise<gazebo::msgs::ServerControl>("/gazebo/server/control");
+    this->gzNode->Advertise<gazebo::msgs::ServerControl>
+    ("/gazebo/server/control");
 }
 
 //////////////////////////////////////////////////
@@ -426,7 +427,7 @@ bool ScoringPlugin::ParseJoints()
 }
 
 void ScoringPlugin::Exit()
-{ 
+{
   if (char* env = std::getenv("VRX_EXIT_ON_COMPLETION"))
   {
     gzdbg << std::string(env) <<std::endl;
@@ -443,9 +444,11 @@ void ScoringPlugin::Exit()
   }
   else
   {
-    gzerr << "VRX_EXIT_ON_COMPLETION not set, will not shutdown on ScoringPlugin::Exit()"
+    gzerr << "VRX_EXIT_ON_COMPLETION not set"
+      << " will not shutdown on ScoringPlugin::Exit()"
       << std::endl;
-    ROS_ERROR("VRX_EXIT_ON_COMPLETION not set, will not shutdown on ScoringPlugin::Exit()");
+    ROS_ERROR("VRX_EXIT_ON_COMPLETION not set, will" +
+              "not shutdown on ScoringPlugin::Exit()");
   }
   return;
 }

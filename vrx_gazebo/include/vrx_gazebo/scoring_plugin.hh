@@ -193,7 +193,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Shutdown gazebo and ros
   public: void Exit();
-	  
+
   /// \brief A world pointer.
   protected: gazebo::physics::WorldPtr world;
 
