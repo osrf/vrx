@@ -26,6 +26,23 @@ foreach(_erb ${model_erb_files})
 
   list(APPEND model_files ${_model})
 endforeach()
+
+set (xacro_erb_files
+  world_models/ocean_waves/model.xacro.erb
+)
+# Process the xacro erb files
+foreach(_erb ${xacro_erb_files})
+  string(REGEX REPLACE ".xacro.erb" ".xacro" _model ${_erb})
+  set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
+  add_custom_command(OUTPUT ${_model}
+                     COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
+                     DEPENDS
+                       ${CMAKE_CURRENT_SOURCE_DIR}/${_erb}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+  list(APPEND model_files ${_model})
+endforeach()
+
 add_custom_target(model_erb_generation ALL
   DEPENDS
     ${model_files}
