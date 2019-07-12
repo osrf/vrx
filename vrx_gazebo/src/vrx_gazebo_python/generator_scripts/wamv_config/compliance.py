@@ -7,8 +7,8 @@ from .. import utils
 
 class Sensor_Compliance:
     def __init__(self):
-        # open sensor_compliance_visual.sdf and all the boxes defined => boxes
-        self.boxes = find_boxes('sensor_compliance/visual.sdf')
+        # open sensor_compliance/bounding_boxes.yaml and all the boxes defined
+        self.boxes = find_boxes('sensor_compliance/bounding_boxes.yaml')
         # look at all sensors in sensors directory and get the default params
         self.sensors_dir = rospy.get_param('sensors_dir') + '/'
         self.default_parameters = utils.get_macros(self.sensors_dir)
@@ -48,7 +48,8 @@ class Sensor_Compliance:
             rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
                          (sensor_type, params['name'],
                           xyz[0], xyz[1], xyz[2],
-                          'must fit in at least one of the following boxes:'))
+                          'must fit in at least one of the following boxes ' +
+                          'with remaining space:'))
             for box in self.boxes:
                 rospy.logerr('  %s' % str(box))
             return False
@@ -67,8 +68,8 @@ class Sensor_Compliance:
 
 class Thruster_Compliance:
     def __init__(self):
-        # open sensor_compliance_visual.sdf and all the boxes defined => boxes
-        self.boxes = find_boxes('thruster_compliance/visual.sdf')
+        # open thruster_compliance/bounding_boxes.yaml and the boxes defined
+        self.boxes = find_boxes('thruster_compliance/bounding_boxes.yaml')
         # look at all sensors in sensors directory and get the default params
         self.thrusters_dir = rospy.get_param('thrusters_dir') + '/'
         self.default_parameters = utils.get_macros(self.thrusters_dir)
@@ -81,6 +82,7 @@ class Thruster_Compliance:
         # ie: given an instance of thruster_type = 'engine'
         # with parameters = params, is this engine in compliance
         # check if the thruster is allowed
+
         params = params.copy()
         if thruster_type not in self.default_parameters:
             rospy.logerr('%s is not defined anywhere under %s' %
@@ -111,7 +113,8 @@ class Thruster_Compliance:
         rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
                      (thruster_type, params['prefix'],
                       xyz[0], xyz[1], xyz[2],
-                      'it must fit in at least one of the following boxes:'))
+                      'it must fit in at least one of the following boxes ' +
+                      'with remaining space:'))
         for box in self.boxes:
             rospy.logerr('  %s' % str(box))
         return False
@@ -126,11 +129,14 @@ class Thruster_Compliance:
 
 
 class Box:
-    def __init__(self, pose, size):
+    def __init__(self, name, pose, size, space):
+        self.name = name
+
         self.pose = np.array([float(j) for j in [i for i in pose.split(' ')
                               if i != '']])
         self.size = np.array([float(j) for j in [i for i in size.split(' ')
                               if i != '']])
+        self.space = int(space)
         return
 
     def fit(self, pose):
@@ -138,44 +144,36 @@ class Box:
         for idx, i in enumerate(pose):
             if abs(i) > self.size[idx]/2:
                 return False
-        return True
+        # if space is -1, unlimited things
+        if self.space == -1:
+            return True
+        elif self.space == 0:
+            return False
+        elif self.space > 0:
+            self.space -= 1
+            return True
 
     def __str__(self):
-        return '<Box x:[%s, %s] y:[%s,%s] z:[%s,%s]>' % \
-                ((self.pose[0] + self.size[0]/2),
-                 (self.pose[0] - self.size[0]/2),
-                 (self.pose[1] + self.size[1]/2),
-                 (self.pose[1] - self.size[1]/2),
-                 (self.pose[2] + self.size[2]/2),
-                 (self.pose[2] - self.size[2]/2))
+        return '<Box name:%s x:[%s, %s] y:[%s,%s] z:[%s,%s]\
+                remaining_space:%s>' % \
+                (self.name,
+                    (self.pose[0] + self.size[0]/2),
+                    (self.pose[0] - self.size[0]/2),
+                    (self.pose[1] + self.size[1]/2),
+                    (self.pose[1] - self.size[1]/2),
+                    (self.pose[2] + self.size[2]/2),
+                    (self.pose[2] - self.size[2]/2),
+                    self.space)
 
 
-def find_boxes(sdf):
-    addrs = rospy.get_param('compliance_dir') + '/' + sdf
-    sdf = open(addrs, 'r')
-    sdf = sdf.read()
+def find_boxes(box_yaml):
+    addrs = rospy.get_param('compliance_dir') + '/' + box_yaml
+    box_def = yaml.load(open(addrs))
     boxes = []
-    while sdf.find('<visual') != -1:
-        start = sdf.find('<visual')
-        sdf = sdf[start+7:]
 
-        start = sdf.find('<pose')
-        sdf = sdf[start+5:]
-
-        start = sdf.find('>')
-        sdf = sdf[start+1:]
-        end = sdf.find('<')
-        pose = sdf[:end]
-        sdf = sdf[end:]
-
-        start = sdf.find('<geometry')
-        sdf = sdf[start:]
-
-        start = sdf.find('<box>')
-        sdf = sdf[start:]
-
-        start = sdf.find('<size>')
-        end = sdf.find('</')
-        size = sdf[start+6:end]
-        boxes.append(Box(pose, size))
+    for name, properties in box_def.iteritems():
+        boxes.append(Box(str(name),
+                         properties['pose'],
+                         properties['size'],
+                         properties['capacity']))
     return boxes

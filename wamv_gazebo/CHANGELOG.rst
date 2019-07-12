@@ -2,6 +2,13 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2019-07-10)
+------------------
+* lidar.xacro edited online with Bitbucket
+* fixed issue
+* cpu cases now included when configured by yaml
+* Contributors: Marshall Rawson <marshallrawson@osrfoundation.org>, MarshallRawson
+
 1.1.1 (2019-07-03)
 ------------------
 

@@ -18,11 +18,11 @@ def main():
 
     # Setup thruster xacro
     if received_thruster_yaml:
-        create_thruster_xacro()
+        thruster_compliant = create_thruster_xacro()
 
     # Setup sensor xacro
     if received_sensor_yaml:
-        create_sensor_xacro()
+        sensor_compliant = create_sensor_xacro()
 
     # Setup command to generate WAM-V urdf file
     wamv_target = rospy.get_param('wamv_target')
@@ -46,6 +46,13 @@ def main():
 
     # Create urdf and print to console
     os.system(create_urdf_command)
+    if not (thruster_compliant and sensor_compliant):
+        rospy.logerr('\nThis sensor/thruster configuration is NOT compliant ' +
+                     'with the (current) VRX constraints. A urdf file will ' +
+                     'be created, but please note that the above errors ' +
+                     'must be fixed for this to be a valid configuration ' +
+                     'for the VRX competition.\n')
+
     print('WAM-V urdf file sucessfully generated. File location: ' +
           wamv_target)
 
@@ -57,6 +64,8 @@ def create_thruster_xacro():
     """
     # Get yaml files for thruster number and pose
     thruster_yaml = rospy.get_param('thruster_yaml')
+    rospy.loginfo('\nUsing %s as the thruster configuration yaml file\n' %
+                  thruster_yaml)
 
     # Set thruster xacro target
     thruster_xacro_target = yaml_to_xacro_extension(thruster_yaml)
@@ -79,13 +88,12 @@ def create_thruster_xacro():
     thruster_param_test = comp.param_compliance
 
     # Create thruster xacro with thruster macros
-    create_xacro_file(yaml_file=thruster_yaml,
-                      xacro_target=thruster_xacro_target,
-                      boiler_plate_top=thruster_boiler_plate_top,
-                      boiler_plate_bot=thruster_boiler_plate_bot,
-                      num_test=thruster_num_test,
-                      param_test=thruster_param_test,
-                      )
+    compliant = create_xacro_file(yaml_file=thruster_yaml,
+                                  xacro_target=thruster_xacro_target,
+                                  boiler_plate_top=thruster_boiler_plate_top,
+                                  boiler_plate_bot=thruster_boiler_plate_bot,
+                                  num_test=thruster_num_test,
+                                  param_test=thruster_param_test)
 
     gz_boiler_plate_top = ('  <gazebo>\n'
                            '    <plugin name="wamv_gazebo_thrust" '
@@ -104,6 +112,7 @@ def create_thruster_xacro():
                                boiler_plate_top=gz_boiler_plate_top,
                                boiler_plate_bot=gz_boiler_plate_bot,
                                )
+    return compliant
 
 
 def create_sensor_xacro():
@@ -113,6 +122,8 @@ def create_sensor_xacro():
     """
     # Get yaml files for sensor number and pose
     sensor_yaml = rospy.get_param('sensor_yaml')
+    rospy.loginfo('\nUsing %s as the sensor configuration yaml file\n' %
+                  sensor_yaml)
 
     # Set sensor xacro target
     sensor_xacro_target = yaml_to_xacro_extension(sensor_yaml)
@@ -133,13 +144,12 @@ def create_sensor_xacro():
     sensor_param_test = comp.param_compliance
 
     # Create sensor xacro with sensor macros
-    create_xacro_file(yaml_file=sensor_yaml,
-                      xacro_target=sensor_xacro_target,
-                      boiler_plate_top=sensor_boiler_plate_top,
-                      boiler_plate_bot=sensor_boiler_plate_bot,
-                      num_test=sensor_num_test,
-                      param_test=sensor_param_test,
-                      )
+    return create_xacro_file(yaml_file=sensor_yaml,
+                             xacro_target=sensor_xacro_target,
+                             boiler_plate_top=sensor_boiler_plate_top,
+                             boiler_plate_bot=sensor_boiler_plate_bot,
+                             num_test=sensor_num_test,
+                             param_test=sensor_param_test)
 
 
 def yaml_to_xacro_extension(string):
