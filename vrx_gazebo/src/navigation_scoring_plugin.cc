@@ -299,6 +299,7 @@ void NavigationScoringPlugin::Update()
   {
     gzmsg << "Course completed!" << std::endl;
     this->Finish();
+    this->Exit();
   }
 }
 
@@ -307,6 +308,7 @@ void NavigationScoringPlugin::Fail()
 {
   this->SetScore(0.0);
   this->Finish();
+  this->Exit();
 }
 
 //////////////////////////////////////////////////
