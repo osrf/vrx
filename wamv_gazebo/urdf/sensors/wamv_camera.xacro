@@ -150,7 +150,7 @@
         <plugin name="camera_plugin_${name}" filename="libgazebo_ros_camera.so">
           <alwaysOn>true</alwaysOn>
           <updateRate>0.0</updateRate>
-          <cameraName>${camera_namespace}${name}</cameraName>
+          <cameraName>${sensor_namespace}${camera_namespace}${name}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>${name}_link_optical</frameName>
