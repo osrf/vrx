@@ -447,7 +447,7 @@ void ScoringPlugin::Exit()
     gzerr << "VRX_EXIT_ON_COMPLETION not set"
       << " will not shutdown on ScoringPlugin::Exit()"
       << std::endl;
-    ROS_ERROR("VRX_EXIT_ON_COMPLETION not set, will" +
+    ROS_ERROR_STREAM("VRX_EXIT_ON_COMPLETION not set, will" <<
               "not shutdown on ScoringPlugin::Exit()");
   }
   return;
