@@ -255,7 +255,7 @@ void ScoringPlugin::OnRunning()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
-  gzmsg << "OnFinished" << std::endl;
+  gzmsg << ros::Time::now() << "  OnFinished" << std::endl;
   this->Exit();
 }
 
