@@ -256,6 +256,7 @@ void ScoringPlugin::OnRunning()
 void ScoringPlugin::OnFinished()
 {
   gzmsg << "OnFinished" << std::endl;
+  this->Exit();
 }
 
 //////////////////////////////////////////////////
