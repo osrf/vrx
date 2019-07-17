@@ -430,7 +430,6 @@ void ScoringPlugin::Exit()
 {
   if (char* env = std::getenv("VRX_EXIT_ON_COMPLETION"))
   {
-    gzdbg << std::string(env) <<std::endl;
     if (std::string(env) == "true")
     {
       // shutdown gazebo
