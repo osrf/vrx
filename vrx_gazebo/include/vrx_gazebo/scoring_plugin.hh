@@ -285,7 +285,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::string taskState = "initial";
 
   /// \brief The next task message to be published.
-  private: vrx_gazebo::Task taskMsg;
+  protected: vrx_gazebo::Task taskMsg;
 
   /// \brief ROS Contact Msg.
   private: vrx_gazebo::Contact contactMsg;
@@ -297,7 +297,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::unique_ptr<ros::NodeHandle> rosNode;
 
   /// \brief Publisher for the task state.
-  private: ros::Publisher taskPub;
+  protected: ros::Publisher taskPub;
 
   /// \brief Publisher for the collision.
   private: ros::Publisher contactPub;
