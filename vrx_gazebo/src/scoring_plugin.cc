@@ -256,6 +256,7 @@ void ScoringPlugin::OnRunning()
 void ScoringPlugin::OnFinished()
 {
   gzmsg << ros::Time::now() << "  OnFinished" << std::endl;
+  this->UpdateTaskMessage();
   this->taskPub.publish(this->taskMsg);
   this->Exit();
 }
