@@ -40,36 +40,69 @@ void UsvWindPlugin::LinkCoeff::CalculateWindCoeff()
     this->windCoeff = ignition::math::Vector3d::Zero;
     for (auto& collision : this->link->GetCollisions())
     {
+      // find WindCoeff relative to the collision link
       ignition::math::Vector3d windCoeff = ignition::math::Vector3d::Zero;
       sdf::ElementPtr collisionSDF = collision->GetSDF();
       if (!collisionSDF->HasElement("geometry") ||
           !collisionSDF->GetElement("geometry"))
         return;
       sdf::ElementPtr geometry = collisionSDF->GetElement("geometry");
-      // if box, approximate the the cd as a cube = 0.8
+      ignition::math::Vector3d cd;
       if (geometry->HasElement("box"))
       {
         ignition::math::Vector3d size = geometry->GetElement("box")-> 
           GetElement("size")->Get<ignition::math::Vector3d>();
-	cd = 0.8;
-	windCoeff.X(size.Y()*size.Z()*cd*r/(2.0));
-	windCoeff.Y(size.X()*size.Z()*cd*r/(2.0));
-	windCoeff.Z(size.X()*size.Y()*cd*r/(2.0)); 
+	
+	// if cube-ish
+	if (size.Min() > (size.Max()/10.0))
+	{
+          cd.X() = 0.8;
+          cd.Y() = 0.8;
+          cd.Z() = 0.8;
+	}
+        // if plate-ish
+	else
+	{
+          for (int i =0; i< 3; ++i)
+          {
+            // if alighned with the shortest dimention of the box,
+	    // approximate as plate 90 deg to flow
+	    if (size[i] == size.Min())
+              cd[i] = 1.17;
+	    // else approximate as turbulent inflow plate
+	    else
+              cd[i] = 0.005;
+          }
+	}
+	windCoeff.X(size.Y()*size.Z()*cd.X()*r/(2.0));
+	windCoeff.Y(size.X()*size.Z()*cd.Y()*r/(2.0));
+	windCoeff.Z(size.X()*size.Y()*cd.Z()*r/(2.0)); 
+      }
+
+      else if (geometry->HasElement("sphere"))
+      { 
+        double radius = geometry->GetElement("sphere")-> 
+          GetElement("radius")->Get<double>();
+        cd.X() = 0.5;
+        cd.Y() = 0.5;
+        cd.Z() = 0.5;
+	
+	windCoeff.X(radius*radius*M_PI*cd.X()*r/(2.0));
+	windCoeff.Y(radius*radius*M_PI*cd.Y()*r/(2.0));
+	windCoeff.Z(radius*radius*M_PI*cd.Z()*r/(2.0)); 
       }
       // Transform windCoeff from collision coordinates to link coordinates
       ignition::math::Vector3d temp = collision->
         InitialRelativePose().Rot().Inverse().RotateVector(windCoeff);
 
-      this->windCoeff.X() = temp.X();
-      this->windCoeff.Y() = temp.Y();
+      this->windCoeff.X() += temp.X();
+      this->windCoeff.Y() += temp.Y();
 
-      this->windCoeff.Z(
-        this->windCoeff.Z() +
+      this->windCoeff.Z() +=
         (this->windCoeff.Y()*collision->
         InitialRelativePose().Pos().X()) +
         (this->windCoeff.X()*collision->
-        InitialRelativePose().Pos().Y())
-	);
+        InitialRelativePose().Pos().Y());
     }
   }
 }
