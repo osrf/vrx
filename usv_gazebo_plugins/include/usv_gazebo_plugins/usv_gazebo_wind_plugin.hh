@@ -59,6 +59,19 @@ namespace gazebo
   /// current and wind disturbances".
   class UsvWindPlugin : public WorldPlugin
   {
+    struct LinkCoeff
+    {
+      std::string linkName;
+      /// \brief Pointer to model link in gazebo,
+      ///  optionally specified by the bodyName parameter,
+      ///  The states are taken from this link and forces applied to this link.
+      physics::LinkPtr link;
+      /// \brief Wind force coefficients.
+      ignition::math::Vector3d windCoeff;
+      /// \brief Calculate the wind Coeff Automatically based on collision geometry 
+      void CalculateWindCoeff();
+    };
+
     struct WindObj
     {
       /// \Bool to show weather the model and link pointers have been set
@@ -68,14 +81,10 @@ namespace gazebo
       std::string modelName;
       /// \model Pointer to the model
       physics::ModelPtr model;
-      /// \Name of the link on that model
-      std::string linkName;
-      /// \brief Pointer to model link in gazebo,
-      ///  optionally specified by the bodyName parameter,
-      ///  The states are taken from this link and forces applied to this link.
-      physics::LinkPtr link;
-      /// \brief Wind force coefficients.
-      ignition::math::Vector3d windCoeff;
+
+      std::vector<UsvWindPlugin::LinkCoeff> lcs;
+
+      void PopulateLinks();
     };
     /// \brief Constructor.
     public: UsvWindPlugin();
