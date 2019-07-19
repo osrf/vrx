@@ -91,6 +91,19 @@ void UsvWindPlugin::LinkCoeff::CalculateWindCoeff()
 	windCoeff.Z(radius*radius*M_PI*cd.Z()*r/(2.0)); 
       }
       //TODO: if cylinder
+      else if (geometry->HasElement("cylinder"))
+      { 
+        double radius = geometry->GetElement("cylinder")-> 
+          GetElement("radius")->Get<double>();
+        double length = geometry->GetElement("cylinder")-> 
+          GetElement("length")->Get<double>();
+        cd.X() = 0.5;//same as sphere?
+        cd.Y() = 0.5;//same as sphere?
+        cd.Z() = 0.8;//same as cube?
+	windCoeff.X(radius*2.0*length*cd.X()*r/(2.0));
+	windCoeff.Y(radius*2.0*length*cd.Y()*r/(2.0));
+	windCoeff.Z(radius*radius*M_PI*cd.Z()*r/(2.0)); 
+      }
       // Transform windCoeff from collision coordinates to link coordinates
       ignition::math::Vector3d temp = collision->
         InitialRelativePose().Rot().Inverse().RotateVector(windCoeff);
