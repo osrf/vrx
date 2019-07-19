@@ -261,6 +261,7 @@ xacro_add_files(
   worlds/wayfinding_task.world.xacro
   worlds/wind_test.world.xacro
   worlds/wind_test2.world.xacro
+  worlds/wind_test3.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 

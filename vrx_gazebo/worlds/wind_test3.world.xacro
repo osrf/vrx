@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="wind_test">
+    <include>
+      <uri>model://sun</uri>
+    </include>	    
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <model name="cubeo">
+      <pose>0 0 0.5 0 0 1.571</pose>
+      <include>
+        <uri>model://placard</uri>
+      </include>
+    </model>
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
+    <xacro:usv_wind_gazebo direction="270"
+                   mean_vel="5"
+                   var_gain="0.01"
+                   var_time="0.01" >
+      <wind_objs>
+        <wind_obj>
+          <model_name>cubeo</model_name>
+        </wind_obj>
+      </wind_objs>
+    </xacro:usv_wind_gazebo>
+  </world>
+</sdf>

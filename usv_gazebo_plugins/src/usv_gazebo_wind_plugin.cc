@@ -33,8 +33,8 @@ void UsvWindPlugin::LinkCoeff::CalculateWindCoeff()
 {
   if (this->linkName != "" && this->link)
   {
-    double r = 1.2;
-    double cd = 0;
+    double r = 1.2;// desity of air
+    double cd = 0;// coefficient of drag
     // add together all the wind coeffs of all collision links in the
     // frame of the parent link
     this->windCoeff = ignition::math::Vector3d::Zero;
@@ -78,7 +78,7 @@ void UsvWindPlugin::LinkCoeff::CalculateWindCoeff()
 	windCoeff.Y(size.X()*size.Z()*cd.Y()*r/(2.0));
 	windCoeff.Z(size.X()*size.Y()*cd.Z()*r/(2.0)); 
       }
-
+      // if sphere
       else if (geometry->HasElement("sphere"))
       { 
         double radius = geometry->GetElement("sphere")-> 
@@ -86,11 +86,11 @@ void UsvWindPlugin::LinkCoeff::CalculateWindCoeff()
         cd.X() = 0.5;
         cd.Y() = 0.5;
         cd.Z() = 0.5;
-	
 	windCoeff.X(radius*radius*M_PI*cd.X()*r/(2.0));
 	windCoeff.Y(radius*radius*M_PI*cd.Y()*r/(2.0));
 	windCoeff.Z(radius*radius*M_PI*cd.Z()*r/(2.0)); 
       }
+      //TODO: if cylinder
       // Transform windCoeff from collision coordinates to link coordinates
       ignition::math::Vector3d temp = collision->
         InitialRelativePose().Rot().Inverse().RotateVector(windCoeff);
