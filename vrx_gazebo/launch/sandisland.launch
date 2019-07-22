@@ -20,6 +20,9 @@
   <arg name="R" default="0" />
   <arg name="Y" default="-2.76" />
 
+  <!-- Enable Gazebo ROS simulation topics -->
+  <arg name="enable_ros_network" default="false"/>
+
   <!-- Allow user specified thruster configurations
        H = stern trusters on each hull
        T = H with a lateral thruster
@@ -40,6 +43,7 @@
     <arg name="paused"       value="$(arg paused)"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui"          value="$(arg gui)" />
+    <arg name="enable_ros_network" value="$(arg enable_ros_network)"/>
     <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
   </include>
 
