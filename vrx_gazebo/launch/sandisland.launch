@@ -21,7 +21,7 @@
   <arg name="Y" default="-2.76" />
 
   <!-- Enable Gazebo ROS simulation topics -->
-  <arg name="enable_ros_network" default="false"/>
+  <arg name="enable_ros_network" default="true"/>
 
   <!-- Allow user specified thruster configurations
        H = stern trusters on each hull
