@@ -42,13 +42,6 @@
       <uri>model://sandisland</uri>
     </include>
 
-    <!-- Should be at the same height as the water level in USV and buoyancy
-    plugin configurations -->
-    <include>
-      <pose> 0 0 0 0 0 0 </pose>
-      <uri>model://ocean_waves</uri>
-    </include>
-
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>

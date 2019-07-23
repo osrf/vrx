@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="perception" params="**model_includes
+                                         **object_sequence
+                                         ">
+    <xacro:insert_block name="model_includes"/>"
+      <plugin filename="libperception_scoring_plugin.so"
+            name="perception_scoring_plugin">
+      <!-- Parameters for ScoringPlugin base class -->
+      <vehicle>wamv</vehicle>
+      <task_name>perception</task_name>
+      <initial_state_duration>10.0</initial_state_duration>
+      <ready_state_duration>10.0</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <!-- Parameters for PopulationPlugin -->
+      <loop_forever>false</loop_forever>
+      <frame>wamv</frame>
+      <!-- Pose of each object is expressed relative to the body frame
+           of the object named in the frame field - i.e., relative to
+           the wam-v-->
+      <object_sequence>
+        <xacro:insert_block name="object_sequence"/>
+      </object_sequence>
+    </plugin>
+  </xacro:macro>
+</world>
