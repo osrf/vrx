@@ -23,7 +23,7 @@
 
 /////////////////////////////////////////////////
 ScoringPlugin::ScoringPlugin()
-    : WorldPlugin(), collisionNode(new gazebo::transport::Node()) {
+    : WorldPlugin(), gzNode(new gazebo::transport::Node()) {
 }
 
 void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
@@ -62,7 +62,7 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScoringPlugin::Update, this));
 
-  collisionNode->Init();
+  gzNode->Init();
 #if GAZEBO_MAJOR_VERSION >= 8
   std::string worldName = this->world->Name();
 #else
@@ -70,8 +70,22 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 #endif
   std::string collisionTopic =
     std::string("/gazebo/") + worldName + std::string("/physics/contacts");
-  collisionSub = collisionNode->Subscribe(collisionTopic,
+  collisionSub = gzNode->Subscribe(collisionTopic,
                                           &ScoringPlugin::OnCollisionMsg, this);
+
+  if (char* env_dbg = std::getenv("VRX_DEBUG"))
+  {
+    if (std::string(env_dbg) == "false")
+      this->debug = false;
+  }
+  else
+  {
+    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to true"
+      << std::endl;
+  }
+  this->serverControlPub =
+    this->gzNode->Advertise<gazebo::msgs::ServerControl>
+    ("/gazebo/server/control");
 }
 
 //////////////////////////////////////////////////
@@ -241,7 +255,10 @@ void ScoringPlugin::OnRunning()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
-  gzmsg << "OnFinished" << std::endl;
+  gzmsg << ros::Time::now() << "  OnFinished" << std::endl;
+  this->UpdateTaskMessage();
+  this->taskPub.publish(this->taskMsg);
+  this->Exit();
 }
 
 //////////////////////////////////////////////////
@@ -300,17 +317,6 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
 //////////////////////////////////////////////////
 bool ScoringPlugin::ParseSDFParameters()
 {
-  if (char* env_dbg = std::getenv("VRX_DEBUG"))
-  {
-    gzdbg << std::string(env_dbg) <<std::endl;
-    if (std::string(env_dbg) == "false")
-      this->debug = false;
-  }
-  else
-  {
-    gzwarn << "VRX_DEBUG enviornment variable not set, defaulting to true"
-      << std::endl;
-  }
   // This is a required element.
   if (!this->sdf->HasElement("vehicle"))
   {
@@ -421,4 +427,30 @@ bool ScoringPlugin::ParseJoints()
   }
 
   return true;
+}
+
+void ScoringPlugin::Exit()
+{
+  if (char* env = std::getenv("VRX_EXIT_ON_COMPLETION"))
+  {
+    if (std::string(env) == "true")
+    {
+      // shutdown gazebo
+      gazebo::msgs::ServerControl msg;
+      msg.set_stop(true);
+      this->serverControlPub->Publish(msg);
+      // shutdown gazebo
+      if (ros::ok())
+        ros::shutdown();
+    }
+  }
+  else
+  {
+    gzerr << "VRX_EXIT_ON_COMPLETION not set"
+      << " will not shutdown on ScoringPlugin::Exit()"
+      << std::endl;
+    ROS_ERROR_STREAM("VRX_EXIT_ON_COMPLETION not set, will" <<
+              "not shutdown on ScoringPlugin::Exit()");
+  }
+  return;
 }

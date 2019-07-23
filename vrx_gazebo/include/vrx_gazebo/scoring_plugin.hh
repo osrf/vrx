@@ -19,6 +19,7 @@
 #define VRX_GAZEBO_SCORING_PLUGIN_HH_
 
 #include <ros/ros.h>
+#include <gazebo/msgs/gz_string.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -190,6 +191,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// otherwise.
   private: bool ParseJoints();
 
+  /// \brief Shutdown gazebo and ros
+  public: void Exit();
+
   /// \brief A world pointer.
   protected: gazebo::physics::WorldPtr world;
 
@@ -206,10 +210,13 @@ class ScoringPlugin : public gazebo::WorldPlugin
   protected: gazebo::common::Time lastCollisionTime;
 
   /// \brief gazebo node pointer
-  private: gazebo::transport::NodePtr collisionNode;
+  private: gazebo::transport::NodePtr gzNode;
 
   /// \brief Collision detection node subscriber
   private: gazebo::transport::SubscriberPtr collisionSub;
+
+  /// \brief gazebo server control publisher
+  private: gazebo::transport::PublisherPtr serverControlPub;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -278,7 +285,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::string taskState = "initial";
 
   /// \brief The next task message to be published.
-  private: vrx_gazebo::Task taskMsg;
+  protected: vrx_gazebo::Task taskMsg;
 
   /// \brief ROS Contact Msg.
   private: vrx_gazebo::Contact contactMsg;
@@ -290,7 +297,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::unique_ptr<ros::NodeHandle> rosNode;
 
   /// \brief Publisher for the task state.
-  private: ros::Publisher taskPub;
+  protected: ros::Publisher taskPub;
 
   /// \brief Publisher for the collision.
   private: ros::Publisher contactPub;
