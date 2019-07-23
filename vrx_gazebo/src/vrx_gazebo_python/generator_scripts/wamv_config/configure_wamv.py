@@ -53,9 +53,8 @@ def main():
                      'must be fixed for this to be a valid configuration ' +
                      'for the VRX competition.\n')
 
-    print('WAM-V urdf file sucessfully generated. File location: ' +
+    rospy.loginfo('WAM-V urdf file sucessfully generated. File location: ' +
           wamv_target)
-
 
 def create_thruster_xacro():
     """
