@@ -1,0 +1,162 @@
+constant:
+    steps: 1
+    macros:
+        sandisland_minus_scene: 
+            -
+    sequence:
+
+tasks:
+    steps: 6
+    macros:
+        stationkeeping:
+            -
+        wayfinding:
+            -
+        perception:
+            -
+        nav_challenge:
+            -
+        dock:
+            -
+        scan_and_dock:
+            -
+    sequence:
+        0:
+            stationkeeping:
+                -
+        1:
+            wayfinding:
+                - /**waypoints: "'
+                <waypoint>
+                  <pose>21.3109331464 -157.888576027 1.21756121843</pose>
+                </waypoint>
+                <waypoint>
+                  <pose>21.30996 -157.8901 1.0</pose>
+                </waypoint>
+                <waypoint>
+                  <pose>21.31 -157.89 1.0</pose>
+                </waypoint>'"
+        2:
+            perception:
+                - /**model_includes: "'
+                  <include>
+                    <name>red_0</name>
+                    <pose>-200 100 1 0 0 0</pose>
+                    <uri>model://surmark950410</uri>
+                  </include>
+                  <include>
+                    <name>green_0</name>
+                    <pose>-200 102 1 0 0 0</pose>
+                    <uri>model://surmark950400</uri>
+                  </include>
+                  <include>
+                    <name>black_0</name>
+                    <pose>-200 104 1 0 0 0</pose>
+                    <uri>model://black_totem</uri>
+                  </include>
+                  '"
+                  /**object_sequence: "'
+                  <object>
+                    <time>5.0</time>
+                    <type>red</type>
+                    <name>red_mark</name>
+                     <pose>8 0 1 0 0 0</pose>
+                  </object>
+                  <object>
+                    <time>10.0</time>
+                    <type>green</type>
+                    <name>green_mark</name>
+                    <pose>8 2 1 0 0 0</pose>
+                  </object>
+                  <object>
+                    <time>15.0</time>
+                    <type>black</type>
+                    <name>black_totem</name>
+                    <pose>8 -2 1 0 0 0</pose>
+                  </object>
+                  '"
+        3:
+            nav_challenge:
+                - name: nav_challenge
+        4:
+            dock:
+                -
+        5:
+            scan_and_dock:
+                -
+waves:
+    steps: 2
+    macros:
+        ocean_waves:
+            -
+    sequence:
+        0:
+            ocean_waves:
+                - gain: 1.0
+                  period: 1.0
+        1:
+            ocean_waves:
+                - gain: 0.4
+                  period: 8.0
+wind:
+    steps: 2
+    macros:
+        usv_wind_gazebo:
+            -
+    sequence:
+        0:
+            usv_wind_gazebo:
+                - mean_vel: 0.0
+                  var_gain: 0
+                  var_time: 2
+                  /**wind_objs: "'
+                  <wind_obj>
+
+                  <name>wamv</name>
+
+                  <link_name>base_link</link_name>
+
+                  <coeff_vector>.5 .5 .33</coeff_vector>
+
+                  </wind_obj>'"
+        1:
+            usv_wind_gazebo:
+                - mean_vel: 8.0
+                  var_gain: 8.0
+                  var_time: 20
+                  /**wind_objs: "'
+                  <wind_obj>
+
+                  <name>wamv</name>
+
+                  <link_name>base_link</link_name>
+
+                  <coeff_vector> .5 .5 .33</coeff_vector>
+
+                  </wind_obj>'"
+scene:
+    steps: 2
+    macros:
+        scene_macro:
+            -
+    sequence:
+        0:
+            scene_macro:
+                - /**fog: "'
+                  <color> 0.7 0.7 0.7 1 </color>
+
+                  <density> 0.0 </density>'"
+                  /**ambient: "'1 1 1 1'"
+        1:
+            scene_macro:
+                - /**fog: "'
+                  <color> 0.9 0.9 0.9 1 </color>
+
+                  <density> 0.1 </density>'"
+                  /**ambient: "'0.3 0.3 0.3 1'"
+
+
+
+
+
+
