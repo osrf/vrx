@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-    <xacro:macro name="include_all_xacros">
+  <xacro:macro name="include_all_xacros">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/sandisland_minus_scene.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scene.xacro" />

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import yaml
+import oyaml as yaml
 import rospy
 import os
 from collections import OrderedDict
