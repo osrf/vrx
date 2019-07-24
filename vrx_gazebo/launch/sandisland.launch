@@ -22,6 +22,7 @@
 
   <!-- Enable Gazebo ROS simulation topics -->
   <arg name="enable_ros_network" default="true"/>
+  <env name="VRX_DEBUG" value="$(arg enable_ros_network)"/>
 
   <!-- Allow user specified thruster configurations
        H = stern trusters on each hull
