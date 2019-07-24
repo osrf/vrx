@@ -10,6 +10,7 @@
       <grid>0</grid>
       <origin_visual> 0 </origin_visual>
       <fog>
+        <type> linear</type>
         <xacro:insert_block name="fog"/>
       </fog>
       <ambient>

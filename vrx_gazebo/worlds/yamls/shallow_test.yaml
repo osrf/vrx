@@ -26,7 +26,7 @@ tasks:
                 -
         1:
             wayfinding:
-                - /**waypoints: "'
+                - /**waypoints: "
                 <waypoint>
                   <pose>21.3109331464 -157.888576027 1.21756121843</pose>
                 </waypoint>
@@ -35,10 +35,10 @@ tasks:
                 </waypoint>
                 <waypoint>
                   <pose>21.31 -157.89 1.0</pose>
-                </waypoint>'"
+                </waypoint>"
         2:
             perception:
-                - /**model_includes: "'
+                - /**model_includes: "
                   <include>
                     <name>red_0</name>
                     <pose>-200 100 1 0 0 0</pose>
@@ -53,9 +53,8 @@ tasks:
                     <name>black_0</name>
                     <pose>-200 104 1 0 0 0</pose>
                     <uri>model://black_totem</uri>
-                  </include>
-                  '"
-                  /**object_sequence: "'
+                  </include>"
+                  /**object_sequence: "
                   <object>
                     <time>5.0</time>
                     <type>red</type>
@@ -73,8 +72,7 @@ tasks:
                     <type>black</type>
                     <name>black_totem</name>
                     <pose>8 -2 1 0 0 0</pose>
-                  </object>
-                  '"
+                  </object>"
         3:
             nav_challenge:
                 - name: nav_challenge
@@ -102,7 +100,7 @@ environment:
                 - mean_vel: 0.0
                   var_gain: 0
                   var_time: 2
-                  /**wind_objs: "'
+                  /**wind_objs: "
                   <wind_obj>
 
                   <name>wamv</name>
@@ -111,13 +109,13 @@ environment:
 
                   <coeff_vector>.5 .5 .33</coeff_vector>
 
-                  </wind_obj>'"
+                  </wind_obj>"
             scene_macro:
                 - /**fog: "'
                   <color> 0.7 0.7 0.7 1 </color>
 
                   <density> 0.0 </density>'"
-                  /**ambient: "'1 1 1 1'"
+                  /**ambient: "1 1 1 1"
         1:
             ocean_waves:
                 - gain: 0.4
@@ -126,7 +124,7 @@ environment:
                 - mean_vel: 8.0
                   var_gain: 8.0
                   var_time: 20
-                  /**wind_objs: "'
+                  /**wind_objs: "
                   <wind_obj>
 
                   <name>wamv</name>
@@ -135,13 +133,13 @@ environment:
 
                   <coeff_vector> .5 .5 .33</coeff_vector>
 
-                  </wind_obj>'"
+                  </wind_obj>"
             scene_macro:
-                - /**fog: "'
+                - /**fog: "
                   <color> 0.9 0.9 0.9 1 </color>
 
-                  <density> 0.1 </density>'"
-                  /**ambient: "'0.3 0.3 0.3 1'"
+                  <density> 0.1 </density>"
+                  /**ambient: "0.3 0.3 0.3 1"
 
 
 
