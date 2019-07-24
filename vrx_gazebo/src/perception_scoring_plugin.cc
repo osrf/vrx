@@ -281,6 +281,16 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
   this->dataPtr->sdf = _sdf;
 
   // Read the SDF parameters
+  if (_sdf->HasElement("vehicle_link"))
+  {
+    this->baseLinkName = _sdf->Get<std::string>("vehicle_link");
+  }
+  else
+  {
+    gzerr << "vehicle_link required" << std::endl;
+  }
+
+
   if (_sdf->HasElement("loop_forever"))
   {
     sdf::ElementPtr loopElem = _sdf->GetElement("loop_forever");
@@ -403,6 +413,39 @@ void PerceptionScoringPlugin::Restart()
 void PerceptionScoringPlugin::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+
+  if (!this->vehicleModel)
+  {
+    return;
+  }
+  if (!this->baseLink)
+  {
+    this->baseLink = this->vehicleModel->GetLink(
+      this->baseLinkName);
+    if (!this->baseLink)
+    {
+        gzerr << "base_link name bad" << std::endl;
+        return;
+    }
+
+    this->prismaticJoint = this->vehicleModel->
+      CreateJoint("prismatic",
+                  "fixed",
+                  boost::dynamic_pointer_cast<gazebo::physics::Link>(
+                    this->world->BaseByName("world")),
+                  this->baseLink);
+
+    this->prismaticJoint->SetName(this->vehicleModel->GetName() +
+      "__lin_joint__");
+
+    this->prismaticJoint->Load(boost::dynamic_pointer_cast<gazebo::physics::Link>(
+                                 this->world->BaseByName("world")),
+                               baseLink,
+                               ignition::math::Pose3d());
+    this->prismaticJoint->Init();
+
+  }
+
 
   // Connect with object checker to see if we need to score a submission
   if (this->dataPtr->objectChecker->SubmissionReceived() &&
