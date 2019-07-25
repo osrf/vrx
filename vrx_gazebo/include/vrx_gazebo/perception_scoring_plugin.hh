@@ -194,6 +194,10 @@ class PerceptionScoringPlugin : public ScoringPlugin
 
   /// \brief Private data pointer.
   private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
+
+  private: std::string baseLinkName;
+
+  private: double elapsedTime = 0.0;
 };
 
 #endif

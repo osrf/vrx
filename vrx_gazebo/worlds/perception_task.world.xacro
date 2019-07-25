@@ -63,7 +63,7 @@
     </plugin>
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo direction="270"
-                   mean_vel="10"
+                   mean_vel="8"
                    var_gain="100"
                    var_time="5" >
       <wind_objs>
