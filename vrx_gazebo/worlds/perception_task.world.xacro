@@ -61,23 +61,5 @@
         </object>
       </object_sequence>
     </plugin>
-    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
-    <xacro:usv_wind_gazebo direction="270"
-                   mean_vel="8"
-                   var_gain="100"
-                   var_time="5" >
-      <wind_objs>
-        <wind_obj>
-          <name>wamv</name>
-          <link_name>base_link</link_name>
-          <coeff_vector>0.5 0.5 0.33</coeff_vector>
-        </wind_obj>
-        <wind_obj>
-          <name>robotx_light_buoy</name>
-          <link_name>base_link</link_name>
-          <coeff_vector>0.5 0.5 0.33</coeff_vector>
-        </wind_obj>
-      </wind_objs>
-    </xacro:usv_wind_gazebo>
   </world>
 </sdf>

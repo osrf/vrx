@@ -414,24 +414,6 @@ void PerceptionScoringPlugin::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  if (this->vehicleModel)
-  {
-    // if wamv spinning out of control ... which it does now
-    // make it stop
-    gazebo::math::Vector3 angularVel =
-      this->vehicleModel->GetLink(this->baseLinkName)->
-      GetWorldAngularVel();
-
-    if (angularVel.GetLength() > 0.5)
-    {
-      this->vehicleModel->GetLink(this->baseLinkName)->
-        SetAngularVel({0.0, 0.0, 0.0});
-      this->vehicleModel->GetLink(this->baseLinkName)->
-        SetLinearVel({0.0, 0.0, 0.0});
-      gzdbg << "spinning out of control" << std::endl;
-    }
-  }
-
   // Connect with object checker to see if we need to score a submission
   if (this->dataPtr->objectChecker->SubmissionReceived() &&
       !this->dataPtr->objectChecker->submissionScored)
