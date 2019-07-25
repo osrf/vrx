@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import yaml
+import oyaml as yaml
 import rospy
 import os
 from collections import OrderedDict
@@ -9,6 +9,9 @@ from .. utils import create_xacro_file
 
 def main():
     s = open(rospy.get_param('requested'))
+    yaml_name = rospy.get_param('requested')[
+        rospy.get_param('requested').rfind('/')+1:
+        rospy.get_param('requested').rfind('.yaml')]
     # get the yaml as a dict
     master = yaml.safe_load(s)
     # get lsit of all coordinates that the master dict maps out
@@ -16,7 +19,7 @@ def main():
     # create a world xacro and subsiquent world file for each coordinate
     for num, i in enumerate(coordinates):
         create_xacro_file(xacro_target=rospy.get_param('world_xacro_target') +
-                          'world' + str(num) + '.world.xacro',
+                          yaml_name + str(num) + '.world.xacro',
 
                           requested_macros=world_gen(coordinate=i,
                                                      master=master),
@@ -30,9 +33,9 @@ def main():
                           '  <xacro:include_all_xacros />\n',
                           boiler_plate_bot='</world>\n</sdf>')
         os.system('rosrun xacro xacro --inorder -o' +
-                  rospy.get_param('world_target') + 'world' + str(num) +
+                  rospy.get_param('world_target') + yaml_name + str(num) +
                   '.world ' +
-                  rospy.get_param('world_xacro_target') + 'world' +
+                  rospy.get_param('world_xacro_target') + yaml_name +
                   str(num) + '.world.xacro')
     print 'All ', len(coordinates), ' worlds generated'
 

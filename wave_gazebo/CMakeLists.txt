@@ -10,13 +10,13 @@ endif()
 find_package(catkin REQUIRED)
 
 # Model files to be processed with erb
-set (model_erb_files
-  world_models/ocean_waves/model.sdf.erb
-)
 
-# Process the model erb files
-foreach(_erb ${model_erb_files})
-  string(REGEX REPLACE ".sdf.erb" ".sdf" _model ${_erb})
+set (xacro_erb_files
+  world_models/ocean_waves/model.xacro.erb
+)
+# Process the xacro erb files
+foreach(_erb ${xacro_erb_files})
+  string(REGEX REPLACE ".xacro.erb" ".xacro" _model ${_erb})
   set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
   add_custom_command(OUTPUT ${_model}
                      COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
@@ -26,6 +26,7 @@ foreach(_erb ${model_erb_files})
 
   list(APPEND model_files ${_model})
 endforeach()
+
 add_custom_target(model_erb_generation ALL
   DEPENDS
     ${model_files}

@@ -262,7 +262,6 @@ xacro_add_files(
   worlds/wind_test.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
-
 # Generate obstacle course
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf

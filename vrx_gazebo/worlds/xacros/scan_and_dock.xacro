@@ -1,48 +1,18 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
-<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
-  <world name="robotx_scan_and_dock">
-    <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
-    <xacro:sandisland />
-
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="scan_and_dock">
+    <!-- The light buoy -->$
+    <include>
+      <uri>model://robotx_light_buoy</uri>
+      <pose>90 70 0.25 0 0 0</pose>
+    </include>
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://dock_2018</uri>
       <pose>60 -2.75 0 0 0 0</pose>
     </include>
-
-    <!-- Uncomment to visualize the bay #1 activation zone -->
-    <!-- <model name="activation_placard1">
-      <static>true</static>
-      <link name="link">
-        <visual name="visual">
-          <pose>72.75 0 0 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.8</transparency>
-        </visual>
-      </link>
-    </model> -->
-
-    <!-- Uncomment to visualize the bay #2 activation zone -->
-    <!-- <model name="activation_placard2">
-      <static>true</static>
-      <link name="link">
-        <visual name="visual">
-          <pose>61.75 0 0 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.8</transparency>
-        </visual>
-      </link>
-    </model> -->
-
+ 
     <!-- The scoring plugin -->
     <plugin name="scan_dock_scoring_plugin"
             filename="libscan_dock_scoring_plugin.so">
@@ -60,7 +30,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-
+ 
       <!-- Color sequence checker -->
       <robot_namespace>vrx</robot_namespace>
       <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
@@ -76,7 +46,7 @@
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>false</dock_allowed>
         </bay>
-
+ 
         <bay>
           <name>bay2</name>
           <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
@@ -87,7 +57,7 @@
       </bays>
       <placard_color_shape>red_triangle</placard_color_shape>
     </plugin>
-
+ 
     <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
     <plugin name="vehicle_docked_bay1" filename="libContainPlugin.so">
       <entity>wamv::base_link</entity>
@@ -99,7 +69,7 @@
         </box>
       </geometry>
     </plugin>
-
+ 
     <!-- Triggers a message when the vehicle enters and exits the bay #2 -->
     <plugin name="vehicle_docked_bay2" filename="libContainPlugin.so">
       <entity>wamv::base_link</entity>
@@ -111,6 +81,5 @@
         </box>
       </geometry>
     </plugin>
-
-  </world>
-</sdf>
+  </xacro:macro>
+</world>
