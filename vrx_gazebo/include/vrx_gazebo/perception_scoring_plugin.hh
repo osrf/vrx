@@ -108,7 +108,6 @@ class ObjectChecker
 
   /// \brief World pointer. Need this for spherical/local conversion.
   private: gazebo::physics::WorldPtr world;
-
 };
 
 // Forward declare private data class
@@ -194,10 +193,6 @@ class PerceptionScoringPlugin : public ScoringPlugin
 
   /// \brief Private data pointer.
   private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
-
-  private: std::string baseLinkName;
-
-  private: double elapsedTime = 0.0;
 };
 
 #endif

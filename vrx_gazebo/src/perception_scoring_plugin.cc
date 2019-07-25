@@ -280,17 +280,6 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
   this->dataPtr->world = _world;
   this->dataPtr->sdf = _sdf;
 
-  // Read the SDF parameters
-  if (_sdf->HasElement("vehicle_link"))
-  {
-    this->baseLinkName = _sdf->Get<std::string>("vehicle_link");
-  }
-  else
-  {
-    gzerr << "vehicle_link required" << std::endl;
-  }
-
-
   if (_sdf->HasElement("loop_forever"))
   {
     sdf::ElementPtr loopElem = _sdf->GetElement("loop_forever");

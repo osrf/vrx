@@ -29,7 +29,6 @@
             name="perception_scoring_plugin">
       <!-- Parameters for ScoringPlugin base class -->
       <vehicle>wamv</vehicle>
-      <vehicle_link>base_link</vehicle_link>
       <task_name>perception</task_name>
       <initial_state_duration>10.0</initial_state_duration>
       <ready_state_duration>10.0</ready_state_duration>
