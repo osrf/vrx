@@ -6,37 +6,12 @@ constant:
     sequence:
 
 tasks:
-    steps: 6
+    steps: 1
     macros:
-        stationkeeping:
-            -
-        wayfinding:
-            -
         perception:
-            -
-        nav_challenge:
-            -
-        dock:
-            -
-        scan_and_dock:
             -
     sequence:
         0:
-            stationkeeping:
-                -
-        1:
-            wayfinding:
-                - /**waypoints: "
-                <waypoint>
-                  <pose>21.3109331464 -157.888576027 1.21756121843</pose>
-                </waypoint>
-                <waypoint>
-                  <pose>21.30996 -157.8901 1.0</pose>
-                </waypoint>
-                <waypoint>
-                  <pose>21.31 -157.89 1.0</pose>
-                </waypoint>"
-        2:
             perception:
                 - /**model_includes: "
                   <include>
@@ -75,15 +50,6 @@ tasks:
                     <pose>8 -2 1 0 0 0</pose>
                   </object>
                   "
-        3:
-            nav_challenge:
-                - name: nav_challenge
-        4:
-            dock:
-                -
-        5:
-            scan_and_dock:
-                -
 waves:
     steps: 2
     macros:
