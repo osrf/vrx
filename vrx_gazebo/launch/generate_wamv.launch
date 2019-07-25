@@ -20,6 +20,6 @@
 
     <param name="compliance_dir" value="$(find vrx_gazebo)/src/vrx_gazebo_python/generator_scripts/wamv_config"/>
 
-    <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv" output="screen"/>
+    <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv" output="screen" required="true"/>
   </group>
 </launch>

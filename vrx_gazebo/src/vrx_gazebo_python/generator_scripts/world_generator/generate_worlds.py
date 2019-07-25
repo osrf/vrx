@@ -13,7 +13,7 @@ def main():
         rospy.get_param('requested').rfind('/')+1:
         rospy.get_param('requested').rfind('.yaml')]
     # get the yaml as a dict
-    master = yaml.load(s)
+    master = yaml.safe_load(s)
     # get lsit of all coordinates that the master dict maps out
     coordinates = linear_combinations(master)
     # create a world xacro and subsiquent world file for each coordinate

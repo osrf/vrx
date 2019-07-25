@@ -35,7 +35,7 @@ def create_xacro_file(xacro_target,
     # If requested_macros not given, then open yaml_file
     if requested_macros is None:
         s = open(yaml_file, 'r')
-        requested_macros = yaml.load(s)
+        requested_macros = yaml.safe_load(s)
 
         # Handle case with empty yaml file
         if requested_macros is None:
@@ -93,7 +93,7 @@ def add_gazebo_thruster_config(xacro_target,
     # If requested_macros not given, then open yaml_file
     if requested_macros is None:
         s = open(yaml_file, 'r')
-        requested_macros = yaml.load(s)
+        requested_macros = yaml.safe_load(s)
 
         # Handle case with empty yaml file
         if requested_macros is None:
