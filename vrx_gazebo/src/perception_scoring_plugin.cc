@@ -414,39 +414,6 @@ void PerceptionScoringPlugin::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
-  if (!this->vehicleModel)
-  {
-    return;
-  }
-  if (!this->baseLink)
-  {
-    this->baseLink = this->vehicleModel->GetLink(
-      this->baseLinkName);
-    if (!this->baseLink)
-    {
-        gzerr << "base_link name bad" << std::endl;
-        return;
-    }
-
-    this->prismaticJoint = this->vehicleModel->
-      CreateJoint("prismatic",
-                  "fixed",
-                  boost::dynamic_pointer_cast<gazebo::physics::Link>(
-                    this->world->BaseByName("world")),
-                  this->baseLink);
-
-    this->prismaticJoint->SetName(this->vehicleModel->GetName() +
-      "__lin_joint__");
-
-    this->prismaticJoint->Load(boost::dynamic_pointer_cast<gazebo::physics::Link>(
-                                 this->world->BaseByName("world")),
-                               baseLink,
-                               ignition::math::Pose3d());
-    this->prismaticJoint->Init();
-
-  }
-
-
   // Connect with object checker to see if we need to score a submission
   if (this->dataPtr->objectChecker->SubmissionReceived() &&
       !this->dataPtr->objectChecker->submissionScored)
@@ -591,4 +558,10 @@ void PerceptionScoringPlugin::OnRunning()
   gzmsg << "OnRunning" << std::endl;
 
   this->dataPtr->objectChecker->Enable();
+}
+
+//////////////////////////////////////////////////
+void PerceptionScoringPlugin::ReleaseVehicle()
+{
+    return;
 }

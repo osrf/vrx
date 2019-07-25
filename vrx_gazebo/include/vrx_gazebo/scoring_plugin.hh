@@ -163,7 +163,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: void PublishStats();
 
   /// \brief Tries to release the vehicle in case is locked.
-  private: void ReleaseVehicle();
+  protected: virtual void ReleaseVehicle();
 
   /// \brief Callback executed when the task state transition into "ready".
   private: virtual void OnReady();

@@ -190,16 +190,10 @@ class PerceptionScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
+  private: void ReleaseVehicle() override;
+
   /// \brief Private data pointer.
   private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
-
-  private: std::string baseLinkName;
-  private: gazebo::physics::LinkPtr baseLink;
-
-  private: gazebo::physics::JointPtr prismaticJoint;
-  private: gazebo::physics::LinkPtr interLink;
-  private: gazebo::physics::JointPtr universalJoint;
-
 };
 
 #endif
