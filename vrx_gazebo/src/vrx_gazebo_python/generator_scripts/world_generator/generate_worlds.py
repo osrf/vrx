@@ -10,7 +10,7 @@ from .. utils import create_xacro_file
 def main():
     s = open(rospy.get_param('requested'))
     # get the yaml as a dict
-    master = yaml.load(s)
+    master = yaml.safe_load(s)
     # get lsit of all coordinates that the master dict maps out
     coordinates = linear_combinations(master)
     # create a world xacro and subsiquent world file for each coordinate

@@ -9,5 +9,5 @@
   <arg name="world_target" default=""/>
   <param name="world_target" value="$(arg world_target)"/>
 
-  <node name = "world_gen" pkg="vrx_gazebo" type="generate_worlds" />
+  <node name = "world_gen" pkg="vrx_gazebo" type="generate_worlds" required="true"/>
 </launch>
