@@ -7,10 +7,15 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  xacro
+  )
+
+catkin_package(
+  CATKIN_DEPENDS xacro
+  )
 
 # Model files to be processed with erb
-
 set (xacro_erb_files
   world_models/ocean_waves/model.xacro.erb
 )
@@ -31,3 +36,11 @@ add_custom_target(model_erb_generation ALL
   DEPENDS
     ${model_files}
 )
+
+# Generate world files from xacro and install
+xacro_add_files(
+  worlds/ocean.world.xacro
+  worlds/ocean_buoys.world.xacro
+  worlds/ocean_wamv.world.xacro
+  INORDER INSTALL DESTINATION worlds
+  )

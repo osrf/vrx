@@ -16,7 +16,7 @@
    limitations under the License.
 
 -->
-<sdf version="1.6">
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="ocean_world">
 
     <!-- GUI -->
@@ -49,16 +49,15 @@
       <uri>model://sun</uri>
     </include>
 
-    <!-- World models  -->
-    <include>
-      <uri>model://ocean_waves</uri>
-    </include>
+     <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves/>
 
-		<!-- Wave gauge to visualize physical/visual sync -->
-		<model name="wavegauge">
+    <!-- Wave gauge to visualize physical/visual sync -->
+    <model name="wavegauge">
       <pose>0 2 0 0 0 0 </pose>
       <include>
-				<uri>model://wavegauge</uri>
+	<uri>model://wavegauge</uri>
       </include>
     </model>
 		

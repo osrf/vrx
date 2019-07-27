@@ -36,7 +36,7 @@ catkin_package(
     Hydrodynamics
     WavefieldModelPlugin
     WavefieldVisualPlugin
-		wavegauge_plugin
+    wavegauge_plugin
   DEPENDS
     gazebo_ros
 )
