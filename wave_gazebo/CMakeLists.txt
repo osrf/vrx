@@ -9,11 +9,11 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS
   xacro
-  )
+)
 
 catkin_package(
   CATKIN_DEPENDS xacro
-  )
+)
 
 # Model files to be processed with erb
 set (xacro_erb_files
@@ -43,4 +43,4 @@ xacro_add_files(
   worlds/ocean_buoys.world.xacro
   worlds/ocean_wamv.world.xacro
   INORDER INSTALL DESTINATION worlds
-  )
+)
