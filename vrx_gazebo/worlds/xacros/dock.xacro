@@ -38,16 +38,20 @@
         <bay>
           <name>bay1</name>
           <activation_topic>/vrx/dock_2018/bay_1/contain</activation_topic>
+          <symbol_topic>/vrx/dock_2018_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>false</dock_allowed>
+          <symbol>red_circle</symbol>
         </bay>
  
         <bay>
           <name>bay2</name>
           <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
+          <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>true</dock_allowed>
-          <announce_symbol>red_circle</announce_symbol>
+          <announce_symbol>red_cross</announce_symbol>
+          <symbol>red_cross</symbol>
         </bay>
       </bays>
       <placard_color_shape>red_triangle</placard_color_shape>
