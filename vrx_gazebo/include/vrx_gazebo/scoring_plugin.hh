@@ -115,6 +115,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Class constructor.
   public: ScoringPlugin();
 
+  /// \brief Shutdown Gazebo and ROS.
+  public: void Exit();
+
   // Documentation inherited.
   protected: void Load(gazebo::physics::WorldPtr _world,
                        sdf::ElementPtr _sdf);
@@ -147,6 +150,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// This will set the "finished" flag in the task message to true.
   protected: void Finish();
 
+  /// \brief Tries to release the vehicle in case is locked.
+  protected: virtual void ReleaseVehicle();
+
   /// \brief Callback executed at every world update.
   private: void Update();
 
@@ -161,9 +167,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Publish the task stats over a ROS topic.
   private: void PublishStats();
-
-  /// \brief Tries to release the vehicle in case is locked.
-  protected: virtual void ReleaseVehicle();
 
   /// \brief Callback executed when the task state transition into "ready".
   private: virtual void OnReady();
@@ -190,9 +193,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \return True when all parameters were successfully parsed or false
   /// otherwise.
   private: bool ParseJoints();
-
-  /// \brief Shutdown gazebo and ros
-  public: void Exit();
 
   /// \brief A world pointer.
   protected: gazebo::physics::WorldPtr world;

@@ -189,6 +189,7 @@ class PerceptionScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
+  // Documentation inherited.
   private: void ReleaseVehicle() override;
 
   /// \brief Private data pointer.

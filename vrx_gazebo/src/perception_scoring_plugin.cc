@@ -552,5 +552,6 @@ void PerceptionScoringPlugin::OnRunning()
 //////////////////////////////////////////////////
 void PerceptionScoringPlugin::ReleaseVehicle()
 {
-    return;
+  // Avoid releasing the vehicle by overriding this function.
+  return;
 }
