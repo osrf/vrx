@@ -16,14 +16,14 @@
    limitations under the License.
 
 -->
-<sdf version="1.6">
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="ocean_world">
 
     <!-- GUI -->
     <gui>
       <plugin name="keyboard_gui_plugin" filename="libKeyboardGUIPlugin.so"/>
       <camera name='user_camera'>
-				<pose frame=''>-22 -1.4  5.8 0 0.25 0.188</pose>
+        <pose frame=''>-22 -1.4  5.8 0 0.25 0.188</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -49,97 +49,93 @@
       <uri>model://sun</uri>
     </include>
 
-    <!-- World models  -->
-    <include>
-      <uri>model://ocean_waves</uri>
-    </include>
+    <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves/>
 
-		<!-- Wave gauge to visualize physical/visual sync -->
-		<model name="wavegauge">
+    <!-- Wave gauge to visualize physical/visual sync -->
+    <model name="wavegauge">
       <pose>0 2 0 0 0 0 </pose>
       <include>
-				<uri>model://wavegauge</uri>
-      </include>
-    </model>
-		
-		<!-- Buoys to look at with the cameras -->
-		<model name="a_surmark46104">
-			<pose>8.1 0 0.5 0 0 0 </pose>
-      <include>
-				<uri>model://surmark46104</uri>
-      </include>
-    </model>
-		<model name="a_surmark950400">
-			<pose>8.1 1 0.5 0 0 0 </pose>
-			<include>
-				<uri>model://surmark950400</uri>
-      </include>
-    </model>
-		<model name="a_surmark950410">
-			<pose>8.1 2 0.5 0 0 0 </pose>
-      <include>
-				<uri>model://surmark950410</uri>
-      </include>
-    </model>
-		<model name="a_polyform_a3">
-			<pose>8.1 -1 0.2 0 0 0 </pose>
-      <include>
-				<uri>model://polyform_a3</uri>
-      </include>
-    </model>
-		<model name="a_polyform_a5">
-			<pose>8.1 -2 0.3 0 0 0 </pose>
-      <include>
-				<uri>model://polyform_a5</uri>
-      </include>
-    </model>
-		<model name="a_polyform_a7">
-			<pose>8.1 -3 0.5 0 0 0 </pose>
-      <include>
-				<uri>model://polyform_a7</uri>
+        <uri>model://wavegauge</uri>
       </include>
     </model>
 
-		
-		<!-- Buoys to look at with the cameras -->
-		<model name="b_surmark46104">
-			<pose>0 14 0.5 0 0 0 </pose>
+    <!-- Buoys to look at with the cameras -->
+    <model name="a_surmark46104">
+      <pose>8.1 0 0.5 0 0 0 </pose>
       <include>
-				<uri>model://surmark46104</uri>
+        <uri>model://surmark46104</uri>
       </include>
     </model>
-		<model name="b_surmark950400">
-			<pose>1 14 0.5 0 0 0 </pose>
-			<include>
-				<uri>model://surmark950400</uri>
+    <model name="a_surmark950400">
+      <pose>8.1 1 0.5 0 0 0 </pose>
+      <include>
+        <uri>model://surmark950400</uri>
       </include>
     </model>
-		<model name="b_surmark950410">
-			<pose>2 14 0.5 0 0 0 </pose>
+    <model name="a_surmark950410">
+      <pose>8.1 2 0.5 0 0 0 </pose>
       <include>
-				<uri>model://surmark950410</uri>
+        <uri>model://surmark950410</uri>
       </include>
     </model>
-		<model name="b_polyform_a3">
-			<pose>-1 14 0.2 0 0 0 </pose>
+    <model name="a_polyform_a3">
+      <pose>8.1 -1 0.2 0 0 0 </pose>
       <include>
-				<uri>model://polyform_a3</uri>
+        <uri>model://polyform_a3</uri>
       </include>
     </model>
-		<model name="b_polyform_a5">
-			<pose>-2 14 0.3 0 0 0 </pose>
+    <model name="a_polyform_a5">
+      <pose>8.1 -2 0.3 0 0 0 </pose>
       <include>
-				<uri>model://polyform_a5</uri>
+        <uri>model://polyform_a5</uri>
       </include>
     </model>
-		<model name="b_polyform_a7">
-			<pose>-3 14 0.7 0 0 0 </pose>
+    <model name="a_polyform_a7">
+      <pose>8.1 -3 0.5 0 0 0 </pose>
       <include>
-				<uri>model://polyform_a7</uri>
+        <uri>model://polyform_a7</uri>
       </include>
     </model>
 
-
+    <!-- Buoys to look at with the cameras -->
+    <model name="b_surmark46104">
+      <pose>0 14 0.5 0 0 0 </pose>
+      <include>
+        <uri>model://surmark46104</uri>
+      </include>
+    </model>
+    <model name="b_surmark950400">
+      <pose>1 14 0.5 0 0 0 </pose>
+      <include>
+        <uri>model://surmark950400</uri>
+      </include>
+    </model>
+    <model name="b_surmark950410">
+      <pose>2 14 0.5 0 0 0 </pose>
+      <include>
+        <uri>model://surmark950410</uri>
+      </include>
+    </model>
+    <model name="b_polyform_a3">
+      <pose>-1 14 0.2 0 0 0 </pose>
+      <include>
+        <uri>model://polyform_a3</uri>
+      </include>
+    </model>
+    <model name="b_polyform_a5">
+      <pose>-2 14 0.3 0 0 0 </pose>
+      <include>
+        <uri>model://polyform_a5</uri>
+      </include>
+    </model>
+    <model name="b_polyform_a7">
+      <pose>-3 14 0.7 0 0 0 </pose>
+      <include>
+        <uri>model://polyform_a7</uri>
+      </include>
+    </model>
 
   </world>
 </sdf>

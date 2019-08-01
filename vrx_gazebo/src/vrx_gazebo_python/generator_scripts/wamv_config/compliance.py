@@ -13,7 +13,7 @@ class Sensor_Compliance:
         self.sensors_dir = rospy.get_param('sensors_dir') + '/'
         self.default_parameters = utils.get_macros(self.sensors_dir)
         self.dir = rospy.get_param('compliance_dir') + '/'
-        self.numeric = yaml.load(open(self.dir +
+        self.numeric = yaml.safe_load(open(self.dir +
                                       'sensor_compliance/numeric.yaml'))
         return
 
@@ -74,7 +74,7 @@ class Thruster_Compliance:
         self.thrusters_dir = rospy.get_param('thrusters_dir') + '/'
         self.default_parameters = utils.get_macros(self.thrusters_dir)
         self.dir = rospy.get_param('compliance_dir') + '/'
-        self.numeric = yaml.load(open(self.dir +
+        self.numeric = yaml.safe_load(open(self.dir +
                                       'thruster_compliance/numeric.yaml'))
         return
 
@@ -168,7 +168,7 @@ class Box:
 
 def find_boxes(box_yaml):
     addrs = rospy.get_param('compliance_dir') + '/' + box_yaml
-    box_def = yaml.load(open(addrs))
+    box_def = yaml.safe_load(open(addrs))
     boxes = []
 
     for name, properties in box_def.iteritems():

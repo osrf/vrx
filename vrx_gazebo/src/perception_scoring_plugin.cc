@@ -280,7 +280,6 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
   this->dataPtr->world = _world;
   this->dataPtr->sdf = _sdf;
 
-  // Read the SDF parameters
   if (_sdf->HasElement("loop_forever"))
   {
     sdf::ElementPtr loopElem = _sdf->GetElement("loop_forever");
@@ -548,4 +547,11 @@ void PerceptionScoringPlugin::OnRunning()
   gzmsg << "OnRunning" << std::endl;
 
   this->dataPtr->objectChecker->Enable();
+}
+
+//////////////////////////////////////////////////
+void PerceptionScoringPlugin::ReleaseVehicle()
+{
+  // Avoid releasing the vehicle by overriding this function.
+  return;
 }

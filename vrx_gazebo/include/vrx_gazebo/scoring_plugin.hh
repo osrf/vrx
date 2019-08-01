@@ -19,6 +19,7 @@
 #define VRX_GAZEBO_SCORING_PLUGIN_HH_
 
 #include <ros/ros.h>
+#include <gazebo/msgs/gz_string.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -114,6 +115,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Class constructor.
   public: ScoringPlugin();
 
+  /// \brief Shutdown Gazebo and ROS.
+  public: void Exit();
+
   // Documentation inherited.
   protected: void Load(gazebo::physics::WorldPtr _world,
                        sdf::ElementPtr _sdf);
@@ -146,6 +150,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// This will set the "finished" flag in the task message to true.
   protected: void Finish();
 
+  /// \brief Tries to release the vehicle in case is locked.
+  protected: virtual void ReleaseVehicle();
+
   /// \brief Callback executed at every world update.
   private: void Update();
 
@@ -160,9 +167,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Publish the task stats over a ROS topic.
   private: void PublishStats();
-
-  /// \brief Tries to release the vehicle in case is locked.
-  private: void ReleaseVehicle();
 
   /// \brief Callback executed when the task state transition into "ready".
   private: virtual void OnReady();
@@ -206,10 +210,13 @@ class ScoringPlugin : public gazebo::WorldPlugin
   protected: gazebo::common::Time lastCollisionTime;
 
   /// \brief gazebo node pointer
-  private: gazebo::transport::NodePtr collisionNode;
+  private: gazebo::transport::NodePtr gzNode;
 
   /// \brief Collision detection node subscriber
   private: gazebo::transport::SubscriberPtr collisionSub;
+
+  /// \brief gazebo server control publisher
+  private: gazebo::transport::PublisherPtr serverControlPub;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -278,7 +285,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::string taskState = "initial";
 
   /// \brief The next task message to be published.
-  private: vrx_gazebo::Task taskMsg;
+  protected: vrx_gazebo::Task taskMsg;
 
   /// \brief ROS Contact Msg.
   private: vrx_gazebo::Contact contactMsg;
@@ -290,7 +297,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::unique_ptr<ros::NodeHandle> rosNode;
 
   /// \brief Publisher for the task state.
-  private: ros::Publisher taskPub;
+  protected: ros::Publisher taskPub;
 
   /// \brief Publisher for the collision.
   private: ros::Publisher contactPub;
