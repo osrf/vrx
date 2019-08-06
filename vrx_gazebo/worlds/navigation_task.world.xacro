@@ -4,7 +4,9 @@
   <world name="robotx_example_course">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
-
+    <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves/>
     <!--wind for the wamv-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo direction = "270" ros_update_rate="10">

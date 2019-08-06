@@ -56,7 +56,6 @@ def main():
     print('WAM-V urdf file sucessfully generated. File location: ' +
           wamv_target)
 
-
 def create_thruster_xacro():
     """
     Purpose: Create a thruster xacro file using the given

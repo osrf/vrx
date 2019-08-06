@@ -25,20 +25,23 @@
 <%
   # Wave model parameters
   model = "PMS"     # Wave model, must be PMS or CWR
-  period = 5        # Peak wave period [s]
-  gain = 0.1        # Multiplider applied to component amplitudes
+  # period = ${period} # Peak wave period [s]
+  # gain = ${gain}  # Deterined at load time by the world xacro file
   number = 3        # Number of component waves
   scale = 1.5       # Spectrum sampling scale 
-  direction_x = 1.0 # Direction of peak wave component 
-  direction_y = 0.0
-  angle = 0.4       # Delta direction for components
+  # direction_x = 1.0 # Direction of peak wave component 
+  # direction_y = 0.0
+  # angle = 0.4       # Delta direction for components
   tau = 2.0         # Time constant for starting wave [s]
   amplitude = 0.0  # No effect for PMS
   steepness = 0.0  # Not yet supported
 %>
 
-<sdf version="1.6">
-  <model name="ocean_waves">
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="ocean_waves" params="gain:=0.1 period:=5
+                     direction_x:=1.0 direction_y:=0.0
+                     angle:=0.4">
+  <model name='ocean_waves'>
     <static>true</static>
     <plugin name="wavefield_plugin" filename="libWavefieldModelPlugin.so">
       <static>false</static>
@@ -47,12 +50,12 @@
       <cell_count>50 50</cell_count>
       <wave>
 				<model><%= model %></model>
-        <period><%= period %></period>
+        <period>${period}</period>
         <number><%= number %></number>
         <scale><%= scale %></scale>
-        <gain><%= gain %></gain>
-        <direction><%= direction_x %> <%=direction_y %></direction>
-        <angle><%= angle %></angle>        
+	<gain>${gain}</gain>
+        <direction>${direction_x} ${direction_y}</direction>
+        <angle>${angle}</angle>        
         <tau><%= tau %></tau>
         <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
         <steepness><%= steepness %></steepness>
@@ -64,12 +67,12 @@
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <wave>
             <model><%= model %></model>
-            <period><%= period %></period>
+            <period>${period}</period>
             <number><%= number %></number>
             <scale><%= scale %></scale>
-            <gain><%= gain %></gain>
-            <direction><%= direction_x %> <%=direction_y %></direction>
-            <angle><%= angle %></angle>        
+	    <gain>${gain}</gain>
+            <direction>${direction_x} ${direction_y}</direction>
+            <angle>${angle}</angle>        
             <tau><%= tau %></tau>
             <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
             <steepness><%= steepness %></steepness>
@@ -92,12 +95,12 @@
         <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <wave>
             <model><%= model %></model>
-            <period><%= period %></period>
+            <period>${period}</period>
             <number><%= number %></number>
             <scale><%= scale %></scale>
-            <gain><%= gain %></gain>
-            <direction><%= direction_x %> <%=direction_y %></direction>
-            <angle><%= angle %></angle>        
+	    <gain>${gain}</gain>
+            <direction>${direction_x} ${direction_y}</direction>
+            <angle>${angle}</angle>        
             <tau><%= tau %></tau>
             <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
             <steepness><%= steepness %></steepness>
@@ -118,4 +121,6 @@
       </visual>
     </link>
   </model>
-</sdf>
+  </xacro:macro>
+</world>
+
