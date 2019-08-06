@@ -12,6 +12,7 @@
     <plugin name="navigation_scoring_plugin"
             filename="libnavigation_scoring_plugin.so">
       <vehicle>wamv</vehicle>
+      <task_name>navigation_course</task_name>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>

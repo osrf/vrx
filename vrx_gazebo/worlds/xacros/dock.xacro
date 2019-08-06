@@ -1,13 +1,12 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="dock">
-    <!-- The 2018 dock with the two placards -->
+  <xacro:macro name="dock" params="uri:=model://dock_2018 x:=60 y:=-2.75 z:=0 R:=0 P:=0 Y:=0">
     <include>
       <uri>model://dock_2018</uri>
-      <pose>60 -2.75 0 0 0 0</pose>
+      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose>
     </include>
- 
+
     <!-- The scoring plugin -->
     <plugin name="scan_dock_scoring_plugin"
             filename="libscan_dock_scoring_plugin.so">
@@ -25,7 +24,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
- 
+
       <!-- Color sequence checker -->
       <robot_namespace>vrx</robot_namespace>
       <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
