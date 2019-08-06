@@ -286,6 +286,9 @@ install(DIRECTORY models/
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 
+install(PROGRAMS scripts/spawn_wamv.bash
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(sandisland_test
