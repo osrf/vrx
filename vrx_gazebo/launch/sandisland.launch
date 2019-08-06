@@ -65,6 +65,9 @@
               -R $(arg R) -P $(arg P) -Y $(arg Y)
               -urdf -param robot_description -model wamv"/> -->
 
-  <node name="spawn_wamv" pkg="vrx_gazebo" type="spawn_wamv.bash"/>
+  <node name="spawn_wamv" pkg="vrx_gazebo" type="spawn_wamv.bash"
+        args="-x $(arg x) -y $(arg y) -z $(arg z)
+              -R $(arg R) -P $(arg P) -Y $(arg Y)
+              --urdf $(arg urdf) --model wamv"/>
 </launch>
 
