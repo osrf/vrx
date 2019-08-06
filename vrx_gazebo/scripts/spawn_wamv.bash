@@ -32,8 +32,6 @@ wait_until_gzserver_is_up()
   while [[ "$(gz topic -l | wc -l)" -le 2 ]];do
     sleep 2s
   done
-
-  sleep 2s
 }
 
 # Define usage function.
