@@ -100,7 +100,9 @@ do
   done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
+final_urdf=/tmp/my_urdf.urdf
 
 wait_until_gzserver_is_up
-echo "gzserver is up"
-gz model --model-name=$model --spawn-file=$urdf -x $x -y $y -z $z -R $R -P $P -Y $Y
+rosrun xacro xacro --inorder -o $final_urdf $urdf
+
+gz model --model-name=$model --spawn-file=$final_urdf -x $x -y $y -z $z -R $R -P $P -Y $Y
