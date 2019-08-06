@@ -14,6 +14,7 @@ tasks:
         0:
             nav_challenge:
                 - name: nav_challenge
+                - uri: navigation_course
 waves:
     steps: 2
     macros:
