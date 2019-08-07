@@ -5,7 +5,6 @@
 # E.g.: ./spawn_wamv.bash /home/<username>/my_urdf.urdf
 
 set -e
-set -x
 
 # Constants.
 RED='\033[0;31m'

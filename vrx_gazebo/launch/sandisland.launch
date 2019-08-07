@@ -23,6 +23,7 @@
   <!-- Enable Gazebo ROS simulation topics -->
   <arg name="enable_ros_network" default="true"/>
   <env name="VRX_DEBUG" value="$(arg enable_ros_network)"/>
+  <env name="GAZEBO_MODEL_PATH" value="$(find vrx_gazebo)/models:$(find wamv_gazebo)/models:$(find wamv_description)/models"/>
 
   <!-- Allow user specified thruster configurations
        H = stern trusters on each hull
@@ -60,12 +61,12 @@
          ground_truth_enabled:=$(arg ground_truth_enabled) "/>
 
   <!-- Spawn model in Gazebo -->
-  <!-- <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" if="$(arg enable_ros_network)"
         args="-x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg R) -P $(arg P) -Y $(arg Y)
-              -urdf -param robot_description -model wamv"/> -->
+              -urdf -param robot_description -model wamv"/>
 
-  <node name="spawn_wamv" pkg="vrx_gazebo" type="spawn_wamv.bash"
+  <node name="spawn_wamv" pkg="vrx_gazebo" type="spawn_wamv.bash" unless="$(arg enable_ros_network)"
         args="-x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg R) -P $(arg P) -Y $(arg Y)
               --urdf $(arg urdf) --model wamv"/>
