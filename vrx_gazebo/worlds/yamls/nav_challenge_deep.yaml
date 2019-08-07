@@ -40,6 +40,7 @@ wind:
                 - mean_vel: 0.0
                   var_gain: 0
                   var_time: 2
+                  seed: 10
                   /**wind_objs: "
                   <wind_obj>
 
@@ -55,6 +56,7 @@ wind:
                 - mean_vel: 8.0
                   var_gain: 8.0
                   var_time: 20
+                  seed: 10
                   /**wind_objs: "
                   <wind_obj>
 
