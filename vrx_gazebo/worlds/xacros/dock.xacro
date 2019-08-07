@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="dock">
+  <xacro:macro name="dock" params="x:=60 y:=-2.75 z:=0 R:=0 P:=0 Y:=0">
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://dock_2018</uri>
@@ -27,7 +27,9 @@
       </release_joints>
  
       <!-- Color sequence checker -->
+      
       <robot_namespace>vrx</robot_namespace>
+      
       <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
       <color_1>red</color_1>
       <color_2>green</color_2>
