@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="nav_challenge" params="name x:=58 y:=68 z:=2 R:=0 P:=0 Y:=0.4 **gates">
+  <xacro:macro name="nav_challenge" params="name='nav_challenge' uri:=navigation_course x:=58 y:=68 z:=2 R:=0 P:=0 Y:=0.4 **gates">
+    <!-- The VRX navigation course -->
     <include>
       <name>${name}</name>
-      <uri>model://robotx_navigation_challenge</uri>
-      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose> 
+      <uri>model://${uri}</uri>
+      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose>
     </include>
+
     <!-- The scoring plugin -->
     <plugin name="navigation_scoring_plugin"
             filename="libnavigation_scoring_plugin.so">
@@ -23,7 +25,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <course_name>vrx_navigation_course</course_name>
+      <course_name>${name}</course_name>
       <obstacle_penalty>10.0</obstacle_penalty>
       <gates>
         <xacro:insert_block name="gates"/>
