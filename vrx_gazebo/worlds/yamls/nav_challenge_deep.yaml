@@ -14,8 +14,8 @@ tasks:
         0:
             nav_challenge:
                 - name: nav_challenge
-                - uri: navigation_course
-                - /**gates: "
+                  uri: navigation_course
+                  /**gates: "
                   <gate>
                     <left_marker>red_bound_0</left_marker>
                     <right_marker>green_bound_0</right_marker>

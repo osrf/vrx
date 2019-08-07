@@ -14,9 +14,8 @@ tasks:
         0:
             nav_challenge:
                 - name: nav_challenge
-                - uri: navigation_course
-
-                - /**gates: "
+                  uri: navigation_course
+                  /**gates: "
                   <gate>
                     <left_marker>red_bound_0</left_marker>
                     <right_marker>green_bound_0</right_marker>
@@ -75,10 +74,10 @@ environment:
 
                   </wind_obj>"
             scene_macro:
-                - /**fog: "'
+                - /**fog: "
                   <color> 0.7 0.7 0.7 1 </color>
 
-                  <density> 0.0 </density>'"
+                  <density> 0.0 </density>"
                   /**ambient: "1 1 1 1"
         1:
             ocean_waves:

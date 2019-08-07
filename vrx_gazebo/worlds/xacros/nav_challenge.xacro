@@ -30,7 +30,6 @@
       <gates>
         <xacro:insert_block name="gates"/>
       </gates>
-
     </plugin>
 
   </xacro:macro>
