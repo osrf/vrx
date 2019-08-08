@@ -68,6 +68,19 @@ add_subdirectory(msgs)
 
 add_definitions(${QT_DEFINITIONS})
 
+# Plugin for controling the pose of the user camera.
+add_library(camera_control_plugin src/camera_control_plugin.cc)
+target_link_libraries(camera_control_plugin
+  ${catkin_LIBRARIES} 
+)
+add_dependencies(camera_control_plugin ${catkin_EXPORTED_TARGETS}
+)
+install(TARGETS camera_control_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Plugin for setting color of light buoy.
 add_library(light_buoy_plugin src/light_buoy_plugin.cc)
 target_link_libraries(light_buoy_plugin
