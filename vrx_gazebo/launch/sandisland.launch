@@ -61,7 +61,7 @@
          lidar_enabled:=$(arg lidar_enabled)
          ground_truth_enabled:=$(arg ground_truth_enabled) "/>
 
-  <!-- Spawn model in Gazebo -->
+  <!-- Spawn model in Gazebo, script depending on non_competition_mode -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" if="$(arg non_competition_mode)"
         args="-x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg R) -P $(arg P) -Y $(arg Y)
