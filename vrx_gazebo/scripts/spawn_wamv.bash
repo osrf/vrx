@@ -1,8 +1,11 @@
 #!/bin/bash
 
 # spawn_wamv.bash: A bash script to spawn a wamv model using gz.
+#                  Used to avoid using gazebo_ros spawn_model, as
+#                  it relies on /gazebo/model_states, which is not
+#                  published when enable_ros_network:=false for competition
 #
-# E.g.: ./spawn_wamv.bash /home/<username>/my_urdf.urdf
+# E.g.: ./spawn_wamv.bash -x <x> -y <y> -z <z> -R <R> -P <P> -Y <Y> --urdf <urdf> --model <model>
 
 set -e
 
@@ -43,6 +46,7 @@ usage()
 # Call usage() function if arguments not supplied.
 [[ $# -le 15 ]] && usage
 
+# Parse arguments
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -97,9 +101,12 @@ do
   done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-final_urdf=/tmp/my_urdf.urdf
-
+# Ensure that gzserver has been started
 wait_until_gzserver_is_up
+
+# If input urdf is a xacro file, convert xacro to a urdf file
+final_urdf=/tmp/my_urdf.urdf
 rosrun xacro xacro --inorder -o $final_urdf $urdf
 
+# Spawn model
 gz model --model-name=$model --spawn-file=$final_urdf -x $x -y $y -z $z -R $R -P $P -Y $Y
