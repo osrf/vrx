@@ -71,3 +71,70 @@ material WaveSim/GerstnerWaves
     }
   }
 }
+
+vertex_program Examples/FresnelRefractReflectVPGLSL glsl
+{
+  source Example_FresnelVp.glsl
+}
+
+fragment_program Examples/FresnelRefractReflectFPGLSL glsl
+{
+  source Example_FresnelFp.glsl
+  default_params
+  {
+    // assign samplers as required by GLSL
+    param_named noiseMap int 0
+    param_named reflectMap int 1
+    param_named refractMap int 2
+  }
+}
+
+material Examples/FresnelReflectionRefraction
+{
+  // ps_2_0 / arbfp1
+  technique
+  {
+    pass
+    {
+
+      vertex_program_ref Examples/FresnelRefractReflectVPGLSL
+      {
+        param_named_auto worldViewProjMatrix worldviewproj_matrix
+        param_named_auto eyePosition camera_position_object_space
+        param_named_auto timeVal time 0.05
+        param_named scroll float 1
+        param_named scale float 1
+        param_named noise float 1
+        // scroll and noisePos will need updating per frame
+      }
+      fragment_program_ref Examples/FresnelRefractReflectFPGLSL
+      {
+        param_named fresnelBias float -0.1
+        param_named fresnelScale float 1.8
+        param_named fresnelPower float 8
+        param_named tintColour float4 0 0.05 0.05 1
+        param_named noiseScale float 0.05
+      }
+      // Noise
+      texture_unit
+      {
+        // Perlin noise volume
+        texture waves2.dds
+        // min / mag filtering, no mip
+        filtering linear linear none
+      }
+      // Reflection
+      texture_unit reflection
+      {
+        tex_address_mode clamp
+      }
+      // Refraction
+      texture_unit refraction
+      {
+        tex_address_mode clamp
+      }
+    }
+
+
+  }
+}
