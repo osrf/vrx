@@ -28,12 +28,11 @@ wait_until_gzserver_is_up()
 {
   until is_gzserver_running
   do
-    sleep 2s
+    sleep 1s
   done
 
-  while [[ "$(gz topic -l | wc -l)" -le 2 ]];do
-    sleep 2s
-  done
+  # ToDo: Figure out a better way to check Gazebo is ready.
+  sleep 4s
 }
 
 # Define usage function.
