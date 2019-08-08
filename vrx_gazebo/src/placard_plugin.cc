@@ -16,7 +16,6 @@
 */
 
 #include <gazebo/rendering/Scene.hh>
-#include <ignition/math/Rand.hh>
 #include "vrx_gazebo/placard_plugin.hh"
 
 // Static initialization.
