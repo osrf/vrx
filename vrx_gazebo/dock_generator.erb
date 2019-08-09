@@ -1,10 +1,11 @@
     <!--
       This is how this dock should look like:
+    <%- static_dock = layout.pop %>
     <% layout.each do |row| -%>
       <%= row -%>
     <% end %>
     -->
-    <%- static = true -%>
+
     <%- link_counter = 0 -%>
     <%- row_counter = 0 -%>
     <%- x_counter = 0 -%>
@@ -12,7 +13,7 @@
     <%- delta_y = 2 -%>
     <%- i = 0 -%>
 
-    <%- if static == true -%>
+    <%- if static_dock == true -%>
       <static>true</static>
     <%- end -%>
 
@@ -25,7 +26,7 @@
     <include>
       <name>dock_block_<%= i %>_<%= j %></name>
       <pose><%= x_counter %> <%= y_counter %> 0.25 0 0 0</pose>
-      <%- if static != true -%>
+      <%- if static_dock != true -%>
         <uri>model://dock_block_4x4</uri>
       <%- else -%>
         <uri>model://dock_block_4x4_static</uri>
@@ -55,7 +56,7 @@
         <%- c = row[j-1] -%>
         <%- d = row[j] -%>
         <%- if (c == 'X') and (d == 'X') -%>
-          <%- if static != true -%>
+          <%- if static_dock != true -%>
     <joint name="<%= i%>_<%= j-1%>_to_<%= i%>_<%= j%>" type="revolute">
       <pose> 0  <%= delta_y/2.0 %> 0 0 0 0</pose>
       <parent>dock_block_<%= i %>_<%= j %>::link</parent>
@@ -95,7 +96,7 @@
         <%- c = layout[i-1][j] -%>
         <%- d = layout[i][j] -%>
         <%- if (c == 'X') and (d == 'X') -%>
-          <%- if static != true -%>
+          <%- if static_dock != true -%>
     <joint name="<%= i%>_<%= j%>_to_<%= i-1%>_<%= j%>" type="revolute">
       <pose> <%= delta_x/2.0 %> 0 0 0 0 0</pose>
       <parent>dock_block_<%= i %>_<%= j %>::link</parent>

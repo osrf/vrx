@@ -2,10 +2,11 @@
 <sdf version="1.6">
 
   <model name="robotx_dock_2016">
+    <static>true</static>
 
     <!-- The 2016 dock base -->
     <include>
-      <uri>model://dock_2016_base</uri>
+      <uri>model://dock_2016_base_static</uri>
     </include>
     
     

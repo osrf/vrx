@@ -3,10 +3,11 @@
 
   <model name="robotx_dock_2018">
 
+    <static>true</static>
     <!-- The 2018 dock base -->
     <include>
       <name>dock_2018_base</name>
-      <uri>model://dock_2018_base</uri>
+      <uri>model://dock_2018_base_static</uri>
     </include>
     
     

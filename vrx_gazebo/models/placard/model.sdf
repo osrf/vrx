@@ -2,10 +2,11 @@
 <sdf version="1.6">
   <model name="placard">
     <pose>0 0 1 0 0 0</pose>
+    <static>true</static>
      <!-- The white placard -->
     <link name="link">
       <inertial>
-        <mass>0.01</mass>
+        <mass>1</mass>
         <inertia>
           <ixx>0.0075083</ixx>
           <ixy>0</ixy>

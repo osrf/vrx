@@ -3,7 +3,7 @@
 
   <!-- Important: This file is generated. DO NOT EDIT! -->
 
-  <model name="robotx_dock_2016_base">
+  <model name="robotx_dock_2016_base_static">
     <selfCollide>false</selfCollide>
 
     <!--
@@ -13,102 +13,103 @@
     -->
 
 
+      <static>true</static>
 
 
     <!-- Row 0 -->
     <include>
       <name>dock_block_0_0</name>
       <pose>0 0 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_0_3</name>
       <pose>0 6 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_0_6</name>
       <pose>0 12 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_0_9</name>
       <pose>0 18 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
 
     <!-- Row 1 -->
     <include>
       <name>dock_block_1_0</name>
       <pose>2 0 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_1_3</name>
       <pose>2 6 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_1_6</name>
       <pose>2 12 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_1_9</name>
       <pose>2 18 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
 
     <!-- Row 2 -->
     <include>
       <name>dock_block_2_0</name>
       <pose>4 0 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_1</name>
       <pose>4 2 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_2</name>
       <pose>4 4 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_3</name>
       <pose>4 6 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_4</name>
       <pose>4 8 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_5</name>
       <pose>4 10 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_6</name>
       <pose>4 12 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_7</name>
       <pose>4 14 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_8</name>
       <pose>4 16 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
     <include>
       <name>dock_block_2_9</name>
       <pose>4 18 0.25 0 0 0</pose>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_static</uri>
     </include>
 
 
@@ -121,113 +122,50 @@
     <!-- Row 1 -->
 
     <!-- Row 2 -->
-    <joint name="2_0_to_2_1" type="revolute">
+    <joint name="2_0_to_2_1" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_1::link</parent>
       <child>dock_block_2_0::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_1_to_2_2" type="revolute">
+    <joint name="2_1_to_2_2" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_2::link</parent>
       <child>dock_block_2_1::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_2_to_2_3" type="revolute">
+    <joint name="2_2_to_2_3" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_3::link</parent>
       <child>dock_block_2_2::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_3_to_2_4" type="revolute">
+    <joint name="2_3_to_2_4" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_4::link</parent>
       <child>dock_block_2_3::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_4_to_2_5" type="revolute">
+    <joint name="2_4_to_2_5" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_5::link</parent>
       <child>dock_block_2_4::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_5_to_2_6" type="revolute">
+    <joint name="2_5_to_2_6" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_6::link</parent>
       <child>dock_block_2_5::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_6_to_2_7" type="revolute">
+    <joint name="2_6_to_2_7" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_7::link</parent>
       <child>dock_block_2_6::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_7_to_2_8" type="revolute">
+    <joint name="2_7_to_2_8" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_8::link</parent>
       <child>dock_block_2_7::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_8_to_2_9" type="revolute">
+    <joint name="2_8_to_2_9" type="fixed">
       <pose> 0  1.0 0 0 0 0</pose>
       <parent>dock_block_2_9::link</parent>
       <child>dock_block_2_8::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>1 0 0</xyz>
-      </axis>
     </joint>
 
 
@@ -235,29 +173,15 @@
     <!-- Add joints across columns -->
 
     <!-- Column 0 -->
-    <joint name="1_0_to_0_0" type="revolute">
+    <joint name="1_0_to_0_0" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_1_0::link</parent>
       <child>dock_block_0_0::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_0_to_1_0" type="revolute">
+    <joint name="2_0_to_1_0" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_2_0::link</parent>
       <child>dock_block_1_0::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
 
     <!-- Column 1 -->
@@ -265,29 +189,15 @@
     <!-- Column 2 -->
 
     <!-- Column 3 -->
-    <joint name="1_3_to_0_3" type="revolute">
+    <joint name="1_3_to_0_3" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_1_3::link</parent>
       <child>dock_block_0_3::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_3_to_1_3" type="revolute">
+    <joint name="2_3_to_1_3" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_2_3::link</parent>
       <child>dock_block_1_3::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
 
     <!-- Column 4 -->
@@ -295,29 +205,15 @@
     <!-- Column 5 -->
 
     <!-- Column 6 -->
-    <joint name="1_6_to_0_6" type="revolute">
+    <joint name="1_6_to_0_6" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_1_6::link</parent>
       <child>dock_block_0_6::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_6_to_1_6" type="revolute">
+    <joint name="2_6_to_1_6" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_2_6::link</parent>
       <child>dock_block_1_6::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
 
     <!-- Column 7 -->
@@ -325,29 +221,15 @@
     <!-- Column 8 -->
 
     <!-- Column 9 -->
-    <joint name="1_9_to_0_9" type="revolute">
+    <joint name="1_9_to_0_9" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_1_9::link</parent>
       <child>dock_block_0_9::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
-    <joint name="2_9_to_1_9" type="revolute">
+    <joint name="2_9_to_1_9" type="fixed">
       <pose> 1.0 0 0 0 0 0</pose>
       <parent>dock_block_2_9::link</parent>
       <child>dock_block_1_9::link</child>
-      <axis>
-        <limit>
-          <lower>-0.1</lower>
-          <upper>0.1</upper>
-        </limit>
-        <xyz>0 1 0</xyz>
-      </axis>
     </joint>
 
 

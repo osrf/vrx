@@ -80,6 +80,14 @@
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
+        <inertial>
+          <mass>0.01</mass>
+          <!--<inertia>
+            <ixy></ixy>
+            <ixz></ixz>
+            <iyz></iyz>
+          </inertia>-->
+        </inertial>
         <% if i == 1%>
         <pose> 0 -0.1 0.75 0 0 0 </pose>
         <% else %>
