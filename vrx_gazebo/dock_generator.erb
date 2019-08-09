@@ -4,12 +4,18 @@
       <%= row -%>
     <% end %>
     -->
+    <%- static = true -%>
     <%- link_counter = 0 -%>
     <%- row_counter = 0 -%>
     <%- x_counter = 0 -%>
     <%- delta_x = 2 -%>
     <%- delta_y = 2 -%>
     <%- i = 0 -%>
+
+    <%- if static == true -%>
+      <static>true</static>
+    <%- end -%>
+
     <%- layout.each do |row| %>
     <!-- Row <%=row_counter %> -->
       <%- y_counter = 0 -%>
@@ -19,7 +25,11 @@
     <include>
       <name>dock_block_<%= i %>_<%= j %></name>
       <pose><%= x_counter %> <%= y_counter %> 0.25 0 0 0</pose>
-      <uri>model://dock_block_4x4</uri>
+      <%- if static != true -%>
+        <uri>model://dock_block_4x4</uri>
+      <%- else -%>
+        <uri>model://dock_block_4x4_static</uri>
+      <%- end -%>
     </include>
           <%- link_counter += 1 -%>
         <%- end -%>
@@ -45,6 +55,7 @@
         <%- c = row[j-1] -%>
         <%- d = row[j] -%>
         <%- if (c == 'X') and (d == 'X') -%>
+          <%- if static != true -%>
     <joint name="<%= i%>_<%= j-1%>_to_<%= i%>_<%= j%>" type="revolute">
       <pose> 0  <%= delta_y/2.0 %> 0 0 0 0</pose>
       <parent>dock_block_<%= i %>_<%= j %>::link</parent>
@@ -57,6 +68,13 @@
         <xyz>1 0 0</xyz>
       </axis>
     </joint>
+          <%- else -%>
+    <joint name="<%= i%>_<%= j-1%>_to_<%= i%>_<%= j%>" type="fixed">
+      <pose> 0  <%= delta_y/2.0 %> 0 0 0 0</pose>
+      <parent>dock_block_<%= i %>_<%= j %>::link</parent>
+      <child>dock_block_<%= i %>_<%= j-1 %>::link</child>
+    </joint>
+          <%- end -%>
         <%- end -%>
         <%- y_counter += delta_x -%>
       <%- end -%>
@@ -77,6 +95,7 @@
         <%- c = layout[i-1][j] -%>
         <%- d = layout[i][j] -%>
         <%- if (c == 'X') and (d == 'X') -%>
+          <%- if static != true -%>
     <joint name="<%= i%>_<%= j%>_to_<%= i-1%>_<%= j%>" type="revolute">
       <pose> <%= delta_x/2.0 %> 0 0 0 0 0</pose>
       <parent>dock_block_<%= i %>_<%= j %>::link</parent>
@@ -89,6 +108,13 @@
         <xyz>0 1 0</xyz>
       </axis>
     </joint>
+          <%- else -%>
+    <joint name="<%= i%>_<%= j%>_to_<%= i-1%>_<%= j%>" type="fixed">
+      <pose> <%= delta_x/2.0 %> 0 0 0 0 0</pose>
+      <parent>dock_block_<%= i %>_<%= j %>::link</parent>
+      <child>dock_block_<%= i-1 %>_<%= j %>::link</child>
+    </joint>
+          <%- end -%>
         <%- end -%>
         <%- x_counter += delta_x -%>
       <%- end -%>
