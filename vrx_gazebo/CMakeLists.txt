@@ -263,7 +263,6 @@ xacro_add_files(
   worlds/ocean.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
-
 # Generate obstacle course
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
@@ -287,6 +286,9 @@ install(DIRECTORY models/
 # Install all the launch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
+install(PROGRAMS scripts/spawn_wamv.bash
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)

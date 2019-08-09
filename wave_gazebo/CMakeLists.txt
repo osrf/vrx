@@ -7,26 +7,15 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
-find_package(catkin REQUIRED)
-
-# Model files to be processed with erb
-set (model_erb_files
-  world_models/ocean_waves/model.sdf.erb
+find_package(catkin REQUIRED COMPONENTS
+  xacro
 )
 
-# Process the model erb files
-foreach(_erb ${model_erb_files})
-  string(REGEX REPLACE ".sdf.erb" ".sdf" _model ${_erb})
-  set(_model ${CMAKE_CURRENT_SOURCE_DIR}/${_model})
-  add_custom_command(OUTPUT ${_model}
-                     COMMAND ${ERB_EXE_PATH} ${_erb} > ${_model}
-                     DEPENDS
-                       ${CMAKE_CURRENT_SOURCE_DIR}/${_erb}
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+catkin_package(
+  CATKIN_DEPENDS xacro
+)
 
-  list(APPEND model_files ${_model})
-endforeach()
-
+# Model files to be processed with erb
 set (xacro_erb_files
   world_models/ocean_waves/model.xacro.erb
 )
@@ -46,4 +35,12 @@ endforeach()
 add_custom_target(model_erb_generation ALL
   DEPENDS
     ${model_files}
+)
+
+# Generate world files from xacro and install
+xacro_add_files(
+  worlds/ocean.world.xacro
+  worlds/ocean_buoys.world.xacro
+  worlds/ocean_wamv.world.xacro
+  INORDER INSTALL DESTINATION worlds
 )

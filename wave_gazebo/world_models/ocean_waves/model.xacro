@@ -25,7 +25,9 @@
 
 
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="ocean_waves" params="gain:=0.1">
+  <xacro:macro name="ocean_waves" params="gain:=0.1 period:=5
+                     direction_x:=1.0 direction_y:=0.0
+                     angle:=0.4">
   <model name='ocean_waves'>
     <static>true</static>
     <plugin name="wavefield_plugin" filename="libWavefieldModelPlugin.so">
@@ -35,12 +37,12 @@
       <cell_count>50 50</cell_count>
       <wave>
 				<model>PMS</model>
-        <period>5</period>
+        <period>${period}</period>
         <number>3</number>
         <scale>1.5</scale>
 	<gain>${gain}</gain>
-        <direction>1.0 0.0</direction>
-        <angle>0.4</angle>        
+        <direction>${direction_x} ${direction_y}</direction>
+        <angle>${angle}</angle>        
         <tau>2.0</tau>
         <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
         <steepness>0.0</steepness>
@@ -52,12 +54,12 @@
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <wave>
             <model>PMS</model>
-            <period>5</period>
+            <period>${period}</period>
             <number>3</number>
             <scale>1.5</scale>
 	    <gain>${gain}</gain>
-            <direction>1.0 0.0</direction>
-            <angle>0.4</angle>        
+            <direction>${direction_x} ${direction_y}</direction>
+            <angle>${angle}</angle>        
             <tau>2.0</tau>
             <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
             <steepness>0.0</steepness>
@@ -74,17 +76,18 @@
             <name>WaveSim/GerstnerWaves</name>
           </script>
         </material>
+        <laser_retro>-1</laser_retro>
       </visual>
       <visual name="ocean_waves_below_visual">
         <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <wave>
             <model>PMS</model>
-            <period>5</period>
+            <period>${period}</period>
             <number>3</number>
             <scale>1.5</scale>
 	    <gain>${gain}</gain>
-            <direction>1.0 0.0</direction>
-            <angle>0.4</angle>        
+            <direction>${direction_x} ${direction_y}</direction>
+            <angle>${angle}</angle>        
             <tau>2.0</tau>
             <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
             <steepness>0.0</steepness>
@@ -101,8 +104,10 @@
             <name>WaveSim/GerstnerWaves</name>
           </script>
         </material>
+        <laser_retro>-1</laser_retro>
       </visual>
     </link>
   </model>
   </xacro:macro>
 </world>
+

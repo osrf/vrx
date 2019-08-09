@@ -27,7 +27,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <utility>
 #include <vector>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
