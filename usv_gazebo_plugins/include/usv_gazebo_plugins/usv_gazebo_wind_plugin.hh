@@ -20,14 +20,15 @@
 
 #include <ros/ros.h>
 #include <memory>
+#include <random>
 #include <string>
 #include <vector>
 #include <gazebo/common/CommonTypes.hh>
 #include <gazebo/common/Plugin.hh>
-#include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
+#include <gazebo/physics/physics.hh>
+
 #include <sdf/sdf.hh>
-#include <ignition/math/Rand.hh>
 
 namespace gazebo
 {
@@ -149,6 +150,9 @@ namespace gazebo
 
     /// \breif Bool debug set by environment var VRX_DEBUG
     private: bool debug = true;
+
+    /// \def Random generator.
+    private: std::unique_ptr<std::mt19937> randGenerator;
   };
 }
 
