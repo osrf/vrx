@@ -8,8 +8,8 @@
 
   <!-- Convert Twist messages to Drive messages -->
   <node pkg="vrx_gazebo" type="twist2thrust.py" name="twist2thrust" output="screen" args="--keyboard">
-    <remap from="left_cmd" to="left_thrust_cmd"/>
-    <remap from="right_cmd" to="right_thrust_cmd"/>
+    <remap from="left_cmd" to="/wamv/thrusters/left_thrust_cmd"/>
+    <remap from="right_cmd" to="/wamv/thrusters/right_thrust_cmd"/>
   </node>
 
   <!-- Set thruster angles -->
