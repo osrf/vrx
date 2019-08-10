@@ -2,20 +2,22 @@
 <!-- Example of ROS localization using the example wamv with sensors -->
 <launch>
   <!-- Publishes static transforms (gps, imu, cameras, etc) to /tf -->
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
+  <node ns="wamv" pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub">
+    <param name="tf_prefix" value="wamv" />
+  </node>
 
   <!-- Kalman filter fusing imu and gps into combined odometry/tf -->
-  <node pkg="robot_localization" type="ekf_localization_node"
+  <node ns="wamv/robot_localization" pkg="robot_localization" type="ekf_localization_node"
         name="ekf_localization" clear_params="false">
     <param name="sensor_timeout" value="2.0"/>
     <param name="two_d_mode" value="false"/>
     <param name="map_frame" value="map"/>
-    <param name="odom_frame" value="odom"/>
-    <param name="base_link_frame" value="base_link"/>
-    <param name="world_frame" value="odom"/>
+    <param name="odom_frame" value="wamv/odom"/>
+    <param name="base_link_frame" value="wamv/base_link"/>
+    <param name="world_frame" value="wamv/odom"/>
     <param name="publish_tf" value="true"/>
     <param name="frequency" value="60"/>
-    <param name="imu0" value="imu/data"/>
+    <param name="imu0" value="/wamv/sensors/imu/imu/data"/>
     <!-- IMU measures orientation, angular velocity, and linear acceleration -->
     <rosparam param="imu0_config">[false, false, false,
                                    true,  true,  true,
@@ -25,7 +27,7 @@
     <param name="imu0_differential" value="false"/>
     <param name="imu0_remove_gravitational_acceleration" value="true"/>
 
-    <param name="odom0" value="odometry/gps"/>
+    <param name="odom0" value="/wamv/robot_localization/odometry/gps"/>
     <!-- GPS only reliably measures absolute position -->
     <rosparam param="odom0_config">[true,  true,  true,
                                    false, false, false,
@@ -38,8 +40,9 @@
   </node>
 
   <!-- Produces local odometry from GPS to be used in Kalman filter -->
-  <node pkg="robot_localization" type="navsat_transform_node"
+  <node ns="wamv/robot_localization" pkg="robot_localization" type="navsat_transform_node"
         name="navsat_transform_node" respawn="true" output="screen">
+       
     <param name="frequency" value="60"/>
     <param name="magnetic_declination_radians" value="0"/>
     <param name="broadcast_utm_transform" value="true"/>
@@ -48,5 +51,6 @@
     <rosparam param="datum">[21.30996, -157.8901]</rosparam>
     <param name="yaw_offset" value="0"/>
     <param name="publish_filtered_gps" value="true"/>
+    <remap to="/wamv/sensors/gps/gps/fix" from="/wamv/robot_localization/gps/fix" />
   </node>
 </launch>
