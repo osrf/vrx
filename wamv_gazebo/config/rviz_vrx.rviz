@@ -195,8 +195,6 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        odom:
-          Value: true
         utm:
           Value: true
         wamv/base_link:
@@ -258,6 +256,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         wamv/odom:
+          utm:
+            {}
           wamv/base_link:
             wamv/cpu_cases_link:
               {}
@@ -404,10 +404,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.340398312
+      Pitch: 0.420398325
       Target Frame: wamv/base_link
       Value: Orbit (rviz)
-      Yaw: 1.00039828
+      Yaw: 0.860398352
     Saved: ~
 Window Geometry:
   Displays:
