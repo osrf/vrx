@@ -3,22 +3,6 @@
   <model name="dock_block_4x4">
     <static>true</static>
     <link name="link">
-      <velocity_decay>
-        <linear>0.001</linear>
-        <angular>0.001</angular>
-      </velocity_decay>
-       <inertial>
-        <pose>0 0 0 0 0 0</pose>
-        <mass>160</mass>
-        <inertia>
-          <ixx>55.467</ixx>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyy>55.467</iyy>
-          <iyz>0</iyz>
-          <izz>106.67</izz>
-        </inertia>
-      </inertial>
       <collision name="collision">
         <pose>0 0 0 0 0 0</pose>
         <geometry>
