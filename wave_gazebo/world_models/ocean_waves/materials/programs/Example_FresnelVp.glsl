@@ -1,6 +1,6 @@
-attribute vec4 uv0;
-attribute vec4 position;
-attribute vec3 normal;
+varying vec4 uv0;
+varying vec4 position;
+varying vec3 normal;
 
 uniform mat4 worldViewProjMatrix;
 uniform vec3 eyePosition; // object space

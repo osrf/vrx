@@ -74,12 +74,12 @@ material WaveSim/GerstnerWaves
 
 vertex_program Examples/FresnelRefractReflectVPGLSL glsl
 {
-  source Example_FresnelVp.glsl
+  source ../programs/Example_FresnelVp.glsl
 }
 
 fragment_program Examples/FresnelRefractReflectFPGLSL glsl
 {
-  source Example_FresnelFp.glsl
+  source ../programs/Example_FresnelFp.glsl
   default_params
   {
     // assign samplers as required by GLSL
@@ -116,13 +116,30 @@ material Examples/FresnelReflectionRefraction
         param_named noiseScale float 0.05
       }
       // Noise
+      // texture_unit
+      // {
+      //   // Perlin noise volume
+      //   texture waves2.dds
+      //   // min / mag filtering, no mip
+      //   filtering linear linear none
+      // }
+
       texture_unit
       {
-        // Perlin noise volume
-        texture waves2.dds
-        // min / mag filtering, no mip
-        filtering linear linear none
+        texture ../textures/wave_normals.dds
+        tex_coord_set 0
+        scale 0.1 0.1
+        filtering linear linear linear
       }
+
+      texture_unit
+      {
+        cubic_texture ../textures/clouds.jpg combinedUVW
+        tex_address_mode clamp
+        tex_coord_set 1
+        filtering linear linear linear
+      }
+
       // Reflection
       texture_unit reflection
       {
