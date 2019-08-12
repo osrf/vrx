@@ -12,7 +12,7 @@
       <visual name="${name}_visual">
         <origin xyz="-0.033 0 0" rpy="0 0 ${pi/2}"/>
         <geometry>
-          <mesh filename="model://mono_camera/mesh/mono_camera.dae"/>
+          <mesh filename="package://vrx_gazebo/models/mono_camera/mesh/mono_camera.dae"/>
         </geometry>
       </visual>
       <collision name="${name}_lens_collision">
@@ -78,7 +78,7 @@
       <visual name="${name}_post_arm_visual">
         <origin xyz="-0.038 0 -0.003" rpy="${radians(-60)} 0 ${-pi/2}"/>
         <geometry>
-          <mesh filename="model://sensor_post/mesh/sensor_post_arm.dae"/>
+          <mesh filename="package://vrx_gazebo/models/sensor_post/mesh/sensor_post_arm.dae"/>
         </geometry>
       </visual>
       <collision name="${name}_post_arm_collision">

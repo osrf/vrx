@@ -5,7 +5,7 @@
     <visual name="cpu_cases_visual">
       <origin xyz="0.073 0 -1.53" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="model://cpu_cases/mesh/cpu_cases.dae"/>
+        <mesh filename="package://vrx_gazebo/models/cpu_cases/mesh/cpu_cases.dae"/>
       </geometry>
     </visual>
     <collision name="cpu_case_1_collision">
