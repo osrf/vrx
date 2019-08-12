@@ -207,16 +207,16 @@ install(TARGETS perception_scoring_plugin
 set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
   models/dock_2018_base/model.sdf.erb
-  models/dock_2016_base_static/model.sdf.erb
-  models/dock_2018_base_static/model.sdf.erb
+  models/dock_2016_base_dynamic/model.sdf.erb
+  models/dock_2018_base_dynamic/model.sdf.erb
 )
 
 # Dock files that need to be processed with erb
 set (dock_erb_files
   models/dock_2016/model.sdf.erb
   models/dock_2018/model.sdf.erb
-  models/dock_2016_static/model.sdf.erb
-  models/dock_2018_static/model.sdf.erb
+  models/dock_2016_dynamic/model.sdf.erb
+  models/dock_2018_dynamic/model.sdf.erb
 )
 
 # Process the dock base erb files

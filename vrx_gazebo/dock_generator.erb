@@ -27,9 +27,9 @@
       <name>dock_block_<%= i %>_<%= j %></name>
       <pose><%= x_counter %> <%= y_counter %> 0.25 0 0 0</pose>
       <%- if static_dock != true -%>
-        <uri>model://dock_block_4x4</uri>
+        <uri>model://dock_block_4x4_dynamic</uri>
       <%- else -%>
-        <uri>model://dock_block_4x4_static</uri>
+        <uri>model://dock_block_4x4</uri>
       <%- end -%>
     </include>
           <%- link_counter += 1 -%>
