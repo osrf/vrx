@@ -38,7 +38,7 @@
           </range>
         </ray>
         <plugin name="multibeam_simulator" filename="libgazebo_ros_gpu_laser.so">
-          <topicName>${sensor_namespace}lidar/${name}/scan</topicName>
+          <topicName>${sensor_namespace}lidars/${name}/scan</topicName>
           <frameName>${name}_link</frameName>
         </plugin>
       </sensor>

@@ -171,7 +171,7 @@
           </noise>
         </ray>
         <plugin name="${name}_plugin" filename="libgazebo_ros_velodyne_gpu_laser.so">
-          <topicName>${sensor_namespace}lidar/${name}/points</topicName>
+          <topicName>${sensor_namespace}lidars/${name}/points</topicName>
           <frameName>${name}_link</frameName>
           <min_intensity>0</min_intensity>
         </plugin>
