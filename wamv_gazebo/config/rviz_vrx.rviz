@@ -323,7 +323,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Flat Squares
-      Topic: /wamv/sensors/lidar/lidar_wamv/points
+      Topic: /wamv/sensors/lidars/lidar_wamv/points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -431,5 +431,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1855
-  X: 1985
+  X: 65
   Y: 24
