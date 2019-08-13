@@ -55,6 +55,10 @@ namespace asv
     /// \brief Called every PreRender event.
     private: void OnUpdate();
 
+    private: void SetRenderTarget(Ogre::RenderTarget *_target);
+
+    private: void UpdateFOV();
+
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldVisualPluginPrivate> data;

@@ -59,6 +59,14 @@ namespace asv
 
     /// \brief Event based connections.
     public: event::ConnectionPtr connection;
+
+    public: Ogre::Texture *renderTexture;
+
+    public: Ogre::RenderTarget *renderTarget;
+
+    public: Ogre::Viewport *viewport;
+
+    public: Ogre::Camera *camera;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,9 +95,12 @@ namespace asv
     // Capture the visual and sdf.
     this->data->visual = _visual;
     this->data->sdf = _sdf;
+
+    this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
+    this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
     //
     // Bind the update method to ConnectPreRender events
-    this->data->connection = event::Events::ConnectPreRender(
+    this->data->connection1 = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
   }
 
@@ -97,4 +108,31 @@ namespace asv
   {
     gzerr << "ON UPDATE" << std::endl;
   }
+
+  void WavefieldVisualPlugin::SetRenderTarget(Ogre::RenderTarget *_target)
+  {
+    this->data->renderTarget = _target;
+
+  //  if (this->data->renderTarget)
+  //  {
+  //    this->data->viewport = this->data->renderTarget->addViewport(this->data->camera);
+  //    this->data->viewport->setClearEveryFrame(true);
+  //    this->data->viewport->setShadowsEnabled(true);
+  //    this->data->viewport->setOverlaysEnabled(false);
+  //    this->data->viewport->setBackgroundColour(Ogre::ColourValue::Black);
+  //    this->UpdateFOV();
+  //  }
+  }
+
+  // void WavefieldVisualPlugin::UpdateFOV()
+  // {
+  //   if (this->data->viewport)
+  //   {
+  //     this->data->viewport->setDimensions(0, 0, 1, 1);
+  //     double ratio = static_cast<double>(this->data->viewport->getActualWidth()) / static_cast<double>(this->data->viewport->getActualHeight());
+  //     double hfov = this->HFOV().Radian();
+  //     double vfov = 2.0 * atan(tan(hfov/2.0) / ratio);
+  //   }
+  // }
+
 }
