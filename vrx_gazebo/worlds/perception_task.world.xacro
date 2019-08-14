@@ -36,7 +36,7 @@
       <ready_state_duration>10.0</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <!-- Parameters for PopulationPlugin -->
-      <loop_forever>false</loop_forever>
+      <loop_forever>true</loop_forever>
       <frame>wamv</frame>
       <!-- Pose of each object is expressed relative to the body frame
            of the object named in the frame field - i.e., relative to
@@ -44,21 +44,24 @@
       <object_sequence>
         <object>
           <time>5.0</time>
-          <type>red</type>
-          <name>red_mark</name>
-            <pose>8 0 1 0 0 0</pose>
+          <type>surmark_950410</type>
+          <name>red_0</name>
+          <pose>8 0 1 0 0 0</pose>
+          <duration>10</duration>
         </object>
         <object>
           <time>10.0</time>
-          <type>green</type>
-          <name>green_mark</name>
+          <type>surmark_950400</type>
+          <name>green_0</name>
           <pose>8 2 1 0 0 0</pose>
+          <duration>9</duration>
         </object>
         <object>
-          <time>15.0</time>
-          <type>black</type>
-          <name>black_totem</name>
+          <time>13.0</time>
+          <type>black_totem</type>
+          <name>black_0</name>
           <pose>8 -2 1 0 0 0</pose>
+          <duration>5</duration>
         </object>
       </object_sequence>
     </plugin>
