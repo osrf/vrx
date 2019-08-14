@@ -6,7 +6,7 @@
     <xacro:sandisland />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
-    <xacro:ocean_waves gain="1.0"/>>
+    <xacro:ocean_waves/>
 
     <!-- The light buoy -->
     <include>
@@ -16,7 +16,7 @@
 
     <!-- The 2018 dock with the two placards -->
     <include>
-      <uri>model://dock_2018_dynamic</uri>
+      <uri>model://dock_2018</uri>
       <pose>60 -2.75 0 0 0 0</pose>
     </include>
 

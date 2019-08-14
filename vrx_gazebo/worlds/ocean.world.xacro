@@ -51,6 +51,6 @@
 
     <!-- World models  -->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
-    <xacro:ocean_waves gain="1"/>
+    <xacro:ocean_waves gain="0.6"/>
   </world>
 </sdf>
