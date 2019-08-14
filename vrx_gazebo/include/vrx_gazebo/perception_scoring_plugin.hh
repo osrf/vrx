@@ -25,6 +25,7 @@
 
 #include <geographic_msgs/GeoPoseStamped.h>
 #include <ros/ros.h>
+#include <vector>
 #include <memory>
 #include <string>
 #include <gazebo/physics/PhysicsTypes.hh>
@@ -39,6 +40,8 @@ class PerceptionObject
 {
   /// \brief Simulation time in which the object should be spawned.
   public: double time;
+
+  /// \brief amount of time in which the object should be spawned.
   public: double duration;
 
   /// \brief PerceptionObject type.
@@ -49,14 +52,20 @@ class PerceptionObject
 
   /// \brief Pose in which the object should be placed in wam-v's frame.
   public: ignition::math::Pose3d trialPose;
-  
+
   /// \brief Pose in which the object should be placed in global frame.
   private: ignition::math::Pose3d origPose;
+
+  /// \brief ModelPtr to the model that this object is representing
   public: gazebo::physics::EntityPtr modelPtr;
 
+  /// \brief bool to tell weather or not the object is open for attempts
   public: bool active = false;
+
+  /// \brief error associated with the guess of a moel
   public: double error = -1.0;
 
+  /// \brief constructor of perception object
   public: PerceptionObject(const double& _time,
                  const double& _duration,
                  const std::string& _type,
@@ -64,12 +73,18 @@ class PerceptionObject
                  const ignition::math::Pose3d& _trialPose,
                  const gazebo::physics::WorldPtr _world);
 
+  /// \brief set the error of this boject if this object is active
+  ///   and this is the lowest seen error
   public: void SetError(const double& _error);
 
+  /// \brief move the object to where it is supposed to be relative to the frame
+  /// \brief of the robot and make it active
   public: void StartTrial(const gazebo::physics::EntityPtr& _frame);
 
+  /// \brief move the object back to its original location and make inactive
   public: void EndTrial();
 
+  /// \return a string summarizing this object
   public: std::string Str();
 };
 
@@ -117,13 +132,15 @@ class PerceptionObject
 ///   <object_sequence>
 ///     <object>
 ///       <time>10.0</time>
-///       <type>model://surmark950410</type>
+///       <duration>5</duration>
+///       <type>surmark_950410</type>
 ///       <name>red_0</name>
 ///       <pose>6 0 1 0 0 0</pose>
 ///     </object>
 ///     <object>
 ///       <time>10.0</time>
-///       <type>model://surmark950400</type>
+///       <duration>5</duration>
+///       <type>surmark_950400</type>
 ///       <name>green_0</name>
 ///       <pose>6 6 1 0 0 0</pose>
 ///     </object>
@@ -144,7 +161,8 @@ class PerceptionScoringPlugin : public ScoringPlugin
   /// \brief Update the plugin.
   protected: void OnUpdate();
 
-  private: void OnAttempt(const geographic_msgs::GeoPoseStamped::ConstPtr &_msg);
+  private: void OnAttempt(
+    const geographic_msgs::GeoPoseStamped::ConstPtr &_msg);
 
   /// \brief Restart the object population list
   private: void Restart();
@@ -198,6 +216,7 @@ class PerceptionScoringPlugin : public ScoringPlugin
   /// \brief Last time (sim time) that the plugin was updated.
   public: gazebo::common::Time lastUpdateTime;
 
+  /// \ brief count of how many objects have been despawned
   private: int objectsDespawned =0;
 };
 

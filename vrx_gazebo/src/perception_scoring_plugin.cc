@@ -55,6 +55,7 @@
 
 
 
+/////////////////////////////////////////////////
 PerceptionObject::PerceptionObject(const double& _time,
                const double& _duration,
                const std::string& _type,
@@ -72,7 +73,7 @@ PerceptionObject::PerceptionObject(const double& _time,
   #else
     this->modelPtr = _world->GetEntity(this->name);
   #endif
-  if(modelPtr)
+  if (modelPtr)
   {
     #if GAZEBO_MAJOR_VERSION >= 8
       this->origPose = this->modelPtr->WorldPose();
@@ -84,7 +85,6 @@ PerceptionObject::PerceptionObject(const double& _time,
 
 std::string PerceptionObject::Str()
 {
-
   std::string rtn = "\nname: ";
   rtn += this->name;
   rtn += "\ntype: ";
@@ -98,11 +98,14 @@ std::string PerceptionObject::Str()
   return rtn;
 }
 
+/////////////////////////////////////////////////
 void PerceptionObject::SetError(const double& _error)
 {
   if (this->active && (_error < this->error || this->error < 0))
     this->error = _error;
 }
+
+/////////////////////////////////////////////////
 void PerceptionObject::StartTrial(const gazebo::physics::EntityPtr& _frame)
 {
   // Set object pose relative to the specified frame (e.g., the wam-v)
@@ -129,6 +132,7 @@ void PerceptionObject::StartTrial(const gazebo::physics::EntityPtr& _frame)
   gzmsg << "PerceptionScoringPlugin: spawning " << this->name << std::endl;
 }
 
+/////////////////////////////////////////////////
 void PerceptionObject::EndTrial()
 {
   this->modelPtr->SetWorldPose(this->origPose);
@@ -137,8 +141,6 @@ void PerceptionObject::EndTrial()
   this->active = false;
   gzmsg << "PerceptionScoringPlugin: despawning " << this->name << std::endl;
 }
-
-
 
 GZ_REGISTER_WORLD_PLUGIN(PerceptionScoringPlugin)
 
@@ -248,7 +250,6 @@ void PerceptionScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   #endif
 
   // Optional: ROS namespace.
-  std::string ns;
   if (_sdf->HasElement("robot_namespace"))
     this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
 
@@ -268,9 +269,11 @@ void PerceptionScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 /////////////////////////////////////////////////
 void PerceptionScoringPlugin::Restart()
 {
-  for(auto& obj : this->objects)
+  for (auto& obj : this->objects)
   {
+    // reset all objects' errors
     obj.error = -1.0;
+    // bump all objs time to start again
     #if GAZEBO_MAJOR_VERSION >= 8
       obj.time += this->world->SimTime().Double();
     #else
@@ -283,8 +286,10 @@ void PerceptionScoringPlugin::Restart()
 /////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnUpdate()
 {
+  // if have not finished the load, skip
   if (!this->frameName.empty())
   {
+    // get frame of robot
     #if GAZEBO_MAJOR_VERSION >= 8
       this->frame =
         this->world->EntityByName(this->frameName);
@@ -292,6 +297,7 @@ void PerceptionScoringPlugin::OnUpdate()
       this->frame =
         this->world->GetEntity(this->frameName);
     #endif
+    // make sure it is a real frame
     if (!this->frame)
     {
       gzwarn << std::string("The frame '") << this->frameName
@@ -305,35 +311,48 @@ void PerceptionScoringPlugin::OnUpdate()
       return;
     }
   }
-  for(auto& obj : this->objects)
+  // look at all objects
+  for (auto& obj : this->objects)
   {
+    // if time to spawn an object
     if (this->ElapsedTime() >= obj.time &&
         this->ElapsedTime() <= obj.time + obj.duration &&
         !obj.active)
     {
+      // increment the atempt balance for this new obj
       this->attemptBal += 1;
       obj.StartTrial(this->frame);
-      ROS_INFO_NAMED("PerceptionScoring", "New Attempt Balance: %d", this->attemptBal);
+      ROS_INFO_NAMED("PerceptionScoring",
+        "New Attempt Balance: %d", this->attemptBal);
     }
+    // if time to despawn and object
     if (this->ElapsedTime() >= obj.time + obj.duration && obj.active)
     {
+      // if the object was not guessed, decrement the attempt bal on despawn
+      //   prevent negative attemp balance
       if (this->attemptBal > 0 && obj.error == -1.0)
         this->attemptBal -= 1;
+      // inc objects despawned
       this->objectsDespawned += 1;
       obj.EndTrial();
+      // only add to score if its type was guessed correctly
       if (obj.error != -1.0)
       {
         this->SetScore(this->Score() + obj.error);
       }
-      ROS_INFO_NAMED("PerceptionScoring", "New Attempt Balance: %d", this->attemptBal);
+      ROS_INFO_NAMED("PerceptionScoring",
+        "New Attempt Balance: %d", this->attemptBal);
     }
   }
+  // if we have finished
   if (this->objectsDespawned == this->objects.size())
   {
-    for(auto& obj : this->objects)
+    // publish string summarizing the objects
+    for (auto& obj : this->objects)
     {
       ROS_INFO_NAMED("PerceptionScoring", "%s", obj.Str().c_str());
     }
+    // if loop, restart
     if (this->loopForever)
     {
       this->objectsDespawned = 0;
@@ -342,21 +361,27 @@ void PerceptionScoringPlugin::OnUpdate()
   }
 }
 
-void PerceptionScoringPlugin::OnAttempt(const geographic_msgs::GeoPoseStamped::ConstPtr &_msg)
+/////////////////////////////////////////////////
+void PerceptionScoringPlugin::OnAttempt(
+  const geographic_msgs::GeoPoseStamped::ConstPtr &_msg)
 {
-  // Only accept one message per trial
+  // only accept an attempt if there are any in the attempt balance
   if (this->attemptBal == 0)
   {
-    ROS_WARN_NAMED("PerceptionScoring", "Attempt Balance is 0, no attempts currently allowed. Ignoring.");
+    ROS_WARN_NAMED("PerceptionScoring",
+      "Attempt Balance is 0, no attempts currently allowed. Ignoring.");
     return;
   }
   else
   {
+    // burn one attempt
     this->attemptBal -= 1;
-    ROS_INFO_NAMED("PerceptionScoring", "New Attempt Balance: %d", this->attemptBal);
+    ROS_INFO_NAMED("PerceptionScoring",
+      "New Attempt Balance: %d", this->attemptBal);
   }
   for (auto& obj : this->objects)
   {
+    // if attempt correct type
     if (obj.type == _msg->header.frame_id)
     {
       // Convert geo pose to Gazebo pose
@@ -390,7 +415,6 @@ void PerceptionScoringPlugin::OnAttempt(const geographic_msgs::GeoPoseStamped::C
 void PerceptionScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
-  // Subscribe
   // Quit if ros plugin was not loaded
   if (!ros::isInitialized())
   {
@@ -398,6 +422,7 @@ void PerceptionScoringPlugin::OnRunning()
     return;
   }
 
+  // Subscribe
   this->nh = ros::NodeHandle(this->ns);
   this->objectSub = this->nh.subscribe(this->objectTopic, 1,
     &PerceptionScoringPlugin::OnAttempt, this);
