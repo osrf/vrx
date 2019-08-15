@@ -203,15 +203,11 @@ void PerceptionScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr timeElement = objectElem->GetElement("time");
     double time = timeElement->Get<double>();
 
-    double duration;
+    double duration = 5;
     if (objectElem->HasElement("duration"))
     {
       sdf::ElementPtr durationElement = objectElem->GetElement("duration");
       duration = durationElement->Get<double>();
-    }
-    else
-    {
-      duration = 5;
     }
 
     // Parse the object type.
