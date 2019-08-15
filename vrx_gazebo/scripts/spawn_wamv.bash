@@ -107,5 +107,10 @@ wait_until_gzserver_is_up
 final_urdf=/tmp/my_urdf.urdf
 rosrun xacro xacro --inorder -o $final_urdf $urdf
 
+# Remove <package>/models
+sed -e "s/vrx_gazebo\/models\///g" -i $final_urdf
+sed -e "s/wamv_gazebo\/models\///g" -i $final_urdf
+sed -e "s/wamv_description\/models\///g" -i $final_urdf
+
 # Spawn model
 gz model --model-name=$model --spawn-file=$final_urdf -x $x -y $y -z $z -R $R -P $P -Y $Y
