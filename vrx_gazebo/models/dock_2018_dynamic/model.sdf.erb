@@ -3,11 +3,10 @@
 
   <model name="robotx_dock_2018">
 
-    <static>true</static>
     <!-- The 2018 dock base -->
     <include>
       <name>dock_2018_base</name>
-      <uri>model://dock_2018_base</uri>
+      <uri>model://dock_2018_base_dynamic</uri>
     </include>
     <%
       # Constants
@@ -74,11 +73,9 @@
     <% for i in 1..2 %>
     <!-- Placard #<%= i %> -->
     <model name="dock_2018_placard<%= i %>">
-      <static>true</static>
       <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
       <include>
-        <static>true</static>
-        <pose> 0 0 0.25 0 0 0</pose>
+      <pose> 0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
@@ -140,6 +137,12 @@
         </visual>
       </link>
 
+      <joint name="placard_to_visual" type="fixed">
+        <pose> 0 0 0 0 0 0 </pose>
+        <parent>placard::link</parent>
+        <child>link_symbols</child>
+      </joint>
+
     </model>
     <%
       placard_x     += placard_offset_x
@@ -172,6 +175,18 @@
     %>
     <% end %>
   
+    <joint name = "joint_placard1" type="fixed">
+      <pose>0 0 3 0 0 0 </pose>
+      <parent>dock_2018_placard1::placard::link</parent>
+      <child>dock_2018_base::dock_block_4_1::link</child>
+    </joint>
+
+    <joint name = "joint_placard2" type="fixed">
+      <pose>0 0 3 0 0 0 </pose>
+      <parent>dock_2018_placard2::placard::link</parent>
+      <child>dock_2018_base::dock_block_3_1::link</child>
+    </joint>
+
   </model>
 
 

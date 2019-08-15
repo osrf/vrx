@@ -2,11 +2,10 @@
 <sdf version="1.6">
 
   <model name="robotx_dock_2016">
-    <static>true</static>
 
     <!-- The 2016 dock base -->
     <include>
-      <uri>model://dock_2016_base</uri>
+      <uri>model://dock_2016_base_dynamic</uri>
     </include>
     
     
@@ -14,14 +13,15 @@
     <model name="dock_2016_placard1">
       <pose>5 2.75 1.5 0 0 1.5707963267948966</pose>
       <include>
-        <static>true</static>
         <pose> 0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
-        <static>true</static>
-        <pose> 0 0.07 0.75 0 0 0 </pose>
-          <visual name="visual_circle">
+        <inertial>
+          <mass>0.01</mass>
+        </inertial>
+        <pose> 0 0.1 0.75 0 0 0 </pose>
+	<visual name="visual_circle">
           <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <cylinder>
@@ -82,14 +82,15 @@
     <model name="dock_2016_placard2">
       <pose>5 8.75 1.5 0 0 1.5707963267948966</pose>
       <include>
-        <static>true</static>
         <pose> 0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
-        <static>true</static>
-        <pose> 0 0.07 0.75 0 0 0 </pose>
-          <visual name="visual_circle">
+        <inertial>
+          <mass>0.01</mass>
+        </inertial>
+        <pose> 0 0.1 0.75 0 0 0 </pose>
+	<visual name="visual_circle">
           <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <cylinder>
@@ -150,14 +151,15 @@
     <model name="dock_2016_placard3">
       <pose>5 14.75 1.5 0 0 1.5707963267948966</pose>
       <include>
-        <static>true</static>
         <pose> 0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
-        <static>true</static>
-        <pose> 0 0.07 0.75 0 0 0 </pose>
-          <visual name="visual_circle">
+        <inertial>
+          <mass>0.01</mass>
+        </inertial>
+        <pose> 0 0.1 0.75 0 0 0 </pose>
+	<visual name="visual_circle">
           <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <cylinder>
@@ -214,5 +216,20 @@
     </model>
     
     
+    <joint name = "joint_placard1" type="fixed">
+      <pose>0 0 3 0 0 0 </pose>
+      <parent>dock_2016_placard1::placard::link</parent>
+      <child>robotx_dock_2016_base::dock_block_2_1::link</child>
+    </joint>
+    <joint name = "joint_placard2" type="fixed">
+      <pose>0 0 3 0 0 0 </pose>
+      <parent>dock_2016_placard2::placard::link</parent>
+      <child>robotx_dock_2016_base::dock_block_2_3::link</child>
+    </joint>
+    <joint name = "joint_placard3" type="fixed">
+      <pose>0 0 3 0 0 0 </pose>
+      <parent>dock_2016_placard3::placard::link</parent>
+      <child>robotx_dock_2016_base::dock_block_2_5::link</child>
+    </joint>
   </model>
 </sdf>

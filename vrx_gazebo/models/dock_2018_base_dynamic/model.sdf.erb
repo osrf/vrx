@@ -3,14 +3,18 @@
 
   <!-- Important: This file is generated. DO NOT EDIT! -->
 
-  <model name="robotx_dock_2016_base">
-    <selfCollide>false</selfCollide>
-<%
+  <model name="robotx_dock_2018_base_dynamic">
+    <%
 layout = [
-  'X  X  X  X',
-  'X  X  X  X',
-  'XXXXXXXXXX',
-  true
+  'X  X',
+  'X  X',
+  'X  X',
+  'XXXX',
+  'XXXX',
+  'X  X',
+  'X  X',
+  'X  X',
+  false,
 ]
 %>
 <%= ERB.new(File.read('dock_generator.erb'),

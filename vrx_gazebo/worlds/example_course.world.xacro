@@ -23,14 +23,14 @@
     <!-- The 2016 dock with the three placards -->
     <include>
       <uri>model://dock_2016</uri>
-      <pose>75 22 0 0 0 -2.78</pose>
+      <pose>75 22 0.25 0 0 -2.78</pose>
     </include>
 
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://dock_2018</uri>
-      <pose>-2 -18 0 0 0 0.2</pose>
-    </include>
+      <pose>-2 -18 0.25 0 0 0.2</pose>
+    </include> 
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo>
       <wind_objs>

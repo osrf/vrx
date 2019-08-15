@@ -207,12 +207,16 @@ install(TARGETS perception_scoring_plugin
 set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
   models/dock_2018_base/model.sdf.erb
+  models/dock_2016_base_dynamic/model.sdf.erb
+  models/dock_2018_base_dynamic/model.sdf.erb
 )
 
 # Dock files that need to be processed with erb
 set (dock_erb_files
   models/dock_2016/model.sdf.erb
   models/dock_2018/model.sdf.erb
+  models/dock_2016_dynamic/model.sdf.erb
+  models/dock_2018_dynamic/model.sdf.erb
 )
 
 # Process the dock base erb files
@@ -260,6 +264,7 @@ xacro_add_files(
   worlds/stationkeeping_task.world.xacro
   worlds/wayfinding_task.world.xacro
   worlds/wind_test.world.xacro
+  worlds/ocean.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 # Generate obstacle course
