@@ -116,6 +116,9 @@ class PerceptionObject
 ///   plugin subscribes for receiving identification and localization msgs.
 ///   Default is "/vrx/perception/landmark"
 ///
+/// <duration>: Optional parameter. Specify the time an object sticks around.
+///   defaults to 5
+///
 /// Here's an example of a valid SDF:
 ///
 /// <plugin filename="libperception_scoring_plugin.so"
@@ -132,14 +135,12 @@ class PerceptionObject
 ///   <object_sequence>
 ///     <object>
 ///       <time>10.0</time>
-///       <duration>5</duration>
 ///       <type>surmark_950410</type>
 ///       <name>red_0</name>
 ///       <pose>6 0 1 0 0 0</pose>
 ///     </object>
 ///     <object>
 ///       <time>10.0</time>
-///       <duration>5</duration>
 ///       <type>surmark_950400</type>
 ///       <name>green_0</name>
 ///       <pose>6 6 1 0 0 0</pose>

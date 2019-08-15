@@ -43,25 +43,22 @@
            the wam-v-->
       <object_sequence>
         <object>
-          <time>5.0</time>
+          <time>5</time>
           <type>surmark_950410</type>
           <name>red_0</name>
           <pose>8 0 1 0 0 0</pose>
-          <duration>10</duration>
         </object>
         <object>
-          <time>10.0</time>
+          <time>5</time>
           <type>surmark_950400</type>
           <name>green_0</name>
           <pose>8 2 1 0 0 0</pose>
-          <duration>9</duration>
         </object>
         <object>
-          <time>13.0</time>
+          <time>15.0</time>
           <type>black_totem</type>
           <name>black_0</name>
           <pose>8 -2 1 0 0 0</pose>
-          <duration>5</duration>
         </object>
       </object_sequence>
     </plugin>

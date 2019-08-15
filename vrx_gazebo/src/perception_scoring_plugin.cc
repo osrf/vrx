@@ -203,8 +203,16 @@ void PerceptionScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr timeElement = objectElem->GetElement("time");
     double time = timeElement->Get<double>();
 
-    sdf::ElementPtr durationElement = objectElem->GetElement("duration");
-    double duration = durationElement->Get<double>();
+    double duration;
+    if (objectElem->HasElement("duration"))
+    {
+      sdf::ElementPtr durationElement = objectElem->GetElement("duration");
+      duration = durationElement->Get<double>();
+    }
+    else
+    {
+      duration = 5;
+    }
 
     // Parse the object type.
     if (!objectElem->HasElement("type"))
@@ -315,8 +323,8 @@ void PerceptionScoringPlugin::OnUpdate()
   for (auto& obj : this->objects)
   {
     // if time to spawn an object
-    if (this->ElapsedTime() >= obj.time &&
-        this->ElapsedTime() <= obj.time + obj.duration &&
+    if (this->ElapsedTime() > obj.time &&
+        this->ElapsedTime() < obj.time + obj.duration &&
         !obj.active)
     {
       // increment the atempt balance for this new obj
@@ -326,11 +334,11 @@ void PerceptionScoringPlugin::OnUpdate()
         "New Attempt Balance: %d", this->attemptBal);
     }
     // if time to despawn and object
-    if (this->ElapsedTime() >= obj.time + obj.duration && obj.active)
+    if (this->ElapsedTime() > obj.time + obj.duration &&
+        obj.active)
     {
-      // if the object was not guessed, decrement the attempt bal on despawn
-      //   prevent negative attemp balance
-      if (this->attemptBal > 0 && obj.error == -1.0)
+      // prevent negative attemp balance
+      if (this->attemptBal > 0)
         this->attemptBal -= 1;
       // inc objects despawned
       this->objectsDespawned += 1;
@@ -345,7 +353,8 @@ void PerceptionScoringPlugin::OnUpdate()
     }
   }
   // if we have finished
-  if (this->objectsDespawned == this->objects.size())
+  if (this->objectsDespawned == this->objects.size() &&
+      this->TaskState() != "finished")
   {
     // publish string summarizing the objects
     for (auto& obj : this->objects)
@@ -357,6 +366,10 @@ void PerceptionScoringPlugin::OnUpdate()
     {
       this->objectsDespawned = 0;
       this->Restart();
+    }
+    else
+    {
+      this->Finish();
     }
   }
 }
