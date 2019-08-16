@@ -32,6 +32,9 @@ foreach(_erb ${xacro_erb_files})
   list(APPEND model_files ${_model})
 endforeach()
 
+install(DIRECTORY world_models/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/world_models)
+
 add_custom_target(model_erb_generation ALL
   DEPENDS
     ${model_files}
