@@ -60,13 +60,13 @@ namespace asv
     /// \brief Event based connections.
     public: event::ConnectionPtr connection;
 
+    // OGRE 
     public: Ogre::Texture *renderTexture;
-
     public: Ogre::RenderTarget *renderTarget;
-
     public: Ogre::Viewport *viewport;
-
     public: Ogre::Camera *camera;
+    public: Ogre::Root *root;
+    public: Ogre::SceneManager* mSceneMgr;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,21 +96,25 @@ namespace asv
     this->data->visual = _visual;
     this->data->sdf = _sdf;
 
+    // OGRE
+    this->data->root = Ogre::Root::getSingletonPtr();
+    this->data->mSceneMgr = this->data->root->createSceneManager(Ogre::ST_EXTERIOR_CLOSE);
     this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
     this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
     //
     // Bind the update method to ConnectPreRender events
-    this->data->connection1 = event::Events::ConnectRender(
+    this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
   }
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    gzerr << "ON UPDATE" << std::endl;
+    //gzerr << "ON UPDATE" << std::endl;
   }
 
   void WavefieldVisualPlugin::SetRenderTarget(Ogre::RenderTarget *_target)
   {
+    gzerr << "SET RENDER TARGET" << std::endl;
     this->data->renderTarget = _target;
 
   //  if (this->data->renderTarget)

@@ -57,8 +57,6 @@ namespace asv
 
     private: void SetRenderTarget(Ogre::RenderTarget *_target);
 
-    private: void UpdateFOV();
-
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldVisualPluginPrivate> data;
