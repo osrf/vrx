@@ -63,12 +63,12 @@ namespace asv
     // OGRE 
     public: Ogre::Texture *renderTexture;
     public: Ogre::RenderTarget *renderTarget;
-    public: Ogre::Viewport *viewport;
     public: Ogre::Camera *camera;
     public: Ogre::Root *root;
     public: Ogre::SceneManager* mSceneMgr;
     public: Ogre::SceneNode *cameraNode;
     public: Ogre::SceneNode *sceneNode;
+    public: Ogre::Viewport *viewport;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,6 +132,21 @@ namespace asv
     gzerr << "SET RENDER TARGET" << std::endl;
     this->data->renderTarget = _target;
 
+    if (this->data->renderTarget)
+    {
+      // Setup the viewport to use the texture
+      this->data->viewport = this->data->renderTarget->addViewport(this->data->camera);
+      this->data->viewport->setClearEveryFrame(true);
+      this->data->viewport->setShadowsEnabled(true);
+      this->data->viewport->setOverlaysEnabled(false);
+
+      //RTShaderSystem::AttachViewport(this->data->viewport, this->GetScene());
+
+      //auto const &ignBG = this->scene->BackgroundColor();
+      //this->data->viewport->setBackgroundColour(Conversions::Convert(ignBG));
+      //this->data->viewport->setVisibilityMask(GZ_VISIBILITY_ALL &
+      //   ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
+    }
   //  if (this->data->renderTarget)
   //  {
   //    this->data->viewport = this->data->renderTarget->addViewport(this->data->camera);
