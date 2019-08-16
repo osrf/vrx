@@ -34,14 +34,15 @@
         <updateRate>15.0</updateRate>
         <alwaysOn>true</alwaysOn>
         <bodyName>${name}_link</bodyName>
-        <frameId>${name}_link</frameId>
-        <topicName>gps/fix</topicName>
+        <!-- Manually prepend namespace to tf frame. -->
+        <frameId>${namespace}/${name}_link</frameId>
+        <topicName>${sensor_namespace}gps/gps/fix</topicName>
         <!-- Note that the hector_gazebo_ros_gps plugin uses NWU coordinates
              for reporting velocities.  This may cause problems if localization
              requires velocity in ENU.  
              See Issue #64 in VRX project for details
              https://bitbucket.org/osrf/vrx/issues/64 -->
-        <velocityTopicName>gps/fix_velocity</velocityTopicName>
+        <velocityTopicName>${sensor_namespace}gps/gps/fix_velocity</velocityTopicName>
         <!-- Location of origin of Gazebo Sand Island map -->
         <referenceLatitude>21.30996</referenceLatitude>
         <referenceLongitude>-157.8901</referenceLongitude>
