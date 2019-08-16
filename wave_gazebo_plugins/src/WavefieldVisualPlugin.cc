@@ -67,6 +67,8 @@ namespace asv
     public: Ogre::Camera *camera;
     public: Ogre::Root *root;
     public: Ogre::SceneManager* mSceneMgr;
+    public: Ogre::SceneNode *cameraNode;
+    public: Ogre::SceneNode *sceneNode;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,6 +101,19 @@ namespace asv
     // OGRE
     this->data->root = Ogre::Root::getSingletonPtr();
     this->data->mSceneMgr = this->data->root->createSceneManager(Ogre::ST_EXTERIOR_CLOSE);
+    this->data->sceneNode = this->data->mSceneMgr->getRootSceneNode()->createChildSceneNode("mycam_SceneNode");
+    this->data->camera = this->data->mSceneMgr->createCamera("mycam");
+    this->data->cameraNode = this->data->sceneNode->createChildSceneNode("mycam_cameraNode");
+    this->data->cameraNode->attachObject(this->data->camera);
+  
+    this->data->cameraNode->yaw(Ogre::Degree(-90.0));
+    this->data->cameraNode->roll(Ogre::Degree(-90.0));
+    this->data->camera = this->data->mSceneMgr->createCamera("PlayerCam");
+
+    this->data->camera->setPosition(Ogre::Vector3(0, 0, 80));
+    this->data->camera->lookAt(Ogre::Vector3(0, 0, -300));
+    this->data->camera->setNearClipDistance(5);
+
     this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
     this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
     //
