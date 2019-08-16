@@ -22,6 +22,7 @@
   <depend>message_runtime</depend>
   <depend>std_msgs</depend>
   <depend>wamv_gazebo</depend>
+  <depend>wave_gazebo</depend>
   <depend>xacro</depend>
   <export>
     <gazebo_ros gazebo_model_path="${prefix}/models"/>

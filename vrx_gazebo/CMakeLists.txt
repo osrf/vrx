@@ -18,6 +18,7 @@ find_package (gazebo REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   message_generation
   wamv_gazebo
+  wave_gazebo
   xacro
   gazebo_dev
   geographic_msgs
@@ -51,7 +52,7 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
+  CATKIN_DEPENDS wamv_gazebo wave_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
 )
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}") 
