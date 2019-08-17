@@ -96,11 +96,11 @@ namespace asv
     rendering::VisualPtr _visual,
     sdf::ElementPtr _sdf)
   {
+    // Only load plugin once
     static int i = 0;
     i++;
     if (i == 2) { return; }
 
-    gzerr << "IN LOAD" << std::endl;
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
     GZ_ASSERT(_sdf != nullptr, "SDF Element must not be null");
@@ -109,63 +109,58 @@ namespace asv
     this->data->visual = _visual;
     this->data->sdf = _sdf;
 
-    gzerr << "ABOUT TO OGRE" << std::endl;
-    // OGRE
+    // OGRE setup
     this->data->root = Ogre::Root::getSingletonPtr();
-    //this->data->scene = gazebo::rendering::get_scene("default");
     this->data->scene = _visual->GetScene();
-    gzerr << "SETUP SCENE DONE" << std::endl;
-    this->data->sceneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode(
-        "mycam_SceneNode" + std::to_string(i));
-    gzerr << "SETUP SCENE NODE DONE" << std::endl;
-    //this->data->camera = this->data->scene->GetUserCamera( 0 );
-    this->data->camera = this->data->scene->OgreSceneManager()->createCamera("mycam" + std::to_string(i));
-    gzerr << "SETUP CAMERA DONE" << std::endl;
-    this->data->cameraNode = this->data->sceneNode->createChildSceneNode(
-        "mycam_cameraNode" + std::to_string(i));
-    gzerr << "SETUP CAMERA NODE DONE" << std::endl;
-    this->data->cameraNode->attachObject(this->data->camera);
-    this->data->cameraNode->yaw(Ogre::Degree(-90.0));
-    this->data->cameraNode->roll(Ogre::Degree(-90.0));
-    gzerr << "MOVED CAMERA NODE" << std::endl;
 
+    // Setup camera from user camera
     gazebo::rendering::UserCameraPtr user_camera = this->data->scene->GetUserCamera(0);
     ignition::math::Pose3d pose = user_camera->InitialPose();
     this->data->camera = user_camera->OgreCamera();
     Ogre::Camera *mCamera = this->data->camera;
-      
     this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
     this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
     this->data->camera->setNearClipDistance(5);
-    gzerr << "MOVED CAMERA" << std::endl;
 
-    //this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
-    gzerr << "RENDERTEXTURE MADE" << std::endl;
-    // this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
-    gzerr << "SET RENDER TARGET DONE" << std::endl;
-
-    // TESTING TUTORIAL
+    // TESTING TUTORIAL setup
     Ogre::MovablePlane* mPlane(0);
     Ogre::Entity* mPlaneEntity(0);
     Ogre::SceneNode* mPlaneNode(0);
     Ogre::Rectangle2D* mMiniScreen(0);
-    Ogre::RenderWindow* mWindow(0);
-    gzerr << "**************" << std::endl;
-    gzerr << "Initialized" << std::endl;
-    //mWindow = this->data->root->initialise(true, "ITutorial" + std::to_string(i));
-    gzerr << "made window" << std::endl;
-    this->data->scene->OgreSceneManager()->setAmbientLight(Ogre::ColourValue(0.2, 0.2, 0.2));
 
+    // Add lighting
+    this->data->scene->OgreSceneManager()->setAmbientLight(Ogre::ColourValue(0.2, 0.2, 0.2));
     Ogre::Light* light = this->data->scene->OgreSceneManager()->createLight("mylight" + std::to_string(i));
     light->setPosition(20, 80, 50);
-    gzerr << "Light made" << std::endl;
-    Ogre::MaterialPtr mat =
-      Ogre::MaterialManager::getSingleton().create(
-      "PlaneMat" + std::to_string(i), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    gzerr << "Made mat" << std::endl;
-    Ogre::TextureUnitState* tuisTexture =
-      mat->getTechnique(0)->getPass(0)->createTextureUnitState("/home/tylerlum/vrx_ws/src/vrx/wave_gazebo/world_models/ocean_waves/materials/textures/clouds_rt.jpg");
-    gzerr << "Made tex" << std::endl;
+
+    // Create render texture
+    Ogre::TexturePtr rttTexture =
+      Ogre::TextureManager::getSingleton().createManual(
+        "mytexture",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+        Ogre::TEX_TYPE_2D, 
+        200, 200, 
+        0, 
+        Ogre::PF_R8G8B8, 
+        Ogre::TU_RENDERTARGET);
+    Ogre::RenderTexture* renderTexture = rttTexture->getBuffer()->getRenderTarget();
+
+    // Setup render texture
+    renderTexture->addViewport(mCamera);
+    renderTexture->getViewport(0)->setClearEveryFrame(true);
+    renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
+    renderTexture->getViewport(0)->setOverlaysEnabled(false);
+    this->data->renderTarget = renderTexture;
+    renderTexture->update();
+    renderTexture->addListener(this);
+    renderTexture->writeContentsToFile("/home/tylerlum/start.png");
+    Ogre::MaterialPtr renderMaterial =
+      Ogre::MaterialManager::getSingleton().getByName(
+        "reflection");
+    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+    renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+
+    // Create Plane for reflection texture
     this->data->plane = new Ogre::MovablePlane("Plane" + std::to_string(i));
     mPlane = this->data->plane;
     mPlane->d = 1;
@@ -178,151 +173,57 @@ namespace asv
       true,
       1, 1, 1,
       Ogre::Vector3::UNIT_Y);
+
+    // Create Plane entity with correct material and texture
     mPlaneEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
-    mPlaneEntity->setMaterialName("PlaneMat" + std::to_string(i));
-    
-    gzerr << "Made plane and mesh" << std::endl;
-    Ogre::TexturePtr rttTexture =
-      Ogre::TextureManager::getSingleton().createManual(
-        "mytexture",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
-        Ogre::TEX_TYPE_2D, 
-        200, 200, 
-        0, 
-        Ogre::PF_R8G8B8, 
-        Ogre::TU_RENDERTARGET);
-    gzerr << "Made texture" << std::endl;
+    mPlaneEntity->setMaterialName("reflection");
+    mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    mPlaneNode->attachObject(mPlaneEntity);
 
-    Ogre::RenderTexture* renderTexture = rttTexture->getBuffer()->getRenderTarget();
-
-    //renderTexture->addViewport(this->data->camera);
-    renderTexture->addViewport(mCamera);
-    renderTexture->getViewport(0)->setClearEveryFrame(true);
-    renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
-    renderTexture->getViewport(0)->setOverlaysEnabled(false);
-    this->data->renderTarget = renderTexture;
-    //this->SetRenderTarget(renderTexture);
-
-    gzerr << "Render texture made" << std::endl;
-    renderTexture->update();
-    renderTexture->writeContentsToFile("/home/tylerlum/start.png");
-    //mMiniScreen = new Ogre::Rectangle2D(true);
+    // Create miniscreen and node
     this->data->miniscreen = new Ogre::Rectangle2D(true);
     mMiniScreen = this->data->miniscreen;
 
-    // miniscreen
     mMiniScreen->setCorners(.5, 1.0, 1.0, .5);
     mMiniScreen->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
     Ogre::SceneNode* miniScreenNode =
       this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     miniScreenNode->attachObject(mMiniScreen);
-
-    Ogre::MaterialPtr renderMaterial =
-      Ogre::MaterialManager::getSingleton().getByName(
-        "reflection");
-    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
-    //gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureName() << std::endl;
-    //gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureNameAlias() << std::endl;
-    //renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(
-  //"mytexture");
-    gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureName() << std::endl;
-    gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureNameAlias() << std::endl;
-
-    
-    gzerr << "Material setup" << std::endl;
-    renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-   // renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
     mMiniScreen->setMaterial("reflection");
-    gzerr << "Mini screen made" << std::endl;
-    gzerr << "Mini screen made 2" << std::endl;
-   // mPlaneEntity->setMaterialName("reflection");
-    mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
-    mPlaneNode->attachObject(mPlaneEntity);
 
-    renderTexture->addListener(this);
-    //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
-    gzerr << "CONNECTION SETUP" << std::endl;
   }
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    gzerr << "ON UPDATE OUTSIDE" << std::endl;
     if (this->data->renderTarget)
     {
-      //gzerr << "ON UPDATE INSIDE" << std::endl;
       this->data->renderTarget->update();
     }
   }
 
-  void WavefieldVisualPlugin::SetRenderTarget(Ogre::RenderTarget *_target)
-  {
-    gzerr << "SET RENDER TARGET" << std::endl;
-    this->data->renderTarget = _target;
-
-    if (this->data->renderTarget)
-    {
-      // Setup the viewport to use the texture
-      this->data->viewport = this->data->renderTarget->addViewport(this->data->camera);
-      this->data->viewport->setClearEveryFrame(true);
-      this->data->viewport->setShadowsEnabled(true);
-      this->data->viewport->setOverlaysEnabled(false);
-
-      gazebo::rendering::RTShaderSystem::AttachViewport(this->data->viewport, this->data->scene);
-
-      //auto const &ignBG = this->scene->BackgroundColor();
-      //this->data->viewport->setBackgroundColour(Conversions::Convert(ignBG));
-      //this->data->viewport->setVisibilityMask(GZ_VISIBILITY_ALL &
-      //   ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    }
-  //  if (this->data->renderTarget)
-  //  {
-  //    this->data->viewport = this->data->renderTarget->addViewport(this->data->camera);
-  //    this->data->viewport->setClearEveryFrame(true);
-  //    this->data->viewport->setShadowsEnabled(true);
-  //    this->data->viewport->setOverlaysEnabled(false);
-  //    this->data->viewport->setBackgroundColour(Ogre::ColourValue::Black);
-  //    this->UpdateFOV();
-  //  }
-  }
-
-  // void WavefieldVisualPlugin::UpdateFOV()
-  // {
-  //   if (this->data->viewport)
-  //   {
-  //     this->data->viewport->setDimensions(0, 0, 1, 1);
-  //     double ratio = static_cast<double>(this->data->viewport->getActualWidth()) / static_cast<double>(this->data->viewport->getActualHeight());
-  //     double hfov = this->HFOV().Radian();
-  //     double vfov = 2.0 * atan(tan(hfov/2.0) / ratio);
-  //   }
-  // }
-
   void WavefieldVisualPlugin::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-    gzerr << "PRERENDER" << std::endl;
     if (this->data->camera)
     {
       this->data->camera->enableReflection(this->data->plane);
     }
     if (this->data->miniscreen)
     {
-      //gzerr << "PRERENDER in " << std::endl;
       this->data->miniscreen->setVisible(false);
     }
   }
   
   void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-    gzerr << "POSTRENDER" << std::endl;
     if (this->data->camera)
     {
       this->data->camera->disableReflection();
     }
     if (this->data->miniscreen)
     {
-      //gzerr << "POSTRENDER in" << std::endl;
       this->data->miniscreen->setVisible(true);
     }
   }
