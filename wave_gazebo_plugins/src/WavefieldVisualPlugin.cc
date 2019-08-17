@@ -140,15 +140,23 @@ namespace asv
     Ogre::Entity* mPlaneEntity(0);
     Ogre::SceneNode* mPlaneNode(0);
     Ogre::Rectangle2D* mMiniScreen(0);
+    Ogre::RenderWindow* mWindow(0);
+    gzerr << "**************" << std::endl;
+    gzerr << "Initialized" << std::endl;
+    //mWindow = this->data->root->initialise(true, "ITutorial" + std::to_string(i));
+    gzerr << "made window" << std::endl;
     this->data->scene->OgreSceneManager()->setAmbientLight(Ogre::ColourValue(0.2, 0.2, 0.2));
 
     Ogre::Light* light = this->data->scene->OgreSceneManager()->createLight("mylight" + std::to_string(i));
     light->setPosition(20, 80, 50);
+    gzerr << "Light made" << std::endl;
     Ogre::MaterialPtr mat =
       Ogre::MaterialManager::getSingleton().create(
       "PlaneMat" + std::to_string(i), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    gzerr << "Made mat" << std::endl;
     Ogre::TextureUnitState* tuisTexture =
       mat->getTechnique(0)->getPass(0)->createTextureUnitState("/home/tylerlum/vrx_ws/src/vrx/wave_gazebo/world_models/ocean_waves/materials/textures/clouds_rt.jpg");
+    gzerr << "Made tex" << std::endl;
     mPlane = new Ogre::MovablePlane("Plane" + std::to_string(i));
     mPlane->d = 0;
     mPlane->normal = Ogre::Vector3::UNIT_Y;
@@ -165,6 +173,15 @@ namespace asv
     
     mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     mPlaneNode->attachObject(mPlaneEntity);
+    Ogre::TexturePtr rttTexture =
+      Ogre::TextureManager::getSingleton().createManual(
+        "RttTex" + std::to_string(i), 
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+        Ogre::TEX_TYPE_2D, 
+        200, 200, 
+        0, 
+        Ogre::PF_R8G8B8, 
+        Ogre::TU_RENDERTARGET);
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
