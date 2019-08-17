@@ -97,6 +97,7 @@ namespace asv
   {
     static int i = 0;
     i++;
+    if (i == 2) { return; }
 
     gzerr << "IN LOAD" << std::endl;
     // Capture visual and plugin SDF
