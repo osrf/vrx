@@ -215,17 +215,19 @@ namespace asv
     miniScreenNode->attachObject(mMiniScreen);
 
     Ogre::MaterialPtr renderMaterial =
-      Ogre::MaterialManager::getSingleton().create(
-        "RttMat" + std::to_string(i),
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+      Ogre::MaterialManager::getSingleton().getByName(
+        "reflection");
+    renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(
+  "mytexture");
+
     
     gzerr << "Material setup" << std::endl;
     renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
-    mMiniScreen->setMaterial("RttMat" + std::to_string(i));
+   // renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+    mMiniScreen->setMaterial("reflection");
     gzerr << "Mini screen made" << std::endl;
     gzerr << "Mini screen made 2" << std::endl;
-    mPlaneEntity->setMaterialName("RttMat" + std::to_string(i));
+    mPlaneEntity->setMaterialName("reflection");
     mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     mPlaneNode->attachObject(mPlaneEntity);
 

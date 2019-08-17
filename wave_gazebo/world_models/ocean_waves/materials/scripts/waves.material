@@ -28,7 +28,7 @@ material reflection
       }
       texture_unit
       {
-        texture reflection
+        texture reflectionTexture
         tex_address_mode clamp
       }
     }
