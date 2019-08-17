@@ -53,6 +53,8 @@ namespace asv
   /// \brief Private data for the WavefieldVisualPlugin
   class WavefieldVisualPluginPrivate
   {
+    public: WavefieldVisualPluginPrivate() : renderTargetListener() {}
+
     /// \brief The visual containing this plugin.
     public: rendering::VisualPtr visual;
 
@@ -72,7 +74,8 @@ namespace asv
     public: Ogre::SceneNode *sceneNode;
     public: Ogre::Viewport *viewport;
     public: gazebo::rendering::ScenePtr scene;
-    public: EditorRenderTargetListenerPtr renderTargetListener;
+    public: WavefieldRenderTargetListenerPtr renderTargetListener;
+    public: Ogre::Rectangle2D* miniscreen;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,7 +89,7 @@ namespace asv
 
   WavefieldVisualPlugin::WavefieldVisualPlugin() :
     VisualPlugin(),
-    data(new WavefieldVisualPluginPrivate)
+    data(new WavefieldVisualPluginPrivate())
   {
   }
 
@@ -178,6 +181,7 @@ namespace asv
     
     mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     mPlaneNode->attachObject(mPlaneEntity);
+    gzerr << "Made plane and mesh" << std::endl;
     Ogre::TexturePtr rttTexture =
       Ogre::TextureManager::getSingleton().createManual(
         "RttTex" + std::to_string(i), 
@@ -187,6 +191,7 @@ namespace asv
         0, 
         Ogre::PF_R8G8B8, 
         Ogre::TU_RENDERTARGET);
+    gzerr << "Made texture" << std::endl;
 
     Ogre::RenderTexture* renderTexture = rttTexture->getBuffer()->getRenderTarget();
 
@@ -197,9 +202,12 @@ namespace asv
     renderTexture->getViewport(0)->setOverlaysEnabled(false);
     this->data->renderTarget = renderTexture;
 
+    gzerr << "Render texture made" << std::endl;
     renderTexture->update();
     renderTexture->writeContentsToFile("/home/tylerlum/start.png");
-    mMiniScreen = new Ogre::Rectangle2D(true);
+    //mMiniScreen = new Ogre::Rectangle2D(true);
+    this->data->miniscreen = new Ogre::Rectangle2D(true);
+    mMiniScreen = this->data->miniscreen;
 
     // miniscreen
     mMiniScreen->setCorners(.5, 1.0, 1.0, .5);
@@ -213,9 +221,14 @@ namespace asv
         "RttMat" + std::to_string(i),
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     
+    gzerr << "Material setup" << std::endl;
     renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
     renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex" + std::to_string(i));
     mMiniScreen->setMaterial("RttMat" + std::to_string(i));
+    gzerr << "Mini screen made" << std::endl;
+    this->data->renderTargetListener->miniscreen = this->data->miniscreen;
+    gzerr << "Mini screen made 2" << std::endl;
+
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
@@ -275,4 +288,24 @@ namespace asv
   //   }
   // }
 
+  WavefieldRenderTargetListener::WavefieldRenderTargetListener() :
+    Ogre::RenderTargetListener()
+  {
+  }
+
+  void WavefieldRenderTargetListener::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
+  {
+    if (this->miniscreen)
+    {
+      this->miniscreen->setVisible(false);
+    }
+  }
+  
+  void WavefieldRenderTargetListener::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
+  {
+    if (this->miniscreen)
+    {
+      this->miniscreen->setVisible(true);
+    }
+  }
 }

@@ -86,6 +86,8 @@ namespace asv
     /// the source render target.
     public: virtual void postRenderTargetUpdate(
                 const Ogre::RenderTargetEvent &_evt);
+
+    public: Ogre::Rectangle2D* miniscreen;
   };
 
 
