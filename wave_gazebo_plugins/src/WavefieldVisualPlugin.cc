@@ -118,8 +118,8 @@ namespace asv
     ignition::math::Pose3d pose = user_camera->InitialPose();
     this->data->camera = user_camera->OgreCamera();
     Ogre::Camera *mCamera = this->data->camera;
-    this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
-    this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
+    //this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
+    //this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
     this->data->camera->setNearClipDistance(5);
 
     // TESTING TUTORIAL setup
@@ -164,7 +164,7 @@ namespace asv
     this->data->plane = new Ogre::MovablePlane("Plane" + std::to_string(i));
     mPlane = this->data->plane;
     mPlane->d = 1;
-    mPlane->normal = Ogre::Vector3::UNIT_Z;
+    mPlane->normal = Ogre::Vector3::UNIT_Y;
     Ogre::MeshManager::getSingleton().createPlane(
       "PlaneMesh" + std::to_string(i),
       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -172,7 +172,7 @@ namespace asv
       100, 100, 1, 1,
       true,
       1, 1, 1,
-      Ogre::Vector3::UNIT_Y);
+      Ogre::Vector3::UNIT_Z);
 
     // Create Plane entity with correct material and texture
     mPlaneEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
