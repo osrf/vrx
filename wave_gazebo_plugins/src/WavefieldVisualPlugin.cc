@@ -176,10 +176,8 @@ namespace asv
       1, 1, 1,
       Ogre::Vector3::UNIT_Z);
     mPlaneEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
-    mPlaneEntity->setMaterialName("PlaneMat" + std::to_string(i));
+    // mPlaneEntity->setMaterialName("PlaneMat" + std::to_string(i));
     
-    mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
-    mPlaneNode->attachObject(mPlaneEntity);
     gzerr << "Made plane and mesh" << std::endl;
     Ogre::TexturePtr rttTexture =
       Ogre::TextureManager::getSingleton().createManual(
@@ -226,6 +224,9 @@ namespace asv
     mMiniScreen->setMaterial("RttMat" + std::to_string(i));
     gzerr << "Mini screen made" << std::endl;
     gzerr << "Mini screen made 2" << std::endl;
+    mPlaneEntity->setMaterialName("RttMat" + std::to_string(i));
+    mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    mPlaneNode->attachObject(mPlaneEntity);
 
     renderTexture->addListener(this);
     //
