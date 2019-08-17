@@ -19,18 +19,25 @@ material reflection
     pass
     {
       scene_blend alpha_blend
-      vertex_program_ref reflectionV
-      {
-      }
-
-      fragment_program_ref reflectionF
-      {
-      }
+//      vertex_program_ref reflectionV
+//      {
+//      }
+//
+//      fragment_program_ref reflectionF
+//      {
+//      }
 //      texture_unit
 //      {
 //        texture reflectionTexture
 //        tex_address_mode clamp
 //      }
+      texture_unit
+      {
+        texture ../textures/wave_normals.dds
+        tex_coord_set 0
+        scale 0.1 0.1
+        filtering linear linear linear
+      }
     }
   }
 }
