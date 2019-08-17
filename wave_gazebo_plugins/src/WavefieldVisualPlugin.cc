@@ -17,6 +17,7 @@
 #include <memory>
 #include <thread>
 #include <vector>
+#include <string>
 
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/Event.hh>
@@ -91,6 +92,9 @@ namespace asv
     rendering::VisualPtr _visual,
     sdf::ElementPtr _sdf)
   {
+    static int i = 0;
+    i++;
+
     gzerr << "IN LOAD" << std::endl;
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
@@ -107,13 +111,13 @@ namespace asv
     this->data->scene = _visual->GetScene();
     gzerr << "SETUP SCENE DONE" << std::endl;
     this->data->sceneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode(
-        "mycam_SceneNode");
+        "mycam_SceneNode" + std::to_string(i));
     gzerr << "SETUP SCENE NODE DONE" << std::endl;
     //this->data->camera = this->data->scene->GetUserCamera( 0 );
-    this->data->camera = this->data->scene->OgreSceneManager()->createCamera("mycam");
+    this->data->camera = this->data->scene->OgreSceneManager()->createCamera("mycam" + std::to_string(i));
     gzerr << "SETUP CAMERA DONE" << std::endl;
     this->data->cameraNode = this->data->sceneNode->createChildSceneNode(
-        "mycam_cameraNode");
+        "mycam_cameraNode" + std::to_string(i));
     gzerr << "SETUP CAMERA NODE DONE" << std::endl;
     this->data->cameraNode->attachObject(this->data->camera);
     this->data->cameraNode->yaw(Ogre::Degree(-90.0));
