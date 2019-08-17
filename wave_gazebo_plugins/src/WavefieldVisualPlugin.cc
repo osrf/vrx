@@ -72,6 +72,7 @@ namespace asv
     public: Ogre::SceneNode *sceneNode;
     public: Ogre::Viewport *viewport;
     public: gazebo::rendering::ScenePtr scene;
+    public: EditorRenderTargetListenerPtr renderTargetListener;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
