@@ -33,6 +33,7 @@
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
+#include "gazebo/rendering/RTShaderSystem.hh"
 #include "gazebo/rendering/ogre_gazebo.h"
 
 #include "wave_gazebo_plugins/WavefieldVisualPlugin.hh"
@@ -158,7 +159,7 @@ namespace asv
       this->data->viewport->setShadowsEnabled(true);
       this->data->viewport->setOverlaysEnabled(false);
 
-      //RTShaderSystem::AttachViewport(this->data->viewport, this->GetScene());
+      gazebo::rendering::RTShaderSystem::AttachViewport(this->data->viewport, this->data->scene);
 
       //auto const &ignBG = this->scene->BackgroundColor();
       //this->data->viewport->setBackgroundColour(Conversions::Convert(ignBG));
