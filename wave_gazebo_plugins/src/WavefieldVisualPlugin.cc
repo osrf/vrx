@@ -134,6 +134,12 @@ namespace asv
     gzerr << "RENDERTEXTURE MADE" << std::endl;
     this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
     gzerr << "SET RENDER TARGET DONE" << std::endl;
+
+    // TESTING
+    this->data->scene->OgreSceneManager()->setAmbientLight(Ogre::ColourValue(0.2, 0.2, 0.2));
+
+    Ogre::Light* light = this->data->scene->OgreSceneManager()->createLight("mylight" + std::to_string(i));
+    light->setPosition(20, 80, 50);
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
