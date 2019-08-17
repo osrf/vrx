@@ -143,7 +143,12 @@ namespace asv
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    //gzerr << "ON UPDATE" << std::endl;
+    gzerr << "ON UPDATE OUTSIDE" << std::endl;
+    if (this->data->renderTarget)
+    {
+      gzerr << "ON UPDATE INSIDE" << std::endl;
+      this->data->renderTarget->update();
+    }
   }
 
   void WavefieldVisualPlugin::SetRenderTarget(Ogre::RenderTarget *_target)
