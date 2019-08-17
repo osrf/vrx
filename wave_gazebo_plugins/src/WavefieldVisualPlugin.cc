@@ -217,8 +217,13 @@ namespace asv
     Ogre::MaterialPtr renderMaterial =
       Ogre::MaterialManager::getSingleton().getByName(
         "reflection");
-    renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(
-  "mytexture");
+    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+    //gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureName() << std::endl;
+    //gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureNameAlias() << std::endl;
+    //renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(
+  //"mytexture");
+    gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureName() << std::endl;
+    gzerr << "**************** " << renderMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureNameAlias() << std::endl;
 
     
     gzerr << "Material setup" << std::endl;
@@ -293,20 +298,20 @@ namespace asv
 
   void WavefieldVisualPlugin::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-    gzerr << "PRERENDER" << std::endl;
+    //gzerr << "PRERENDER" << std::endl;
     if (this->data->miniscreen)
     {
-      gzerr << "PRERENDER in " << std::endl;
+      //gzerr << "PRERENDER in " << std::endl;
       this->data->miniscreen->setVisible(false);
     }
   }
   
   void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-    gzerr << "POSTRENDER" << std::endl;
+    //gzerr << "POSTRENDER" << std::endl;
     if (this->data->miniscreen)
     {
-      gzerr << "POSTRENDER in" << std::endl;
+      //gzerr << "POSTRENDER in" << std::endl;
       this->data->miniscreen->setVisible(true);
     }
   }

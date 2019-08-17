@@ -26,11 +26,11 @@ material reflection
       fragment_program_ref reflectionF
       {
       }
-      texture_unit
-      {
-        texture reflectionTexture
-        tex_address_mode clamp
-      }
+//      texture_unit
+//      {
+//        texture reflectionTexture
+//        tex_address_mode clamp
+//      }
     }
   }
 }
