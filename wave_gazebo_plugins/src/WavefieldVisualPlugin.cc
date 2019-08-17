@@ -73,6 +73,7 @@ namespace asv
     public: Ogre::Viewport *viewport;
     public: gazebo::rendering::ScenePtr scene;
     public: Ogre::Rectangle2D* miniscreen;
+    public: Ogre::MovablePlane* plane;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,7 +131,8 @@ namespace asv
 
     gazebo::rendering::UserCameraPtr user_camera = this->data->scene->GetUserCamera(0);
     ignition::math::Pose3d pose = user_camera->InitialPose();
-    Ogre::Camera *mCamera = user_camera->OgreCamera();
+    this->data->camera = user_camera->OgreCamera();
+    Ogre::Camera *mCamera = this->data->camera;
       
     this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
     this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
@@ -164,7 +166,8 @@ namespace asv
     Ogre::TextureUnitState* tuisTexture =
       mat->getTechnique(0)->getPass(0)->createTextureUnitState("/home/tylerlum/vrx_ws/src/vrx/wave_gazebo/world_models/ocean_waves/materials/textures/clouds_rt.jpg");
     gzerr << "Made tex" << std::endl;
-    mPlane = new Ogre::MovablePlane("Plane" + std::to_string(i));
+    this->data->plane = new Ogre::MovablePlane("Plane" + std::to_string(i));
+    mPlane = this->data->plane;
     mPlane->d = 1;
     mPlane->normal = Ogre::Vector3::UNIT_Z;
     Ogre::MeshManager::getSingleton().createPlane(
@@ -176,7 +179,7 @@ namespace asv
       1, 1, 1,
       Ogre::Vector3::UNIT_Y);
     mPlaneEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
-    // mPlaneEntity->setMaterialName("PlaneMat" + std::to_string(i));
+    mPlaneEntity->setMaterialName("PlaneMat" + std::to_string(i));
     
     gzerr << "Made plane and mesh" << std::endl;
     Ogre::TexturePtr rttTexture =
@@ -232,7 +235,7 @@ namespace asv
     mMiniScreen->setMaterial("reflection");
     gzerr << "Mini screen made" << std::endl;
     gzerr << "Mini screen made 2" << std::endl;
-    mPlaneEntity->setMaterialName("reflection");
+   // mPlaneEntity->setMaterialName("reflection");
     mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     mPlaneNode->attachObject(mPlaneEntity);
 
@@ -246,7 +249,7 @@ namespace asv
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    //gzerr << "ON UPDATE OUTSIDE" << std::endl;
+    gzerr << "ON UPDATE OUTSIDE" << std::endl;
     if (this->data->renderTarget)
     {
       //gzerr << "ON UPDATE INSIDE" << std::endl;
@@ -298,7 +301,11 @@ namespace asv
 
   void WavefieldVisualPlugin::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-    //gzerr << "PRERENDER" << std::endl;
+    gzerr << "PRERENDER" << std::endl;
+    if (this->data->camera)
+    {
+      this->data->camera->enableReflection(this->data->plane);
+    }
     if (this->data->miniscreen)
     {
       //gzerr << "PRERENDER in " << std::endl;
@@ -308,7 +315,11 @@ namespace asv
   
   void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-    //gzerr << "POSTRENDER" << std::endl;
+    gzerr << "POSTRENDER" << std::endl;
+    if (this->data->camera)
+    {
+      this->data->camera->disableReflection();
+    }
     if (this->data->miniscreen)
     {
       //gzerr << "POSTRENDER in" << std::endl;
