@@ -135,13 +135,36 @@ namespace asv
     this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
     gzerr << "SET RENDER TARGET DONE" << std::endl;
 
-    // TESTING
+    // TESTING TUTORIAL
+    Ogre::MovablePlane* mPlane(0);
+    Ogre::Entity* mPlaneEntity(0);
+    Ogre::SceneNode* mPlaneNode(0);
+    Ogre::Rectangle2D* mMiniScreen(0);
     this->data->scene->OgreSceneManager()->setAmbientLight(Ogre::ColourValue(0.2, 0.2, 0.2));
 
     Ogre::Light* light = this->data->scene->OgreSceneManager()->createLight("mylight" + std::to_string(i));
     light->setPosition(20, 80, 50);
-    gazebo::rendering::UserCameraPtr cam = this->data->scene->GetUserCamera( 0 );
-    cam->MoveToVisual(_visual);
+    Ogre::MaterialPtr mat =
+      Ogre::MaterialManager::getSingleton().create(
+      "PlaneMat" + std::to_string(i), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::TextureUnitState* tuisTexture =
+      mat->getTechnique(0)->getPass(0)->createTextureUnitState("wave_normals.dds");
+    mPlane = new Ogre::MovablePlane("Plane" + std::to_string(i));
+    mPlane->d = 0;
+    mPlane->normal = Ogre::Vector3::UNIT_Y;
+    Ogre::MeshManager::getSingleton().createPlane(
+      "PlaneMesh" + std::to_string(i),
+      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+      *mPlane,
+      120, 120, 1, 1,
+      true,
+      1, 1, 1,
+      Ogre::Vector3::UNIT_Z);
+    mPlaneEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
+    mPlaneEntity->setMaterialName("PlaneMat" + std::to_string(i));
+    
+    mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    mPlaneNode->attachObject(mPlaneEntity);
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
