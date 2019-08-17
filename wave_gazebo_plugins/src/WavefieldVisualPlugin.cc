@@ -195,6 +195,14 @@ namespace asv
 
     renderTexture->update();
     renderTexture->writeContentsToFile("/home/tylerlum/start.png");
+    mMiniScreen = new Ogre::Rectangle2D(true);
+
+    // miniscreen
+    mMiniScreen->setCorners(.5, 1.0, 1.0, .5);
+    mMiniScreen->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
+    Ogre::SceneNode* miniScreenNode =
+      this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    miniScreenNode->attachObject(mMiniScreen);
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
