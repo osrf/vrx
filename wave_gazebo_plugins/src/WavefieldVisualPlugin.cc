@@ -125,8 +125,8 @@ namespace asv
     this->data->cameraNode->roll(Ogre::Degree(-90.0));
     gzerr << "MOVED CAMERA NODE" << std::endl;
 
-    this->data->camera->setPosition(Ogre::Vector3(0, 0, 80));
-    this->data->camera->lookAt(Ogre::Vector3(0, 0, -300));
+    this->data->camera->setPosition(Ogre::Vector3(158, 108, 1));
+    this->data->camera->lookAt(Ogre::Vector3(0, 300, -300));
     this->data->camera->setNearClipDistance(5);
     gzerr << "MOVED CAMERA" << std::endl;
 
