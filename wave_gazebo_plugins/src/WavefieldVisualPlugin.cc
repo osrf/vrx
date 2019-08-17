@@ -69,6 +69,7 @@ namespace asv
     public: Ogre::SceneNode *cameraNode;
     public: Ogre::SceneNode *sceneNode;
     public: Ogre::Viewport *viewport;
+    public: gazebo::rendering::ScenePtr scene;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,6 +114,7 @@ namespace asv
     this->data->camera->setPosition(Ogre::Vector3(0, 0, 80));
     this->data->camera->lookAt(Ogre::Vector3(0, 0, -300));
     this->data->camera->setNearClipDistance(5);
+    this->data->scene = gazebo::rendering::get_scene("default");
 
     this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
     this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
