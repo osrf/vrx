@@ -165,16 +165,16 @@ namespace asv
       mat->getTechnique(0)->getPass(0)->createTextureUnitState("/home/tylerlum/vrx_ws/src/vrx/wave_gazebo/world_models/ocean_waves/materials/textures/clouds_rt.jpg");
     gzerr << "Made tex" << std::endl;
     mPlane = new Ogre::MovablePlane("Plane" + std::to_string(i));
-    mPlane->d = 0;
-    mPlane->normal = Ogre::Vector3::UNIT_Y;
+    mPlane->d = 1;
+    mPlane->normal = Ogre::Vector3::UNIT_Z;
     Ogre::MeshManager::getSingleton().createPlane(
       "PlaneMesh" + std::to_string(i),
       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
       *mPlane,
-      120, 120, 1, 1,
+      1200, 1200, 1, 1,
       true,
       1, 1, 1,
-      Ogre::Vector3::UNIT_Z);
+      Ogre::Vector3::UNIT_Y);
     mPlaneEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
     // mPlaneEntity->setMaterialName("PlaneMat" + std::to_string(i));
     
