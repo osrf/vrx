@@ -127,6 +127,7 @@ namespace asv
 
     gazebo::rendering::UserCameraPtr user_camera = this->data->scene->GetUserCamera(0);
     ignition::math::Pose3d pose = user_camera->InitialPose();
+    Ogre::Camera *mCamera = user_camera->OgreCamera();
       
     this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
     this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
@@ -188,7 +189,8 @@ namespace asv
 
     Ogre::RenderTexture* renderTexture = rttTexture->getBuffer()->getRenderTarget();
 
-    renderTexture->addViewport(this->data->camera);
+    //renderTexture->addViewport(this->data->camera);
+    renderTexture->addViewport(mCamera);
     renderTexture->getViewport(0)->setClearEveryFrame(true);
     renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
     renderTexture->getViewport(0)->setOverlaysEnabled(false);
@@ -210,7 +212,7 @@ namespace asv
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     
     renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex");
+    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex" + std::to_string(i));
     mMiniScreen->setMaterial("RttMat" + std::to_string(i));
     //
     // Bind the update method to ConnectPreRender events
