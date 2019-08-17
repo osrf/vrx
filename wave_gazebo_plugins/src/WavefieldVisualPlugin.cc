@@ -203,6 +203,15 @@ namespace asv
     Ogre::SceneNode* miniScreenNode =
       this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     miniScreenNode->attachObject(mMiniScreen);
+
+    Ogre::MaterialPtr renderMaterial =
+      Ogre::MaterialManager::getSingleton().create(
+        "RttMat" + std::to_string(i),
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    
+    renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex");
+    mMiniScreen->setMaterial("RttMat" + std::to_string(i));
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
