@@ -148,7 +148,7 @@ namespace asv
       Ogre::MaterialManager::getSingleton().create(
       "PlaneMat" + std::to_string(i), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     Ogre::TextureUnitState* tuisTexture =
-      mat->getTechnique(0)->getPass(0)->createTextureUnitState("wave_normals.dds");
+      mat->getTechnique(0)->getPass(0)->createTextureUnitState("/home/tylerlum/vrx_ws/src/vrx/wave_gazebo/world_models/ocean_waves/materials/textures/clouds_rt.jpg");
     mPlane = new Ogre::MovablePlane("Plane" + std::to_string(i));
     mPlane->d = 0;
     mPlane->normal = Ogre::Vector3::UNIT_Y;
