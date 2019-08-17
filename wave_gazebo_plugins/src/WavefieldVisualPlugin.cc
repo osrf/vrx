@@ -74,6 +74,7 @@ namespace asv
     public: gazebo::rendering::ScenePtr scene;
     public: Ogre::Rectangle2D* miniscreen;
     public: Ogre::MovablePlane* plane;
+    public: Ogre::Entity* planeEntity;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,7 +176,8 @@ namespace asv
       Ogre::Vector3::UNIT_Z);
 
     // Create Plane entity with correct material and texture
-    mPlaneEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
+    this->data->planeEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
+    mPlaneEntity = this->data->planeEntity;
     mPlaneEntity->setMaterialName("reflection");
     mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     mPlaneNode->attachObject(mPlaneEntity);
@@ -206,6 +208,10 @@ namespace asv
 
   void WavefieldVisualPlugin::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
+    if (this->data->planeEntity)
+    {
+      this->data->planeEntity->setVisible(false);
+    }
     if (this->data->camera)
     {
       this->data->camera->enableReflection(this->data->plane);
@@ -218,6 +224,10 @@ namespace asv
   
   void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
+    if (this->data->planeEntity)
+    {
+      this->data->planeEntity->setVisible(true);
+    }
     if (this->data->camera)
     {
       this->data->camera->disableReflection();
