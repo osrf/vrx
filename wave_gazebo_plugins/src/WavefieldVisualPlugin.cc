@@ -182,6 +182,13 @@ namespace asv
         0, 
         Ogre::PF_R8G8B8, 
         Ogre::TU_RENDERTARGET);
+
+    Ogre::RenderTexture* renderTexture = rttTexture->getBuffer()->getRenderTarget();
+
+    renderTexture->addViewport(this->data->camera);
+    renderTexture->getViewport(0)->setClearEveryFrame(true);
+    renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
+    renderTexture->getViewport(0)->setOverlaysEnabled(false);
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
