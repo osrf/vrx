@@ -103,11 +103,13 @@ namespace asv
     gzerr << "ABOUT TO OGRE" << std::endl;
     // OGRE
     this->data->root = Ogre::Root::getSingletonPtr();
-    this->data->scene = gazebo::rendering::get_scene("default");
+    //this->data->scene = gazebo::rendering::get_scene("default");
+    this->data->scene = _visual->GetScene();
     gzerr << "SETUP SCENE DONE" << std::endl;
     this->data->sceneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode(
         "mycam_SceneNode");
     gzerr << "SETUP SCENE NODE DONE" << std::endl;
+    //this->data->camera = this->data->scene->GetUserCamera( 0 );
     this->data->camera = this->data->scene->OgreSceneManager()->createCamera("mycam");
     gzerr << "SETUP CAMERA DONE" << std::endl;
     this->data->cameraNode = this->data->sceneNode->createChildSceneNode(
