@@ -125,8 +125,11 @@ namespace asv
     this->data->cameraNode->roll(Ogre::Degree(-90.0));
     gzerr << "MOVED CAMERA NODE" << std::endl;
 
-    this->data->camera->setPosition(Ogre::Vector3(158, 108, 1));
-    this->data->camera->lookAt(Ogre::Vector3(0, 300, -300));
+    gazebo::rendering::UserCameraPtr user_camera = this->data->scene->GetUserCamera(0);
+    ignition::math::Pose3d pose = user_camera->InitialPose();
+      
+    this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
+    this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
     this->data->camera->setNearClipDistance(5);
     gzerr << "MOVED CAMERA" << std::endl;
 

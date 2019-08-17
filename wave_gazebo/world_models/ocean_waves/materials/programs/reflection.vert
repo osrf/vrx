@@ -5,6 +5,6 @@ void main(void)
 {
     color = gl_Vertex;
     vec4 P = gl_Vertex;
-    P.z += 10;
+    //P.z += 10;
     gl_Position = gl_ModelViewProjectionMatrix * P;
 }
