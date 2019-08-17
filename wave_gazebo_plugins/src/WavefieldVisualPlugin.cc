@@ -194,6 +194,7 @@ namespace asv
     renderTexture->getViewport(0)->setClearEveryFrame(true);
     renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
     renderTexture->getViewport(0)->setOverlaysEnabled(false);
+    this->data->renderTarget = renderTexture;
 
     renderTexture->update();
     renderTexture->writeContentsToFile("/home/tylerlum/start.png");
