@@ -140,6 +140,8 @@ namespace asv
 
     Ogre::Light* light = this->data->scene->OgreSceneManager()->createLight("mylight" + std::to_string(i));
     light->setPosition(20, 80, 50);
+    gazebo::rendering::UserCameraPtr cam = this->data->scene->GetUserCamera( 0 );
+    cam->MoveToVisual(_visual);
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
