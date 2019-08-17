@@ -34,15 +34,11 @@ namespace asv
 ///////////////////////////////////////////////////////////////////////////////
 // WavefieldVisualPlugin
 
-  class WavefieldRenderTargetListener;
-  using WavefieldRenderTargetListenerPtr =
-      std::shared_ptr<WavefieldRenderTargetListener>;
-
   /// \internal
   /// \brief Class to hold private data for WavefieldModelPlugin.
   class WavefieldVisualPluginPrivate;
 
-  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin : public gazebo::VisualPlugin
+  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin : public gazebo::VisualPlugin, public Ogre::RenderTargetListener
   {
     /// \brief Destructor.
     public: virtual ~WavefieldVisualPlugin();
@@ -61,35 +57,12 @@ namespace asv
 
     private: void SetRenderTarget(Ogre::RenderTarget *_target);
 
+    private: virtual void preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte);
+    private: virtual void postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte);
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldVisualPluginPrivate> data;
   };
-
-
-  class WavefieldRenderTargetListener : public Ogre::RenderTargetListener
-  {
-    /// \brief Constructor
-    public: explicit WavefieldRenderTargetListener();
-
-    /// \brief Destructor
-    public: ~WavefieldRenderTargetListener() = default;
-
-    /// \brief Ogre's pre-render update callback
-    /// \param[in] _evt Ogre render target event containing information about
-    /// the source render target.
-    public: virtual void preRenderTargetUpdate(
-                const Ogre::RenderTargetEvent &_evt);
-
-    /// \brief Ogre's post-render update callback
-    /// \param[in] _evt Ogre render target event containing information about
-    /// the source render target.
-    public: virtual void postRenderTargetUpdate(
-                const Ogre::RenderTargetEvent &_evt);
-
-    public: Ogre::Rectangle2D* miniscreen;
-  };
-
 
 }
 

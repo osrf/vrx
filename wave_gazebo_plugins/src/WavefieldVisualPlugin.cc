@@ -53,8 +53,6 @@ namespace asv
   /// \brief Private data for the WavefieldVisualPlugin
   class WavefieldVisualPluginPrivate
   {
-    public: WavefieldVisualPluginPrivate() : renderTargetListener() {}
-
     /// \brief The visual containing this plugin.
     public: rendering::VisualPtr visual;
 
@@ -74,7 +72,6 @@ namespace asv
     public: Ogre::SceneNode *sceneNode;
     public: Ogre::Viewport *viewport;
     public: gazebo::rendering::ScenePtr scene;
-    public: WavefieldRenderTargetListenerPtr renderTargetListener;
     public: Ogre::Rectangle2D* miniscreen;
   };
 
@@ -89,6 +86,7 @@ namespace asv
 
   WavefieldVisualPlugin::WavefieldVisualPlugin() :
     VisualPlugin(),
+    RenderTargetListener(),
     data(new WavefieldVisualPluginPrivate())
   {
   }
@@ -226,9 +224,9 @@ namespace asv
     renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex" + std::to_string(i));
     mMiniScreen->setMaterial("RttMat" + std::to_string(i));
     gzerr << "Mini screen made" << std::endl;
-    this->data->renderTargetListener->miniscreen = this->data->miniscreen;
     gzerr << "Mini screen made 2" << std::endl;
 
+    renderTexture->addListener(this);
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
@@ -238,10 +236,10 @@ namespace asv
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    gzerr << "ON UPDATE OUTSIDE" << std::endl;
+    //gzerr << "ON UPDATE OUTSIDE" << std::endl;
     if (this->data->renderTarget)
     {
-      gzerr << "ON UPDATE INSIDE" << std::endl;
+      //gzerr << "ON UPDATE INSIDE" << std::endl;
       this->data->renderTarget->update();
     }
   }
@@ -288,24 +286,23 @@ namespace asv
   //   }
   // }
 
-  WavefieldRenderTargetListener::WavefieldRenderTargetListener() :
-    Ogre::RenderTargetListener()
+  void WavefieldVisualPlugin::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-  }
-
-  void WavefieldRenderTargetListener::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
-  {
-    if (this->miniscreen)
+    gzerr << "PRERENDER" << std::endl;
+    if (this->data->miniscreen)
     {
-      this->miniscreen->setVisible(false);
+      gzerr << "PRERENDER in " << std::endl;
+      this->data->miniscreen->setVisible(false);
     }
   }
   
-  void WavefieldRenderTargetListener::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
+  void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
   {
-    if (this->miniscreen)
+    gzerr << "POSTRENDER" << std::endl;
+    if (this->data->miniscreen)
     {
-      this->miniscreen->setVisible(true);
+      gzerr << "POSTRENDER in" << std::endl;
+      this->data->miniscreen->setVisible(true);
     }
   }
 }
