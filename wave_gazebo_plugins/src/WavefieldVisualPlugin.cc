@@ -91,6 +91,7 @@ namespace asv
     rendering::VisualPtr _visual,
     sdf::ElementPtr _sdf)
   {
+    gzerr << "IN LOAD" << std::endl;
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
     GZ_ASSERT(_sdf != nullptr, "SDF Element must not be null");
@@ -99,29 +100,38 @@ namespace asv
     this->data->visual = _visual;
     this->data->sdf = _sdf;
 
+    gzerr << "ABOUT TO OGRE" << std::endl;
     // OGRE
     this->data->root = Ogre::Root::getSingletonPtr();
-    this->data->mSceneMgr = this->data->root->createSceneManager(Ogre::ST_EXTERIOR_CLOSE);
-    this->data->sceneNode = this->data->mSceneMgr->getRootSceneNode()->createChildSceneNode("mycam_SceneNode");
-    this->data->camera = this->data->mSceneMgr->createCamera("mycam");
-    this->data->cameraNode = this->data->sceneNode->createChildSceneNode("mycam_cameraNode");
+    this->data->scene = gazebo::rendering::get_scene("default");
+    gzerr << "SETUP SCENE DONE" << std::endl;
+    this->data->sceneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode(
+        "mycam_SceneNode");
+    gzerr << "SETUP SCENE NODE DONE" << std::endl;
+    this->data->camera = this->data->scene->OgreSceneManager()->createCamera("mycam");
+    gzerr << "SETUP CAMERA DONE" << std::endl;
+    this->data->cameraNode = this->data->sceneNode->createChildSceneNode(
+        "mycam_cameraNode");
+    gzerr << "SETUP CAMERA NODE DONE" << std::endl;
     this->data->cameraNode->attachObject(this->data->camera);
-  
     this->data->cameraNode->yaw(Ogre::Degree(-90.0));
     this->data->cameraNode->roll(Ogre::Degree(-90.0));
-    this->data->camera = this->data->mSceneMgr->createCamera("PlayerCam");
+    gzerr << "MOVED CAMERA NODE" << std::endl;
 
     this->data->camera->setPosition(Ogre::Vector3(0, 0, 80));
     this->data->camera->lookAt(Ogre::Vector3(0, 0, -300));
     this->data->camera->setNearClipDistance(5);
-    this->data->scene = gazebo::rendering::get_scene("default");
+    gzerr << "MOVED CAMERA" << std::endl;
 
     this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
+    gzerr << "RENDERTEXTURE MADE" << std::endl;
     this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
+    gzerr << "SET RENDER TARGET DONE" << std::endl;
     //
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
+    gzerr << "CONNECTION SETUP" << std::endl;
   }
 
   void WavefieldVisualPlugin::OnUpdate()
