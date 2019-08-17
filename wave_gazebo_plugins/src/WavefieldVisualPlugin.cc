@@ -171,7 +171,7 @@ namespace asv
       "PlaneMesh" + std::to_string(i),
       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
       *mPlane,
-      1200, 1200, 1, 1,
+      100, 100, 1, 1,
       true,
       1, 1, 1,
       Ogre::Vector3::UNIT_Y);

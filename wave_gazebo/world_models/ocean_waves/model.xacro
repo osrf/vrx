@@ -55,6 +55,7 @@
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh.dae</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
         </geometry>
         <material>
@@ -70,6 +71,7 @@
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
+            <scale>0.1 0.1 0.1</scale>
           </mesh>
         </geometry>
         <material>
