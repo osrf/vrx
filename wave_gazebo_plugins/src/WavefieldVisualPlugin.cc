@@ -137,9 +137,9 @@ namespace asv
     this->data->camera->setNearClipDistance(5);
     gzerr << "MOVED CAMERA" << std::endl;
 
-    this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
+    //this->data->renderTexture = Ogre::TextureManager::getSingleton().createManual("reflection", "General", Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET).getPointer();
     gzerr << "RENDERTEXTURE MADE" << std::endl;
-    this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
+    // this->SetRenderTarget(this->data->renderTexture->getBuffer()->getRenderTarget());
     gzerr << "SET RENDER TARGET DONE" << std::endl;
 
     // TESTING TUTORIAL
@@ -181,7 +181,7 @@ namespace asv
     gzerr << "Made plane and mesh" << std::endl;
     Ogre::TexturePtr rttTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        "RttTex" + std::to_string(i), 
+        "mytexture",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
         Ogre::TEX_TYPE_2D, 
         200, 200, 
@@ -198,6 +198,7 @@ namespace asv
     renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
     renderTexture->getViewport(0)->setOverlaysEnabled(false);
     this->data->renderTarget = renderTexture;
+    //this->SetRenderTarget(renderTexture);
 
     gzerr << "Render texture made" << std::endl;
     renderTexture->update();
@@ -220,7 +221,7 @@ namespace asv
     
     gzerr << "Material setup" << std::endl;
     renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex" + std::to_string(i));
+    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
     mMiniScreen->setMaterial("RttMat" + std::to_string(i));
     gzerr << "Mini screen made" << std::endl;
     gzerr << "Mini screen made 2" << std::endl;

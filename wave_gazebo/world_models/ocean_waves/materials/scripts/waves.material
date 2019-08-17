@@ -6,6 +6,10 @@ vertex_program reflectionV glsl
 fragment_program reflectionF glsl
 {
   source ../programs/reflection.frag
+  default_params
+  {
+    param_named reflectMap int 0
+  }
 }
 
 material reflection
