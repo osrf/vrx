@@ -148,11 +148,13 @@ namespace asv
       Ogre::MaterialManager::getSingleton().create(
         "mymat",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    Ogre::TextureUnitState* t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RustedMetal.jpg");
-    t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+    //Ogre::TextureUnitState* t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RustedMetal.jpg");
+    //t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+    Ogre::TextureUnitState* t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+
     // Blend with base texture
-    t->setColourOperationEx(Ogre::LBX_BLEND_MANUAL, Ogre::LBS_TEXTURE, Ogre::LBS_CURRENT, Ogre::ColourValue::White,
-        Ogre::ColourValue::White, 0.25);
+    //t->setColourOperationEx(Ogre::LBX_BLEND_MANUAL, Ogre::LBS_TEXTURE, Ogre::LBS_CURRENT, Ogre::ColourValue::White,
+        //Ogre::ColourValue::White, 0.25);
     t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
     t->setProjectiveTexturing(true, this->data->camera);
     this->data->renderTarget->addListener(this);
