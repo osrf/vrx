@@ -121,7 +121,7 @@ namespace asv
     Ogre::Camera *mCamera = this->data->camera;
     //this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
     //this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
-    this->data->camera->setNearClipDistance(5);
+    //this->data->camera->setNearClipDistance(5);
 
     // TESTING TUTORIAL setup
     Ogre::MovablePlane* mPlane(0);
@@ -212,10 +212,10 @@ namespace asv
     {
       this->data->planeEntity->setVisible(false);
     }
-    if (this->data->camera)
-    {
-      this->data->camera->enableReflection(this->data->plane);
-    }
+    //if (this->data->camera)
+    //{
+    //  this->data->camera->enableReflection(this->data->plane);
+    //}
     if (this->data->miniscreen)
     {
       this->data->miniscreen->setVisible(false);
@@ -228,10 +228,10 @@ namespace asv
     {
       this->data->planeEntity->setVisible(true);
     }
-    if (this->data->camera)
-    {
-      this->data->camera->disableReflection();
-    }
+    //if (this->data->camera)
+    //{
+    //  this->data->camera->disableReflection();
+    //}
     if (this->data->miniscreen)
     {
       this->data->miniscreen->setVisible(true);
