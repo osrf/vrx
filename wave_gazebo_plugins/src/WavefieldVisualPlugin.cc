@@ -66,6 +66,7 @@ namespace asv
     public: Ogre::RenderTarget *renderTarget;
     public: Ogre::Camera *camera;
     public: Ogre::SceneNode *planeNode;
+    public: Ogre::SceneNode *miniscreenNode;
     public: gazebo::rendering::ScenePtr scene;
     public: Ogre::Rectangle2D* miniscreen;
     public: Ogre::MovablePlane* plane;
@@ -124,7 +125,6 @@ namespace asv
     this->data->planeNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     this->data->planeNode->attachObject(this->data->planeEntity);
     this->data->planeNode->attachObject(this->data->plane);
-    //this->data->planeNode->roll(Ogre::Degree(45));
 
     // QUESTION: Create render texture, if I give it the same name as the texture in scripts/waves.material, it would not work for some reason
     Ogre::TexturePtr rttTexture =
@@ -160,6 +160,18 @@ namespace asv
     this->data->camera->enableCustomNearClipPlane(this->data->plane);
     this->data->planeEntity->setMaterialName("mymat");
 
+    // MINISCREEN: Create miniscreen and node (to view what the texture looks like, need to turn off enableReflection to do so)
+    this->data->miniscreen = new Ogre::Rectangle2D(true);
+
+    this->data->miniscreen->setCorners(.5, 1.0, 1.0, .5);
+    this->data->miniscreen->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
+    this->data->miniscreenNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    this->data->miniscreenNode->attachObject(this->data->miniscreen);
+    this->data->miniscreen->setMaterial("mymat");
+
+    // Show rendertexture on oceanwaves, not well scaled or positioned
+    //this->data->visual->SetMaterial("mymat");
+
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
@@ -184,6 +196,10 @@ namespace asv
       this->data->camera->enableReflection(this->data->plane);
       this->data->camera->enableCustomNearClipPlane(this->data->plane);
     }
+    if (this->data->miniscreen)
+    {
+      this->data->miniscreen->setVisible(false);
+    }
   }
   
   void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
@@ -196,6 +212,10 @@ namespace asv
     {
       this->data->camera->disableReflection();
       this->data->camera->disableCustomNearClipPlane();
+    }
+    if (this->data->miniscreen)
+    {
+      this->data->miniscreen->setVisible(true);
     }
   }
 }
