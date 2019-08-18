@@ -140,12 +140,12 @@ namespace asv
 
     // QUESTION: From Pro OGRE 3D Programming: https://books.google.ca/books?id=GifUrbWat14C&pg=PA166&lpg=PA166&dq=ogre+reflection&source=bl&ots=glk0q9tlDg&sig=ACfU3U2g_Zg3zryST6pGEYVmzPOsE06i2w&hl=en&sa=X&ved=2ahUKEwiXvIPFhYvkAhW2JTQIHdbGAdQQ6AEwDHoECAgQAQ#v=onepage&q&f=false, not working for me
     t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
-    //t->setProjectiveTexturing(true, this->data->camera);
+    t->setProjectiveTexturing(true, this->data->camera);
 
     // Create Plane for reflection texture
     this->data->plane = new Ogre::MovablePlane("Plane" + std::to_string(i));
     this->data->plane->d = 1;
-    this->data->plane->normal = Ogre::Vector3::UNIT_Y;
+    this->data->plane->normal = -Ogre::Vector3::UNIT_Z;
     Ogre::MeshManager::getSingleton().createPlane(
       "PlaneMesh" + std::to_string(i),
       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -153,16 +153,17 @@ namespace asv
       100, 100, 1, 1,
       true,
       1, 1, 1,
-      Ogre::Vector3::UNIT_Z);
+      Ogre::Vector3::UNIT_Y);
 
     // Camera reflection and clip plane setup
     this->data->camera->enableReflection(this->data->plane);
-    //this->data->camera->enableCustomNearClipPlane(this->data->plane);
+    this->data->camera->enableCustomNearClipPlane(this->data->plane);
 
     // Create Plane entity with correct material and texture
     this->data->planeEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
     this->data->planeEntity->setMaterialName("mymat");
     this->data->planeNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    this->data->planeNode->setPosition(0, 0, 0);
     this->data->planeNode->attachObject(this->data->planeEntity);
 
     // Create miniscreen and node (to view what the texture looks like, need to turn off enableReflection to do so)
