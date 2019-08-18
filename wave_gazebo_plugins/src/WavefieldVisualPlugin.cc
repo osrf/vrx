@@ -130,7 +130,7 @@ namespace asv
     // the texture in scripts/waves.material, it would not work for some reason
     Ogre::TexturePtr rttTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        "mytexture",
+        "mytexture2",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -148,12 +148,21 @@ namespace asv
     (this->data->renderTarget->getViewport(0)->
      setBackgroundColour(Ogre::ColourValue::Black));
 
+    Ogre::MaterialPtr renderMaterial =
+      Ogre::MaterialManager::getSingleton().create(
+        "mymat",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::TextureUnitState* t = (renderMaterial->getTechnique(0)->getPass(0)->
+      createTextureUnitState("mytexture2"));
+
+    t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+    t->setProjectiveTexturing(true, this->data->camera);
     this->data->renderTarget->addListener(this);
 
     // Camera reflection and clip plane setup
     this->data->camera->enableReflection(this->data->plane);
     this->data->camera->enableCustomNearClipPlane(this->data->plane);
-    this->data->planeEntity->setMaterialName("reflection");
+    this->data->planeEntity->setMaterialName("mymat");
 
     // Show rendertexture on oceanwaves, not well scaled or positioned
     // this->data->visual->SetMaterial("mymat");
