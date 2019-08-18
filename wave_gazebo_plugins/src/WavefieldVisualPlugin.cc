@@ -148,30 +148,12 @@ namespace asv
     (this->data->renderTarget->getViewport(0)->
      setBackgroundColour(Ogre::ColourValue::Black));
 
-    Ogre::MaterialPtr renderMaterial =
-      Ogre::MaterialManager::getSingleton().create(
-        "mymat",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    // Ogre::TextureUnitState* t = (renderMaterial->getTechnique(0)->
-    //   getPass(0)->createTextureUnitState("RustedMetal.jpg"));
-    // t = (renderMaterial->getTechnique(0)->getPass(0)->
-    //   createTextureUnitState("mytexture"));
-    Ogre::TextureUnitState* t = (renderMaterial->getTechnique(0)->getPass(0)->
-      createTextureUnitState("mytexture"));
-
-    // Blend with base texture
-    // t->setColourOperationEx(
-        // Ogre::LBX_BLEND_MANUAL, Ogre::LBS_TEXTURE, Ogre::LBS_CURRENT,
-        // Ogre::ColourValue::White,
-        // Ogre::ColourValue::White, 0.25);
-    t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
-    t->setProjectiveTexturing(true, this->data->camera);
     this->data->renderTarget->addListener(this);
 
     // Camera reflection and clip plane setup
     this->data->camera->enableReflection(this->data->plane);
     this->data->camera->enableCustomNearClipPlane(this->data->plane);
-    this->data->planeEntity->setMaterialName("mymat");
+    this->data->planeEntity->setMaterialName("reflection");
 
     // Show rendertexture on oceanwaves, not well scaled or positioned
     // this->data->visual->SetMaterial("mymat");
