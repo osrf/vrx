@@ -66,6 +66,7 @@ namespace asv
     public: Ogre::Texture *renderTexture;
     public: Ogre::RenderTarget *renderTarget;
     public: Ogre::Camera *camera;
+    public: gazebo::rendering::CameraPtr gzCamera;
     public: Ogre::Root *root;
     public: Ogre::SceneManager* mSceneMgr;
     public: Ogre::SceneNode *cameraNode;
@@ -116,14 +117,21 @@ namespace asv
 
     // Setup camera from user camera
     Ogre::Camera* user_camera = this->data->scene->GetUserCamera(0)->OgreCamera();
-    this->data->camera = this->data->scene->OgreSceneManager()->createCamera("reflectCam");
+    gzerr << "NUM NON USER CAMERAS " << this->data->scene->CameraCount() << std::endl;
+    gzerr << "NUM USER CAMERAS " << this->data->scene->UserCameraCount() << std::endl;
+    this->data->camera = this->data->scene->CreateCamera("reflectCam")->OgreCamera();
+    gzerr << "NUM NON USER CAMERAS " << this->data->scene->CameraCount() << std::endl;
+    gzerr << "NUM USER CAMERAS " << this->data->scene->UserCameraCount() << std::endl;
     //this->data->camera = user_camera;
     Ogre::Camera *mCamera = this->data->camera;
-    mCamera->setPosition(user_camera->getPosition());
-    mCamera->setOrientation(user_camera->getOrientation());
-    mCamera->setNearClipDistance(user_camera->getNearClipDistance());
-    mCamera->setFarClipDistance(user_camera->getFarClipDistance());
-    mCamera->setAspectRatio(user_camera->getAspectRatio());
+    gzerr << __LINE__ << std::endl;
+    //mCamera->setPosition(user_camera->getPosition());
+    //mCamera->setOrientation(user_camera->getOrientation());
+    //mCamera->setNearClipDistance(user_camera->getNearClipDistance());
+    //mCamera->setFarClipDistance(user_camera->getFarClipDistance());
+    gzerr << __LINE__ << std::endl;
+    //mCamera->setAspectRatio(user_camera->getAspectRatio());
+    gzerr << __LINE__ << std::endl;
 
     // TESTING TUTORIAL setup
     Ogre::MovablePlane* mPlane(0);
@@ -149,7 +157,9 @@ namespace asv
     Ogre::RenderTexture* renderTexture = rttTexture->getBuffer()->getRenderTarget();
 
     // Setup render texture
+    gzerr << __LINE__ << std::endl;
     renderTexture->addViewport(mCamera);
+    gzerr << __LINE__ << std::endl;
     renderTexture->getViewport(0)->setClearEveryFrame(true);
     renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
     renderTexture->getViewport(0)->setOverlaysEnabled(false);
@@ -207,6 +217,18 @@ namespace asv
 
   void WavefieldVisualPlugin::OnUpdate()
   {
+    Ogre::Camera* user_camera = this->data->scene->GetUserCamera(0)->OgreCamera();
+    //Ogre::Camera *mCamera = this->data->camera;
+    gzerr << user_camera->getPosition().x << std::endl;
+    gzerr << user_camera->getPosition().y << std::endl;
+    gzerr << user_camera->getPosition().z << std::endl;
+    gzerr << __LINE__ << std::endl;
+    gazebo::rendering::UserCameraPtr c = this->data->scene->GetUserCamera(0);
+    gzerr << c->WorldPosition().X() << std::endl;
+    gzerr << c->WorldPosition().Y() << std::endl;
+    gzerr << c->WorldPosition().Z() << std::endl;
+    //mCamera->setPosition(user_camera->getPosition());
+    //mCamera->setOrientation(user_camera->getOrientation());
     if (this->data->renderTarget)
     {
       this->data->renderTarget->update();
