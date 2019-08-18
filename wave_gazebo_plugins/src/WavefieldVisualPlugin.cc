@@ -108,8 +108,23 @@ namespace asv
     // OGRE setup
     this->data->scene = _visual->GetScene();
 
-    // Setup camera from user camera, may need to create a new camera with same pose based on Pro OGRE 3D Programming: https://books.google.ca/books?id=GifUrbWat14C&pg=PA166&lpg=PA166&dq=ogre+reflection&source=bl&ots=glk0q9tlDg&sig=ACfU3U2g_Zg3zryST6pGEYVmzPOsE06i2w&hl=en&sa=X&ved=2ahUKEwiXvIPFhYvkAhW2JTQIHdbGAdQQ6AEwDHoECAgQAQ#v=onepage&q&f=false
-    this->data->camera = this->data->scene->GetUserCamera(0)->OgreCamera();
+    // Create Plane for reflection texture
+    this->data->plane = new Ogre::MovablePlane("Plane");
+    this->data->plane->d = 0;
+    this->data->plane->normal = Ogre::Vector3::UNIT_Z;
+    Ogre::MeshManager::getSingleton().createPlane(
+      "PlaneMesh",
+      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+      *(this->data->plane),
+      100, 100, 1, 1,
+      true,
+      1, 1, 1,
+      Ogre::Vector3::UNIT_Y);
+    this->data->planeEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh");
+    this->data->planeNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    this->data->planeNode->attachObject(this->data->planeEntity);
+    this->data->planeNode->attachObject(this->data->plane);
+    //this->data->planeNode->roll(Degree(15));
 
     // QUESTION: Create render texture, if I give it the same name as the texture in scripts/waves.material, it would not work for some reason
     Ogre::TexturePtr rttTexture =
@@ -117,67 +132,33 @@ namespace asv
         "mytexture",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
         Ogre::TEX_TYPE_2D, 
-        512, 512, 
+        100, 100, 
         0, 
         Ogre::PF_R8G8B8, 
         Ogre::TU_RENDERTARGET);
     this->data->renderTarget = rttTexture->getBuffer()->getRenderTarget();
 
+    // Setup camera from user camera, may need to create a new camera with same pose based on Pro OGRE 3D Programming: https://books.google.ca/books?id=GifUrbWat14C&pg=PA166&lpg=PA166&dq=ogre+reflection&source=bl&ots=glk0q9tlDg&sig=ACfU3U2g_Zg3zryST6pGEYVmzPOsE06i2w&hl=en&sa=X&ved=2ahUKEwiXvIPFhYvkAhW2JTQIHdbGAdQQ6AEwDHoECAgQAQ#v=onepage&q&f=false
+    this->data->camera = this->data->scene->GetUserCamera(0)->OgreCamera();
+
     // Setup render texture
     this->data->renderTarget->addViewport(this->data->camera);
     this->data->renderTarget->getViewport(0)->setClearEveryFrame(true);
     this->data->renderTarget->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
-    this->data->renderTarget->getViewport(0)->setOverlaysEnabled(false);
-    this->data->renderTarget->writeContentsToFile("/home/tylerlum/start.png");
+
     Ogre::MaterialPtr renderMaterial =
       Ogre::MaterialManager::getSingleton().create(
         "mymat",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     Ogre::TextureUnitState* t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
-    renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-    this->data->renderTarget->update();
-    this->data->renderTarget->addListener(this);
-
-    // QUESTION: From Pro OGRE 3D Programming: https://books.google.ca/books?id=GifUrbWat14C&pg=PA166&lpg=PA166&dq=ogre+reflection&source=bl&ots=glk0q9tlDg&sig=ACfU3U2g_Zg3zryST6pGEYVmzPOsE06i2w&hl=en&sa=X&ved=2ahUKEwiXvIPFhYvkAhW2JTQIHdbGAdQQ6AEwDHoECAgQAQ#v=onepage&q&f=false, not working for me
     t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
     t->setProjectiveTexturing(true, this->data->camera);
-
-    // Create Plane for reflection texture
-    this->data->plane = new Ogre::MovablePlane("Plane" + std::to_string(i));
-    this->data->plane->d = 1;
-    this->data->plane->normal = -Ogre::Vector3::UNIT_Z;
-    Ogre::MeshManager::getSingleton().createPlane(
-      "PlaneMesh" + std::to_string(i),
-      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-      *(this->data->plane),
-      100, 100, 1, 1,
-      true,
-      1, 1, 1,
-      Ogre::Vector3::UNIT_Y);
+    this->data->renderTarget->addListener(this);
 
     // Camera reflection and clip plane setup
     this->data->camera->enableReflection(this->data->plane);
     this->data->camera->enableCustomNearClipPlane(this->data->plane);
-
-    // Create Plane entity with correct material and texture
-    this->data->planeEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
     this->data->planeEntity->setMaterialName("mymat");
-    this->data->planeNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
-    this->data->planeNode->setPosition(0, 0, 0);
-    this->data->planeNode->attachObject(this->data->planeEntity);
-
-    // Create miniscreen and node (to view what the texture looks like, need to turn off enableReflection to do so)
-    //this->data->miniscreen = new Ogre::Rectangle2D(true);
-
-    //this->data->miniscreen->setCorners(.5, 1.0, 1.0, .5);
-    //this->data->miniscreen->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
-    //Ogre::SceneNode* miniScreenNode =
-    //  this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
-    //miniScreenNode->attachObject(this->data->miniscreen);
-    //this->data->miniscreen->setMaterial("mymat");
-
-    // Show rendertexture on oceanwaves, not well scaled or positioned
-    //this->data->visual->SetMaterial("mymat");
 
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
@@ -198,10 +179,6 @@ namespace asv
     {
       this->data->planeEntity->setVisible(false);
     }
-    if (this->data->miniscreen)
-    {
-      this->data->miniscreen->setVisible(false);
-    }
   }
   
   void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
@@ -209,10 +186,6 @@ namespace asv
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(true);
-    }
-    if (this->data->miniscreen)
-    {
-      this->data->miniscreen->setVisible(true);
     }
   }
 }
