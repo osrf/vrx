@@ -62,7 +62,7 @@ namespace asv
     /// \brief Event based connections.
     public: event::ConnectionPtr connection;
 
-    // OGRE 
+    // OGRE
     public: Ogre::RenderTarget *renderTarget;
     public: Ogre::Camera *camera;
     public: Ogre::SceneNode *planeNode;
@@ -119,42 +119,51 @@ namespace asv
       true,
       1, 1, 1,
       Ogre::Vector3::UNIT_Y);
-    this->data->planeEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh");
-    this->data->planeNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    (this->data->planeEntity = this->data->scene->OgreSceneManager()->
+     createEntity("PlaneMesh"));
+    (this->data->planeNode = this->data->scene->OgreSceneManager()->
+     getRootSceneNode()->createChildSceneNode());
     this->data->planeNode->attachObject(this->data->planeEntity);
     this->data->planeNode->attachObject(this->data->plane);
 
-    // QUESTION: Create render texture, if I give it the same name as the texture in scripts/waves.material, it would not work for some reason
+    // QUESTION: Create render texture, if I give it the same name as
+    // the texture in scripts/waves.material, it would not work for some reason
     Ogre::TexturePtr rttTexture =
       Ogre::TextureManager::getSingleton().createManual(
         "mytexture",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
-        Ogre::TEX_TYPE_2D, 
-        512, 512, 
-        0, 
-        Ogre::PF_R8G8B8, 
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+        Ogre::TEX_TYPE_2D,
+        512, 512,
+        0,
+        Ogre::PF_R8G8B8,
         Ogre::TU_RENDERTARGET);
     this->data->renderTarget = rttTexture->getBuffer()->getRenderTarget();
 
-    // Setup camera from user camera, may need to create a new camera with same pose based on Pro OGRE 3D Programming: https://books.google.ca/books?id=GifUrbWat14C&pg=PA166&lpg=PA166&dq=ogre+reflection&source=bl&ots=glk0q9tlDg&sig=ACfU3U2g_Zg3zryST6pGEYVmzPOsE06i2w&hl=en&sa=X&ved=2ahUKEwiXvIPFhYvkAhW2JTQIHdbGAdQQ6AEwDHoECAgQAQ#v=onepage&q&f=false
+    // Setup camera
     this->data->camera = this->data->scene->GetUserCamera(0)->OgreCamera();
 
     // Setup render texture
     this->data->renderTarget->addViewport(this->data->camera);
     this->data->renderTarget->getViewport(0)->setClearEveryFrame(true);
-    this->data->renderTarget->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
+    (this->data->renderTarget->getViewport(0)->
+     setBackgroundColour(Ogre::ColourValue::Black));
 
     Ogre::MaterialPtr renderMaterial =
       Ogre::MaterialManager::getSingleton().create(
         "mymat",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    //Ogre::TextureUnitState* t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RustedMetal.jpg");
-    //t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
-    Ogre::TextureUnitState* t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+    // Ogre::TextureUnitState* t = (renderMaterial->getTechnique(0)->
+    //   getPass(0)->createTextureUnitState("RustedMetal.jpg"));
+    // t = (renderMaterial->getTechnique(0)->getPass(0)->
+    //   createTextureUnitState("mytexture"));
+    Ogre::TextureUnitState* t = (renderMaterial->getTechnique(0)->getPass(0)->
+      createTextureUnitState("mytexture"));
 
     // Blend with base texture
-    //t->setColourOperationEx(Ogre::LBX_BLEND_MANUAL, Ogre::LBS_TEXTURE, Ogre::LBS_CURRENT, Ogre::ColourValue::White,
-        //Ogre::ColourValue::White, 0.25);
+    // t->setColourOperationEx(
+        // Ogre::LBX_BLEND_MANUAL, Ogre::LBS_TEXTURE, Ogre::LBS_CURRENT,
+        // Ogre::ColourValue::White,
+        // Ogre::ColourValue::White, 0.25);
     t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
     t->setProjectiveTexturing(true, this->data->camera);
     this->data->renderTarget->addListener(this);
@@ -165,7 +174,7 @@ namespace asv
     this->data->planeEntity->setMaterialName("mymat");
 
     // Show rendertexture on oceanwaves, not well scaled or positioned
-    //this->data->visual->SetMaterial("mymat");
+    // this->data->visual->SetMaterial("mymat");
 
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
@@ -180,7 +189,8 @@ namespace asv
     }
   }
 
-  void WavefieldVisualPlugin::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
+  void WavefieldVisualPlugin::preRenderTargetUpdate(
+      const Ogre::RenderTargetEvent& rte)
   {
     if (this->data->planeEntity)
     {
@@ -192,8 +202,9 @@ namespace asv
       this->data->camera->enableCustomNearClipPlane(this->data->plane);
     }
   }
-  
-  void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
+
+  void WavefieldVisualPlugin::postRenderTargetUpdate(
+      const Ogre::RenderTargetEvent& rte)
   {
     if (this->data->planeEntity)
     {

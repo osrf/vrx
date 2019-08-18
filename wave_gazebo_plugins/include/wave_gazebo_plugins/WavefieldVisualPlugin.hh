@@ -38,7 +38,9 @@ namespace asv
   /// \brief Class to hold private data for WavefieldModelPlugin.
   class WavefieldVisualPluginPrivate;
 
-  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin : public gazebo::VisualPlugin, public Ogre::RenderTargetListener
+  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin :
+    public gazebo::VisualPlugin,
+    public Ogre::RenderTargetListener
   {
     /// \brief Destructor.
     public: virtual ~WavefieldVisualPlugin();
@@ -57,8 +59,10 @@ namespace asv
 
     private: void SetRenderTarget(Ogre::RenderTarget *_target);
 
-    private: virtual void preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte);
-    private: virtual void postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte);
+    private: virtual void preRenderTargetUpdate(
+                 const Ogre::RenderTargetEvent& rte);
+    private: virtual void postRenderTargetUpdate(
+                 const Ogre::RenderTargetEvent& rte);
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldVisualPluginPrivate> data;
