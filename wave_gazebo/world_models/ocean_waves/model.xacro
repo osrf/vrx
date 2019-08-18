@@ -55,15 +55,15 @@
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh.dae</uri>
-            <scale>0.01 0.01 0.01</scale>
+            <!-- <scale>0.01 0.01 0.01</scale> -->
           </mesh>
         </geometry>
-        <material>
+        <!-- <material>
           <script>
             <uri>model://ocean_waves/materials/scripts/waves.material</uri>
             <name>reflection</name>
           </script>
-        </material>
+        </material> -->
         <laser_retro>-1</laser_retro>
       </visual>
       <visual name="ocean_waves_below_visual">
@@ -71,15 +71,15 @@
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
-            <scale>0.1 0.1 0.1</scale>
+            <!-- <scale>0.1 0.1 0.1</scale> -->
           </mesh>
         </geometry>
-        <material>
+        <!-- <material>
           <script>
             <uri>model://ocean_waves/materials/scripts/waves.material</uri>
             <name>reflection</name>
           </script>
-        </material>
+        </material> -->
         <laser_retro>-1</laser_retro>
       </visual>
     </link>

@@ -197,6 +197,7 @@ namespace asv
     miniScreenNode->attachObject(mMiniScreen);
     mMiniScreen->setMaterial("mymat");
 
+    this->data->visual->SetMaterial("mymat");
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
