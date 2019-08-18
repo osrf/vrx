@@ -176,7 +176,7 @@ namespace asv
       true,
       1, 1, 1,
       Ogre::Vector3::UNIT_Z);
-    //mCamera->enableReflection(this->data->plane);
+    mCamera->enableReflection(this->data->plane);
     //mCamera->enableCustomNearClipPlane(this->data->plane);
 
     // Create Plane entity with correct material and texture
@@ -187,17 +187,17 @@ namespace asv
     mPlaneNode->attachObject(mPlaneEntity);
 
     // Create miniscreen and node
-    this->data->miniscreen = new Ogre::Rectangle2D(true);
-    mMiniScreen = this->data->miniscreen;
+    //this->data->miniscreen = new Ogre::Rectangle2D(true);
+    //mMiniScreen = this->data->miniscreen;
 
-    mMiniScreen->setCorners(.5, 1.0, 1.0, .5);
-    mMiniScreen->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
-    Ogre::SceneNode* miniScreenNode =
-      this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
-    miniScreenNode->attachObject(mMiniScreen);
-    mMiniScreen->setMaterial("mymat");
+    //mMiniScreen->setCorners(.5, 1.0, 1.0, .5);
+    //mMiniScreen->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
+    //Ogre::SceneNode* miniScreenNode =
+    //  this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
+    //miniScreenNode->attachObject(mMiniScreen);
+    //mMiniScreen->setMaterial("mymat");
 
-    this->data->visual->SetMaterial("mymat");
+    //this->data->visual->SetMaterial("mymat");
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
