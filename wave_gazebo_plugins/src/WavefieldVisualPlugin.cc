@@ -119,7 +119,17 @@ namespace asv
     Ogre::Camera* user_camera = this->data->scene->GetUserCamera(0)->OgreCamera();
     gzerr << "NUM NON USER CAMERAS " << this->data->scene->CameraCount() << std::endl;
     gzerr << "NUM USER CAMERAS " << this->data->scene->UserCameraCount() << std::endl;
-    this->data->camera = this->data->scene->CreateCamera("reflectCam")->OgreCamera();
+    this->data->gzCamera = this->data->scene->CreateCamera("reflectCam");
+    if (this->data->gzCamera) { gzerr << "gzcamera not null" << std::endl; }
+    else { gzerr << "gzcamera null" << std::endl; }
+    gzerr << __LINE__ << std::endl;
+    ignition::math::Vector3d v = this->data->scene->GetUserCamera(0)->WorldPosition();
+    gzerr << __LINE__ << std::endl;
+    this->data->gzCamera->SetWorldPosition(v);
+    gzerr << __LINE__ << std::endl;
+    this->data->gzCamera->SetWorldRotation(this->data->scene->GetUserCamera(0)->WorldRotation());
+    gzerr << __LINE__ << std::endl;
+    this->data->camera = this->data->gzCamera->OgreCamera();
     gzerr << "NUM NON USER CAMERAS " << this->data->scene->CameraCount() << std::endl;
     gzerr << "NUM USER CAMERAS " << this->data->scene->UserCameraCount() << std::endl;
     //this->data->camera = user_camera;
