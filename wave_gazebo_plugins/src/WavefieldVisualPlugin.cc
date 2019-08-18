@@ -115,13 +115,15 @@ namespace asv
     this->data->scene = _visual->GetScene();
 
     // Setup camera from user camera
-    gazebo::rendering::UserCameraPtr user_camera = this->data->scene->GetUserCamera(0);
-    ignition::math::Pose3d pose = user_camera->InitialPose();
-    this->data->camera = user_camera->OgreCamera();
+    Ogre::Camera* user_camera = this->data->scene->GetUserCamera(0)->OgreCamera();
+    this->data->camera = this->data->scene->OgreSceneManager()->createCamera("reflectCam");
+    //this->data->camera = user_camera;
     Ogre::Camera *mCamera = this->data->camera;
-    //this->data->camera->setPosition(Ogre::Vector3(pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z()));
-    //this->data->camera->lookAt(Ogre::Vector3(158, 108, 0.1));
-    //this->data->camera->setNearClipDistance(5);
+    mCamera->setPosition(user_camera->getPosition());
+    mCamera->setOrientation(user_camera->getOrientation());
+    mCamera->setNearClipDistance(user_camera->getNearClipDistance());
+    mCamera->setFarClipDistance(user_camera->getFarClipDistance());
+    mCamera->setAspectRatio(user_camera->getAspectRatio());
 
     // TESTING TUTORIAL setup
     Ogre::MovablePlane* mPlane(0);
@@ -140,7 +142,7 @@ namespace asv
         "mytexture",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
         Ogre::TEX_TYPE_2D, 
-        200, 200, 
+        512, 512, 
         0, 
         Ogre::PF_R8G8B8, 
         Ogre::TU_RENDERTARGET);
@@ -152,14 +154,17 @@ namespace asv
     renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
     renderTexture->getViewport(0)->setOverlaysEnabled(false);
     this->data->renderTarget = renderTexture;
-    renderTexture->update();
-    renderTexture->addListener(this);
     renderTexture->writeContentsToFile("/home/tylerlum/start.png");
     Ogre::MaterialPtr renderMaterial =
-      Ogre::MaterialManager::getSingleton().getByName(
-        "reflection");
-    renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
+      Ogre::MaterialManager::getSingleton().create(
+        "mymat",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::TextureUnitState* t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("mytexture");
     renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+    //t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+    //t->setProjectiveTexturing(true, mCamera);
+    renderTexture->update();
+    renderTexture->addListener(this);
 
     // Create Plane for reflection texture
     this->data->plane = new Ogre::MovablePlane("Plane" + std::to_string(i));
@@ -174,11 +179,13 @@ namespace asv
       true,
       1, 1, 1,
       Ogre::Vector3::UNIT_Z);
+    //mCamera->enableReflection(this->data->plane);
+    //mCamera->enableCustomNearClipPlane(this->data->plane);
 
     // Create Plane entity with correct material and texture
     this->data->planeEntity = this->data->scene->OgreSceneManager()->createEntity("PlaneMesh" + std::to_string(i));
     mPlaneEntity = this->data->planeEntity;
-    mPlaneEntity->setMaterialName("reflection");
+    mPlaneEntity->setMaterialName("mymat");
     mPlaneNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     mPlaneNode->attachObject(mPlaneEntity);
 
@@ -191,7 +198,7 @@ namespace asv
     Ogre::SceneNode* miniScreenNode =
       this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     miniScreenNode->attachObject(mMiniScreen);
-    mMiniScreen->setMaterial("reflection");
+    mMiniScreen->setMaterial("mymat");
 
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
