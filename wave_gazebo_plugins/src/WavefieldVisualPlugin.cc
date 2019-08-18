@@ -116,7 +116,7 @@ namespace asv
       "PlaneMesh",
       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
       *(this->data->plane),
-      100, 100, 1, 1,
+      512, 512, 1, 1,
       true,
       1, 1, 1,
       Ogre::Vector3::UNIT_Y);
@@ -124,7 +124,7 @@ namespace asv
     this->data->planeNode = this->data->scene->OgreSceneManager()->getRootSceneNode()->createChildSceneNode();
     this->data->planeNode->attachObject(this->data->planeEntity);
     this->data->planeNode->attachObject(this->data->plane);
-    //this->data->planeNode->roll(Degree(15));
+    //this->data->planeNode->roll(Ogre::Degree(45));
 
     // QUESTION: Create render texture, if I give it the same name as the texture in scripts/waves.material, it would not work for some reason
     Ogre::TexturePtr rttTexture =
@@ -132,7 +132,7 @@ namespace asv
         "mytexture",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
         Ogre::TEX_TYPE_2D, 
-        100, 100, 
+        512, 512, 
         0, 
         Ogre::PF_R8G8B8, 
         Ogre::TU_RENDERTARGET);
@@ -179,6 +179,11 @@ namespace asv
     {
       this->data->planeEntity->setVisible(false);
     }
+    if (this->data->camera)
+    {
+      this->data->camera->enableReflection(this->data->plane);
+      this->data->camera->enableCustomNearClipPlane(this->data->plane);
+    }
   }
   
   void WavefieldVisualPlugin::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
@@ -186,6 +191,10 @@ namespace asv
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(true);
+    }
+    if (this->data->camera)
+    {
+      this->data->camera->disableReflection();
     }
   }
 }
