@@ -195,6 +195,7 @@ namespace asv
     if (this->data->camera)
     {
       this->data->camera->disableReflection();
+      this->data->camera->disableCustomNearClipPlane();
     }
   }
 }
