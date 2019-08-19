@@ -124,7 +124,6 @@ namespace asv
     (this->data->planeNode = this->data->scene->OgreSceneManager()->
      getRootSceneNode()->createChildSceneNode());
     this->data->planeNode->attachObject(this->data->planeEntity);
-    this->data->planeNode->attachObject(this->data->plane);
 
     // QUESTION: Create render texture, if I give it the same name as
     // the texture in scripts/waves.material, it would not work for some reason
