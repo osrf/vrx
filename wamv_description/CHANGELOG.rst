@@ -2,8 +2,8 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2019-08-19)
+------------------
 * Merge from topic_namespace_generation
 * fix catkin make install issues with meshes
 * Merged in Fix-RVIZ-Mesh-Issue (pull request #158)

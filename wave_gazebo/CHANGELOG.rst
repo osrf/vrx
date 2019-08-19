@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2019-08-19)
+------------------
 * Try to change material script to match the newly created texture, did not work
 * Rewrite code to match with rendertotexture tutorial
 * Hide minimap, water constant texture, try get plane to be reflection, shows reflection but wrong geometry

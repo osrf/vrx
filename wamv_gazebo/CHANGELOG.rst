@@ -2,8 +2,8 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2019-08-19)
+------------------
 * Merge from topic_namespace_generation
 * Update rviz configuration with new lidar topic
 * lidar->lidars in topic names

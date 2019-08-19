@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2019-08-19)
+------------------
 * Go back to custom material, note if you change mytexture2 -> mytexture, it breaks it from resource group can't find error
 * Try to change plane material to use existing reflection material and only edit the texture, but does not work
 * Fix code quality to pass pipeline

@@ -2,8 +2,8 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2019-08-19)
+------------------
 * Deterministic wind.
 * Add v3d plugin - this publishes a vecotr based on the world frame velocity in Gazebo
   Update gps configuration to add gazebo gps and v3d plugins to standard configuration

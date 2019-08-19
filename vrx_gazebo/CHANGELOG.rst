@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2019-08-19)
+------------------
 * Merged default into topic_namespace_generation
 * Modify teleop examples to use namespaces
 * Add a namespace parameter to the launch file.
