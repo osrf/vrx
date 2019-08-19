@@ -2,6 +2,67 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Go back to custom material, note if you change mytexture2 -> mytexture, it breaks it from resource group can't find error
+* Try to change plane material to use existing reflection material and only edit the texture, but does not work
+* Fix code quality to pass pipeline
+* Try to change material script to match the newly created texture, did not work
+* Add jpg texture mix with ocean, worked decently
+* Try to add miniscreen to see the material/texture, but not working for some reason
+* Disable clip plane each post render, working very well
+* Turn on and off reflection and clip plane in pre/post render
+* Rewrite code to match with rendertotexture tutorial
+* Add reflection to plane
+* Add comments and documentation and removed unneeded parts
+* Hide minimap, water constant texture, try get plane to be reflection, shows reflection but wrong geometry
+* Add texture material to water
+* Go back to orig user camera
+* Unsuccessful attempt to switch cameras
+* Show difference between Ogre::Cam and gz:rend:Cam position
+* Add code from book to use new camera, needs update
+* Remove enable/disable refl to fix render issue
+* Hide plane from texture
+* Change to ogre user camera pos and orient, try but fail shaders
+* BIG CLEANUP, removed old unused lines of code
+* Add enableRefl and disableRelf
+* Scale plane and mesh to show it
+* Flip plane to be flat, need to next hide the original water
+* Create new texture unit
+* Change texture name, miniscreen and plane work but not water
+* Try to change ocean to show the texture, did not work yet
+* Put texture onto plane
+* Make only one visualplugin to remove extra miniscreen
+* Add rendertargetlistener to not show miniscreen (still shows because there are two)
+* Try to implement it, did not work
+* Add WavefieldRenderTargetListener, completely untested
+* Update miniscreen continuously
+* SUCCESSFULLY show small version in mini screen
+* Add view to miniscreen, ugly
+* Add miniscreen
+* Change position and angle of camera
+* Change angle to view something
+* Save to image file, it is blank
+* Add render texture
+* Add texture
+* Change to valid image
+* Add plane image, looks weird
+* Move user camera
+* Added a light
+* Add render updates
+* Add RTShaderSystem
+* Add static function variable to differentiate between Ogre names
+* Fix scene, still not working
+* Not working setup, likely need to use visualptr to get scene
+* Add scene ptr
+* Add viewport setup
+* Add scene nodes and camera setup
+* Add root, scenemgr
+* Add unworking Ogre texture creation
+* Work off ocean model, clean out visual plugin and use new simple material scripts
+* Modiying world definitions in wave_gazebo package to use xacro
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Tyler Lum <tylergwlum@gmail.com>
+
 1.1.2 (2019-07-10)
 ------------------
 * Workaround to fix compile errors on Kinetic
