@@ -147,21 +147,31 @@ namespace asv
     (this->data->renderTarget->getViewport(0)->
      setBackgroundColour(Ogre::ColourValue::Black));
 
-    Ogre::MaterialPtr renderMaterial =
-      Ogre::MaterialManager::getSingleton().create(
-        "mymat",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    // Ogre::MaterialPtr renderMaterial =
+      // Ogre::MaterialManager::getSingleton().create(
+        // "mymat",
+        // Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    gzerr << __LINE__ << std::endl;
+    Ogre::MaterialPtr renderMaterial = Ogre::MaterialManager::getSingleton().getByName("reflection");
+    gzerr << __LINE__ << std::endl;
     Ogre::TextureUnitState* t = (renderMaterial->getTechnique(0)->getPass(0)->
       createTextureUnitState("mytexture2"));
+    gzerr << __LINE__ << std::endl;
 
     t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+    gzerr << __LINE__ << std::endl;
     t->setProjectiveTexturing(true, this->data->camera);
+    gzerr << __LINE__ << std::endl;
     this->data->renderTarget->addListener(this);
+    gzerr << __LINE__ << std::endl;
 
     // Camera reflection and clip plane setup
     this->data->camera->enableReflection(this->data->plane);
+    gzerr << __LINE__ << std::endl;
     this->data->camera->enableCustomNearClipPlane(this->data->plane);
-    this->data->planeEntity->setMaterialName("mymat");
+    gzerr << __LINE__ << std::endl;
+    this->data->planeEntity->setMaterialName("reflection");
+    gzerr << __LINE__ << std::endl;
 
     // Show rendertexture on oceanwaves, not well scaled or positioned
     // this->data->visual->SetMaterial("mymat");
@@ -169,10 +179,12 @@ namespace asv
     // Bind the update method to ConnectPreRender events
     this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
+    gzerr << __LINE__ << std::endl;
   }
 
   void WavefieldVisualPlugin::OnUpdate()
   {
+    gzerr << __LINE__ << std::endl;
     if (this->data->renderTarget)
     {
       this->data->renderTarget->update();
@@ -182,6 +194,7 @@ namespace asv
   void WavefieldVisualPlugin::preRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
+    gzerr << __LINE__ << std::endl;
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(false);
@@ -196,6 +209,7 @@ namespace asv
   void WavefieldVisualPlugin::postRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
+    gzerr << __LINE__ << std::endl;
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(true);

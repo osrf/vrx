@@ -1,16 +1,16 @@
-vertex_program reflectionV glsl
-{
-  source ../programs/reflection.vert
-}
-
-fragment_program reflectionF glsl
-{
-  source ../programs/reflection.frag
-  default_params
-  {
-    param_named reflectMap int 0
-  }
-}
+// vertex_program reflectionV glsl
+// {
+//   source ../programs/reflection.vert
+// }
+// 
+// fragment_program reflectionF glsl
+// {
+//   source ../programs/reflection.frag
+//   default_params
+//   {
+//     param_named reflectMap int 0
+//   }
+// }
 
 material reflection
 {
@@ -45,11 +45,11 @@ material reflection
 //				texture reflection
 //				tex_address_mode clamp
 //			}
-      texture_unit
-      {
-        texture mytexture
-        tex_address_mode clamp
-      }
+//      texture_unit
+//      {
+//        texture mytexture
+//        tex_address_mode clamp
+//      }
 //      texture_unit
 //      {
 //        texture ../textures/wave_normals.dds
