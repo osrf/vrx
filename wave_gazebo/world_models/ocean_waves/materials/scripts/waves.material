@@ -1,16 +1,13 @@
+#version 130
 // vertex_program reflectionV glsl
 // {
 //   source ../programs/reflection.vert
 // }
 // 
-// fragment_program reflectionF glsl
-// {
-//   source ../programs/reflection.frag
-//   default_params
-//   {
-//     param_named reflectMap int 0
-//   }
-// }
+fragment_program reflectionF glsl
+{
+  source ../programs/reflection.frag
+}
 
 material reflection
 {
@@ -30,33 +27,10 @@ material reflection
 //				// scroll and noisePos will need updating per frame
 //      }
 //
-//      fragment_program_ref reflectionF
-//      {
-//				param_named fresnelBias float -0.1 
-//				param_named fresnelScale float 1.8 
-//				param_named fresnelPower float 8  
-//				param_named tintColour float4 0 0.05 0.05 1
-//				param_named noiseScale float 0.05 
-//      }
-//			// Reflection
-//			texture_unit
-//			{
-//				// Will be filled in at runtime
-//				texture reflection
-//				tex_address_mode clamp
-//			}
-//      texture_unit
-//      {
-//        texture mytexture
-//        tex_address_mode clamp
-//      }
-//      texture_unit
-//      {
-//        texture ../textures/wave_normals.dds
-//        tex_coord_set 0
-//        scale 0.1 0.1
-//        filtering linear linear linear
-//      }
+      fragment_program_ref reflectionF
+      {
+        param_named reflectMap int 0
+      }
     }
   }
 }

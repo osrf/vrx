@@ -160,7 +160,7 @@ namespace asv
 
     t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
     gzerr << __LINE__ << std::endl;
-    t->setProjectiveTexturing(true, this->data->camera);
+    //t->setProjectiveTexturing(true, this->data->camera);
     gzerr << __LINE__ << std::endl;
     this->data->renderTarget->addListener(this);
     gzerr << __LINE__ << std::endl;
