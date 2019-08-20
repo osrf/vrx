@@ -25,6 +25,8 @@
 #include <gazebo/common/SphericalCoordinates.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
+#include <ignition/msgs.hh>
+#include <ignition/transport.hh>
 #include <gazebo/physics/Model.hh>
 #include "vrx_gazebo/wayfinding_scoring_plugin.hh"
 
