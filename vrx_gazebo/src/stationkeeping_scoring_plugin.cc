@@ -90,6 +90,8 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&StationkeepingScoringPlugin::Update, this));
+
+  this->PublishPositionMarker();
 }
 
 //////////////////////////////////////////////////
@@ -172,6 +174,32 @@ void StationkeepingScoringPlugin::PublishGoal()
 }
 
 //////////////////////////////////////////////////
+void StationkeepingScoringPlugin::PublishPositionMarker() {
+  // gazebo transport node
+  ignition::transport::Node node;
+
+  ignition::msgs::Marker markerMsg;
+  markerMsg.set_ns("station_keeping_marker");
+  markerMsg.set_id(0);
+  markerMsg.set_type(ignition::msgs::Marker::CYLINDER);
+  markerMsg.set_action(ignition::msgs::Marker::ADD_MODIFY);
+
+  ignition::msgs::Material *matMsg = markerMsg.mutable_material();
+  matMsg->mutable_script()->set_name("Gazebo/Red");
+  ignition::msgs::Set(markerMsg.mutable_scale(),
+                      ignition::math::Vector3d(0.3, 0.3, 1.5)); 
+  ignition::msgs::Set(markerMsg.mutable_pose(),
+                      ignition::math::Pose3d(this->goalX,
+                          this->goalY, 4.0, 0, 0, 0));
+
+  bool result = node.Request("/marker", markerMsg);
+  if (!result) {
+    gzwarn << "Error publishing waypoint marker message" << std::endl;
+  }
+}
+
+
+//////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnReady()
 {
   gzmsg << "OnReady" << std::endl;
@@ -186,7 +214,6 @@ void StationkeepingScoringPlugin::OnRunning()
 
   this->timer.Start();
 }
-
 
 
 // Register plugin with gazebo

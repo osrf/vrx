@@ -69,6 +69,9 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Publish the goal pose.
   private: void PublishGoal();
 
+  /// \brief Publish gazebo display markers for position
+  private: void PublishPositionMarker();
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
