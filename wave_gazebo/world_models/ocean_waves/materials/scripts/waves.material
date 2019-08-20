@@ -18,7 +18,8 @@ material reflection
       scene_blend alpha_blend
       vertex_program_ref reflectionV
       {
-        param_named_auto worldViewProjMatrix worldviewproj_matrix
+        // param_named_auto worldViewProjMatrix worldviewproj_matrix
+        param_named_auto worldViewProjMatrix world_matrix
       }
 
       fragment_program_ref reflectionF
