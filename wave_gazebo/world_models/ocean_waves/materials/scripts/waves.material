@@ -1,9 +1,9 @@
 #version 130
-// vertex_program reflectionV glsl
-// {
-//   source ../programs/reflection.vert
-// }
-// 
+vertex_program reflectionV glsl
+{
+  source ../programs/reflection.vert
+}
+
 fragment_program reflectionF glsl
 {
   source ../programs/reflection.frag
@@ -16,17 +16,11 @@ material reflection
     pass
     {
       scene_blend alpha_blend
-//      vertex_program_ref reflectionV
-//      {
-//				param_named_auto worldViewProjMatrix worldviewproj_matrix
-//				param_named_auto eyePosition camera_position_object_space
-//				param_named_auto timeVal time 0.05
-//				param_named scroll float 1  
-//				param_named scale float 1 
-//				param_named noise float 1 
-//				// scroll and noisePos will need updating per frame
-//      }
-//
+      vertex_program_ref reflectionV
+      {
+        param_named_auto worldViewProjMatrix worldviewproj_matrix
+      }
+
       fragment_program_ref reflectionF
       {
         param_named reflectMap int 0

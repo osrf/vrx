@@ -1,11 +1,13 @@
 #version 130
+
 uniform sampler2D reflectMap;
 
+varying vec2 oUV0;
 void main(void)
 {
-    gl_FragColor = vec4(1, 1, 0, 0.5);
+    gl_FragColor = texture2D(reflectMap, oUV0);
 }
-
+//
 //uniform vec4 tintColour;
 //uniform float noiseScale;
 //uniform float fresnelBias;
