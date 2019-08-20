@@ -187,7 +187,7 @@ void StationkeepingScoringPlugin::PublishPositionMarker() {
   ignition::msgs::Material *matMsg = markerMsg.mutable_material();
   matMsg->mutable_script()->set_name("Gazebo/Red");
   ignition::msgs::Set(markerMsg.mutable_scale(),
-                      ignition::math::Vector3d(0.3, 0.3, 1.5)); 
+                      ignition::math::Vector3d(0.3, 0.3, 1.5));
   ignition::msgs::Set(markerMsg.mutable_pose(),
                       ignition::math::Pose3d(this->goalX,
                           this->goalY, 4.0, 0, 0, 0));
