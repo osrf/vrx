@@ -1,11 +1,11 @@
 vertex_program fresnel/FresnelRefractReflectVP glsl
 {
-  source fresnel_vp.glsl
+  source ../programs/fresnel_vp.glsl
 }
 
 fragment_program fresnel/FresnelRefractReflectFP glsl
 {
-  source fresnel_fp.glsl
+  source ../programs/fresnel_fp.glsl
 
   default_params
   {
@@ -25,7 +25,6 @@ material fresnel
     {
       vertex_program_ref fresnel/FresnelRefractReflectVP
       {
-        param_named_auto worldViewProjMatrix worldviewproj_matrix
         param_named_auto eyePosition camera_position_object_space
         param_named_auto timeVal time 0.05
         param_named scroll float 1
@@ -45,9 +44,11 @@ material fresnel
       texture_unit
       {
         // Perlin noise volume
-        texture waves2.dds
+        texture ../textures/waves2.dds
+        tex_coord_set 0
+        scale 0.1 0.1
         // min / mag filtering, no mip
-        filtering linear linear none
+        filtering linear linear linear
       }
       // Reflection
       texture_unit

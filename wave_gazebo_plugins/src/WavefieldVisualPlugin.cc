@@ -36,7 +36,10 @@
 #include "gazebo/rendering/RTShaderSystem.hh"
 #include "gazebo/rendering/ogre_gazebo.h"
 
-#include "ocean_visual.hh"
+#include "wave_gazebo_plugins/WavefieldVisualPlugin.hh"
+#include "wave_gazebo_plugins/Gazebo.hh"
+#include "wave_gazebo_plugins/Wavefield.hh"
+#include "wave_gazebo_plugins/Utilities.hh"
 
 using namespace gazebo;
 
@@ -60,10 +63,9 @@ namespace asv
     public: event::ConnectionPtr connection;
 
     // OGRE
-    public: Ogre::RenderTarget *renderTarget;
+    public: Ogre::RenderTarget *reflectionRt;
     public: Ogre::RenderTarget *refractionRt;
     public: Ogre::Camera *camera;
-    public: Ogre::SceneNode *planeNode;
     public: gazebo::rendering::ScenePtr scene;
     public: Ogre::Plane planeUp;
     public: Ogre::Plane planeDown;
@@ -92,8 +94,6 @@ namespace asv
     rendering::VisualPtr _visual,
     sdf::ElementPtr _sdf)
   {
-    gzerr << "IN OCEAN VISUAL" << std::endl;
-
     // Capture visual and plugin SDF
     GZ_ASSERT(_visual != nullptr, "Visual must not be null");
     GZ_ASSERT(_sdf != nullptr, "SDF Element must not be null");
@@ -105,8 +105,7 @@ namespace asv
     // OGRE setup
     this->data->scene = _visual->GetScene();
 
-    // Only load plugin once
-    // load the visual plugin in gzclient for now.
+    // Only load plugin once, load the visual plugin in gzclient for now.
     if (!this->data->scene->EnableVisualizations())
       return;
 
@@ -122,7 +121,7 @@ namespace asv
       return;
     }
 
-
+    // Setup planeEntity
     Ogre::SceneNode *ogreNode = _visual->GetSceneNode();
     this->data->planeEntity =
         dynamic_cast<Ogre::Entity *>(ogreNode->getAttachedObject(0));
@@ -158,36 +157,39 @@ namespace asv
         Ogre::PF_R8G8B8,
         Ogre::TU_RENDERTARGET);
 
+    // Get background color
     Ogre::ColourValue bgColor =
         rendering::Conversions::Convert(this->data->scene->BackgroundColor());
 
-    // Setup render texture
-    this->data->renderTarget =
+    // Setup reflection render target
+    this->data->reflectionRt =
         this->data->rttReflectionTexture->getBuffer()->getRenderTarget();
-    this->data->renderTarget->setAutoUpdated(false);
-    Ogre::Viewport *vp =
-        this->data->renderTarget->addViewport(this->data->camera);
-    vp->setClearEveryFrame(true);
-    vp->setOverlaysEnabled(false);
-    vp->setBackgroundColour(bgColor);
-    vp->setVisibilityMask(GZ_VISIBILITY_ALL &
+    this->data->reflectionRt->setAutoUpdated(false);
+    Ogre::Viewport *reflVp =
+        this->data->reflectionRt->addViewport(this->data->camera);
+    reflVp->setClearEveryFrame(true);
+    reflVp->setOverlaysEnabled(false);
+    reflVp->setBackgroundColour(bgColor);
+    reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    rendering::RTShaderSystem::AttachViewport(vp, this->data->scene);
-    this->data->renderTarget->addListener(this);
+    rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
+    this->data->reflectionRt->addListener(this);
 
+    // Setup refraction render target
     this->data->refractionRt =
         this->data->rttRefractionTexture->getBuffer()->getRenderTarget();
     this->data->refractionRt->setAutoUpdated(false);
-    Ogre::Viewport *rfvp =
+    Ogre::Viewport *refrVp =
         this->data->refractionRt->addViewport(this->data->camera);
-    rfvp->setClearEveryFrame(true);
-    rfvp->setOverlaysEnabled(false);
-    rfvp->setBackgroundColour(bgColor);
-    rfvp->setVisibilityMask(GZ_VISIBILITY_ALL &
+    refrVp->setClearEveryFrame(true);
+    refrVp->setOverlaysEnabled(false);
+    refrVp->setBackgroundColour(bgColor);
+    refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    rendering::RTShaderSystem::AttachViewport(rfvp, this->data->scene);
+    rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
     this->data->refractionRt->addListener(this);
 
+    // Give material the new textures
     Ogre::MaterialPtr origMat =
         Ogre::MaterialManager::getSingleton().getByName("fresnel");
     Ogre::MaterialPtr mat = origMat->clone(this->data->visual->Name() + "_mat");
@@ -198,24 +200,22 @@ namespace asv
         mat->getTechnique(0)->getPass(0)->getTextureUnitState(2);
     refractTex->setTexture(this->data->rttRefractionTexture);
 
-    // Camera reflection and clip plane setup
+    // Put material onto plane
     this->data->planeEntity->setMaterialName(mat->getName());
 
-    // Bind the update method to ConnectPreRender events
+    // Bind the update method to ConnectRender events
     this->data->connection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnUpdate, this));
   }
 
   void WavefieldVisualPlugin::OnUpdate()
   {
-    if (!this->data->camera || !this->data->renderTarget ||
+    if (!this->data->camera || !this->data->reflectionRt ||
         !this->data->refractionRt)
       return;
 
-    this->data->renderTarget->update();
-    // this->data->renderTarget->writeContentsToFile("reflection.png");
+    this->data->reflectionRt->update();
     this->data->refractionRt->update();
-    // this->data->refractionRt->writeContentsToFile("refraction.png");
   }
 
   void WavefieldVisualPlugin::preRenderTargetUpdate(
@@ -230,18 +230,16 @@ namespace asv
     }
 
     // reflection
-    if (rte.source == this->data->renderTarget)
+    if (rte.source == this->data->reflectionRt)
     {
       this->data->camera->enableReflection(this->data->planeUp);
       this->data->camera->enableCustomNearClipPlane(this->data->planeUp);
-      // TODO hide visuals below plane
     }
     // refraction
     else
     {
       this->data->visual->SetVisible(false);
       this->data->camera->enableCustomNearClipPlane(this->data->planeDown);
-      // TODO hide visuals above plane
     }
   }
 
@@ -257,17 +255,15 @@ namespace asv
     }
 
     // reflection
-    if (rte.source == this->data->renderTarget)
+    if (rte.source == this->data->reflectionRt)
     {
       this->data->camera->disableReflection();
       this->data->camera->disableCustomNearClipPlane();
-      // TODO hide visuals below plane
     }
     // refraction
     else
     {
       this->data->camera->disableCustomNearClipPlane();
-      // TODO hide visuals above plane
     }
   }
 }

@@ -53,35 +53,39 @@
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so"/>
         <geometry>
-          <mesh>
-            <uri>model://ocean_waves/meshes/mesh.dae</uri>
-            <scale>0.01 0.01 0.01</scale>
-          </mesh>
+          <plane>$
+            <normal>0 0 1</normal>$
+            <size>1000 1000</size>$
+          </plane>$
         </geometry>
         <material>
           <script>
-            <uri>model://ocean_waves/materials/scripts/waves.material</uri>
-            <name>reflection</name>
+            <uri>model://ocean_waves/materials/scripts</uri>
+            <uri>model://ocean_waves/materials/programs</uri>
+            <uri>model://ocean_waves/materials/textures</uri>
+            <name>fresnel</name>
           </script>
         </material>
         <laser_retro>-1</laser_retro>
       </visual>
-      <visual name="ocean_waves_below_visual">
+      <!-- <visual name="ocean_waves_below_visual">
         <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so"/>
         <geometry>
-          <mesh>
-            <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
-            <scale>0.1 0.1 0.1</scale>
-          </mesh>
+          <plane>$
+            <normal>0 0 -1</normal>$
+            <size>1000 1000</size>$
+          </plane>$
         </geometry>
         <material>
           <script>
-            <uri>model://ocean_waves/materials/scripts/waves.material</uri>
-            <name>reflection</name>
+            <uri>model://ocean_waves/materials/scripts</uri>
+            <uri>model://ocean_waves/materials/programs</uri>
+            <uri>model://ocean_waves/materials/textures</uri>
+            <name>fresnel</name>
           </script>
         </material>
         <laser_retro>-1</laser_retro>
-      </visual>
+      </visual> -->
     </link>
   </model>
   </xacro:macro>
