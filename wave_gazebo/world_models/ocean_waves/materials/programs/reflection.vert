@@ -1,6 +1,6 @@
 varying vec4 projectionCoord;
 
-void main()
+void main(void)
 {
   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
   // Projective texture coordinates, adjust for mapping
