@@ -22,8 +22,10 @@
 #include <gazebo/physics/Model.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
-#include <ignition/msgs.hh>
-#include <ignition/transport.hh>
+#if GAZEBO_MAJOR_VERSION >= 8
+  #include <ignition/msgs.hh>
+  #include <ignition/transport.hh>
+#endif
 #include "vrx_gazebo/stationkeeping_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
@@ -177,6 +179,7 @@ void StationkeepingScoringPlugin::PublishGoal()
 
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::PublishPositionMarker() {
+#if GAZEBO_MAJOR_VERSION >= 8
   // gazebo transport node
   ignition::transport::Node node;
 
@@ -198,6 +201,9 @@ void StationkeepingScoringPlugin::PublishPositionMarker() {
   if (!result) {
     gzwarn << "Error publishing waypoint marker message" << std::endl;
   }
+#else
+  gzwarn << "Gazebo markers not published (Gazebo version < 8)" << std::endl;
+#endif
 }
 
 

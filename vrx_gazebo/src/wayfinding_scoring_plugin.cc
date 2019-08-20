@@ -25,9 +25,11 @@
 #include <gazebo/common/SphericalCoordinates.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
-#include <ignition/msgs.hh>
-#include <ignition/transport.hh>
 #include <gazebo/physics/Model.hh>
+#if GAZEBO_MAJOR_VERSION >= 8
+#include <ignition/msgs.hh>
+  #include <ignition/transport.hh>
+#endif
 #include "vrx_gazebo/wayfinding_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
@@ -223,6 +225,7 @@ void WayfindingScoringPlugin::PublishWaypoints()
 
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::PublishWaypointMarkers() {
+#if GAZEBO_MAJOR_VERSION >= 8
   // gazebo transport node
   ignition::transport::Node node;
 
@@ -262,6 +265,9 @@ void WayfindingScoringPlugin::PublishWaypointMarkers() {
       gzwarn << "Error publishing waypoint marker message" << std::endl;
     }
   }
+#else
+  gzwarn << "Gazebo markers not published (Gazebo version < 8)" << std::endl;
+#endif
 }
 
 //////////////////////////////////////////////////
