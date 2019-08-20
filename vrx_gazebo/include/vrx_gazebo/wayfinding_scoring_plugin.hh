@@ -73,6 +73,9 @@ class WayfindingScoringPlugin : public ScoringPlugin
   /// \brief Publish the waypoints through which the vehicle must navigate.
   private: void PublishWaypoints();
 
+  /// \brief Publishes gazebo display markers for waypoints
+  private: void PublishWaypointMarkers();
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
