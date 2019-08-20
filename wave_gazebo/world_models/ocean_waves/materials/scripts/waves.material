@@ -18,13 +18,18 @@ material reflection
       scene_blend alpha_blend
       vertex_program_ref reflectionV
       {
-        // param_named_auto worldViewProjMatrix worldviewproj_matrix
-        param_named_auto worldViewProjMatrix world_matrix
       }
 
       fragment_program_ref reflectionF
       {
-        param_named reflectMap int 0
+        //param_named reflectMap int 0
+      }
+
+      texture_unit
+      {
+        // Will be filled in at runtime
+        // texture mytexture
+        tex_address_mode clamp
       }
     }
   }
