@@ -142,10 +142,11 @@ namespace asv
     this->data->camera = this->data->scene->GetUserCamera(0)->OgreCamera();
 
     // Setup render texture
+    this->data->renderTarget->setAutoUpdated(false); 
     this->data->renderTarget->addViewport(this->data->camera);
     this->data->renderTarget->getViewport(0)->setClearEveryFrame(true);
     (this->data->renderTarget->getViewport(0)->
-     setBackgroundColour(Ogre::ColourValue::Black));
+     setBackgroundColour(gazebo::rendering::Conversions::Convert(this->data->scene->BackgroundColor())));
 
     // Ogre::MaterialPtr renderMaterial =
       // Ogre::MaterialManager::getSingleton().create(

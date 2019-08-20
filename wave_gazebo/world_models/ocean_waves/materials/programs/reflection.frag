@@ -8,6 +8,6 @@ void main(void)
   vec2 final = projectionCoord.xy / projectionCoord.w;
   vec4 reflectionColour = texture2D(reflectMap, final);
 
-  //gl_FragColor = reflectionColour;
-  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+  gl_FragColor = reflectionColour;
+  // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
