@@ -45,10 +45,9 @@ material fresnel
       {
         // Perlin noise volume
         texture ../textures/waves2.dds
-        tex_coord_set 0
-        scale 0.1 0.1
+        // tex_coord_set 0
         // min / mag filtering, no mip
-        filtering linear linear linear
+        filtering linear linear none
       }
       // Reflection
       texture_unit
