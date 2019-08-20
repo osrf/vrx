@@ -1,5 +1,3 @@
-#version 130
-
 varying vec4 projectionCoord;
 
 uniform sampler2D reflectMap;

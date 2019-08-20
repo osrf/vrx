@@ -1,5 +1,3 @@
-#version 130
-
 varying vec4 projectionCoord;
 
 void main()

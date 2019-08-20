@@ -1,4 +1,3 @@
-#version 130
 vertex_program reflectionV glsl
 {
   source ../programs/reflection.vert
@@ -22,7 +21,7 @@ material reflection
 
       fragment_program_ref reflectionF
       {
-        //param_named reflectMap int 0
+        param_named reflectMap int 0
       }
 
       texture_unit
