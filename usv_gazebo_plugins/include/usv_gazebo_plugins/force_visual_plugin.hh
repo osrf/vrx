@@ -21,10 +21,11 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
-#include <ignition/transport.hh>
-#include <ignition/msgs.hh>
 #include <ignition/math/Vector3.hh>
-
+#if GAZEBO_MAJOR_VERSION >= 8
+  #include <ignition/msgs.hh>
+  #include <ignition/transport.hh>
+#endif
 
 namespace gazebo
 {

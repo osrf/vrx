@@ -65,6 +65,7 @@ void ForceVisualPlugin::Update() {
 //////////////////////////////////////////////////
 bool ForceVisualPlugin::PublishMarker(const gazebo::physics::LinkPtr& link)
 {
+#if GAZEBO_MAJOR_VERSION >= 8
   auto pos = link->WorldPose().Pos();
   auto force = link->WorldForce() / this->scaling;
 
@@ -79,6 +80,10 @@ bool ForceVisualPlugin::PublishMarker(const gazebo::physics::LinkPtr& link)
     ignition::msgs::Set(markerMsg.add_point(), pos);
   ignition::msgs::Set(markerMsg.add_point(), pos + force);
   return this->node.Request(this->markerTopic, markerMsg);
+#else
+  gzwarn << "Gazebo markers not published (Gazebo version < 8)" << std::endl;
+  return false;
+#endif
 }
 
 // Register this plugin with the simulator
