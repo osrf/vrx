@@ -60,8 +60,10 @@ namespace gazebo
     /// \brief Vector of link pointers for the model
     private: physics::Link_V links;
 
+#if GAZEBO_MAJOR_VERSION >= 8
     /// \brief Transport node
     private: ignition::transport::Node node;
+#endif
 
     /// \brief Marker service name
     private: std::string markerTopic = "/marker";

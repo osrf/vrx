@@ -34,6 +34,7 @@ void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
   // Get vector of links in model
   this->links = this->model->GetLinks();
 
+#if GAZEBO_MAJOR_VERSION >= 8
   // advertise on marker topic
   if (!this->node.Advertise<ignition::msgs::Marker>(this->markerTopic))
   {
@@ -41,6 +42,7 @@ void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
           << this->markerTopic << "]" << std::endl;
     return;
   }
+#endif
 
   // set namespace for marker
   this->ns = "force_visualize/" + this->model->GetName();
