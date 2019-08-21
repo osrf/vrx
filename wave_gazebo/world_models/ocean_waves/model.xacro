@@ -66,13 +66,13 @@
           </wave>
         </plugin>
         <geometry>
-          <plane>
+          <!-- <plane>
             <normal>0 0 1</normal>
             <size>1000 1000</size>
-          </plane>
-          <!-- <mesh>
+          </plane> -->
+          <mesh>
             <uri>model://ocean_waves/meshes/mesh.dae</uri>
-          </mesh> -->
+          </mesh>
         </geometry>
         <material>
           <script>
@@ -98,13 +98,13 @@
           </wave>
         </plugin>
         <geometry>
-          <plane>
+          <!-- <plane>
             <normal>0 0 1</normal>
             <size>1000 1000</size>
-          </plane>
-          <!-- <mesh>
+          </plane> -->
+          <mesh>
             <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
-          </mesh> -->
+          </mesh>
         </geometry>
         <material>
           <script>
