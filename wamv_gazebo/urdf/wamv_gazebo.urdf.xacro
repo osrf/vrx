@@ -10,6 +10,16 @@
   <xacro:arg name="lidar_enabled" default="false" />
   <xacro:arg name="ground_truth_enabled" default="false" />
   <xacro:arg name="vrx_sensors_enabled" default="false" />
+  <xacro:arg name="thruster_namespace" default="thrusters/"/>
+  <xacro:arg name="camera_namespace" default="cameras/"/>  
+  <xacro:arg name="sensor_namespace" default="sensors/"/>
+  <!-- Note: this is only used for some sensors that do not correctly use the 
+  robotNamespace parameter -->
+  <xacro:arg name="namespace" default="wamv"/>    
+  <xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global" />
+  <xacro:property name="camera_namespace" value="$(arg camera_namespace)" scope="global" />
+  <xacro:property name="sensor_namespace" value="$(arg sensor_namespace)" scope="global" />
+  <xacro:property name="namespace" value="$(arg namespace)" scope="global" />      
   
   <!-- Sensor yaml file -->
   <xacro:arg name="yaml_sensor_generation" default="false"/>

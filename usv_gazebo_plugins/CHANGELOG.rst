@@ -2,6 +2,24 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2019-08-19)
+------------------
+* Deterministic wind.
+* Add v3d plugin - this publishes a vecotr based on the world frame velocity in Gazebo
+  Update gps configuration to add gazebo gps and v3d plugins to standard configuration
+* Add plugin for ROS interface to gazebo GPS sensor.
+* added cylinder placeholder
+* incremental
+* added plate and sphere models
+* functional for cubes
+* added force visual plugin
+* Contributors: Carlos Aguero, Jonathan Wheare <jonathan.wheare@flinders.edu.au>, MarshallRawson, Rumman Waqar <rumman.waqar05@gmail.com>
+
+1.1.2 (2019-07-10)
+------------------
+* usv_gazebo_wind_plugin.hh changes
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Agüero <cen.aguero@gmail.com>, Rumman Waqar <rumman.waqar05@gmail.com>
+
 1.1.1 (2019-07-03)
 ------------------
 * Reinterpret the wind 'gain' parameter.  Set defaults to zero

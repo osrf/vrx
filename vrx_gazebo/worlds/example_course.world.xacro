@@ -4,7 +4,9 @@
   <world name="robotx_example_course">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
-
+    <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves/>
     <include>
       <uri>model://robotx_navigation_challenge</uri>
       <pose>58 68 2 0 0 0.4</pose>
@@ -21,14 +23,14 @@
     <!-- The 2016 dock with the three placards -->
     <include>
       <uri>model://dock_2016</uri>
-      <pose>75 22 0 0 0 -2.78</pose>
+      <pose>75 22 0.25 0 0 -2.78</pose>
     </include>
 
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://dock_2018</uri>
-      <pose>-2 -18 0 0 0 0.2</pose>
-    </include>
+      <pose>-2 -18 0.25 0 0 0.2</pose>
+    </include> 
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo>
       <wind_objs>

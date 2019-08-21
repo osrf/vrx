@@ -2,6 +2,54 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2019-08-19)
+------------------
+* Merge from topic_namespace_generation
+* Update rviz configuration with new lidar topic
+* lidar->lidars in topic names
+* Merged default into topic_namespace_generation
+* Alter launch file to fix tf frame error in navsat_transform_node
+* Update rviz configuration to match namespaces
+* Update localisation example launch file to support namespace.  The addition of a robot namespace also results in the creation of tf namespaces.  This patch upadtes the launch file to support this
+* Modify xacro files to add further topic subnamespaces to sensor models
+* Merged default into topic_namespace_generation
+* fix catkin make install issues with meshes
+* Merged in Fix-RVIZ-Mesh-Issue (pull request #158)
+  Fix RVIZ Mesh Issue
+  Approved-by: Carlos Agüero <cen.aguero@gmail.com>
+* Fully functional solution, with urdf file modified when calling spawn_wamv.bash and giving proper model dirs to wamv_gazebo and wamv_description
+* Fully functional solution, with model.config errors only when non_competition_mode:=false
+* Change all to package://vrx_gazebo
+* Rm fake vrx_gazebo/models and make it work, needs testing
+* Change model names to No Model
+* Move cameras into sensor namespace
+  Add senosr namespace to p3d position feedback
+* Remove extra slashes from topic names
+* Merged default into topic_namespace_generation
+* Fix namepsaces to work with robotNamespace parameter
+* Merge changes with default branch
+* Add sensor namepsace to planar lidar
+  Remove gloabl namespace
+* Add support for namespaces This includes thruster, camera and sensor namespaces, as well as a global namespace allowing multiple vehicles to be created without causing interference.
+* Add v3d plugin - this publishes a vecotr based on the world frame velocity in Gazebo
+  Update gps configuration to add gazebo gps and v3d plugins to standard configuration
+* Add plugin for ROS interface to gazebo GPS sensor.
+* Clean up model.config files
+* Add fake models in vrx_gazebo, wamv_description, wamv_gazebo to avoid GAZEBO_MODEL_PATH errors
+* fixed wamv_camera
+* remove tab
+* fix issue
+* removed old debug msg
+* added force visualization to wamv
+* Contributors: Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, Jonathan Wheare <jonathan.wheare@flinders.edu.au>, MarshallRawson, Rumman Waqar <rumman.waqar05@gmail.com>, Tyler Lum <tylergwlum@gmail.com>
+
+1.1.2 (2019-07-10)
+------------------
+* lidar.xacro edited online with Bitbucket
+* fixed issue
+* cpu cases now included when configured by yaml
+* Contributors: Marshall Rawson <marshallrawson@osrfoundation.org>, MarshallRawson
+
 1.1.1 (2019-07-03)
 ------------------
 

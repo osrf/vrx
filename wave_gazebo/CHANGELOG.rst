@@ -2,6 +2,66 @@
 Changelog for package wave_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2019-08-19)
+------------------
+* Try to change material script to match the newly created texture, did not work
+* Rewrite code to match with rendertotexture tutorial
+* Hide minimap, water constant texture, try get plane to be reflection, shows reflection but wrong geometry
+* Add texture material to water
+* Remove enable/disable refl to fix render issue
+* Change to ogre user camera pos and orient, try but fail shaders
+* Scale plane and mesh to show it
+* Flip plane to be flat, need to next hide the original water
+* Test removing preset shader/texture to see if water will update, will not BIG CHANGES SOON
+* Create new texture unit
+* Change texture name, miniscreen and plane work but not water
+* Try to change ocean to show the texture, did not work yet
+* Change position and angle of camera
+* Add reflection texture empty
+* Remove textures
+* Move ocean visual plane upwards
+* Use gl_ModelViewProjectionMatrix to see colorful ocean
+* Work off ocean model, clean out visual plugin and use new simple material scripts
+* Merged default into topic_namespace_generation
+* fix catkin make install issues with meshes
+* Fix source paths and variable keywords
+* merged with default
+* removed sdf
+* Copy over Fresnel materials files
+* merge default
+* Merged default into Add-Option-To-Hide-Gazebo-Topics
+* Merged in xacro_for_oceanwaves (pull request #153)
+  Modiying world definitions in wave_gazebo package to use xacro
+  Approved-by: Carlos Agüero <cen.aguero@gmail.com>
+* Style.
+* Modiying world definitions in wave_gazebo package to use xacro
+* Merged in ocean-wave-xacro (pull request #150)
+  Ocean wave xacro
+  Approved-by: Marshall Rawson <marshallrawson@osrfoundation.org>
+* cleaning
+* added spinning out detection
+* incremental
+* removed erb from CMake
+* removed ocean-waves-sdf
+* functional?
+* incremental
+* functional
+* approximate 4x4 dock block as a sphere
+* merge
+* fixed dock inertial issues
+* model.sdf.erb edited online with Bitbucket
+* model.sdf.erb edited online with Bitbucket
+* model.sdf.erb edited online with Bitbucket
+* added <laser_retro>-1 flags to new wave visual links
+* functional
+* Install world_models in wave_gazebo
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, Jonathan Wheare <jonathan.wheare@flinders.edu.au>, Jose Luis Rivero <jrivero@osrfoundation.org>, Marshall Rawson <marshallrawson@osrfoundation.org>, MarshallRawson, MarshallRawson <marshallrawson@osrfoundation.org>, Tyler Lum <tylergwlum@gmail.com>
+
+1.1.2 (2019-07-10)
+------------------
+* fixed 2016 placard joint issue
+* Contributors: MarshallRawson
+
 1.1.1 (2019-07-03)
 ------------------
 * Missing ruby in build depend for wave_gazebo

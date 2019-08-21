@@ -18,6 +18,7 @@ find_package (gazebo REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   message_generation
   wamv_gazebo
+  wave_gazebo
   xacro
   gazebo_dev
   geographic_msgs
@@ -51,7 +52,7 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS wamv_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
+  CATKIN_DEPENDS wamv_gazebo wave_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
 )
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}") 
@@ -207,12 +208,16 @@ install(TARGETS perception_scoring_plugin
 set (dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
   models/dock_2018_base/model.sdf.erb
+  models/dock_2016_base_dynamic/model.sdf.erb
+  models/dock_2018_base_dynamic/model.sdf.erb
 )
 
 # Dock files that need to be processed with erb
 set (dock_erb_files
   models/dock_2016/model.sdf.erb
   models/dock_2018/model.sdf.erb
+  models/dock_2016_dynamic/model.sdf.erb
+  models/dock_2018_dynamic/model.sdf.erb
 )
 
 # Process the dock base erb files
@@ -260,9 +265,9 @@ xacro_add_files(
   worlds/stationkeeping_task.world.xacro
   worlds/wayfinding_task.world.xacro
   worlds/wind_test.world.xacro
+  worlds/ocean.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
-
 # Generate obstacle course
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
@@ -286,6 +291,9 @@ install(DIRECTORY models/
 # Install all the launch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
+install(PROGRAMS scripts/spawn_wamv.bash
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)

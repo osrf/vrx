@@ -1,5 +1,11 @@
 ## VRX 1
 
+
+### VRX 1.2
+
+1. Deterministic wind plugin:
+    * [Pull request 157](https://bitbucket.org/osrf/vrx/pull-requests/157)
+
 ### VRX 1.1
 
 1. GUI overlay plugin (prototype):

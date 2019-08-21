@@ -22,6 +22,7 @@
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/Events.hh>
+#include <ignition/math/config.hh>
 #include <ignition/math/Matrix4.hh>
 #include <ignition/math/Pose3.hh>
 #include <gazebo/physics/Link.hh>
@@ -30,214 +31,121 @@
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/perception_scoring_plugin.hh"
 
-using namespace gazebo;
+/* The version of ignition math in Ubuntu Xenial is 2.2.3 and lacks of
+ * some features added after that version in the 2.x series */
 
-//////////////////////////////////////////////////
-ObjectChecker::ObjectChecker(const std::string &_rosNameSpace,
-  const std::string &_rosObjectTopic, gazebo::physics::WorldPtr _world)
-  : ns(_rosNameSpace),
-    objectTopic(_rosObjectTopic),
-    world(_world)
-{
-  // Quit if ros plugin was not loaded
-  if (!ros::isInitialized())
-  {
-    ROS_ERROR("ROS was not initialized.");
-    return;
-  }
-
-  this->nh = ros::NodeHandle(this->ns);
-}
-
-//////////////////////////////////////////////////
-void ObjectChecker::NewTrial(const std::string &_objectName,
-  gazebo::physics::EntityPtr _object)
-{
-  // Setup for a new trial
-  this->trialCount++;
-  this->objectReceived = false;
-  this->objectCorrect = false;
-  this->submissionScored = false;
-  this->objectError = -1.0;
-
-  // Store truth
-  this->trueName = _objectName;
-  this->currObject = _object;
-
-  ROS_INFO_NAMED("ObjectChecker", "Initiating new trial");
-}
-
-//////////////////////////////////////////////////
-void ObjectChecker::Enable()
-{
-  // Subscribe
-  this->objectSub = this->nh.subscribe(this->objectTopic, 1,
-    &ObjectChecker::OnObject, this);
-}
-
-//////////////////////////////////////////////////
-void ObjectChecker::Disable()
-{
-  this->objectSub.shutdown();
-}
-
-//////////////////////////////////////////////////
-bool ObjectChecker::SubmissionReceived() const
-{
-  return this->objectReceived;
-}
-
-//////////////////////////////////////////////////
-bool ObjectChecker::Correct() const
-{
-  return this->objectCorrect;
-}
-
-//////////////////////////////////////////////////
-void ObjectChecker::OnObject(
-  const geographic_msgs::GeoPoseStamped::ConstPtr &_msg)
-{
-  // Only accept one message per trial
-  if (this->objectReceived)
-  {
-    ROS_WARN_NAMED("ObjectChecker", "Receiving multiple ID messages for same "
-      "trial.  Ignoring.");
-    return;
-  }
-
-  // Accept the message
-  this->objectReceived = true;
-  this->objectCorrect = !this->trueName.compare(_msg->header.frame_id);
-  // Convert geo pose to Gazebo pose
-  // Note - this is used in a few different VRX plugins, may want to have a
-  // separate library?
-  // Convert lat/lon to local
-  // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
-  ignition::math::Vector3d scVec(_msg->pose.position.latitude,
-    _msg->pose.position.longitude, 0);
-#if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Vector3d cartVec =
-  this->world->SphericalCoords()->LocalFromSpherical(scVec);
+/* There is a bug in versions for ign-math in Bionic that does not
+ * define properly IGNITION_MATH_MAJOR_VERSION. Some magic to check
+ * defined variables but empty and assume 3.0.x series */
+#define DO_EXPAND(VAL)  VAL ## 1
+#define EXPAND(VAL)     DO_EXPAND(VAL)
+#if (EXPAND(IGNITION_MATH_MAJOR_VERSION) == 1)
+  #define MAJOR_VERSION 3
+  #define MINOR_VERSION 0
 #else
-  ignition::math::Vector3d cartVec =
-  this->world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+  #define MAJOR_VERSION IGNITION_MATH_MAJOR_VERSION
+  #define MINOR_VERSION IGNITION_MATH_MINOR_VERSION
 #endif
 
-  // Get current pose of the current object
+#if MAJOR_VERSION == 2 && MINOR_VERSION < 3
+  #define ign_math_vector3d_zero ignition::math::Vector3d(0, 0, 0)
+#else
+  #define ign_math_vector3d_zero ignition::math::Vector3d::Zero
+#endif
+
+
+
+/////////////////////////////////////////////////
+PerceptionObject::PerceptionObject(const double& _time,
+               const double& _duration,
+               const std::string& _type,
+               const std::string& _name,
+               const ignition::math::Pose3d& _trialPose,
+               const gazebo::physics::WorldPtr _world)
+{
+  this->time = _time;
+  this->duration = _duration;
+  this->type = _type;
+  this->name = _name;
+  this->trialPose = _trialPose;
   #if GAZEBO_MAJOR_VERSION >= 8
-    ignition::math::Pose3d truePose = this->currObject->WorldPose();
+    this->modelPtr = _world->EntityByName(this->name);
   #else
-    ignition::math::Pose3d truePose = this->currObject->GetWorldPose().Ign();
+    this->modelPtr = _world->GetEntity(this->name);
   #endif
-
-  // 2D Error
-  this->objectError = sqrt(pow(cartVec.X() - truePose.Pos().X(), 2)+
-    pow(cartVec.Y() - truePose.Pos().Y(), 2));
-
-  ROS_INFO_NAMED("ObjectChecker", "Object ID: true = %s, submitted = %s "
-    "result=%d; 2D position error = %.3f m",
-    this->trueName.c_str(), _msg->header.frame_id.c_str(),
-    static_cast<int>(this->objectCorrect), this->objectError);
+  if (modelPtr)
+  {
+    #if GAZEBO_MAJOR_VERSION >= 8
+      this->origPose = this->modelPtr->WorldPose();
+    #else
+      this->origPose = this->modelPtr->GetWorldPose().Ign();
+    #endif
+  }
 }
 
-//////////////////////////////////////////////////
-/// \internal
-/// \brief Private data for the PerceptionScoringPlugin class.
-struct PerceptionScoringPluginPrivate
+std::string PerceptionObject::Str()
 {
-  /// \brief World pointer.
-  public: physics::WorldPtr world;
+  std::string rtn = "\nname: ";
+  rtn += this->name;
+  rtn += "\ntype: ";
+  rtn += this->type;
+  rtn += "\ntime: ";
+  rtn += std::to_string(this->time);
+  rtn +=  "\nduration: ";
+  rtn += std::to_string(this->duration);
+  rtn +=  "\nerror: ";
+  rtn += std::to_string(this->error);
+  return rtn;
+}
 
-  /// \brief SDF pointer.
-  public: sdf::ElementPtr sdf;
+/////////////////////////////////////////////////
+void PerceptionObject::SetError(const double& _error)
+{
+  if (this->active && (_error < this->error || this->error < 0))
+    this->error = _error;
+}
 
-  /// \brief Class to store information about each object to be populated.
-  public: class Object
-  {
-    /// \brief Less than operator.
-    /// \param[in] _obj Other object to compare
-    /// \return True if this < _obj
-    public: bool operator<(const Object &_obj) const
-    {
-      return this->time < _obj.time;
-    }
+/////////////////////////////////////////////////
+void PerceptionObject::StartTrial(const gazebo::physics::EntityPtr& _frame)
+{
+  // Set object pose relative to the specified frame (e.g., the wam-v)
+  // Pitch and roll are set to zero as a hack to deal with
+  // transients associated with spawning buoys with significant attitude.
+  #if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Pose3d framePose(
+      _frame->WorldPose().Pos(),
+      ignition::math::Quaterniond(0.0, 0.0,
+        _frame->WorldPose().Rot().Yaw()));
+  #else
+    ignition::math::Pose3d framePose(
+      _frame->GetWorldPose().pos.Ign(),
+      ignition::math::Quaterniond(0.0, 0.0,
+        _frame->GetWorldPose().rot.Ign().Yaw()));
+  #endif
+  ignition::math::Matrix4d transMat(framePose);
+  ignition::math::Matrix4d pose_local(this->trialPose);
 
-    /// \brief Stream insertion operator.
-    /// \param[in] _out output stream
-    /// \param[in] _obj object to output
-    /// \return The output stream
-    public: friend std::ostream &operator<<(std::ostream &_out,
-                                            const Object &_obj)
-    {
-      _out << _obj.type << std::endl;
-      _out << "  Time: [" << _obj.time << "]" << std::endl;
-      _out << "  Pose: [" << _obj.pose << "]" << std::endl;
-      return _out;
-    }
+  this->modelPtr->SetWorldPose((transMat * pose_local).Pose());
+  this->modelPtr->SetWorldTwist(ign_math_vector3d_zero,
+    ign_math_vector3d_zero);
+  this->active = true;
+  gzmsg << "PerceptionScoringPlugin: spawning " << this->name << std::endl;
+}
 
-    /// \brief Simulation time in which the object should be spawned.
-    public: double time;
-
-    /// \brief Object type.
-    public: std::string type;
-
-    /// \brief Object type.
-    public: std::string name;
-
-    /// \brief Pose in which the object should be placed.
-    public: ignition::math::Pose3d pose;
-  };
-
-  /// \brief Collection of objects to be spawned.
-  public: std::vector<Object> objects;
-
-  /// \brief Contains the entire collection of objects. This is used for
-  /// inserting the objects in a cyclic way.
-  public: std::vector<Object> initialObjects;
-
-  /// \brief Connection event.
-  public: event::ConnectionPtr connection;
-
-  /// \brief The time specified in the object is relative to this time.
-  public: common::Time startTime;
-
-  /// \brief When true, "objects" will be repopulated when the object queue
-  /// is empty, creating an infinite supply of objects.
-  public: bool loopForever = false;
-
-  /// \brief Link/model name for the object poses use as their frame of
-  /// reference
-  public: std::string frameName = std::string();
-
-  /// \brief Link/model that the object poses use as their frame of reference.
-  public: physics::EntityPtr frame;
-
-  /// \brief Current object that has been placed
-  public: physics::EntityPtr curr_model;
-
-  /// \brief Current object's original pose
-  public: ignition::math::Pose3d orig_pose;
-
-  /// \brief Mutex to avoid race conditions.
-  public: std::mutex mutex;
-
-  /// \brief Last time (sim time) that the plugin was updated.
-  public: gazebo::common::Time lastUpdateTime;
-
-  /// \brief Counter for spawning objects with unique names on the belt.
-  /// The key is the object type and the value contains the index of the next
-  /// object to be spawned.
-  public: std::map<std::string, int> objectCounter;
-
-  /// \brief Implements ROS interface to recieve and check team submissions
-  public: std::unique_ptr<ObjectChecker> objectChecker;
-};
+/////////////////////////////////////////////////
+void PerceptionObject::EndTrial()
+{
+  this->modelPtr->SetWorldPose(this->origPose);
+  this->modelPtr->SetWorldTwist(ign_math_vector3d_zero,
+    ign_math_vector3d_zero);
+  this->active = false;
+  gzmsg << "PerceptionScoringPlugin: despawning " << this->name << std::endl;
+}
 
 GZ_REGISTER_WORLD_PLUGIN(PerceptionScoringPlugin)
 
 /////////////////////////////////////////////////
 PerceptionScoringPlugin::PerceptionScoringPlugin()
-  : dataPtr(new PerceptionScoringPluginPrivate)
 {
   gzmsg << "PerceptionScoringPlugin loaded" << std::endl;
 }
@@ -248,25 +156,24 @@ PerceptionScoringPlugin::~PerceptionScoringPlugin()
 }
 
 /////////////////////////////////////////////////
-void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
+void PerceptionScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   sdf::ElementPtr _sdf)
 {
   // Base class, also binds the update method for the base class
   ScoringPlugin::Load(_world, _sdf);
 
-  this->dataPtr->world = _world;
-  this->dataPtr->sdf = _sdf;
+  this->world = _world;
+  this->sdf = _sdf;
 
-  // Read the SDF parameters
   if (_sdf->HasElement("loop_forever"))
   {
     sdf::ElementPtr loopElem = _sdf->GetElement("loop_forever");
-    this->dataPtr->loopForever = loopElem->Get<bool>();
+    this->loopForever = loopElem->Get<bool>();
   }
 
   if (_sdf->HasElement("frame"))
   {
-    this->dataPtr->frameName = _sdf->Get<std::string>("frame");
+    this->frameName = _sdf->Get<std::string>("frame");
   }
 
   if (!_sdf->HasElement("object_sequence"))
@@ -295,6 +202,13 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
     }
     sdf::ElementPtr timeElement = objectElem->GetElement("time");
     double time = timeElement->Get<double>();
+
+    double duration = 5;
+    if (objectElem->HasElement("duration"))
+    {
+      sdf::ElementPtr durationElement = objectElem->GetElement("duration");
+      duration = durationElement->Get<double>();
+    }
 
     // Parse the object type.
     if (!objectElem->HasElement("type"))
@@ -327,195 +241,182 @@ void PerceptionScoringPlugin::Load(physics::WorldPtr _world,
     ignition::math::Pose3d pose = poseElement->Get<ignition::math::Pose3d>();
 
     // Add the object to the collection.
-    PerceptionScoringPluginPrivate::Object obj = {time, type, name, pose};
-    this->dataPtr->initialObjects.push_back(obj);
+    PerceptionObject obj(time, duration, type, name, pose, _world);
+    this->objects.push_back(obj);
 
     objectElem = objectElem->GetNextElement("object");
   }
 
-  std::sort(this->dataPtr->initialObjects.begin(),
-    this->dataPtr->initialObjects.end());
   #if GAZEBO_MAJOR_VERSION >= 8
-    this->dataPtr->lastUpdateTime = this->dataPtr->world->SimTime();
+    this->lastUpdateTime = this->world->SimTime();
   #else
-    this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
+    this->lastUpdateTime = this->world->GetSimTime();
   #endif
 
   // Optional: ROS namespace.
-  std::string ns;
   if (_sdf->HasElement("robot_namespace"))
-    ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
+    this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
 
   // Optional: ROS topic.
-  std::string object_topic = "/vrx/perception/landmark";
+  this->objectTopic = "/vrx/perception/landmark";
   if (_sdf->HasElement("landmark_topic"))
   {
-    object_topic = _sdf->GetElement("landmark_topic")->Get<std::string>();
+    this->objectTopic = _sdf->GetElement("landmark_topic")->Get<std::string>();
   }
-  // Instatiate the object checker
-  this->dataPtr->objectChecker.reset(
-    new ObjectChecker(ns, object_topic, _world));
 
   this->Restart();
 
-  this->dataPtr->connection = event::Events::ConnectWorldUpdateEnd(
+  this->connection = gazebo::event::Events::ConnectWorldUpdateEnd(
       boost::bind(&PerceptionScoringPlugin::OnUpdate, this));
 }
 
 /////////////////////////////////////////////////
 void PerceptionScoringPlugin::Restart()
 {
-  #if GAZEBO_MAJOR_VERSION >= 8
-    this->dataPtr->startTime = this->dataPtr->world->SimTime();
-  #else
-    this->dataPtr->startTime = this->dataPtr->world->GetSimTime();
-  #endif
-
-  this->dataPtr->objects = this->dataPtr->initialObjects;
-
-  // gzmsg << "Object population restarted" << std::endl;
+  for (auto& obj : this->objects)
+  {
+    // reset all objects' errors
+    obj.error = -1.0;
+    // bump all objs time to start again
+    #if GAZEBO_MAJOR_VERSION >= 8
+      obj.time += this->world->SimTime().Double();
+    #else
+      obj.time += this->world->GetSimTime().Double();
+    #endif
+  }
+  gzmsg << "Object population restarted" << std::endl;
 }
 
 /////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnUpdate()
 {
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-
-  // Connect with object checker to see if we need to score a submission
-  if (this->dataPtr->objectChecker->SubmissionReceived() &&
-      !this->dataPtr->objectChecker->submissionScored)
+  // if have not finished the load, skip
+  if (!this->frameName.empty())
   {
-    ROS_INFO("Scoring a new submission");
-    // Only add score if the identification is correct
-    if (this->dataPtr->objectChecker->Correct())
+    // get frame of robot
+    #if GAZEBO_MAJOR_VERSION >= 8
+      this->frame =
+        this->world->EntityByName(this->frameName);
+    #else
+      this->frame =
+        this->world->GetEntity(this->frameName);
+    #endif
+    // make sure it is a real frame
+    if (!this->frame)
     {
-      this->SetScore(this->Score()+this->dataPtr->objectChecker->objectError);
+      gzwarn << std::string("The frame '") << this->frameName
+        << "' does not exist";
+      return;
     }
-    // Mark trial as scored
-    this->dataPtr->objectChecker->submissionScored = true;
-  }
-
-  // Have we completed a cycle through the object queue?
-  if (this->dataPtr->objects.empty())
-  {
-    if (this->dataPtr->loopForever)
+    if (!this->frame->HasType(gazebo::physics::Base::LINK) &&
+        !this->frame->HasType(gazebo::physics::Base::MODEL))
     {
+      gzwarn << "'frame' tag must list the name of a link or model";
+      return;
+    }
+  }
+  // look at all objects
+  for (auto& obj : this->objects)
+  {
+    // if time to spawn an object
+    if (this->ElapsedTime() > obj.time &&
+        this->ElapsedTime() < obj.time + obj.duration &&
+        !obj.active)
+    {
+      // increment the atempt balance for this new obj
+      this->attemptBal += 1;
+      obj.StartTrial(this->frame);
+      ROS_INFO_NAMED("PerceptionScoring",
+        "New Attempt Balance: %d", this->attemptBal);
+    }
+    // if time to despawn and object
+    if (this->ElapsedTime() > obj.time + obj.duration &&
+        obj.active)
+    {
+      // prevent negative attemp balance
+      if (this->attemptBal > 0)
+        this->attemptBal -= 1;
+      // inc objects despawned
+      this->objectsDespawned += 1;
+      obj.EndTrial();
+      // only add to score if its type was guessed correctly
+      if (obj.error != -1.0)
+      {
+        this->SetScore(this->Score() + obj.error);
+      }
+      ROS_INFO_NAMED("PerceptionScoring",
+        "New Attempt Balance: %d", this->attemptBal);
+    }
+  }
+  // if we have finished
+  if (this->objectsDespawned == this->objects.size() &&
+      this->TaskState() != "finished")
+  {
+    // publish string summarizing the objects
+    for (auto& obj : this->objects)
+    {
+      ROS_INFO_NAMED("PerceptionScoring", "%s", obj.Str().c_str());
+    }
+    // if loop, restart
+    if (this->loopForever)
+    {
+      this->objectsDespawned = 0;
       this->Restart();
     }
     else
     {
-      #if GAZEBO_MAJOR_VERSION >= 8
-        this->dataPtr->lastUpdateTime = this->dataPtr->world->SimTime();
-      #else
-        this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
-      #endif
-      return;
+      this->Finish();
     }
   }
+}
 
-  // Check whether move the next object in the list.
-  if (this->ElapsedTime() >= this->dataPtr->objects.front().time)
+/////////////////////////////////////////////////
+void PerceptionScoringPlugin::OnAttempt(
+  const geographic_msgs::GeoPoseStamped::ConstPtr &_msg)
+{
+  // only accept an attempt if there are any in the attempt balance
+  if (this->attemptBal == 0)
   {
-    gzmsg << "PerceptionScoringPlugin: spawn next object." << std::endl;
-    auto obj = this->dataPtr->objects.front();
-
-    // Try to use a model/link frame if specified.
-    if (!this->dataPtr->frameName.empty())
+    ROS_WARN_NAMED("PerceptionScoring",
+      "Attempt Balance is 0, no attempts currently allowed. Ignoring.");
+    return;
+  }
+  else
+  {
+    // burn one attempt
+    this->attemptBal -= 1;
+    ROS_INFO_NAMED("PerceptionScoring",
+      "New Attempt Balance: %d", this->attemptBal);
+  }
+  for (auto& obj : this->objects)
+  {
+    // if attempt correct type
+    if (obj.type == _msg->header.frame_id)
     {
+      // Convert geo pose to Gazebo pose
+      // Note - this is used in a few different VRX plugins, may want to have a
+      // separate library?
+      // Convert lat/lon to local
+      // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
+      ignition::math::Vector3d scVec(_msg->pose.position.latitude,
+        _msg->pose.position.longitude, 0);
       #if GAZEBO_MAJOR_VERSION >= 8
-        this->dataPtr->frame =
-          this->dataPtr->world->EntityByName(this->dataPtr->frameName);
+        ignition::math::Vector3d cartVec =
+        this->world->SphericalCoords()->LocalFromSpherical(scVec);
       #else
-        this->dataPtr->frame =
-          this->dataPtr->world->GetEntity(this->dataPtr->frameName);
+        ignition::math::Vector3d cartVec =
+        this->world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
       #endif
-      if (!this->dataPtr->frame)
-      {
-        gzthrow(std::string("The frame '") + this->dataPtr->frameName +
-          "' does not exist");
-      }
-      if (!this->dataPtr->frame->HasType(physics::Base::LINK) &&
-          !this->dataPtr->frame->HasType(physics::Base::MODEL))
-      {
-        gzthrow("'frame' tag must list the name of a link or model");
-      }
-    }
-
-    if (this->dataPtr->frame)
-    {
-      // Set object pose relative to the specified frame (e.g., the wam-v)
-      // Pitch and roll are set to zero as a hack to deal with
-      // transients associated with spawning buoys with significant attitude.
+      // Get current pose of the current object
       #if GAZEBO_MAJOR_VERSION >= 8
-        ignition::math::Pose3d framePose(
-          this->dataPtr->frame->WorldPose().Pos(),
-          ignition::math::Quaterniond(0.0, 0.0,
-            this->dataPtr->frame->WorldPose().Rot().Yaw()));
+        ignition::math::Pose3d truePose = obj.modelPtr->WorldPose();
       #else
-        ignition::math::Pose3d framePose(
-          this->dataPtr->frame->GetWorldPose().pos.Ign(),
-          ignition::math::Quaterniond(0.0, 0.0,
-            this->dataPtr->frame->GetWorldPose().rot.Ign().Yaw()));
+        ignition::math::Pose3d truePose = obj.modelPtr->GetWorldPose().Ign();
       #endif
-      ignition::math::Matrix4d transMat(framePose);
-      ignition::math::Matrix4d pose_local(obj.pose);
-      obj.pose = (transMat * pose_local).Pose();
+      // 2D Error
+      obj.SetError(sqrt(pow(cartVec.X() - truePose.Pos().X(), 2)+
+        pow(cartVec.Y() - truePose.Pos().Y(), 2)));
     }
-
-    std::string modelName = obj.type;
-
-    // Get a new index for the object.
-    if (this->dataPtr->objectCounter.find(obj.type) ==
-        this->dataPtr->objectCounter.end())
-    {
-    this->dataPtr->objectCounter[obj.type] = 0;
-    }
-    else
-    {
-      this->dataPtr->objectCounter[obj.type]++;
-    }
-    int index = this->dataPtr->objectCounter[obj.type];
-
-    // If necessary, move object back to original pose
-    if (this->dataPtr->curr_model)
-    {
-      this->dataPtr->curr_model->SetWorldPose(this->dataPtr->orig_pose);
-    }
-    // Get a unique name for the new object.
-    modelName += "_" + std::to_string(index);
-    #if GAZEBO_MAJOR_VERSION >= 8
-      auto modelPtr = this->dataPtr->world->EntityByName(modelName);
-    #else
-      auto modelPtr = this->dataPtr->world->GetEntity(modelName);
-    #endif
-    if (modelPtr)
-    {
-      // Setup new trial in object checker
-      this->dataPtr->objectChecker->NewTrial(obj.name, modelPtr);
-
-      // Save current object and original pose for later
-      this->dataPtr->curr_model = modelPtr;
-      #if GAZEBO_MAJOR_VERSION >= 8
-        this->dataPtr->orig_pose = modelPtr->WorldPose();
-      #else
-        this->dataPtr->orig_pose = modelPtr->GetWorldPose().Ign();
-      #endif
-      // Move object to the target pose.
-      modelPtr->SetWorldPose(obj.pose);
-      modelPtr->SetWorldTwist(ignition::math::Vector3d::Zero,
-        ignition::math::Vector3d::Zero);
-      gzdbg << "Object [" << modelName << "] spawned" << std::endl;
-    }
-    else
-    {
-      gzerr << "Object [" << modelName << "] NOT spawned" << std::endl;
-    }
-    this->dataPtr->objects.erase(this->dataPtr->objects.begin());
-    #if GAZEBO_MAJOR_VERSION >= 8
-      this->dataPtr->lastUpdateTime = this->dataPtr->world->SimTime();
-    #else
-      this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
-    #endif
   }
 }
 
@@ -523,6 +424,22 @@ void PerceptionScoringPlugin::OnUpdate()
 void PerceptionScoringPlugin::OnRunning()
 {
   gzmsg << "OnRunning" << std::endl;
+  // Quit if ros plugin was not loaded
+  if (!ros::isInitialized())
+  {
+    ROS_ERROR("ROS was not initialized.");
+    return;
+  }
 
-  this->dataPtr->objectChecker->Enable();
+  // Subscribe
+  this->nh = ros::NodeHandle(this->ns);
+  this->objectSub = this->nh.subscribe(this->objectTopic, 1,
+    &PerceptionScoringPlugin::OnAttempt, this);
+}
+
+//////////////////////////////////////////////////
+void PerceptionScoringPlugin::ReleaseVehicle()
+{
+  // Avoid releasing the vehicle by overriding this function.
+  return;
 }

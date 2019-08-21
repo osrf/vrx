@@ -4,6 +4,9 @@
   <world name="robotx_scan_and_dock">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
     <xacro:sandisland />
+    <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves/>
 
     <!-- The light buoy -->
     <include>

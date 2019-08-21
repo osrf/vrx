@@ -3,8 +3,10 @@
 
   <model name="robotx_dock_2018">
 
+    <static>true</static>
     <!-- The 2018 dock base -->
     <include>
+      <name>dock_2018_base</name>
       <uri>model://dock_2018_base</uri>
     </include>
     <%
@@ -43,7 +45,7 @@
       # Variables
       placard_x     = dock_x
       placard_y     = dock_y
-      placard_z     = dock_z
+      placard_z     = dock_z + 0.1
       placard_roll  = dock_roll
       placard_pitch = dock_pitch
       placard_yaw   = dock_yaw
@@ -72,13 +74,21 @@
     <% for i in 1..2 %>
     <!-- Placard #<%= i %> -->
     <model name="dock_2018_placard<%= i %>">
+      <static>true</static>
+      <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
       <include>
-        <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
+        <static>true</static>
+        <pose> 0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
+        <% if i == 1%>
+        <pose> 0 -0.1 0.75 0 0 0 </pose>
+        <% else %>
+        <pose> 0 0.1 0.75 0 0 0 </pose>
+        <% end %>
         <visual name="visual_circle">
-          <pose><%=circle_x %> <%=circle_y%> <%=circle_z%> <%=circle_roll %> <%=circle_pitch%> <%=circle_yaw%></pose>
+          <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -104,7 +114,7 @@
           </plugin>
         </visual>
         <visual name="visual_h_cross">
-          <pose><%=cross_x %> <%=cross_y%> <%=cross_z%> <%=cross_roll %> <%=cross_pitch%> <%=cross_yaw%></pose>
+          <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <box>
               <size>0.99 0.33 0.001</size>
@@ -113,7 +123,7 @@
           <transparency>1</transparency>
         </visual>
         <visual name="visual_v_cross">
-          <pose><%=cross_x %> <%=cross_y%> <%=cross_z%> <%=cross_roll %> <%=cross_pitch%> <%=cross_yaw%></pose>
+          <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <box>
               <size>0.33 0.99 0.001</size>
@@ -122,13 +132,14 @@
           <transparency>1</transparency>
         </visual>
         <visual name="visual_triangle">
-          <pose><%=triangle_x %> <%=triangle_y%> <%=triangle_z%> <%=triangle_roll %> <%=triangle_pitch%> <%=triangle_yaw%></pose>
+          <pose> -0.5 0 -0.5 1.571 0 0</pose>
           <geometry>
             <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
           </geometry>
           <transparency>1</transparency>
         </visual>
       </link>
+
     </model>
     <%
       placard_x     += placard_offset_x
@@ -160,5 +171,8 @@
       triangle_yaw   += placard_offset_yaw
     %>
     <% end %>
+  
   </model>
+
+
 </sdf>

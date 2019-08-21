@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>wave_gazebo_plugins</name>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
   <description>
     This package contains Gazebo plugins for the simulation of 
     water surface waves and hydrostatic and hydrodynamics forces. 
