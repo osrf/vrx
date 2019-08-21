@@ -6,7 +6,7 @@
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
-  <arg name="verbose" default="false"/>
+  <arg name="verbose" default="true"/>
   <!-- Set various other gazebo arguments-->
   <arg name="extra_gazebo_args" default=""/>
   <!-- Start in a default namespace -->

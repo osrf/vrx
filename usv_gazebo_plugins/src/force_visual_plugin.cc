@@ -22,7 +22,12 @@
 using namespace gazebo;
 
 //////////////////////////////////////////////////
-void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr) {
+void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
+  // parse parameters
+  if (_sdf->HasElement("scaling")) {
+    this->scaling = _sdf->GetElement("scaling")->Get<double>();
+  }
+
   // Store the pointer to the model
   this->model = _parent;
 
@@ -61,16 +66,18 @@ void ForceVisualPlugin::Update() {
 bool ForceVisualPlugin::PublishMarker(const gazebo::physics::LinkPtr& link)
 {
   auto pos = link->WorldPose().Pos();
+  auto force = link->WorldForce() / this->scaling;
 
   ignition::msgs::Marker markerMsg;
   markerMsg.set_ns(this->ns);
   markerMsg.set_id(link->GetId());
-
-  // publish force marker
   markerMsg.set_action(ignition::msgs::Marker::ADD_MODIFY);
   markerMsg.set_type(ignition::msgs::Marker::LINE_LIST);
-  ignition::msgs::Set(markerMsg.add_point(), pos);
-  ignition::msgs::Set(markerMsg.add_point(), pos + link->WorldForce());
+
+  ignition::msgs::Material *matMsg = markerMsg.mutable_material();
+  matMsg->mutable_script()->set_name("Gazebo/Red");
+    ignition::msgs::Set(markerMsg.add_point(), pos);
+  ignition::msgs::Set(markerMsg.add_point(), pos + force);
   return this->node.Request(this->markerTopic, markerMsg);
 }
 

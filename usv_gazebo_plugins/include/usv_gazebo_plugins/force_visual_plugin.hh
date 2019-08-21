@@ -28,6 +28,8 @@
 
 namespace gazebo
 {
+  /// \brief This plugin visualizes forces on each link of an object.
+  ///   <scaling />        Scaling for force vectors (optional)
   class ForceVisualPlugin : public ModelPlugin
   {
     /// \brief Constructor
@@ -39,7 +41,7 @@ namespace gazebo
     /// \brief Update the plugin once every iteration of simulation.
     public: void Update();
 
-    /// \brief Publish force / torque markers for link
+    /// \brief Publish force markers for link
     /// @param link link pointer
     /// @return true if marker publishing was successful
     private: bool PublishMarker(const gazebo::physics::LinkPtr& link);
@@ -51,7 +53,7 @@ namespace gazebo
     private: physics::Link_V links;
 
     /// \brief Transport node
-    ignition::transport::Node node;
+    private: ignition::transport::Node node;
 
     /// \brief Marker service name
     private: std::string markerTopic = "/marker";
@@ -61,5 +63,8 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;
+
+    /// \brief Scaling factor for visualized force vectors
+    private: double scaling = 1.0;
   };
 }
