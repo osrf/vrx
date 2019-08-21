@@ -113,7 +113,9 @@ namespace asv
   /// 9. <direction> (Vector2D, default: (1 0))
   ///   A two component vector specifiying the direction of the mean wave.
   ///
-  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin : public gazebo::VisualPlugin
+  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin :
+    public gazebo::VisualPlugin,
+    public Ogre::RenderTargetListener
   {
     /// \brief Destructor.
     public: virtual ~WavefieldVisualPlugin();
@@ -134,7 +136,15 @@ namespace asv
 
     /// internal
     /// \brief Called every PreRender event.
-    private: void OnUpdate();
+    private: void OnPreRender();
+
+    /// internal
+    /// \brief Called every Render event.
+    private: void OnRender();
+
+    /// internal
+    /// \brief Setup Ogre objects for reflection/refraction
+    private: void SetupReflectionRefraction();
 
     /// internal
     /// \brief Callback for gztopic "~/world_stats".
@@ -145,6 +155,13 @@ namespace asv
     /// internal
     /// \brief Update the vertex shader parameters.
     private: void SetShaderParams();
+
+    /// internal
+    /// \brief Hide/Show objects for reflection/refraction render
+    private: virtual void preRenderTargetUpdate(
+                 const Ogre::RenderTargetEvent& rte);
+    private: virtual void postRenderTargetUpdate(
+                 const Ogre::RenderTargetEvent& rte);
 
     /// \internal
     /// \brief Pointer to the class private data.
