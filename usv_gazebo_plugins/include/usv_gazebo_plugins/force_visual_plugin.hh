@@ -31,6 +31,13 @@ namespace gazebo
 {
   /// \brief This plugin visualizes forces on each link of an object.
   ///   <scaling />        Scaling for force vectors (optional)
+  ///
+  /// Example: adding to wamv_gazebo.xacro
+  ///    <gazebo>
+  ///      <plugin name="ForcePlugin" filename="libforce_visual_plugin.so">
+  ///        <scaling>20.0</scaling>
+  ///      </plugin>
+  ///    </gazebo>
   class ForceVisualPlugin : public ModelPlugin
   {
     /// \brief Constructor
