@@ -65,5 +65,7 @@ void main(void)
 
   // Perform linear interpolation between reflection and refraction.
   vec4 color = mix(waterColor, envColor, refractionRatio);
-  gl_FragColor = vec4(color.xyz, 0.9);
+  //gl_FragColor = vec4(color.xyz, 0.9);
+  gl_FragColor = reflectionColour;
+
 }

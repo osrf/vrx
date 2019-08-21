@@ -260,7 +260,7 @@ namespace asv
     this->data->waveParams->DebugPrint();
 
     // Setup reflection refraction
-    // this->SetupReflectionRefraction();
+    this->SetupReflectionRefraction();
 
     // Bind the update method to ConnectPreRender events
     this->data->preRenderConnection = event::Events::ConnectPreRender(
