@@ -16,6 +16,8 @@
 // Input parameters
 uniform sampler2D bumpMap;
 uniform samplerCube cubeMap;
+uniform sampler2D reflectMap;
+uniform sampler2D refractMap;
 uniform vec4 deepColor;
 uniform vec4 shallowColor;
 uniform float fresnelPower;
@@ -26,8 +28,18 @@ varying mat3 rotMatrix;
 varying vec3 eyeVec;
 varying vec2 bumpCoord;
 
+varying vec4 projectionCoord;
+
 void main(void)
 {
+  // Do the tex projection manually so we can distort _after_
+  vec2 final = projectionCoord.xy / projectionCoord.w;
+
+  // Reflection / refraction
+  vec4 tintColour = vec4(0, 0.05, 0.05, 1);
+  vec4 reflectionColour = texture2D(reflectMap, final);
+  vec4 refractionColour = texture2D(refractMap, final) + tintColour;
+
   // Apply bump mapping to normal vector to make waves look more detailed:
   vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
   vec3 N = normalize(rotMatrix * bump.xyz);
