@@ -9,6 +9,8 @@
   <arg name="verbose" default="false"/>
   <!-- Set various other gazebo arguments-->
   <arg name="extra_gazebo_args" default=""/>
+  <!-- Start in a default namespace -->
+  <arg name="namespace" default="wamv"/>
 
   <arg name="paused" default="false"/>
 
@@ -44,7 +46,7 @@
 
   <!-- Load robot model -->
   <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
-  <param name="robot_description"
+  <param name="$(arg namespace)/robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
          locked:=$(arg wamv_locked)
          thruster_config:=$(arg thrust_config)
@@ -54,5 +56,5 @@
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
         args="-x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg R) -P $(arg P) -Y $(arg Y)
-              -urdf -param robot_description -model wamv"/>
+              -urdf -param $(arg namespace)/robot_description -model wamv -robot_namespace $(arg namespace)"/>
 </launch>
