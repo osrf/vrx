@@ -25,6 +25,7 @@
 
 #include <geographic_msgs/GeoPoseStamped.h>
 #include <ros/ros.h>
+#include <vector>
 #include <memory>
 #include <string>
 #include <gazebo/physics/PhysicsTypes.hh>
@@ -33,85 +34,60 @@
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
 
-/// \brief A class to monitor if the object and pose reported matches the
-/// currently visible object and pose.
-/// displayed in the light buoy.
-class ObjectChecker
+
+/// \brief Class to store information about each object to be populated.
+class PerceptionObject
 {
-  /// \brief Constructor.
-  /// \param[in] _rosNameSpace ROS namespace.
-  /// \param[in] _rosObjectTopic The ROS topic used to receive
-  /// the object identification and localization
-  public: ObjectChecker(const std::string &_rosNameSpace,
-                        const std::string &_rosObjectTopic,
-                        gazebo::physics::WorldPtr _world);
+  /// \brief Simulation time in which the object should be spawned.
+  public: double time;
 
-  /// \brief Initialize a new trial
-  /// \param[in] _objectName Name of the object for id purposes
-  /// \param[in] _objectPose Pose of the object for localization purposes
-  public: void NewTrial(const std::string &_objectName,
-                        gazebo::physics::EntityPtr _object);
+  /// \brief amount of time in which the object should be spawned.
+  public: double duration;
 
-  /// Enable the ROS subscription.
-  public: void Enable();
+  /// \brief PerceptionObject type.
+  public: std::string type;
 
-  /// Disable the ROS subscription.
-  public: void Disable();
+  /// \brief PerceptionObject type.
+  public: std::string name;
 
-  /// \brief Whether a team submitted an identification for current trial
-  /// \return True when the submission was received or false otherwise.
-  public: bool SubmissionReceived() const;
+  /// \brief Pose in which the object should be placed in wam-v's frame.
+  public: ignition::math::Pose3d trialPose;
 
-  /// \brief Has the submission been scored?
-  public: bool submissionScored = false;
+  /// \brief Pose in which the object should be placed in global frame.
+  private: ignition::math::Pose3d origPose;
 
-  /// \brief Whether a team submitted a correct id or not.
-  /// \return True when the team submitted the id and it is correct
-  /// or false otherwise.
-  public: bool Correct() const;
+  /// \brief ModelPtr to the model that this object is representing
+  public: gazebo::physics::EntityPtr modelPtr;
 
-  /// \brief Callback executed when a new color submission is received.
-  /// \param[in] _request Contains the submission.
-  /// \param[out] _res The Response. Note that this will be true even if the
-  /// reported sequence is incorrect.
-  private: void OnObject(const geographic_msgs::GeoPoseStamped::ConstPtr &_msg);
+  /// \brief bool to tell weather or not the object is open for attempts
+  public: bool active = false;
 
-  /// \brief Pose error of object localization.
-  public: double objectError = -1.0;
+  /// \brief error associated with the guess of a moel
+  public: double error = -1.0;
 
-  /// \brief ROS namespace.
-  private: std::string ns;
+  /// \brief constructor of perception object
+  public: PerceptionObject(const double& _time,
+                 const double& _duration,
+                 const std::string& _type,
+                 const std::string& _name,
+                 const ignition::math::Pose3d& _trialPose,
+                 const gazebo::physics::WorldPtr _world);
 
-  /// \brief ROS topic where the object id/pose is received.
-  private: std::string objectTopic;
+  /// \brief set the error of this boject if this object is active
+  ///   and this is the lowest seen error
+  public: void SetError(const double& _error);
 
-  /// \brief ROS Node handle.
-  private: ros::NodeHandle nh;
+  /// \brief move the object to where it is supposed to be relative to the frame
+  /// \brief of the robot and make it active
+  public: void StartTrial(const gazebo::physics::EntityPtr& _frame);
 
-  /// \brief ROS subscriber
-  private: ros::Subscriber objectSub;
+  /// \brief move the object back to its original location and make inactive
+  public: void EndTrial();
 
-  /// \brief Whether the object has been received or not.
-  private: bool objectReceived = false;
-
-  /// \brief Whether the object ID received is correct or not.
-  private: bool objectCorrect = false;
-
-  /// \brief Count the trials.
-  private: int trialCount = 0;
-
-  /// \brief Current correct object name.
-  private: std::string trueName;
-
-  /// \brief Current object
-  private: gazebo::physics::EntityPtr currObject;
-
-  /// \brief World pointer. Need this for spherical/local conversion.
-  private: gazebo::physics::WorldPtr world;
+  /// \return a string summarizing this object
+  public: std::string Str();
 };
 
-// Forward declare private data class
-class PerceptionScoringPluginPrivate;
 
 /// \brief A plugin that allows models to be spawned at a given location in
 /// a specific simulation time and then takes care of scoring correct
@@ -140,6 +116,9 @@ class PerceptionScoringPluginPrivate;
 ///   plugin subscribes for receiving identification and localization msgs.
 ///   Default is "/vrx/perception/landmark"
 ///
+/// <duration>: Optional parameter. Specify the time an object sticks around.
+///   defaults to 5
+///
 /// Here's an example of a valid SDF:
 ///
 /// <plugin filename="libperception_scoring_plugin.so"
@@ -156,14 +135,14 @@ class PerceptionScoringPluginPrivate;
 ///   <object_sequence>
 ///     <object>
 ///       <time>10.0</time>
-///       <type>red</type>
-///       <name>red_mark</name>
+///       <type>surmark_950410</type>
+///       <name>red_0</name>
 ///       <pose>6 0 1 0 0 0</pose>
 ///     </object>
 ///     <object>
 ///       <time>10.0</time>
-///       <type>green</type>
-///       <name>green_mark</name>
+///       <type>surmark_950400</type>
+///       <name>green_0</name>
 ///       <pose>6 6 1 0 0 0</pose>
 ///     </object>
 ///   </object_sequence>
@@ -183,6 +162,9 @@ class PerceptionScoringPlugin : public ScoringPlugin
   /// \brief Update the plugin.
   protected: void OnUpdate();
 
+  private: void OnAttempt(
+    const geographic_msgs::GeoPoseStamped::ConstPtr &_msg);
+
   /// \brief Restart the object population list
   private: void Restart();
 
@@ -192,8 +174,51 @@ class PerceptionScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void ReleaseVehicle() override;
 
-  /// \brief Private data pointer.
-  private: std::unique_ptr<PerceptionScoringPluginPrivate> dataPtr;
+  private: int attemptBal = 0;
+
+  /// \brief ROS namespace.
+  private: std::string ns;
+
+  /// \brief ROS topic where the object id/pose is received.
+  private: std::string objectTopic;
+
+  /// \brief ROS Node handle.
+  private: ros::NodeHandle nh;
+
+  /// \brief ROS subscriber
+  private: ros::Subscriber objectSub;
+
+  /// \brief World pointer.
+  public: gazebo::physics::WorldPtr world;
+
+  /// \brief SDF pointer.
+  public: sdf::ElementPtr sdf;
+
+  /// \brief Collection of objects to be spawned.
+  public: std::vector<PerceptionObject> objects;
+
+  /// \brief Connection event.
+  public: gazebo::event::ConnectionPtr connection;
+
+  /// \brief The time specified in the object is relative to this time.
+  public: gazebo::common::Time startTime;
+
+  /// \brief When true, "objects" will be repopulated when the object queue
+  /// is empty, creating an infinite supply of objects.
+  public: bool loopForever = false;
+
+  /// \brief Link/model name for the object poses use as their frame of
+  /// reference
+  public: std::string frameName = std::string();
+
+  /// \brief Link/model that the object poses use as their frame of reference.
+  public: gazebo::physics::EntityPtr frame;
+
+  /// \brief Last time (sim time) that the plugin was updated.
+  public: gazebo::common::Time lastUpdateTime;
+
+  /// \ brief count of how many objects have been despawned
+  private: int objectsDespawned =0;
 };
 
 #endif

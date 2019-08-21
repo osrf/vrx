@@ -2,6 +2,134 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2019-08-19)
+------------------
+* Merged default into topic_namespace_generation
+* Modify teleop examples to use namespaces
+* Add a namespace parameter to the launch file.
+* Merged default into topic_namespace_generation
+* now installs the custom protobuf message types
+* Adding dependency on wave_gazebo.
+* Merged in floating_docks (pull request #146)
+  Floating docks
+  Approved-by: Carlos Agüero <cen.aguero@gmail.com>
+* fixed triangle for dynamic
+* dock 016 dynamic base name fixed
+* Tweak default duration.
+* fixed triangle position
+* incremental
+* uperception scoring: updated ymal files and fixed end condition bug when not looping
+* lowered gaines for waves
+* styling and documentation
+* perception plugin refactored to be more fllexible
+* Fully functional solution, with urdf file modified when calling spawn_wamv.bash and giving proper model dirs to wamv_gazebo and wamv_description
+* Fully functional solution, with model.config errors only when non_competition_mode:=false
+* tracking dock model sdf's
+* static dynamic refactor complete
+* files renamed
+* halfway through dock name refactor
+* static dock preformance improved
+* incremental
+* scan_dock now dynamic dock
+* added static dock counter parts
+* adding static dock option
+* merged with default
+* Merged default into Add-Option-To-Hide-Gazebo-Topics
+* Tweak in wait_until_gzserver_is_up().
+* Merged in issue_92 (pull request #157)
+  Fix issue #92
+  Approved-by: Tyler Lum <tylergwlum@gmail.com>
+* Camera control plugin.
+* Clean launch file
+* Improve sandisland.launch clarity
+* Improve spawn_wamv.bash comments clarity
+* Change argument from competition_mode to non_competition_mode to fix publishing errors
+* Add competition_mode argument
+* Concatenate original Gazebo Model Path to new value
+* Rm fake vrx_gazebo/models and make it work, needs testing
+* Change model names to No Model
+* Use if and unless in launch file for roslaunch spawn
+* Deterministic wind.
+* Merged default into topic_namespace_generation
+* Fix namepsaces to work with robotNamespace parameter
+* Merge changes with default branch
+* Merged default into gps_plugin
+* Add v3d plugin - this publishes a vecotr based on the world frame velocity in Gazebo
+  Update gps configuration to add gazebo gps and v3d plugins to standard configuration
+* Add plugin for ROS interface to gazebo GPS sensor.
+* Merged default into gps_plugin
+* added more params to dock xacro
+* fix nav_challenge
+* resolved merge conflicts
+* dock xacro fixed
+* incremental
+* added scoring plugin to the nav_challenge xacro for world generation
+* Remove redundant sleep
+* Update script to run rosrun xacro to make final urdf, seems to work well
+* Add arg parsing for spawn_wamv, does not work with urdf.xacros yet
+* Add wait for gzserver, might need testing
+* Spawn wamv with bash script, still needs improvement
+* Add fake models in vrx_gazebo, wamv_description, wamv_gazebo to avoid GAZEBO_MODEL_PATH errors
+* Merged default into Add-Option-To-Hide-Gazebo-Topics
+* Merged in wamv-lock-at-run-time (pull request #152)
+  Wamv lock at run time
+  Approved-by: Carlos Agüero <cen.aguero@gmail.com>
+* Fix spacing in yaml
+* Tweaks.
+* Fix nav_challenge_deep
+* Add nav_challenge scoring plugin and gates
+* Update xacros/dock.xacro and xacros/scan_and_dock.xacro to match original (add missing parameters)
+* Add verbose and paused option for improved playback
+* Merged in ocean-wave-xacro (pull request #150)
+  Ocean wave xacro
+  Approved-by: Marshall Rawson <marshallrawson@osrfoundation.org>
+* cleaning
+* wamv-locked by plugin permanetely
+* added spinning out detection
+* Merged default into ocean-wave-xacro
+* incremental
+* incremental
+* Change big shallow and deep world yaml to individual tasks
+* nodes now shutdown and use safe_yaml
+* VRX_DEBUG now linked to enable_ros_network
+* fixed ambient light and fog
+* print to rospy.loginfo
+* fixed xacro insert block ordering issue
+* includes the yaml files in repository
+* functional?
+* Change to default to true, as it should
+* Add enable_ros_network argument
+* incremental
+* added plate and sphere models
+* functional for cubes
+* incremental
+* made taskMsgPub and taskMsg protected
+* Now published taskMsg in OnFinished
+* added time stamp to OnFinsihed
+* moved exit to scoring plugin.
+* removed old debug msg
+* Fix build issue by resolving typo with ROS_ERROR msg
+* styling
+* functional, does not shutdown gzclient
+* functional
+* approximate 4x4 dock block as a sphere
+* merge
+* Merged in compliance-refactor (pull request #139)
+  Compliance refactor
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+  Approved-by: Tyler Lum <tylergwlum@gmail.com>
+* fix print
+* styling
+* added overall compliance error
+* Removed old print statments, Added yaml file confirmation ROSINFO message
+* fixed dock inertial issues
+* fixed error message
+* example_sensor_config.yaml edited online with Bitbucket
+* merge
+* functional
+* merge
+* Contributors: Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, Jonathan Wheare <jonathan.wheare@flinders.edu.au>, Marshall Rawson <marshallrawson@osrfoundation.org>, MarshallRawson, MarshallRawson <marshallrawson@osrfoundation.org>, Tyler Lum <tylergwlum@gmail.com>
+
 1.1.2 (2019-07-10)
 ------------------
 * Merged in world-gen-bug-fix (pull request #145)

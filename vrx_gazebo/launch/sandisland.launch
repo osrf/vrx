@@ -24,8 +24,7 @@
   <arg name="non_competition_mode" default="true"/>
   <arg name="enable_ros_network" value="$(arg non_competition_mode)"/>
   <env name="VRX_DEBUG" value="$(arg non_competition_mode)"/>
-  <env name="GAZEBO_MODEL_PATH"
-       value="$(find vrx_gazebo)/models:$(find wamv_gazebo)/models:$(find wamv_description)/models:$(optenv GAZEBO_MODEL_PATH)"/>
+  <env unless="$(arg non_competition_mode)" name="GAZEBO_MODEL_PATH" value="$(find vrx_gazebo)/models:$(find wamv_gazebo)/models:$(find wamv_description)/models:$(optenv GAZEBO_MODEL_PATH)"/>
 
   <!-- Allow user specified thruster configurations
        H = stern trusters on each hull

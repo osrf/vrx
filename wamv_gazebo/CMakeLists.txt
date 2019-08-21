@@ -16,8 +16,8 @@ xacro_add_files(
 )
 
 # Install meshes and textures
-install(DIRECTORY mesh/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/mesh)
+install(DIRECTORY models/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/models)
 
 # Install xacro files / macros
 install(DIRECTORY urdf/

@@ -62,10 +62,10 @@ namespace gazebo
 ///     <shape>triangle</shape>
 ///     <color>red</color>
 ///     <visuals>
-///       <visual>dock_2018_placard1::link_symbols::visual_circle</visual>
-///       <visual>dock_2018_placard1::link_symbols::visual_h_cross</visual>
-///       <visual>dock_2018_placard1::link_symbols::visual_v_cross</visual>
-///       <visual>dock_2018_placard1::link_symbols::visual_triangle</visual>
+///       <visual>dock_2018_placard1::visual_circle</visual>
+///       <visual>dock_2018_placard1::visual_h_cross</visual>
+///       <visual>dock_2018_placard1::visual_v_cross</visual>
+///       <visual>dock_2018_placard1::visual_triangle</visual>
 ///     </visuals>
 ///     <shuffle>true</shuffle>
 ///     <robot_namespace>vrx</robot_namespace>

@@ -2,6 +2,26 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2019-08-19)
+------------------
+* Merge from topic_namespace_generation
+* fix catkin make install issues with meshes
+* Merged in Fix-RVIZ-Mesh-Issue (pull request #158)
+  Fix RVIZ Mesh Issue
+  Approved-by: Carlos Agüero <cen.aguero@gmail.com>
+* Fully functional solution, with urdf file modified when calling spawn_wamv.bash and giving proper model dirs to wamv_gazebo and wamv_description
+* Fully functional solution, with model.config errors only when non_competition_mode:=false
+* Change all to package://vrx_gazebo
+* Rm fake vrx_gazebo/models and make it work, needs testing
+* Change model names to No Model
+* Add sensor namepsace to planar lidar
+  Remove gloabl namespace
+* Add support for namespaces This includes thruster, camera and sensor namespaces, as well as a global namespace allowing multiple vehicles to be created without causing interference.
+* Merged default into gps_plugin
+* Clean up model.config files
+* Add fake models in vrx_gazebo, wamv_description, wamv_gazebo to avoid GAZEBO_MODEL_PATH errors
+* Contributors: Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, Jonathan Wheare <jonathan.wheare@flinders.edu.au>, MarshallRawson, Tyler Lum <tylergwlum@gmail.com>
+
 1.1.2 (2019-07-10)
 ------------------
 
