@@ -328,12 +328,13 @@ namespace asv
     // OGRE setup
     this->data->scene = this->data->visual->GetScene();
 
-    // Only load plugin once, load the visual plugin in gzclient for now.
+    // Only load the visual plugin in gzclient for now.
     if (!this->data->scene->EnableVisualizations())
       return;
 
     // Setup camera
-    Ogre::Camera *userCamera = this->data->scene->GetUserCamera(0)->OgreCamera();
+    Ogre::Camera *userCamera = (this->data->scene->GetUserCamera(0)->
+                                OgreCamera());
     if (userCamera)
     {
       this->data->camera = userCamera;
@@ -414,7 +415,8 @@ namespace asv
 
     // Give material the new textures
     Ogre::MaterialPtr origMat =
-        Ogre::MaterialManager::getSingleton().getByName(this->data->visual->GetMaterialName());
+      Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
+                                                      GetMaterialName());
     Ogre::MaterialPtr mat = origMat;
     Ogre::TextureUnitState *reflectTex =
         mat->getTechnique(0)->getPass(0)->getTextureUnitState(2);
@@ -498,13 +500,13 @@ namespace asv
       this->data->planeEntity->setVisible(false);
     }
 
-    // reflection
+    // Reflection: hide objects below water
     if (rte.source == this->data->reflectionRt)
     {
       this->data->camera->enableReflection(this->data->planeUp);
       this->data->camera->enableCustomNearClipPlane(this->data->planeUp);
     }
-    // refraction
+    // Refraction: hide objects above water
     else
     {
       this->data->visual->SetVisible(false);
@@ -523,13 +525,13 @@ namespace asv
       this->data->planeEntity->setVisible(true);
     }
 
-    // reflection
+    // Reflection: unhide objects below water
     if (rte.source == this->data->reflectionRt)
     {
       this->data->camera->disableReflection();
       this->data->camera->disableCustomNearClipPlane();
     }
-    // refraction
+    // Refraction: unhide objects above water
     else
     {
       this->data->camera->disableCustomNearClipPlane();

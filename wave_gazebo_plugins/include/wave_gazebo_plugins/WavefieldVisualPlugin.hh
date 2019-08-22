@@ -158,6 +158,9 @@ namespace asv
 
     /// internal
     /// \brief Hide/Show objects for reflection/refraction render
+    ///        eg. hide objects above water for refraction
+    ///            hide objects below water for reflection
+    ///            unhide all objects after texture is rendered
     private: virtual void preRenderTargetUpdate(
                  const Ogre::RenderTargetEvent& rte);
     private: virtual void postRenderTargetUpdate(

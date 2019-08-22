@@ -132,9 +132,9 @@ void main(void)
 
   // Calculate projection coordinates for refl/refr
   // Projective texture coordinates, adjust for mapping
-  mat4 scalemat = mat4(0.5, 0.0, 0.0, 0.0,
-                         0.0, -0.5, 0.0, 0.0,
-                         0.0, 0.0, 0.5, 0.0,
-                         0.5, 0.5, 0.5, 1.0);
+  mat4 scalemat = mat4( 0.5,  0.0,  0.0,  0.0,
+                        0.0, -0.5,  0.0,  0.0,
+                        0.0,  0.0,  0.5,  0.0,
+                        0.5,  0.5,  0.5,  1.0);
   projectionCoord = scalemat * gl_Position;
 }
