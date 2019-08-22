@@ -259,8 +259,10 @@ namespace asv
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
 
     // Read refraction and reflection ratios
-    this->data->shallowRefractRatio = Utilities::SdfParamDouble(*_sdf, "shallowRefractRatio", 0.2);
-    this->data->envReflectRatio = Utilities::SdfParamDouble(*_sdf, "envReflectRatio", 0.2);
+    this->data->shallowRefractRatio =
+      Utilities::SdfParamDouble(*_sdf, "shallowRefractRatio", 0.2);
+    this->data->envReflectRatio =
+      Utilities::SdfParamDouble(*_sdf, "envReflectRatio", 0.2);
 
     this->data->waveParams.reset(new WaveParameters());
     if (_sdf->HasElement("wave"))
