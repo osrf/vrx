@@ -178,7 +178,8 @@ void StationkeepingScoringPlugin::PublishGoal()
 }
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::PublishPositionMarker() {
+void StationkeepingScoringPlugin::PublishPositionMarker()
+{
 #if GAZEBO_MAJOR_VERSION >= 8
   // gazebo transport node
   ignition::transport::Node node;
@@ -198,7 +199,8 @@ void StationkeepingScoringPlugin::PublishPositionMarker() {
                           this->goalY, 4.0, 0, 0, 0));
 
   bool result = node.Request("/marker", markerMsg);
-  if (!result) {
+  if (!result)
+  {
     gzwarn << "Error publishing waypoint marker message" << std::endl;
   }
 #else
