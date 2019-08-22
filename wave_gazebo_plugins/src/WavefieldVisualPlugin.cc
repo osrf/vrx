@@ -321,6 +321,8 @@ namespace asv
 
     this->data->reflectionRt->update();
     this->data->refractionRt->update();
+    this->data->reflectionRt->writeContentsToFile("/home/tylerlum/reflection.png");
+    this->data->refractionRt->writeContentsToFile("/home/tylerlum/refraction.png");
   }
 
   void WavefieldVisualPlugin::SetupReflectionRefraction()
@@ -397,6 +399,7 @@ namespace asv
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
     rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
     this->data->reflectionRt->addListener(this);
+
 
     // Setup refraction render target
     this->data->refractionRt =
@@ -510,7 +513,6 @@ namespace asv
     // refraction
     else
     {
-      this->data->visual->SetVisible(false);
       this->data->camera->enableCustomNearClipPlane(this->data->planeDown);
     }
   }

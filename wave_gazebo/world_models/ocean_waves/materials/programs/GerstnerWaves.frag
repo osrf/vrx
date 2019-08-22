@@ -39,7 +39,7 @@ void main(void)
   // Reflection / refraction
   vec4 tintColour = vec4(0, 0.05, 0.05, 1);
   vec4 reflectionColour = texture2D(reflectMap, vec2(final.x, final.y));
-  vec4 refractionColour = texture2D(refractMap, final) + tintColour;
+  vec4 refractionColour = texture2D(refractMap, vec2(final.x, final.y)) + tintColour;
 
   // Apply bump mapping to normal vector to make waves look more detailed:
   vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
@@ -67,7 +67,7 @@ void main(void)
   // Perform linear interpolation between reflection and refraction.
   vec4 color = mix(waterColor, envColor, refractionRatio);
   //gl_FragColor = vec4(color.xyz, 0.9);
-  //gl_FragColor = reflectionColour;
-  gl_FragColor = refractionColour;
+  gl_FragColor = reflectionColour;
+  //gl_FragColor = refractionColour;
 
 }
