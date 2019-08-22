@@ -39,7 +39,8 @@ namespace asv
   class WavefieldVisualPluginPrivate;
 
   /// \brief A Gazebo visual plugin to synchronise and control
-  /// a vertex shader rendering Gerstner waves.
+  /// a vertex shader rendering Gerstner waves. It also renders reflections
+  /// and refractions onto the water.
   ///
   /// # Usage
   ///
@@ -55,6 +56,8 @@ namespace asv
   ///
   /// \code
   /// <plugin name="wavefield_visual" filename="libWavefieldVisualPlugin.so">
+  ///   <shallowRefractRatio>0.1</shallowRefractRatio>
+  ///   <envReflectRatio>0.5</envReflectRatio>
   ///   <static>false</static>
   ///   <wave>
   ///     <number>3</number>
@@ -87,30 +90,38 @@ namespace asv
   /// 1. <static> (bool, default: false)
   ///   Display a static wave field if set to true.
   ///
-  /// 2. <number> (int, default: 1)
+  /// 2. <shallowRefractRatio> (double, default: 0.2)
+  ///   Ratio between shallow water color and refraction color to use
+  ///   In [0, 1], where 0 is no refraction and 1 is maximum refraction
+  ///
+  /// 3. <envReflectRatio> (double, default: 0.2)
+  ///    Ratio between environment color and reflection color to use
+  ///    In [0, 1], where 0 is no reflection and 1 is maximum reflection
+  ///
+  /// 4. <number> (int, default: 1)
   ///   The number of component waves.
   ///
-  /// 3. <scale> (double, default: 2.0)
+  /// 5. <scale> (double, default: 2.0)
   ///   The scale between the mean and largest / smallest component waves.
   ///
-  /// 4. <angle> (double, default: 2*pi/10)
+  /// 6. <angle> (double, default: 2*pi/10)
   ///   The angle between the mean wave direction and the
   ///   largest / smallest component waves.
   ///
-  /// 5. <steepness> (double, default: 1.0)
+  /// 7. <steepness> (double, default: 1.0)
   ///   A parameter in [0, 1] controlling the wave steepness
   ///   with 1 being steepest.
   ///
-  /// 6. <amplitude> (double, default: 0.0)
+  /// 8. <amplitude> (double, default: 0.0)
   ///   The amplitude of the mean wave in [m].
   ///
-  /// 7. <period> (double, default: 1.0)
+  /// 9. <period> (double, default: 1.0)
   ///   The period of the mean wave in [s].
   ///
-  /// 8. <phase> (double, default: 0.0)
+  /// 10. <phase> (double, default: 0.0)
   ///   The phase of the mean wave.
   ///
-  /// 9. <direction> (Vector2D, default: (1 0))
+  /// 11. <direction> (Vector2D, default: (1 0))
   ///   A two component vector specifiying the direction of the mean wave.
   ///
   class GZ_RENDERING_VISIBLE WavefieldVisualPlugin :
