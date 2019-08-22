@@ -33,13 +33,12 @@ varying vec4 projectionCoord;
 void main(void)
 {
   // Do the tex projection manually so we can distort _after_
-  // vec2 final = vec2(projectionCoord.x / projectionCoord.w, projectionCoord.y / projectionCoord.w);
-  vec3 final = projectionCoord.xyz / projectionCoord.w;
+  vec2 final = projectionCoord.xy / projectionCoord.w;
 
   // Reflection / refraction
   vec4 tintColour = vec4(0, 0.05, 0.05, 1);
-  vec4 reflectionColour = texture2D(reflectMap, vec2(final.x, final.y));
-  vec4 refractionColour = texture2D(refractMap, vec2(final.x, final.y)) + tintColour;
+  vec4 reflectionColour = texture2D(reflectMap, final);
+  vec4 refractionColour = texture2D(refractMap, final) + tintColour;
 
   // Apply bump mapping to normal vector to make waves look more detailed:
   vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
@@ -63,11 +62,10 @@ void main(void)
 
   // Refracted ray only considers deep and shallow water colors:
   vec4 waterColor = mix(shallowColor, deepColor, facing);
+  // vec4 waterColor = mix(refractionColour, deepColor, facing);
 
   // Perform linear interpolation between reflection and refraction.
-  vec4 color = mix(waterColor, envColor, refractionRatio);
-  //gl_FragColor = vec4(color.xyz, 0.9);
-  gl_FragColor = reflectionColour;
-  //gl_FragColor = refractionColour;
-
+  // vec4 color = mix(waterColor, envColor, refractionRatio);
+  vec4 color = mix(waterColor, reflectionColour, refractionRatio);
+  gl_FragColor = vec4(color.xyz, 0.9);
 }

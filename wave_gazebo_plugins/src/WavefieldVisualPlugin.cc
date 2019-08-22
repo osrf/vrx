@@ -321,8 +321,6 @@ namespace asv
 
     this->data->reflectionRt->update();
     this->data->refractionRt->update();
-    this->data->reflectionRt->writeContentsToFile("/home/tylerlum/reflection.png");
-    this->data->refractionRt->writeContentsToFile("/home/tylerlum/refraction.png");
   }
 
   void WavefieldVisualPlugin::SetupReflectionRefraction()
@@ -400,7 +398,6 @@ namespace asv
     rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
     this->data->reflectionRt->addListener(this);
 
-
     // Setup refraction render target
     this->data->refractionRt =
         this->data->rttRefractionTexture->getBuffer()->getRenderTarget();
@@ -417,8 +414,9 @@ namespace asv
 
     // Give material the new textures
     Ogre::MaterialPtr origMat =
-        Ogre::MaterialManager::getSingleton().getByName("WaveSim/GerstnerWaves");
-    Ogre::MaterialPtr mat = origMat->clone(this->data->visual->Name() + "_mat");
+        Ogre::MaterialManager::getSingleton().getByName(this->data->visual->GetMaterialName());
+    // Ogre::MaterialPtr mat = origMat->clone(this->data->visual->Name() + "_mat");
+    Ogre::MaterialPtr mat = origMat;
     Ogre::TextureUnitState *reflectTex =
         mat->getTechnique(0)->getPass(0)->getTextureUnitState(2);
     reflectTex->setTexture(this->data->rttReflectionTexture);
@@ -427,8 +425,8 @@ namespace asv
     refractTex->setTexture(this->data->rttRefractionTexture);
 
     // Put material onto plane
-    this->data->planeEntity->setMaterialName(mat->getName());
-
+    // this->data->planeEntity->setMaterialName(mat->getName());
+//
     // Bind the update method to ConnectRender events
     this->data->renderConnection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnRender, this));
@@ -513,6 +511,7 @@ namespace asv
     // refraction
     else
     {
+      this->data->visual->SetVisible(false);
       this->data->camera->enableCustomNearClipPlane(this->data->planeDown);
     }
   }

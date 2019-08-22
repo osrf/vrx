@@ -66,44 +66,8 @@
           </wave>
         </plugin>
         <geometry>
-          <!-- <plane>
-            <normal>0 0 1</normal>
-            <size>1000 1000</size>
-          </plane> -->
           <mesh>
             <uri>model://ocean_waves/meshes/mesh.dae</uri>
-          </mesh>
-        </geometry>
-        <material>
-          <script>
-            <uri>model://ocean_waves/materials/scripts/waves.material</uri>
-            <name>WaveSim/GerstnerWaves</name>
-          </script>
-        </material>
-        <laser_retro>-1</laser_retro>
-      </visual>
-      <visual name="ocean_waves_below_visual">
-        <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
-          <wave>
-            <model>PMS</model>
-            <period>${period}</period>
-            <number>3</number>
-            <scale>1.5</scale>
-	    <gain>${gain}</gain>
-            <direction>${direction_x} ${direction_y}</direction>
-            <angle>${angle}</angle>        
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-            <steepness>0.0</steepness>
-          </wave>
-        </plugin>
-        <geometry>
-          <!-- <plane>
-            <normal>0 0 1</normal>
-            <size>1000 1000</size>
-          </plane> -->
-          <mesh>
-            <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
           </mesh>
         </geometry>
         <material>
