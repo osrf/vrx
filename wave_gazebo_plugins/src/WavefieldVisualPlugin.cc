@@ -415,7 +415,6 @@ namespace asv
     // Give material the new textures
     Ogre::MaterialPtr origMat =
         Ogre::MaterialManager::getSingleton().getByName(this->data->visual->GetMaterialName());
-    // Ogre::MaterialPtr mat = origMat->clone(this->data->visual->Name() + "_mat");
     Ogre::MaterialPtr mat = origMat;
     Ogre::TextureUnitState *reflectTex =
         mat->getTechnique(0)->getPass(0)->getTextureUnitState(2);
@@ -424,9 +423,6 @@ namespace asv
         mat->getTechnique(0)->getPass(0)->getTextureUnitState(3);
     refractTex->setTexture(this->data->rttRefractionTexture);
 
-    // Put material onto plane
-    // this->data->planeEntity->setMaterialName(mat->getName());
-//
     // Bind the update method to ConnectRender events
     this->data->renderConnection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnRender, this));

@@ -36,9 +36,8 @@ void main(void)
   vec2 final = projectionCoord.xy / projectionCoord.w;
 
   // Reflection / refraction
-  vec4 tintColour = vec4(0, 0.05, 0.05, 1);
-  vec4 reflectionColour = texture2D(reflectMap, final);
-  vec4 refractionColour = texture2D(refractMap, final) + tintColour;
+  vec4 reflectionColor = texture2D(reflectMap, final);
+  vec4 refractionColor = texture2D(refractMap, final);
 
   // Apply bump mapping to normal vector to make waves look more detailed:
   vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
@@ -60,12 +59,14 @@ void main(void)
   float facing = 1.0 - dot(-E, N);
   float refractionRatio = clamp(pow(facing, fresnelPower), 0.0, 1.0);
 
-  // Refracted ray only considers deep and shallow water colors:
-  vec4 waterColor = mix(shallowColor, deepColor, facing);
-  // vec4 waterColor = mix(refractionColour, deepColor, facing);
+  // Water color is mix of refraction color, shallow color, and deep color
+  vec4 realShallowColor = mix(shallowColor, refractionColor, 0.2);
+  vec4 waterColor = mix(realShallowColor, deepColor, facing);
+
+  // Environment color is mix of clouds and reflection
+  vec4 realEnvColor = mix(envColor, reflectionColor, 0.2);
 
   // Perform linear interpolation between reflection and refraction.
-  // vec4 color = mix(waterColor, envColor, refractionRatio);
-  vec4 color = mix(waterColor, reflectionColour, refractionRatio);
+  vec4 color = mix(waterColor, realEnvColor, refractionRatio);
   gl_FragColor = vec4(color.xyz, 0.9);
 }
