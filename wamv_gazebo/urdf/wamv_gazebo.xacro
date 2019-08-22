@@ -16,6 +16,6 @@
       <plugin name="ForcePlugin" filename="libforce_visual_plugin.so">
         <scaling>20.0</scaling>
       </plugin>
-    </gazebo>
-  </xacro:macro> -->
+    </gazebo> -->
+  </xacro:macro>
 </robot>
