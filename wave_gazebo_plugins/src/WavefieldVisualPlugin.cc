@@ -165,6 +165,9 @@ namespace asv
     /// \brief The visual containing this plugin.
     public: rendering::VisualPtr visual;
 
+    /// \brief The visual's name
+    public: std::string visual_name;
+
     /// \brief The wavefield visual plugin SDF.
     public: sdf::ElementPtr sdf;
 
@@ -237,12 +240,14 @@ namespace asv
 
     // Process SDF Parameters
     #if GAZEBO_MAJOR_VERSION >= 8
-      gzmsg << "WavefieldVisualPlugin <" << _visual->Name()
-            << ">: Loading WaveParamaters from SDF" <<  std::endl;
+      this->data->visual_name = _visual->Name();
     #else
-      gzmsg << "WavefieldVisualPlugin <" << _visual->GetName()
-            << ">: Loading WaveParamaters from SDF" <<  std::endl;
+      this->data->visual_name = _visual->GetName();
     #endif
+
+    gzmsg << "WavefieldVisualPlugin <" << this->data->visual_name
+          << ">: Loading WaveParamaters from SDF" <<  std::endl;
+
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
     this->data->waveParams.reset(new WaveParameters());
     if (_sdf->HasElement("wave"))
@@ -362,7 +367,7 @@ namespace asv
     // Create reflection texture
     this->data->rttReflectionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual->Name() + "_reflection",
+        this->data->visual_name + "_reflection",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -373,7 +378,7 @@ namespace asv
     // Create refraction texture
     this->data->rttRefractionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual->Name() + "_refraction",
+        this->data->visual_name + "_refraction",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
