@@ -22,9 +22,11 @@
 using namespace gazebo;
 
 //////////////////////////////////////////////////
-void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
+void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
+{
   // parse parameters
-  if (_sdf->HasElement("scaling")) {
+  if (_sdf->HasElement("scaling"))
+  {
     this->scaling = _sdf->GetElement("scaling")->Get<double>();
   }
 
@@ -54,10 +56,11 @@ void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
 }
 
 //////////////////////////////////////////////////
-void ForceVisualPlugin::Update() {
+void ForceVisualPlugin::Update()
+{
   for (const auto & link : this->links)
   {
-    if (!PublishMarker(link))
+    if (!this->PublishMarker(link))
     {
       gzwarn << "Error publishing marker message" << std::endl;
     }
