@@ -80,6 +80,20 @@
         </material>
         <laser_retro>-1</laser_retro>
       </visual>
+      <visual name="ocean_waves_below_visual">
+        <geometry>
+          <mesh>
+            <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://ocean_waves/materials/scripts/waves.material</uri>
+            <name>WaveSim/GerstnerWaves</name>
+          </script>
+        </material>
+        <laser_retro>-1</laser_retro>
+      </visual>
     </link>
   </model>
   </xacro:macro>
