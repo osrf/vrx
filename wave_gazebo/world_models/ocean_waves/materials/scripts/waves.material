@@ -50,8 +50,10 @@ material WaveSim/GerstnerWaves
         param_named shallowColor float4 0 0.6 1 1.0
         param_named fresnelPower float 5
         param_named hdrMultiplier float 0.4
-        param_named shallowRefractRatio float 0.2
-        param_named envReflectRatio float 0.2
+
+        // Commented out b/c set in C++ code
+        // param_named shallowRefractRatio float 0.2
+        // param_named envReflectRatio float 0.2
 
         // Textures
         param_named bumpMap int 0

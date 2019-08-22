@@ -177,6 +177,14 @@ namespace asv
     /// \brief Do not update visual if 'true', [false].
     public: bool isStatic;
 
+    /// \brief Ratio between shallow water color and refraction color to use
+    ///        In [0, 1], where 0 is no refraction and 1 is maximum refraction
+    public: double shallowRefractRatio;
+
+    /// \brief Ratio between environment color and reflection color to use
+    ///        In [0, 1], where 0 is no reflection and 1 is maximum reflection
+    public: double envReflectRatio;
+
     /// \brief World stats.
     public: double simTime, realTime, pauseTime;
     public: bool paused;
@@ -249,6 +257,11 @@ namespace asv
           << ">: Loading WaveParamaters from SDF" <<  std::endl;
 
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
+
+    // Read refraction and reflection ratios
+    this->data->shallowRefractRatio = Utilities::SdfParamDouble(*_sdf, "shallowRefractRatio", 0.2);
+    this->data->envReflectRatio = Utilities::SdfParamDouble(*_sdf, "envReflectRatio", 0.2);
+
     this->data->waveParams.reset(new WaveParameters());
     if (_sdf->HasElement("wave"))
     {
@@ -324,6 +337,7 @@ namespace asv
         !this->data->refractionRt)
       return;
 
+    // Update reflection/refraction
     this->data->reflectionRt->update();
     this->data->refractionRt->update();
   }
@@ -433,6 +447,14 @@ namespace asv
     // Bind the update method to ConnectRender events
     this->data->renderConnection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnRender, this));
+
+    // Set reflection/refraction parameters
+    rendering::SetMaterialShaderParam(*this->data->visual,
+      "shallowRefractRatio", "fragment",
+      std::to_string(static_cast<float>(this->data->shallowRefractRatio)));
+    rendering::SetMaterialShaderParam(*this->data->visual,
+      "envReflectRatio", "fragment",
+      std::to_string(static_cast<float>(this->data->envReflectRatio)));
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
