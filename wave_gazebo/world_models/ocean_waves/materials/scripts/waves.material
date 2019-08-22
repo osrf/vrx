@@ -45,10 +45,15 @@ material WaveSim/GerstnerWaves
 
       fragment_program_ref GerstnerWavesFS
       {
+        // Colors and ratios
         param_named deepColor float4 0 0.05 0.2 1.0
         param_named shallowColor float4 0 0.6 1 1.0
         param_named fresnelPower float 5
         param_named hdrMultiplier float 0.4
+        param_named shallowRefractRatio float 0.2
+        param_named envReflectRatio float 0.2
+
+        // Textures
         param_named bumpMap int 0
         param_named cubeMap int 1
         param_named reflectMap int 2

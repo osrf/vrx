@@ -23,6 +23,9 @@ uniform vec4 shallowColor;
 uniform float fresnelPower;
 uniform float hdrMultiplier;
 
+uniform float shallowRefractRatio;
+uniform float envReflectRatio;
+
 // Input computed in vertex shader
 varying mat3 rotMatrix;
 varying vec3 eyeVec;
@@ -57,16 +60,16 @@ void main(void)
 
   // Compute refraction ratio (Fresnel):
   float facing = 1.0 - dot(-E, N);
-  float refractionRatio = clamp(pow(facing, fresnelPower), 0.0, 1.0);
+  float waterEnvRatio = clamp(pow(facing, fresnelPower), 0.0, 1.0);
 
   // Water color is mix of refraction color, shallow color, and deep color
-  vec4 realShallowColor = mix(shallowColor, refractionColor, 0.2);
+  vec4 realShallowColor = mix(shallowColor, refractionColor, shallowRefractRatio);
   vec4 waterColor = mix(realShallowColor, deepColor, facing);
 
   // Environment color is mix of clouds and reflection
-  vec4 realEnvColor = mix(envColor, reflectionColor, 0.2);
+  vec4 realEnvColor = mix(envColor, reflectionColor, envReflectRatio);
 
   // Perform linear interpolation between reflection and refraction.
-  vec4 color = mix(waterColor, realEnvColor, refractionRatio);
+  vec4 color = mix(waterColor, realEnvColor, waterEnvRatio);
   gl_FragColor = vec4(color.xyz, 0.9);
 }
