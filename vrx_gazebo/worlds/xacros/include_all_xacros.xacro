@@ -5,11 +5,11 @@
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/sandisland_minus_scene.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scene.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/nav_challenge.xacro" />
-    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/light_buoy.xacro" />
+    <!-- <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/light_buoy.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/qualifying_pinger_transit_2016.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/dock_2016.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/dock_2018.xacro" />
-    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scene_macro.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scene_macro.xacro" /> -->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro" />
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/perception.xacro" />
