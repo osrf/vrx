@@ -60,12 +60,12 @@
          gps_enabled:=$(arg gps_enabled)
          imu_enabled:=$(arg imu_enabled)
          lidar_enabled:=$(arg lidar_enabled)
-         ground_truth_enabled:=$(arg ground_truth_enabled) "/>
+         ground_truth_enabled:=$(arg ground_truth_enabled)
+         namespace:=$(arg namespace) "/>
 
   <!-- Spawn WAMV model in Gazebo -->
   <node name="spawn_model_wamv" pkg="gazebo_ros" type="spawn_model"
   args="-x $(arg x) -y $(arg y) -z $(arg z)
         -R $(arg R) -P $(arg P) -Y $(arg Y)
-        -urdf -param $(arg namespace)/robot_description -model wamv
-        -robot_namespace $(arg namespace)"/>
+        -urdf -param $(arg namespace)/robot_description -model wamv"/>
 </launch>
