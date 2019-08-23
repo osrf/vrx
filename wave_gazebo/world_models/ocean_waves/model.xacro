@@ -81,6 +81,7 @@
         <laser_retro>-1</laser_retro>
       </visual>
       <visual name="ocean_waves_below_visual">
+        <pose>0 0 -0.05 0 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
