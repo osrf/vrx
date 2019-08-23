@@ -457,6 +457,10 @@ namespace asv
     rendering::SetMaterialShaderParam(*this->data->visual,
       "envReflectRatio", "fragment",
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
+
+    // Render water later for proper rendering of propeller
+    this->data->planeEntity->setRenderQueueGroup(this->data->planeEntity->
+                                                 getRenderQueueGroup()+1);
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
