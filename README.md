@@ -26,5 +26,5 @@ We continue to receive important improvements from the community.  We have done 
 
 ## Contacts
 
- * Carlos Agüero <caguero@osrfoundation.org>
+ * Carlos Agüero <caguero@openrobotics.org>
  * Brian Bingham <bbingham@nps.edu>
