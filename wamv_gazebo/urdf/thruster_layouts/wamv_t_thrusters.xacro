@@ -7,6 +7,7 @@
   <gazebo>
     <plugin name="wamv_gazebo_thrust" filename="libusv_gazebo_thrust_plugin.so">
       <cmdTimeout>1.0</cmdTimeout>
+      <robotNamespace>${namespace}</robotNamespace>
       <xacro:include filename="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_gazebo_thruster_config.xacro" />
       <xacro:wamv_gazebo_thruster_config name="left" />
       <xacro:wamv_gazebo_thruster_config name="right" />
