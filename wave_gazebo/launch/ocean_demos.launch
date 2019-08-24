@@ -11,9 +11,11 @@
   <arg name="recording" default="false"/>
   <arg name="debug" default="false"/>
   <arg name="verbose" default="false"/>
+  <!-- Start in a default namespace -->
+  <arg name="namespace" default="wamv"/>
 
   <!-- World file name from the wave_gazebo/worlds directory -->
-  <arg name="world" default="ocean_buoys.launch"/>
+  <arg name="world" default="ocean_buoys.world"/>
 
   <!-- Initial USV location and attitude-->
   <arg name="x" default="0" />
@@ -51,18 +53,19 @@
 
   <!-- Load robot model -->
   <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
-  <param name="robot_description"
+  <param name="$(arg namespace)/robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
          thruster_config:=$(arg thrust_config)
          camera_enabled:=$(arg camera_enabled)
          gps_enabled:=$(arg gps_enabled)
          imu_enabled:=$(arg imu_enabled)
          lidar_enabled:=$(arg lidar_enabled)
-         ground_truth_enabled:=$(arg ground_truth_enabled) "/>
+         ground_truth_enabled:=$(arg ground_truth_enabled)
+         namespace:=$(arg namespace) "/>
 
   <!-- Spawn WAMV model in Gazebo -->
   <node name="spawn_model_wamv" pkg="gazebo_ros" type="spawn_model"
   args="-x $(arg x) -y $(arg y) -z $(arg z)
         -R $(arg R) -P $(arg P) -Y $(arg Y)
-        -urdf -param robot_description -model wamv"/>
+        -urdf -param $(arg namespace)/robot_description -model wamv"/>
 </launch>

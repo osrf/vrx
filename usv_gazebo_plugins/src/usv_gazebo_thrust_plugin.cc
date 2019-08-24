@@ -94,6 +94,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("robotNamespace"))
   {
     nodeNamespace = _sdf->Get<std::string>("robotNamespace") + "/";
+    ROS_INFO_STREAM("Thruster namespace <" << nodeNamespace << ">");
   }
 
   this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", 1.0);
