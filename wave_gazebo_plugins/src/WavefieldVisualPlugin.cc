@@ -511,6 +511,12 @@ namespace asv
     this->data->reflectionRts.push_back(reflectionRt);
     this->data->refractionRts.push_back(refractionRt);
 
+    this->data->camera = camera->OgreCamera();
+    this->data->rttReflectionTexture = rttReflectionTexture;
+    this->data->rttRefractionTexture = rttRefractionTexture;
+    this->data->reflectionRt = reflectionRt;
+    this->data->refractionRt = refractionRt;
+
     Ogre::TextureUnitState *reflectTex =
         this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
     reflectTex->setTexture(rttReflectionTexture);
