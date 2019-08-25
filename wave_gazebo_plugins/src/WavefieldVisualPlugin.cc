@@ -36,6 +36,8 @@
 
 #include "gazebo/rendering/ogre_gazebo.h"
 #include "gazebo/rendering/RTShaderSystem.hh"
+#include <gazebo/rendering/Camera.hh>
+#include <gazebo/rendering/UserCamera.hh>
 #include "gazebo/sensors/SensorManager.hh"
 #include "gazebo/sensors/Sensor.hh"
 #include "gazebo/sensors/CameraSensor.hh"
@@ -213,7 +215,7 @@ namespace asv
     public: Ogre::RenderTarget *refractionRt;
 
     // Vectors of OGRE objects
-    public: std::vector<Ogre::Camera*> cameras;
+    public: std::vector<rendering::CameraPtr> cameras;
     public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
     public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
     public: std::vector<Ogre::RenderTarget*> reflectionRts;
@@ -347,7 +349,7 @@ namespace asv
         std::to_string(static_cast<float>(simTime.Double())));
 #endif
 
-      std::vector<Ogre::Camera*> new_cameras = this->NewCameras();
+      std::vector<rendering::CameraPtr> new_cameras = this->NewCameras();
       gzerr << "Number of camera sensors: " << new_cameras.size() << std::endl;
     }
   }
@@ -363,9 +365,9 @@ namespace asv
     this->data->refractionRt->update();
   }
 
-  std::vector<Ogre::Camera*> WavefieldVisualPlugin::NewCameras()
+  std::vector<rendering::CameraPtr> WavefieldVisualPlugin::NewCameras()
   {
-    std::vector<Ogre::Camera*> retVal;
+    std::vector<rendering::CameraPtr> retVal;
 
     sensors::Sensor_V all_sensors = sensors::SensorManager::Instance()->GetSensors();
     for (sensors::SensorPtr sensor : all_sensors)
@@ -382,7 +384,7 @@ namespace asv
       }
 
       // Add new cameras
-      Ogre::Camera *camera = c->Camera()->OgreCamera();
+      rendering::CameraPtr camera = c->Camera();
       if(std::find(this->data->cameras.begin(), this->data->cameras.end(), camera) == this->data->cameras.end())
       {
         retVal.push_back(camera);
@@ -422,6 +424,11 @@ namespace asv
     this->data->backgroundColor =
         rendering::Conversions::Convert(this->data->scene->BackgroundColor());
 
+    // Give material the new textures
+    this->data->material =
+      Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
+                                                      GetMaterialName());
+
     // Bind the update method to ConnectRender events
     this->data->renderConnection = event::Events::ConnectRender(
         std::bind(&WavefieldVisualPlugin::OnRender, this));
@@ -435,22 +442,23 @@ namespace asv
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
 
     // Setup camera
-    Ogre::Camera *userCamera = (this->data->scene->GetUserCamera(0)->
-                                OgreCamera());
-    if (userCamera)
-    {
-      this->data->camera = userCamera;
-    }
-    else
+    rendering::CameraPtr userCamera = this->data->scene->GetUserCamera(0);
+
+    if (!userCamera)
     {
       gzerr << "User camera not found" << std::endl;
       return;
     }
 
+    this->CreateReflectionRefractionTextures(userCamera);
+  }
+
+  void WavefieldVisualPlugin::CreateReflectionRefractionTextures(rendering::CameraPtr camera)
+  {
     // Create reflection texture
-    this->data->rttReflectionTexture =
+    Ogre::TexturePtr rttReflectionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_reflection",
+        this->data->visual_name + "_" + camera->ScopedName() + "_reflection",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -459,9 +467,9 @@ namespace asv
         Ogre::TU_RENDERTARGET);
 
     // Create refraction texture
-    this->data->rttRefractionTexture =
+    Ogre::TexturePtr rttRefractionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_refraction",
+        this->data->visual_name + "_" + camera->ScopedName() + "_refraction",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -469,45 +477,46 @@ namespace asv
         Ogre::PF_R8G8B8,
         Ogre::TU_RENDERTARGET);
 
-
     // Setup reflection render target
-    this->data->reflectionRt =
-        this->data->rttReflectionTexture->getBuffer()->getRenderTarget();
-    this->data->reflectionRt->setAutoUpdated(false);
+    Ogre::RenderTarget *reflectionRt =
+        rttReflectionTexture->getBuffer()->getRenderTarget();
+    reflectionRt->setAutoUpdated(false);
     Ogre::Viewport *reflVp =
-        this->data->reflectionRt->addViewport(this->data->camera);
+        reflectionRt->addViewport(camera->OgreCamera());
     reflVp->setClearEveryFrame(true);
     reflVp->setOverlaysEnabled(false);
     reflVp->setBackgroundColour(this->data->backgroundColor);
     reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
     rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
-    this->data->reflectionRt->addListener(this);
+    reflectionRt->addListener(this);
 
     // Setup refraction render target
-    this->data->refractionRt =
-        this->data->rttRefractionTexture->getBuffer()->getRenderTarget();
-    this->data->refractionRt->setAutoUpdated(false);
+    Ogre::RenderTarget *refractionRt =
+        rttRefractionTexture->getBuffer()->getRenderTarget();
+    refractionRt->setAutoUpdated(false);
     Ogre::Viewport *refrVp =
-        this->data->refractionRt->addViewport(this->data->camera);
+        refractionRt->addViewport(camera->OgreCamera());
     refrVp->setClearEveryFrame(true);
     refrVp->setOverlaysEnabled(false);
     refrVp->setBackgroundColour(this->data->backgroundColor);
     refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
     rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
-    this->data->refractionRt->addListener(this);
+    refractionRt->addListener(this);
 
-    // Give material the new textures
-    this->data->material =
-      Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
-                                                      GetMaterialName());
+    this->data->cameras.push_back(camera);
+    this->data->rttReflectionTextures.push_back(rttReflectionTexture);
+    this->data->rttRefractionTextures.push_back(rttRefractionTexture);
+    this->data->reflectionRts.push_back(reflectionRt);
+    this->data->refractionRts.push_back(refractionRt);
+
     Ogre::TextureUnitState *reflectTex =
         this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
-    reflectTex->setTexture(this->data->rttReflectionTexture);
+    reflectTex->setTexture(rttReflectionTexture);
     Ogre::TextureUnitState *refractTex =
         this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
-    refractTex->setTexture(this->data->rttRefractionTexture);
+    refractTex->setTexture(rttRefractionTexture);
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
