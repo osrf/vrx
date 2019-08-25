@@ -15,6 +15,7 @@
  *
 */
 
+#include <algorithm>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -35,6 +36,10 @@
 
 #include "gazebo/rendering/ogre_gazebo.h"
 #include "gazebo/rendering/RTShaderSystem.hh"
+#include "gazebo/sensors/SensorManager.hh"
+#include "gazebo/sensors/Sensor.hh"
+#include "gazebo/sensors/CameraSensor.hh"
+#include "gazebo/sensors/SensorsIface.hh"
 
 #include "wave_gazebo_plugins/WavefieldVisualPlugin.hh"
 #include "wave_gazebo_plugins/Gazebo.hh"
@@ -203,6 +208,13 @@ namespace asv
     public: Ogre::RenderTarget *reflectionRt;
     public: Ogre::RenderTarget *refractionRt;
 
+    // Vectors of OGRE objects
+    public: std::vector<Ogre::Camera*> cameras;
+    public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
+    public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
+    public: std::vector<Ogre::RenderTarget*> reflectionRts;
+    public: std::vector<Ogre::RenderTarget*> refractionRts;
+
     /// \brief Event based connections.
     public: event::ConnectionPtr preRenderConnection;
     public: event::ConnectionPtr renderConnection;
@@ -330,6 +342,27 @@ namespace asv
         "time", "vertex",
         std::to_string(static_cast<float>(simTime.Double())));
 #endif
+
+      sensors::Sensor_V all_sensors = sensors::SensorManager::Instance()->GetSensors();
+      for (sensors::SensorPtr sensor : all_sensors)
+      {
+        // Check if sensor is a camera and can be casted
+        if (sensor->Type().compare("camera") != 0)
+        {
+          continue;
+        }
+        sensors::CameraSensorPtr c = std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
+        if (!c)
+        {
+          continue;
+        }
+        Ogre::Camera *camera = c->Camera()->OgreCamera();
+        if(std::find(this->data->cameras.begin(), this->data->cameras.end(), camera) == this->data->cameras.end())
+        {
+          this->data->cameras.push_back(camera);
+        }
+      }
+      gzerr << "Number of camera sensors: " << this->data->cameras.size() << std::endl;
     }
   }
 
