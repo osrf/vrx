@@ -15,7 +15,6 @@
  *
 */
 
-#include <algorithm>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -36,12 +35,6 @@
 
 #include "gazebo/rendering/ogre_gazebo.h"
 #include "gazebo/rendering/RTShaderSystem.hh"
-#include <gazebo/rendering/Camera.hh>
-#include <gazebo/rendering/UserCamera.hh>
-#include "gazebo/sensors/SensorManager.hh"
-#include "gazebo/sensors/Sensor.hh"
-#include "gazebo/sensors/CameraSensor.hh"
-#include "gazebo/sensors/SensorsIface.hh"
 
 #include "wave_gazebo_plugins/WavefieldVisualPlugin.hh"
 #include "wave_gazebo_plugins/Gazebo.hh"
@@ -201,18 +194,14 @@ namespace asv
 
     // OGRE objects for reflection/refraction
     public: gazebo::rendering::ScenePtr scene;
+    public: Ogre::Camera *camera;
     public: Ogre::Entity* planeEntity;
     public: Ogre::Plane planeUp;
     public: Ogre::Plane planeDown;
-    public: Ogre::ColourValue backgroundColor;
-    public: Ogre::MaterialPtr material;
-
-    // Vectors of OGRE objects
-    public: std::vector<rendering::CameraPtr> cameras;
-    public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
-    public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
-    public: std::vector<Ogre::RenderTarget*> reflectionRts;
-    public: std::vector<Ogre::RenderTarget*> refractionRts;
+    public: Ogre::TexturePtr rttReflectionTexture;
+    public: Ogre::TexturePtr rttRefractionTexture;
+    public: Ogre::RenderTarget *reflectionRt;
+    public: Ogre::RenderTarget *refractionRt;
 
     /// \brief Event based connections.
     public: event::ConnectionPtr preRenderConnection;
@@ -341,57 +330,20 @@ namespace asv
         "time", "vertex",
         std::to_string(static_cast<float>(simTime.Double())));
 #endif
-
-      std::vector<rendering::CameraPtr> new_cameras = this->NewCameras();
-      // gzerr << "Number of camera sensors: " << new_cameras.size() << std::endl;
-      for (rendering::CameraPtr c : new_cameras)
-      {
-        this->CreateReflectionRefractionTextures(c);
-      }
     }
   }
 
   void WavefieldVisualPlugin::OnRender()
   {
-    for (Ogre::RenderTarget* rt : this->data->reflectionRts)
-    {
-      rt->update();
-    }
+    if (!this->data->camera || !this->data->reflectionRt ||
+        !this->data->refractionRt)
+      return;
 
-    for (Ogre::RenderTarget* rt : this->data->refractionRts)
-    {
-      rt->update();
-    }
+    // Update reflection/refraction
+    this->data->reflectionRt->update();
+    this->data->refractionRt->update();
   }
 
-  std::vector<rendering::CameraPtr> WavefieldVisualPlugin::NewCameras()
-  {
-    std::vector<rendering::CameraPtr> retVal;
-
-    sensors::Sensor_V all_sensors = sensors::SensorManager::Instance()->GetSensors();
-    for (sensors::SensorPtr sensor : all_sensors)
-    {
-      // Check if sensor is a camera and can be casted
-      if (sensor->Type().compare("camera") != 0)
-      {
-        continue;
-      }
-      sensors::CameraSensorPtr c = std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-      if (!c)
-      {
-        continue;
-      }
-
-      // Add new cameras
-      rendering::CameraPtr camera = c->Camera();
-      if(std::find(this->data->cameras.begin(), this->data->cameras.end(), camera) == this->data->cameras.end())
-      {
-        retVal.push_back(camera);
-      }
-    }
-
-    return retVal;
-  }
   void WavefieldVisualPlugin::SetupReflectionRefraction()
   {
     // OGRE setup
@@ -400,6 +352,19 @@ namespace asv
     // Only load the visual plugin in gzclient for now.
     if (!this->data->scene->EnableVisualizations())
       return;
+
+    // Setup camera
+    Ogre::Camera *userCamera = (this->data->scene->GetUserCamera(0)->
+                                OgreCamera());
+    if (userCamera)
+    {
+      this->data->camera = userCamera;
+    }
+    else
+    {
+      gzerr << "User camera not found" << std::endl;
+      return;
+    }
 
     // Setup planeEntity
     Ogre::SceneNode *ogreNode = this->data->visual->GetSceneNode();
@@ -411,22 +376,75 @@ namespace asv
       return;
     }
 
-    // Render water later for proper rendering of propeller
-    this->data->planeEntity->setRenderQueueGroup(this->data->planeEntity->
-                                                 getRenderQueueGroup()+1);
-
     // Create clipping planes to hide objects
-    this->data->planeUp = Ogre::Plane(Ogre::Vector3::UNIT_Z, 0);  // TODO: change location depending on ocean location and orientation
+    this->data->planeUp = Ogre::Plane(Ogre::Vector3::UNIT_Z, 0);
     this->data->planeDown = Ogre::Plane(-Ogre::Vector3::UNIT_Z, 0);
 
+    // Create reflection texture
+    this->data->rttReflectionTexture =
+      Ogre::TextureManager::getSingleton().createManual(
+        this->data->visual_name + "_reflection",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+        Ogre::TEX_TYPE_2D,
+        512, 512,
+        0,
+        Ogre::PF_R8G8B8,
+        Ogre::TU_RENDERTARGET);
+
+    // Create refraction texture
+    this->data->rttRefractionTexture =
+      Ogre::TextureManager::getSingleton().createManual(
+        this->data->visual_name + "_refraction",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+        Ogre::TEX_TYPE_2D,
+        512, 512,
+        0,
+        Ogre::PF_R8G8B8,
+        Ogre::TU_RENDERTARGET);
+
     // Get background color
-    this->data->backgroundColor =
+    Ogre::ColourValue bgColor =
         rendering::Conversions::Convert(this->data->scene->BackgroundColor());
 
+    // Setup reflection render target
+    this->data->reflectionRt =
+        this->data->rttReflectionTexture->getBuffer()->getRenderTarget();
+    this->data->reflectionRt->setAutoUpdated(false);
+    Ogre::Viewport *reflVp =
+        this->data->reflectionRt->addViewport(this->data->camera);
+    reflVp->setClearEveryFrame(true);
+    reflVp->setOverlaysEnabled(false);
+    reflVp->setBackgroundColour(bgColor);
+    reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
+        ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
+    rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
+    this->data->reflectionRt->addListener(this);
+
+    // Setup refraction render target
+    this->data->refractionRt =
+        this->data->rttRefractionTexture->getBuffer()->getRenderTarget();
+    this->data->refractionRt->setAutoUpdated(false);
+    Ogre::Viewport *refrVp =
+        this->data->refractionRt->addViewport(this->data->camera);
+    refrVp->setClearEveryFrame(true);
+    refrVp->setOverlaysEnabled(false);
+    refrVp->setBackgroundColour(bgColor);
+    refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
+        ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
+    rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
+    this->data->refractionRt->addListener(this);
+
     // Give material the new textures
-    this->data->material =
+    Ogre::MaterialPtr origMat =
       Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
                                                       GetMaterialName());
+    Ogre::MaterialPtr mat = origMat;
+    Ogre::TextureUnitState *reflectTex =
+        mat->getTechnique(0)->getPass(0)->getTextureUnitState(2);
+    reflectTex->setTexture(this->data->rttReflectionTexture);
+    Ogre::TextureUnitState *refractTex =
+        mat->getTechnique(0)->getPass(0)->getTextureUnitState(3);
+    refractTex->setTexture(this->data->rttRefractionTexture);
 
     // Bind the update method to ConnectRender events
     this->data->renderConnection = event::Events::ConnectRender(
@@ -440,78 +458,9 @@ namespace asv
       "envReflectRatio", "fragment",
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
 
-    // Setup camera
-    rendering::CameraPtr userCamera = this->data->scene->GetUserCamera(0);
-
-    if (!userCamera)
-    {
-      gzerr << "User camera not found" << std::endl;
-      return;
-    }
-
-    this->CreateReflectionRefractionTextures(userCamera);
-  }
-
-  void WavefieldVisualPlugin::CreateReflectionRefractionTextures(rendering::CameraPtr camera)
-  {
-    static int i = 0;
-    i++;
-    gzerr << "Create: " << i << std::endl;
-    // Create reflection texture
-    Ogre::TexturePtr rttReflectionTexture =
-      Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_" + camera->ScopedName() + "_reflection",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        Ogre::TEX_TYPE_2D,
-        512, 512,
-        0,
-        Ogre::PF_R8G8B8,
-        Ogre::TU_RENDERTARGET);
-
-    // Create refraction texture
-    Ogre::TexturePtr rttRefractionTexture =
-      Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_" + camera->ScopedName() + "_refraction",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        Ogre::TEX_TYPE_2D,
-        512, 512,
-        0,
-        Ogre::PF_R8G8B8,
-        Ogre::TU_RENDERTARGET);
-
-    // Setup reflection render target
-    Ogre::RenderTarget *reflectionRt =
-        rttReflectionTexture->getBuffer()->getRenderTarget();
-    reflectionRt->setAutoUpdated(false);
-    Ogre::Viewport *reflVp =
-        reflectionRt->addViewport(camera->OgreCamera());
-    reflVp->setClearEveryFrame(true);
-    reflVp->setOverlaysEnabled(false);
-    reflVp->setBackgroundColour(this->data->backgroundColor);
-    reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
-        ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
-    reflectionRt->addListener(this);
-
-    // Setup refraction render target
-    Ogre::RenderTarget *refractionRt =
-        rttRefractionTexture->getBuffer()->getRenderTarget();
-    refractionRt->setAutoUpdated(false);
-    Ogre::Viewport *refrVp =
-        refractionRt->addViewport(camera->OgreCamera());
-    refrVp->setClearEveryFrame(true);
-    refrVp->setOverlaysEnabled(false);
-    refrVp->setBackgroundColour(this->data->backgroundColor);
-    refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
-        ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
-    refractionRt->addListener(this);
-
-    this->data->cameras.push_back(camera);
-    this->data->rttReflectionTextures.push_back(rttReflectionTexture);
-    this->data->rttRefractionTextures.push_back(rttRefractionTexture);
-    this->data->reflectionRts.push_back(reflectionRt);
-    this->data->refractionRts.push_back(refractionRt);
+    // Render water later for proper rendering of propeller
+    this->data->planeEntity->setRenderQueueGroup(this->data->planeEntity->
+                                                 getRenderQueueGroup()+1);
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
@@ -576,79 +525,48 @@ namespace asv
   void WavefieldVisualPlugin::preRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
+    if (!this->data->camera)
+      return;
+
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(false);
     }
 
-    Ogre::TextureUnitState *reflectTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
-    Ogre::TextureUnitState *refractTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
-
-    for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
+    // Reflection: hide objects below water
+    if (rte.source == this->data->reflectionRt)
     {
-      if (rte.source == this->data->reflectionRts.at(i))
-      {
-        gzerr << "Pre refl: " << i << std::endl;
-        this->data->cameras.at(i)->OgreCamera()->enableReflection(this->data->planeUp);
-        this->data->cameras.at(i)->OgreCamera()->enableCustomNearClipPlane(this->data->planeUp);
-        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
-        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
-        return;
-      }
+      this->data->camera->enableReflection(this->data->planeUp);
+      this->data->camera->enableCustomNearClipPlane(this->data->planeUp);
     }
-    for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
+    // Refraction: hide objects above water
+    else
     {
-      if (rte.source == this->data->refractionRts.at(i))
-      {
-        // This line needed to see waves move properly
-        this->data->visual->SetVisible(false);
-
-        gzerr << "Pre refr: " << i << std::endl;
-        this->data->cameras.at(i)->OgreCamera()->enableCustomNearClipPlane(this->data->planeDown);
-        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
-        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
-        return;
-      }
+      this->data->camera->enableCustomNearClipPlane(this->data->planeDown);
     }
   }
 
   void WavefieldVisualPlugin::postRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
+    if (!this->data->camera)
+      return;
+
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(true);
     }
 
-    Ogre::TextureUnitState *reflectTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
-    Ogre::TextureUnitState *refractTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
-
-    for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
+    // Reflection: unhide objects below water
+    if (rte.source == this->data->reflectionRt)
     {
-      if (rte.source == this->data->reflectionRts.at(i))
-      {
-        gzerr << "Post refl: " << i << std::endl;
-        this->data->cameras.at(i)->OgreCamera()->disableReflection();
-        this->data->cameras.at(i)->OgreCamera()->disableCustomNearClipPlane();
-        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
-        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
-        return;
-      }
+      this->data->camera->disableReflection();
+      this->data->camera->disableCustomNearClipPlane();
     }
-    for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
+    // Refraction: unhide objects above water
+    else
     {
-      if (rte.source == this->data->refractionRts.at(i))
-      {
-        gzerr << "Post refr: " << i << std::endl;
-        this->data->cameras.at(i)->OgreCamera()->disableCustomNearClipPlane();
-        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
-        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
-        return;
-      }
+      this->data->camera->disableCustomNearClipPlane();
     }
   }
 }
