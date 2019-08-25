@@ -343,26 +343,8 @@ namespace asv
         std::to_string(static_cast<float>(simTime.Double())));
 #endif
 
-      sensors::Sensor_V all_sensors = sensors::SensorManager::Instance()->GetSensors();
-      for (sensors::SensorPtr sensor : all_sensors)
-      {
-        // Check if sensor is a camera and can be casted
-        if (sensor->Type().compare("camera") != 0)
-        {
-          continue;
-        }
-        sensors::CameraSensorPtr c = std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-        if (!c)
-        {
-          continue;
-        }
-        Ogre::Camera *camera = c->Camera()->OgreCamera();
-        if(std::find(this->data->cameras.begin(), this->data->cameras.end(), camera) == this->data->cameras.end())
-        {
-          this->data->cameras.push_back(camera);
-        }
-      }
-      gzerr << "Number of camera sensors: " << this->data->cameras.size() << std::endl;
+      std::vector<Ogre::Camera*> new_cameras = this->NewCameras();
+      gzerr << "Number of camera sensors: " << new_cameras.size() << std::endl;
     }
   }
 
@@ -377,6 +359,34 @@ namespace asv
     this->data->refractionRt->update();
   }
 
+  std::vector<Ogre::Camera*> WavefieldVisualPlugin::NewCameras()
+  {
+    std::vector<Ogre::Camera*> retVal;
+
+    sensors::Sensor_V all_sensors = sensors::SensorManager::Instance()->GetSensors();
+    for (sensors::SensorPtr sensor : all_sensors)
+    {
+      // Check if sensor is a camera and can be casted
+      if (sensor->Type().compare("camera") != 0)
+      {
+        continue;
+      }
+      sensors::CameraSensorPtr c = std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
+      if (!c)
+      {
+        continue;
+      }
+
+      // Add new cameras
+      Ogre::Camera *camera = c->Camera()->OgreCamera();
+      if(std::find(this->data->cameras.begin(), this->data->cameras.end(), camera) == this->data->cameras.end())
+      {
+        retVal.push_back(camera);
+      }
+    }
+
+    return retVal;
+  }
   void WavefieldVisualPlugin::SetupReflectionRefraction()
   {
     // OGRE setup

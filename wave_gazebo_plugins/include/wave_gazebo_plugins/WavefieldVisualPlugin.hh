@@ -158,6 +158,10 @@ namespace asv
     private: void SetupReflectionRefraction();
 
     /// internal
+    /// \brief Get new cameras
+    private: std::vector<Ogre::Camera*> NewCameras();
+
+    /// internal
     /// \brief Callback for gztopic "~/world_stats".
     ///
     /// \param[in] _msg World statistics message.
