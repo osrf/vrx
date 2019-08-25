@@ -454,6 +454,9 @@ namespace asv
 
   void WavefieldVisualPlugin::CreateReflectionRefractionTextures(rendering::CameraPtr camera)
   {
+    static int i = 0;
+    i++;
+    gzerr << "Create: " << i << std::endl;
     // Create reflection texture
     Ogre::TexturePtr rttReflectionTexture =
       Ogre::TextureManager::getSingleton().createManual(
@@ -587,6 +590,7 @@ namespace asv
     {
       if (rte.source == this->data->reflectionRts.at(i))
       {
+        gzerr << "Pre refl: " << i << std::endl;
         this->data->cameras.at(i)->OgreCamera()->enableReflection(this->data->planeUp);
         this->data->cameras.at(i)->OgreCamera()->enableCustomNearClipPlane(this->data->planeUp);
         reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
@@ -598,7 +602,10 @@ namespace asv
     {
       if (rte.source == this->data->refractionRts.at(i))
       {
-        // do i need this? this->data->visual->SetVisible(false);
+        // This line needed to see waves move properly
+        this->data->visual->SetVisible(false);
+
+        gzerr << "Pre refr: " << i << std::endl;
         this->data->cameras.at(i)->OgreCamera()->enableCustomNearClipPlane(this->data->planeDown);
         reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
         refractTex->setTexture(this->data->rttRefractionTextures.at(i));
@@ -624,6 +631,7 @@ namespace asv
     {
       if (rte.source == this->data->reflectionRts.at(i))
       {
+        gzerr << "Post refl: " << i << std::endl;
         this->data->cameras.at(i)->OgreCamera()->disableReflection();
         this->data->cameras.at(i)->OgreCamera()->disableCustomNearClipPlane();
         reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
@@ -635,6 +643,7 @@ namespace asv
     {
       if (rte.source == this->data->refractionRts.at(i))
       {
+        gzerr << "Post refr: " << i << std::endl;
         this->data->cameras.at(i)->OgreCamera()->disableCustomNearClipPlane();
         reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
         refractTex->setTexture(this->data->rttRefractionTextures.at(i));
