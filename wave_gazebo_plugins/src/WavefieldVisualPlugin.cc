@@ -199,10 +199,14 @@ namespace asv
 
     // OGRE objects for reflection/refraction
     public: gazebo::rendering::ScenePtr scene;
-    public: Ogre::Camera *camera;
     public: Ogre::Entity* planeEntity;
     public: Ogre::Plane planeUp;
     public: Ogre::Plane planeDown;
+    public: Ogre::ColourValue backgroundColor;
+    public: Ogre::MaterialPtr material;
+
+    // To be replaced by vectors soon
+    public: Ogre::Camera *camera;
     public: Ogre::TexturePtr rttReflectionTexture;
     public: Ogre::TexturePtr rttRefractionTexture;
     public: Ogre::RenderTarget *reflectionRt;
@@ -396,6 +400,40 @@ namespace asv
     if (!this->data->scene->EnableVisualizations())
       return;
 
+    // Setup planeEntity
+    Ogre::SceneNode *ogreNode = this->data->visual->GetSceneNode();
+    this->data->planeEntity =
+        dynamic_cast<Ogre::Entity *>(ogreNode->getAttachedObject(0));
+    if (!this->data->planeEntity)
+    {
+      gzerr << "No plane entity found" << std::endl;
+      return;
+    }
+
+    // Render water later for proper rendering of propeller
+    this->data->planeEntity->setRenderQueueGroup(this->data->planeEntity->
+                                                 getRenderQueueGroup()+1);
+
+    // Create clipping planes to hide objects
+    this->data->planeUp = Ogre::Plane(Ogre::Vector3::UNIT_Z, 0);  // TODO: change location depending on ocean location and orientation
+    this->data->planeDown = Ogre::Plane(-Ogre::Vector3::UNIT_Z, 0);
+
+    // Get background color
+    this->data->backgroundColor =
+        rendering::Conversions::Convert(this->data->scene->BackgroundColor());
+
+    // Bind the update method to ConnectRender events
+    this->data->renderConnection = event::Events::ConnectRender(
+        std::bind(&WavefieldVisualPlugin::OnRender, this));
+
+    // Set reflection/refraction parameters
+    rendering::SetMaterialShaderParam(*this->data->visual,
+      "shallowRefractRatio", "fragment",
+      std::to_string(static_cast<float>(this->data->shallowRefractRatio)));
+    rendering::SetMaterialShaderParam(*this->data->visual,
+      "envReflectRatio", "fragment",
+      std::to_string(static_cast<float>(this->data->envReflectRatio)));
+
     // Setup camera
     Ogre::Camera *userCamera = (this->data->scene->GetUserCamera(0)->
                                 OgreCamera());
@@ -408,20 +446,6 @@ namespace asv
       gzerr << "User camera not found" << std::endl;
       return;
     }
-
-    // Setup planeEntity
-    Ogre::SceneNode *ogreNode = this->data->visual->GetSceneNode();
-    this->data->planeEntity =
-        dynamic_cast<Ogre::Entity *>(ogreNode->getAttachedObject(0));
-    if (!this->data->planeEntity)
-    {
-      gzerr << "No plane entity found" << std::endl;
-      return;
-    }
-
-    // Create clipping planes to hide objects
-    this->data->planeUp = Ogre::Plane(Ogre::Vector3::UNIT_Z, 0);
-    this->data->planeDown = Ogre::Plane(-Ogre::Vector3::UNIT_Z, 0);
 
     // Create reflection texture
     this->data->rttReflectionTexture =
@@ -445,9 +469,6 @@ namespace asv
         Ogre::PF_R8G8B8,
         Ogre::TU_RENDERTARGET);
 
-    // Get background color
-    Ogre::ColourValue bgColor =
-        rendering::Conversions::Convert(this->data->scene->BackgroundColor());
 
     // Setup reflection render target
     this->data->reflectionRt =
@@ -457,7 +478,7 @@ namespace asv
         this->data->reflectionRt->addViewport(this->data->camera);
     reflVp->setClearEveryFrame(true);
     reflVp->setOverlaysEnabled(false);
-    reflVp->setBackgroundColour(bgColor);
+    reflVp->setBackgroundColour(this->data->backgroundColor);
     reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
     rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
@@ -471,39 +492,22 @@ namespace asv
         this->data->refractionRt->addViewport(this->data->camera);
     refrVp->setClearEveryFrame(true);
     refrVp->setOverlaysEnabled(false);
-    refrVp->setBackgroundColour(bgColor);
+    refrVp->setBackgroundColour(this->data->backgroundColor);
     refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
     rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
     this->data->refractionRt->addListener(this);
 
     // Give material the new textures
-    Ogre::MaterialPtr origMat =
+    this->data->material =
       Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
                                                       GetMaterialName());
-    Ogre::MaterialPtr mat = origMat;
     Ogre::TextureUnitState *reflectTex =
-        mat->getTechnique(0)->getPass(0)->getTextureUnitState(2);
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
     reflectTex->setTexture(this->data->rttReflectionTexture);
     Ogre::TextureUnitState *refractTex =
-        mat->getTechnique(0)->getPass(0)->getTextureUnitState(3);
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
     refractTex->setTexture(this->data->rttRefractionTexture);
-
-    // Bind the update method to ConnectRender events
-    this->data->renderConnection = event::Events::ConnectRender(
-        std::bind(&WavefieldVisualPlugin::OnRender, this));
-
-    // Set reflection/refraction parameters
-    rendering::SetMaterialShaderParam(*this->data->visual,
-      "shallowRefractRatio", "fragment",
-      std::to_string(static_cast<float>(this->data->shallowRefractRatio)));
-    rendering::SetMaterialShaderParam(*this->data->visual,
-      "envReflectRatio", "fragment",
-      std::to_string(static_cast<float>(this->data->envReflectRatio)));
-
-    // Render water later for proper rendering of propeller
-    this->data->planeEntity->setRenderQueueGroup(this->data->planeEntity->
-                                                 getRenderQueueGroup()+1);
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
