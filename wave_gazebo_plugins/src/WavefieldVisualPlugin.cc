@@ -346,13 +346,26 @@ namespace asv
 
   void WavefieldVisualPlugin::OnRender()
   {
-    for (Ogre::RenderTarget* rt : this->data->reflectionRts)
+    std::string path = "";
+    if (char* home_dir = std::getenv("HOME"))
     {
-      rt->update();
+      path += std::string(home_dir);
     }
-    for (Ogre::RenderTarget* rt : this->data->refractionRts)
+
+    // Reflection
+    for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
+      Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
       rt->update();
+      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName() + "_reflection.png");
+    }
+
+    // Refraction
+    for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
+    {
+      Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
+      rt->update();
+      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName() + "_refraction.png");
     }
   }
 
@@ -418,7 +431,6 @@ namespace asv
     else
     {
       std::vector<Ogre::Camera*> newCameras = this->NewCameras();
-      gzerr << "Num new cams: " << newCameras.size() << std::endl;
       for (Ogre::Camera* c : newCameras)
       {
         this->CreateReflectionRefractionTextures(c);
