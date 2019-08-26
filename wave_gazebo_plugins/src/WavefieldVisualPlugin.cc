@@ -168,6 +168,11 @@ namespace asv
   /// \brief Private data for the WavefieldVisualPlugin
   class WavefieldVisualPluginPrivate
   {
+    public: WavefieldVisualPluginPrivate() :
+            planeUp("planeUp"),
+            planeDown("planeDown")
+            {}
+
     /// \brief The visual containing this plugin.
     public: rendering::VisualPtr visual;
 
@@ -199,9 +204,9 @@ namespace asv
 
     // OGRE objects for reflection/refraction
     public: gazebo::rendering::ScenePtr scene;
-    public: Ogre::Entity* planeEntity;
-    public: Ogre::Plane planeUp;
-    public: Ogre::Plane planeDown;
+    public: Ogre::Entity* oceanEntity;
+    public: Ogre::MovablePlane planeUp;
+    public: Ogre::MovablePlane planeDown;
     public: Ogre::ColourValue backgroundColor;
     public: Ogre::MaterialPtr material;
     public: Ogre::TextureUnitState *reflectTex;
@@ -330,6 +335,20 @@ namespace asv
 
   void WavefieldVisualPlugin::OnPreRender()
   {
+    // Update clip plane pose (in case the ocean moves, may need to optimize)
+    Ogre::Vector3 oceanPosition(this->data->visual->WorldPose().Pos().X(),
+                                this->data->visual->WorldPose().Pos().Y(),
+                                this->data->visual->WorldPose().Pos().Z());
+
+    Ogre::Quaternion oceanRotation(this->data->visual->WorldPose().Rot().W(),
+                                   this->data->visual->WorldPose().Rot().X(),
+                                   this->data->visual->WorldPose().Rot().Y(),
+                                   this->data->visual->WorldPose().Rot().Z());
+    Ogre::Vector3 oceanNormal = oceanRotation * Ogre::Vector3::UNIT_Z;
+    this->data->planeUp.redefine(oceanNormal, oceanPosition);
+    this->data->planeDown.redefine(-oceanNormal, oceanPosition);
+
+    // Create moving ocean waves
     if (!this->data->isStatic)
     {
 #if 0
@@ -376,23 +395,25 @@ namespace asv
     // OGRE setup
     this->data->scene = this->data->visual->GetScene();
 
-    // Setup planeEntity
+    // Setup oceanEntity
     Ogre::SceneNode *ogreNode = this->data->visual->GetSceneNode();
-    this->data->planeEntity =
+    this->data->oceanEntity =
         dynamic_cast<Ogre::Entity *>(ogreNode->getAttachedObject(0));
-    if (!this->data->planeEntity)
+    if (!this->data->oceanEntity)
     {
       gzerr << "No plane entity found" << std::endl;
       return;
     }
 
     // Render water later for proper rendering of propeller
-    this->data->planeEntity->setRenderQueueGroup(this->data->planeEntity->
+    this->data->oceanEntity->setRenderQueueGroup(this->data->oceanEntity->
                                                  getRenderQueueGroup()+1);
 
-    // Create clipping planes to hide objects
-    this->data->planeUp = Ogre::Plane(Ogre::Vector3::UNIT_Z, 0);
-    this->data->planeDown = Ogre::Plane(-Ogre::Vector3::UNIT_Z, 0);
+    // Create clipping planes to hide objects, default pose
+    this->data->planeUp = Ogre::MovablePlane(Ogre::Vector3::UNIT_Z,
+                                             Ogre::Vector3::ZERO);
+    this->data->planeDown = Ogre::MovablePlane(-Ogre::Vector3::UNIT_Z,
+                                               Ogre::Vector3::ZERO);
 
     // Get background color
     this->data->backgroundColor =
@@ -603,9 +624,9 @@ namespace asv
     if (this->data->cameras.size() == 0)
       return;
 
-    if (this->data->planeEntity)
+    if (this->data->oceanEntity)
     {
-      this->data->planeEntity->setVisible(false);
+      this->data->oceanEntity->setVisible(false);
     }
 
     // Reflection
@@ -644,9 +665,9 @@ namespace asv
     if (this->data->cameras.size() == 0)
       return;
 
-    if (this->data->planeEntity)
+    if (this->data->oceanEntity)
     {
-      this->data->planeEntity->setVisible(true);
+      this->data->oceanEntity->setVisible(true);
     }
 
     // Reflection
