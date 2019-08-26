@@ -207,11 +207,11 @@ namespace asv
     public: Ogre::MaterialPtr material;
 
     // Vectors of OGRE objects
-    // public: Ogre::Camera* camera;
-    // public: Ogre::TexturePtr rttReflectionTexture;
-    // public: Ogre::TexturePtr rttRefractionTexture;
-    // public: Ogre::RenderTarget* reflectionRt;
-    // public: Ogre::RenderTarget* refractionRt;
+    public: Ogre::Camera* camera;
+    public: Ogre::TexturePtr rttReflectionTexture;
+    public: Ogre::TexturePtr rttRefractionTexture;
+    public: Ogre::RenderTarget* reflectionRt;
+    public: Ogre::RenderTarget* refractionRt;
 
     public: std::vector<Ogre::Camera*> cameras;
     public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
@@ -355,13 +355,8 @@ namespace asv
         this->data->reflectionRts.size() == 0 ||
         this->data->refractionRts.size() == 0)
       return;
-    // if (!this->data->camera ||
-    //     !this->data->reflectionRt ||
-    //     !this->data->refractionRt)
 
     // Update reflection/refraction
-    // this->data->reflectionRts.at(0)->update();
-    // this->data->refractionRts.at(0)->update();
     this->data->reflectionRts.at(0)->update();
     this->data->refractionRts.at(0)->update();
   }
@@ -489,12 +484,6 @@ namespace asv
     this->data->rttRefractionTextures.push_back(rttRefractionTexture);
     this->data->reflectionRts.push_back(reflectionRt);
     this->data->refractionRts.push_back(refractionRt);
-
-    // this->data->camera = camera;
-    // this->data->rttReflectionTexture = rttReflectionTexture;
-    // this->data->rttRefractionTexture = rttRefractionTexture;
-    // this->data->reflectionRt = reflectionRt;
-    // this->data->refractionRt = refractionRt;
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
@@ -561,7 +550,6 @@ namespace asv
   {
     if (this->data->cameras.size() == 0)
       return;
-    // if (!this->data->camera)
 
     if (this->data->planeEntity)
     {
@@ -574,14 +562,11 @@ namespace asv
     {
       this->data->cameras.at(0)->enableReflection(this->data->planeUp);
       this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeUp);
-      // this->data->camera->enableReflection(this->data->planeUp);
-      // this->data->camera->enableCustomNearClipPlane(this->data->planeUp);
     }
     // Refraction: hide objects above water
     else
     {
       this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeDown);
-      // this->data->camera->enableCustomNearClipPlane(this->data->planeDown);
     }
   }
 
@@ -590,7 +575,6 @@ namespace asv
   {
     if (this->data->cameras.size() == 0)
       return;
-    // if (!this->data->camera)
 
     if (this->data->planeEntity)
     {
@@ -598,19 +582,15 @@ namespace asv
     }
 
     // Reflection: unhide objects below water
-    // if (rte.source == this->data->reflectionRts.at(0))
     if (rte.source == this->data->reflectionRts.at(0))
     {
       this->data->cameras.at(0)->disableReflection();
       this->data->cameras.at(0)->disableCustomNearClipPlane();
-      // this->data->camera->disableReflection();
-      // this->data->camera->disableCustomNearClipPlane();
     }
     // Refraction: unhide objects above water
     else
     {
       this->data->cameras.at(0)->disableCustomNearClipPlane();
-      // this->data->camera->disableCustomNearClipPlane();
     }
   }
 }
