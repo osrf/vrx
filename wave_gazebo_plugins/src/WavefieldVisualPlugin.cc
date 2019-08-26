@@ -351,14 +351,14 @@ namespace asv
 
   void WavefieldVisualPlugin::OnRender()
   {
-    if (this->data->cameras.size() == 0 ||
-        this->data->reflectionRts.size() == 0 ||
-        this->data->refractionRts.size() == 0)
-      return;
-
-    // Update reflection/refraction
-    this->data->reflectionRts.at(0)->update();
-    this->data->refractionRts.at(0)->update();
+    for (Ogre::RenderTarget* rt : this->data->reflectionRts)
+    {
+      rt->update();
+    }
+    for (Ogre::RenderTarget* rt : this->data->refractionRts)
+    {
+      rt->update();
+    }
   }
 
   void WavefieldVisualPlugin::SetupReflectionRefraction()
