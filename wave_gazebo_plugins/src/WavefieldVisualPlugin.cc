@@ -212,11 +212,11 @@ namespace asv
     public: Ogre::TexturePtr rttRefractionTexture;
     public: Ogre::RenderTarget* reflectionRt;
     public: Ogre::RenderTarget* refractionRt;
-    // public: std::vector<Ogre::Camera*> cameras;
-    // public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
-    // public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
-    // public: std::vector<Ogre::RenderTarget*> reflectionRts;
-    // public: std::vector<Ogre::RenderTarget*> refractionRts;
+    public: std::vector<Ogre::Camera*> cameras;
+    public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
+    public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
+    public: std::vector<Ogre::RenderTarget*> reflectionRts;
+    public: std::vector<Ogre::RenderTarget*> refractionRts;
 
     /// \brief Event based connections.
     public: event::ConnectionPtr preRenderConnection;
@@ -361,8 +361,8 @@ namespace asv
     // Update reflection/refraction
     // this->data->reflectionRts.at(0)->update();
     // this->data->refractionRts.at(0)->update();
-    this->data->reflectionRt->update();
-    this->data->refractionRt->update();
+    this->data->reflectionRts.at(0)->update();
+    this->data->refractionRts.at(0)->update();
   }
 
   void WavefieldVisualPlugin::SetupReflectionRefraction()
@@ -483,11 +483,11 @@ namespace asv
         this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
     refractTex->setTexture(rttRefractionTexture);
 
-    // this->data->cameras.push_back(camera);
-    // this->data->rttReflectionTextures.push_back(rttReflectionTexture);
-    // this->data->rttRefractionTextures.push_back(rttRefractionTexture);
-    // this->data->reflectionRts.push_back(reflectionRt);
-    // this->data->refractionRts.push_back(refractionRt);
+    this->data->cameras.push_back(camera);
+    this->data->rttReflectionTextures.push_back(rttReflectionTexture);
+    this->data->rttRefractionTextures.push_back(rttRefractionTexture);
+    this->data->reflectionRts.push_back(reflectionRt);
+    this->data->refractionRts.push_back(refractionRt);
     this->data->camera = camera;
     this->data->rttReflectionTexture = rttReflectionTexture;
     this->data->rttRefractionTexture = rttRefractionTexture;
@@ -568,18 +568,18 @@ namespace asv
 
     // Reflection: hide objects below water
     // if (rte.source == this->data->reflectionRts.at(0))
-    if (rte.source == this->data->reflectionRt)
+    if (rte.source == this->data->reflectionRts.at(0))
     {
-      // this->data->cameras.at(0)->enableReflection(this->data->planeUp);
-      // this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeUp);
-      this->data->camera->enableReflection(this->data->planeUp);
-      this->data->camera->enableCustomNearClipPlane(this->data->planeUp);
+      this->data->cameras.at(0)->enableReflection(this->data->planeUp);
+      this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeUp);
+      // this->data->camera->enableReflection(this->data->planeUp);
+      // this->data->camera->enableCustomNearClipPlane(this->data->planeUp);
     }
     // Refraction: hide objects above water
     else
     {
-      // this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeDown);
-      this->data->camera->enableCustomNearClipPlane(this->data->planeDown);
+      this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeDown);
+      // this->data->camera->enableCustomNearClipPlane(this->data->planeDown);
     }
   }
 
@@ -597,18 +597,18 @@ namespace asv
 
     // Reflection: unhide objects below water
     // if (rte.source == this->data->reflectionRts.at(0))
-    if (rte.source == this->data->reflectionRt)
+    if (rte.source == this->data->reflectionRts.at(0))
     {
-      // this->data->cameras.at(0)->disableReflection();
-      // this->data->cameras.at(0)->disableCustomNearClipPlane();
-      this->data->camera->disableReflection();
-      this->data->camera->disableCustomNearClipPlane();
+      this->data->cameras.at(0)->disableReflection();
+      this->data->cameras.at(0)->disableCustomNearClipPlane();
+      // this->data->camera->disableReflection();
+      // this->data->camera->disableCustomNearClipPlane();
     }
     // Refraction: unhide objects above water
     else
     {
-      // this->data->cameras.at(0)->disableCustomNearClipPlane();
-      this->data->camera->disableCustomNearClipPlane();
+      this->data->cameras.at(0)->disableCustomNearClipPlane();
+      // this->data->camera->disableCustomNearClipPlane();
     }
   }
 }
