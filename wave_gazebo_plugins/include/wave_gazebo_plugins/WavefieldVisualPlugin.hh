@@ -164,7 +164,8 @@ namespace asv
 
     /// internal
     /// \brief Create reflection refraction textures and stores the texture and target
-    private: void CreateReflectionRefractionTextures(gazebo::rendering::CameraPtr camera);
+    // private: void CreateReflectionRefractionTextures(gazebo::rendering::CameraPtr camera);
+    private: void CreateReflectionRefractionTextures(Ogre::Camera* camera);
 
     /// internal
     /// \brief Callback for gztopic "~/world_stats".
