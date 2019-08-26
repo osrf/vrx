@@ -366,10 +366,6 @@ namespace asv
     // OGRE setup
     this->data->scene = this->data->visual->GetScene();
 
-    // Only load the visual plugin in gzclient for now.
-    if (!this->data->scene->EnableVisualizations())
-      return;
-
     // Setup planeEntity
     Ogre::SceneNode *ogreNode = this->data->visual->GetSceneNode();
     this->data->planeEntity =
@@ -404,16 +400,30 @@ namespace asv
       "envReflectRatio", "fragment",
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
 
-    // Setup camera
-    Ogre::Camera *userCamera = (this->data->scene->GetUserCamera(0)->
-                                OgreCamera());
-    if (!userCamera)
+    // User cam setup in gzclient
+    if (this->data->scene->EnableVisualizations())
     {
-      gzerr << "User camera not found" << std::endl;
-      return;
+      // Setup camera
+      Ogre::Camera *userCamera = (this->data->scene->GetUserCamera(0)->
+                                  OgreCamera());
+      if (!userCamera)
+      {
+        gzerr << "User camera not found" << std::endl;
+        return;
+      }
+  
+      this->CreateReflectionRefractionTextures(userCamera);
     }
-
-    this->CreateReflectionRefractionTextures(userCamera);
+    // Camera sensor setup in gzserver
+    else
+    {
+      std::vector<Ogre::Camera*> newCameras = this->NewCameras();
+      gzerr << "Num new cams: " << newCameras.size() << std::endl;
+      for (Ogre::Camera* c : newCameras)
+      {
+        this->CreateReflectionRefractionTextures(c);
+      }
+    }
 
     // Bind the update method to ConnectRender events
     this->data->renderConnection = event::Events::ConnectRender(
@@ -425,7 +435,7 @@ namespace asv
     // Create reflection texture
     Ogre::TexturePtr rttReflectionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_reflection",
+        this->data->visual_name + "_" + camera->getName() + "_reflection",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -436,7 +446,7 @@ namespace asv
     // Create refraction texture
     Ogre::TexturePtr rttRefractionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_refraction",
+        this->data->visual_name + "_" + camera->getName() + "_refraction",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -484,6 +494,35 @@ namespace asv
     this->data->rttRefractionTextures.push_back(rttRefractionTexture);
     this->data->reflectionRts.push_back(reflectionRt);
     this->data->refractionRts.push_back(refractionRt);
+  }
+
+  std::vector<Ogre::Camera*> WavefieldVisualPlugin::NewCameras()
+  {
+    std::vector<Ogre::Camera*> retVal;
+
+    sensors::Sensor_V all_sensors = sensors::SensorManager::Instance()->GetSensors();
+    for (sensors::SensorPtr sensor : all_sensors)
+    {
+      // Check if sensor is a camera and can be casted
+      if (sensor->Type().compare("camera") != 0)
+      {
+        continue;
+      }
+      sensors::CameraSensorPtr c = std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
+      if (!c)
+      {
+        continue;
+      }
+
+      // Add new cameras
+      Ogre::Camera* camera = c->Camera()->OgreCamera();
+      if(std::find(this->data->cameras.begin(), this->data->cameras.end(), camera) == this->data->cameras.end())
+      {
+        retVal.push_back(camera);
+      }
+    }
+
+    return retVal;
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
