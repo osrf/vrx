@@ -207,11 +207,11 @@ namespace asv
     public: Ogre::MaterialPtr material;
 
     // Vectors of OGRE objects
-    public: Ogre::Camera* camera;
-    public: Ogre::TexturePtr rttReflectionTexture;
-    public: Ogre::TexturePtr rttRefractionTexture;
-    public: Ogre::RenderTarget* reflectionRt;
-    public: Ogre::RenderTarget* refractionRt;
+    // public: Ogre::Camera* camera;
+    // public: Ogre::TexturePtr rttReflectionTexture;
+    // public: Ogre::TexturePtr rttRefractionTexture;
+    // public: Ogre::RenderTarget* reflectionRt;
+    // public: Ogre::RenderTarget* refractionRt;
 
     public: std::vector<Ogre::Camera*> cameras;
     public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
