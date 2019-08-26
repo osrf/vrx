@@ -28,6 +28,7 @@
 #include <gazebo/rendering/Camera.hh>
 
 #include <memory>
+#include <vector>
 
 namespace asv
 {
@@ -163,8 +164,8 @@ namespace asv
     private: std::vector<Ogre::Camera*> NewCameras();
 
     /// internal
-    /// \brief Create reflection refraction textures and stores the texture and target
-    // private: void CreateReflectionRefractionTextures(gazebo::rendering::CameraPtr camera);
+    /// \brief Create reflection refraction textures and stores the texture
+    //         and target
     private: void CreateReflectionRefractionTextures(Ogre::Camera* camera);
 
     /// internal

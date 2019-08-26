@@ -35,8 +35,8 @@
 
 #include "gazebo/rendering/ogre_gazebo.h"
 #include "gazebo/rendering/RTShaderSystem.hh"
-#include <gazebo/rendering/Camera.hh>
-#include <gazebo/rendering/UserCamera.hh>
+#include "gazebo/rendering/Camera.hh"
+#include "gazebo/rendering/UserCamera.hh"
 #include "gazebo/sensors/SensorManager.hh"
 #include "gazebo/sensors/Sensor.hh"
 #include "gazebo/sensors/CameraSensor.hh"
@@ -357,7 +357,8 @@ namespace asv
     {
       Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
       rt->update();
-      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName() + "_reflection.png");
+      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
+                              + "_reflection.png");
     }
 
     // Refraction
@@ -365,7 +366,8 @@ namespace asv
     {
       Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
       rt->update();
-      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName() + "_refraction.png");
+      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
+                              + "_refraction.png");
     }
   }
 
@@ -401,9 +403,11 @@ namespace asv
       Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
                                                       GetMaterialName());
     this->data->reflectTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
+        (this->data->material->getTechnique(0)->getPass(0)->
+         getTextureUnitState(2));
     this->data->refractTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
+        (this->data->material->getTechnique(0)->getPass(0)->
+         getTextureUnitState(3));
 
     // Set reflection/refraction parameters
     rendering::SetMaterialShaderParam(*this->data->visual,
@@ -424,7 +428,7 @@ namespace asv
         gzerr << "User camera not found" << std::endl;
         return;
       }
-  
+
       this->CreateReflectionRefractionTextures(userCamera);
     }
     // Camera sensor setup in gzserver
@@ -442,7 +446,8 @@ namespace asv
         std::bind(&WavefieldVisualPlugin::OnRender, this));
   }
 
-  void WavefieldVisualPlugin::CreateReflectionRefractionTextures(Ogre::Camera* camera)
+  void WavefieldVisualPlugin::CreateReflectionRefractionTextures(Ogre::Camera*
+                                                                 camera)
   {
     // Create reflection texture
     Ogre::TexturePtr rttReflectionTexture =
@@ -505,7 +510,8 @@ namespace asv
   {
     std::vector<Ogre::Camera*> retVal;
 
-    sensors::Sensor_V all_sensors = sensors::SensorManager::Instance()->GetSensors();
+    sensors::Sensor_V all_sensors = (sensors::SensorManager::Instance()->
+                                     GetSensors());
     for (sensors::SensorPtr sensor : all_sensors)
     {
       // Check if sensor is a camera and can be casted
@@ -513,17 +519,19 @@ namespace asv
       {
         continue;
       }
-      sensors::CameraSensorPtr c = std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-      if (!c)
+      sensors::CameraSensorPtr camera =
+        std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
+      if (!camera)
       {
         continue;
       }
 
       // Add new cameras
-      Ogre::Camera* camera = c->Camera()->OgreCamera();
-      if(std::find(this->data->cameras.begin(), this->data->cameras.end(), camera) == this->data->cameras.end())
+      Ogre::Camera* c = camera->Camera()->OgreCamera();
+      if (std::find(this->data->cameras.begin(), this->data->cameras.end(), c)
+         == this->data->cameras.end())
       {
-        retVal.push_back(camera);
+        retVal.push_back(c);
       }
     }
 
@@ -607,8 +615,10 @@ namespace asv
       if (rte.source == rt)
       {
         this->data->cameras.at(i)->enableReflection(this->data->planeUp);
-        this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->planeUp);
-        this->data->reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
+        this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->
+                                                             planeUp);
+        this->data->reflectTex->setTexture(this->data->
+                                           rttReflectionTextures.at(i));
         return;
       }
     }
@@ -619,8 +629,10 @@ namespace asv
       Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
       if (rte.source == rt)
       {
-        this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->planeDown);
-        this->data->refractTex->setTexture(this->data->rttRefractionTextures.at(i));
+        this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->
+                                                             planeDown);
+        this->data->refractTex->setTexture(this->data->
+                                           rttRefractionTextures.at(i));
         return;
       }
     }
@@ -645,7 +657,8 @@ namespace asv
       {
         this->data->cameras.at(i)->disableReflection();
         this->data->cameras.at(i)->disableCustomNearClipPlane();
-        this->data->reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
+        this->data->reflectTex->setTexture(this->data->
+                                           rttReflectionTextures.at(i));
         return;
       }
     }
@@ -657,7 +670,8 @@ namespace asv
       if (rte.source == rt)
       {
         this->data->cameras.at(i)->disableCustomNearClipPlane();
-        this->data->refractTex->setTexture(this->data->rttRefractionTextures.at(i));
+        this->data->refractTex->setTexture(this->data->
+                                           rttRefractionTextures.at(i));
         return;
       }
     }
