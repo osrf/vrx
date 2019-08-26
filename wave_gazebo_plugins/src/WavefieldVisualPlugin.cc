@@ -192,8 +192,7 @@ namespace asv
     public: double envReflectRatio;
 
     /// \brief World stats.
-    public: double simTime, realTime, pauseTime;
-    public: bool paused;
+    public: double simTime;
 
     /// \brief Prevent multiple calls to Init loading visuals twice...
     public: bool isInitialised;
@@ -335,7 +334,7 @@ namespace asv
 
   void WavefieldVisualPlugin::OnPreRender()
   {
-    if (!this->data->isStatic && !this->data->paused)
+    if (!this->data->isStatic)
     {
 #if 0
       this->data->visual->SetMaterialShaderParam(
