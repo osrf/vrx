@@ -481,13 +481,6 @@ namespace asv
     rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
     refractionRt->addListener(this);
 
-    Ogre::TextureUnitState *reflectTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
-    reflectTex->setTexture(rttReflectionTexture);
-    Ogre::TextureUnitState *refractTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
-    refractTex->setTexture(rttRefractionTexture);
-
     this->data->cameras.push_back(camera);
     this->data->rttReflectionTextures.push_back(rttReflectionTexture);
     this->data->rttRefractionTextures.push_back(rttRefractionTexture);
@@ -589,22 +582,39 @@ namespace asv
     if (this->data->cameras.size() == 0)
       return;
 
+    Ogre::TextureUnitState *reflectTex =
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
+    Ogre::TextureUnitState *refractTex =
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
+
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(false);
     }
 
-    // Reflection: hide objects below water
-    // if (rte.source == this->data->reflectionRts.at(0))
-    if (rte.source == this->data->reflectionRts.at(0))
+    // Reflection
+    for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
-      this->data->cameras.at(0)->enableReflection(this->data->planeUp);
-      this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeUp);
+      Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
+      if (rte.source == rt)
+      {
+        this->data->cameras.at(i)->enableReflection(this->data->planeUp);
+        this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->planeUp);
+        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
+        return;
+      }
     }
-    // Refraction: hide objects above water
-    else
+
+    // Refraction
+    for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
     {
-      this->data->cameras.at(0)->enableCustomNearClipPlane(this->data->planeDown);
+      Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
+      if (rte.source == rt)
+      {
+        this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->planeDown);
+        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
+        return;
+      }
     }
   }
 
@@ -614,21 +624,39 @@ namespace asv
     if (this->data->cameras.size() == 0)
       return;
 
+    Ogre::TextureUnitState *reflectTex =
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
+    Ogre::TextureUnitState *refractTex =
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
+
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(true);
     }
 
-    // Reflection: unhide objects below water
-    if (rte.source == this->data->reflectionRts.at(0))
+    // Reflection
+    for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
-      this->data->cameras.at(0)->disableReflection();
-      this->data->cameras.at(0)->disableCustomNearClipPlane();
+      Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
+      if (rte.source == rt)
+      {
+        this->data->cameras.at(i)->disableReflection();
+        this->data->cameras.at(i)->disableCustomNearClipPlane();
+        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
+        return;
+      }
     }
-    // Refraction: unhide objects above water
-    else
+
+    // Refraction
+    for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
     {
-      this->data->cameras.at(0)->disableCustomNearClipPlane();
+      Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
+      if (rte.source == rt)
+      {
+        this->data->cameras.at(i)->disableCustomNearClipPlane();
+        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
+        return;
+      }
     }
   }
 }
