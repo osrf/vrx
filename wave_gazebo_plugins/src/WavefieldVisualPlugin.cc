@@ -204,14 +204,10 @@ namespace asv
     public: Ogre::Plane planeDown;
     public: Ogre::ColourValue backgroundColor;
     public: Ogre::MaterialPtr material;
+    public: Ogre::TextureUnitState *reflectTex;
+    public: Ogre::TextureUnitState *refractTex;
 
     // Vectors of OGRE objects
-    public: Ogre::Camera* camera;
-    public: Ogre::TexturePtr rttReflectionTexture;
-    public: Ogre::TexturePtr rttRefractionTexture;
-    public: Ogre::RenderTarget* reflectionRt;
-    public: Ogre::RenderTarget* refractionRt;
-
     public: std::vector<Ogre::Camera*> cameras;
     public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
     public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
@@ -387,10 +383,15 @@ namespace asv
     this->data->backgroundColor =
         rendering::Conversions::Convert(this->data->scene->BackgroundColor());
 
-    // Give material the new textures
+    // Get material to give new textures
     this->data->material =
       Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
                                                       GetMaterialName());
+    this->data->reflectTex =
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
+    this->data->refractTex =
+        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
+
     // Set reflection/refraction parameters
     rendering::SetMaterialShaderParam(*this->data->visual,
       "shallowRefractRatio", "fragment",
@@ -582,11 +583,6 @@ namespace asv
     if (this->data->cameras.size() == 0)
       return;
 
-    Ogre::TextureUnitState *reflectTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
-    Ogre::TextureUnitState *refractTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
-
     if (this->data->planeEntity)
     {
       this->data->planeEntity->setVisible(false);
@@ -600,7 +596,7 @@ namespace asv
       {
         this->data->cameras.at(i)->enableReflection(this->data->planeUp);
         this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->planeUp);
-        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
+        this->data->reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
         return;
       }
     }
@@ -612,7 +608,7 @@ namespace asv
       if (rte.source == rt)
       {
         this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->planeDown);
-        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
+        this->data->refractTex->setTexture(this->data->rttRefractionTextures.at(i));
         return;
       }
     }
@@ -623,11 +619,6 @@ namespace asv
   {
     if (this->data->cameras.size() == 0)
       return;
-
-    Ogre::TextureUnitState *reflectTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(2);
-    Ogre::TextureUnitState *refractTex =
-        this->data->material->getTechnique(0)->getPass(0)->getTextureUnitState(3);
 
     if (this->data->planeEntity)
     {
@@ -642,7 +633,7 @@ namespace asv
       {
         this->data->cameras.at(i)->disableReflection();
         this->data->cameras.at(i)->disableCustomNearClipPlane();
-        reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
+        this->data->reflectTex->setTexture(this->data->rttReflectionTextures.at(i));
         return;
       }
     }
@@ -654,7 +645,7 @@ namespace asv
       if (rte.source == rt)
       {
         this->data->cameras.at(i)->disableCustomNearClipPlane();
-        refractTex->setTexture(this->data->rttRefractionTextures.at(i));
+        this->data->refractTex->setTexture(this->data->rttRefractionTextures.at(i));
         return;
       }
     }
