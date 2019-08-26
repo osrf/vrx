@@ -212,6 +212,7 @@ namespace asv
     public: Ogre::TexturePtr rttRefractionTexture;
     public: Ogre::RenderTarget* reflectionRt;
     public: Ogre::RenderTarget* refractionRt;
+
     public: std::vector<Ogre::Camera*> cameras;
     public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
     public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
@@ -350,13 +351,13 @@ namespace asv
 
   void WavefieldVisualPlugin::OnRender()
   {
-    // if (this->data->cameras.size() == 0 ||
-    //     this->data->reflectionRts.size() == 0 ||
-    //     this->data->refractionRts.size() == 0)
-    if (!this->data->camera ||
-        !this->data->reflectionRt ||
-        !this->data->refractionRt)
+    if (this->data->cameras.size() == 0 ||
+        this->data->reflectionRts.size() == 0 ||
+        this->data->refractionRts.size() == 0)
       return;
+    // if (!this->data->camera ||
+    //     !this->data->reflectionRt ||
+    //     !this->data->refractionRt)
 
     // Update reflection/refraction
     // this->data->reflectionRts.at(0)->update();
@@ -488,11 +489,12 @@ namespace asv
     this->data->rttRefractionTextures.push_back(rttRefractionTexture);
     this->data->reflectionRts.push_back(reflectionRt);
     this->data->refractionRts.push_back(refractionRt);
-    this->data->camera = camera;
-    this->data->rttReflectionTexture = rttReflectionTexture;
-    this->data->rttRefractionTexture = rttRefractionTexture;
-    this->data->reflectionRt = reflectionRt;
-    this->data->refractionRt = refractionRt;
+
+    // this->data->camera = camera;
+    // this->data->rttReflectionTexture = rttReflectionTexture;
+    // this->data->rttRefractionTexture = rttRefractionTexture;
+    // this->data->reflectionRt = reflectionRt;
+    // this->data->refractionRt = refractionRt;
   }
 
   void WavefieldVisualPlugin::SetShaderParams()
@@ -557,9 +559,9 @@ namespace asv
   void WavefieldVisualPlugin::preRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
-    // if (this->data->cameras.size() == 0)
-    if (!this->data->camera)
+    if (this->data->cameras.size() == 0)
       return;
+    // if (!this->data->camera)
 
     if (this->data->planeEntity)
     {
@@ -586,9 +588,9 @@ namespace asv
   void WavefieldVisualPlugin::postRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
-    // if (this->data->cameras.size() == 0)
-    if (!this->data->camera)
+    if (this->data->cameras.size() == 0)
       return;
+    // if (!this->data->camera)
 
     if (this->data->planeEntity)
     {
