@@ -354,17 +354,14 @@ namespace asv
     if (this->data->scene->EnableVisualizations())
     {
       // Get user cam
-      rendering::CameraPtr userCamera = this->data->scene->GetUserCamera(0);
+      rendering::UserCameraPtr userCamera = this->data->scene->GetUserCamera(0);
 
       // If user cam not already in cameras
       if (std::find(this->data->cameras.begin(), this->data->cameras.end(), userCamera->OgreCamera())
          == this->data->cameras.end())
       {
         // Add listener for user cam
-        Ogre::Texture *rt = userCamera->RenderTexture();
-        if (!rt) { gzerr << "userCam !rt" << std::endl; return; }
-        rt->getBuffer()->getRenderTarget()->addListener(this);
-
+        userCamera->OgreViewport()->getTarget()->addListener(this);
         // Create rtts for usercam
         this->CreateReflectionRefractionTextures(userCamera->OgreCamera());
       }
