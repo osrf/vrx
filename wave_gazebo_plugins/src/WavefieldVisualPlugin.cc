@@ -350,6 +350,45 @@ namespace asv
     this->data->planeUp.redefine(oceanNormal, oceanPosition);
     this->data->planeDown.redefine(-oceanNormal, oceanPosition);
 
+    // User cam setup in gzclient
+    if (this->data->scene->EnableVisualizations())
+    {
+      // Get user cam
+      rendering::CameraPtr userCamera = this->data->scene->GetUserCamera(0);
+
+      // If user cam not already in cameras
+      if (std::find(this->data->cameras.begin(), this->data->cameras.end(), userCamera->OgreCamera())
+         == this->data->cameras.end())
+      {
+        // Add listener for user cam
+        Ogre::Texture *rt = userCamera->RenderTexture();
+        if (!rt) { gzerr << "userCam !rt" << std::endl; return; }
+        rt->getBuffer()->getRenderTarget()->addListener(this);
+
+        // Create rtts for usercam
+        this->CreateReflectionRefractionTextures(userCamera->OgreCamera());
+      }
+    }
+
+    // Camera sensor setup in gzserver
+    else
+    {
+      // Get new cameras
+      std::vector<rendering::CameraPtr> newCameras = this->NewCameras();
+      int p = 0;
+      for (rendering::CameraPtr c : newCameras)
+      {
+        p++;
+        // Add listener for camera sensor
+        Ogre::Texture *rt = c->RenderTexture();
+        if (!rt) { gzerr << p << " !rt" << std::endl; return; }
+        rt->getBuffer()->getRenderTarget()->addListener(this);
+
+        // Create rtts for usercam
+        this->CreateReflectionRefractionTextures(c->OgreCamera());
+      }
+    }
+
     // Create moving ocean waves
     if (!this->data->isStatic)
     {
@@ -440,33 +479,10 @@ namespace asv
       "envReflectRatio", "fragment",
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
 
-    // User cam setup in gzclient
-    if (this->data->scene->EnableVisualizations())
-    {
-      // Setup camera
-      Ogre::Camera *userCamera = (this->data->scene->GetUserCamera(0)->
-                                  OgreCamera());
-      if (!userCamera)
-      {
-        gzerr << "User camera not found" << std::endl;
-        return;
-      }
-
-      this->CreateReflectionRefractionTextures(userCamera);
-    }
-    // Camera sensor setup in gzserver
-    else
-    {
-      std::vector<Ogre::Camera*> newCameras = this->NewCameras();
-      for (Ogre::Camera* c : newCameras)
-      {
-        this->CreateReflectionRefractionTextures(c);
-      }
-    }
 
     // Bind the update method to ConnectRender events
-    this->data->renderConnection = event::Events::ConnectRender(
-        std::bind(&WavefieldVisualPlugin::OnRender, this));
+    // this->data->renderConnection = event::Events::ConnectRender(
+        // std::bind(&WavefieldVisualPlugin::OnRender, this));
   }
 
   void WavefieldVisualPlugin::CreateReflectionRefractionTextures(Ogre::Camera*
@@ -529,9 +545,9 @@ namespace asv
     this->data->refractionRts.push_back(refractionRt);
   }
 
-  std::vector<Ogre::Camera*> WavefieldVisualPlugin::NewCameras()
+  std::vector<rendering::CameraPtr> WavefieldVisualPlugin::NewCameras()
   {
-    std::vector<Ogre::Camera*> retVal;
+    std::vector<rendering::CameraPtr> retVal;
 
     sensors::Sensor_V all_sensors = (sensors::SensorManager::Instance()->
                                      GetSensors());
@@ -550,8 +566,8 @@ namespace asv
       }
 
       // Add new cameras
-      Ogre::Camera* c = camera->Camera()->OgreCamera();
-      if (std::find(this->data->cameras.begin(), this->data->cameras.end(), c)
+      rendering::CameraPtr c = camera->Camera();
+      if (std::find(this->data->cameras.begin(), this->data->cameras.end(), c->OgreCamera())
          == this->data->cameras.end())
       {
         retVal.push_back(c);

@@ -161,7 +161,7 @@ namespace asv
 
     /// internal
     /// \brief Get new cameras
-    private: std::vector<Ogre::Camera*> NewCameras();
+    private: std::vector<gazebo::rendering::CameraPtr> NewCameras();
 
     /// internal
     /// \brief Create reflection refraction textures and stores the texture
