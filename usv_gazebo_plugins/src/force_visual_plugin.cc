@@ -30,29 +30,32 @@ void ForceVisualPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->scaling = _sdf->GetElement("scaling")->Get<double>();
   }
 
-  // Store the pointer to the model
-  this->model = _parent;
+  if (_sdf->HasElement("disable_z"))
+  {
+    this->disableZ = _sdf->Get<bool>("disable_z");
+  }
 
   // Get vector of links in model
-  this->links = this->model->GetLinks();
-
-#if GAZEBO_MAJOR_VERSION >= 8
-  // advertise on marker topic
-  if (!this->node.Advertise<ignition::msgs::Marker>(this->markerTopic))
-  {
-    gzerr << "Error advertising service ["
-          << this->markerTopic << "]" << std::endl;
-    return;
-  }
-#endif
+  this->links = _parent->GetLinks();
 
   // set namespace for marker
-  this->ns = "force_visualize/" + this->model->GetName();
+  this->ns = "force_visualize/" + _parent->GetName();
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  if (_sdf->HasElement("envflag") &&
+      std::getenv(_sdf->Get<std::string>("envflag").c_str()) == NULL)
+  {
+    // if envflag tag is available but flag is not set
+    gzwarn << "Force visualization markers disabled." << std::endl;
+    return;
+  }
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
       std::bind(&ForceVisualPlugin::Update, this));
+#else
+  gzwarn << "Gazebo markers not published (Gazebo version < 8)" << std::endl;
+#endif
 }
 
 //////////////////////////////////////////////////
@@ -72,7 +75,11 @@ bool ForceVisualPlugin::PublishMarker(const gazebo::physics::LinkPtr& link)
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   auto pos = link->WorldPose().Pos();
-  auto force = link->WorldForce() / this->scaling;
+  auto force = link->WorldForce() * this->scaling;
+  if (this->disableZ)
+  {
+    force.Z() = 0;
+  }
 
   ignition::msgs::Marker markerMsg;
   markerMsg.set_ns(this->ns);
@@ -86,7 +93,6 @@ bool ForceVisualPlugin::PublishMarker(const gazebo::physics::LinkPtr& link)
   ignition::msgs::Set(markerMsg.add_point(), pos + force);
   return this->node.Request(this->markerTopic, markerMsg);
 #else
-  gzwarn << "Gazebo markers not published (Gazebo version < 8)" << std::endl;
   return false;
 #endif
 }

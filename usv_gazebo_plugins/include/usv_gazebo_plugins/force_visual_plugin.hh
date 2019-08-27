@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <cstdlib>
 #include <string>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
@@ -30,7 +31,8 @@
 namespace gazebo
 {
   /// \brief This plugin visualizes forces on each link of an object.
-  ///   <scaling />        Scaling for force vectors (optional)
+  ///   <scaling />        Scaling for force vectors (optional).
+  ///                      Default: 1.0
   ///
   /// Example: adding to wamv_gazebo.xacro
   ///    <gazebo>
@@ -50,12 +52,9 @@ namespace gazebo
     public: void Update();
 
     /// \brief Publish force markers for link
-    /// @param link link pointer
-    /// @return true if marker publishing was successful
+    /// \param[in] link Link pointer
+    /// \return Returns true if marker was successfully published
     private: bool PublishMarker(const gazebo::physics::LinkPtr& link);
-
-    /// \brief Pointer to the model
-    private: physics::ModelPtr model;
 
     /// \brief Vector of link pointers for the model
     private: physics::Link_V links;
@@ -76,5 +75,8 @@ namespace gazebo
 
     /// \brief Scaling factor for visualized force vectors
     private: double scaling = 1.0;
+
+    /// \brief disable visualization of forces in Z axis
+    private: bool disableZ = false;
   };
 }

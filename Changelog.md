@@ -6,6 +6,9 @@
 1. Deterministic wind plugin:
     * [Pull request 157](https://bitbucket.org/osrf/vrx/pull-requests/157)
 
+1. Force visualization plugin:
+    * [Pull request 163](https://bitbucket.org/osrf/vrx/pull-requests/163)
+
 ### VRX 1.1
 
 1. GUI overlay plugin (prototype):
