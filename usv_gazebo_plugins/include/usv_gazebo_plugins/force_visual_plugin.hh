@@ -33,11 +33,18 @@ namespace gazebo
   /// \brief This plugin visualizes forces on each link of an object.
   ///   <scaling />        Scaling for force vectors (optional).
   ///                      Default: 1.0
+  ///   <envflag />        Specifies an environment variable that needs
+  ///                      to be set to enable visualizations (optional).
+  ///                      Default: visualizations are always enabled.
+  ///   <disable_z />      Disables force visualizations in Z axis if
+  ///                      set (optional).
   ///
   /// Example: adding to wamv_gazebo.xacro
   ///    <gazebo>
   ///      <plugin name="ForcePlugin" filename="libforce_visual_plugin.so">
   ///        <scaling>20.0</scaling>
+  ///        <envflag>WAMV_FORCE_DEBUG</envflag>
+  ///        <disable_z>1</disable_z>
   ///      </plugin>
   ///    </gazebo>
   class ForceVisualPlugin : public ModelPlugin
