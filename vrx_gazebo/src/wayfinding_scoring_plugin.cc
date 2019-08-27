@@ -222,9 +222,9 @@ void WayfindingScoringPlugin::PublishWaypoints()
 }
 
 //////////////////////////////////////////////////
-void WayfindingScoringPlugin::PublishWaypointMarkers() {
+void WayfindingScoringPlugin::PublishWaypointMarkers()
+{
 #if GAZEBO_MAJOR_VERSION >= 8
-  // gazebo transport node
   ignition::transport::Node node;
 
   // create markers
@@ -235,7 +235,8 @@ void WayfindingScoringPlugin::PublishWaypointMarkers() {
   ignition::msgs::Material *matMsg = markerMsg.mutable_material();
   matMsg->mutable_script()->set_name("Gazebo/Red");
 
-  for (const auto waypoint : this->localWaypoints) {
+  for (const auto waypoint : this->localWaypoints)
+  {
     // draw cylinder
     markerMsg.set_type(ignition::msgs::Marker::CYLINDER);
     ignition::msgs::Set(markerMsg.mutable_scale(),
@@ -244,7 +245,8 @@ void WayfindingScoringPlugin::PublishWaypointMarkers() {
         ignition::math::Pose3d(waypoint.X(), waypoint.Y(), 4.0, 0, 0, 0));
     markerMsg.set_id(markerIndex++);
     bool result = node.Request("/marker", markerMsg);
-    if (!result) {
+    if (!result)
+    {
       gzwarn << "Error publishing waypoint marker message" << std::endl;
       continue;
     }
@@ -259,7 +261,8 @@ void WayfindingScoringPlugin::PublishWaypointMarkers() {
                             waypoint.Y()-0.2, 5.5, 0, 0, 0));
     markerMsg.set_id(markerIndex++);
     result = node.Request("/marker", markerMsg);
-    if (!result) {
+    if (!result)
+    {
       gzwarn << "Error publishing waypoint marker message" << std::endl;
     }
   }
@@ -272,7 +275,6 @@ void WayfindingScoringPlugin::PublishWaypointMarkers() {
 void WayfindingScoringPlugin::OnReady()
 {
   gzmsg << "OnReady" << std::endl;
-
   this->PublishWaypoints();
 }
 
@@ -283,7 +285,6 @@ void WayfindingScoringPlugin::OnRunning()
   gzmsg << "OnRunning" << std::endl;
   this->timer.Start();
 }
-
 
 // Register plugin with gazebo
 GZ_REGISTER_WORLD_PLUGIN(WayfindingScoringPlugin)
