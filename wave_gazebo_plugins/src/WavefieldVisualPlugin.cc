@@ -401,33 +401,6 @@ namespace asv
     }
   }
 
-  void WavefieldVisualPlugin::OnRender()
-  {
-    std::string path = "";
-    if (char* home_dir = std::getenv("HOME"))
-    {
-      path += std::string(home_dir);
-    }
-
-    // Reflection
-    for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
-    {
-      Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
-      rt->update();
-      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
-                              + "_reflection.png");
-    }
-
-    // Refraction
-    for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
-    {
-      Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
-      rt->update();
-      rt->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
-                              + "_refraction.png");
-    }
-  }
-
   void WavefieldVisualPlugin::SetupReflectionRefraction()
   {
     // OGRE setup
@@ -475,11 +448,6 @@ namespace asv
     rendering::SetMaterialShaderParam(*this->data->visual,
       "envReflectRatio", "fragment",
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
-
-
-    // Bind the update method to ConnectRender events
-    // this->data->renderConnection = event::Events::ConnectRender(
-        // std::bind(&WavefieldVisualPlugin::OnRender, this));
   }
 
   void WavefieldVisualPlugin::CreateReflectionRefractionTextures(Ogre::Camera*
@@ -644,6 +612,11 @@ namespace asv
       this->data->oceanEntity->setVisible(false);
     }
 
+    std::string path = "";
+    if (char* home_dir = std::getenv("HOME"))
+    {
+      path += std::string(home_dir);
+    }
     // On Camera preupdate, update rtts first before updating camera
     if (!this->data->rttUpdate)
     {
@@ -654,7 +627,11 @@ namespace asv
         {
           this->data->rttUpdate = true;
           this->data->reflectionRts.at(i)->update();
+          this->data->reflectionRts.at(i)->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
+                              + "_reflection.png");
           this->data->refractionRts.at(i)->update();
+          this->data->refractionRts.at(i)->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
+                              + "_refraction.png");
           this->data->rttUpdate = false;
           return;
         }
