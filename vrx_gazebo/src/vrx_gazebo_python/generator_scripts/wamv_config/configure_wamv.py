@@ -98,6 +98,7 @@ def create_thruster_xacro():
                            '    <plugin name="wamv_gazebo_thrust" '
                            'filename="libusv_gazebo_thrust_plugin.so">\n'
                            '      <cmdTimeout>1.0</cmdTimeout>\n'
+                           '      <robotNamespace>${namespace}</robotNamespace>\n'
                            '      <xacro:include filename="$(find wamv_gazebo)'
                            '/urdf/thruster_layouts/'
                            'wamv_gazebo_thruster_config.xacro" />\n')

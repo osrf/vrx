@@ -45,7 +45,7 @@
                 },
                 "mouse_pub_topic": {
                   "type": "repr",
-                  "repr": "u'/wamv1/front_camera/image_raw_mouse_left'"
+                  "repr": "u'/wamv1/sensors/cameras/front_camera/image_raw_mouse_left'"
                 },
                 "num_gridlines": {
                   "type": "repr",
@@ -65,7 +65,7 @@
                 },
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/wamv1/front_camera/image_raw'"
+                  "repr": "u'/wamv1/sensors/cameras/front_camera/image_raw'"
                 },
                 "publish_click_location": {
                   "type": "repr",
@@ -112,7 +112,7 @@
                 },
                 "mouse_pub_topic": {
                   "type": "repr",
-                  "repr": "u'/wamv0/front_camera/image_raw_mouse_left'"
+                  "repr": "u'/wamv0/sensors/cameras/front_camera/image_raw_mouse_left'"
                 },
                 "num_gridlines": {
                   "type": "repr",
@@ -132,7 +132,7 @@
                 },
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/wamv0/front_camera/image_raw'"
+                  "repr": "u'/wamv0/sensors/cameras/front_camera/image_raw'"
                 },
                 "publish_click_location": {
                   "type": "repr",
