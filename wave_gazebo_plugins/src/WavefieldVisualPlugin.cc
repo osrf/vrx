@@ -219,6 +219,8 @@ namespace asv
     public: std::vector<Ogre::RenderTarget*> reflectionRts;
     public: std::vector<Ogre::RenderTarget*> refractionRts;
 
+    public: bool rttUpdate = false;
+
     /// \brief Event based connections.
     public: event::ConnectionPtr preRenderConnection;
     public: event::ConnectionPtr renderConnection;
@@ -627,6 +629,23 @@ namespace asv
     if (this->data->oceanEntity)
     {
       this->data->oceanEntity->setVisible(false);
+    }
+
+    // On Camera preupdate, update rtts first before updating camera
+    if (!this->data->rttUpdate)
+    {
+      for (unsigned int i = 0; i < this->data->cameras.size(); ++i)
+      {
+        Ogre::RenderTarget *rt = this->data->cameras.at(i)->getViewport()->getTarget();
+        if (rte.source->getViewport(0)->getCamera() == this->data->cameras.at(i))
+        {
+          this->data->rttUpdate = true;
+          this->data->reflectionRts.at(i)->update();
+          this->data->refractionRts.at(i)->update();
+          this->data->rttUpdate = false;
+          return;
+        }
+      }
     }
 
     // Reflection
