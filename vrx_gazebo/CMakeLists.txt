@@ -69,6 +69,15 @@ add_subdirectory(msgs)
 
 add_definitions(${QT_DEFINITIONS})
 
+add_library(waypoint_markers src/waypoint_markers.cc)
+target_link_libraries(waypoint_markers ${catkin_LIBRARIES})
+add_dependencies(waypoint_markers ${catkin_EXPORTED_TARGETS})
+install(TARGETS waypoint_markers
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Plugin for setting color of light buoy.
 add_library(light_buoy_plugin src/light_buoy_plugin.cc)
 target_link_libraries(light_buoy_plugin
@@ -132,7 +141,8 @@ install(TARGETS navigation_scoring_plugin
 add_library(stationkeeping_scoring_plugin src/stationkeeping_scoring_plugin.cc)
 target_link_libraries(stationkeeping_scoring_plugin
   ${catkin_LIBRARIES}
-  scoring_plugin)
+  scoring_plugin
+  waypoint_markers)
 add_dependencies(stationkeeping_scoring_plugin ${catkin_EXPORTED_TARGETS})
 install(TARGETS stationkeeping_scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -144,7 +154,8 @@ install(TARGETS stationkeeping_scoring_plugin
 add_library(wayfinding_scoring_plugin src/wayfinding_scoring_plugin.cc)
 target_link_libraries(wayfinding_scoring_plugin
   ${catkin_LIBRARIES}
-  scoring_plugin)
+  scoring_plugin
+  waypoint_markers)
 add_dependencies(wayfinding_scoring_plugin ${catkin_EXPORTED_TARGETS})
 install(TARGETS wayfinding_scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

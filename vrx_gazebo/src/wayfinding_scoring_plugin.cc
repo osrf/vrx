@@ -26,10 +26,8 @@
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <gazebo/physics/Model.hh>
-#if GAZEBO_MAJOR_VERSION >= 8
-#include <ignition/msgs.hh>
-  #include <ignition/transport.hh>
-#endif
+
+#include "vrx_gazebo/waypoint_markers.hh"
 #include "vrx_gazebo/wayfinding_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
