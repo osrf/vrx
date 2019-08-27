@@ -32,6 +32,7 @@
 
 /////////////////////////////////////////////////
 WayfindingScoringPlugin::WayfindingScoringPlugin()
+  : waypointMarkers("waypoint_marker")
 {
   gzmsg << "Wayfinding scoring plugin loaded" << std::endl;
   this->timer.Stop();
@@ -112,7 +113,28 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     std::bind(&WayfindingScoringPlugin::Update, this));
 
   // Publish waypoint markers
-  this->PublishWaypointMarkers();
+  if (_sdf->HasElement("markers"))
+  {
+    this->waypointMarkers.Load(_sdf->GetElement("markers"));
+    if (this->waypointMarkers.IsAvailable())
+    {
+      int markerId = 0;
+      for (const auto waypoint : this->localWaypoints)
+      {
+        if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
+            waypoint.Y(), std::to_string(markerId)))
+        {
+          gzerr << "Error creating visual marker" << std::endl;
+        }
+        markerId++;
+      }
+    }
+    else
+    {
+      gzwarn << "Cannot display gazebo markers (Gazebo version < 8)"
+             << std::endl;
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -219,56 +241,6 @@ void WayfindingScoringPlugin::PublishWaypoints()
     path_msg.poses.push_back(wp_msg);
   }
   this->waypointsPub.publish(path_msg);
-}
-
-//////////////////////////////////////////////////
-void WayfindingScoringPlugin::PublishWaypointMarkers()
-{
-#if GAZEBO_MAJOR_VERSION >= 8
-  ignition::transport::Node node;
-
-  // create markers
-  int markerIndex = 0;
-  ignition::msgs::Marker markerMsg;
-  markerMsg.set_ns("waypoint_marker");
-  markerMsg.set_action(ignition::msgs::Marker::ADD_MODIFY);
-  ignition::msgs::Material *matMsg = markerMsg.mutable_material();
-  matMsg->mutable_script()->set_name("Gazebo/Red");
-
-  for (const auto waypoint : this->localWaypoints)
-  {
-    // draw cylinder
-    markerMsg.set_type(ignition::msgs::Marker::CYLINDER);
-    ignition::msgs::Set(markerMsg.mutable_scale(),
-        ignition::math::Vector3d(0.3, 0.3, 1.5));
-    ignition::msgs::Set(markerMsg.mutable_pose(),
-        ignition::math::Pose3d(waypoint.X(), waypoint.Y(), 4.0, 0, 0, 0));
-    markerMsg.set_id(markerIndex++);
-    bool result = node.Request("/marker", markerMsg);
-    if (!result)
-    {
-      gzwarn << "Error publishing waypoint marker message" << std::endl;
-      continue;
-    }
-
-    // draw text
-    markerMsg.set_type(ignition::msgs::Marker::TEXT);
-    markerMsg.set_text(std::to_string((markerIndex-1)/2));
-    ignition::msgs::Set(markerMsg.mutable_scale(),
-                        ignition::math::Vector3d(1.0, 1.0, 1.0));
-    ignition::msgs::Set(markerMsg.mutable_pose(),
-                        ignition::math::Pose3d(waypoint.X(),
-                            waypoint.Y()-0.2, 5.5, 0, 0, 0));
-    markerMsg.set_id(markerIndex++);
-    result = node.Request("/marker", markerMsg);
-    if (!result)
-    {
-      gzwarn << "Error publishing waypoint marker message" << std::endl;
-    }
-  }
-#else
-  gzwarn << "Gazebo markers not published (Gazebo version < 8)" << std::endl;
-#endif
 }
 
 //////////////////////////////////////////////////

@@ -69,6 +69,7 @@ add_subdirectory(msgs)
 
 add_definitions(${QT_DEFINITIONS})
 
+# Library for displaying waypoint markers
 add_library(waypoint_markers src/waypoint_markers.cc)
 target_link_libraries(waypoint_markers ${catkin_LIBRARIES})
 add_dependencies(waypoint_markers ${catkin_EXPORTED_TARGETS})

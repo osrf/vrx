@@ -67,9 +67,10 @@ bool WaypointMarkers::DrawMarker(int _marker_id, double _x, double _y,
   markerMsg.set_type(ignition::msgs::Marker::CYLINDER);
   ignition::msgs::Set(markerMsg.mutable_scale(),
                       this->scaling);
-  double zPos = this->height + this->scaling.Z() / 2.0;
   ignition::msgs::Set(markerMsg.mutable_pose(),
-                      ignition::math::Pose3d(_x, _y, zPos, 0, 0, 0));
+                      ignition::math::Pose3d(_x, _y,
+                          this->height + this->scaling.Z() / 2.0,
+                          0, 0, 0));
   markerMsg.set_id(_marker_id);
   bool result = node.Request("/marker", markerMsg);
   if (!result)
@@ -85,7 +86,8 @@ bool WaypointMarkers::DrawMarker(int _marker_id, double _x, double _y,
     ignition::msgs::Set(markerMsg.mutable_scale(),
                         ignition::math::Vector3d(1.0, 1.0, 1.0));
     ignition::msgs::Set(markerMsg.mutable_pose(),
-                        ignition::math::Pose3d(_x, _y - 0.2, zPos + 1.5,
+                        ignition::math::Pose3d(_x, _y - 0.2,
+                            this->height + this->scaling.Z() + 0.8,
                             0, 0, 0));
     markerMsg.set_id((_marker_id + 1) * 1000);
     result = node.Request("/marker", markerMsg);

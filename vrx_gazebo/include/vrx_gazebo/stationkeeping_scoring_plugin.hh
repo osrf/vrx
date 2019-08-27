@@ -26,8 +26,8 @@
 #include <gazebo/common/Timer.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
-#include "vrx_gazebo/waypoint_markers.hh"
 #include "vrx_gazebo/scoring_plugin.hh"
+#include "vrx_gazebo/waypoint_markers.hh"
 
 /// \brief A plugin for computing the score of the station keeping task.
 /// This plugin derives from the generic ScoringPlugin class. Refer to that
