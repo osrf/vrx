@@ -614,9 +614,6 @@ namespace asv
   void WavefieldVisualPlugin::preRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
-    if (this->data->cameras.size() == 0)
-      return;
-
     // Hide ocean for creating reflection/refraction textures
     if (this->data->oceanEntity)
     {
@@ -673,9 +670,6 @@ namespace asv
   void WavefieldVisualPlugin::postRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
   {
-    if (this->data->cameras.size() == 0)
-      return;
-
     // Show ocean after creating reflection/refraction textures
     if (this->data->oceanEntity)
     {
