@@ -397,6 +397,9 @@ namespace asv
     }
   }
 
+///////////////////////////////////////////////////////////////////////////////
+// Reflection/Refraction setup and texture creation
+
   void WavefieldVisualPlugin::SetupReflectionRefraction()
   {
     // OGRE setup
@@ -552,6 +555,9 @@ namespace asv
     return retVal;
   }
 
+///////////////////////////////////////////////////////////////////////////////
+// Shader Params Wave Generation
+
   void WavefieldVisualPlugin::SetShaderParams()
   {
     const std::string shaderType = "vertex";
@@ -610,6 +616,9 @@ namespace asv
       "tau", shaderType, Ogre::StringConverter::toString(tau));
 #endif
   }
+
+///////////////////////////////////////////////////////////////////////////////
+// pre and post RenderTargetUpdate(): RenderTargetListener methods
 
   void WavefieldVisualPlugin::preRenderTargetUpdate(
       const Ogre::RenderTargetEvent& rte)
