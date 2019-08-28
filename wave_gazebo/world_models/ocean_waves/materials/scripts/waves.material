@@ -54,6 +54,7 @@ material WaveSim/GerstnerWaves
         // Commented out b/c set in C++ code
         // param_named shallowRefractRatio float 0.2
         // param_named envReflectRatio float 0.2
+        // param_named flipAcrossY int 1  // Temp fix for camera sensors rendering upsidedown
 
         // Textures
         param_named bumpMap int 0

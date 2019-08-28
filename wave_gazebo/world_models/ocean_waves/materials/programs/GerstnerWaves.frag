@@ -22,6 +22,7 @@ uniform vec4 deepColor;
 uniform vec4 shallowColor;
 uniform float fresnelPower;
 uniform float hdrMultiplier;
+uniform int flipAcrossY;
 
 uniform float shallowRefractRatio;
 uniform float envReflectRatio;
@@ -39,8 +40,13 @@ void main(void)
   vec2 final = projectionCoord.xy / projectionCoord.w;
 
   // Reflection / refraction
-  vec4 reflectionColor = texture2D(reflectMap, final);
-  vec4 refractionColor = texture2D(refractMap, final);
+  vec4 reflectionColor = texture2D(reflectMap, vec2(final.x, final.y));
+  vec4 refractionColor = texture2D(refractMap, vec2(final.x, final.y));
+  if (flipAcrossY == 1)  // Temp fix for camera sensors rendering upsidedown
+  {
+    reflectionColor = texture2D(reflectMap, vec2(final.x, 1.0-final.y));
+    refractionColor = texture2D(refractMap, vec2(final.x, 1.0-final.y));
+  }
 
   // Apply bump mapping to normal vector to make waves look more detailed:
   vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;

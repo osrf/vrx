@@ -448,6 +448,9 @@ namespace asv
     rendering::SetMaterialShaderParam(*this->data->visual,
       "envReflectRatio", "fragment",
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
+    rendering::SetMaterialShaderParam(*this->data->visual,
+      "flipAcrossY", "fragment",
+      std::to_string(0));
   }
 
   void WavefieldVisualPlugin::CreateReflectionRefractionTextures(Ogre::Camera*
@@ -606,6 +609,20 @@ namespace asv
   {
     if (this->data->cameras.size() == 0)
       return;
+
+    // Temp fix for camera sensors rendering upsidedown
+    if (this->data->scene->EnableVisualizations())
+    {
+      rendering::SetMaterialShaderParam(*this->data->visual,
+        "flipAcrossY", "fragment",
+        std::to_string(0));
+    }
+    else
+    {
+      rendering::SetMaterialShaderParam(*this->data->visual,
+        "flipAcrossY", "fragment",
+        std::to_string(1));
+    }
 
     if (this->data->oceanEntity)
     {
