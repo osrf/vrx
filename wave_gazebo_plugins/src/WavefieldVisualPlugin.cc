@@ -334,7 +334,7 @@ namespace asv
 
   void WavefieldVisualPlugin::OnPreRender()
   {
-    // Update clip plane pose (in case the ocean moves)
+    // Update reflection/refraction clip plane pose (in case the ocean moves)
     Ogre::Vector3 oceanPosition(this->data->visual->WorldPose().Pos().X(),
                                 this->data->visual->WorldPose().Pos().Y(),
                                 this->data->visual->WorldPose().Pos().Z());
@@ -347,7 +347,7 @@ namespace asv
     this->data->planeUp.redefine(oceanNormal, oceanPosition);
     this->data->planeDown.redefine(-oceanNormal, oceanPosition);
 
-    // Continuously look for new cameras for reflection/refraction
+    // Continuously look for new cameras for reflection/refraction setup
     // User cam setup in gzclient
     if (this->data->scene->EnableVisualizations())
     {
