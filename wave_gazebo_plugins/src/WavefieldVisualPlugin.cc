@@ -211,6 +211,7 @@ namespace asv
     public: Ogre::MaterialPtr material;
     public: Ogre::TextureUnitState *reflectTex;
     public: Ogre::TextureUnitState *refractTex;
+    public: bool rttUpdate = false;
 
     // Vectors of OGRE objects
     public: std::vector<Ogre::Camera*> cameras;
@@ -219,11 +220,8 @@ namespace asv
     public: std::vector<Ogre::RenderTarget*> reflectionRts;
     public: std::vector<Ogre::RenderTarget*> refractionRts;
 
-    public: bool rttUpdate = false;
-
     /// \brief Event based connections.
     public: event::ConnectionPtr preRenderConnection;
-    public: event::ConnectionPtr renderConnection;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -236,7 +234,6 @@ namespace asv
 
     // Reset connections and transport.
     this->data->preRenderConnection.reset();
-    this->data->renderConnection.reset();
   }
 
   WavefieldVisualPlugin::WavefieldVisualPlugin() :
@@ -337,7 +334,7 @@ namespace asv
 
   void WavefieldVisualPlugin::OnPreRender()
   {
-    // Update clip plane pose (in case the ocean moves, may need to optimize)
+    // Update clip plane pose (in case the ocean moves)
     Ogre::Vector3 oceanPosition(this->data->visual->WorldPose().Pos().X(),
                                 this->data->visual->WorldPose().Pos().Y(),
                                 this->data->visual->WorldPose().Pos().Z());
@@ -350,6 +347,7 @@ namespace asv
     this->data->planeUp.redefine(oceanNormal, oceanPosition);
     this->data->planeDown.redefine(-oceanNormal, oceanPosition);
 
+    // Continuously look for new cameras for reflection/refraction
     // User cam setup in gzclient
     if (this->data->scene->EnableVisualizations())
     {
@@ -357,8 +355,8 @@ namespace asv
       rendering::UserCameraPtr userCamera = this->data->scene->GetUserCamera(0);
 
       // If user cam not already in cameras
-      if (std::find(this->data->cameras.begin(), this->data->cameras.end(), userCamera->OgreCamera())
-         == this->data->cameras.end())
+      if (std::find(this->data->cameras.begin(), this->data->cameras.end(),
+                    userCamera->OgreCamera()) == this->data->cameras.end())
       {
         // Add listener for user cam
         userCamera->OgreViewport()->getTarget()->addListener(this);
@@ -372,16 +370,14 @@ namespace asv
     {
       // Get new cameras
       std::vector<rendering::CameraPtr> newCameras = this->NewCameras();
-      int p = 0;
       for (rendering::CameraPtr c : newCameras)
       {
-        p++;
         // Add listener for camera sensor
         Ogre::Texture *rt = c->RenderTexture();
-        if (!rt) { gzerr << p << " !rt" << std::endl; return; }
+        if (!rt) { gzerr << "!rt" << std::endl; return; }
         rt->getBuffer()->getRenderTarget()->addListener(this);
 
-        // Create rtts for usercam
+        // Create rtts for camera sensor
         this->CreateReflectionRefractionTextures(c->OgreCamera());
       }
     }
@@ -412,7 +408,7 @@ namespace asv
         dynamic_cast<Ogre::Entity *>(ogreNode->getAttachedObject(0));
     if (!this->data->oceanEntity)
     {
-      gzerr << "No plane entity found" << std::endl;
+      gzerr << "No ocean entity found" << std::endl;
       return;
     }
 
@@ -420,7 +416,7 @@ namespace asv
     this->data->oceanEntity->setRenderQueueGroup(this->data->oceanEntity->
                                                  getRenderQueueGroup()+1);
 
-    // Create clipping planes to hide objects, default pose
+    // Create clipping planes to hide objects, with default pose
     this->data->planeUp = Ogre::MovablePlane(Ogre::Vector3::UNIT_Z,
                                              Ogre::Vector3::ZERO);
     this->data->planeDown = Ogre::MovablePlane(-Ogre::Vector3::UNIT_Z,
@@ -430,7 +426,7 @@ namespace asv
     this->data->backgroundColor =
         rendering::Conversions::Convert(this->data->scene->BackgroundColor());
 
-    // Get material to give new textures
+    // Get material to give new textures to
     this->data->material =
       Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
                                                       GetMaterialName());
@@ -449,16 +445,15 @@ namespace asv
       "envReflectRatio", "fragment",
       std::to_string(static_cast<float>(this->data->envReflectRatio)));
 
+    // Temp fix for camera sensors rendering upsidedown, only needed on server
     if (this->data->scene->EnableVisualizations())
     {
-      // Temp fix for camera sensors rendering upsidedown
       rendering::SetMaterialShaderParam(*this->data->visual,
         "flipAcrossY", "fragment",
         std::to_string(0));
     }
     else
     {
-      // Temp fix for camera sensors rendering upsidedown
       rendering::SetMaterialShaderParam(*this->data->visual,
         "flipAcrossY", "fragment",
         std::to_string(1));
@@ -547,8 +542,8 @@ namespace asv
 
       // Add new cameras
       rendering::CameraPtr c = camera->Camera();
-      if (std::find(this->data->cameras.begin(), this->data->cameras.end(), c->OgreCamera())
-         == this->data->cameras.end())
+      if (std::find(this->data->cameras.begin(), this->data->cameras.end(),
+                    c->OgreCamera()) == this->data->cameras.end())
       {
         retVal.push_back(c);
       }
@@ -622,6 +617,7 @@ namespace asv
     if (this->data->cameras.size() == 0)
       return;
 
+    // Hide ocean for creating reflection/refraction textures
     if (this->data->oceanEntity)
     {
       this->data->oceanEntity->setVisible(false);
@@ -637,23 +633,28 @@ namespace asv
     {
       for (unsigned int i = 0; i < this->data->cameras.size(); ++i)
       {
-        Ogre::RenderTarget *rt = this->data->cameras.at(i)->getViewport()->getTarget();
-        if (rte.source->getViewport(0)->getCamera() == this->data->cameras.at(i))
+        if (rte.source->getViewport(0)->getCamera() ==
+            this->data->cameras.at(i))
         {
           this->data->rttUpdate = true;
           this->data->reflectionRts.at(i)->update();
-          this->data->reflectionRts.at(i)->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
-                              + "_reflection.png");
+          (this->data->reflectionRts.at(i)->
+           writeContentsToFile(path + "/" +
+                               this->data->cameras.at(i)->getName()
+                               + "_reflection.png"));
+
           this->data->refractionRts.at(i)->update();
-          this->data->refractionRts.at(i)->writeContentsToFile(path + "/" + this->data->cameras.at(i)->getName()
-                              + "_refraction.png");
+          (this->data->refractionRts.at(i)->
+           writeContentsToFile(path + "/" +
+                               this->data->cameras.at(i)->getName()
+                               + "_refraction.png"));
           this->data->rttUpdate = false;
           return;
         }
       }
     }
 
-    // Reflection
+    // Reflection: hide entities below and reflect
     for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
@@ -668,7 +669,7 @@ namespace asv
       }
     }
 
-    // Refraction
+    // Refraction: hide entities above
     for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
@@ -689,12 +690,13 @@ namespace asv
     if (this->data->cameras.size() == 0)
       return;
 
+    // Show ocean after creating reflection/refraction textures
     if (this->data->oceanEntity)
     {
       this->data->oceanEntity->setVisible(true);
     }
 
-    // Reflection
+    // Reflection: reshow all entities
     for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
@@ -708,7 +710,7 @@ namespace asv
       }
     }
 
-    // Refraction
+    // Refraction: reshow all entities
     for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
