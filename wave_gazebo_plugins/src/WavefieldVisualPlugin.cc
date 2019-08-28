@@ -640,7 +640,7 @@ namespace asv
       }
     }
 
-    // Reflection: hide entities below and reflect
+    // Reflection: hide entities below, reflect, and set the right texture
     for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
@@ -655,7 +655,7 @@ namespace asv
       }
     }
 
-    // Refraction: hide entities above
+    // Refraction: hide entities above and set the right texture
     for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
@@ -690,8 +690,6 @@ namespace asv
       {
         this->data->cameras.at(i)->disableReflection();
         this->data->cameras.at(i)->disableCustomNearClipPlane();
-        this->data->reflectTex->setTexture(this->data->
-                                           rttReflectionTextures.at(i));
         return;
       }
     }
@@ -703,8 +701,6 @@ namespace asv
       if (rte.source == rt)
       {
         this->data->cameras.at(i)->disableCustomNearClipPlane();
-        this->data->refractTex->setTexture(this->data->
-                                           rttRefractionTextures.at(i));
         return;
       }
     }
