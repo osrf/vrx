@@ -152,20 +152,18 @@ namespace asv
     private: void OnPreRender();
 
     /// internal
-    /// \brief Called every Render event.
-    private: void OnRender();
-
-    /// internal
     /// \brief Setup Ogre objects for reflection/refraction
     private: void SetupReflectionRefraction();
 
     /// internal
-    /// \brief Get new cameras
+    /// \brief Get new cameras from camera sensors
+    ///        not already contained in this->data->cameras
     private: std::vector<gazebo::rendering::CameraPtr> NewCameras();
 
     /// internal
-    /// \brief Create reflection refraction textures and stores the texture
-    //         and target
+    /// \brief Create reflection refraction textures
+    ///        Stores the texture and target
+    ///        Stores the given camera
     private: void CreateReflectionRefractionTextures(Ogre::Camera* camera);
 
     /// internal
