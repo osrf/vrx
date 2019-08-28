@@ -623,11 +623,6 @@ namespace asv
       this->data->oceanEntity->setVisible(false);
     }
 
-    std::string path = "";
-    if (char* home_dir = std::getenv("HOME"))
-    {
-      path += std::string(home_dir);
-    }
     // On Camera preupdate, update rtts first before updating camera
     if (!this->data->rttUpdate)
     {
@@ -638,16 +633,7 @@ namespace asv
         {
           this->data->rttUpdate = true;
           this->data->reflectionRts.at(i)->update();
-          (this->data->reflectionRts.at(i)->
-           writeContentsToFile(path + "/" +
-                               this->data->cameras.at(i)->getName()
-                               + "_reflection.png"));
-
           this->data->refractionRts.at(i)->update();
-          (this->data->refractionRts.at(i)->
-           writeContentsToFile(path + "/" +
-                               this->data->cameras.at(i)->getName()
-                               + "_refraction.png"));
           this->data->rttUpdate = false;
           return;
         }
