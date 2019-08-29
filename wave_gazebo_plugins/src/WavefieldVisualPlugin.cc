@@ -335,14 +335,25 @@ namespace asv
   void WavefieldVisualPlugin::OnPreRender()
   {
     // Update reflection/refraction clip plane pose (in case the ocean moves)
-    Ogre::Vector3 oceanPosition(this->data->visual->WorldPose().Pos().X(),
-                                this->data->visual->WorldPose().Pos().Y(),
-                                this->data->visual->WorldPose().Pos().Z());
+    #if GAZEBO_MAJOR_VERSION >= 8
+      Ogre::Vector3 oceanPosition(this->data->visual->Position().X(),
+                                  this->data->visual->Position().Y(),
+                                  this->data->visual->Position().Z());
 
-    Ogre::Quaternion oceanRotation(this->data->visual->WorldPose().Rot().W(),
-                                   this->data->visual->WorldPose().Rot().X(),
-                                   this->data->visual->WorldPose().Rot().Y(),
-                                   this->data->visual->WorldPose().Rot().Z());
+      Ogre::Quaternion oceanRotation(this->data->visual->Rotation().W(),
+                                     this->data->visual->Rotation().X(),
+                                     this->data->visual->Rotation().Y(),
+                                     this->data->visual->Rotation().Z());
+    #else
+      Ogre::Vector3 oceanPosition(this->data->visual->GetPosition().Pos().x,
+                                  this->data->visual->GetPosition().Pos().y,
+                                  this->data->visual->GetPosition().Pos().z);
+
+      Ogre::Quaternion oceanRotation(this->data->visual->GetRotation().w,
+                                     this->data->visual->GetRotation().x,
+                                     this->data->visual->GetRotation().y,
+                                     this->data->visual->GetRotation().z);
+    #endif
     Ogre::Vector3 oceanNormal = oceanRotation * Ogre::Vector3::UNIT_Z;
     this->data->planeUp.redefine(oceanNormal, oceanPosition);
     this->data->planeDown.redefine(-oceanNormal, oceanPosition);
