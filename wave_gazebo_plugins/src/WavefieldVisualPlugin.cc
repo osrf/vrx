@@ -336,23 +336,25 @@ namespace asv
   {
     // Update reflection/refraction clip plane pose (in case the ocean moves)
     #if GAZEBO_MAJOR_VERSION >= 8
-      Ogre::Vector3 oceanPosition(this->data->visual->Position().X(),
-                                  this->data->visual->Position().Y(),
-                                  this->data->visual->Position().Z());
+      ignition::math::Pose3d pose = this->data->visual->WorldPose();
+      Ogre::Vector3 oceanPosition(pose.Pos().X(),
+                                  pose.Pos().Y(),
+                                  pose.Pos().Z());
 
-      Ogre::Quaternion oceanRotation(this->data->visual->Rotation().W(),
-                                     this->data->visual->Rotation().X(),
-                                     this->data->visual->Rotation().Y(),
-                                     this->data->visual->Rotation().Z());
+      Ogre::Quaternion oceanRotation(pose.Rot().W(),
+                                     pose.Rot().X(),
+                                     pose.Rot().Y(),
+                                     pose.Rot().Z());
     #else
-      Ogre::Vector3 oceanPosition(this->data->visual->GetPosition().x,
-                                  this->data->visual->GetPosition().y,
-                                  this->data->visual->GetPosition().z);
+      math::Pose pose = this->data->visual->GetWorldPose();
+      Ogre::Vector3 oceanPosition(pose.pos.x,
+                                  pose.pos.y,
+                                  pose.pos.z);
 
-      Ogre::Quaternion oceanRotation(this->data->visual->GetRotation().w,
-                                     this->data->visual->GetRotation().x,
-                                     this->data->visual->GetRotation().y,
-                                     this->data->visual->GetRotation().z);
+      Ogre::Quaternion oceanRotation(pose.rot.w,
+                                     pose.rot.x,
+                                     pose.rot.y,
+                                     pose.rot.z);
     #endif
     Ogre::Vector3 oceanNormal = oceanRotation * Ogre::Vector3::UNIT_Z;
     this->data->planeUp.redefine(oceanNormal, oceanPosition);
