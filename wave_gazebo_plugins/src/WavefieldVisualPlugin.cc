@@ -345,9 +345,9 @@ namespace asv
                                      this->data->visual->Rotation().Y(),
                                      this->data->visual->Rotation().Z());
     #else
-      Ogre::Vector3 oceanPosition(this->data->visual->GetPosition().Pos().x,
-                                  this->data->visual->GetPosition().Pos().y,
-                                  this->data->visual->GetPosition().Pos().z);
+      Ogre::Vector3 oceanPosition(this->data->visual->GetPosition().x,
+                                  this->data->visual->GetPosition().y,
+                                  this->data->visual->GetPosition().z);
 
       Ogre::Quaternion oceanRotation(this->data->visual->GetRotation().w,
                                      this->data->visual->GetRotation().x,
