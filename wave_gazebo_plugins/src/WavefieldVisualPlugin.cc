@@ -222,6 +222,7 @@ namespace asv
 
     /// \brief Event based connections.
     public: event::ConnectionPtr preRenderConnection;
+    public: event::ConnectionPtr cameraPreRenderConnection;
   };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -300,6 +301,11 @@ namespace asv
     // Bind the update method to ConnectPreRender events
     this->data->preRenderConnection = event::Events::ConnectPreRender(
         std::bind(&WavefieldVisualPlugin::OnPreRender, this));
+
+    // Bind the update method to ConnectPreRender events
+    this->data->cameraPreRenderConnection = rendering::Events::ConnectCameraPreRender(
+        std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
+            this, std::placeholders::_1));
   }
 
   void WavefieldVisualPlugin::Init()
@@ -358,9 +364,6 @@ namespace asv
       if (std::find(this->data->cameras.begin(), this->data->cameras.end(),
                     userCamera->OgreCamera()) == this->data->cameras.end())
       {
-        // Add listener for user cam
-        userCamera->OgreViewport()->getTarget()->addListener(this);
-        // Create rtts for usercam
         this->CreateReflectionRefractionTextures(userCamera->OgreCamera());
       }
     }
@@ -372,11 +375,6 @@ namespace asv
       std::vector<rendering::CameraPtr> newCameras = this->NewCameras();
       for (rendering::CameraPtr c : newCameras)
       {
-        // Add listener for camera sensor
-        Ogre::Texture *rt = c->RenderTexture();
-        if (!rt) { gzerr << "!rt" << std::endl; return; }
-        rt->getBuffer()->getRenderTarget()->addListener(this);
-
         // Create rtts for camera sensor
         this->CreateReflectionRefractionTextures(c->OgreCamera());
       }
@@ -436,6 +434,7 @@ namespace asv
     this->data->reflectTex =
         (this->data->material->getTechnique(0)->getPass(0)->
          getTextureUnitState(2));
+
     this->data->refractTex =
         (this->data->material->getTechnique(0)->getPass(0)->
          getTextureUnitState(3));
@@ -499,7 +498,7 @@ namespace asv
     reflVp->setBackgroundColour(this->data->backgroundColor);
     reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
+    // rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
     reflectionRt->addListener(this);
 
     // Setup refraction render target
@@ -513,7 +512,7 @@ namespace asv
     refrVp->setBackgroundColour(this->data->backgroundColor);
     refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
+    // rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
     refractionRt->addListener(this);
 
     this->data->cameras.push_back(camera);
@@ -521,6 +520,10 @@ namespace asv
     this->data->rttRefractionTextures.push_back(rttRefractionTexture);
     this->data->reflectionRts.push_back(reflectionRt);
     this->data->refractionRts.push_back(refractionRt);
+
+    // Get material to give new textures to
+    this->data->reflectTex->addFrameTextureName(rttReflectionTexture->getName());
+    this->data->refractTex->addFrameTextureName(rttRefractionTexture->getName());
   }
 
   std::vector<rendering::CameraPtr> WavefieldVisualPlugin::NewCameras()
@@ -617,6 +620,28 @@ namespace asv
 #endif
   }
 
+
+  void WavefieldVisualPlugin::OnCameraPreRender(const std::string &_camera)
+  {
+    // On Camera preupdate, update rtts first before updating camera
+    rendering::CameraPtr camSource;
+    if (this->data->scene->EnableVisualizations())
+      camSource = this->data->scene->GetUserCamera(0);
+    else
+      camSource = this->data->scene->GetCamera(_camera);
+
+    for (unsigned int i = 0; i < this->data->cameras.size(); ++i)
+    {
+      if (camSource->OgreCamera() == this->data->cameras.at(i))
+      {
+        this->data->rttUpdate = true;
+        this->data->reflectionRts.at(i)->update();
+        this->data->refractionRts.at(i)->update();
+        return;
+      }
+    }
+  }
+
 ///////////////////////////////////////////////////////////////////////////////
 // pre and post RenderTargetUpdate(): RenderTargetListener methods
 
@@ -629,23 +654,6 @@ namespace asv
       this->data->oceanEntity->setVisible(false);
     }
 
-    // On Camera preupdate, update rtts first before updating camera
-    if (!this->data->rttUpdate)
-    {
-      for (unsigned int i = 0; i < this->data->cameras.size(); ++i)
-      {
-        if (rte.source->getViewport(0)->getCamera() ==
-            this->data->cameras.at(i))
-        {
-          this->data->rttUpdate = true;
-          this->data->reflectionRts.at(i)->update();
-          this->data->refractionRts.at(i)->update();
-          this->data->rttUpdate = false;
-          return;
-        }
-      }
-    }
-
     // Reflection: hide entities below, reflect, and set the right texture
     for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
@@ -655,8 +663,7 @@ namespace asv
         this->data->cameras.at(i)->enableReflection(this->data->planeUp);
         this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->
                                                              planeUp);
-        this->data->reflectTex->setTexture(this->data->
-                                           rttReflectionTextures.at(i));
+        this->data->reflectTex->setCurrentFrame(i);
         return;
       }
     }
