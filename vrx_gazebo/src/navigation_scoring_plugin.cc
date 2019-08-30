@@ -114,7 +114,7 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 #endif
   if (!this->course)
   {
-    gzerr << "could not find " << 
+    gzerr << "could not find " <<
       _sdf->Get<std::string>("course_name") << std::endl;
   }
 
