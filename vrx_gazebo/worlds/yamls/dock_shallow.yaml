@@ -44,10 +44,12 @@ environment:
 
                   </wind_obj>"
             scene_macro:
-                - /**fog: "'
-                  <color> 0.7 0.7 0.7 1 </color>
-
-                  <density> 0.0 </density>'"
+                - /**fog: "
+                  <fog>
++                   <type> linear</type>
+                    <color> 0.7 0.7 0.7 1 </color>
+                    <density> 0.0 </density>
+                  </fog>"
                   /**ambient: "1 1 1 1"
         1:
             ocean_waves:
@@ -70,13 +72,10 @@ environment:
                   </wind_obj>"
             scene_macro:
                 - /**fog: "
+                <fog>
++                 <type> linear</type>
                   <color> 0.9 0.9 0.9 1 </color>
 
-                  <density> 0.1 </density>"
+                  <density> 0.1 </density>
+                </fog>"
                   /**ambient: "0.3 0.3 0.3 1"
-
-
-
-
-
-
