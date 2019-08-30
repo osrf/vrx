@@ -38,13 +38,13 @@ void NavigationScoringPlugin::Gate::Update()
     return;
 
   // The pose of the markers delimiting the gate.
-  #if GAZEBO_MAJOR_VERSION >= 8
-    const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
-    const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
-  #else
-    const auto leftMarkerPose = this->leftMarkerModel->GetWorldPose().Ign();
-    const auto rightMarkerPose = this->rightMarkerModel->GetWorldPose().Ign();
-  #endif
+#if GAZEBO_MAJOR_VERSION >= 8
+  const auto leftMarkerPose = this->leftMarkerModel->WorldPose();
+  const auto rightMarkerPose = this->rightMarkerModel->WorldPose();
+#else
+  const auto leftMarkerPose = this->leftMarkerModel->GetWorldPose().Ign();
+  const auto rightMarkerPose = this->rightMarkerModel->GetWorldPose().Ign();
+#endif
 
   // Unit vector from the left marker to the right one.
   auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
@@ -87,7 +87,6 @@ NavigationScoringPlugin::GateState NavigationScoringPlugin::Gate::IsPoseInGate(
     return GateState::VEHICLE_OUTSIDE;
 }
 
-
 /////////////////////////////////////////////////
 NavigationScoringPlugin::NavigationScoringPlugin()
 {
@@ -106,16 +105,16 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     gzerr << "Unable to find <course_name> element in SDF." << std::endl;
     return;
   }
-  #if GAZEBO_MAJOR_VERSION >= 8
-    this->course =
-      this->world->ModelByName(_sdf->Get<std::string>("course_name"));
-  #else
-    this->course =
-      this->world->GetModel(_sdf->Get<std::string>("course_name"));
-  #endif
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->course =
+    this->world->ModelByName(_sdf->Get<std::string>("course_name"));
+#else
+  this->course =
+    this->world->GetModel(_sdf->Get<std::string>("course_name"));
+#endif
   if (!this->course)
   {
-    gzerr << "could not find " <<
+    gzerr << "could not find " << 
       _sdf->Get<std::string>("course_name") << std::endl;
   }
 
@@ -229,11 +228,11 @@ void NavigationScoringPlugin::Update()
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->vehicleModel)
   {
-    #if GAZEBO_MAJOR_VERSION >= 8
-      this->vehicleModel = this->world->ModelByName(this->vehicleName);
-    #else
-      this->vehicleModel = this->world->GetModel(this->vehicleName);
-    #endif
+#if GAZEBO_MAJOR_VERSION >= 8
+    this->vehicleModel = this->world->ModelByName(this->vehicleName);
+#else
+    this->vehicleModel = this->world->GetModel(this->vehicleName);
+#endif
     if (!this->vehicleModel)
       return;
   }
@@ -245,11 +244,11 @@ void NavigationScoringPlugin::Update()
   this->ScoringPlugin::SetScore(std::max(0.0, this->RemainingTime().Double() -
     this->numCollisions * this->obstaclePenalty));
 
-  #if GAZEBO_MAJOR_VERSION >= 8
-    const auto robotPose = this->vehicleModel->WorldPose();
-  #else
-    const auto robotPose = this->vehicleModel->GetWorldPose().Ign();
-  #endif
+#if GAZEBO_MAJOR_VERSION >= 8
+  const auto robotPose = this->vehicleModel->WorldPose();
+#else
+  const auto robotPose = this->vehicleModel->GetWorldPose().Ign();
+#endif
 
   // Update the state of all gates.
   auto iter = std::begin(this->gates);
@@ -314,8 +313,6 @@ void NavigationScoringPlugin::OnCollision()
 {
   this->numCollisions++;
 }
-
-
 
 // Register plugin with gazebo
 GZ_REGISTER_WORLD_PLUGIN(NavigationScoringPlugin)

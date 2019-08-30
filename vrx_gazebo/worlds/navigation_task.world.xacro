@@ -22,7 +22,7 @@
 
     <!-- The VRX navigation course -->
     <include>
-      <uri>model://navigation_course0</uri>
+      <uri>model://navigation_course</uri>
       <pose>130 100 0 0 0 0</pose>
     </include>
 
@@ -43,7 +43,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <course_name>vrx_navigation_course_0</course_name>
+      <course_name>vrx_navigation_course</course_name>
       <obstacle_penalty>10.0</obstacle_penalty>
       <gates>
         <gate>
@@ -58,7 +58,7 @@
           <left_marker>red_bound_2</left_marker>
           <right_marker>green_bound_2</right_marker>
         </gate>
-        <!-- <gate>
+        <gate>
           <left_marker>red_bound_3</left_marker>
           <right_marker>green_bound_3</right_marker>
         </gate>
@@ -73,7 +73,7 @@
         <gate>
           <left_marker>red_bound_6</left_marker>
           <right_marker>green_bound_6</right_marker>
-        </gate> -->
+        </gate>
       </gates>
 
     </plugin>
