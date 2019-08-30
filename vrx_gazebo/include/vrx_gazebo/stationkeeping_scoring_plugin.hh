@@ -27,6 +27,7 @@
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
+#include "vrx_gazebo/waypoint_markers.hh"
 
 /// \brief A plugin for computing the score of the station keeping task.
 /// This plugin derives from the generic ScoringPlugin class. Refer to that
@@ -48,6 +49,8 @@
 /// <goal_pose>: Optional parameter (vector type) specifying the latitude,
 /// longitude and yaw of the task goal. If not provided, all values default
 /// to 0.
+/// <markers>: Optional parameter to enable visualization markers. Check the
+/// WaypointMarkers class for SDF documentation.
 class StationkeepingScoringPlugin : public ScoringPlugin
 {
   /// \brief Constructor.
@@ -93,13 +96,13 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Publisher for the current rms error.
   private: ros::Publisher rmsErrorPub;
 
-  /// \brief Goal pose in local (Gazebo) coordiates.
+  /// \brief Goal pose in local (Gazebo) coordinates.
   private: double goalX;
 
-  /// \brief Goal pose in local (Gazebo) coordiates.
+  /// \brief Goal pose in local (Gazebo) coordinates.
   private: double goalY;
 
-  /// \brief Goal pose in local (Gazebo) coordiates.
+  /// \brief Goal pose in local (Gazebo) coordinates.
   private: double goalYaw;
 
   /// \brief Goal pose in spherical (WGS84) coordinates.
@@ -122,6 +125,9 @@ class StationkeepingScoringPlugin : public ScoringPlugin
 
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: gazebo::common::Timer timer;
+
+  /// \brief Waypoint visualization markers
+  private: WaypointMarkers waypointMarkers;
 };
 
 #endif

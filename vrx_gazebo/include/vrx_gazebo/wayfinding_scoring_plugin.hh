@@ -27,6 +27,7 @@
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
+#include "vrx_gazebo/waypoint_markers.hh"
 
 /// \brief A plugin for computing the score of the wayfinding navigation task.
 /// This plugin derives from the generic ScoringPlugin class. Refer to that
@@ -52,6 +53,8 @@
 ///    This block should contain at least one of these blocks:
 ///     <waypoint>: This block should contain a <pose> element specifying the
 ///     lattitude, longitude and yaw of a waypoint.
+/// <markers>: Optional parameter to enable visualization markers. Check the
+/// WaypointMarkers class for SDF documentation.
 class WayfindingScoringPlugin : public ScoringPlugin
 {
   /// \brief Constructor.
@@ -119,6 +122,9 @@ class WayfindingScoringPlugin : public ScoringPlugin
 
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: gazebo::common::Timer timer;
+
+  /// \brief Waypoint visualization markers.
+  private: WaypointMarkers waypointMarkers;
 };
 
 #endif

@@ -26,10 +26,13 @@
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <gazebo/physics/Model.hh>
+
+#include "vrx_gazebo/waypoint_markers.hh"
 #include "vrx_gazebo/wayfinding_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
 WayfindingScoringPlugin::WayfindingScoringPlugin()
+  : waypointMarkers("waypoint_marker")
 {
   gzmsg << "Wayfinding scoring plugin loaded" << std::endl;
   this->timer.Stop();
@@ -108,6 +111,30 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&WayfindingScoringPlugin::Update, this));
+
+  // Publish waypoint markers
+  if (_sdf->HasElement("markers"))
+  {
+    this->waypointMarkers.Load(_sdf->GetElement("markers"));
+    if (this->waypointMarkers.IsAvailable())
+    {
+      int markerId = 0;
+      for (const auto waypoint : this->localWaypoints)
+      {
+        if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
+            waypoint.Y(), std::to_string(markerId)))
+        {
+          gzerr << "Error creating visual marker" << std::endl;
+        }
+        markerId++;
+      }
+    }
+    else
+    {
+      gzwarn << "Cannot display gazebo markers (Gazebo version < 8)"
+             << std::endl;
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -220,7 +247,6 @@ void WayfindingScoringPlugin::PublishWaypoints()
 void WayfindingScoringPlugin::OnReady()
 {
   gzmsg << "OnReady" << std::endl;
-
   this->PublishWaypoints();
 }
 
@@ -231,7 +257,6 @@ void WayfindingScoringPlugin::OnRunning()
   gzmsg << "OnRunning" << std::endl;
   this->timer.Start();
 }
-
 
 // Register plugin with gazebo
 GZ_REGISTER_WORLD_PLUGIN(WayfindingScoringPlugin)

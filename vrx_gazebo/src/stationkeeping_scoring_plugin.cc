@@ -22,10 +22,12 @@
 #include <gazebo/physics/Model.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
+
 #include "vrx_gazebo/stationkeeping_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
 StationkeepingScoringPlugin::StationkeepingScoringPlugin()
+  : waypointMarkers("station_keeping_marker")
 {
   gzmsg << "Stationkeeping scoring plugin loaded" << std::endl;
 
@@ -90,6 +92,23 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&StationkeepingScoringPlugin::Update, this));
+
+  if (_sdf->HasElement("markers"))
+  {
+    this->waypointMarkers.Load(_sdf->GetElement("markers"));
+    if (this->waypointMarkers.IsAvailable())
+    {
+      if (!this->waypointMarkers.DrawMarker(0, this->goalX, this->goalY))
+      {
+        gzerr << "Error creating visual marker" << std::endl;
+      }
+    }
+    else
+    {
+      gzwarn << "Cannot display gazebo markers (Gazebo version < 8)"
+        << std::endl;
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -186,7 +205,6 @@ void StationkeepingScoringPlugin::OnRunning()
 
   this->timer.Start();
 }
-
 
 
 // Register plugin with gazebo

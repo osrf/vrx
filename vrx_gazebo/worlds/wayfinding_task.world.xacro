@@ -37,6 +37,10 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
+      <markers>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
+      </markers>
     </plugin>
 
   </world>
