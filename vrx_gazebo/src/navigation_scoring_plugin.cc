@@ -195,9 +195,9 @@ bool NavigationScoringPlugin::ParseGates(sdf::ElementPtr _sdf)
 bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     const std::string &_rightMarkerName)
 {
-    gazebo::physics::LinkPtr leftMarkerModel =
-      this->course->GetLink(this->course->GetName() + "::" +
-        _leftMarkerName + "::link");
+  gazebo::physics::LinkPtr leftMarkerModel =
+    this->course->GetLink(this->course->GetName() + "::" +
+      _leftMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!leftMarkerModel)
@@ -206,9 +206,9 @@ bool NavigationScoringPlugin::AddGate(const std::string &_leftMarkerName,
     return false;
   }
 
-    gazebo::physics::LinkPtr rightMarkerModel =
-      this->course->GetLink(this->course->GetName() + "::" +
-        _rightMarkerName + "::link");
+  gazebo::physics::LinkPtr rightMarkerModel =
+    this->course->GetLink(this->course->GetName() + "::" +
+      _rightMarkerName + "::link");
 
   // Sanity check: Make sure that the model exists.
   if (!rightMarkerModel)
