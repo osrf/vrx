@@ -66,9 +66,3 @@ tasks:
             scene_macro:
                 - /**fog: ""
                   /**ambient: "0.3 0.3 0.3 1"
-
-
-
-
-
-

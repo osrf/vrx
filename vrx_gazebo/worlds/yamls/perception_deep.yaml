@@ -112,7 +112,7 @@ scene:
             scene_macro:
                 - /**fog: "
                 <fog>
-+                 <type> linear</type>
+                  <type> linear</type>
                   <color> 0.7 0.7 0.7 1 </color>
                   <density> 0.0 </density>
                 </fog>"
@@ -121,7 +121,7 @@ scene:
             scene_macro:
                 - /**fog: "
                 <fog>
-+                 <type> linear</type>
+                  <type> linear</type>
                   <color> 0.9 0.9 0.9 1 </color>
 
                   <density> 0.1 </density>
