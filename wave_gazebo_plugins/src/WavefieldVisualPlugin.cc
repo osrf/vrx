@@ -202,15 +202,11 @@ namespace asv
     public: Ogre::Entity* oceanEntity;
     public: Ogre::MovablePlane planeUp;
     public: Ogre::MovablePlane planeDown;
-    public: Ogre::ColourValue backgroundColor;
-    public: Ogre::MaterialPtr material;
     public: Ogre::TextureUnitState *reflectTex;
     public: Ogre::TextureUnitState *refractTex;
 
     // Vectors of OGRE objects
     public: std::vector<Ogre::Camera*> cameras;
-    public: std::vector<Ogre::TexturePtr> rttReflectionTextures;
-    public: std::vector<Ogre::TexturePtr> rttRefractionTextures;
     public: std::vector<Ogre::RenderTarget*> reflectionRts;
     public: std::vector<Ogre::RenderTarget*> refractionRts;
 
@@ -229,6 +225,7 @@ namespace asv
 
     // Reset connections and transport.
     this->data->preRenderConnection.reset();
+    this->data->cameraPreRenderConnection.reset();
   }
 
   WavefieldVisualPlugin::WavefieldVisualPlugin() :
@@ -430,21 +427,15 @@ namespace asv
     this->data->planeDown = Ogre::MovablePlane(-Ogre::Vector3::UNIT_Z,
                                                Ogre::Vector3::ZERO);
 
-    // Get background color
-    this->data->backgroundColor =
-        rendering::Conversions::Convert(this->data->scene->BackgroundColor());
-
     // Get material to give new textures to
-    this->data->material =
+    Ogre::MaterialPtr material =
       Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
                                                       GetMaterialName());
-    this->data->reflectTex =
-        (this->data->material->getTechnique(0)->getPass(0)->
-         getTextureUnitState(2));
+    this->data->reflectTex = (material->getTechnique(0)->getPass(0)->
+                              getTextureUnitState(2));
 
-    this->data->refractTex =
-        (this->data->material->getTechnique(0)->getPass(0)->
-         getTextureUnitState(3));
+    this->data->refractTex = (material->getTechnique(0)->getPass(0)->
+                              getTextureUnitState(3));
 
     // Set reflection/refraction parameters
     rendering::SetMaterialShaderParam(*this->data->visual,
@@ -494,6 +485,9 @@ namespace asv
         Ogre::PF_R8G8B8,
         Ogre::TU_RENDERTARGET);
 
+    Ogre::ColourValue backgroundColor =
+        rendering::Conversions::Convert(this->data->scene->BackgroundColor());
+
     // Setup reflection render target
     Ogre::RenderTarget* reflectionRt =
         rttReflectionTexture->getBuffer()->getRenderTarget();
@@ -502,7 +496,7 @@ namespace asv
         reflectionRt->addViewport(camera);
     reflVp->setClearEveryFrame(true);
     reflVp->setOverlaysEnabled(false);
-    reflVp->setBackgroundColour(this->data->backgroundColor);
+    reflVp->setBackgroundColour(backgroundColor);
     reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
     reflectionRt->addListener(this);
@@ -515,15 +509,13 @@ namespace asv
         refractionRt->addViewport(camera);
     refrVp->setClearEveryFrame(true);
     refrVp->setOverlaysEnabled(false);
-    refrVp->setBackgroundColour(this->data->backgroundColor);
+    refrVp->setBackgroundColour(backgroundColor);
     refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
     refractionRt->addListener(this);
 
     // Store camera and rtts
     this->data->cameras.push_back(camera);
-    this->data->rttReflectionTextures.push_back(rttReflectionTexture);
-    this->data->rttRefractionTextures.push_back(rttRefractionTexture);
     this->data->reflectionRts.push_back(reflectionRt);
     this->data->refractionRts.push_back(refractionRt);
 
