@@ -301,9 +301,10 @@ namespace asv
         std::bind(&WavefieldVisualPlugin::OnPreRender, this));
 
     // Bind the update method to ConnectPreRender events
-    this->data->cameraPreRenderConnection = rendering::Events::ConnectCameraPreRender(
+    this->data->cameraPreRenderConnection =
+      rendering::Events::ConnectCameraPreRender(
         std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
-            this, std::placeholders::_1));
+                  this, std::placeholders::_1));
   }
 
   void WavefieldVisualPlugin::Init()
@@ -531,8 +532,10 @@ namespace asv
     this->data->refractionRts.push_back(refractionRt);
 
     // Add frame to texture units
-    this->data->reflectTex->addFrameTextureName(rttReflectionTexture->getName());
-    this->data->refractTex->addFrameTextureName(rttRefractionTexture->getName());
+    this->data->reflectTex->addFrameTextureName(rttReflectionTexture
+                                                ->getName());
+    this->data->refractTex->addFrameTextureName(rttRefractionTexture
+                                                ->getName());
   }
 
   std::vector<rendering::CameraPtr> WavefieldVisualPlugin::NewCameras()

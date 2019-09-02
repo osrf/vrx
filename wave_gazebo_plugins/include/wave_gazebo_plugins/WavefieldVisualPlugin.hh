@@ -28,6 +28,7 @@
 #include <gazebo/rendering/Camera.hh>
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace asv
