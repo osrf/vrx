@@ -429,9 +429,6 @@ namespace asv
           std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
                     this, std::placeholders::_1));
     #endif
-
-    Ogre::Vector3 oceanNormal = oceanRotation * Ogre::Vector3::UNIT_Z;
-    this->data->planeUp.redefine(oceanNormal, oceanPosition);
   }
 
   void WavefieldVisualPlugin::UpdateClipPlanes()

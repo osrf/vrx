@@ -35,6 +35,7 @@
   tau = 2.0         # Time constant for starting wave [s]
   amplitude = 0.0  # No effect for PMS
   steepness = 0.0  # Not yet supported
+  enableRtt = true
   shallowRefractRatio = 0.2
   envReflectRatio = 0.2
 %>
@@ -67,6 +68,7 @@
     <link name="ocean_waves_link">
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
+          <enableRtt><%= enableRtt %></enableRtt>
           <shallowRefractRatio><%= shallowRefractRatio %></shallowRefractRatio>
           <envReflectRatio><%= envReflectRatio %></envReflectRatio>
           <wave>
