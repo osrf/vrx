@@ -36,10 +36,6 @@
 #include "gazebo/rendering/ogre_gazebo.h"
 #include "gazebo/rendering/Camera.hh"
 #include "gazebo/rendering/UserCamera.hh"
-#include "gazebo/sensors/SensorManager.hh"
-#include "gazebo/sensors/Sensor.hh"
-#include "gazebo/sensors/CameraSensor.hh"
-#include "gazebo/sensors/SensorsIface.hh"
 
 #include "wave_gazebo_plugins/WavefieldVisualPlugin.hh"
 #include "wave_gazebo_plugins/Gazebo.hh"
@@ -542,24 +538,10 @@ namespace asv
   {
     std::vector<rendering::CameraPtr> retVal;
 
-    sensors::Sensor_V all_sensors = (sensors::SensorManager::Instance()->
-                                     GetSensors());
-    for (sensors::SensorPtr sensor : all_sensors)
+    for (unsigned int i = 0; i < this->data->scene->CameraCount(); ++i)
     {
-      // Check if sensor is a camera and can be casted
-      if (sensor->Type().compare("camera") != 0)
-      {
-        continue;
-      }
-      sensors::CameraSensorPtr camera =
-        std::dynamic_pointer_cast<sensors::CameraSensor>(sensor);
-      if (!camera)
-      {
-        continue;
-      }
-
       // Add new cameras
-      rendering::CameraPtr c = camera->Camera();
+      rendering::CameraPtr c = this->data->scene->GetCamera(i);
       if (std::find(this->data->cameras.begin(), this->data->cameras.end(),
                     c->OgreCamera()) == this->data->cameras.end())
       {
