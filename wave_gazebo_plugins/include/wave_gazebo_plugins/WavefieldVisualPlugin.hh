@@ -157,15 +157,21 @@ namespace asv
     private: void SetupReflectionRefraction();
 
     /// internal
-    /// \brief Get new cameras from camera sensors
-    ///        not already contained in this->data->cameras
-    private: std::vector<gazebo::rendering::CameraPtr> NewCameras();
+    /// \brief Move and rotate clip planes to match ocean pose
+    private: void UpdateClipPlanes();
 
     /// internal
-    /// \brief Create reflection refraction textures
-    ///        Stores the texture and target
-    ///        Stores the given camera
-    private: void CreateReflectionRefractionTextures(Ogre::Camera* camera);
+    /// \brief Check for new cameras, setup rtts for them
+    private: void AddNewCamerasForReflectionRefraction();
+
+    /// internal
+    /// \brief Create reflection refraction rtts for a given camera
+    ///        Stores the render target and given camera
+    private: void CreateRtts(Ogre::Camera* _camera);
+
+    /// internal
+    /// \brief Get new cameras not already contained in this->data->cameras
+    private: std::vector<gazebo::rendering::CameraPtr> NewCameras();
 
     /// internal
     /// \brief Callback for gztopic "~/world_stats".
