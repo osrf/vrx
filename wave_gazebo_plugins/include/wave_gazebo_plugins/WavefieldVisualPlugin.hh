@@ -186,6 +186,8 @@ namespace asv
     private: virtual void postRenderTargetUpdate(
                  const Ogre::RenderTargetEvent& rte);
 
+    private: void OnCameraPreRender(const std::string &_camera);
+
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::shared_ptr<WavefieldVisualPluginPrivate> data;
