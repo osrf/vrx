@@ -34,7 +34,6 @@
 #include <ignition/math/Vector3.hh>
 
 #include "gazebo/rendering/ogre_gazebo.h"
-#include "gazebo/rendering/RTShaderSystem.hh"
 #include "gazebo/rendering/Camera.hh"
 #include "gazebo/rendering/UserCamera.hh"
 #include "gazebo/sensors/SensorManager.hh"
@@ -211,7 +210,6 @@ namespace asv
     public: Ogre::MaterialPtr material;
     public: Ogre::TextureUnitState *reflectTex;
     public: Ogre::TextureUnitState *refractTex;
-    public: bool rttUpdate = false;
 
     // Vectors of OGRE objects
     public: std::vector<Ogre::Camera*> cameras;
@@ -373,7 +371,7 @@ namespace asv
       // Get user cam
       rendering::UserCameraPtr userCamera = this->data->scene->GetUserCamera(0);
 
-      // If user cam not already in cameras
+      // If user cam not already in cameras, create its rtts
       if (std::find(this->data->cameras.begin(), this->data->cameras.end(),
                     userCamera->OgreCamera()) == this->data->cameras.end())
       {
@@ -384,11 +382,10 @@ namespace asv
     // Camera sensor setup in gzserver
     else
     {
-      // Get new cameras
+      // Get new cameras, create their rtts
       std::vector<rendering::CameraPtr> newCameras = this->NewCameras();
       for (rendering::CameraPtr c : newCameras)
       {
-        // Create rtts for camera sensor
         this->CreateReflectionRefractionTextures(c->OgreCamera());
       }
     }
@@ -511,7 +508,6 @@ namespace asv
     reflVp->setBackgroundColour(this->data->backgroundColor);
     reflVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    // rendering::RTShaderSystem::AttachViewport(reflVp, this->data->scene);
     reflectionRt->addListener(this);
 
     // Setup refraction render target
@@ -525,16 +521,16 @@ namespace asv
     refrVp->setBackgroundColour(this->data->backgroundColor);
     refrVp->setVisibilityMask(GZ_VISIBILITY_ALL &
         ~(GZ_VISIBILITY_GUI | GZ_VISIBILITY_SELECTABLE));
-    // rendering::RTShaderSystem::AttachViewport(refrVp, this->data->scene);
     refractionRt->addListener(this);
 
+    // Store camera and rtts
     this->data->cameras.push_back(camera);
     this->data->rttReflectionTextures.push_back(rttReflectionTexture);
     this->data->rttRefractionTextures.push_back(rttRefractionTexture);
     this->data->reflectionRts.push_back(reflectionRt);
     this->data->refractionRts.push_back(refractionRt);
 
-    // Get material to give new textures to
+    // Add frame to texture units
     this->data->reflectTex->addFrameTextureName(rttReflectionTexture->getName());
     this->data->refractTex->addFrameTextureName(rttRefractionTexture->getName());
   }
@@ -636,18 +632,18 @@ namespace asv
 
   void WavefieldVisualPlugin::OnCameraPreRender(const std::string &_camera)
   {
-    // On Camera preupdate, update rtts first before updating camera
+    // Get appropriate camera source
     rendering::CameraPtr camSource;
     if (this->data->scene->EnableVisualizations())
       camSource = this->data->scene->GetUserCamera(0);
     else
       camSource = this->data->scene->GetCamera(_camera);
 
+    // Update rtts first before updating camera
     for (unsigned int i = 0; i < this->data->cameras.size(); ++i)
     {
       if (camSource->OgreCamera() == this->data->cameras.at(i))
       {
-        this->data->rttUpdate = true;
         this->data->reflectionRts.at(i)->update();
         this->data->refractionRts.at(i)->update();
         return;
@@ -689,8 +685,7 @@ namespace asv
       {
         this->data->cameras.at(i)->enableCustomNearClipPlane(this->data->
                                                              planeDown);
-        this->data->refractTex->setTexture(this->data->
-                                           rttRefractionTextures.at(i));
+        this->data->refractTex->setCurrentFrame(i);
         return;
       }
     }

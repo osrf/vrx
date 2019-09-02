@@ -186,6 +186,8 @@ namespace asv
     private: virtual void postRenderTargetUpdate(
                  const Ogre::RenderTargetEvent& rte);
 
+    /// internal
+    /// \brief Update rtts before cameras
     private: void OnCameraPreRender(const std::string &_camera);
 
     /// \internal
