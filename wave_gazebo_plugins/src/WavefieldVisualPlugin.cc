@@ -172,7 +172,7 @@ namespace asv
     public: rendering::VisualPtr visual;
 
     /// \brief The visual's name
-    public: std::string visual_name;
+    public: std::string visualName;
 
     /// \brief The wavefield visual plugin SDF.
     public: sdf::ElementPtr sdf;
@@ -255,12 +255,12 @@ namespace asv
 
     // Process SDF Parameters
     #if GAZEBO_MAJOR_VERSION >= 8
-      this->data->visual_name = _visual->Name();
+      this->data->visualName = _visual->Name();
     #else
-      this->data->visual_name = _visual->GetName();
+      this->data->visualName = _visual->GetName();
     #endif
 
-    gzmsg << "WavefieldVisualPlugin <" << this->data->visual_name
+    gzmsg << "WavefieldVisualPlugin <" << this->data->visualName
           << ">: Loading WaveParamaters from SDF" <<  std::endl;
 
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
@@ -421,13 +421,13 @@ namespace asv
     this->data->oceanEntity->setRenderQueueGroup(this->data->oceanEntity->
                                                  getRenderQueueGroup()+1);
 
-    // Create clipping planes to hide objects, with default pose
+    // Create clipping planes to hide objects for making rtts, in default pose
     this->data->planeUp = Ogre::MovablePlane(Ogre::Vector3::UNIT_Z,
                                              Ogre::Vector3::ZERO);
     this->data->planeDown = Ogre::MovablePlane(-Ogre::Vector3::UNIT_Z,
                                                Ogre::Vector3::ZERO);
 
-    // Get material to give new textures to
+    // Get texture unit states to update with rtts
     Ogre::MaterialPtr material =
       Ogre::MaterialManager::getSingleton().getByName(this->data->visual->
                                                       GetMaterialName());
@@ -466,7 +466,7 @@ namespace asv
     // Create reflection texture
     Ogre::TexturePtr rttReflectionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_" + camera->getName() + "_reflection",
+        this->data->visualName + "_" + camera->getName() + "_reflection",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -477,7 +477,7 @@ namespace asv
     // Create refraction texture
     Ogre::TexturePtr rttRefractionTexture =
       Ogre::TextureManager::getSingleton().createManual(
-        this->data->visual_name + "_" + camera->getName() + "_refraction",
+        this->data->visualName + "_" + camera->getName() + "_refraction",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
         512, 512,
@@ -640,7 +640,7 @@ namespace asv
       this->data->oceanEntity->setVisible(false);
     }
 
-    // Reflection: hide entities below, reflect, and set the right texture
+    // Reflection: hide entities below, reflect, and set the right frame
     for (unsigned int i = 0; i < this->data->reflectionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->reflectionRts.at(i);
@@ -654,7 +654,7 @@ namespace asv
       }
     }
 
-    // Refraction: hide entities above and set the right texture
+    // Refraction: hide entities above and set the right frame
     for (unsigned int i = 0; i < this->data->refractionRts.size(); ++i)
     {
       Ogre::RenderTarget* rt = this->data->refractionRts.at(i);
