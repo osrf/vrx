@@ -269,10 +269,15 @@ namespace asv
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
 
     // Check if reflection/refracion rtts enabled
-    #if GAZEBO_MAJOR_VERSION > 9 || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION >= 11)
-      this->data->enableRtt = Utilities::SdfParamBool(*_sdf, "enableRtt", true);
+    #if GAZEBO_MAJOR_VERSION > 9
+      this->data->enableRtt = Utilities::SdfParamBool(*_sdf, "enableRtt",
+                                                      true);
+    #elif GAZEBO_MAJOR_VERSION == 9
+      #if GAZEBO_MINOR_VERSION >= 11
+        this->data->enableRtt = Utilities::SdfParamBool(*_sdf, "enableRtt",
+                                                        true);
+      #endif
     #else
-      // Reflection/refraction not available on Gazebo 7
       this->data->enableRtt = false;
     #endif
 
@@ -425,12 +430,20 @@ namespace asv
         std::to_string(1));
     }
 
-    #if GAZEBO_MAJOR_VERSION > 9 || (GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION >= 11)
+    #if GAZEBO_MAJOR_VERSION > 9
       // Bind the update method to ConnectCameraPreRender events, not in gz7
       this->data->cameraPreRenderConnection =
         rendering::Events::ConnectCameraPreRender(
           std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
                     this, std::placeholders::_1));
+    #elif GAZEBO_MAJOR_VERSION == 9
+      #if GAZEBO_MINOR_VERSION >= 11
+        // Bind the update method to ConnectCameraPreRender events, not in gz7
+        this->data->cameraPreRenderConnection =
+          rendering::Events::ConnectCameraPreRender(
+            std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
+                      this, std::placeholders::_1));
+      #endif
     #endif
   }
 
