@@ -183,6 +183,9 @@ namespace asv
     /// \brief Do not update visual if 'true', [false].
     public: bool isStatic;
 
+    /// \brief Enable rtts for reflection refraction, [true].
+    public: bool enableRtt;
+
     /// \brief Ratio between shallow water color and refraction color to use
     ///        In [0, 1], where 0 is no refraction and 1 is maximum refraction
     public: double shallowRefractRatio;
@@ -265,6 +268,14 @@ namespace asv
 
     this->data->isStatic = Utilities::SdfParamBool(*_sdf, "static", false);
 
+    // Check if reflection/refracion rtts enabled
+    #if GAZEBO_MAJOR_VERSION >= 8
+      this->data->enableRtt = Utilities::SdfParamBool(*_sdf, "enableRtt", true);
+    #else
+      // Reflection/refraction not available on Gazebo 7
+      this->data->enableRtt = false;
+    #endif
+
     // Read refraction and reflection ratios
     this->data->shallowRefractRatio =
       Utilities::SdfParamDouble(*_sdf, "shallowRefractRatio", 0.2);
@@ -301,7 +312,8 @@ namespace asv
                                                  getRenderQueueGroup()+1);
 
     // Setup reflection refraction
-    this->SetupReflectionRefraction();
+    if (this->data->enableRtt)
+      this->SetupReflectionRefraction();
 
     // Bind the update method to ConnectPreRender events
     this->data->preRenderConnection = event::Events::ConnectPreRender(
@@ -340,11 +352,14 @@ namespace asv
 
   void WavefieldVisualPlugin::OnPreRender()
   {
-    // Update reflection/refraction clip plane pose (in case the ocean moves)
-    this->UpdateClipPlanes();
+    if (this->data->enableRtt)
+    {
+      // Update reflection/refraction clip plane pose (in case the ocean moves)
+      this->UpdateClipPlanes();
 
-    // Continuously look for new cameras for reflection/refraction setup
-    this->AddNewCamerasForReflectionRefraction();
+      // Continuously look for new cameras for reflection/refraction setup
+      this->AddNewCamerasForReflectionRefraction();
+    }
 
     // Create moving ocean waves
     if (!this->data->isStatic)
