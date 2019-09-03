@@ -88,15 +88,14 @@
           <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
           <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-					<!-- Set this bay as the intended docking bay -->
+          <!-- Set this bay as the intended docking bay -->
           <dock_allowed>true</dock_allowed>
-					<!-- Prescribe the symbol published to the ROS API -->
+          <!-- Prescribe the symbol published to the ROS API -->
           <announce_symbol>red_cross</announce_symbol>
-					<!-- Specify the visual symbol - should be same as announced -->
+          <!-- Specify the visual symbol - should be same as announced -->
           <symbol>red_cross</symbol>
         </bay>
       </bays>
-      <!--<placard_color_shape>red_cross</placard_color_shape>-->
     </plugin>
 
     <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
