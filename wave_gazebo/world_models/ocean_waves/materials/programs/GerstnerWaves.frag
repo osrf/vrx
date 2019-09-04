@@ -39,18 +39,17 @@ uniform float noiseScale;
 ////////// Input computed in vertex shader //////////
 varying mat3 rotMatrix;
 varying vec3 eyeVec;
-varying vec2 waveBumpCoord;
+varying vec2 bumpCoord;
 
-varying vec4 rttProjectionCoord;
-varying vec3 rttNoiseCoord;
+varying vec4 projectionCoord;
 
 void main(void)
 {
   // Do the tex projection manually so we can distort _after_
-  vec2 reflectFinal = rttProjectionCoord.xy / rttProjectionCoord.w;
+  vec2 reflectFinal = projectionCoord.xy / projectionCoord.w;
 
   // Noise
-  vec3 noiseNormal = (texture2D(bumpMap, (rttNoiseCoord.xy / 5.0)).rgb - 0.5).rbg * noiseScale;
+  vec3 noiseNormal = (texture2D(bumpMap, (bumpCoord.xy / 5.0)).rgb - 0.5).rbg * noiseScale;
   vec2 refractFinal = reflectFinal + noiseNormal.xz;
 
   // Temp fix for camera sensors rendering upsidedown
@@ -65,7 +64,7 @@ void main(void)
   vec4 refractionColor = texture2D(refractMap, refractFinal);
 
   // Apply bump mapping to normal vector to make waves look more detailed:
-  vec4 bump = texture2D(bumpMap, waveBumpCoord)*2.0 - 1.0;
+  vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
   vec3 N = normalize(rotMatrix * bump.xyz);
 
   // Reflected ray:

@@ -40,12 +40,6 @@ material WaveSim/GerstnerWaves
         // param_named wavenumber3 float 0.0785 0.0 0.0
         // param_named omega3 float 0.877 0.0 0.0
         // param_named steepness float3 1.0 0.0 0.0
-
-        // Noise
-        param_named_auto timeVal time 0.05
-        param_named scroll float 1
-        param_named scale float 1
-        param_named noise float 1
       }
 
       fragment_program_ref GerstnerWavesFS
@@ -61,7 +55,7 @@ material WaveSim/GerstnerWaves
         // param_named envReflectRatio float 0.2
         // param_named flipAcrossY int 1  // Temp fix for camera sensors rendering upsidedown
 
-        param_named noiseScale float 0.05
+        param_named noiseScale float 0.3
 
         // Textures
         param_named bumpMap int 0
