@@ -53,8 +53,8 @@
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <enableRtt>true</enableRtt>
-          <shallowRefractRatio>1.0</shallowRefractRatio>
-          <envReflectRatio>1.0</envReflectRatio>
+          <shallowRefractRatio>0.2</shallowRefractRatio>
+          <envReflectRatio>0.2</envReflectRatio>
           <wave>
             <model>PMS</model>
             <period>${period}</period>
