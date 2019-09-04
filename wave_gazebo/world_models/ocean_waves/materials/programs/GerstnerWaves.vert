@@ -34,7 +34,8 @@
 // updated to be consistent with this convention.
 //
 
-// Input parameters
+/////////// Input parameters //////////
+// Waves
 uniform int Nwaves;
 uniform vec3 eyePos;
 uniform float rescale;
@@ -50,12 +51,20 @@ uniform vec2 dir1;
 uniform vec2 dir2;
 uniform float tau;
 
-// Output variables
+// Noise
+uniform float timeVal;
+uniform float scale;  // the amount to scale the noise texture by
+uniform float scroll; // the amount by which to scroll the noise
+uniform float noise;  // the noise perturb as a factor of the time
+
+/////////// Output variables to fragment shader  //////////
 varying mat3 rotMatrix;
 varying vec3 eyeVec;
-varying vec2 bumpCoord;
+varying vec2 waveBumpCoord;
 
-varying vec4 projectionCoord;
+// Rtt coordinates
+varying vec4 rttProjectionCoord;
+varying vec3 rttNoiseCoord;
 
 // Compute linear combination of Gerstner waves as described in
 // GPU Gems, chapter 01: "Effective Water Simulation from Physical Models"
@@ -126,7 +135,7 @@ void main(void)
   gl_Position = gl_ModelViewProjectionMatrix*P;
 
   // Compute texture coordinates for bump map
-  bumpCoord = gl_MultiTexCoord0.xy*bumpScale + time*bumpSpeed;
+  waveBumpCoord = gl_MultiTexCoord0.xy*bumpScale + time*bumpSpeed;
 
   eyeVec = P.xyz - eyePos; // eye position in vertex space
 
@@ -136,5 +145,9 @@ void main(void)
                         0.0, -0.5,  0.0,  0.0,
                         0.0,  0.0,  0.5,  0.0,
                         0.5,  0.5,  0.5,  1.0);
-  projectionCoord = scalemat * gl_Position;
+  rttProjectionCoord = scalemat * gl_Position;
+
+  // Noise map coords
+  rttNoiseCoord.xy = (gl_MultiTexCoord0.xy + (timeVal * scroll)) * scale;
+  rttNoiseCoord.z = noise * timeVal;
 }

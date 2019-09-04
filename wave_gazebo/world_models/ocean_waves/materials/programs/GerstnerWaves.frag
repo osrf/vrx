@@ -13,44 +13,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Input parameters
+////////// Input parameters //////////
+// Textures
 uniform sampler2D bumpMap;
 uniform samplerCube cubeMap;
 uniform sampler2D reflectMap;
 uniform sampler2D refractMap;
+
+// Colors
 uniform vec4 deepColor;
 uniform vec4 shallowColor;
 uniform float fresnelPower;
 uniform float hdrMultiplier;
-uniform int flipAcrossY;
 
+// Reflect/refract amount
 uniform float shallowRefractRatio;
 uniform float envReflectRatio;
 
-// Input computed in vertex shader
+// Temp fix for camera sensors rendering upsidedown
+uniform int flipAcrossY;
+
+// Noise
+uniform float noiseScale;
+
+////////// Input computed in vertex shader //////////
 varying mat3 rotMatrix;
 varying vec3 eyeVec;
-varying vec2 bumpCoord;
+varying vec2 waveBumpCoord;
 
-varying vec4 projectionCoord;
+varying vec4 rttProjectionCoord;
+varying vec3 rttNoiseCoord;
 
 void main(void)
 {
   // Do the tex projection manually so we can distort _after_
-  vec2 final = projectionCoord.xy / projectionCoord.w;
+  vec2 reflectFinal = rttProjectionCoord.xy / rttProjectionCoord.w;
+
+  // Noise
+  vec3 noiseNormal = (texture2D(bumpMap, (rttNoiseCoord.xy / 5.0)).rgb - 0.5).rbg * noiseScale;
+  vec2 refractFinal = reflectFinal + noiseNormal.xz;
 
   // Temp fix for camera sensors rendering upsidedown
   if (flipAcrossY == 1)
   {
-    final = vec2(final.x, 1.0-final.y);
+    reflectFinal = vec2(reflectFinal.x, 1.0-reflectFinal.y);
+    refractFinal = vec2(refractFinal.x, 1.0-refractFinal.y);
   }
 
   // Reflection / refraction
-  vec4 reflectionColor = texture2D(reflectMap, final);
-  vec4 refractionColor = texture2D(refractMap, final);
+  vec4 reflectionColor = texture2D(reflectMap, reflectFinal);
+  vec4 refractionColor = texture2D(refractMap, refractFinal);
 
   // Apply bump mapping to normal vector to make waves look more detailed:
-  vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
+  vec4 bump = texture2D(bumpMap, waveBumpCoord)*2.0 - 1.0;
   vec3 N = normalize(rotMatrix * bump.xyz);
 
   // Reflected ray:
