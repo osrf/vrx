@@ -59,7 +59,6 @@
           <symbol>red_cross</symbol>
         </bay>
       </bays>
-      <placard_color_shape>red_cross</placard_color_shape>
     </plugin>
   </xacro:macro>
 </world>

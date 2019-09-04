@@ -56,7 +56,6 @@
           <symbol>red_cross</symbol>
         </bay>
       </bays>
-      <placard_color_shape>red_triangle</placard_color_shape>
     </plugin>
  
     <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
