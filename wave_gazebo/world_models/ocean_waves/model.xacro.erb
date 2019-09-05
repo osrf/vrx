@@ -35,6 +35,10 @@
   tau = 2.0         # Time constant for starting wave [s]
   amplitude = 0.0  # No effect for PMS
   steepness = 0.0  # Not yet supported
+  enableRtt = true
+  rttNoise = 0.1
+  refractOpacity = 0.2
+  reflectOpacity = 0.2
 %>
 
 <world xmlns:xacro="http://ros.org/wiki/xacro">
@@ -65,6 +69,10 @@
     <link name="ocean_waves_link">
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
+          <enableRtt><%= enableRtt %></enableRtt>
+          <rttNoise><%= rttNoise %></rttNoise>
+          <refractOpacity><%= refractOpacity %></refractOpacity>
+          <reflectOpacity><%= reflectOpacity %></reflectOpacity>
           <wave>
             <model><%= model %></model>
             <period>${period}</period>
@@ -92,20 +100,7 @@
         <laser_retro>-1</laser_retro>
       </visual>
       <visual name="ocean_waves_below_visual">
-        <plugin name="ocean_waves_below_visual_plugin" filename="libWavefieldVisualPlugin.so">
-          <wave>
-            <model><%= model %></model>
-            <period>${period}</period>
-            <number><%= number %></number>
-            <scale><%= scale %></scale>
-	    <gain>${gain}</gain>
-            <direction>${direction_x} ${direction_y}</direction>
-            <angle>${angle}</angle>        
-            <tau><%= tau %></tau>
-            <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
-            <steepness><%= steepness %></steepness>
-          </wave>
-        </plugin>
+        <pose>0 0 -0.05 0 0 0</pose>  <!-- Offset to prevent rendering conflict -->
         <geometry>
           <mesh>
             <uri>model://ocean_waves/meshes/mesh_below.dae</uri>

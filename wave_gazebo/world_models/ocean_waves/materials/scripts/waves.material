@@ -29,7 +29,6 @@ material WaveSim/GerstnerWaves
   {
     pass
     {
-      scene_blend alpha_blend
       vertex_program_ref GerstnerWavesVS
       {
         param_named_auto eyePos camera_position_object_space
@@ -45,12 +44,23 @@ material WaveSim/GerstnerWaves
 
       fragment_program_ref GerstnerWavesFS
       {
+        // Colors and ratios
         param_named deepColor float4 0 0.05 0.2 1.0
         param_named shallowColor float4 0 0.6 1 1.0
         param_named fresnelPower float 5
         param_named hdrMultiplier float 0.4
+
+        // Commented out b/c set in C++ code
+        // param_named refractOpacity float 0.2
+        // param_named reflectOpacity float 0.2
+        // param_named flipAcrossY int 1  // Temp fix for camera sensors rendering upsidedown
+        // param_named rttNoise float 0.1
+
+        // Textures
         param_named bumpMap int 0
         param_named cubeMap int 1
+        param_named reflectMap int 2
+        param_named refractMap int 3
       }
 
       texture_unit
@@ -67,6 +77,20 @@ material WaveSim/GerstnerWaves
         tex_address_mode clamp
         tex_coord_set 1
         filtering linear linear linear
+      }
+      // Reflection
+      texture_unit
+      {
+        // Will be filled in at runtime
+        // texture reflection
+        tex_address_mode clamp
+      }
+      // Refraction
+      texture_unit
+      {
+        // Will be filled in at runtime
+        // texture refraction
+        tex_address_mode clamp
       }
     }
   }

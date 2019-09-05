@@ -13,21 +13,55 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Input parameters
+////////// Input parameters //////////
+// Textures
 uniform sampler2D bumpMap;
 uniform samplerCube cubeMap;
+uniform sampler2D reflectMap;
+uniform sampler2D refractMap;
+
+// Colors
 uniform vec4 deepColor;
 uniform vec4 shallowColor;
 uniform float fresnelPower;
 uniform float hdrMultiplier;
 
-// Input computed in vertex shader
+// Reflect/refract amount
+uniform float refractOpacity;
+uniform float reflectOpacity;
+
+// Temp fix for camera sensors rendering upsidedown
+uniform int flipAcrossY;
+
+// Noise
+uniform float rttNoise;
+
+////////// Input computed in vertex shader //////////
 varying mat3 rotMatrix;
 varying vec3 eyeVec;
 varying vec2 bumpCoord;
 
+varying vec4 projectionCoord;
+
 void main(void)
 {
+  // Do the tex projection manually so we can distort _after_
+  vec2 final = projectionCoord.xy / projectionCoord.w;
+
+  // Noise
+  vec3 noiseNormal = (texture2D(bumpMap, (bumpCoord.xy / 5.0)).rgb - 0.5).rbg * rttNoise;
+  final = final + noiseNormal.xz;
+
+  // Temp fix for camera sensors rendering upsidedown
+  if (flipAcrossY == 1)
+  {
+    final = vec2(final.x, 1.0-final.y);
+  }
+
+  // Reflection / refraction
+  vec4 reflectionColor = texture2D(reflectMap, final);
+  vec4 refractionColor = texture2D(refractMap, final);
+
   // Apply bump mapping to normal vector to make waves look more detailed:
   vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
   vec3 N = normalize(rotMatrix * bump.xyz);
@@ -46,12 +80,16 @@ void main(void)
 
   // Compute refraction ratio (Fresnel):
   float facing = 1.0 - dot(-E, N);
-  float refractionRatio = clamp(pow(facing, fresnelPower), 0.0, 1.0);
+  float waterEnvRatio = clamp(pow(facing, fresnelPower), 0.0, 1.0);
 
-  // Refracted ray only considers deep and shallow water colors:
-  vec4 waterColor = mix(shallowColor, deepColor, facing);
+  // Water color is mix of refraction color, shallow color, and deep color
+  vec4 realShallowColor = mix(shallowColor, refractionColor, refractOpacity);
+  vec4 waterColor = mix(realShallowColor, deepColor, facing);
+
+  // Environment color is mix of clouds and reflection
+  vec4 realEnvColor = mix(envColor, reflectionColor, reflectOpacity);
 
   // Perform linear interpolation between reflection and refraction.
-  vec4 color = mix(waterColor, envColor, refractionRatio);
+  vec4 color = mix(waterColor, realEnvColor, waterEnvRatio);
   gl_FragColor = vec4(color.xyz, 0.9);
 }

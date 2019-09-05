@@ -25,8 +25,11 @@
 
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/msgs/msgs.hh>
+#include <gazebo/rendering/Camera.hh>
 
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace asv
 {
@@ -39,7 +42,8 @@ namespace asv
   class WavefieldVisualPluginPrivate;
 
   /// \brief A Gazebo visual plugin to synchronise and control
-  /// a vertex shader rendering Gerstner waves.
+  /// a vertex shader rendering Gerstner waves. It also renders reflections
+  /// and refractions onto the water.
   ///
   /// # Usage
   ///
@@ -55,6 +59,10 @@ namespace asv
   ///
   /// \code
   /// <plugin name="wavefield_visual" filename="libWavefieldVisualPlugin.so">
+  ///   <enableRtt>true</enableRtt>
+  ///   <rttNoise>0.1</rttNoise>
+  ///   <refractOpacity>0.1</refractOpacity>
+  ///   <reflectOpacity>0.5</reflectOpacity>
   ///   <static>false</static>
   ///   <wave>
   ///     <number>3</number>
@@ -85,35 +93,51 @@ namespace asv
   /// # Parameters
   ///
   /// 1. <static> (bool, default: false)
-  ///   Display a static wave field if set to true.
+  ///    Display a static wave field if set to true.
   ///
-  /// 2. <number> (int, default: 1)
-  ///   The number of component waves.
+  /// 2. <enableRtt> (bool, default: true)
+  ///    Display reflection and reflections if set to true.
   ///
-  /// 3. <scale> (double, default: 2.0)
-  ///   The scale between the mean and largest / smallest component waves.
+  /// 3. <rttNoise> (double, default: 0.1)
+  ///    Amount of distortion in reflection/refraction.
   ///
-  /// 4. <angle> (double, default: 2*pi/10)
-  ///   The angle between the mean wave direction and the
-  ///   largest / smallest component waves.
+  /// 4. <refractOpacity> (double, default: 0.2)
+  ///    Ratio between shallow water color and refraction color to use
+  ///    In [0, 1], where 0 is no refraction and 1 is maximum refraction
   ///
-  /// 5. <steepness> (double, default: 1.0)
-  ///   A parameter in [0, 1] controlling the wave steepness
-  ///   with 1 being steepest.
+  /// 5. <reflectOpacity> (double, default: 0.2)
+  ///    Ratio between environment color and reflection color to use
+  ///    In [0, 1], where 0 is no reflection and 1 is maximum reflection
   ///
-  /// 6. <amplitude> (double, default: 0.0)
-  ///   The amplitude of the mean wave in [m].
+  /// 6. <number> (int, default: 1)
+  ///    The number of component waves.
   ///
-  /// 7. <period> (double, default: 1.0)
-  ///   The period of the mean wave in [s].
+  /// 7. <scale> (double, default: 2.0)
+  ///    The scale between the mean and largest / smallest component waves.
   ///
-  /// 8. <phase> (double, default: 0.0)
-  ///   The phase of the mean wave.
+  /// 8. <angle> (double, default: 2*pi/10)
+  ///    The angle between the mean wave direction and the
+  ///    largest / smallest component waves.
   ///
-  /// 9. <direction> (Vector2D, default: (1 0))
-  ///   A two component vector specifiying the direction of the mean wave.
+  /// 9. <steepness> (double, default: 1.0)
+  ///    A parameter in [0, 1] controlling the wave steepness
+  ///    with 1 being steepest.
   ///
-  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin : public gazebo::VisualPlugin
+  /// 10. <amplitude> (double, default: 0.0)
+  ///    The amplitude of the mean wave in [m].
+  ///
+  /// 11.<period> (double, default: 1.0)
+  ///    The period of the mean wave in [s].
+  ///
+  /// 12.<phase> (double, default: 0.0)
+  ///    The phase of the mean wave.
+  ///
+  /// 13.<direction> (Vector2D, default: (1 0))
+  ///    A two component vector specifiying the direction of the mean wave.
+  ///
+  class GZ_RENDERING_VISIBLE WavefieldVisualPlugin :
+    public gazebo::VisualPlugin,
+    public Ogre::RenderTargetListener
   {
     /// \brief Destructor.
     public: virtual ~WavefieldVisualPlugin();
@@ -134,7 +158,28 @@ namespace asv
 
     /// internal
     /// \brief Called every PreRender event.
-    private: void OnUpdate();
+    private: void OnPreRender();
+
+    /// internal
+    /// \brief Setup Ogre objects for reflection/refraction
+    private: void SetupReflectionRefraction();
+
+    /// internal
+    /// \brief Move and rotate clip planes to match ocean pose
+    private: void UpdateClipPlanes();
+
+    /// internal
+    /// \brief Check for new cameras, setup rtts for them
+    private: void AddNewCamerasForReflectionRefraction();
+
+    /// internal
+    /// \brief Create reflection refraction rtts for a given camera
+    ///        Stores the render target and given camera
+    private: void CreateRtts(Ogre::Camera* _camera);
+
+    /// internal
+    /// \brief Get new cameras not already contained in this->data->cameras
+    private: std::vector<gazebo::rendering::CameraPtr> NewCameras();
 
     /// internal
     /// \brief Callback for gztopic "~/world_stats".
@@ -145,6 +190,20 @@ namespace asv
     /// internal
     /// \brief Update the vertex shader parameters.
     private: void SetShaderParams();
+
+    /// internal
+    /// \brief Hide/Show objects for reflection/refraction render
+    ///        eg. hide objects above water for refraction
+    ///            hide objects below water for reflection
+    ///            unhide all objects after texture is rendered
+    private: virtual void preRenderTargetUpdate(
+                 const Ogre::RenderTargetEvent& rte);
+    private: virtual void postRenderTargetUpdate(
+                 const Ogre::RenderTargetEvent& rte);
+
+    /// internal
+    /// \brief Update rtts before cameras
+    private: void OnCameraPreRender(const std::string &_camera);
 
     /// \internal
     /// \brief Pointer to the class private data.

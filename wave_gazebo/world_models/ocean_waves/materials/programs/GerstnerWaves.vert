@@ -34,7 +34,8 @@
 // updated to be consistent with this convention.
 //
 
-// Input parameters
+/////////// Input parameters //////////
+// Waves
 uniform int Nwaves;
 uniform vec3 eyePos;
 uniform float rescale;
@@ -50,10 +51,13 @@ uniform vec2 dir1;
 uniform vec2 dir2;
 uniform float tau;
 
-// Output variables
+/////////// Output variables to fragment shader //////////
 varying mat3 rotMatrix;
 varying vec3 eyeVec;
 varying vec2 bumpCoord;
+
+// Rtt coordinates
+varying vec4 projectionCoord;
 
 // Compute linear combination of Gerstner waves as described in
 // GPU Gems, chapter 01: "Effective Water Simulation from Physical Models"
@@ -127,4 +131,12 @@ void main(void)
   bumpCoord = gl_MultiTexCoord0.xy*bumpScale + time*bumpSpeed;
 
   eyeVec = P.xyz - eyePos; // eye position in vertex space
+
+  // Calculate projection coordinates for refl/refr
+  // Projective texture coordinates, adjust for mapping
+  mat4 scalemat = mat4( 0.5,  0.0,  0.0,  0.0,
+                        0.0, -0.5,  0.0,  0.0,
+                        0.0,  0.0,  0.5,  0.0,
+                        0.5,  0.5,  0.5,  1.0);
+  projectionCoord = scalemat * gl_Position;
 }
