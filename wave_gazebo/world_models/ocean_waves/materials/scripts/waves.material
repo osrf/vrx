@@ -29,6 +29,7 @@ material WaveSim/GerstnerWaves
   {
     pass
     {
+      scene_blend alpha_blend
       vertex_program_ref GerstnerWavesVS
       {
         param_named_auto eyePos camera_position_object_space
@@ -54,7 +55,6 @@ material WaveSim/GerstnerWaves
         // param_named shallowRefractRatio float 0.2
         // param_named envReflectRatio float 0.2
         // param_named flipAcrossY int 1  // Temp fix for camera sensors rendering upsidedown
-
         param_named noiseScale float 0.3
 
         // Textures
