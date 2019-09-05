@@ -46,22 +46,21 @@ varying vec4 projectionCoord;
 void main(void)
 {
   // Do the tex projection manually so we can distort _after_
-  vec2 reflectFinal = projectionCoord.xy / projectionCoord.w;
+  vec2 final = projectionCoord.xy / projectionCoord.w;
 
   // Noise
   vec3 noiseNormal = (texture2D(bumpMap, (bumpCoord.xy / 5.0)).rgb - 0.5).rbg * rttNoise;
-  vec2 refractFinal = reflectFinal + noiseNormal.xz;
+  final = final + noiseNormal.xz;
 
   // Temp fix for camera sensors rendering upsidedown
   if (flipAcrossY == 1)
   {
-    reflectFinal = vec2(reflectFinal.x, 1.0-reflectFinal.y);
-    refractFinal = vec2(refractFinal.x, 1.0-refractFinal.y);
+    final = vec2(final.x, 1.0-final.y);
   }
 
   // Reflection / refraction
-  vec4 reflectionColor = texture2D(reflectMap, reflectFinal);
-  vec4 refractionColor = texture2D(refractMap, refractFinal);
+  vec4 reflectionColor = texture2D(reflectMap, final);
+  vec4 refractionColor = texture2D(refractMap, final);
 
   // Apply bump mapping to normal vector to make waves look more detailed:
   vec4 bump = texture2D(bumpMap, bumpCoord)*2.0 - 1.0;
