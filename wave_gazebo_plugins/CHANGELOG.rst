@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2019-09-05)
+------------------
 * remove gazebo version check, scene blend
 * Add rttNoise parameter to scale distortion in refraction
 * Switch ratio->opacity naming

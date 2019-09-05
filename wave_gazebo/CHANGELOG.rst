@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2019-09-05)
+------------------
 * remove gazebo version check, scene blend
 * Reduce noise back down
 * Change to have distortion in both refl and refr

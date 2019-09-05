@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>wamv_description</name>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <description>This package provides a URDF model of WAM-V</description>
   <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
   <maintainer email="jriveroo@osrfoundation.org">Jose Luis Rivero</maintainer>

@@ -2,8 +2,8 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2019-09-05)
+------------------
 * minor cleanup + env flag + disable z
 * Adding namespaces to the other thruster configurations.
 * Namespace tweaks.
