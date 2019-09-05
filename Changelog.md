@@ -1,17 +1,18 @@
 ## VRX 1
 
 
-### VRX 1.2
+### VRX 1.2.1
+
+1. Ocean reflection and refraction visual effects:
+    * [Pull request 165](https://bitbucket.org/osrf/vrx/pull-requests/165)
+
+### VRX 1.2.0
 
 1. Deterministic wind plugin:
     * [Pull request 157](https://bitbucket.org/osrf/vrx/pull-requests/157)
     
 1. Waypoint marker visualization:
-    * [Pull request 162](https://bitbucket.org/osrf/vrx/pull-requests/162)
-    
-
-1. Ocean reflection and refraction visual effects:
-    * [Pull request 165](https://bitbucket.org/osrf/vrx/pull-requests/165)
+    * [Pull request 162](https://bitbucket.org/osrf/vrx/pull-requests/162)    
 
 ### VRX 1.1
 

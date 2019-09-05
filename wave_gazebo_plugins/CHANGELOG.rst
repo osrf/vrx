@@ -2,6 +2,84 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove gazebo version check, scene blend
+* Add rttNoise parameter to scale distortion in refraction
+* Switch ratio->opacity naming
+* Clean code for checking GZ version
+* Test having higher required GZ major and minor version, but fix codecheck issues
+* Test having higher required GZ major and minor version
+* Fix build issues and document enableRtt
+* Use #if to not use ConnectCameraPreRender in gz7
+* Add enableRtt bool, may need to change as it likely still not build for gz7
+* Refactor to have more functions for clarity and to setup for optional no rtt
+* Clean code
+* Simplify code by removing unused private variables
+* Simplify NewCameras() by not using SensorManager
+* Fix code to pass code check
+* Clean up code with comments and removing redundant parts
+* Merged in Issue#122-Ocean-Reflections_ian (pull request #170)
+  test using render events
+* Fix clipPlane position, need to use WorldPose()
+* test using render events
+* Fix to build on gz7
+* Change clipPlane updates to build on gz7
+* Update comments
+* Add more clarity with comments
+* Update header file for better comments and less redundancy
+* Remove redundant cameras.size() == 0 check
+* Set ocean texture only in preRenderTargetUpdate(), not postRenderTargetUpdate()
+* Remove writing texture contents to file for debugging
+* Add better comments, clean out redundant code, pass code check
+* Move flipAcrossY to setupreflrefr() to be just set once
+* Move flipAcrossY setup from preRender to Load for efficiency
+* Add flipAcrossY temp fix for camera sensors
+* Increase reflection for easier debugging, rm redundant code, writeContentsToFile
+* Add listener for user camera correctly with OgreViewport
+* Try to run addListener for usercams and camera sensors, usercam texture returning null
+* Add Ian's recommended change, image_viewer still not show refl
+* Make ocean reflections work, even if ocean pose changes (position and angle)
+* Fix codecheck build errors
+* Save textures to pngs for viewing
+* Store reflect/refract texture unit states for easier usage
+* Iterate through all rts in preRenderTargetUpdate() and postRenderTargetUpdate(), client working, but sensors not
+* IMPORTANT FIX: remove unneeded pause variable that was never set or cleared, causing issues with updating
+* Update OnRender to update all textures
+* In client, add usercam. In server, add all sensors. Still working, but not camera sensors
+* Remove redundant comments, still leave in variables to runs fine now, but not sure why they are needed
+* Very strange, comment out these unused variables and it sometimes doesn't work (waves don't move)
+* Fully functional, but if I comment out the Ogre objects, it stops working sometimes
+* Transition to using vectors, but not fully. Fully functional
+* Refactor to get ready for transition, fully functional tested multiple times, about to switch to vectors
+* After fixing multiple head issues, stable working commit of user camera reflections
+* Set correct visibility to see proper wave movement and add prints
+* Use vector of cams, rtts, textures. Runs, shows reflections for user cam, but not for sensors.
+* Reintegration to make refl/refr still work
+* Add CreateReflRefrTexture function to work on rendering::Camera, need to finish integration
+* Reorder SetupReflRefr function to only do one-time assignments, so that CreateReflRefrTexture function can be added
+* Create NewCameras() function, working but need to add Usercams and cams as well
+* Add new cameras from OnPreRender()
+* Change render order of water to properly render propellers
+* Add documentation to header file
+* Fix build issues
+* Define refl/refr amounts in model.xacro, then use visual plugin to set the parameters
+* Fix build issues related to gz7 by storing visual name
+* Add comments, clean code, pass code check
+* Reduce reflection and refraction amounts to make more subtle effect
+* Integrate reflection with Gerstner waves, working well
+* Show updated render picture
+* Change mesh->plane and show pure reflection color on it, working well but need to switch back to mesh
+* Add in ocean reflection/refraction C++ code, but keep main function commented out so it still looks same as before
+* Refactor C++ code and change shaders to match version 130
+* Copy over files from gazebo_plugin_setup
+* Add changes recommended by Ian
+* Simplify shaders and texture, still has exception about reflectMap
+* Try to use shaders, but not working
+* Comment out shader and most of material (near empty material), in C++ get material and give it a texture, but will not run
+* Stop unneeded plane object from being added to planeNode
+* Contributors: Ian Chen <ichen@osrfoundation.org>, Tyler Lum <tylergwlum@gmail.com>
+
 1.2.0 (2019-08-19)
 ------------------
 * Go back to custom material, note if you change mytexture2 -> mytexture, it breaks it from resource group can't find error

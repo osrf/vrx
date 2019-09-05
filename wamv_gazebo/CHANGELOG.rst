@@ -2,6 +2,20 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* minor cleanup + env flag + disable z
+* Adding namespaces to the other thruster configurations.
+* Namespace tweaks.
+* Fix typo.
+* Style changes.
+* Merge
+* Added commented code to wamv_xacro
+* removed from wamv
+* force vectors are correct; scaling added
+* merged with master
+* Contributors: Carlos Aguero, Rumman Waqar <rumman.waqar05@gmail.com>, Tyler Lum <tylergwlum@gmail.com>
+
 1.2.0 (2019-08-19)
 ------------------
 * Merge from topic_namespace_generation

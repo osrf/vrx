@@ -2,6 +2,35 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Removing other instances of <placard_color_shape>.
+* Just a couple comments to support task tutorial for changing the shape and color
+* Style
+* Tweak
+* Remove extra joint in colored totems.
+* Tweak
+* Wrap the entire fog element inside a xacro block.
+* merged master
+* updated waypoint plugin
+* merged
+* new waypoint marker class + updated station keeping
+* Add hardcoded robot namespace to thrusters
+* Namespace tweaks.
+* Style
+* Remove oyaml use
+* Comment out missing files, as a workaround
+* namespace fix
+* gazebo 7 compatibility
+* force vectors are correct; scaling added
+* merged with master
+* handle gazebo 7
+* included for ignition stuff
+* removed whitespace at the end of line
+* added marker for station keeping
+* added waypoints for wayfinding task
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Aguero <caguero@openrobotics.org>, Rumman Waqar <rumman.waqar05@gmail.com>, Tyler Lum <tylergwlum@gmail.com>
+
 1.2.0 (2019-08-19)
 ------------------
 * Merged default into topic_namespace_generation

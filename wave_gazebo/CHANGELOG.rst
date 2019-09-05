@@ -2,6 +2,57 @@
 Changelog for package wave_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove gazebo version check, scene blend
+* Reduce noise back down
+* Change to have distortion in both refl and refr
+* Add rttNoise parameter to scale distortion in refraction
+* Switch ratio->opacity naming
+* Add back ocean transparency
+* Change to realistic reflection and refraction ratio
+* Simplify by using bumpCoord
+* Working refraction
+* Fix build issues and document enableRtt
+* Simplify flipAcrossY in shader
+* Add flipAcrossY temp fix for camera sensors
+* Increase reflection for easier debugging, rm redundant code, writeContentsToFile
+* Fix model.xacro.erb to match without 2nd plugin and add offset
+* Attempt to merge
+* Namespace tweaks.
+* Move ocean_visual_below slightly to stop interference and wrong colors cutting in/out
+* Add back ocean_waves_below_visual, without Visual Plugin, working as expected
+* Define refl/refr amounts in model.xacro, then use visual plugin to set the parameters
+* Add envReflectRatio and shallowRefractRatio variables
+* Add comments, clean code, pass code check
+* Reduce reflection and refraction amounts to make more subtle effect
+* Integrate reflection with Gerstner waves, working well
+* Fixes for the new topic layout.
+* Show updated render picture
+* Use reflection color
+* Change plane->mesh, still shows correct reflection texture but projected onto the mesh wrong
+* Change mesh->plane and show pure reflection color on it, working well but need to switch back to mesh
+* Add reflection/refraction texture to shaders, but do not use yet
+* Merge
+* merged with master
+* Remove unneeded files
+* Add missing part of Fresnel
+* Remove fresnel and noise effects
+* Refactor C++ code and change shaders to match version 130
+* Copy over files from gazebo_plugin_setup
+* Add changes recommended by Ian
+* Move reflectMap to default params
+* Test hardcoding fragment shader to red, not working
+* Remove random text
+* Small fix (add void)
+* Remove version and add back reflectMap
+* Simplify shaders and texture, still has exception about reflectMap
+* Try to improve plane, no difference
+* Use shaders to show texture
+* Try to use shaders, but not working
+* Comment out shader and most of material (near empty material), in C++ get material and give it a texture, but will not run
+* Contributors: Carlos Aguero, Ian Chen <ichen@osrfoundation.org>, Rumman Waqar <rumman.waqar05@gmail.com>, Tyler Lum <tylergwlum@gmail.com>
+
 1.2.0 (2019-08-19)
 ------------------
 * Try to change material script to match the newly created texture, did not work

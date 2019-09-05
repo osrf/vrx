@@ -2,6 +2,18 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* updated comments
+* minor cleanup + env flag + disable z
+* Namespace tweaks.
+* Style changes.
+* gazebo 7 bug fix
+* removed from wamv
+* gazebo 7 compatibility
+* force vectors are correct; scaling added
+* Contributors: Carlos Aguero, Rumman Waqar <rumman.waqar05@gmail.com>
+
 1.2.0 (2019-08-19)
 ------------------
 * Deterministic wind.
