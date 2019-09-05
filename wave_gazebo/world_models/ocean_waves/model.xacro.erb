@@ -36,8 +36,8 @@
   amplitude = 0.0  # No effect for PMS
   steepness = 0.0  # Not yet supported
   enableRtt = true
-  shallowRefractRatio = 0.2
-  envReflectRatio = 0.2
+  refractOpacity = 0.2
+  reflectOpacity = 0.2
 %>
 
 <world xmlns:xacro="http://ros.org/wiki/xacro">
@@ -69,8 +69,8 @@
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <enableRtt><%= enableRtt %></enableRtt>
-          <shallowRefractRatio><%= shallowRefractRatio %></shallowRefractRatio>
-          <envReflectRatio><%= envReflectRatio %></envReflectRatio>
+          <refractOpacity><%= refractOpacity %></refractOpacity>
+          <reflectOpacity><%= reflectOpacity %></reflectOpacity>
           <wave>
             <model><%= model %></model>
             <period>${period}</period>

@@ -27,8 +27,8 @@ uniform float fresnelPower;
 uniform float hdrMultiplier;
 
 // Reflect/refract amount
-uniform float shallowRefractRatio;
-uniform float envReflectRatio;
+uniform float refractOpacity;
+uniform float reflectOpacity;
 
 // Temp fix for camera sensors rendering upsidedown
 uniform int flipAcrossY;
@@ -84,11 +84,11 @@ void main(void)
   float waterEnvRatio = clamp(pow(facing, fresnelPower), 0.0, 1.0);
 
   // Water color is mix of refraction color, shallow color, and deep color
-  vec4 realShallowColor = mix(shallowColor, refractionColor, shallowRefractRatio);
+  vec4 realShallowColor = mix(shallowColor, refractionColor, refractOpacity);
   vec4 waterColor = mix(realShallowColor, deepColor, facing);
 
   // Environment color is mix of clouds and reflection
-  vec4 realEnvColor = mix(envColor, reflectionColor, envReflectRatio);
+  vec4 realEnvColor = mix(envColor, reflectionColor, reflectOpacity);
 
   // Perform linear interpolation between reflection and refraction.
   vec4 color = mix(waterColor, realEnvColor, waterEnvRatio);

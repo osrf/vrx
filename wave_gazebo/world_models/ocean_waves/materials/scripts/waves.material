@@ -52,8 +52,8 @@ material WaveSim/GerstnerWaves
         param_named hdrMultiplier float 0.4
 
         // Commented out b/c set in C++ code
-        // param_named shallowRefractRatio float 0.2
-        // param_named envReflectRatio float 0.2
+        // param_named refractOpacity float 0.2
+        // param_named reflectOpacity float 0.2
         // param_named flipAcrossY int 1  // Temp fix for camera sensors rendering upsidedown
         param_named noiseScale float 0.3
 

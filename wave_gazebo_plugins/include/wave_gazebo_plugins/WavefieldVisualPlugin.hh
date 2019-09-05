@@ -60,8 +60,8 @@ namespace asv
   /// \code
   /// <plugin name="wavefield_visual" filename="libWavefieldVisualPlugin.so">
   ///   <enableRtt>true</enableRtt>
-  ///   <shallowRefractRatio>0.1</shallowRefractRatio>
-  ///   <envReflectRatio>0.5</envReflectRatio>
+  ///   <refractOpacity>0.1</refractOpacity>
+  ///   <reflectOpacity>0.5</reflectOpacity>
   ///   <static>false</static>
   ///   <wave>
   ///     <number>3</number>
@@ -97,11 +97,11 @@ namespace asv
   /// 2. <enableRtt> (bool, default: true)
   ///    Display reflection and reflections if set to true.
   ///
-  /// 3. <shallowRefractRatio> (double, default: 0.2)
+  /// 3. <refractOpacity> (double, default: 0.2)
   ///    Ratio between shallow water color and refraction color to use
   ///    In [0, 1], where 0 is no refraction and 1 is maximum refraction
   ///
-  /// 4. <envReflectRatio> (double, default: 0.2)
+  /// 4. <reflectOpacity> (double, default: 0.2)
   ///    Ratio between environment color and reflection color to use
   ///    In [0, 1], where 0 is no reflection and 1 is maximum reflection
   ///
