@@ -55,7 +55,7 @@ material WaveSim/GerstnerWaves
         // param_named refractOpacity float 0.2
         // param_named reflectOpacity float 0.2
         // param_named flipAcrossY int 1  // Temp fix for camera sensors rendering upsidedown
-        param_named noiseScale float 0.3
+        // param_named rttNoise float 0.1
 
         // Textures
         param_named bumpMap int 0

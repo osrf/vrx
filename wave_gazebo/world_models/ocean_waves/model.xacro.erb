@@ -36,6 +36,7 @@
   amplitude = 0.0  # No effect for PMS
   steepness = 0.0  # Not yet supported
   enableRtt = true
+  rttNoise = 0.1
   refractOpacity = 0.2
   reflectOpacity = 0.2
 %>
@@ -69,6 +70,7 @@
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <enableRtt><%= enableRtt %></enableRtt>
+          <rttNoise><%= rttNoise %></rttNoise>
           <refractOpacity><%= refractOpacity %></refractOpacity>
           <reflectOpacity><%= reflectOpacity %></reflectOpacity>
           <wave>

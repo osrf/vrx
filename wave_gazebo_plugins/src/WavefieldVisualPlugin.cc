@@ -194,6 +194,9 @@ namespace asv
     ///        In [0, 1], where 0 is no reflection and 1 is maximum reflection
     public: double reflectOpacity;
 
+    /// \brief Noise scale in rtt. Create distortion in reflection/refraction
+    public: double rttNoise;
+
     /// \brief World stats.
     public: double simTime;
 
@@ -280,11 +283,13 @@ namespace asv
       this->data->enableRtt = false;
     #endif
 
-    // Read refraction and reflection ratios
+    // Read refraction and reflection ratios and noise
     this->data->refractOpacity =
       Utilities::SdfParamDouble(*_sdf, "refractOpacity", 0.2);
     this->data->reflectOpacity =
       Utilities::SdfParamDouble(*_sdf, "reflectOpacity", 0.2);
+    this->data->rttNoise =
+      Utilities::SdfParamDouble(*_sdf, "rttNoise", 0.1);
 
     this->data->waveParams.reset(new WaveParameters());
     if (_sdf->HasElement("wave"))
@@ -411,6 +416,9 @@ namespace asv
     rendering::SetMaterialShaderParam(*this->data->visual,
       "reflectOpacity", "fragment",
       std::to_string(static_cast<float>(this->data->reflectOpacity)));
+    rendering::SetMaterialShaderParam(*this->data->visual,
+      "rttNoise", "fragment",
+      std::to_string(static_cast<float>(this->data->rttNoise)));
 
     // Temp fix for camera sensors rendering upsidedown, only needed on server
     if (this->data->scene->EnableVisualizations())

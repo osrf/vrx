@@ -34,7 +34,7 @@ uniform float reflectOpacity;
 uniform int flipAcrossY;
 
 // Noise
-uniform float noiseScale;
+uniform float rttNoise;
 
 ////////// Input computed in vertex shader //////////
 varying mat3 rotMatrix;
@@ -49,7 +49,7 @@ void main(void)
   vec2 reflectFinal = projectionCoord.xy / projectionCoord.w;
 
   // Noise
-  vec3 noiseNormal = (texture2D(bumpMap, (bumpCoord.xy / 5.0)).rgb - 0.5).rbg * noiseScale;
+  vec3 noiseNormal = (texture2D(bumpMap, (bumpCoord.xy / 5.0)).rgb - 0.5).rbg * rttNoise;
   vec2 refractFinal = reflectFinal + noiseNormal.xz;
 
   // Temp fix for camera sensors rendering upsidedown

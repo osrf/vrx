@@ -53,6 +53,7 @@
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
           <enableRtt>true</enableRtt>
+          <rttNoise>0.3</rttNoise>
           <refractOpacity>0.2</refractOpacity>
           <reflectOpacity>0.2</reflectOpacity>
           <wave>

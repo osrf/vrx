@@ -60,6 +60,7 @@ namespace asv
   /// \code
   /// <plugin name="wavefield_visual" filename="libWavefieldVisualPlugin.so">
   ///   <enableRtt>true</enableRtt>
+  ///   <rttNoise>0.1</rttNoise>
   ///   <refractOpacity>0.1</refractOpacity>
   ///   <reflectOpacity>0.5</reflectOpacity>
   ///   <static>false</static>
@@ -97,38 +98,41 @@ namespace asv
   /// 2. <enableRtt> (bool, default: true)
   ///    Display reflection and reflections if set to true.
   ///
-  /// 3. <refractOpacity> (double, default: 0.2)
+  /// 3. <rttNoise> (double, default: 0.1)
+  ///    Amount of distortion in reflection/refraction.
+  ///
+  /// 4. <refractOpacity> (double, default: 0.2)
   ///    Ratio between shallow water color and refraction color to use
   ///    In [0, 1], where 0 is no refraction and 1 is maximum refraction
   ///
-  /// 4. <reflectOpacity> (double, default: 0.2)
+  /// 5. <reflectOpacity> (double, default: 0.2)
   ///    Ratio between environment color and reflection color to use
   ///    In [0, 1], where 0 is no reflection and 1 is maximum reflection
   ///
-  /// 5. <number> (int, default: 1)
+  /// 6. <number> (int, default: 1)
   ///    The number of component waves.
   ///
-  /// 6. <scale> (double, default: 2.0)
+  /// 7. <scale> (double, default: 2.0)
   ///    The scale between the mean and largest / smallest component waves.
   ///
-  /// 7. <angle> (double, default: 2*pi/10)
+  /// 8. <angle> (double, default: 2*pi/10)
   ///    The angle between the mean wave direction and the
   ///    largest / smallest component waves.
   ///
-  /// 8. <steepness> (double, default: 1.0)
+  /// 9. <steepness> (double, default: 1.0)
   ///    A parameter in [0, 1] controlling the wave steepness
   ///    with 1 being steepest.
   ///
-  /// 9. <amplitude> (double, default: 0.0)
+  /// 10. <amplitude> (double, default: 0.0)
   ///    The amplitude of the mean wave in [m].
   ///
-  /// 10.<period> (double, default: 1.0)
+  /// 11.<period> (double, default: 1.0)
   ///    The period of the mean wave in [s].
   ///
-  /// 11.<phase> (double, default: 0.0)
+  /// 12.<phase> (double, default: 0.0)
   ///    The phase of the mean wave.
   ///
-  /// 12.<direction> (Vector2D, default: (1 0))
+  /// 13.<direction> (Vector2D, default: (1 0))
   ///    A two component vector specifiying the direction of the mean wave.
   ///
   class GZ_RENDERING_VISIBLE WavefieldVisualPlugin :
