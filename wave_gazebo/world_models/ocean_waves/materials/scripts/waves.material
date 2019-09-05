@@ -29,7 +29,6 @@ material WaveSim/GerstnerWaves
   {
     pass
     {
-      scene_blend alpha_blend
       vertex_program_ref GerstnerWavesVS
       {
         param_named_auto eyePos camera_position_object_space

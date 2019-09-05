@@ -273,16 +273,8 @@ namespace asv
 
     // Check if reflection/refracion rtts enabled
     // Only available in Gazebo Version >=9.11.0
-    #if GAZEBO_MAJOR_VERSION > 9
-      this->data->enableRtt = Utilities::SdfParamBool(*_sdf, "enableRtt",
-                                                      true);
-    #elif GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION >= 11
-      this->data->enableRtt = Utilities::SdfParamBool(*_sdf, "enableRtt",
-                                                      true);
-    #else
-      this->data->enableRtt = false;
-    #endif
-
+    this->data->enableRtt = Utilities::SdfParamBool(*_sdf, "enableRtt",
+                                                    true);
     // Read refraction and reflection ratios and noise
     this->data->refractOpacity =
       Utilities::SdfParamDouble(*_sdf, "refractOpacity", 0.2);
@@ -436,17 +428,10 @@ namespace asv
 
     // Bind the update method to ConnectCameraPreRender events
     // Only in Gazebo Version >=9.11.0
-    #if GAZEBO_MAJOR_VERSION > 9
-      this->data->cameraPreRenderConnection =
-        rendering::Events::ConnectCameraPreRender(
-          std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
-                    this, std::placeholders::_1));
-    #elif GAZEBO_MAJOR_VERSION == 9 && GAZEBO_MINOR_VERSION >= 11
-      this->data->cameraPreRenderConnection =
-        rendering::Events::ConnectCameraPreRender(
-          std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
-                    this, std::placeholders::_1));
-    #endif
+    this->data->cameraPreRenderConnection =
+      rendering::Events::ConnectCameraPreRender(
+        std::bind(&WavefieldVisualPlugin::OnCameraPreRender,
+                  this, std::placeholders::_1));
   }
 
   void WavefieldVisualPlugin::UpdateClipPlanes()
