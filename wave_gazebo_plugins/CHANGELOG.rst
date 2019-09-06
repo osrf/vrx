@@ -2,6 +2,12 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Combine boolean expressions.
+* Make code compatible with older Gazebo minor versions.
+* Contributors: Carlos Aguero
+
 1.2.1 (2019-09-05)
 ------------------
 * remove gazebo version check, scene blend

@@ -2,6 +2,9 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.1 (2019-09-05)
 ------------------
 * Removing other instances of <placard_color_shape>.

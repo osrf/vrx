@@ -2,6 +2,9 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.1 (2019-09-05)
 ------------------
 * updated comments
