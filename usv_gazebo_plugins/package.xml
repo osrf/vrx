@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>usv_gazebo_plugins</name>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <description>
     Gazebo plugins for simulating Unmanned Surface Vehicles
     Originaly copied from https://github.com/bsb808/usv_gazebo_plugins

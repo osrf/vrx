@@ -2,8 +2,8 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.2 (2019-09-06)
+------------------
 * Combine boolean expressions.
 * Make code compatible with older Gazebo minor versions.
 * Contributors: Carlos Aguero
