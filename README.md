@@ -9,7 +9,7 @@ This is an active development project.  We are adding and improving things all t
 
 ## Getting Started
 
- * Watch the [Release 1.2 Highlight Video](https://youtu.be/LEFZoJD39JI)
+ * Watch the [Release 1.2 Highlight Video](https://youtu.be/0Q2ehhmSz0Q)
  * The [VRX Wiki](https://bitbucket.org/osrf/vrx/wiki) provides documentation and tutorials.
  * The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
  * For technical problems, please us the [project issue tracker](https://bitbucket.org/osrf/vrx/issues?status=new&status=open) to describe your problem or request support. 
