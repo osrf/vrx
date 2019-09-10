@@ -1,3 +1,4 @@
+syntax = "proto2";
 package dock_placard_msgs.msgs;
 
 message DockPlacard
