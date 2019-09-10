@@ -119,7 +119,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
   else
   {
-    this->paramLengthN = _sdf->GetElement("length_n")->Get<int>();    
+    this->paramLengthN = _sdf->GetElement("length_n")->Get<int>();
   }
 
 
