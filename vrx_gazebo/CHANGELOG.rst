@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.4 (2019-09-12)
+------------------
 * Add protobuf-dev as a buildtool depend for vrx_gazebo
 * Tweaks: Adding missing line breaks and adjusting perspective file for new topic namespace
 * Contributors: Brian Bingham <briansbingham@gmail.com>, Tully Foote <tfoote@osrfoundation.org>
