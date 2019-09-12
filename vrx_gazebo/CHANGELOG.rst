@@ -2,6 +2,11 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Minor maintenance updates.
+* Contributors: Carlos Aguero
+
 1.2.2 (2019-09-06)
 ------------------
 

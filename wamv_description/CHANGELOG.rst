@@ -2,6 +2,9 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.2 (2019-09-06)
 ------------------
 

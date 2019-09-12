@@ -2,6 +2,12 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Replace EnableVisualizations() with UserCameraCount().
+* Minor maintenance updates.
+* Contributors: Carlos Aguero
+
 1.2.2 (2019-09-06)
 ------------------
 * Combine boolean expressions.
