@@ -311,7 +311,7 @@ void PerceptionScoringPlugin::OnUpdate()
     if (!this->frame->HasType(gazebo::physics::Base::LINK) &&
         !this->frame->HasType(gazebo::physics::Base::MODEL))
     {
-      gzwarn << "'frame' tag must list the name of a link or model" 
+      gzwarn << "'frame' tag must list the name of a link or model"
         << std::endl;
       return;
     }
