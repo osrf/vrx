@@ -418,7 +418,7 @@ namespace asv
       std::to_string(static_cast<float>(this->data->rttNoise)));
 
     // Temp fix for camera sensors rendering upsidedown, only needed on server
-    if (this->data->scene->EnableVisualizations())
+    if (this->data->scene->UserCameraCount() > 0)
     {
       rendering::SetMaterialShaderParam(*this->data->visual,
         "flipAcrossY", "fragment",
@@ -473,7 +473,7 @@ namespace asv
   void WavefieldVisualPlugin::AddNewCamerasForReflectionRefraction()
   {
     // User cam setup in gzclient
-    if (this->data->scene->EnableVisualizations())
+    if (this->data->scene->UserCameraCount() > 0)
     {
       // Get user cam
       rendering::UserCameraPtr userCamera = this->data->scene->GetUserCamera(0);
@@ -650,7 +650,7 @@ namespace asv
   {
     // Get appropriate camera source
     rendering::CameraPtr camSource;
-    if (this->data->scene->EnableVisualizations())
+    if (this->data->scene->UserCameraCount() > 0)
       camSource = this->data->scene->GetUserCamera(0);
     else
       camSource = this->data->scene->GetCamera(_camera);
