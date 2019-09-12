@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>vrx_gazebo</name>
-  <version>1.2.2</version>
+  <version>1.2.3</version>
   <description>
     The ROS package for the RobotX competition running in Gazebo.
   </description>
