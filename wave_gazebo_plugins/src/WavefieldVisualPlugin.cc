@@ -165,7 +165,7 @@ namespace asv
   {
     public: WavefieldVisualPluginPrivate() :
             planeUp("planeUp"),
-            planeDown("planeDown"),
+            planeDown("planeDown")
             {}
 
     /// \brief The visual containing this plugin.
