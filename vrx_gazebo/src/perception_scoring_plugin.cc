@@ -305,13 +305,14 @@ void PerceptionScoringPlugin::OnUpdate()
     if (!this->frame)
     {
       gzwarn << std::string("The frame '") << this->frameName
-        << "' does not exist";
+        << "' does not exist" << std::endl;
       return;
     }
     if (!this->frame->HasType(gazebo::physics::Base::LINK) &&
         !this->frame->HasType(gazebo::physics::Base::MODEL))
     {
-      gzwarn << "'frame' tag must list the name of a link or model";
+      gzwarn << "'frame' tag must list the name of a link or model"
+        << std::endl;
       return;
     }
   }

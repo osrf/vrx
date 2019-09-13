@@ -32,7 +32,7 @@ GZ_REGISTER_GUI_PLUGIN(GUITaskWidget)
 GUITaskWidget::GUITaskWidget()
   : GUIPlugin(),
     // setup pixmap and painter for wind compass
-    // cppcheck-suppress 3;
+    //// cppcheck-suppress 3;
     windPixmap(150, 150), windPainter(&(this->windPixmap)),
     // setup pixmap and painter for contact
     contactPixmap(150, 150), contactPainter(&(this->contactPixmap)),
