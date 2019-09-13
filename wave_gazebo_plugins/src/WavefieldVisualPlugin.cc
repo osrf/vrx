@@ -166,16 +166,6 @@ namespace asv
     public: WavefieldVisualPluginPrivate() :
             planeUp("planeUp"),
             planeDown("planeDown"),
-            isStatic(false),
-            enableRtt(true),
-            refractOpacity(0.2),
-            reflectOpacity(0.2),
-            rttNoise(0.1),
-            simTime(true),
-            isInitialised(false),
-            oceanEntity(nullptr),
-            reflectTex(nullptr),
-            refractTex(nullptr)
             {}
 
     /// \brief The visual containing this plugin.
