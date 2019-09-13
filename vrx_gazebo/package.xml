@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>vrx_gazebo</name>
-  <version>1.2.2</version>
+  <version>1.2.4</version>
   <description>
     The ROS package for the RobotX competition running in Gazebo.
   </description>
@@ -14,6 +14,7 @@
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <replace>vmrc_gazebo</replace>
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>protobuf-dev</buildtool_depend>
   <depend version_gte="2.5.17">gazebo_ros</depend>
   <depend>gazebo_dev</depend>
   <depend>geographic_msgs</depend>

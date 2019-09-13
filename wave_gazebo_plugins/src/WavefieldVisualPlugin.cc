@@ -191,35 +191,35 @@ namespace asv
     public: std::shared_ptr<WaveParameters> waveParams;
 
     /// \brief Do not update visual if 'true', [false].
-    public: bool isStatic;
+    public: bool isStatic = false;
 
     /// \brief Enable rtts for reflection refraction, [true].
-    public: bool enableRtt;
+    public: bool enableRtt = true;
 
     /// \brief Ratio between shallow water color and refraction color to use
     ///        In [0, 1], where 0 is no refraction and 1 is maximum refraction
-    public: double refractOpacity;
+    public: double refractOpacity = 0;
 
     /// \brief Ratio between environment color and reflection color to use
     ///        In [0, 1], where 0 is no reflection and 1 is maximum reflection
-    public: double reflectOpacity;
+    public: double reflectOpacity = 0;
 
     /// \brief Noise scale in rtt. Create distortion in reflection/refraction
-    public: double rttNoise;
+    public: double rttNoise = 0;
 
     /// \brief World stats.
-    public: double simTime;
+    public: double simTime = 0;
 
     /// \brief Prevent multiple calls to Init loading visuals twice...
-    public: bool isInitialised;
+    public: bool isInitialised = false;
 
     // OGRE objects for reflection/refraction
     public: gazebo::rendering::ScenePtr scene;
-    public: Ogre::Entity* oceanEntity;
+    public: Ogre::Entity* oceanEntity = nullptr;
     public: Ogre::MovablePlane planeUp;
     public: Ogre::MovablePlane planeDown;
-    public: Ogre::TextureUnitState *reflectTex;
-    public: Ogre::TextureUnitState *refractTex;
+    public: Ogre::TextureUnitState *reflectTex = nullptr;
+    public: Ogre::TextureUnitState *refractTex = nullptr;
 
     // Vectors of OGRE objects
     public: std::vector<Ogre::Camera*> cameras;
@@ -428,7 +428,7 @@ namespace asv
       std::to_string(static_cast<float>(this->data->rttNoise)));
 
     // Temp fix for camera sensors rendering upsidedown, only needed on server
-    if (this->data->scene->EnableVisualizations())
+    if (this->data->scene->UserCameraCount() > 0)
     {
       rendering::SetMaterialShaderParam(*this->data->visual,
         "flipAcrossY", "fragment",
@@ -483,7 +483,7 @@ namespace asv
   void WavefieldVisualPlugin::AddNewCamerasForReflectionRefraction()
   {
     // User cam setup in gzclient
-    if (this->data->scene->EnableVisualizations())
+    if (this->data->scene->UserCameraCount() > 0)
     {
       // Get user cam
       rendering::UserCameraPtr userCamera = this->data->scene->GetUserCamera(0);
@@ -660,7 +660,7 @@ namespace asv
   {
     // Get appropriate camera source
     rendering::CameraPtr camSource;
-    if (this->data->scene->EnableVisualizations())
+    if (this->data->scene->UserCameraCount() > 0)
       camSource = this->data->scene->GetUserCamera(0);
     else
       camSource = this->data->scene->GetCamera(_camera);

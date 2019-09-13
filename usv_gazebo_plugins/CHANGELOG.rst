@@ -2,6 +2,16 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.4 (2019-09-12)
+------------------
+
+1.2.3 (2019-09-12)
+------------------
+* Minor maintenance updates.
+* Fix style error.
+* Adding a default value for the length_n plugin parameter
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Aguero <caguero@osrfoundation.org>
+
 1.2.2 (2019-09-06)
 ------------------
 

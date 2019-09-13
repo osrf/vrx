@@ -107,9 +107,10 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->paramMq          = this->SdfParamDouble(_sdf, "mQ"          , 20);
   this->paramNr          = this->SdfParamDouble(_sdf, "nR"          , 20);
   this->paramNrr         = this->SdfParamDouble(_sdf, "nRR"         , 0);
-  this->paramHullRadius  = this->SdfParamDouble(_sdf, "hullRadius"    , 0.213);
+  this->paramHullRadius  = this->SdfParamDouble(_sdf, "hullRadius"  , 0.213);
   this->paramBoatWidth   = this->SdfParamDouble(_sdf, "boatWidth"   , 1.0);
   this->paramBoatLength  = this->SdfParamDouble(_sdf, "boatLength"  , 1.35);
+
   if (!_sdf->HasElement("length_n"))
   {
     int defaultVal = 2;
