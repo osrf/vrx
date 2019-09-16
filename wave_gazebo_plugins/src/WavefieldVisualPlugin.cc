@@ -581,7 +581,6 @@ namespace asv
             this->data->cameras.end(),
             c->OgreCamera()) == this->data->cameras.end())
         {
-
           retVal.push_back(c);
         }
       }
