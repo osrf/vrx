@@ -27,6 +27,8 @@
 #include <gazebo/rendering/RenderTypes.hh>
 #include <gazebo/rendering/Scene.hh>
 #include <gazebo/rendering/Visual.hh>
+#include <gazebo/sensors/Sensor.hh>
+#include <gazebo/sensors/SensorManager.hh>
 #include <gazebo/transport/transport.hh>
 #include <gazebo/transport/Node.hh>
 
@@ -567,17 +569,22 @@ namespace asv
   {
     std::vector<rendering::CameraPtr> retVal;
 
-    for (unsigned int i = 0; i < this->data->scene->CameraCount(); ++i)
+    auto sensors = sensors::SensorManager::Instance()->GetSensors();
+    for (auto sensor : sensors)
     {
-      // Add new cameras
-      rendering::CameraPtr c = this->data->scene->GetCamera(i);
-      if (std::find(this->data->cameras.begin(), this->data->cameras.end(),
-                    c->OgreCamera()) == this->data->cameras.end())
+      if (sensor->Type() == "camera")
       {
-        retVal.push_back(c);
+        rendering::CameraPtr c = this->data->scene->GetCamera(
+            this->data->scene->StripSceneName(sensor->ScopedName()));
+
+        if (c && std::find(this->data->cameras.begin(),
+            this->data->cameras.end(),
+            c->OgreCamera()) == this->data->cameras.end())
+        {
+          retVal.push_back(c);
+        }
       }
     }
-
     return retVal;
   }
 
