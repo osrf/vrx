@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import rospy
+from __future__ import absolute_import, division, print_function
 from std_msgs.msg import Float32
 
 import math
 import numpy
+import rospy
 import sys
 import termios
 

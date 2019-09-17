@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # license removed for brevity
 
-import sys
-import rospy
+from __future__ import absolute_import
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
+
+import sys
+import rospy
 
 class Node():
     def __init__(self,linear_scaling,angular_scaling,keyboard=False):

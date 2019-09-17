@@ -3,14 +3,16 @@
 Node to convert from quaternions to rpy in various ROS messages
 '''
 
-import rospy
-import tf
+from __future__ import absolute_import
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
 from sensor_msgs.msg import Imu
 from gazebo_msgs.msg import ModelStates
 from nav_msgs.msg import Odometry
+
+import rospy
+import tf
 
 class Node():
     def __init__(self,pose_index=None,model_name=None,
