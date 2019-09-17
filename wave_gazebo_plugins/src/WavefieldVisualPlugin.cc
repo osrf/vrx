@@ -502,13 +502,18 @@ namespace asv
 
   void WavefieldVisualPlugin::CreateRtts(Ogre::Camera* _camera)
   {
+    // Preserve the camera aspect ratio in the texture.
+    const double kScale = 0.25;
+    const int kWidth    = _camera->getViewport()->getActualWidth() * kScale;
+    const int kHeight   = _camera->getViewport()->getActualHeight() * kScale;
+
     // Create reflection texture
     Ogre::TexturePtr rttReflectionTexture =
       Ogre::TextureManager::getSingleton().createManual(
         this->data->visualName + "_" + _camera->getName() + "_reflection",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
-        512, 512,
+        kWidth, kHeight,
         0,
         Ogre::PF_R8G8B8,
         Ogre::TU_RENDERTARGET);
@@ -519,7 +524,7 @@ namespace asv
         this->data->visualName + "_" + _camera->getName() + "_refraction",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D,
-        512, 512,
+        kWidth, kHeight,
         0,
         Ogre::PF_R8G8B8,
         Ogre::TU_RENDERTARGET);
