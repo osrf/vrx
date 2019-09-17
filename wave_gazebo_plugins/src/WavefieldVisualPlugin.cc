@@ -502,7 +502,7 @@ namespace asv
 
   void WavefieldVisualPlugin::CreateRtts(Ogre::Camera* _camera)
   {
-    // Preserve the camera aspect ration in the texture.
+    // Preserve the camera aspect ratio in the texture.
     const double kScale = 0.25;
     const int kWidth    = _camera->getViewport()->getActualWidth() * kScale;
     const int kHeight   = _camera->getViewport()->getActualHeight() * kScale;
