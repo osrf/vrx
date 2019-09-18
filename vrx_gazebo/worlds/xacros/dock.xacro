@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="dock" params="uri:=dock_2018 x:=60 y:=-2.75 z:=0 R:=0 P:=0 Y:=0">
+  <xacro:macro name="dock" params="uri:=dock_2018 x:=60 y:=-2.75 z:=0 R:=0 P:=0 Y:=0 bay1_allowed:=false bay1_symbol:=red_circle bay2_allowed:=true bay2_symbol:=blue_cross">
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://${uri}</uri>
@@ -42,8 +42,8 @@
           <activation_topic>/vrx/dock_2018/bay_1/contain</activation_topic>
           <symbol_topic>/vrx/dock_2018_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>false</dock_allowed>
-          <symbol>red_circle</symbol>
+          <dock_allowed>${bay1_allowed}</dock_allowed>
+          <symbol>${bay1_symbol}</symbol>
         </bay>
  
         <bay>
@@ -51,9 +51,8 @@
           <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
           <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>true</dock_allowed>
-          <announce_symbol>red_cross</announce_symbol>
-          <symbol>red_cross</symbol>
+          <dock_allowed>${bay2_allowed}</dock_allowed>
+          <symbol>${bay2_symbol}</symbol>
         </bay>
       </bays>
     </plugin>
