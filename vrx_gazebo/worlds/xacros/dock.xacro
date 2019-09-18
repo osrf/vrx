@@ -43,7 +43,6 @@
           <symbol_topic>/vrx/dock_2018_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>${bay1_allowed}</dock_allowed>
-          <announce_symbol>${bay1_symbol}</announce_symbol>
           <symbol>${bay1_symbol}</symbol>
         </bay>
  
@@ -53,7 +52,6 @@
           <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>${bay2_allowed}</dock_allowed>
-          <announce_symbol>${bay2_symbol}</announce_symbol>
           <symbol>${bay2_symbol}</symbol>
         </bay>
       </bays>
