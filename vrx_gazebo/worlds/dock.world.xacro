@@ -90,8 +90,6 @@
           <min_dock_time>10.0</min_dock_time>
           <!-- Set this bay as the intended docking bay -->
           <dock_allowed>true</dock_allowed>
-          <!-- Prescribe the symbol published to the ROS API -->
-          <announce_symbol>red_cross</announce_symbol>
           <!-- Specify the visual symbol - should be same as announced -->
           <symbol>red_cross</symbol>
         </bay>
