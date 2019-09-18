@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="nav_challenge" params="name='nav_challenge' uri:=navigation_course x:=58 y:=68 z:=2 R:=0 P:=0 Y:=0.4 **gates">
+  <xacro:macro name="nav_challenge" params="name='nav_challenge' uri:=navigation_course x:=58 y:=68 z:=2 R:=0 P:=0 Y:=0.4 running_duration:=300 **gates">
     <!-- The VRX navigation course -->
     <include>
       <name>${name}</name>
@@ -15,7 +15,7 @@
       <task_name>navigation_course</task_name>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
+      <running_state_duration>${running_duration}</running_state_duration>
       <collision_buffer>10</collision_buffer>
       <release_joints>
         <joint>
