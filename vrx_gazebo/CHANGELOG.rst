@@ -2,6 +2,18 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.5 (2019-09-19)
+------------------
+* Remove <announce_symbol> parameter.
+* moving static docks to waterline
+* Use __future_\_ import
+* Adding running_duration parameter to the nav_challenge.xacro.
+* Tweak buoyany primative so that 4x4 dock element floats at water line instead of above
+* Adding parameters to dock.xacro to for auto. generation of tasks
+* adding params to dock xacro for the benefit of automatically generating tasks
+* Changes for code checker
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Aguero <caguero@openrobotics.org>
+
 1.2.4 (2019-09-12)
 ------------------
 * Add protobuf-dev as a buildtool depend for vrx_gazebo

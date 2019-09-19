@@ -2,6 +2,21 @@
 Changelog for package wave_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.5 (2019-09-19)
+------------------
+* typo
+* Fix aspect ration with reflections.
+* Style.
+* apply reflection / refraction only to camera sensors
+* syntax tweak
+* removing redundancy in variable initialization
+* merging default into branch
+* Merged in maintenance (pull request #174)
+  Minor maintenance updates
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+* Changes for code checker
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, Ian Chen <ichen@osrfoundation.org>
+
 1.2.4 (2019-09-12)
 ------------------
 

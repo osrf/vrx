@@ -2,6 +2,12 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.5 (2019-09-19)
+------------------
+* merging default into branch
+* Changes for code checker
+* Contributors: Brian Bingham <briansbingham@gmail.com>
+
 1.2.4 (2019-09-12)
 ------------------
 
