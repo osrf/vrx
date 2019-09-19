@@ -165,6 +165,7 @@ void DockChecker::AnnounceSymbol()
     (0, announceSymbol.data.find("_")));
   symbol.set_shape(announceSymbol.data.substr
     (announceSymbol.data.find("_")+1));
+  gzmsg << "ScanDockScoringPlugin::DockChecker publishing symbol <" << announceSymbol.data << "> on topic <" << gzSymbolTopic << std::endl;
   this->dockPlacardPub->Publish(symbol);
 
   if (this->dockAllowed)
@@ -310,7 +311,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: bay name.
     if (!bayElem->GetElement("name"))
     {
-      ROS_ERROR("<gates::gate::name> missing");
+      ROS_ERROR("<bays::bay::name> missing");
       return false;
     }
     std::string bayName = bayElem->Get<std::string>("name");
@@ -318,7 +319,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: activation topic.
     if (!bayElem->GetElement("activation_topic"))
     {
-      ROS_ERROR("<gates::gate::activation_topic> missing");
+      ROS_ERROR("<bays::bay::activation_topic> missing");
       return false;
     }
     std::string activationTopic = bayElem->Get<std::string>("activation_topic");
@@ -326,7 +327,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: gazebo symbol topic.
     if (!bayElem->GetElement("symbol_topic"))
     {
-      ROS_ERROR("<gates::gate::symbol_topic> missing");
+      ROS_ERROR("<bays::bay::symbol_topic> missing");
       return false;
     }
     std::string symbolTopic = bayElem->Get<std::string>("symbol_topic");
@@ -334,7 +335,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: minimum time to be considered "docked".
     if (!bayElem->GetElement("min_dock_time"))
     {
-      ROS_ERROR("<gates::gate::min_dock_time> missing");
+      ROS_ERROR("<bays::bay::min_dock_time> missing");
       return false;
     }
     double minDockTime = bayElem->Get<double>("min_dock_time");
@@ -342,7 +343,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: dock allowed.
     if (!bayElem->GetElement("dock_allowed"))
     {
-      ROS_ERROR("<gates::gate::dock_allowed> missing");
+      ROS_ERROR("<bays::bay::dock_allowed> missing");
       return false;
     }
     bool dockAllowed = bayElem->Get<bool>("dock_allowed");
@@ -350,7 +351,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     std::string announceSymbol = "";
     if (!bayElem->HasElement("symbol"))
     {
-      ROS_ERROR("<symbol> not found");
+      ROS_ERROR("<bays::bay:symbol> not found");
     }
     announceSymbol =
       bayElem->GetElement("symbol")->Get<std::string>();

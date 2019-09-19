@@ -95,9 +95,14 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
 
 void PlacardPlugin::ChangeSymbolTo(gazebo::ConstDockPlacardPtr &_msg)
 {
-  std::lock_guard<std::mutex> lock(this->mutex);
-  this->shape = _msg->shape();
-  this->color = _msg->color();
+  {
+    std::lock_guard<std::mutex> lock(this->mutex);
+    this->shape = _msg->shape();
+    this->color = _msg->color();
+  }
+  gzmsg << "PlacardPlugin: ChangeSymbolTo <" << _msg->color()
+	<< "_" << _msg->shape() << ">" << std::endl;
+
 }
 
 
@@ -237,6 +242,7 @@ void PlacardPlugin::Update()
     {
       color = this->kColors[this->color];
     }
+    gzmsg << "Curr: " << this->color << this->shape << std::endl;
     #if GAZEBO_MAJOR_VERSION >= 8
       ignition::math::Color gazeboColor(color.r, color.g, color.b, color.a);
     #else

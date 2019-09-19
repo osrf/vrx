@@ -45,7 +45,7 @@
               <visual>robotx_dock_2018::dock_2018_placard1::link_symbols::visual_v_cross</visual>
               <visual>robotx_dock_2018::dock_2018_placard1::link_symbols::visual_triangle</visual>
             </visuals>
-            <shuffle>true</shuffle>
+            <shuffle>false</shuffle>
             <robot_namespace>vrx/dock_2018_placard1</robot_namespace>
             <ros_shuffle_topic>shuffle</ros_shuffle_topic>
           </plugin>
@@ -114,7 +114,7 @@
               <visual>robotx_dock_2018::dock_2018_placard2::link_symbols::visual_v_cross</visual>
               <visual>robotx_dock_2018::dock_2018_placard2::link_symbols::visual_triangle</visual>
             </visuals>
-            <shuffle>true</shuffle>
+            <shuffle>false</shuffle>
             <robot_namespace>vrx/dock_2018_placard2</robot_namespace>
             <ros_shuffle_topic>shuffle</ros_shuffle_topic>
           </plugin>
