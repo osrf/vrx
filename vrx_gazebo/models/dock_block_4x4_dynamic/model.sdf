@@ -44,12 +44,12 @@
       <angular_drag>200.0</angular_drag>
       <buoyancy name="buoyancy_base">
         <link_name>link</link_name>
-      	<pose>0 0 0 0 0 0</pose>
+      	<pose>0 0 0.35 0 0 0</pose>
         <geometry>
-	  <sphere>
+					<sphere>
             <radius>0.72557</radius>
           </sphere>
-	</geometry>
+				</geometry>
       </buoyancy>
     </plugin>
   </model>
