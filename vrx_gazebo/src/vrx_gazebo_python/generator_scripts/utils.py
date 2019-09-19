@@ -55,7 +55,8 @@ def create_xacro_file(xacro_target,
             test_fail = param_test(key, i)
 
             # Write macro
-            xacro_file.write('    ' + macro_call_gen(key, i))
+            # Replacing * allows us to call same macro multiple times
+            xacro_file.write('    ' + macro_call_gen(key.replace('*',''), i))
         xacro_file.write('\n')
 
     xacro_file.write(boiler_plate_bot)
