@@ -10,6 +10,12 @@
       </sky>
       <grid>0</grid>
       <origin_visual>0</origin_visual>
+      <fog>
+        <type> linear</type>
+        <color> 0.7 0.7 0.7 1 </color>
+        <density> 0.0 </density>
+      </fog>
+      <ambient> 1.0 1.0 1.0 1 </ambient>-->
     </scene>
     <!-- Estimated latitude/longitude of sandisland from satellite imagery -->
     <spherical_coordinates>
