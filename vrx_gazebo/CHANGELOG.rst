@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.5 (2019-09-19)
+------------------
 * Remove <announce_symbol> parameter.
 * moving static docks to waterline
 * Use __future_\_ import
