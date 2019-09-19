@@ -12,11 +12,11 @@
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://dock_2018</uri>
-      <pose>60 -2.75 0 0 0 0</pose>
+      <pose>138 103 0 0 0 -2.76</pose>
     </include>
 
     <!-- Uncomment to visualize the bay #1 activation zone -->
-    <!-- <model name="activation_placard1">
+    <model name="activation_placard1">
       <static>true</static>
       <link name="link">
         <visual name="visual">
@@ -29,7 +29,7 @@
           <transparency>0.8</transparency>
         </visual>
       </link>
-    </model> -->
+    </model>
 
     <!-- Uncomment to visualize the bay #2 activation zone -->
     <!-- <model name="activation_placard2">
