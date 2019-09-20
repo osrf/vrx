@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-import yaml
-import rospy
-import os
-from collections import OrderedDict
 
+from collections import OrderedDict
+from __future__ import absolute_import, division, print_function
 from .. utils import create_xacro_file
 
+import os
+import rospy
+import yaml
 
 def main():
     s = open(rospy.get_param('requested'))
