@@ -1,5 +1,9 @@
 ## VRX 1
 
+### VRX 1.2.X
+
+1. Initial Python 3 support.
+    * [Pull request 184](https://bitbucket.org/osrf/vrx/pull-requests/184)
 
 ### VRX 1.2.1
 
