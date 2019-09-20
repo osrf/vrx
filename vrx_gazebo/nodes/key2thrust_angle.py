@@ -85,13 +85,13 @@ if __name__ == "__main__":
             # Read in pressed key
             key = getch()
 
-            if key in moveBindings.keys():
+            if key in moveBindings:
                 # Increment angle, but clip it between [-max_angle, max_angle]
                 curr_angle += thrust_angle_speed * moveBindings[key]
                 curr_angle = numpy.clip(curr_angle,
                                         -max_angle, max_angle).item()
 
-            elif key in speedBindings.keys():
+            elif key in speedBindings:
                 # Increment/decrement speed of angle change and print it
                 thrust_angle_speed += (speedBindings[key] * 0.1 *
                                        thrust_angle_speed)
