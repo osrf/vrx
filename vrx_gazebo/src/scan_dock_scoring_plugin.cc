@@ -419,10 +419,21 @@ void ScanDockScoringPlugin::Update()
 
     // Points granted for docking!
     this->SetScore(this->Score() + this->dockBonusPoints);
+    gzmsg << "Successfully docked - granting <" << this->dockBonusPoints 
+      << "> points" <<std::endl;  
 
     // Is this the right bay?
     if (dockChecker->Allowed())
+    {
       this->SetScore(this->Score() + this->correctDockBonusPoints);
+      gzmsg << "Docked in the correct bay - granting <" 
+        << this->correctDockBonusPoints 
+        << "> points" <<std::endl;  
+    }
+    else
+    {
+        gzmsg << "Incorrect docking bay - granting no poitns" << std::endl;
+    }
 
     // Time to finish the task as the vehicle docked.
     // Note that we only allow to dock one time. This is to prevent teams
