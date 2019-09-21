@@ -150,9 +150,9 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
     std::transform(color.begin(), color.end(), color.begin(), ::tolower);
 
-    // Sanity check: color should be red, green, blue or yellow.
+    // Sanity check: color should be red, green, blue, yellow or off.
     if (color != "red"  && color != "green" &&
-        color != "blue" && color != "yellow")
+        color != "blue" && color != "yellow" && color != "off")
     {
       ROS_ERROR("Invalid color [%s]", color.c_str());
       return false;
