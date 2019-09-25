@@ -103,7 +103,7 @@
       <pose frame="robotx_dock_2018::dock_2018_placard1::placard::link">0 -5 -1.5 0 0 0</pose>
       <geometry>
         <box>
-          <size>4 1.5 2</size>
+          <size>40 15 20</size>
         </box>
       </geometry>
     </plugin>
@@ -115,7 +115,7 @@
       <pose frame="robotx_dock_2018::dock_2018_placard2::placard::link">0 5 -1.5 0 0 0</pose>
       <geometry>
         <box>
-          <size>4 1.5 2</size>
+          <size>40 15 20</size>
         </box>
       </geometry>
     </plugin>
