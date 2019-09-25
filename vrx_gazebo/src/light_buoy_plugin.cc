@@ -91,6 +91,11 @@ void LightBuoyPlugin::ChangePatternTo(
   pattern[2] = IndexFromColor(_msg->color_3());
   pattern[3] = IndexFromColor("off");
   pattern[4] = IndexFromColor("off");
+  
+  // If we get a new pattern, reinitialize the sequence.
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->nextUpdateTime = this->scene->SimTime() + gazebo::common::Time(1.0);
+  this->state = 0;
 
   return;
 }
