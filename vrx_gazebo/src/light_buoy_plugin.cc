@@ -92,6 +92,11 @@ void LightBuoyPlugin::ChangePatternTo(
   pattern[3] = IndexFromColor("off");
   pattern[4] = IndexFromColor("off");
 
+  // If we get a new pattern, reinitialize the sequence.
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->nextUpdateTime = this->scene->SimTime() + gazebo::common::Time(1.0);
+  this->state = 0;
+
   return;
 }
 
@@ -150,9 +155,9 @@ bool LightBuoyPlugin::ParseSDF(sdf::ElementPtr _sdf)
     auto color = _sdf->GetElement(colorIndex)->Get<std::string>();
     std::transform(color.begin(), color.end(), color.begin(), ::tolower);
 
-    // Sanity check: color should be red, green, blue or yellow.
+    // Sanity check: color should be red, green, blue, yellow or off.
     if (color != "red"  && color != "green" &&
-        color != "blue" && color != "yellow")
+        color != "blue" && color != "yellow" && color != "off")
     {
       ROS_ERROR("Invalid color [%s]", color.c_str());
       return false;
@@ -234,12 +239,12 @@ void LightBuoyPlugin::Update()
     }
   }
 
+  std::lock_guard<std::mutex> lock(this->mutex);
+
   if (this->scene->SimTime() < this->nextUpdateTime)
     return;
 
   this->nextUpdateTime = this->nextUpdateTime + gazebo::common::Time(1.0);
-
-  std::lock_guard<std::mutex> lock(this->mutex);
 
   // Start over if at end of pattern
   if (this->state > 4)
