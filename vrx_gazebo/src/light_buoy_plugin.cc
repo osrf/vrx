@@ -239,12 +239,12 @@ void LightBuoyPlugin::Update()
     }
   }
 
+  std::lock_guard<std::mutex> lock(this->mutex);
+
   if (this->scene->SimTime() < this->nextUpdateTime)
     return;
 
   this->nextUpdateTime = this->nextUpdateTime + gazebo::common::Time(1.0);
-
-  std::lock_guard<std::mutex> lock(this->mutex);
 
   // Start over if at end of pattern
   if (this->state > 4)
