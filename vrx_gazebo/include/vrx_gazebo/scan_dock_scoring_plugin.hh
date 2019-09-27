@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <gazebo/gazebo.hh>
+#include <ignition/transport/Node.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/ColorSequence.h"
 #include "vrx_gazebo/scoring_plugin.hh"
@@ -128,7 +129,11 @@ class DockChecker
   /// \brief Callback triggered when the vehicle enters or exits the activation
   /// zone.
   /// \param[in] _msg The current state (0: exiting, 1: entering).
+#if GAZEBO_MAJOR_VERSION >= 8
+  private: void OnActivationEvent(const ignition::msgs::Boolean &_msg);
+#else
   private: void OnActivationEvent(ConstIntPtr &_msg);
+#endif
 
   /// \brief The name of this checker.
   private: std::string name;
@@ -149,6 +154,11 @@ class DockChecker
 
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: gazebo::common::Timer timer;
+
+#if GAZEBO_MAJOR_VERSION >= 8
+  /// \brief Ignition Transport node used for communication.
+  private: ignition::transport::Node ignNode;
+#endif
 
   /// \brief Create a node for communication.
   private: gazebo::transport::NodePtr node;
