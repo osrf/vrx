@@ -26,7 +26,9 @@
 #include <string>
 #include <vector>
 #include <gazebo/gazebo.hh>
-#include <ignition/transport/Node.hh>
+#if GAZEBO_MAJOR_VERSION >= 8
+  #include <ignition/transport/Node.hh>
+#endif
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/ColorSequence.h"
 #include "vrx_gazebo/scoring_plugin.hh"
