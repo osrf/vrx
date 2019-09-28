@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wayfinding" params="**waypoints">
+  <xacro:macro name="wayfinding" params="**wp_markers **waypoints">
     <plugin name="wayfinding_scoring_plugin"
             filename="libwayfinding_scoring_plugin.so">
       <vehicle>wamv</vehicle>
@@ -20,6 +20,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
+      <xacro:insert_block name="wp_markers" />
     </plugin>
   </xacro:macro>
 </world>
