@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v">
+  <xacro:property name="platform_z" value="1.2965"/>
+  <xacro:property name="sail_length_x" value="1"/>
+  <xacro:property name="sail_length_y" value="0.2"/>
+  <xacro:property name="sail_length_z" value="1"/>
+  <xacro:property name="sail_z" value="${platform_z+sail_length_z/2}"/>
+
   <!-- Macro for creating the main collisions as simple shapes. -->
   <xacro:macro name="main_collisions" params="prefix reflect:=1">
     <!-- Main float -->
@@ -98,6 +104,31 @@
     <parent link="base_link"/>
     <child link="dummy_link"/>
   </joint>
+
+  <joint name="sail_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="sail_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="${-pi}" upper="${pi}" effort="10" velocity="10"/>
+    <origin xyz="0 0 ${sail_z}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="sail_link">
+    <visual>
+      <geometry>
+        <box size="1 0.25 1" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="1 0.25 1" />
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1"/>
+      <inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
 
   <!-- Basic model of the 16' WAM-V USV -->
   <link name="dummy_link">
