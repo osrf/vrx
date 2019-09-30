@@ -208,7 +208,7 @@ void DockChecker::OnActivationEvent(const ignition::msgs::Boolean &_msg)
     this->timer.Reset();
   }
 
-  gzdbg << "[" << this->name << "] OnActivationEvent(): "
+  gzmsg << "[" << this->name << "] OnActivationEvent(): "
         << _msg.data() << std::endl;
 }
 #else
