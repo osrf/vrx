@@ -299,7 +299,7 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
             << _contacts->contact(i).collision1() << "] and ["
             << _contacts->contact(i).collision2() << "]" << std::endl;
       // Uncomment to get details of collisions
-      //gzdbg << _contacts->contact(i).DebugString() << std::endl;
+      // gzdbg << _contacts->contact(i).DebugString() << std::endl;
 #if GAZEBO_MAJOR_VERSION >= 8
       this->lastCollisionTime = this->world->SimTime();
 #else

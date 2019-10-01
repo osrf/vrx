@@ -194,10 +194,9 @@ void DockChecker::Update()
 
   if (this->anytimeDocked)
   {
-    gzmsg  << "Successfully stayed in dock for " << this->minDockTime 
+    gzmsg  << "Successfully stayed in dock for " << this->minDockTime
       << " seconds, transitioning to <docked> state" << std::endl;
   }
-
 }
 
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -467,7 +466,7 @@ void ScanDockScoringPlugin::Update()
     this->SetScore(this->Score() + this->dockBonusPoints);
     if (this->TaskState() == "running")
     {
-    gzmsg  << "Successfully docked in [" << dockChecker->name << "]" 
+    gzmsg  << "Successfully docked in [" << dockChecker->name << "]"
       << ". Awarding " << this->dockBonusPoints << " points." <<std::endl;
     }
 
@@ -477,15 +476,16 @@ void ScanDockScoringPlugin::Update()
       this->SetScore(this->Score() + this->correctDockBonusPoints);
       if (this->TaskState() == "running")
       {
-        gzmsg  << "Docked in correct dock [" << dockChecker->name << "]" 
-        << ". Awarding " << this->correctDockBonusPoints << " more points." <<std::endl;
+        gzmsg << "Docked in correct dock [" << dockChecker->name << "]"
+              << ". Awarding " << this->correctDockBonusPoints
+              << " more points." << std::endl;
       }
     }
     else
     {
       if (this->TaskState() == "running")
       {
-        gzmsg  << "Docked in incorrect dock [" << dockChecker->name << "]" 
+        gzmsg  << "Docked in incorrect dock [" << dockChecker->name << "]"
         << ". No additional points." <<std::endl;
       }
     }
