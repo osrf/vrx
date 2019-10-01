@@ -111,6 +111,9 @@ class DockChecker
                       const std::string &_announceSymbol,
                       const std::string &_gzSymbolTopic);
 
+  /// \brief The name of this checker.
+  public: std::string name;
+
   /// \brief Whether the robot has been successfully docked in this bay or not.
   /// \return True when the robot has been docked or false otherwise.
   public: bool AnytimeDocked() const;
@@ -136,9 +139,6 @@ class DockChecker
 #else
   private: void OnActivationEvent(ConstIntPtr &_msg);
 #endif
-
-  /// \brief The name of this checker.
-  private: std::string name;
 
   /// \brief The gazebo topic used to receive notifications
   /// from the "contain" plugin.

@@ -11,41 +11,9 @@
 
     <!-- The 2018 dock with the two placards -->
     <include>
-      <uri>model://dock_2018</uri>
-      <pose>60 -2.75 0 0 0 0</pose>
+      <uri>model://dock_2018_dynamic</uri>
+      <pose>130 97 0 0 0 0</pose>
     </include>
-
-    <!-- Uncomment to visualize the bay #1 activation zone -->
-    <!-- <model name="activation_placard1">
-      <static>true</static>
-      <link name="link">
-        <visual name="visual">
-          <pose>72.75 0 0 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.8</transparency>
-        </visual>
-      </link>
-    </model> -->
-
-    <!-- Uncomment to visualize the bay #2 activation zone -->
-    <!-- <model name="activation_placard2">
-      <static>true</static>
-      <link name="link">
-        <visual name="visual">
-          <pose>61.75 0 0 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.8</transparency>
-        </visual>
-      </link>
-    </model> -->
 
     <!-- The scoring plugin -->
     <plugin name="scan_dock_scoring_plugin"

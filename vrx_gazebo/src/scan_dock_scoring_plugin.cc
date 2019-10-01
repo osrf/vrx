@@ -191,6 +191,12 @@ void DockChecker::Update()
 
   this->anytimeDocked =
     this->timer.GetElapsed() >= gazebo::common::Time(this->minDockTime);
+
+  if (this->anytimeDocked)
+  {
+    gzmsg  << "Successfully stayed in dock for " << this->minDockTime
+      << " seconds, transitioning to <docked> state" << std::endl;
+  }
 }
 
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -200,12 +206,26 @@ void DockChecker::OnActivationEvent(const ignition::msgs::Boolean &_msg)
   this->currentlyDocked = _msg.data() == 1;
 
   if (_msg.data() == 1)
+  {
     this->timer.Start();
+    gzmsg << "Entering dock activation zone, transitioning to <docking> "
+      << "state in [" << this->name << "]." << std::endl;
+  }
 
   if (_msg.data() == 0)
   {
     this->timer.Stop();
     this->timer.Reset();
+    if (this->AnytimeDocked())
+    {
+    gzmsg << "Leaving dock activation zone after requried time - "
+      << "transitioning to <exited> state." << std::endl;
+    }
+    else
+    {
+    gzmsg << "Leaving dock activation zone early - transitioning back to "
+      << " <undocked> state. " << std::endl;
+    }
   }
 
   gzdbg << "[" << this->name << "] OnActivationEvent(): "
@@ -444,10 +464,31 @@ void ScanDockScoringPlugin::Update()
 
     // Points granted for docking!
     this->SetScore(this->Score() + this->dockBonusPoints);
+    if (this->TaskState() == "running")
+    {
+    gzmsg  << "Successfully docked in [" << dockChecker->name << "]"
+      << ". Awarding " << this->dockBonusPoints << " points." <<std::endl;
+    }
 
     // Is this the right bay?
     if (dockChecker->Allowed())
+    {
       this->SetScore(this->Score() + this->correctDockBonusPoints);
+      if (this->TaskState() == "running")
+      {
+        gzmsg << "Docked in correct dock [" << dockChecker->name << "]"
+              << ". Awarding " << this->correctDockBonusPoints
+              << " more points." << std::endl;
+      }
+    }
+    else
+    {
+      if (this->TaskState() == "running")
+      {
+        gzmsg  << "Docked in incorrect dock [" << dockChecker->name << "]"
+        << ". No additional points." <<std::endl;
+      }
+    }
 
     // Time to finish the task as the vehicle docked.
     // Note that we only allow to dock one time. This is to prevent teams
