@@ -75,7 +75,7 @@
     <model name="dock_2018_placard<%= i %>">
       <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
       <include>
-        <pose> 0 0 0.25 0 0 0</pose>
+        <pose>0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
@@ -146,12 +146,12 @@
       <!-- For visualizing ContainPlugin volume 
            Make sure that the size and location are consistent with plugin -->
       <link name="bay_visualization">
-        <% if i == 1%>
-        <pose frame="placard::link">0 -5 -1.5 0 0 0</pose>
-        <% else %>
-        <pose frame="placard::link">0  5 -1.5 0 0 0</pose>
-        <% end %>
         <visual name="bay_box">
+          <% if i == 1%>
+          <pose frame="placard::link">0 -5 -1.5 0 0 0</pose>
+          <% else %>
+          <pose frame="placard::link">0  5 -1.5 0 0 0</pose>
+          <% end %>
           <material>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
@@ -161,6 +161,25 @@
           <geometry>
             <box>
               <size>1.5 4 2</size>
+            </box>
+          </geometry>
+          <transparency>0.0</transparency>
+        </visual>
+        <visual name="bay_box_exterior">
+          <% if i == 1%>
+          <pose frame="placard::link">0 -10 -1.5 0 0 0</pose>
+          <% else %>
+          <pose frame="placard::link">0  10 -1.5 0 0 0</pose>
+          <% end %>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Red</name>
+            </script>
+          </material>
+          <geometry>
+            <box>
+              <size>8 1.5 2</size>
             </box>
           </geometry>
           <transparency>0.0</transparency>

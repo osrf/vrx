@@ -112,12 +112,15 @@ bool ColorSequenceChecker::OnColorSequence(
 
 /////////////////////////////////////////////////
 DockChecker::DockChecker(const std::string &_name,
-  const std::string &_activationTopic, const double _minDockTime,
+  const std::string &_internalActivationTopic,
+  const std::string &_externalActivationTopic,
+  const double _minDockTime,
   const bool _dockAllowed, const std::string &_worldName,
   const std::string &_rosNameSpace, const std::string &_announceSymbol,
   const std::string &_gzSymbolTopic)
   : name(_name),
-    activationTopic(_activationTopic),
+    internalActivationTopic(_internalActivationTopic),
+    externalActivationTopic(_externalActivationTopic),
     minDockTime(_minDockTime),
     dockAllowed(_dockAllowed),
     ns(_rosNameSpace),
@@ -133,11 +136,15 @@ DockChecker::DockChecker(const std::string &_name,
 
   // Subscriber to receive ContainPlugin updates.
 #if GAZEBO_MAJOR_VERSION >= 8
-  this->ignNode.Subscribe(this->activationTopic,
-    &DockChecker::OnActivationEvent, this);
+  this->ignNode.Subscribe(this->internalActivationTopic,
+    &DockChecker::OnInternalActivationEvent, this);
+  this->ignNode.Subscribe(this->externalActivationTopic,
+    &DockChecker::OnExternalActivationEvent, this);
 #else
-  this->containSub = this->node->Subscribe(this->activationTopic,
-    &DockChecker::OnActivationEvent, this);
+  this->containSub = this->node->Subscribe(this->internalActivationTopic,
+    &DockChecker::OnInternalActivationEvent, this);
+  this->containSub = this->node->Subscribe(this->externalActivationTopic,
+    &DockChecker::OnExternalActivationEvent, this);
 #endif
 }
 
@@ -148,9 +155,9 @@ bool DockChecker::AnytimeDocked() const
 }
 
 /////////////////////////////////////////////////
-bool DockChecker::CurrentlyDocked() const
+bool DockChecker::AtEntrance() const
 {
-  return this->currentlyDocked;
+  return this->atEntrance;
 }
 
 /////////////////////////////////////////////////
@@ -195,59 +202,117 @@ void DockChecker::Update()
   if (this->anytimeDocked)
   {
     gzmsg  << "Successfully stayed in dock for " << this->minDockTime
-      << " seconds, transitioning to <docked> state" << std::endl;
+           << " seconds, transitioning to <docked> state" << std::endl;
   }
 }
 
 #if GAZEBO_MAJOR_VERSION >= 8
 /////////////////////////////////////////////////
-void DockChecker::OnActivationEvent(const ignition::msgs::Boolean &_msg)
+void DockChecker::OnInternalActivationEvent(const ignition::msgs::Boolean &_msg)
 {
-  this->currentlyDocked = _msg.data() == 1;
-
+  // Currently docked.
   if (_msg.data() == 1)
   {
     this->timer.Start();
-    gzmsg << "Entering dock activation zone, transitioning to <docking> "
-      << "state in [" << this->name << "]." << std::endl;
+    gzmsg << "Entering internal dock activation zone, transitioning to "
+          << "<docking> state in [" << this->name << "]." << std::endl;
   }
 
+  // Currently undocked.
   if (_msg.data() == 0)
   {
     this->timer.Stop();
     this->timer.Reset();
     if (this->AnytimeDocked())
     {
-    gzmsg << "Leaving dock activation zone after requried time - "
-      << "transitioning to <exited> state." << std::endl;
+      gzmsg << "Leaving internal dock activation zone in [" << this->name
+            << "] after required time - transitioning to <exited> state."
+            << std::endl;
     }
     else
     {
-    gzmsg << "Leaving dock activation zone early - transitioning back to "
-      << " <undocked> state. " << std::endl;
+      gzmsg << "Leaving internal dock activation zone in [" << this->name
+            << "] early - transitioning back to <undocked> state."
+            << std::endl;
     }
   }
 
-  gzdbg << "[" << this->name << "] OnActivationEvent(): "
+  gzdbg << "[" << this->name << "] OnInternalActivationEvent(): "
+        << _msg.data() << std::endl;
+}
+
+/////////////////////////////////////////////////
+void DockChecker::OnExternalActivationEvent(const ignition::msgs::Boolean &_msg)
+{
+  this->atEntrance = _msg.data() == 1;
+
+  if (this->atEntrance)
+  {
+    gzmsg << "Entering external dock activation zone in [" << this->name
+          << "]" << std::endl;
+  }
+  else
+  {
+    gzmsg << "Leaving external dock activation zone in [" << this->name
+          << "]" << std::endl;
+  }
+
+  gzdbg << "[" << this->name << "] OnExternalActivationEvent(): "
         << _msg.data() << std::endl;
 }
 #else
 /////////////////////////////////////////////////
-void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
+void DockChecker::OnInternalActivationEvent(ConstIntPtr &_msg)
 {
-  this->currentlyDocked = _msg->data() == 1;
-
+  // Currently docked.
   if (_msg->data() == 1)
+  {
     this->timer.Start();
+    gzmsg << "Entering internal dock activation zone, transitioning to "
+          << "<docking> state in [" << this->name << "]." << std::endl;
+  }
 
+  // Currently undocked.
   if (_msg->data() == 0)
   {
     this->timer.Stop();
     this->timer.Reset();
+    if (this->AnytimeDocked())
+    {
+      gzmsg << "Leaving internal dock activation zone in [" << this->name
+            << "] after required time - transitioning to <exited> state."
+            << std::endl;
+    }
+    else
+    {
+      gzmsg << "Leaving internal dock activation zone in [" << this->name
+            << "] early - transitioning back to <undocked> state."
+            << std::endl;
+    }
   }
 
-  gzdbg << "[" << this->name << "] OnActivationEvent(): "
-        << _msg->data() << std::endl;
+  gzdbg << "[" << this->name << "] OnInternalActivationEvent(): "
+        << _msg.data() << std::endl;
+}
+
+/////////////////////////////////////////////////
+void DockChecker::OnExternalActivationEvent(ConstIntPtr &_msg)
+{
+  this->atEntrance = _msg->data() == 1;
+
+  if (this->atEntrance)
+  {
+    gzmsg << "Entering external dock activation zone in [" << this->name
+          << "]" << std::endl;
+  }
+  else
+  {
+    gzmsg << "Leaving external dock activation zone in [" << this->name
+          << "]" << std::endl;
+  }
+
+  gzdbg << "[" << this->name << "] OnExternalActivationEvent(): "
+        << _msg.data() << std::endl;
 }
 #endif
 
@@ -355,23 +420,33 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: bay name.
     if (!bayElem->GetElement("name"))
     {
-      ROS_ERROR("<gates::gate::name> missing");
+      ROS_ERROR("<bays::bay::name> missing");
       return false;
     }
     std::string bayName = bayElem->Get<std::string>("name");
 
-    // Required: activation topic.
-    if (!bayElem->GetElement("activation_topic"))
+    // Required: internal_activation topic.
+    if (!bayElem->GetElement("internal_activation_topic"))
     {
-      ROS_ERROR("<gates::gate::activation_topic> missing");
+      ROS_ERROR("<bays::bay::internal_activation_topic> missing");
       return false;
     }
-    std::string activationTopic = bayElem->Get<std::string>("activation_topic");
+    std::string internalActivationTopic =
+      bayElem->Get<std::string>("internal_activation_topic");
+
+    // Required: external_activation topic.
+    if (!bayElem->GetElement("external_activation_topic"))
+    {
+      ROS_ERROR("<bays::bay::external_activation_topic> missing");
+      return false;
+    }
+    std::string externalActivationTopic =
+      bayElem->Get<std::string>("external_activation_topic");
 
     // Required: gazebo symbol topic.
     if (!bayElem->GetElement("symbol_topic"))
     {
-      ROS_ERROR("<gates::gate::symbol_topic> missing");
+      ROS_ERROR("<bays::bay::symbol_topic> missing");
       return false;
     }
     std::string symbolTopic = bayElem->Get<std::string>("symbol_topic");
@@ -379,7 +454,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: minimum time to be considered "docked".
     if (!bayElem->GetElement("min_dock_time"))
     {
-      ROS_ERROR("<gates::gate::min_dock_time> missing");
+      ROS_ERROR("<bays::bay::min_dock_time> missing");
       return false;
     }
     double minDockTime = bayElem->Get<double>("min_dock_time");
@@ -387,7 +462,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: dock allowed.
     if (!bayElem->GetElement("dock_allowed"))
     {
-      ROS_ERROR("<gates::gate::dock_allowed> missing");
+      ROS_ERROR("<bays::bay::dock_allowed> missing");
       return false;
     }
     bool dockAllowed = bayElem->Get<bool>("dock_allowed");
@@ -395,7 +470,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     std::string announceSymbol = "";
     if (!bayElem->HasElement("symbol"))
     {
-      ROS_ERROR("<symbol> not found");
+      ROS_ERROR("<bays::bay::symbol> not found");
     }
     announceSymbol =
       bayElem->GetElement("symbol")->Get<std::string>();
@@ -404,11 +479,13 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Create a new dock checker.
     #if GAZEBO_MAJOR_VERSION >= 8
       std::unique_ptr<DockChecker> dockChecker(
-        new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
+        new DockChecker(bayName, internalActivationTopic,
+          externalActivationTopic, minDockTime, dockAllowed,
           this->world->Name(), ns, announceSymbol, symbolTopic));
     #else
       std::unique_ptr<DockChecker> dockChecker(
-        new DockChecker(bayName, activationTopic, minDockTime, dockAllowed,
+        new DockChecker(bayName, internalActivationTopic,
+          externalActivationTopic, minDockTime, dockAllowed,
           this->world->GetName(), ns, announceSymbol, symbolTopic));
     #endif
 
@@ -458,8 +535,8 @@ void ScanDockScoringPlugin::Update()
     // We always need to update the checkers.
     dockChecker->Update();
 
-    // Nothing to do if nobody ever docked or we're currently docked.
-    if (!dockChecker->AnytimeDocked() || dockChecker->CurrentlyDocked())
+    // Nothing to do if nobody ever docked or we're still inside the bay.
+    if (!dockChecker->AnytimeDocked() || !dockChecker->AtEntrance())
       continue;
 
     // Points granted for docking!
