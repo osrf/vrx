@@ -11,25 +11,34 @@
 
     <!-- The 2018 dock with the two placards -->
     <include>
-      <uri>model://dock_2018</uri>
+      <uri>model://dock_2018_dynamic</uri>
       <pose>60 -2.75 0 0 0 0</pose>
     </include>
 
     <!-- Uncomment to visualize the bay #1 activation zone -->
-    <!-- <model name="activation_placard1">
+    <!--
+    <model name="activation_placard1">
+      <pose frame="robotx_dock_2018::dock_2018_placard1::placard::link">
+        0 0 10 0 0 0 </pose>
       <static>true</static>
       <link name="link">
+        <pose frame="robotx_dock_2018::dock_2018_placard1::placard::link">
+        0 0 10 0 0 0 </pose>
         <visual name="visual">
-          <pose>72.75 0 0 0 0 0</pose>
           <geometry>
             <box>
               <size>1.5 4 2</size>
             </box>
           </geometry>
-          <transparency>0.8</transparency>
+          <transparency>0.0</transparency>
         </visual>
       </link>
-    </model> -->
+      <joint name="act1" type="fixed">
+        <child>robotx_dock_2018::dock_2018_placard1::placard::link</child>
+        <parent>link</parent>
+      </joint>
+    </model>
+  -->
 
     <!-- Uncomment to visualize the bay #2 activation zone -->
     <!-- <model name="activation_placard2">
@@ -103,7 +112,7 @@
       <pose frame="robotx_dock_2018::dock_2018_placard1::placard::link">0 -5 -1.5 0 0 0</pose>
       <geometry>
         <box>
-          <size>40 15 20</size>
+          <size>4 1.5 2</size>
         </box>
       </geometry>
     </plugin>
@@ -115,7 +124,7 @@
       <pose frame="robotx_dock_2018::dock_2018_placard2::placard::link">0 5 -1.5 0 0 0</pose>
       <geometry>
         <box>
-          <size>40 15 20</size>
+          <size>4 1.5 2</size>
         </box>
       </geometry>
     </plugin>

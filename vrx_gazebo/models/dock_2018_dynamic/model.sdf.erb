@@ -75,7 +75,7 @@
     <model name="dock_2018_placard<%= i %>">
       <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
       <include>
-      <pose> 0 0 0.25 0 0 0</pose>
+        <pose> 0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
@@ -142,6 +142,34 @@
         <parent>placard::link</parent>
         <child>link_symbols</child>
       </joint>
+      
+      <!-- For visualizing ContainPlugin volume 
+           Make sure that the size and location are consistent with plugin -->
+      <link name="bay_visualization">
+        <% if i == 1%>
+        <pose frame="placard::link">0 -5 -1.5 0 0 0</pose>
+        <% else %>
+        <pose frame="placard::link">0  5 -1.5 0 0 0</pose>
+        <% end %>
+        <visual name="bay_box">
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+          <geometry>
+            <box>
+              <size>1.5 4 2</size>
+            </box>
+          </geometry>
+          <transparency>0.0</transparency>
+        </visual>
+      </link>
+      <joint name="placard_to_bay" type="fixed">
+        <child>placard::link</child>
+        <parent>bay_visualization</parent>
+      </joint>
 
     </model>
     <%
@@ -186,8 +214,5 @@
       <parent>dock_2018_placard2::placard::link</parent>
       <child>dock_2018_base::dock_block_3_1::link</child>
     </joint>
-
   </model>
-
-
 </sdf>
