@@ -12,7 +12,7 @@
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://dock_2018_dynamic</uri>
-      <pose>60 -2.75 0 0 0 0</pose>
+      <pose>125 85 0 0 0 0.32</pose>
     </include>
 
     <!-- Uncomment to visualize the bay #1 activation zone -->
