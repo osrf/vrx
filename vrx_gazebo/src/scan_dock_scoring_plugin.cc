@@ -292,7 +292,7 @@ void DockChecker::OnInternalActivationEvent(ConstIntPtr &_msg)
   }
 
   gzdbg << "[" << this->name << "] OnInternalActivationEvent(): "
-        << _msg.data() << std::endl;
+        << _msg->data() << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -312,7 +312,7 @@ void DockChecker::OnExternalActivationEvent(ConstIntPtr &_msg)
   }
 
   gzdbg << "[" << this->name << "] OnExternalActivationEvent(): "
-        << _msg.data() << std::endl;
+        << _msg->data() << std::endl;
 }
 #endif
 
