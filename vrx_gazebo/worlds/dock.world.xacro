@@ -15,47 +15,6 @@
       <pose>130 97 0 0 0 0</pose>
     </include>
 
-    <!-- Uncomment to visualize the bay #1 activation zone -->
-    <!--
-    <model name="activation_placard1">
-      <pose frame="robotx_dock_2018::dock_2018_placard1::placard::link">
-        0 0 10 0 0 0 </pose>
-      <static>true</static>
-      <link name="link">
-        <pose frame="robotx_dock_2018::dock_2018_placard1::placard::link">
-        0 0 10 0 0 0 </pose>
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.0</transparency>
-        </visual>
-      </link>
-      <joint name="act1" type="fixed">
-        <child>robotx_dock_2018::dock_2018_placard1::placard::link</child>
-        <parent>link</parent>
-      </joint>
-    </model>
-  -->
-
-    <!-- Uncomment to visualize the bay #2 activation zone -->
-    <!-- <model name="activation_placard2">
-      <static>true</static>
-      <link name="link">
-        <visual name="visual">
-          <pose>61.75 0 0 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.8</transparency>
-        </visual>
-      </link>
-    </model> -->
-
     <!-- The scoring plugin -->
     <plugin name="scan_dock_scoring_plugin"
             filename="libscan_dock_scoring_plugin.so">
