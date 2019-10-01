@@ -128,12 +128,17 @@ DockChecker::DockChecker(const std::string &_name,
 
   this->announceSymbol.data = _announceSymbol;
 
-  // Subscriber to receive world updates (e.g.: a notification after a cloning).
   this->node.reset(new gazebo::transport::Node());
   this->node->Init();
 
+  // Subscriber to receive ContainPlugin updates.
+#if GAZEBO_MAJOR_VERSION >= 8
+  this->ignNode.Subscribe(this->activationTopic,
+    &DockChecker::OnActivationEvent, this);
+#else
   this->containSub = this->node->Subscribe(this->activationTopic,
     &DockChecker::OnActivationEvent, this);
+#endif
 }
 
 /////////////////////////////////////////////////
@@ -188,6 +193,25 @@ void DockChecker::Update()
     this->timer.GetElapsed() >= gazebo::common::Time(this->minDockTime);
 }
 
+#if GAZEBO_MAJOR_VERSION >= 8
+/////////////////////////////////////////////////
+void DockChecker::OnActivationEvent(const ignition::msgs::Boolean &_msg)
+{
+  this->currentlyDocked = _msg.data() == 1;
+
+  if (_msg.data() == 1)
+    this->timer.Start();
+
+  if (_msg.data() == 0)
+  {
+    this->timer.Stop();
+    this->timer.Reset();
+  }
+
+  gzdbg << "[" << this->name << "] OnActivationEvent(): "
+        << _msg.data() << std::endl;
+}
+#else
 /////////////////////////////////////////////////
 void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
 {
@@ -205,6 +229,7 @@ void DockChecker::OnActivationEvent(ConstIntPtr &_msg)
   gzdbg << "[" << this->name << "] OnActivationEvent(): "
         << _msg->data() << std::endl;
 }
+#endif
 
 //////////////////////////////////////////////////
 ScanDockScoringPlugin::ScanDockScoringPlugin():
