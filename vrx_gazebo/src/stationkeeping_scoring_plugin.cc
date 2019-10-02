@@ -142,11 +142,12 @@ void StationkeepingScoringPlugin::Update()
   double currentHeading = robotPose.Rot().Euler().Z();
   double dx   =  this->goalX - robotPose.Pos().X();
   double dy   =  this->goalY - robotPose.Pos().Y();
-  double dhdg =  this->goalYaw - currentHeading;
+  double dhdg =  abs(this->goalYaw - currentHeading);
+  double headError = 1 - abs(dhdg - M_PI)/M_PI;
 
-  double sqError =  pow(dx, 2) + pow(dy, 2) + pow(dhdg, 2);
+  double sqError =  pow(dx, 2) + pow(dy, 2);
 
-  this->poseError  = sqrt(sqError);
+  this->poseError  = sqrt(sqError) + headError;
   this->totalSquaredError += sqError;
   this->sampleCount++;
 
