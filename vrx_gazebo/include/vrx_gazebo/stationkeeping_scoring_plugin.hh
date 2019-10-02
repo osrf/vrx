@@ -82,7 +82,7 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   private: std::string poseErrorTopic = "/vrx/station_keeping/pose_error";
 
   /// \brief Topic where mean pose error is published.
-  private: std::string meanErrorTopic = "/vrx/station_keeping/mean_error";
+  private: std::string meanErrorTopic = "/vrx/station_keeping/rms_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
