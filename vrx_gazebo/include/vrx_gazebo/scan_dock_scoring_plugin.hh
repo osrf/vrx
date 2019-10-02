@@ -26,6 +26,9 @@
 #include <string>
 #include <vector>
 #include <gazebo/gazebo.hh>
+#if GAZEBO_MAJOR_VERSION >= 8
+  #include <ignition/transport/Node.hh>
+#endif
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/ColorSequence.h"
 #include "vrx_gazebo/scoring_plugin.hh"
@@ -92,7 +95,10 @@ class DockChecker
 {
   /// \brief Constructor.
   /// \param[in] _name The name of the checker (only used for debugging).
-  /// \param[in] _activationTopic The gazebo topic used to receive notifications
+  /// \param[in] _internalActivationTopic The gazebo topic used to receive
+  /// notifications about the internal activation zone.
+  /// \param[in] _externalActivationTopic The gazebo topic used to receive
+  /// notifications about the external activation zone.
   /// from the "contain" plugin.
   /// \param[in] _minDockTime Minimum amount of seconds to stay docked to be
   /// considered a fully successfull dock.
@@ -100,7 +106,8 @@ class DockChecker
   /// \param[in] _worldName Gazebo world name.
   /// \param[in] _announceSymbol Optional symbol to announce via ROS.
   public: DockChecker(const std::string &_name,
-                      const std::string &_activationTopic,
+                      const std::string &_internalActivationTopic,
+                      const std::string &_exteriorActivationTopic,
                       const double _minDockTime,
                       const bool _dockAllowed,
                       const std::string &_worldName,
@@ -108,13 +115,16 @@ class DockChecker
                       const std::string &_announceSymbol,
                       const std::string &_gzSymbolTopic);
 
+  /// \brief The name of this checker.
+  public: std::string name;
+
   /// \brief Whether the robot has been successfully docked in this bay or not.
   /// \return True when the robot has been docked or false otherwise.
   public: bool AnytimeDocked() const;
 
-  /// \brief Whether the robot is currently docked in this bay or not.
-  /// \return True when the robot is currently docked or false otherwise.
-  public: bool CurrentlyDocked() const;
+  /// \brief Whether the robot is currently at the entrance of the bay.
+  /// \return True when the robot is at the entrance or false othwerwise.
+  public: bool AtEntrance() const;
 
   /// \brief Whether it is allowed to dock in this bay or not.
   public: bool Allowed() const;
@@ -128,14 +138,28 @@ class DockChecker
   /// \brief Callback triggered when the vehicle enters or exits the activation
   /// zone.
   /// \param[in] _msg The current state (0: exiting, 1: entering).
-  private: void OnActivationEvent(ConstIntPtr &_msg);
+#if GAZEBO_MAJOR_VERSION >= 8
+  private: void OnInternalActivationEvent(const ignition::msgs::Boolean &_msg);
+#else
+  private: void OnInternalActivationEvent(ConstIntPtr &_msg);
+#endif
 
-  /// \brief The name of this checker.
-  private: std::string name;
+  /// \brief Callback triggered when the vehicle enters or exits the activation
+  /// zone.
+  /// \param[in] _msg The current state (0: exiting, 1: entering).
+#if GAZEBO_MAJOR_VERSION >= 8
+  private: void OnExternalActivationEvent(const ignition::msgs::Boolean &_msg);
+#else
+  private: void OnExternalActivationEvent(ConstIntPtr &_msg);
+#endif
 
   /// \brief The gazebo topic used to receive notifications
-  /// from the "contain" plugin.
-  private: std::string activationTopic;
+  /// from the internal activation zone.
+  private: std::string internalActivationTopic;
+
+  /// \brief The gazebo topic used to receive notifications
+  /// from the external activation zone.
+  private: std::string externalActivationTopic;
 
   /// \brief The gazebo topic used to publish symbols to the placards
   private: std::string gzSymbolTopic;
@@ -150,6 +174,11 @@ class DockChecker
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: gazebo::common::Timer timer;
 
+#if GAZEBO_MAJOR_VERSION >= 8
+  /// \brief Ignition Transport node used for communication.
+  private: ignition::transport::Node ignNode;
+#endif
+
   /// \brief Create a node for communication.
   private: gazebo::transport::NodePtr node;
 
@@ -159,8 +188,8 @@ class DockChecker
   /// \brief Whether the vehicle has successfully docked or not.
   private: bool anytimeDocked = false;
 
-  /// \brief Whether the vehicle is currently docked or not.
-  private: bool currentlyDocked = false;
+  /// \brief Whether the vehicle is at the entrance of the bay or not.
+  private: bool atEntrance = false;
 
   /// \brief Color and shape of symbol to announce. E.g.: red_cross, blue_circle
   private: std_msgs::String announceSymbol;
@@ -200,8 +229,10 @@ class DockChecker
 ///   <bay>: A bay represents a potential play where a vehicle can dock. It has
 ///   the following required elements:
 ///     <name>The name of the bay. This is used for debugging only.
-///     <activation_topic>The gazebo topic used to receive notifications
-///     from the "contain" plugin.
+///     <internal_activation_topic>The gazebo topic used to receive
+///     notifications from the internal activation zone.
+///     <external_activation_topic>The gazebo topic used to receive
+///     notifications from the external activation zone.
 ///     <min_dock_time>Minimum amount of seconds to stay docked to be
 ///     considered a fully successfull dock.
 ///     <dockAllowed> Whether is allowed to dock in this bay or not.
@@ -246,14 +277,24 @@ class DockChecker
 ///   <bays>
 ///     <bay>
 ///       <name>bay1</name>
-///       <activation_topic>/vrx/dock_2018/bay_1/contain</activation_topic>
+///       <internal_activation_topic>
+///         /vrx/dock_2018/bay_1_internal/contain
+///       </internal_activation_topic>
+///       <external_activation_topic>
+///         /vrx/dock_2018/bay_1_external/contain
+///       </external_activation_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>false</dock_allowed>
 ///     </bay>
 ///
 ///     <bay>
 ///       <name>bay2</name>
-///       <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
+///       <internal_activation_topic>
+///         /vrx/dock_2018/bay_2_internal/contain
+///       </internal_activation_topic>
+///       <external_activation_topic>
+///         /vrx/dock_2018/bay_2_external/contain
+///       </external_activation_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>true</dock_allowed>
 ///       <symbol>red_circle</symbol>
