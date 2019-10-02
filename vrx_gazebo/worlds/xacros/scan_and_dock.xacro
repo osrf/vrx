@@ -42,7 +42,8 @@
       <bays>
         <bay>
           <name>bay1</name>
-          <activation_topic>/vrx/dock_2018/bay_1/contain</activation_topic>
+          <internal_activation_topic>/vrx/dock_2018/bay_1/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2018/bay_1_exterior/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2018_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>false</dock_allowed>
@@ -51,7 +52,8 @@
 
         <bay>
           <name>bay2</name>
-          <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
+          <internal_activation_topic>/vrx/dock_2018/bay_2/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2018/bay_2_exterior/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>true</dock_allowed>

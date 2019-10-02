@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="dock" params="uri:=dock_2018 x:=60 y:=-2.75 z:=0 
+  <xacro:macro name="dock" params="model_name:=robotx_dock_2018
+    uri:=dock_2018 x:=60 y:=-2.75 z:=0 
     R:=0 P:=0 Y:=0 bay1_allowed:=false bay1_symbol:=red_circle 
     bay2_allowed:=true bay2_symbol:=blue_cross
     light_buoy_present:=false 
@@ -50,7 +51,8 @@
       <bays>
         <bay>
           <name>bay1</name>
-          <activation_topic>/vrx/dock_2018/bay_1/contain</activation_topic>
+          <internal_activation_topic>/vrx/dock_2018/bay_1_internal/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2018/bay_1_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2018_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>${bay1_allowed}</dock_allowed>
@@ -59,7 +61,8 @@
  
         <bay>
           <name>bay2</name>
-          <activation_topic>/vrx/dock_2018/bay_2/contain</activation_topic>
+          <internal_activation_topic>/vrx/dock_2018/bay_2_internal/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2018/bay_2_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>${bay2_allowed}</dock_allowed>
@@ -71,23 +74,45 @@
     <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
     <plugin name="vehicle_docked_bay1" filename="libContainPlugin.so">
       <entity>wamv::base_link</entity>
-      <namespace>vrx/dock_2018/bay_1</namespace>
-      <pose frame="robotx_dock_2018::dock_2018_placard1::placard::link">0 -5 -1.5 0 0 0</pose>
+      <namespace>vrx/dock_2018/bay_1_internal</namespace>
+      <pose frame="${model_name}::dock_2018_placard1::placard::link">0 -5 -1.5 0 0 0</pose>
       <geometry>
         <box>
           <size>4 1.5 2</size>
         </box>
       </geometry>
     </plugin>
- 
+    <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
+    <plugin name="vehicle_docked_bay1_exterior" filename="libContainPlugin.so">
+      <entity>wamv::base_link</entity>
+      <namespace>vrx/dock_2018/bay_1_external</namespace>
+      <pose frame="${model_name}::dock_2018_placard1::placard::link">0 -10 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>8 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
     <!-- Triggers a message when the vehicle enters and exits the bay #2 -->
     <plugin name="vehicle_docked_bay2" filename="libContainPlugin.so">
       <entity>wamv::base_link</entity>
-      <namespace>vrx/dock_2018/bay_2</namespace>
-      <pose frame="robotx_dock_2018::dock_2018_placard2::placard::link">0 5 -1.5 0 0 0</pose>
+      <namespace>vrx/dock_2018/bay_2_internal</namespace>
+      <pose frame="${model_name}::dock_2018_placard2::placard::link">0 5 -1.5 0 0 0</pose>
       <geometry>
         <box>
           <size>4 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
+    <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
+    <plugin name="vehicle_docked_bay2_exterior" filename="libContainPlugin.so">
+      <entity>wamv::base_link</entity>
+      <namespace>vrx/dock_2018/bay_2_external</namespace>
+      <pose frame="${model_name}::dock_2018_placard1::placard::link">0 10 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>8 1.5 2</size>
         </box>
       </geometry>
     </plugin>
