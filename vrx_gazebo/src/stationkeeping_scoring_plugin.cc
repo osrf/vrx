@@ -149,7 +149,7 @@ void StationkeepingScoringPlugin::Update()
   this->totalPoseError += poseError;
   this->sampleCount++;
 
-  this->meanError = sqrt(this->totalPoseError / this->sampleCount);
+  this->meanError = this->totalPoseError / this->sampleCount;
 
   poseErrorMsg.data = this->poseError;
   meanErrorMsg.data = this->meanError;
