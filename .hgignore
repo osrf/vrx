@@ -11,3 +11,4 @@ build_*
 *.swp
 *.orig
 *.*~
+vrx_gazebo/models/dock_permutations/*
