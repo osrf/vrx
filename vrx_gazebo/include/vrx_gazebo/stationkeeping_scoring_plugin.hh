@@ -81,8 +81,8 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Topic where 2D pose error is published
   private: std::string poseErrorTopic = "/vrx/station_keeping/pose_error";
 
-  /// \brief Topic where total RMS pose error is published.
-  private: std::string rmsErrorTopic = "/vrx/station_keeping/rms_error";
+  /// \brief Topic where mean pose error is published.
+  private: std::string meanErrorTopic = "/vrx/station_keeping/mean_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
@@ -93,8 +93,8 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Publisher for the combined 2D pose error.
   private: ros::Publisher poseErrorPub;
 
-  /// \brief Publisher for the current rms error.
-  private: ros::Publisher rmsErrorPub;
+  /// \brief Publisher for the current mean error.
+  private: ros::Publisher meanErrorPub;
 
   /// \brief Goal pose in local (Gazebo) coordinates.
   private: double goalX;
@@ -117,11 +117,11 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Number of instant pose error scores calculated so far .
   private: unsigned int sampleCount = 0;
 
-  /// \brief Sum of squared error scores calculated so far.
-  private: double totalSquaredError;
+  /// \brief Sum of all pose error scores calculated so far.
+  private: double totalPoseError;
 
   /// \brief Cumulative 2D RMS error in meters.
-  private: double rmsError;
+  private: double meanError;
 
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: gazebo::common::Timer timer;
