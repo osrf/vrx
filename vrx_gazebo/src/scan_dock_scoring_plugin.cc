@@ -353,7 +353,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
   this->enableColorChecker = true;
   if (_sdf->HasElement("enable_color_checker"))
   {
-    enableColorChecker = 
+    enableColorChecker =
       _sdf->GetElement("enable_color_checker")->Get<bool>();
   }
   // Optional: ROS service.
@@ -407,7 +407,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
   if (this->enableColorChecker)
   {
     this->colorChecker.reset(
-      new ColorSequenceChecker(this->expectedSequence, ns, 
+      new ColorSequenceChecker(this->expectedSequence, ns,
                                 colorSequenceService));
   }
 

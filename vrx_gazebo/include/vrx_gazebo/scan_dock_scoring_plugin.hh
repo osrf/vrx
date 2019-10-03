@@ -215,7 +215,7 @@ class DockChecker
 /// plugin for other required SDF elements.
 /// This plugin requires the following SDF parameters:
 ///
-/// <enable_color_checker>: Optional parameter to turn off color checker 
+/// <enable_color_checker>: Optional parameter to turn off color checker
 /// service - default is true.
 /// <robot_namespace>: Optional parameter with the ROS namespace.
 /// <color_sequence_service>: Optional paramter with the ROS service used to
@@ -342,7 +342,7 @@ class ScanDockScoringPlugin : public ScoringPlugin
   private: std::vector<std::unique_ptr<DockChecker>> dockCheckers;
 
   /// \brief To check colors or not
-  private: bool enableColorChecker = true; 
+  private: bool enableColorChecker = true;
 
   /// \brief Whether we have processed the color sequence submission or not.
   private: bool colorSubmissionProcessed = false;
