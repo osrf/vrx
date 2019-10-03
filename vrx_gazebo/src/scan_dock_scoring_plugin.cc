@@ -87,6 +87,7 @@ bool ColorSequenceChecker::OnColorSequence(
   // Sanity check: Make sure that we have the expected color sequence.
   if (this->expectedSequence.size() != 3u)
   {
+    ROS_ERROR("The color sequence is not of size 3 - will be ignored.");
     res.success = false;
     return false;
   }
@@ -104,6 +105,16 @@ bool ColorSequenceChecker::OnColorSequence(
       color1 == this->expectedSequence[0] &&
       color2 == this->expectedSequence[1] &&
       color3 == this->expectedSequence[2];
+  if (this->correctSequence)
+  {
+    ROS_INFO_NAMED("ColorSequenceChecker", "Received color sequence is "
+      "correct.  Additional points will be scored.");
+  }
+  else
+  {
+    ROS_INFO_NAMED("ColorSequenceChecker", "Received color sequence is "
+      "not correct. No additional points.");
+  }
 
   // The submission is considered correct even if the sequence is wrong.
   res.success = true;
@@ -535,7 +546,11 @@ void ScanDockScoringPlugin::Update()
     {
       // We need to decide if we grant extra points.
       if (this->colorChecker->Correct())
+      {
+        gzmsg << "Adding <" << this->colorBonusPoints << "> points for correct "
+          << "reporting of color sequence" << std::endl;
         this->SetScore(this->Score() + this->colorBonusPoints);
+      }
 
       // We only allow one color sequence submission.
       this->colorChecker->Disable();
