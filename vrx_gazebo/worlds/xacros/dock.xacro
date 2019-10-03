@@ -7,7 +7,8 @@
     bay2_allowed:=true bay2_symbol:=blue_cross
     light_buoy_present:=false 
     color_1:=red color_2:=green color_3:=blue
-    lb_x:=90 lb_y:=70 lb_z:=0 lb_R:=0 lb_P:=0 lb_Y:=0">
+    lb_x:=90 lb_y:=70 lb_z:=0 lb_R:=0 lb_P:=0 lb_Y:=0
+    enable_color_checker:=true">
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://${uri}</uri>
@@ -41,6 +42,7 @@
       </release_joints>
 
       <!-- Color sequence checker -->
+      <enable_color_checker>${enable_color_checker}</enable_color_checker>
       <robot_namespace>vrx</robot_namespace>
       <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
       <color_1>${color_1}</color_1>

@@ -349,6 +349,13 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
   if (_sdf->HasElement("robot_namespace"))
     ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
 
+  // Enable color checker - default is true
+  this->enableColorChecker = true;
+  if (_sdf->HasElement("enable_color_checker"))
+  {
+    enableColorChecker =
+      _sdf->GetElement("enable_color_checker")->Get<bool>();
+  }
   // Optional: ROS service.
   std::string colorSequenceService = "/vrx/scan_dock/color_sequence";
   if (_sdf->HasElement("color_sequence_service"))
@@ -397,8 +404,12 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
   }
 
   // Instantiate the color checker.
-  this->colorChecker.reset(
-    new ColorSequenceChecker(this->expectedSequence, ns, colorSequenceService));
+  if (this->enableColorChecker)
+  {
+    this->colorChecker.reset(
+      new ColorSequenceChecker(this->expectedSequence, ns,
+                                colorSequenceService));
+  }
 
   // Required: Parse the bays.
   if (!_sdf->HasElement("bays"))
@@ -516,17 +527,20 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
 //////////////////////////////////////////////////
 void ScanDockScoringPlugin::Update()
 {
-  // Verify the color checker.
-  if (!this->colorSubmissionProcessed &&
-      this->colorChecker->SubmissionReceived())
+  if (this->enableColorChecker)
   {
-    // We need to decide if we grant extra points.
-    if (this->colorChecker->Correct())
-      this->SetScore(this->Score() + this->colorBonusPoints);
+    // Verify the color checker.
+    if (!this->colorSubmissionProcessed &&
+        this->colorChecker->SubmissionReceived())
+    {
+      // We need to decide if we grant extra points.
+      if (this->colorChecker->Correct())
+        this->SetScore(this->Score() + this->colorBonusPoints);
 
-    // We only allow one color sequence submission.
-    this->colorChecker->Disable();
-    this->colorSubmissionProcessed = true;
+      // We only allow one color sequence submission.
+      this->colorChecker->Disable();
+      this->colorSubmissionProcessed = true;
+    }
   }
 
   // Verify the dock checkers.
@@ -594,7 +608,10 @@ void ScanDockScoringPlugin::OnRunning()
   colors.set_color_3(this->expectedSequence[2]);
   lightBuoySequencePub->Publish(colors);
 
-  this->colorChecker->Enable();
+  if (this->enableColorChecker)
+  {
+    this->colorChecker->Enable();
+  }
   // Announce the symbol if needed.
   for (auto &dockChecker : this->dockCheckers)
     dockChecker->AnnounceSymbol();
