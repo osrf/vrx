@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.6 (2019-10-04)
+------------------
 * new worlds with only one dock
 * Scan and dock worlds - models are aleady present
 * Merged in stationkeeping_wind (pull request #187)
