@@ -6,177 +6,10 @@
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- COORDINATE: {'tasks': 2, 'constant': 0} -->
   <world name="robotx_example_course" xmlns:xacro="http://ros.org/wiki/xacro">
-    <model name="ocean_waves">
-      <static>true</static>
-      <plugin filename="libWavefieldModelPlugin.so" name="wavefield_plugin">
-        <static>false</static>
-        <update_rate>30</update_rate>
-        <size>1000 1000</size>
-        <cell_count>50 50</cell_count>
-        <wave>
-          <model>PMS</model>
-          <period>3.0</period>
-          <number>3</number>
-          <scale>1.5</scale>
-          <gain>0.7</gain>
-          <direction>0.37 -0.92</direction>
-          <angle>0.4</angle>
-          <tau>2.0</tau>
-          <amplitude>0.0</amplitude>
-          <!-- No effect for the PMS model -->
-          <steepness>0.0</steepness>
-        </wave>
-      </plugin>
-      <link name="ocean_waves_link">
-        <visual name="ocean_waves_visual">
-          <plugin filename="libWavefieldVisualPlugin.so" name="ocean_waves_visual_plugin">
-            <enableRtt>true</enableRtt>
-            <rttNoise>0.1</rttNoise>
-            <refractOpacity>0.2</refractOpacity>
-            <reflectOpacity>0.2</reflectOpacity>
-            <wave>
-              <model>PMS</model>
-              <period>3.0</period>
-              <number>3</number>
-              <scale>1.5</scale>
-              <gain>0.7</gain>
-              <direction>0.37 -0.92</direction>
-              <angle>0.4</angle>
-              <tau>2.0</tau>
-              <amplitude>0.0</amplitude>
-              <!-- No effect for the PMS model -->
-              <steepness>0.0</steepness>
-            </wave>
-          </plugin>
-          <geometry>
-            <mesh>
-              <uri>model://ocean_waves/meshes/mesh.dae</uri>
-            </mesh>
-          </geometry>
-          <material>
-            <script>
-              <uri>model://ocean_waves/materials/scripts/waves.material</uri>
-              <name>WaveSim/GerstnerWaves</name>
-            </script>
-          </material>
-          <laser_retro>-1</laser_retro>
-        </visual>
-        <visual name="ocean_waves_below_visual">
-          <pose>0 0 -0.05 0 0 0</pose>
-          <!-- Offset to prevent rendering conflict -->
-          <geometry>
-            <mesh>
-              <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
-            </mesh>
-          </geometry>
-          <material>
-            <script>
-              <uri>model://ocean_waves/materials/scripts/waves.material</uri>
-              <name>WaveSim/GerstnerWaves</name>
-            </script>
-          </material>
-          <laser_retro>-1</laser_retro>
-        </visual>
-      </link>
-    </model>
-    <!-- The 2018 dock with the two placards -->
-    <include>
-      <uri>model://vrx_dock_blue_circle__blue_cross</uri>
-      <pose>111 90 -0.2 0 0 2.76</pose>
-    </include>
-    <!-- The scoring plugin -->
-    <plugin filename="libscan_dock_scoring_plugin.so" name="scan_dock_scoring_plugin">
-      <!-- Parameters for scoring_plugin -->
-      <vehicle>wamv</vehicle>
-      <task_name>scan_dock</task_name>
-      <initial_state_duration>3</initial_state_duration>
-      <ready_state_duration>3</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
-      <release_joints>
-        <joint>
-          <name>wamv_external_pivot_joint</name>
-        </joint>
-        <joint>
-          <name>wamv_external_riser</name>
-        </joint>
-      </release_joints>
-      <!-- Color sequence checker -->
-      <enable_color_checker>False</enable_color_checker>
-      <robot_namespace>vrx</robot_namespace>
-      <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
-      <color_1>red</color_1>
-      <color_2>green</color_2>
-      <color_3>blue</color_3>
-      <!-- Dock checkers -->
-      <bays>
-        <bay>
-          <name>bay1</name>
-          <internal_activation_topic>/vrx/dock_2018/bay_1_internal/contain</internal_activation_topic>
-          <external_activation_topic>/vrx/dock_2018/bay_1_external/contain</external_activation_topic>
-          <symbol_topic>/vrx/dock_2018_placard1/symbol</symbol_topic>
-          <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>False</dock_allowed>
-          <symbol>blue_circle</symbol>
-        </bay>
-        <bay>
-          <name>bay2</name>
-          <internal_activation_topic>/vrx/dock_2018/bay_2_internal/contain</internal_activation_topic>
-          <external_activation_topic>/vrx/dock_2018/bay_2_external/contain</external_activation_topic>
-          <symbol_topic>/vrx/dock_2018_placard2/symbol</symbol_topic>
-          <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>False</dock_allowed>
-          <symbol>blue_cross</symbol>
-        </bay>
-      </bays>
-    </plugin>
-    <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
-    <plugin filename="libContainPlugin.so" name="vehicle_docked_bay1">
-      <entity>wamv::base_link</entity>
-      <namespace>vrx/dock_2018/bay_1_internal</namespace>
-      <pose frame="vrx_dock_blue_circle__blue_cross::dock_2018_placard1::placard::link">0 -5 -1.5 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>4 1.5 2</size>
-        </box>
-      </geometry>
-    </plugin>
-    <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
-    <plugin filename="libContainPlugin.so" name="vehicle_docked_bay1_exterior">
-      <entity>wamv::base_link</entity>
-      <namespace>vrx/dock_2018/bay_1_external</namespace>
-      <pose frame="vrx_dock_blue_circle__blue_cross::dock_2018_placard1::placard::link">0 -10 -1.5 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>8 1.5 2</size>
-        </box>
-      </geometry>
-    </plugin>
-    <!-- Triggers a message when the vehicle enters and exits the bay #2 -->
-    <plugin filename="libContainPlugin.so" name="vehicle_docked_bay2">
-      <entity>wamv::base_link</entity>
-      <namespace>vrx/dock_2018/bay_2_internal</namespace>
-      <pose frame="vrx_dock_blue_circle__blue_cross::dock_2018_placard2::placard::link">0 5 -1.5 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>4 1.5 2</size>
-        </box>
-      </geometry>
-    </plugin>
-    <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
-    <plugin filename="libContainPlugin.so" name="vehicle_docked_bay2_exterior">
-      <entity>wamv::base_link</entity>
-      <namespace>vrx/dock_2018/bay_2_external</namespace>
-      <pose frame="vrx_dock_blue_circle__blue_cross::dock_2018_placard1::placard::link">0 10 -1.5 0 0 0</pose>
-      <geometry>
-        <box>
-          <size>8 1.5 2</size>
-        </box>
-      </geometry>
-    </plugin>
     <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://vrx_dock_red_cross__red_triangle</uri>
-      <pose>45 85 -0.2 0 0 -1.2</pose>
+      <pose>45 85 -0.2 0 0 0</pose>
     </include>
     <!-- The scoring plugin -->
     <plugin filename="libscan_dock_scoring_plugin.so" name="scan_dock_scoring_plugin">
@@ -267,6 +100,79 @@
         </box>
       </geometry>
     </plugin>
+    <model name="ocean_waves">
+      <static>true</static>
+      <plugin filename="libWavefieldModelPlugin.so" name="wavefield_plugin">
+        <static>false</static>
+        <update_rate>30</update_rate>
+        <size>1000 1000</size>
+        <cell_count>50 50</cell_count>
+        <wave>
+          <model>PMS</model>
+          <period>3.0</period>
+          <number>3</number>
+          <scale>1.5</scale>
+          <gain>0.7</gain>
+          <direction>0.37 -0.92</direction>
+          <angle>0.4</angle>
+          <tau>2.0</tau>
+          <amplitude>0.0</amplitude>
+          <!-- No effect for the PMS model -->
+          <steepness>0.0</steepness>
+        </wave>
+      </plugin>
+      <link name="ocean_waves_link">
+        <visual name="ocean_waves_visual">
+          <plugin filename="libWavefieldVisualPlugin.so" name="ocean_waves_visual_plugin">
+            <enableRtt>true</enableRtt>
+            <rttNoise>0.1</rttNoise>
+            <refractOpacity>0.2</refractOpacity>
+            <reflectOpacity>0.2</reflectOpacity>
+            <wave>
+              <model>PMS</model>
+              <period>3.0</period>
+              <number>3</number>
+              <scale>1.5</scale>
+              <gain>0.7</gain>
+              <direction>0.37 -0.92</direction>
+              <angle>0.4</angle>
+              <tau>2.0</tau>
+              <amplitude>0.0</amplitude>
+              <!-- No effect for the PMS model -->
+              <steepness>0.0</steepness>
+            </wave>
+          </plugin>
+          <geometry>
+            <mesh>
+              <uri>model://ocean_waves/meshes/mesh.dae</uri>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://ocean_waves/materials/scripts/waves.material</uri>
+              <name>WaveSim/GerstnerWaves</name>
+            </script>
+          </material>
+          <laser_retro>-1</laser_retro>
+        </visual>
+        <visual name="ocean_waves_below_visual">
+          <pose>0 0 -0.05 0 0 0</pose>
+          <!-- Offset to prevent rendering conflict -->
+          <geometry>
+            <mesh>
+              <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
+            </mesh>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://ocean_waves/materials/scripts/waves.material</uri>
+              <name>WaveSim/GerstnerWaves</name>
+            </script>
+          </material>
+          <laser_retro>-1</laser_retro>
+        </visual>
+      </link>
+    </model>
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <plugin filename="libusv_gazebo_wind_plugin.so" name="wind">
       <!-- models to be effected by the wind -->
