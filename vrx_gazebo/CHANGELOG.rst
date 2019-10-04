@@ -2,6 +2,68 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* new worlds with only one dock
+* Scan and dock worlds - models are aleady present
+* Merged in stationkeeping_wind (pull request #187)
+  Default Wind for Tasks
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+* Adding stdout messages when to help with debugging color sequence checking service
+* Adding navigation course models and worlds.
+* Adding practice perception worlds.
+* adding dock worlds and associated models to support dress rehearsal practice
+* style
+* Functionality to turn off color checker in the scan_dock_scoring_plugin
+* restore rms_error topic name
+* merging default
+* Merged in issue_164 (pull request #188)
+  Fixing dock scoring plugin for Gazebo 9
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+* tweak to generator to allow calling same macro more than once
+* towards permutations
+* adding empty directory
+* Remove dock_2018_dynamic/model.sdf
+* fix meanError equation
+* switching from RMS error to mean pose error
+* new heading error formula
+* adding model_name paramter to dock.xacro for flexibility in generating automated tasks
+* state diagram
+* images for wiki
+* Tweak
+* Double activation zone.
+* Style.
+* removing activation zone viz from world.xacro
+* adding gzmsgs
+* merging with issue_164 and moving dock closer to WAMV
+* increment
+* Moving dock closer to WAMV
+* Functional
+* temporary
+* working on brute force docking solution
+* easier setup, but not working?
+* adding insert blocks to generate debug markers for wayfinding and stationkeeping tasks
+* Tweak
+* Fixing dock scoring plugin for Gazebo 9.
+* Move lock_guard.
+* code check whitespace
+* reinit when getting new color seq.
+* adding default wind to dock, scan-dock and wayfinding tasks
+* connecting usv_wind_plugin to stationkeeping world
+* Model default is off.
+* adding params to dock.xacro for task/trial generation
+* adds light buoys
+* changes to debugging messages to help find issues with docking
+* More Python3 tweaks.
+* Remove .keys().
+* Easy docking example for testing
+* adding wamv_locked argument to vrx.launch
+* adding fog and ambient elements to sandisland xacro
+* messing with plugins
+* simple macro for inserting a model - useful for task generation
+* a bit of a hack, but allows us repeated use of same macro
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, m1chaelm
+
 1.2.5 (2019-09-19)
 ------------------
 * Remove <announce_symbol> parameter.
