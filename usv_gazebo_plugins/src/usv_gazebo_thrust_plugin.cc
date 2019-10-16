@@ -436,7 +436,7 @@ void UsvThrust::SpinPropeller(size_t _i)
   // Calculate effort on propeller joint
   if (std::abs(this->thrusters[_i].currCmd/
               this->thrusters[_i].maxCmd) > kMinInput)
-    effort = (this->thrusters[_i].currCmd / 
+    effort = (this->thrusters[_i].currCmd /
               this->thrusters[_i].maxCmd) * kMaxEffort;
 
   propeller->SetForce(0, effort);
