@@ -8,6 +8,9 @@
   <!-- If true, run gazebo in verbose mode -->
   <arg name="verbose" default="false"/>
 
+  <!-- Needed to find the WAM-V model during playback -->
+  <env name="GAZEBO_MODEL_PATH" value="$(find wamv_description)/models:$(optenv GAZEBO_MODEL_PATH)"/>
+
   <!-- Start Gazebo with the recorded log file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="extra_gazebo_args" value="-p $(arg log_file)"/>
