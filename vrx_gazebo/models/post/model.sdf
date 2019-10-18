@@ -4,20 +4,27 @@
     <static>true</static>
     <pose>0 0 0 0 0 0</pose>
     <link name="base_link">
-      <visual name="visual">
+      <visual name="visual_1">
         <geometry>
-           <mesh>
-            <uri>file://post/meshes/post.dae</uri>
-          </mesh>
+          <box>
+            <size>1 0.2 0.2</size>
+          </box>
+        </geometry>
+      </visual>
+      <visual name="visual_2">
+        <pose>0.4 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.4 0.4 0.4</size>
+          </box>
         </geometry>
       </visual>
       <collision name="collision">
         <pose>0 0 0.5 0 0 0</pose>
         <geometry>
-          <cylinder>
-            <radius>0.3</radius>
-            <length>1</length>
-          </cylinder>
+          <box>
+            <size>1 0.2 1</size>
+          </box>
         </geometry>
       </collision>
     </link>

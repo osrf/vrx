@@ -3,8 +3,13 @@
   <xacro:property name="platform_z" value="1.2965"/>
   <xacro:property name="sail_length_x" value="1"/>
   <xacro:property name="sail_length_y" value="0.2"/>
-  <xacro:property name="sail_length_z" value="1"/>
+  <xacro:property name="sail_length_z" value="2"/>
   <xacro:property name="sail_z" value="${platform_z+sail_length_z/2}"/>
+  <xacro:property name="rudder_length_x" value="2"/>
+  <xacro:property name="rudder_length_y" value="0.2"/>
+  <xacro:property name="rudder_length_z" value="0.2"/>
+  <xacro:property name="rudder_x" value="-1"/>
+  <xacro:property name="rudder_z" value="${platform_z-1}"/>
 
   <!-- Macro for creating the main collisions as simple shapes. -->
   <xacro:macro name="main_collisions" params="prefix reflect:=1">
@@ -116,12 +121,37 @@
   <link name="sail_link">
     <visual>
       <geometry>
-        <box size="1 0.25 1" />
+        <box size="${sail_length_x} ${sail_length_y} ${sail_length_z}" />
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <box size="1 0.25 1" />
+        <box size="${sail_length_x} ${sail_length_y} ${sail_length_z}" />
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1"/>
+      <inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+
+  <joint name="rudder_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="rudder_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="${-pi}" upper="${pi}" effort="10" velocity="10"/>
+    <origin xyz="${rudder_x} 0 ${rudder_z}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="rudder_link">
+    <visual>
+      <geometry>
+        <box size="${rudder_length_x} ${rudder_length_y} ${rudder_length_z}" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${rudder_length_x} ${rudder_length_y} ${rudder_length_z}" />
       </geometry>
     </collision>
     <inertial>
