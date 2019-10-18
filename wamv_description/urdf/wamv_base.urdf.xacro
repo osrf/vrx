@@ -8,7 +8,7 @@
   <xacro:property name="rudder_length_x" value="2"/>
   <xacro:property name="rudder_length_y" value="0.2"/>
   <xacro:property name="rudder_length_z" value="0.2"/>
-  <xacro:property name="rudder_x" value="-1"/>
+  <xacro:property name="rudder_x" value="-4"/>
   <xacro:property name="rudder_z" value="${platform_z-1}"/>
 
   <!-- Macro for creating the main collisions as simple shapes. -->
