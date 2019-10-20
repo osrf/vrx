@@ -2,6 +2,13 @@
 <launch>
   <arg name="max_angle" default="$(eval pi/2)"/>
 
+  <!-- Set thruster angles -->
+  <node pkg="vrx_gazebo" type="key2thrust_angle.py" name="key2thrust_angle" output="screen">
+    <param name="max_angle" value="$(arg max_angle)"/>
+    <remap from="left_thrust_angle" to="/wamv/thrusters/left_thrust_angle"/>
+    <remap from="right_thrust_angle" to="/wamv/thrusters/right_thrust_angle"/>
+  </node>
+
   <!-- Keyboard teleop -->
   <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen">
   </node>
@@ -10,11 +17,6 @@
   <node pkg="vrx_gazebo" type="twist2thrust.py" name="twist2thrust" output="screen" args="--keyboard">
     <remap from="left_cmd" to="/wamv/thrusters/left_thrust_cmd"/>
     <remap from="right_cmd" to="/wamv/thrusters/right_thrust_cmd"/>
-  </node>
-
-  <!-- Set thruster angles -->
-  <node pkg="vrx_gazebo" type="key2thrust_angle.py" name="key2thrust_angle" output="screen">
-    <param name="max_angle" value="$(arg max_angle)"/>
   </node>
 
 </launch>
