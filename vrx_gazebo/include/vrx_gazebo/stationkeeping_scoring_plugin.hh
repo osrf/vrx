@@ -118,7 +118,7 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   private: unsigned int sampleCount = 0;
 
   /// \brief Sum of all pose error scores calculated so far.
-  private: double totalPoseError;
+  private: double totalPoseError = 0;
 
   /// \brief Cumulative 2D RMS error in meters.
   private: double meanError;
