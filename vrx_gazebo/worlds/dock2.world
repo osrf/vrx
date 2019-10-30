@@ -15,7 +15,7 @@
     <plugin filename="libscan_dock_scoring_plugin.so" name="scan_dock_scoring_plugin">
       <!-- Parameters for scoring_plugin -->
       <vehicle>wamv</vehicle>
-      <task_name>scan_dock</task_name>
+      <task_name>scan</task_name>
       <initial_state_duration>3</initial_state_duration>
       <ready_state_duration>3</ready_state_duration>
       <running_state_duration>300</running_state_duration>
