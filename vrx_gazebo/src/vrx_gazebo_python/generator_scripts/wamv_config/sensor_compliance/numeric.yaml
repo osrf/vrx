@@ -48,6 +48,6 @@ lidar:
         type
 
 wamv_p3d:
-    num: 1
+    num: 0
     allowed_params:
         name
