@@ -146,7 +146,7 @@ void StationkeepingScoringPlugin::Update()
   double headError = 1 - abs(dhdg - M_PI)/M_PI;
 
   this->poseError  = sqrt(pow(dx, 2) + pow(dy, 2)) + headError;
-  this->totalPoseError += poseError;
+  this->totalPoseError += this->poseError;
   this->sampleCount++;
 
   this->meanError = this->totalPoseError / this->sampleCount;
