@@ -153,6 +153,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Tries to release the vehicle in case is locked.
   protected: virtual void ReleaseVehicle();
 
+  /// \brief Set the score in case of timeout
+  protected: void SetTimeoutScore(double _timeoutScore);
+
   /// \brief Callback executed at every world update.
   private: void Update();
 
@@ -209,6 +212,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Last collision time.
   protected: gazebo::common::Time lastCollisionTime;
 
+  /// \brief Duration (seconds) of the running state (max task time).
+  protected: double runningStateDuration = 300.0;
+
   /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr gzNode;
 
@@ -241,9 +247,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Duration (seconds) of the ready state.
   private: double readyStateDuration = 60.0;
-
-  /// \brief Duration (seconds) of the running state (max task time).
-  private: double runningStateDuration = 300.0;
 
   /// \brief Absolute time specifying the start of the ready state.
   private: gazebo::common::Time readyTime;
@@ -301,6 +304,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Publisher for the collision.
   private: ros::Publisher contactPub;
+
+  /// \brief Score in case of timeout - added for Navigation task
+  private: double timeoutScore = -1.0;
 };
 
 #endif

@@ -175,6 +175,9 @@ class NavigationScoringPlugin : public ScoringPlugin
   /// \brief All the gates.
   private: std::vector<Gate> gates;
 
+  /// \brief Number of gates
+  private: int numGates;
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
@@ -183,6 +186,7 @@ class NavigationScoringPlugin : public ScoringPlugin
 
   /// \brief Number of points deducted per collision.
   private: double obstaclePenalty = 10.0;
+
 };
 
 #endif
