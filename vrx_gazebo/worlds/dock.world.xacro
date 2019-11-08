@@ -48,6 +48,7 @@
 
       <!-- Color sequence checker -->
       <robot_namespace>vrx</robot_namespace>
+      <enable_color_checker>False</enable_color_checker>
       <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
       <color_1>red</color_1>
       <color_2>green</color_2>

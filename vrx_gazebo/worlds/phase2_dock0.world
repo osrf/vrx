@@ -28,7 +28,7 @@
         </joint>
       </release_joints>
       <!-- Color sequence checker -->
-      <enable_color_checker>true</enable_color_checker>
+      <enable_color_checker>False</enable_color_checker>
       <robot_namespace>vrx</robot_namespace>
       <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
       <color_1>red</color_1>
