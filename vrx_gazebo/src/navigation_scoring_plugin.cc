@@ -137,6 +137,15 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     return;
   }
 
+  // Save number of gates
+  this->numGates = this->gates.size();
+
+  // Set default score in case of timeout.
+  double timeoutScore = 2.0 * this->GetRunningStateDuration() /
+                        static_cast<double>(this->numGates);
+  gzmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
+  this->ScoringPlugin::SetTimeoutScore(timeoutScore);
+
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
@@ -241,8 +250,10 @@ void NavigationScoringPlugin::Update()
   if (this->TaskState() != "running")
     return;
 
-  this->ScoringPlugin::SetScore(std::max(0.0, this->RemainingTime().Double() -
-    this->numCollisions * this->obstaclePenalty));
+  // Current score
+  this->ScoringPlugin::SetScore(std::min(this->GetRunningStateDuration(),
+    this->ElapsedTime().Double() +
+    this->numCollisions * this->obstaclePenalty)/this->numGates);
 
 #if GAZEBO_MAJOR_VERSION >= 8
   const auto robotPose = this->vehicleModel->WorldPose();
@@ -304,7 +315,7 @@ void NavigationScoringPlugin::Update()
 //////////////////////////////////////////////////
 void NavigationScoringPlugin::Fail()
 {
-  this->SetScore(0.0);
+  this->SetScore(this->ScoringPlugin::GetTimeoutScore());
   this->Finish();
 }
 

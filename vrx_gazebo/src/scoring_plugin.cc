@@ -256,6 +256,11 @@ void ScoringPlugin::OnRunning()
 void ScoringPlugin::OnFinished()
 {
   gzmsg << ros::Time::now() << "  OnFinished" << std::endl;
+  // If a timeoutScore was specified, use it.
+  if (this->timedOut && this->timeoutScore > 0.0)
+  {
+    this->score = this->timeoutScore;
+  }
   this->UpdateTaskMessage();
   this->taskPub.publish(this->taskMsg);
   this->Exit();
@@ -454,4 +459,19 @@ void ScoringPlugin::Exit()
               "not shutdown on ScoringPlugin::Exit()");
   }
   return;
+}
+
+void ScoringPlugin::SetTimeoutScore(double _timeoutScore)
+{
+  this->timeoutScore = _timeoutScore;
+}
+
+double ScoringPlugin::GetTimeoutScore()
+{
+  return this->timeoutScore;
+}
+
+double ScoringPlugin::GetRunningStateDuration()
+{
+  return this->runningStateDuration;
 }
