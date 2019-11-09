@@ -141,9 +141,10 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->numGates = this->gates.size();
 
   // Set default score in case of timeout.
-  double timeoutScore = 2.0 * this->runningStateDuration / ((double)this->numGates);
+  double timeoutScore = 2.0 * this->GetRunningStateDuration() /
+                        static_cast<double>(this->numGates);
   gzmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
-  this->ScoringPlugin::SetTimeoutScore( timeoutScore );
+  this->ScoringPlugin::SetTimeoutScore(timeoutScore);
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
@@ -250,8 +251,8 @@ void NavigationScoringPlugin::Update()
     return;
 
   // Current score
-  this->ScoringPlugin::SetScore(std::min(this->runningStateDuration,
-    this->ElapsedTime().Double() + 
+  this->ScoringPlugin::SetScore(std::min(this->GetRunningStateDuration(),
+    this->ElapsedTime().Double() +
     this->numCollisions * this->obstaclePenalty)/this->numGates);
 
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -314,7 +315,7 @@ void NavigationScoringPlugin::Update()
 //////////////////////////////////////////////////
 void NavigationScoringPlugin::Fail()
 {
-  this->SetScore(2.0*this->runningStateDuration);
+  this->SetScore(this->ScoringPlugin::GetTimeoutScore());
   this->Finish();
 }
 

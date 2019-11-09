@@ -156,6 +156,12 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Set the score in case of timeout
   protected: void SetTimeoutScore(double _timeoutScore);
 
+  /// \brief Get the timeoutScore
+  protected: double GetTimeoutScore();
+
+  /// \brief Get running duration
+  protected: double GetRunningStateDuration();
+
   /// \brief Callback executed at every world update.
   private: void Update();
 
@@ -212,9 +218,6 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Last collision time.
   protected: gazebo::common::Time lastCollisionTime;
 
-  /// \brief Duration (seconds) of the running state (max task time).
-  protected: double runningStateDuration = 300.0;
-
   /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr gzNode;
 
@@ -247,6 +250,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Duration (seconds) of the ready state.
   private: double readyStateDuration = 60.0;
+
+  /// \brief Duration (seconds) of the running state (max task time).
+  protected: double runningStateDuration = 300.0;
 
   /// \brief Absolute time specifying the start of the ready state.
   private: gazebo::common::Time readyTime;

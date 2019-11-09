@@ -186,7 +186,6 @@ class NavigationScoringPlugin : public ScoringPlugin
 
   /// \brief Number of points deducted per collision.
   private: double obstaclePenalty = 10.0;
-
 };
 
 #endif

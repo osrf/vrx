@@ -465,3 +465,13 @@ void ScoringPlugin::SetTimeoutScore(double _timeoutScore)
 {
   this->timeoutScore = _timeoutScore;
 }
+
+double ScoringPlugin::GetTimeoutScore()
+{
+  return this->timeoutScore;
+}
+
+double ScoringPlugin::GetRunningStateDuration()
+{
+  return this->runningStateDuration;
+}
