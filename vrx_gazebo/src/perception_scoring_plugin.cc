@@ -101,8 +101,8 @@ std::string PerceptionObject::Str()
 /////////////////////////////////////////////////
 void PerceptionObject::SetError(const double& _error)
 {
-  if (this->active && (_error < this->error || this->error < 0))
-    this->error = _error;
+  if (this->active)
+    this->error = std::min(2.0, std::min(this->error, _error));
 }
 
 /////////////////////////////////////////////////
@@ -276,7 +276,7 @@ void PerceptionScoringPlugin::Restart()
   for (auto& obj : this->objects)
   {
     // reset all objects' errors
-    obj.error = -1.0;
+    obj.error = 10.0;
     // bump all objs time to start again
     #if GAZEBO_MAJOR_VERSION >= 8
       obj.time += this->world->SimTime().Double();
@@ -340,11 +340,10 @@ void PerceptionScoringPlugin::OnUpdate()
       // inc objects despawned
       this->objectsDespawned += 1;
       obj.EndTrial();
-      // only add to score if its type was guessed correctly
-      if (obj.error != -1.0)
-      {
-        this->SetScore(this->Score() + obj.error);
-      }
+
+      // Add the score for this object.
+      this->SetScore(this->Score() + obj.error);
+
       ROS_INFO_NAMED("PerceptionScoring",
         "New Attempt Balance: %d", this->attemptBal);
     }
@@ -358,6 +357,11 @@ void PerceptionScoringPlugin::OnUpdate()
     {
       ROS_INFO_NAMED("PerceptionScoring", "%s", obj.Str().c_str());
     }
+
+    // Run score is the mean error per object.
+    this->SetScore(this->Score() / this->objects.size());
+    ROS_INFO_NAMED("Perception run score: ", "%f", this->Score());
+
     // if loop, restart
     if (this->loopForever)
     {
