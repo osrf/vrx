@@ -16,7 +16,7 @@
       </inertial>
     </link>
     <joint name="${name}_joint" type="revolute">
-      <axis xyz="0 0 0"/>
+      <axis xyz="0 0 1"/>
       <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
       <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}"/>
       <parent link="base_link"/>
