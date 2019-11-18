@@ -32,13 +32,13 @@ tasks:
                   /**object_sequence: "
                   <object>
                     <time>5</time>
-                    <type>surmark_950410</type>
+                    <type>surmark950410</type>
                     <name>red_0</name>
                     <pose>8 0 1 0 0 0</pose>
                   </object>
                   <object>
                     <time>5</time>
-                    <type>surmark_950400</type>
+                    <type>surmark950400</type>
                     <name>green_0</name>
                     <pose>8 2 1 0 0 0</pose>
                   </object>

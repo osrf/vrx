@@ -135,13 +135,13 @@ class PerceptionObject
 ///   <object_sequence>
 ///     <object>
 ///       <time>10.0</time>
-///       <type>surmark_950410</type>
+///       <type>surmark950410</type>
 ///       <name>red_0</name>
 ///       <pose>6 0 1 0 0 0</pose>
 ///     </object>
 ///     <object>
 ///       <time>10.0</time>
-///       <type>surmark_950400</type>
+///       <type>surmark950400</type>
 ///       <name>green_0</name>
 ///       <pose>6 6 1 0 0 0</pose>
 ///     </object>
