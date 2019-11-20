@@ -14,7 +14,7 @@
     <!-- Placard #1 -->
     <model name="dock_2018_placard1">
       <static>true</static>
-      <pose>7.75 2.75 1.6 0 0 1.5707963267948966</pose>
+      <pose>7.5 3 1.6 0 0 1.5707963267948966</pose>
       <include>
         <static>true</static>
         <pose> 0 0 0.25 0 0 0</pose>
@@ -83,7 +83,7 @@
     <!-- Placard #2 -->
     <model name="dock_2018_placard2">
       <static>true</static>
-      <pose>6.75 2.75 1.6 0 0 1.5707963267948966</pose>
+      <pose>6.5 3 1.6 0 0 1.5707963267948966</pose>
       <include>
         <static>true</static>
         <pose> 0 0 0.25 0 0 0</pose>
