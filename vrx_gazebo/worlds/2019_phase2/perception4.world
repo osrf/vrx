@@ -204,13 +204,13 @@
         </object>
         <object>
           <time>35.0</time>
-          <type>red_totem</type>
+          <type>surmark950410</type>
           <name>red_0</name>
           <pose>6.46 0.86 0.7 0 0 0</pose>
         </object>
         <object>
           <time>35.0</time>
-          <type>red_totem</type>
+          <type>surmark950410</type>
           <name>red_1</name>
           <pose>4.07 -0.21 0.7 0 0 0</pose>
         </object>
