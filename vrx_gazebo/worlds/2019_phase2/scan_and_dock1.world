@@ -64,7 +64,7 @@
     <plugin filename="libContainPlugin.so" name="vehicle_docked_bay1">
       <entity>wamv::base_link</entity>
       <namespace>vrx/dock_2018/bay_1_internal</namespace>
-      <pose frame="vrx__green_triangle__blue_cross::dock_2018_placard1::placard::link">0 -5 -1.5 0 0 0</pose>
+      <pose frame="vrx_dock_green_triangle__blue_cross::dock_2018_placard1::placard::link">0 -5 -1.5 0 0 0</pose>
       <geometry>
         <box>
           <size>4 1.5 2</size>
@@ -75,7 +75,7 @@
     <plugin filename="libContainPlugin.so" name="vehicle_docked_bay1_exterior">
       <entity>wamv::base_link</entity>
       <namespace>vrx/dock_2018/bay_1_external</namespace>
-      <pose frame="vrx__green_triangle__blue_cross::dock_2018_placard1::placard::link">0 -10 -1.5 0 0 0</pose>
+      <pose frame="vrx_dock_green_triangle__blue_cross::dock_2018_placard1::placard::link">0 -10 -1.5 0 0 0</pose>
       <geometry>
         <box>
           <size>8 1.5 2</size>
@@ -86,7 +86,7 @@
     <plugin filename="libContainPlugin.so" name="vehicle_docked_bay2">
       <entity>wamv::base_link</entity>
       <namespace>vrx/dock_2018/bay_2_internal</namespace>
-      <pose frame="vrx__green_triangle__blue_cross::dock_2018_placard2::placard::link">0 5 -1.5 0 0 0</pose>
+      <pose frame="vrx_dock_green_triangle__blue_cross::dock_2018_placard2::placard::link">0 5 -1.5 0 0 0</pose>
       <geometry>
         <box>
           <size>4 1.5 2</size>
@@ -97,7 +97,7 @@
     <plugin filename="libContainPlugin.so" name="vehicle_docked_bay2_exterior">
       <entity>wamv::base_link</entity>
       <namespace>vrx/dock_2018/bay_2_external</namespace>
-      <pose frame="vrx__green_triangle__blue_cross::dock_2018_placard1::placard::link">0 10 -1.5 0 0 0</pose>
+      <pose frame="vrx_dock_green_triangle__blue_cross::dock_2018_placard1::placard::link">0 10 -1.5 0 0 0</pose>
       <geometry>
         <box>
           <size>8 1.5 2</size>
