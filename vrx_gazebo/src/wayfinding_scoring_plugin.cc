@@ -122,7 +122,7 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
       for (const auto waypoint : this->localWaypoints)
       {
         if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
-            waypoint.Y(), std::to_string(markerId)))
+            waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
         {
           gzerr << "Error creating visual marker" << std::endl;
         }

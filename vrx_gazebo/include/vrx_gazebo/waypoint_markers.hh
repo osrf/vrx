@@ -64,7 +64,7 @@ class WaypointMarkers
   /// \param[in] _text (optional) Text above waypoint marker
   /// \return Returns true if marker is successfully sent to Gazebo
   public: bool DrawMarker(int _marker_id, double _x, double _y,
-      std::string _text = "");
+      double _yaw, std::string _text = "");
 
   /// \brief Namespace for Gazebo markers
   private: std::string ns;
