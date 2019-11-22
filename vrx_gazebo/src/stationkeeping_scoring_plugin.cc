@@ -98,7 +98,8 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     this->waypointMarkers.Load(_sdf->GetElement("markers"));
     if (this->waypointMarkers.IsAvailable())
     {
-      if (!this->waypointMarkers.DrawMarker(0, this->goalX, this->goalY))
+      if (!this->waypointMarkers.DrawMarker(0, this->goalX, this->goalY,
+            this->goalYaw))
       {
         gzerr << "Error creating visual marker" << std::endl;
       }

@@ -54,7 +54,7 @@ bool WaypointMarkers::IsAvailable()
 
 /////////////////////////////////////////////////
 bool WaypointMarkers::DrawMarker(int _marker_id, double _x, double _y,
-    std::string _text)
+    double _yaw, std::string _text)
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   ignition::msgs::Marker markerMsg;
@@ -77,7 +77,20 @@ bool WaypointMarkers::DrawMarker(int _marker_id, double _x, double _y,
   {
     return false;
   }
-
+  // draw direction cylinder
+  markerMsg.set_type(ignition::msgs::Marker::CYLINDER);
+  ignition::msgs::Set(markerMsg.mutable_scale(),
+                      this->scaling);
+  ignition::msgs::Set(markerMsg.mutable_pose(),
+                      ignition::math::Pose3d(_x + cos(_yaw), _y + sin(_yaw),
+                          this->height + this->scaling.Z() / 2.0,
+                          0, M_PI/2, _yaw));
+  markerMsg.set_id((_marker_id+1)*1000);
+  result = node.Request("/marker", markerMsg);
+  if (!result)
+  {
+    return false;
+  }
   // draw text
   if (!_text.empty())
   {
@@ -89,7 +102,7 @@ bool WaypointMarkers::DrawMarker(int _marker_id, double _x, double _y,
                         ignition::math::Pose3d(_x, _y - 0.2,
                             this->height + this->scaling.Z() + 0.8,
                             0, 0, 0));
-    markerMsg.set_id((_marker_id + 1) * 1000);
+    markerMsg.set_id((_marker_id + 1) * 10000);
     result = node.Request("/marker", markerMsg);
   }
   return result;
