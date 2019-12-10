@@ -18,9 +18,17 @@ This is an active development project.  We are adding and improving things all t
 
 If you use the VRX simulation in your work, please cite our summary publication, [Toward Maritime Robotic Simulation in Gazebo](https://wiki.nps.edu/display/BB/Publications?preview=/1173263776/1173263778/PID6131719.pdf): 
 
+```
+@InProceedings{bingham19toward,
+  Title                    = {Toward Maritime Robotic Simulation in Gazebo},
+  Author                   = {Brian Bingham and Carlos Aguero and Michael McCarrin and Joseph Klamo and Joshua Malia and Kevin Allen and Tyler Lum and Marshall Rawson and Rumman Waqar},
+  Booktitle                = {Proceedings of MTS/IEEE OCEANS Conference},
+  Year                     = {2019},
+  Address                  = {Seattle, WA},
+  Month                    = {October}
+}
+```
 
-
- 
 ## Contributing
 
 The simulation tools under active development to support the RobotX teams.  We are starting simple with the important fundamental aspects of the robot and environment, but will rely on the community to develop additional functionality around their particular use cases.
