@@ -41,5 +41,5 @@ We continue to receive important improvements from the community.  We have done 
 
 ## Contacts
 
- * Carlos AgÅero <caguero@openrobotics.org>
+ * Carlos Aguero <caguero@openrobotics.org>
  * Brian Bingham <bbingham@nps.edu>
