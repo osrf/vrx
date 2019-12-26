@@ -2,8 +2,8 @@
 Changelog for package wamv_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2019-12-26)
+------------------
 * Switch to 0 0 1 in axis.
 * Create links where the GPS and IMU sensors are attached.
 * Contributors: Carlos Aguero

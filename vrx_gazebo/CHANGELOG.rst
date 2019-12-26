@@ -2,8 +2,8 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2019-12-26)
+------------------
 * Fix pose frame in scan_and_dock1.world
 * make marker id more intelligible
 * documenting new yaw parameter
