@@ -2,6 +2,13 @@
 Changelog for package wamv_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Move rudder farther back
+* Add sail and rudder link to wamv base, as well as turn post to wind direction arrow
+* Add sail link and joint
+* Contributors: Tyler Lum <tylergwlum@gmail.com>
+
 1.2.6 (2019-10-04)
 ------------------
 

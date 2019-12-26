@@ -2,6 +2,43 @@
 Changelog for package vrx_gazebo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix pose frame in scan_and_dock1.world
+* make marker id more intelligible
+* documenting new yaw parameter
+* adding direction indicator to visual markers for stationkeeping and wayfinding
+* Fix perception plugin object types.
+* Fix offset in 2016 dynamic dock.
+* Center all placards in the dock bays.
+* Update expected type in perception plugin for surmark objects.
+* Set initial and ready states to 10 seconds in dock tasks.
+* Merged in worlds_refactor (pull request #213)
+  Refactor VRX worlds location
+  Approved-by: Coline Ramee <coline.ramee@gatech.edu>
+  Approved-by: Brian Bingham <briansbingham@gmail.com>
+* Make the exit gate a blue-red gate.
+* Refactor VRX worlds location.
+* Updated perception score according to the 1.4 version of the tasks document.
+* dealing with fail and style tweaks
+* adding a modified nav course world to speed up testing
+* changing scoring method to be consistent with documentation
+* tracking down more bad dock worlds
+* disables color checker in example models and by default in dock.xacro
+* prohibiting p3d sensor in compliance check
+* update old worlds
+* changing task names in standalone
+* initializing error total
+* adding worlds and models used in Phase2 for Phase 3 practice
+* adding xacro parameter to specify task name in plugin
+* adding commad line arg to keydrive launch
+* remapping for new namespace
+* Add sail and rudder link to wamv base, as well as turn post to wind direction arrow
+* Extra path to be added to GAZEBO_MODEL_PATH.
+* Set GAZEBO_MODEL_PATH while playing back.
+* adding practice worlds for stationkeeping and wayfinding
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero, Carlos Agüero <cen.aguero@gmail.com>, Tyler Lum <tylergwlum@gmail.com>, m1chaelm
+
 1.2.6 (2019-10-04)
 ------------------
 * new worlds with only one dock

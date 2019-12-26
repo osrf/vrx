@@ -2,6 +2,12 @@
 Changelog for package usv_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Make code_check happy.
+* Mod to make use of maxCmd and update to .hgignore
+* Contributors: Brian Bingham <briansbingham@gmail.com>, Carlos Aguero
+
 1.2.6 (2019-10-04)
 ------------------
 
