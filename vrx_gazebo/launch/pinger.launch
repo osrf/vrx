@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="set_pinger_position" pkg="robotx_gazebo" type="set_pinger_position.py" output="screen">
+    <rosparam command="load" file="$(find robotx_gazebo)/config/pinger.yaml" />
+  </node>
+  <node name="pinger_visualisation" pkg="robotx_gazebo" type="pinger_visualisation.py" />
+</launch>

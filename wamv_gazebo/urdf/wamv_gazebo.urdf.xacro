@@ -10,6 +10,7 @@
   <xacro:arg name="lidar_enabled" default="false" />
   <xacro:arg name="ground_truth_enabled" default="false" />
   <xacro:arg name="vrx_sensors_enabled" default="false" />
+  <xacro:arg name="pinger_enabled" default="true" />
   <xacro:arg name="thruster_namespace" default="thrusters/"/>
   <xacro:arg name="camera_namespace" default="cameras/"/>  
   <xacro:arg name="sensor_namespace" default="sensors/"/>
@@ -128,6 +129,11 @@
     <xacro:if value="$(arg ground_truth_enabled)">
       <xacro:wamv_p3d name="p3d_wamv"/>
     </xacro:if>
+
+    <!-- Add pinger -->
+    <xacro:if value="$(arg pinger_enabled)">
+      <xacro:wamv_pinger name="pinger_wamv" position="1.0 0 -1.0" />
+    </xacro:if>
     
     <!-- ==== VRX sensor configuration ==== -->
     <xacro:if value="$(arg vrx_sensors_enabled)">
@@ -151,6 +157,9 @@
     
       <!-- Add 3D LIDAR -->
       <xacro:lidar name="lidar_wamv" type="16_beam"/>
+
+      <!-- Add pinger -->
+      <xacro:wamv_pinger name="pinger_wamv" position="1.0 0 -1.0" />
       
     </xacro:if>
   </xacro:unless>
