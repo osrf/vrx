@@ -21,5 +21,6 @@
   <depend>eigen</depend>
   <depend>xacro</depend>
   <depend>wave_gazebo_plugins</depend>
+  <depend>usv_msgs</depend>
   <exec_depend>message_runtime</exec_depend>
 </package>
