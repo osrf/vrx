@@ -98,7 +98,7 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       "missing <robotNamespace>, defaulting to %s", ns.c_str());
   }
 
-  // Set the frame_id.  Defaults to "pinger".
+  // Set the frame_id. Defaults to "pinger".
   this->frameId = "pinger";
   if (_sdf->HasElement("frameId"))
     this->frameId = _sdf->GetElement("frameId")->Get<std::string>();
@@ -221,15 +221,15 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   // connect the update function to the world update event.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-    std::bind(&AcousticPinger::UpdateChild, this));
+    std::bind(&AcousticPinger::Update, this));
 }
 
 //////////////////////////////////////////////////
-void AcousticPinger::UpdateChild()
+void AcousticPinger::Update()
 {
   // Test to see if it's time to generate a sensor reading.
   if ((this->model->GetWorld()->SimTime() - this->lastUpdateTime) >
-      (1.0f / updateRate))
+      (1.0f / this->updateRate))
   {
     // lock the thread to protect this->position vector.
     std::lock_guard<std::mutex> lock(this->mutex);
@@ -241,7 +241,7 @@ void AcousticPinger::UpdateChild()
     // Direction vector to the pinger from the USV.
     ignition::math::Vector3d direction = this->position - modelPose.Pos();
 
-    // Sensor reading is in the sensor frame.  Rotate the direction vector into
+    // Sensor reading is in the sensor frame. Rotate the direction vector into
     // the frame of reference of the sensor.
     ignition::math::Vector3d directionSensorFrame =
       modelPose.Rot().RotateVectorReverse(direction);
@@ -290,11 +290,9 @@ void AcousticPinger::UpdateChild()
 
 //////////////////////////////////////////////////
 void AcousticPinger::PingerPositionCallback(
-  const geometry_msgs::Vector3ConstPtr &msg)
+  const geometry_msgs::Vector3ConstPtr &_pos)
 {
   // Mutex added to prevent simulataneous reads and writes of mutex.
-  // May not be neccesary, as this thread will only write, while the UpdateChild
-  // thread only reads.
   std::lock_guard<std::mutex> lock(this->mutex);
-  this->position = ignition::math::Vector3d(msg->x, msg->y, msg->z);
+  this->position = ignition::math::Vector3d(_pos->x, _pos->y, _pos->z);
 }

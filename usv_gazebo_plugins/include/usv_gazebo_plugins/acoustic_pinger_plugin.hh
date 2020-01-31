@@ -66,7 +66,7 @@ class AcousticPinger : public ModelPlugin
                     sdf::ElementPtr _sdf);
 
   /// \brief Callback used by gazebo to update the plugin.
-  protected: virtual void UpdateChild();
+  protected: virtual void Update();
 
   /// \brief Callback function called when receiving a new pinger position
   /// via the pinger subscription callback.
