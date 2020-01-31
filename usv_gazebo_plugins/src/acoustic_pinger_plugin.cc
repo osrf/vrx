@@ -43,6 +43,9 @@
  *  
  */
 
+#include <usv_msgs/RangeBearing.h>
+#include <cmath>
+#include <ignition/math/Pose3.hh>
 #include "usv_gazebo_plugins/acoustic_pinger_plugin.hh"
 
 using namespace gazebo;
@@ -66,15 +69,15 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Store pointer to model for later use.
   this->model = _parent;
 
-  // From gazebo_ros_color plugin
+  // From gazebo_ros_color plugin.
   GZ_ASSERT(_parent != nullptr, "Received NULL model pointer");
 
-  // Make sure the ROS node for Gazebo has already been initialised
+  // Make sure the ROS node for Gazebo has already been initialised.
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM_NAMED("usv_gazebo_pinger_plugin", "A ROS node for Gazebo "
-    "has not been initialised, unable to load plugin. Load the Gazebo "
-    "system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    ROS_FATAL_STREAM_NAMED("usv_gazebo_acoustic_pinger_plugin", "A ROS node for"
+      " Gazebo hasn't been initialised, unable to load plugin. Load the Gazebo "
+      "system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
 
@@ -83,66 +86,58 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   std::string modelName = _parent->GetName();
   auto delim = modelName.find(":");
   if (delim != std::string::npos)
-  {
     modelName = modelName.substr(0, delim);
-  }
 
-  // Initialise the namespace
+  // Initialise the namespace.
   std::string ns = modelName;
   if (_sdf->HasElement("robotNamespace"))
     ns = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
   {
-    ROS_DEBUG_NAMED("usv_gazebo_pinger_plugin",
+    ROS_DEBUG_NAMED("usv_gazebo_acoustic_pinger_plugin",
       "missing <robotNamespace>, defaulting to %s", ns.c_str());
   }
 
   // Set the frame_id.  Defaults to "pinger".
   this->frameId = "pinger";
   if (_sdf->HasElement("frameId"))
-  {
     this->frameId = _sdf->GetElement("frameId")->Get<std::string>();
-  }
 
-  // Load topic from sdf if available
+  // Load topic from SDF if available.
   std::string topicName = "/pinger/range_bearing";
   if (_sdf->HasElement("topicName"))
     topicName = _sdf->GetElement("topicName")->Get<std::string>();
   else
   {
-    ROS_INFO_NAMED("usv_gazebo_pinger_plugin",
+    ROS_INFO_NAMED("usv_gazebo_acoustic_pinger_plugin",
       "missing <topicName>, defaulting to %s", topicName.c_str());
   }
 
-  // Set the topic to be used to publish the senor message
-  std::string setPostionTopicName = "/pinger/set_pinger_position";
+  // Set the topic to be used to publish the sensor message.
+  std::string setPositionTopicName = "/pinger/set_pinger_position";
   if (_sdf->HasElement("setPositionTopicName"))
   {
-    setPostionTopicName = _sdf->GetElement("setPositionTopicName")\
-    ->Get<std::string>();
+    setPositionTopicName =
+      _sdf->GetElement("setPositionTopicName")->Get<std::string>();
   }
   else
   {
-    ROS_INFO_NAMED("usv_gazebo_pinger_plugin",
+    ROS_INFO_NAMED("usv_gazebo_acoustic_pinger_plugin",
       "missing <setPositionTopicName>, defaulting to %s", topicName.c_str());
   }
 
-  // Initialise pinger position.  Defaults to origin.
-  this->position = math::Vector3(0, 0, 0);
+  // Initialise pinger position. Defaults to origin.
+  this->position = ignition::math::Vector3d::Zero;
   if (_sdf->HasElement("position"))
-  {
-    this->position = _sdf->Get<math::Vector3>("position");
-  }
+    this->position = _sdf->Get<ignition::math::Vector3d>("position");
 
   // Initialise update rate. Default to 1 reading per second.
-  this->updateRate = 1.0;
+  this->updateRate = 1.0f;
   if (_sdf->HasElement("updateRate"))
-  {
     this->updateRate = _sdf->Get<float>("updateRate");
-  }
 
-  // From Brian Binghams rangebearing_gazebo_plugin.
-  // Noise setup and parse SDF
+  // From Brian Bingham's rangebearing_gazebo_plugin.
+  // Noise setup and parse SDF.
   if (_sdf->HasElement("rangeNoise"))
   {
     sdf::ElementPtr rangeNoiseElem = _sdf->GetElement("rangeNoise");
@@ -150,20 +145,18 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     // element be "noise".
     if (rangeNoiseElem->HasElement("noise"))
     {
-      this->rangeNoise =
-  sensors::NoiseFactory::NewNoiseModel(rangeNoiseElem->GetElement("noise"));
+      this->rangeNoise = sensors::NoiseFactory::NewNoiseModel(
+        rangeNoiseElem->GetElement("noise"));
     }
     else
     {
-      this->rangeNoise = nullptr;
-      ROS_WARN("usv_gazebo_pinger_plugin: "
+      ROS_WARN("usv_gazebo_acoustic_pinger_plugin: "
                "The rangeNoise SDF element must contain noise tag");
     }
   }
   else
   {
-    this->rangeNoise = nullptr;
-    ROS_INFO("usv_gazebo_pinger_plugin: "
+    ROS_INFO("usv_gazebo_acoustic_pinger_plugin: "
              "No rangeNoise tag found, no noise added to measurements");
   }
 
@@ -175,20 +168,18 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     // element be "noise".
     if (bearingNoiseElem->HasElement("noise"))
     {
-      this->bearingNoise =
-  sensors::NoiseFactory::NewNoiseModel(bearingNoiseElem->GetElement("noise"));
+      this->bearingNoise = sensors::NoiseFactory::NewNoiseModel(
+        bearingNoiseElem->GetElement("noise"));
     }
     else
     {
-      this->bearingNoise = nullptr;
-      ROS_WARN("usv_gazebo_pinger_plugin: "
+      ROS_WARN("usv_gazebo_acoustic_pinger_plugin: "
                "The bearingNoise SDF element must contain noise tag");
     }
   }
   else
   {
-    this->bearingNoise = nullptr;
-    ROS_INFO("usv_gazebo_pinger_plugin: "
+    ROS_INFO("usv_gazebo_acoustic_pinger_plugin: "
              "No bearingNoise tag found, no noise added to measurements");
   }
 
@@ -199,78 +190,76 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     // element be "noise".
     if (elevationNoiseElem->HasElement("noise"))
     {
-      this->elevationNoise =
-  sensors::NoiseFactory::NewNoiseModel(elevationNoiseElem->GetElement("noise"));
+      this->elevationNoise = sensors::NoiseFactory::NewNoiseModel(
+        elevationNoiseElem->GetElement("noise"));
     }
     else
     {
-      this->elevationNoise = nullptr;
-      ROS_WARN("usv_gazebo_pinger_plugin: "
+      ROS_WARN("usv_gazebo_acoustic_pinger_plugin: "
                "The elevationNoise SDF element must contain noise tag");
     }
   }
   else
   {
-    this->elevationNoise = nullptr;
-    ROS_INFO("usv_gazebo_pinger_plugin: "
+    ROS_INFO("usv_gazebo_acoustic_pinger_plugin: "
              "No elevationNoise tag found, no noise added to measurements");
   }
 
-  // initialise the ros handle
+  // initialise the ros handle.
   this->rosNodeHandle.reset(new ros::NodeHandle(ns));
 
-  // setup the publisher
-  this->rangeBearingPub = this->rosNodeHandle \
-  ->advertise<usv_msgs::RangeBearing>(std::string(topicName), 1);
+  // setup the publisher.
+  this->rangeBearingPub =
+    this->rosNodeHandle->advertise<usv_msgs::RangeBearing>(
+      std::string(topicName), 1);
 
-  this->setPositionSub = this->rosNodeHandle \
-  ->subscribe(setPostionTopicName, 1, &USVGazeboPinger::PingerPositionCallback,
-    this);
+  this->setPositionSub = this->rosNodeHandle->subscribe(
+    setPositionTopicName, 1, &AcousticPinger::PingerPositionCallback, this);
 
-  // intialise the time with world time
-  this->lastUpdateTime = this->model->GetWorld()->GetSimTime();
+  // intialise the time with world time.
+  this->lastUpdateTime = this->model->GetWorld()->SimTime();
 
   // connect the update function to the world update event.
-  this->updateConnection = \
-  event::Events::ConnectWorldUpdateBegin(
-    std::bind(&USVGazeboPinger::UpdateChild, this));
+  this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+    std::bind(&AcousticPinger::UpdateChild, this));
 }
 
 //////////////////////////////////////////////////
 void AcousticPinger::UpdateChild()
 {
-  // Test to see if it's time to generate a sensor reading
-  if ((this->model->GetWorld()->GetSimTime() - this->lastUpdateTime) \
-  > (1.0f / updateRate))
+  // Test to see if it's time to generate a sensor reading.
+  if ((this->model->GetWorld()->SimTime() - this->lastUpdateTime) >
+      (1.0f / updateRate))
   {
     // lock the thread to protect this->position vector.
     std::lock_guard<std::mutex> lock(this->mutex);
-    this->lastUpdateTime = this->model->GetWorld()->GetSimTime();
+    this->lastUpdateTime = this->model->GetWorld()->SimTime();
 
     // Find the pose of the model.
-    math::Pose modelPose = this->model->GetWorldPose();
+    ignition::math::Pose3d modelPose = this->model->WorldPose();
 
-    // Direction vector to the pinger from the USV
-    math::Vector3 direction = this->position - modelPose.pos;
+    // Direction vector to the pinger from the USV.
+    ignition::math::Vector3d direction = this->position - modelPose.Pos();
 
     // Sensor reading is in the sensor frame.  Rotate the direction vector into
     // the frame of reference of the sensor.
-    math::Vector3 directionSensorFrame = \
-      modelPose.rot.RotateVectorReverse(direction);
+    ignition::math::Vector3d directionSensorFrame =
+      modelPose.Rot().RotateVectorReverse(direction);
 
     // Generate a 2d vector for elevation calculation.
-    math::Vector3 directionSensorFrame2d = \
-        math::Vector3(directionSensorFrame.x, directionSensorFrame.y, 0);
+    ignition::math::Vector3d directionSensorFrame2d =
+      ignition::math::Vector3d(
+        directionSensorFrame.X(), directionSensorFrame.Y(), 0);
 
     // bearing is calculated by finding the world frame direction vector
     // and transforming into the pose of the sensor.  Bearing is calculated
     // using the atan2 function of the x and y components of the transformed
     // vector.  The elevation is calculated from the length of the 2D only
     // and the z component of the sensor frame vector.
-    double bearing = atan2(directionSensorFrame.y, directionSensorFrame.x);
-    double range = directionSensorFrame.GetLength();
-    double elevation = atan2(directionSensorFrame.z, \
-      directionSensorFrame2d.GetLength());
+    double bearing = atan2(directionSensorFrame.Y(), directionSensorFrame.X());
+    double range = directionSensorFrame.Length();
+    double elevation =
+      atan2(directionSensorFrame.Z(), directionSensorFrame2d.Length());
 
     // Apply noise to each measurement.
     // From Brian Binghams rangebearing_gazebo_plugin.
@@ -283,7 +272,7 @@ void AcousticPinger::UpdateChild()
 
     // Publish a ROS message.
     usv_msgs::RangeBearing msg;
-    // generate ROS header.  Sequence number is automatically populated.
+    // generate ROS header. Sequence number is automatically populated.
     msg.header.stamp = ros::Time(this->lastUpdateTime.sec,
       this->lastUpdateTime.nsec);
     // frame_id is neccesary for finding the tf transform.  The frame_id is
@@ -294,7 +283,7 @@ void AcousticPinger::UpdateChild()
     msg.bearing = bearing;
     msg.elevation = elevation;
 
-    // publish range and bearing message
+    // publish range and bearing message.
     this->rangeBearingPub.publish(msg);
   }
 }
@@ -307,5 +296,5 @@ void AcousticPinger::PingerPositionCallback(
   // May not be neccesary, as this thread will only write, while the UpdateChild
   // thread only reads.
   std::lock_guard<std::mutex> lock(this->mutex);
-  this->position = math::Vector3(msg->x, msg->y, msg->z);
+  this->position = ignition::math::Vector3d(msg->x, msg->y, msg->z);
 }
