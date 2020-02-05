@@ -10,7 +10,7 @@
   <xacro:arg name="lidar_enabled" default="false" />
   <xacro:arg name="ground_truth_enabled" default="false" />
   <xacro:arg name="vrx_sensors_enabled" default="false" />
-  <xacro:arg name="pinger_enabled" default="true" />
+  <xacro:arg name="pinger_enabled" default="false" />
   <xacro:arg name="thruster_namespace" default="thrusters/"/>
   <xacro:arg name="camera_namespace" default="cameras/"/>  
   <xacro:arg name="sensor_namespace" default="sensors/"/>

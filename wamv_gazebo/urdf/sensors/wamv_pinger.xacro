@@ -21,7 +21,7 @@
       <child link="${name}"/>
     </joint>
     <gazebo>
-      <plugin name="pinger_plugin" filename="libusv_gazebo_pinger_plugin.so">
+      <plugin name="pinger_plugin" filename="libusv_gazebo_acoustic_pinger_plugin.so">
         <frameId>pinger_wamv</frameId>
         <rangeNoise>
           <noise>
