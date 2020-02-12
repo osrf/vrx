@@ -216,8 +216,12 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->setPositionSub = this->rosNodeHandle->subscribe(
     setPositionTopicName, 1, &AcousticPinger::PingerPositionCallback, this);
 
-  // intialise the time with world time.
+  // Initialise the time with world time.
+#if GAZEBO_MAJOR_VERSION >= 8
   this->lastUpdateTime = this->model->GetWorld()->SimTime();
+#else
+  this->lastUpdateTime = this->model->GetWorld()->GetSimTime();
+#endif
 
   // connect the update function to the world update event.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -228,12 +232,22 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 void AcousticPinger::Update()
 {
   // Test to see if it's time to generate a sensor reading.
+#if GAZEBO_MAJOR_VERSION >= 8
   if ((this->model->GetWorld()->SimTime() - this->lastUpdateTime) >
       (1.0f / this->updateRate))
+#else
+  if ((this->model->GetWorld()->GetSimTime() - this->lastUpdateTime) >
+      (1.0f / this->updateRate))
+#endif
   {
     // lock the thread to protect this->position vector.
     std::lock_guard<std::mutex> lock(this->mutex);
+
+#if GAZEBO_MAJOR_VERSION >= 8
     this->lastUpdateTime = this->model->GetWorld()->SimTime();
+#else
+    this->lastUpdateTime = this->model->GetWorld()->GetSimTime();
+#endif
 
     // Find the pose of the model.
     ignition::math::Pose3d modelPose = this->model->WorldPose();
