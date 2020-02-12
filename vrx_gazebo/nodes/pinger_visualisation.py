@@ -53,11 +53,11 @@ class PingerVisualisation:
         rospy.init_node("pinger_visualisation")
 
         # Startup a publisher of the marker messages
-        self.markerPub = rospy.Publisher("/pinger/marker/signal", Marker,
+        self.markerPub = rospy.Publisher("/wamv/sensors/pingers/pinger/marker/signal", Marker,
                                          queue_size=10, latch=True)
 
         # Start subscriber
-        self.pingerSub = rospy.Subscriber("/pinger/range_bearing",
+        self.pingerSub = rospy.Subscriber("/wamv/sensors/pingers/pinger/range_bearing",
                                           RangeBearing, self.pingerCallback)
 
         # Spin until closed

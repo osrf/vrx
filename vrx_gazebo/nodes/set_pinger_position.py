@@ -49,9 +49,9 @@ class PingerPosition:
         # If there are no matching positions, initialise to the origin.
         if i == 1:
             self.pingerPositions.append([0, 0, 0])
-        self.pingerPub = rospy.Publisher("/pinger/set_pinger_position",
+        self.pingerPub = rospy.Publisher("/wamv/sensors/pingers/pinger/set_pinger_position",
                                          Vector3, queue_size=10, latch=True)
-        self.markerPub = rospy.Publisher("/pinger/marker/ground_truth", Marker,
+        self.markerPub = rospy.Publisher("/wamv/sensors/pingers/pinger/marker/ground_truth", Marker,
                                          queue_size=10, latch=True)
 
         while not rospy.is_shutdown():

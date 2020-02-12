@@ -22,7 +22,9 @@
     </joint>
     <gazebo>
       <plugin name="pinger_plugin" filename="libusv_gazebo_acoustic_pinger_plugin.so">
-        <frameId>pinger_wamv</frameId>
+        <frameId>wamv/pinger</frameId>
+        <topicName>${namespace}/${sensor_namespace}${pinger_namespace}${name}/range_bearing</topicName>
+        <setPositionTopicName>${namespace}/${sensor_namespace}${pinger_namespace}${name}/set_pinger_position</setPositionTopicName>
         <rangeNoise>
           <noise>
             <type>gaussian</type>
