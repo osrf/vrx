@@ -250,7 +250,7 @@ void AcousticPinger::Update()
 #endif
 
     // Find the pose of the model.
-    ignition::math::Pose3d modelPose = this->model->WorldPose();
+    ignition::math::Pose3d modelPose = this->model->GetWorldPose().Ign();
 
     // Direction vector to the pinger from the USV.
     ignition::math::Vector3d direction = this->position - modelPose.Pos();
