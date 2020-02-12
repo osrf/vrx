@@ -245,12 +245,13 @@ void AcousticPinger::Update()
 
 #if GAZEBO_MAJOR_VERSION >= 8
     this->lastUpdateTime = this->model->GetWorld()->SimTime();
+    // Find the pose of the model.
+    ignition::math::Pose3d modelPose = this->model->WorldPose();
 #else
     this->lastUpdateTime = this->model->GetWorld()->GetSimTime();
-#endif
-
     // Find the pose of the model.
     ignition::math::Pose3d modelPose = this->model->GetWorldPose().Ign();
+#endif
 
     // Direction vector to the pinger from the USV.
     ignition::math::Vector3d direction = this->position - modelPose.Pos();
