@@ -1,5 +1,9 @@
 ## VRX 1
 
+### VRX 1.3.X
+
+1. Adding camera optical frame:
+    * [Pull request 223](https://bitbucket.org/osrf/vrx/pull-requests/223)
 
 ### VRX 1.2.1
 

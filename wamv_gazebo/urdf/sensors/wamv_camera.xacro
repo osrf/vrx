@@ -40,6 +40,11 @@
       </inertial>
     </link>
 
+    <!-- Define a link for the optical frame.  This will match the sensor frame and
+         be oriented in the camera convention. -->
+    <link name="${name}_link_optical">
+    </link>
+
     <!-- Define post length and mass based on desired z position of sensor -->
     <xacro:property name="post_length" value="${z-platform_z-post_arm_to_camera_z}"/>
     <xacro:property name="post_mass_per_meter" value="0.9"/>
@@ -123,6 +128,15 @@
       <child link="${name}_link" />
     </joint>
 
+    <!-- Camera to optical frame joint.  This is oriented to convert between ENU
+         and camera conventions -->
+    <joint name="${name}_to_${name}_link_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+      <parent link="${name}_link" />
+      <child link="${name}_link_optical" />
+    </joint>
+
+
     <!-- Gazebo camera setup -->
     <gazebo reference="${name}_link">
       <sensor type="camera" name="${name}_sensor">
@@ -153,7 +167,7 @@
           <cameraName>${namespace}/${sensor_namespace}${camera_namespace}${name}</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>${name}_link_optical</frameName>
+          <frameName>${namespace}/${name}_link_optical</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
