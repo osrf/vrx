@@ -48,7 +48,7 @@
         <!-- Location of origin of Gazebo Sand Island map -->
         <referenceLatitude>21.30996</referenceLatitude>
         <referenceLongitude>-157.8901</referenceLongitude>
-        <referenceAltitude>${z}</referenceAltitude>
+        <referenceAltitude>0</referenceAltitude>
         <referenceHeading>90</referenceHeading>
         <offset>0.0 0.0 0.0</offset>
         <drift>0.0 0.0 0.0</drift>
