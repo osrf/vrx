@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(usv_gazebo_plugins)
-find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation xacro wave_gazebo_plugins)
+find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation xacro wave_gazebo_plugins usv_msgs)
 find_package(Eigen3 REQUIRED)
 
 ###################################
@@ -76,6 +76,26 @@ target_link_libraries(usv_gazebo_wind_plugin
   ${catkin_LIBRARIES}
   ${Eigen_LIBRARIES}
 )
+install(TARGETS usv_gazebo_wind_plugin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+## Declare a C++ library
+add_library(usv_gazebo_acoustic_pinger_plugin
+  src/acoustic_pinger_plugin.cc
+)
+add_dependencies(usv_gazebo_acoustic_pinger_plugin usv_msgs_generate_messages_cpp)
+target_link_libraries(usv_gazebo_acoustic_pinger_plugin
+  ${catkin_LIBRARIES}
+  ${Eigen_LIBRARIES}
+)
+install(TARGETS usv_gazebo_acoustic_pinger_plugin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 # Generate demo world files from xacro and install
 xacro_add_files(
@@ -90,12 +110,6 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(buoyancy_plugin_test test/buoyancy_test.cc)
   target_link_libraries(buoyancy_plugin_test buoyancy_gazebo_plugin)
 endif()
-
-install(TARGETS usv_gazebo_wind_plugin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
