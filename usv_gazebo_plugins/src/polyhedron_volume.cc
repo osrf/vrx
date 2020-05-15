@@ -125,6 +125,25 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
 }
 
 //////////////////////////////////////////////////////
+Polyhedron Polyhedron::makePolyhedron(const std::vector<ignition::math::Vector3d>& vertices,
+				      const std::vector<Polyhedron::Face>& faces)
+{
+  Polyhedron poly;
+  // generate vertices (TODO: could just use assignment?)
+  for (unsigned int i = 0; i < vertices.size(); i++)
+  {
+     poly.vertices.emplace_back(vertices[i]);
+  }
+  // generate faces (TODO: could just use assignment?)
+  for (unsigned int i = 0; i < faces.size(); i++)
+  {
+     poly.faces.emplace_back(faces[i]);
+  }
+
+  return poly;
+}
+
+//////////////////////////////////////////////////////
 Volume Polyhedron::tetrahedronVolume(const ignition::math::Vector3d &v1,
     const ignition::math::Vector3d &v2, const ignition::math::Vector3d &v3,
     const ignition::math::Vector3d &p)

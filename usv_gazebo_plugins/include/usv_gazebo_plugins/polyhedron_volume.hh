@@ -86,6 +86,13 @@ namespace buoyancy
                                            double l,
                                            int n);
 
+    /// \brief Generate a general polyhedron centered at origin
+    /// @param vertices: the vertices of the polyhedron
+    /// @param faces: the faces of the polyhedron
+    /// @return Polyhedron object
+    public: static Polyhedron makePolyhedron(const std::vector<ignition::math::Vector3d>& vertices,
+				  	     const std::vector<Polyhedron::Face>& faces);
+
     /// \brief Compute full volume and center of buoyancy of the polyhedron
     /// @return Volume object with volume and centroid
     public: Volume ComputeFullVolume();

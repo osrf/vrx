@@ -112,6 +112,8 @@ std::string ShapeVolume::Display()
       return "Cylinder";
     case ShapeType::Sphere:
       return "Sphere";
+    case ShapeType::Polyhedron:
+      return "Polyhedron";
   }
 }
 
@@ -225,4 +227,32 @@ Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
     output.centroid.Z() = pose.Pos().Z() + output.centroid.Z();
   }
   return output;
+}
+
+/////////////////////////////////////////////////
+PolyhedronVolume::PolyhedronVolume(const std::vector<ignition::math::Vector3d>& vertices,
+				   const std::vector<Polyhedron::Face>& faces)
+    : polyhedron(Polyhedron::makePolyhedron(vertices, faces))
+{
+  type = ShapeType::Polyhedron;
+  volume = polyhedron.ComputeFullVolume().volume;
+  // TODO: not sure how to get `averageLength` for a polyhedron.  Assume a cube for now.  The `averageLength` property is used for calculating drag forces
+  averageLength = pow(volume,1/3.0);
+}
+
+/////////////////////////////////////////////////
+std::string PolyhedronVolume::Display()
+{
+  std::stringstream ss;
+  ss << ShapeVolume::Display() << ": TODO"; 
+  return ss.str();
+}
+
+/////////////////////////////////////////////////
+Volume PolyhedronVolume::CalculateVolume(const ignition::math::Pose3d &pose,
+                                         double fluidLevel)
+{
+  Plane waterSurface;
+  waterSurface.offset = fluidLevel;
+  return this->polyhedron.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
 }
