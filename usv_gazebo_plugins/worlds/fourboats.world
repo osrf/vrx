@@ -118,7 +118,24 @@
             <izz>22.76025</izz>
           </inertia>
         </inertial>
-      </link>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <topicName>imu</topicName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>50.0</updateRateHZ>
+        <gaussianNoise>0.0001</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+        <initialOrientationAsReference>false</initialOrientationAsReference>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+</link>
       <plugin filename="libbuoyancy_gazebo_plugin.so" name="BuoyancyPlugin">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
