@@ -24,6 +24,9 @@
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
 #include "usv_gazebo_plugins/polyhedron_volume.hh"
+#include "gazebo/common/MeshManager.hh"
+
+using namespace gazebo;
 
 namespace buoyancy
 {
@@ -150,8 +153,7 @@ namespace buoyancy
     /// \brief Default constructor
     /// @param r: radius
     /// @param l: length
-    explicit PolyhedronVolume(const std::vector<ignition::math::Vector3d>& vertices,
-			      const std::vector<Polyhedron::Face>& faces);
+    explicit PolyhedronVolume(const common::Mesh* mesh);
 
     /// \brief Display string for polyhedron shape
     std::string Display() override;

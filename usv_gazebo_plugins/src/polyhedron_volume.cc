@@ -125,21 +125,27 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
 }
 
 //////////////////////////////////////////////////////
-Polyhedron Polyhedron::makePolyhedron(const std::vector<ignition::math::Vector3d>& vertices,
-				      const std::vector<Polyhedron::Face>& faces)
+Polyhedron Polyhedron::makePolyhedron(const common::Mesh* mesh)
 {
   Polyhedron poly;
-  // generate vertices (TODO: could just use assignment?)
-  for (unsigned int i = 0; i < vertices.size(); i++)
-  {
-     poly.vertices.emplace_back(vertices[i]);
+  std::cout << "making poly" << std::endl;
+  if (mesh->GetSubMeshCount() > 1) {
+    std::cerr << "Not sure if code works when there are multiple submeshes" << std::endl;
   }
-  // generate faces (TODO: could just use assignment?)
-  for (unsigned int i = 0; i < faces.size(); i++)
-  {
-     poly.faces.emplace_back(faces[i]);
-  }
+  // TODO: check for triangles type
+  for (int i = 0; i < mesh->GetSubMeshCount(); i++) {
+     const common::SubMesh* subMesh = mesh->GetSubMesh(i);
 
+     for (unsigned int j = 0; j < subMesh->GetVertexCount(); j++) {
+       poly.vertices.emplace_back(subMesh->Vertex(subMesh->GetIndex(j)));
+     }
+     for (unsigned int j = 0; j < subMesh->GetVertexCount() / 3; j++) {
+       // TODO: something is fishy about the Normal vectors, they don't seem to be perpendicular to the faces
+       poly.faces.emplace_back(Face(j*3, j*3+1, j*3+2));
+     }
+     std::cout << "Copied submesh with n faces: " << subMesh->GetVertexCount()/3 << std::endl;
+  }
+  std::cout << poly.ComputeFullVolume().volume << std::endl;
   return poly;
 }
 

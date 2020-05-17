@@ -16,8 +16,10 @@
 */
 
 #include "usv_gazebo_plugins/shape_volume.hh"
+#include "gazebo/common/MeshManager.hh"
 
 using namespace buoyancy;
+using namespace gazebo;
 
 /////////////////////////////////////////////////
 ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
@@ -89,11 +91,34 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
     {
       throw ParseException("cylinder", "missing <radius> or <length> element");
     }
+  } else if (sdf->HasElement("mesh")) {
+    auto meshElem = sdf->GetElement("mesh");
+    std::string meshStr = meshElem->Get<std::string>("uri");
+    common::MeshManager *meshManager = common::MeshManager::Instance();
+    const common::Mesh *mesh = meshManager->GetMesh(meshStr);
+    std::cout << mesh << std::endl;
+    if (!mesh)
+    {
+      meshStr = common::find_file(meshStr);
+      std::cout << meshStr << std::endl;
+      if (meshStr == "__default__" || meshStr.empty())
+      {
+	throw ParseException("mesh", "No mesh specified");
+      }
+
+      if ((mesh = meshManager->Load(meshStr)) == NULL)
+      {
+	std::stringstream ss;
+	ss << "Unable to load mesh from file[" << meshStr << "]";
+	throw ParseException("mesh", ss.str().c_str());
+      }
+    }
+    shape = dynamic_cast<ShapeVolume*>(new PolyhedronVolume(mesh));
   }
   else
   {
     throw ParseException(
-        "geometry", "missing <box>, <cylinder> or <sphere> element");
+        "geometry", "missing <box>, <cylinder>, <sphere>, or <mesh> element");
   }
 
   return std::unique_ptr<ShapeVolume>(shape);
@@ -230,9 +255,8 @@ Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
 }
 
 /////////////////////////////////////////////////
-PolyhedronVolume::PolyhedronVolume(const std::vector<ignition::math::Vector3d>& vertices,
-				   const std::vector<Polyhedron::Face>& faces)
-    : polyhedron(Polyhedron::makePolyhedron(vertices, faces))
+PolyhedronVolume::PolyhedronVolume(const common::Mesh* mesh)
+    : polyhedron(Polyhedron::makePolyhedron(mesh))
 {
   type = ShapeType::Polyhedron;
   volume = polyhedron.ComputeFullVolume().volume;
