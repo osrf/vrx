@@ -40,7 +40,7 @@
         </visual>
       </link>
     </model>
-    <model name="shape_1_boat">
+    <model name="shape_1_boat_mathematica">
 	    <!-- AVS is about 92 degrees (as calculated by John's code) -->
       <pose>2 2 0.5 0 0 0</pose>
       <static>False</static>
@@ -48,27 +48,27 @@
         <visual name="visual">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_1_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_1_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </visual>
         <collision name="collision">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_1_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_1_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </collision>
         <inertial>
-		<mass>65.8</mass>
-		<pose>0 0 0.329114 0 0 0</pose>
+		<mass>62.44425</mass>
+		<pose>0 0 0.333586 0 0 0</pose>
           <inertia>
-            <ixx>6.56839929</ixx>
+            <ixx>6.0645</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>3.78948036</iyy>
+            <iyy>3.466</iyy>
             <iyz>0</iyz>
-            <izz>8.45976427</izz>
+            <izz>7.8047</izz>
           </inertia>
         </inertial>
       </link>
@@ -81,41 +81,40 @@
           <link_name>link</link_name>
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_1_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_1_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </buoyancy>
       </plugin>
     </model>
-    <model name="shape_2_boat">
-	    <!-- AVS is about 92 degrees (as calculated by John's code) -->
+    <model name="shape_2_boat_mathematica">
       <pose>2 -2 0.5 0 0 0</pose>
       <static>False</static>
       <link name="link">
         <visual name="visual">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_2_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_2_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </visual>
         <collision name="collision">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_2_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_2_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </collision>
         <inertial>
-		<mass>121.7528</mass>
-		<pose>0 0 0.296752 0 0 0</pose>
+		<mass>117.787</mass>
+		<pose>0 0 0.300031 0 0 0</pose>
           <inertia>
-            <ixx>12.54525</ixx>
+            <ixx>11.82975</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>14.5035</iyy>
+            <iyy>13.7865</iyy>
             <iyz>0</iyz>
-            <izz>22.76025</izz>
+            <izz>21.58125</izz>
           </inertia>
         </inertial>
       </link>
@@ -128,41 +127,40 @@
           <link_name>link</link_name>
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_2_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_2_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </buoyancy>
       </plugin>
     </model>
-    <model name="shape_4_boat">
-	    <!-- AVS is about 92 degrees (as calculated by John's code) -->
+    <model name="shape_4_boat_mathematica">
       <pose>-2 2 0.5 0 0 0</pose>
       <static>False</static>
       <link name="link">
         <visual name="visual">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_4_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_4_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </visual>
         <collision name="collision">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_4_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_4_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </collision>
         <inertial>
-		<mass>173.75</mass>
-		<pose>0 0 0.274307 0 0 0</pose>
+		<mass>168.1105</mass>
+		<pose>0 0 0.277797 0 0 0</pose>
           <inertia>
-            <ixx>18.223</ixx>
+            <ixx>17.1965</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>33.09775</iyy>
+            <iyy>31.47625</iyy>
             <iyz>0</iyz>
-            <izz>44.565</izz>
+            <izz>42.29</izz>
           </inertia>
         </inertial>
       </link>
@@ -175,41 +173,40 @@
           <link_name>link</link_name>
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_4_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_4_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </buoyancy>
       </plugin>
     </model>
-    <model name="shape_8_boat">
-	    <!-- AVS is about 92 degrees (as calculated by John's code) -->
+    <model name="shape_8_boat_mathematica">
       <pose>-2 -2 0.5 0 0 0</pose>
       <static>False</static>
       <link name="link">
         <visual name="visual">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_8_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_8_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </visual>
         <collision name="collision">
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_8_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_8_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </collision>
         <inertial>
-		<mass>210.0155</mass>
-		<pose>0 0 0.261879 0 0 0</pose>
+		<mass>203.699</mass>
+		<pose>0 0 0.264741 0 0 0</pose>
           <inertia>
-            <ixx>22.211</ixx>
+            <ixx>21.0285</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>53.2345</iyy>
+            <iyy>50.74775</iyy>
             <iyz>0</iyz>
-            <izz>66.91275</izz>
+            <izz>63.66025</izz>
           </inertia>
         </inertial>
       </link>
@@ -217,17 +214,24 @@
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>5</linear_drag>
-        <angular_drag>2.0</angular_drag>
+        <angular_drag>2</angular_drag>
         <buoyancy name="buoyancy">
           <link_name>link</link_name>
           <geometry>
             <mesh>
-		    <uri>model://bod/meshes/shape_8_boat_convex.stl</uri>
+		    <uri>model://bod/meshes/shape_8_boat_mathematica.stl</uri>
             </mesh>
           </geometry>
         </buoyancy>
       </plugin>
     </model>
+    <!-- go a little faster -->
+  <physics type='ode'>
+    <max_step_size>0.04000</max_step_size>
+    <real_time_factor>1.000000</real_time_factor>
+    <real_time_update_rate>25.000000</real_time_update_rate>
+    <gravity>0.000000 0.000000 -9.800000</gravity>
+  </physics>
 </world>
 </sdf>
 

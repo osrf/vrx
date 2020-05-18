@@ -1,6 +1,13 @@
-function findWaterline(n, pitchAngle)
+function findWaterline(n, pitchAngle,isMathematica)
+    if nargin < 3
+        isMathematica = false;
+    end
     svc = rossvcclient('gazebo/pause_physics');
-    modelname = ['shape_',num2str(n),'_boat'];
+    if isMathematica % use Mathematica boat
+        modelname = ['shape_',num2str(n),'_boat_mathematica'];
+    else
+        modelname = ['shape_',num2str(n),'_boat'];
+    end
     msg = rosmessage(svc);
     call(svc, msg);
 
@@ -42,6 +49,10 @@ function findWaterline(n, pitchAngle)
     elseif n == 8
         guessZ = 0.78*D;
         posX = -2;
+        posY = -2;
+    elseif n == 0 % mathematica boat
+        guessZ = 0.55*D;
+        posX = 4;
         posY = -2;
     end
     msg.ModelState.Pose.Position.Z = guessZ;
