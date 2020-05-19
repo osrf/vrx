@@ -50,11 +50,10 @@ function findWaterline(n, pitchAngle,isMathematica)
         guessZ = 0.78*D;
         posX = -2;
         posY = -2;
-    elseif n == 0 % mathematica boat
-        guessZ = 0.55*D;
-        posX = 4;
-        posY = -2;
     end
+    % use the computed waterline
+    [~, waterLine] = getWaterLine(n,pitchAngle);
+    guessZ = -waterLine;
     msg.ModelState.Pose.Position.Z = guessZ;
     msg.ModelState.Pose.Position.X = posX;
     msg.ModelState.Pose.Position.Y = posY;
