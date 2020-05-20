@@ -1,9 +1,12 @@
-function findWaterlineAutomated(n)
+function [thetas, angular_velocities] = getAVSExperimental(n)
 sub = rossubscriber('/gazebo/model_states');
 svc = rossvcclient('gazebo/set_model_state');
-for theta = linspace(80,120,500)
-    findWaterline(n,theta,svc);
-    pause(0.2);
+thetas = linspace(0,180,500);
+angular_velocities = [];
+
+for theta = thetas
+    placeBoat(n,theta,svc);
+    pause(0.1);
     m = sub.LatestMessage;
     % should be consistent order, but just in case
     model_idx = 0;
@@ -14,6 +17,12 @@ for theta = linspace(80,120,500)
         end
     end
     tiltingSpeed = m.Twist(model_idx).Angular.Y;
+    angular_velocities(end+1) = -tiltingSpeed;
     [theta tiltingSpeed]
 end
+thetas = linspace(0,120,500);
+figure;
+plot(thetas,angular_velocities);
+xlabel('heel angle (degrees)');
+ylabel('approximately proportional torque');
 end

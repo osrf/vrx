@@ -1,4 +1,4 @@
-function findWaterline(n, pitchAngle, svc)
+function placeBoat(n, pitchAngle, svc)
     if nargin < 3
         svc = rossvcclient('gazebo/set_model_state');
     end
