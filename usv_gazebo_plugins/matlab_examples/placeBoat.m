@@ -30,7 +30,7 @@ function placeBoat(n, pitchAngle, svc)
     end
     % use the computed waterline (need to see if this matches since some
     % changes were made)
-    L = 1; % m
+    L = 0.6; % m
     W = 1; % m (I don't think this matches the STLs that we used since
     % those had variable width, dending on n)
     D = 0.5; % m

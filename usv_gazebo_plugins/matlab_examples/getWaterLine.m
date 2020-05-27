@@ -1,7 +1,7 @@
 function [torque,d] = getWaterline(theta,L,n,D,W)
 if nargin < 5
     % define the size and displacement of the boat
-    L = 1;%m
+    L = 0.6;%m
     D = 0.5;%m
     W = 1;%m
     n = 2;
@@ -19,7 +19,7 @@ da = dy.*dz;
 
 % find the com;
 [ycom,zcom,area] = cob(y,z,n,0,D,da,D,W);
-mass = area*1000/4;%Kg
+mass = area*L*1000/4;%Kg
 
 % define the direction of gravity
 down = [0, 0, -1];

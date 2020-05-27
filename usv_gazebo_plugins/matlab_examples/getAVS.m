@@ -2,7 +2,7 @@ function AVS = getAVS(n,useGreensTheorem)
 if nargin < 2
     useGreensTheorem = true;
 end
-L = 1;%m
+L = 0.6;%m
 D = 0.5;%m
 % this is for a boat of width 1
 W = 1;%m
