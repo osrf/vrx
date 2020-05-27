@@ -28,8 +28,13 @@ function placeBoat(n, pitchAngle, svc)
         posX = -2;
         posY = -2;
     end
-    % use the computed waterline
-    [~, waterLine] = getWaterLine(n,pitchAngle);
+    % use the computed waterline (need to see if this matches since some
+    % changes were made)
+    L = 1; % m
+    W = 1; % m (I don't think this matches the STLs that we used since
+    % those had variable width, dending on n)
+    D = 0.5; % m
+    [~, waterLine] = getWaterLine(pitchAngle,L,n,D,W);
     guessZ = -waterLine;
     msg.ModelState.Pose.Position.Z = guessZ;
     msg.ModelState.Pose.Position.X = posX;
