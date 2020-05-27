@@ -60,15 +60,15 @@
           </geometry>
         </collision>
         <inertial>
-		<mass>65.8</mass>
-		<pose>0 0 0.329114 0 0 0</pose>
+		<mass>37.47525</mass>
+		<pose>0 0 0.333414 0 0 0</pose>
           <inertia>
-            <ixx>6.56839929</ixx>
+            <ixx>1.64275</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>3.78948036</iyy>
+            <iyy>2.08</iyy>
             <iyz>0</iyz>
-            <izz>8.45976427</izz>
+            <izz>2.68475</izz>
           </inertia>
         </inertial>
       </link>
@@ -107,15 +107,15 @@
           </geometry>
         </collision>
         <inertial>
-		<mass>121.7528</mass>
-		<pose>0 0 0.296752 0 0 0</pose>
+		<mass>49.9715</mass>
+		<pose>0 0 0.300021 0 0 0</pose>
           <inertia>
-            <ixx>12.54525</ixx>
+            <ixx>2.354</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>14.5035</iyy>
+            <iyy>3.35325</iyy>
             <iyz>0</iyz>
-            <izz>22.76025</izz>
+            <izz>3.995755</izz>
           </inertia>
         </inertial>
       </link>
@@ -135,7 +135,6 @@
       </plugin>
     </model>
     <model name="shape_4_boat">
-	    <!-- AVS is about 92 degrees (as calculated by John's code) -->
       <pose>-2 2 0.5 0 0 0</pose>
       <static>False</static>
       <link name="link">
@@ -154,15 +153,15 @@
           </geometry>
         </collision>
         <inertial>
-		<mass>173.75</mass>
-		<pose>0 0 0.274307 0 0 0</pose>
+		<mass>59.961</mass>
+		<pose>0 0 0.277813 0 0 0</pose>
           <inertia>
-            <ixx>18.223</ixx>
+            <ixx>2.93525</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>33.09775</iyy>
+            <iyy>4.705</iyy>
             <iyz>0</iyz>
-            <izz>44.565</izz>
+            <izz>5.3645</izz>
           </inertia>
         </inertial>
       </link>
@@ -182,7 +181,6 @@
       </plugin>
     </model>
     <model name="shape_8_boat">
-	    <!-- AVS is about 92 degrees (as calculated by John's code) -->
       <pose>-2 -2 0.5 0 0 0</pose>
       <static>False</static>
       <link name="link">
@@ -201,15 +199,15 @@
           </geometry>
         </collision>
         <inertial>
-		<mass>210.0155</mass>
-		<pose>0 0 0.261879 0 0 0</pose>
+		<mass>66.624</mass>
+		<pose>0 0 0.264759 0 0 0</pose>
           <inertia>
-            <ixx>22.211</ixx>
+            <ixx>3.324</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>53.2345</iyy>
+            <iyy>5.867</iyy>
             <iyz>0</iyz>
-            <izz>66.91275</izz>
+            <izz>6.53775</izz>
           </inertia>
         </inertial>
       </link>
