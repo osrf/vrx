@@ -1,9 +1,14 @@
 <?xml version="1.0"?>
 <!-- Example of ROS localization using the example wamv with sensors -->
 <launch>
-  <!-- Publishes static transforms (gps, imu, cameras, etc) to /tf -->
+  <!-- Publishes static joint transforms (lidar, cameras, etc) to /tf -->
   <node ns="wamv" pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub">
     <param name="tf_prefix" value="wamv" />
+  </node>
+
+  <!-- Publishes revolute joint static transforms (gps and imu) to /tf -->
+  <node ns="wamv" pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
+    <param name="gui" value="false" />
   </node>
 
   <!-- Kalman filter fusing imu and gps into combined odometry/tf -->
