@@ -58,6 +58,7 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
     ros-${DIST}-gazebo-ros \
     ros-${DIST}-gazebo-plugins \
     ros-${DIST}-hector-gazebo-plugins \
+    ros-${DIST}-joint-state-publisher \
     ros-${DIST}-joy \
     ros-${DIST}-joy-teleop \
     ros-${DIST}-key-teleop \
