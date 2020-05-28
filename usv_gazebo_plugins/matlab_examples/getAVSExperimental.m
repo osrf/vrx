@@ -20,7 +20,6 @@ for theta = thetas
     angular_velocities(end+1) = -tiltingSpeed;
     [theta tiltingSpeed]
 end
-thetas = linspace(0,120,500);
 figure;
 plot(thetas,angular_velocities);
 xlabel('heel angle (degrees)');
