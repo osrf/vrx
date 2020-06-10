@@ -29,11 +29,11 @@ jobs:
         run: |
           mkdir -p /tmp/vrx_ws/src;
           ln -s `pwd` /tmp/vrx_ws/src;
-          cd /tmp/vrx_ws
 
       - name: Build
         shell: bash
         run: |
+          cd /tmp/vrx_ws
           pwd;
           ls `pwd`;
           source /opt/ros/melodic/setup.bash;
