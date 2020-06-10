@@ -13,7 +13,7 @@ jobs:
       - run: 
           echo $HOME;
           echo `pwd`;
-          echo $USER;
+          whoami;
           sudo chown -R $USER:$USER $HOME .
 
       - uses: actions/checkout@v2
