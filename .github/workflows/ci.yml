@@ -1,6 +1,6 @@
 name: Ubuntu CI
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   test-gazebo9-melodic:
