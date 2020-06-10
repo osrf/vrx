@@ -34,7 +34,7 @@ jobs:
       - name: Build
         run: |
           ls /opt/ros/melodic;
-          source /opt/ros/melodic/setup.bash;
+          bash -c "source /opt/ros/melodic/setup.bash";
           catkin_make -j1
 
       - name: Run tests
