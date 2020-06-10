@@ -12,7 +12,8 @@ jobs:
     steps:
       - run: 
           echo $HOME;
-          sudo chown -R $USER:$USER "$HOME" .
+          echo `pwd`;
+          sudo chown -R $USER:$USER $HOME .
 
       - uses: actions/checkout@v2
       - name: Install base dependencies
