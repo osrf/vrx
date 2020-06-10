@@ -34,7 +34,10 @@ jobs:
       - name: Build
         shell: bash
         run: |
+          pwd;
+          ls `pwd`;
           source /opt/ros/melodic/setup.bash;
+          catkin_make -j1
 
       - name: Run tests
         run: catkin_make run_tests -j1
