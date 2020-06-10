@@ -6,6 +6,7 @@ This is an active development project.  We are adding and improving things all t
 
 
 ![VRX](images/sand_island.png)
+![Ubuntu CI](https://github.com/osrf/vrx/workflows/Ubuntu%20CI/badge.svg)
 
 ## Getting Started
 
@@ -33,7 +34,7 @@ If you use the VRX simulation in your work, please cite our summary publication,
 
 The simulation tools under active development to support the RobotX teams.  We are starting simple with the important fundamental aspects of the robot and environment, but will rely on the community to develop additional functionality around their particular use cases.
 
-If you have any questions about these topics, or would like to work on other aspects, please contribute.  You can contact us directly (see below), submit an [issue](https://bitbucket.org/osrf/vrx/issues) or, better yet, submit a [pull request](https://github.com/osrf/vrx/pulls/)!
+If you have any questions about these topics, or would like to work on other aspects, please contribute.  You can contact us directly (see below), submit an [issue](https://github.com/osrf/vrx/issues) or, better yet, submit a [pull request](https://github.com/osrf/vrx/pulls/)!
 
 ## Contributors
 

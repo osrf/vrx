@@ -9,7 +9,7 @@
   <maintainer email="jriveroo@osrfoundation.org">Jose Luis Rivero</maintainer>
   <license>Apache 2.0</license>
   <url type="website">http://wiki.ros.org/wamv_gazebo</url>
-  <url type="bugtracker">http://bitbucket.org/osrf/vrx/issues</url>
+  <url type="bugtracker">http://github.com/osrf/vrx/issues</url>
   <author email="briansbingham@gmail.com">Brian Bingham</author>
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
   <buildtool_depend>catkin</buildtool_depend>
