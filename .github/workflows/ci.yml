@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - run: 
-          ls "$HOME";
+          echo $HOME;
           sudo chown -R $USER:$USER "$HOME" .
 
       - uses: actions/checkout@v2
