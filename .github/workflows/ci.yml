@@ -6,25 +6,25 @@ jobs:
   test-gazebo9-melodic:
 
     runs-on: ubuntu-18.04
-    container: osrf/vrx:current
+    container: 
+      image: osrf/vrx:current
 
     steps:
+      - run: sudo chown -R $USER:$USER "$HOME" .
+
       - uses: actions/checkout@v2
-        with:
-          path: /tmp
       - name: Install base dependencies
         run: |
           sudo apt update;
           sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
-        run: cd /tmp/vrx;
-             sh tools/code_check.sh;
+        run: sh tools/code_check.sh
 
       - name: Set up workspace
         run: |
           mkdir -p /tmp/vrx_ws/src;
-          ln -s /tmp/vrx /tmp/vrx_ws/src;
+          ln -s `pwd` /tmp/vrx_ws/src;
           cd /tmp/vrx_ws
 
       - name: Build
