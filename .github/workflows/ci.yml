@@ -10,18 +10,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: /tmp
       - name: Install base dependencies
         run: |
           sudo apt update;
           sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
-        run: sh tools/code_check.sh
+        run: cd /tmp/vrx;
+             sh tools/code_check.sh;
 
       - name: Set up workspace
         run: |
           mkdir -p /tmp/vrx_ws/src;
-          ln -s `pwd` /tmp/vrx_ws/src;
+          ln -s /tmp/vrx /tmp/vrx_ws/src;
           cd /tmp/vrx_ws
 
       - name: Build
