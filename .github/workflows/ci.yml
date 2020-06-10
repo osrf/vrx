@@ -10,7 +10,9 @@ jobs:
       image: osrf/vrx:current
 
     steps:
-      - run: sudo chown -R $USER:$USER "$HOME" .
+      - run: 
+          ls "$HOME";
+          sudo chown -R $USER:$USER "$HOME" .
 
       - uses: actions/checkout@v2
       - name: Install base dependencies
