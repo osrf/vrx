@@ -1,0 +1,62 @@
+name: Ubuntu CI
+
+on: [pull_request]
+
+jobs:
+  test-gazebo9-melodic:
+
+    runs-on: ubuntu-18.04
+    container: 
+      image: osrf/vrx:current
+    steps:
+      - run: sudo chown -R `whoami`:`whoami` .
+      - uses: actions/checkout@v2
+      - name: Install base dependencies
+        run: |
+          sudo apt update;
+          sudo apt-get -y install cppcheck protobuf-compiler;
+  
+      - name: Static code checking
+        run: sh tools/code_check.sh
+
+      - name: Set up workspace
+        run: |
+          mkdir -p /tmp/vrx_ws/src;
+          ln -s `pwd` /tmp/vrx_ws/src;
+
+      - name: Build and run tests
+        shell: bash
+        run: |
+          cd /tmp/vrx_ws;
+          source /opt/ros/melodic/setup.bash;
+          catkin_make -j1;
+          catkin_make run_tests -j1;
+
+  test-gazebo7-kinetic:
+
+    runs-on: ubuntu-18.04
+    container: 
+      image: osrf/vrx:test_gaz7
+    steps:
+      - run: sudo chown -R `whoami`:`whoami` .
+      - uses: actions/checkout@v2
+      - name: Install base dependencies
+        run: |
+          sudo apt update;
+          sudo apt-get -y install cppcheck protobuf-compiler;
+  
+      - name: Static code checking
+        run: sh tools/code_check.sh
+
+      - name: Set up workspace
+        run: |
+          mkdir -p /tmp/vrx_ws/src;
+          ln -s `pwd` /tmp/vrx_ws/src;
+
+      - name: Build and run tests
+        shell: bash
+        run: |
+          cd /tmp/vrx_ws;
+          source /opt/ros/kinetic/setup.bash;
+          catkin_make -j1;
+          catkin_make run_tests -j1;
