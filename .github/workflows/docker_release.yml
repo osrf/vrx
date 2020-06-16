@@ -41,7 +41,7 @@ jobs:
 
       - name: Tag image
         if: ${{ success() }}
-        run: docker tag ${{ matrix.image_name }}:current ${{ env.registry }}:current
+        run: sudo docker tag ${{ matrix.image_name }}:current ${{ env.registry }}:current
 
       - name: Login to docker hub
         if: ${{ success() }}
