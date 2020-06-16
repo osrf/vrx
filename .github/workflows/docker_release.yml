@@ -25,7 +25,8 @@ jobs:
         if: ${{ success() }}
         run: |
             echo `pwd`;
-            cd vrx;
+            ls;
+            cd vrx_ws/src/vrx;
             bash +xe ./docker/build.bash ${{ matrix.image_name }}
 
       - name: Tag image
