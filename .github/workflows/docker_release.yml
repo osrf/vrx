@@ -24,6 +24,8 @@ jobs:
       - name: Run build script
         if: ${{ success() }}
         run: |
+            echo `pwd`;
+            cd vrx;
             bash +xe ./docker/build.bash ${{ matrix.image_name }}
 
       - name: Tag image
