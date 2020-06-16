@@ -1,5 +1,5 @@
 name: Release to DockerHub
-on: [pull_request]
+on: [push]
 jobs:
   build_docker_image:
     runs-on: ubuntu-latest
