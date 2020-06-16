@@ -1,0 +1,49 @@
+name: Relase to DockerHub
+on:
+  push:
+    tags:
+      - '**'  # Trigger Dockerhub push on all tags
+jobs:
+  build_docker_image:
+    runs-on: ubuntu-latest
+    container: 
+      image: osrf/vrx:current
+    env:
+      registry: osrf/vrx
+    strategy:
+      matrix:
+        image_name: ['vrx']
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install base dependencies
+        if: ${{ success() }}
+        run: |
+          sudo apt update;
+          sudo apt-get install -y docker
+
+      - name: Run build script
+        if: ${{ success() }}
+        run: |
+            bash +xe ./docker/build.bash ${{ matrix.image_name }}
+
+      - name: Tag image
+        if: ${{ success() }}
+        run: docker tag ${{ matrix.image_name }}:current ${{ env.registry }}:current
+
+      - name: Login to docker hub
+        if: ${{ success() }}
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to docker
+        if: ${{ success() }}
+        uses: actions-hub/docker@master
+        env:
+          NAME: ${{ matrix.image_name }}
+          TAG: ${{ env.registry }}:current
+        with:
+          args: push ${IMAGE_TAG}
