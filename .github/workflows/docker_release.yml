@@ -3,15 +3,12 @@ on: [push]
 jobs:
   build_docker_image:
     runs-on: ubuntu-latest
-    container: 
-      image: osrf/vrx:current
     env:
       registry: osrf/vrx
     strategy:
       matrix:
         image_name: ['vrx']
     steps:
-      - run: sudo chown -R `whoami`:`whoami` .
       - name: Checkout sources
         uses: actions/checkout@v2
 
@@ -19,25 +16,14 @@ jobs:
         if: ${{ success() }}
         run: |
           sudo apt update;
-          sudo apt-get install -y apt-transport-https \
-                                  ca-certificates \
-                                  curl \
-                                  gnupg-agent \
-                                  software-properties-common;
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-          sudo add-apt-repository \
-            "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-            $(lsb_release -cs) \
-            stable";
-          sudo apt-get update;
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io;
+          sudo apt-get install -y docker
 
       - name: Run build script
         shell: bash
         if: ${{ success() }}
         run: |
           ls -a;
-          sudo docker/build.bash . -t ${{ matrix.image_name }}:current
+          docker/build.bash . -t ${{ matrix.image_name }}:current
 
       - name: Login to docker hub
         if: ${{ success() }}
