@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       registry: osrf/vrx
+      tag: ${GITHUB_REF#refs/tags/}
     strategy:
       matrix:
         image_name: ['vrx']
@@ -23,6 +24,7 @@ jobs:
         if: ${{ success() }}
         run: |
           ls -a;
+          echo ${{ env.tag }}
           docker/build.bash . -t ${{ matrix.image_name }}:current
 
       - name: Login to docker hub
