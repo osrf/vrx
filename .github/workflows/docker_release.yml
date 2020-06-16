@@ -1,8 +1,5 @@
-name: Relase to DockerHub
-on:
-  push:
-    tags:
-      - '**'  # Trigger Dockerhub push on all tags
+name: Release to DockerHub
+on: [pull_request]
 jobs:
   build_docker_image:
     runs-on: ubuntu-latest
