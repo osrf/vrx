@@ -73,6 +73,8 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
  && rosdep init \
  && apt clean
 
+RUN /bin/bash -c ". /opt/ros/${DIST}/setup.bash"
+
 RUN rosdep update
 
 # Set USER and GROUP

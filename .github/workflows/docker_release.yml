@@ -15,7 +15,7 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install base dependencies
+      - name: Install Docker
         if: ${{ success() }}
         run: |
           sudo apt update;
@@ -37,11 +37,7 @@ jobs:
         if: ${{ success() }}
         run: |
           ls -a;
-          sudo docker/build.bash .
-
-      - name: Tag image
-        if: ${{ success() }}
-        run: sudo docker tag ${{ matrix.image_name }}:current ${{ env.registry }}:current
+          sudo docker/build.bash . -t ${{ matrix.image_name }}:current
 
       - name: Login to docker hub
         if: ${{ success() }}
