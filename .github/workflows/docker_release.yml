@@ -22,12 +22,11 @@ jobs:
           sudo apt-get install -y docker
 
       - name: Run build script
+        shell: bash
         if: ${{ success() }}
         run: |
-            echo `pwd`;
-            ls;
-            cd vrx_ws/src/vrx;
-            bash +xe ./docker/build.bash ${{ matrix.image_name }}
+          ls;
+          docker/build.bash .
 
       - name: Tag image
         if: ${{ success() }}
