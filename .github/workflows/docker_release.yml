@@ -37,7 +37,7 @@ jobs:
         if: ${{ success() }}
         run: |
           ls -a;
-          docker/build.bash .
+          sudo docker/build.bash .
 
       - name: Tag image
         if: ${{ success() }}
