@@ -39,6 +39,6 @@ jobs:
         uses: actions-hub/docker@master
         env:
           NAME: ${{ matrix.image_name }}
-          TAG: ${{ env.registry }}:current
+          TAG: current
         with:
           args: push vrx:current
