@@ -24,9 +24,9 @@ jobs:
         if: ${{ success() }}
         run: |
           ls -a;
-          echo ${{ env.tag }}
-          docker/build.bash . -t ${{ matrix.image_name }}:current
-          docker image list
+          echo ${{ env.tag }};
+          docker/build.bash .
+          docker image list;
 
       - name: Login to docker hub
         if: ${{ success() }}
@@ -38,5 +38,8 @@ jobs:
       - name: Push to docker
         if: ${{ success() }}
         uses: actions-hub/docker@master
+        env:
+          NAME: ${{ matrix.image_name }}
+          TAG: ${{ env.registry }}:${{ matrix.image_name }}:latest
         with:
-          args: push vrx:current
+          args: push ${IMAGE_TAG}
