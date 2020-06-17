@@ -41,4 +41,4 @@ jobs:
           NAME: ${{ matrix.image_name }}
           TAG: ${{ env.registry }}:current
         with:
-          args: push docker.pkg.github.com/osrf/vrx/vrx:current
+          args: push vrx:current
