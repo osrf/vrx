@@ -26,6 +26,7 @@ jobs:
           ls -a;
           echo ${{ env.tag }}
           docker/build.bash . -t ${{ matrix.image_name }}:current
+          docker image list
 
       - name: Login to docker hub
         if: ${{ success() }}
