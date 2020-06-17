@@ -37,8 +37,5 @@ jobs:
       - name: Push to docker
         if: ${{ success() }}
         uses: actions-hub/docker@master
-        env:
-          NAME: ${{ matrix.image_name }}:current
-          TAG: ${{ env.registry }}:current
         with:
-          args: push ${IMAGE_TAG}
+          args: push vrx:current
