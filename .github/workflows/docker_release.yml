@@ -34,11 +34,4 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to docker
-        if: ${{ success() }}
-        uses: actions-hub/docker@master
-        env:
-          NAME: ${{ matrix.image_name }}
-          TAG: ${{ env.registry }}:current
-        with:
-          args: push ${IMAGE_TAG}
+      
