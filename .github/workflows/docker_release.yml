@@ -6,44 +6,5 @@ jobs:
     env:
       registry: osrf/vrx
       tag: ${GITHUB_REF#refs/tags/}
-    strategy:
-      matrix:
-        image_name: ['vrx']
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Install Docker
-        if: ${{ success() }}
-        run: |
-          sudo apt update;
-          sudo apt-get install -y docker
-
-      - name: Run build script
-        shell: bash
-        if: ${{ success() }}
-        run: |
-          ls -a;
-          echo ${{ env.tag }};
-          docker/build.bash .
-          docker image list;
-
-      - name: Tag image
-        if: ${{ success() }}
-        run: docker tag ${{ matrix.image_name }}:latest ${{ env.registry }}:current
-
-      - name: Login to docker hub
-        if: ${{ success() }}
-        uses: actions-hub/docker/login@master
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push to docker
-        if: ${{ success() }}
-        uses: actions-hub/docker@master
-        env:
-          NAME: ${{ matrix.image_name }}
-          TAG: ${{ env.registry }}:current
-        with:
-          args: push ${IMAGE_TAG}
+      - run: echo ${{env.tag}}
