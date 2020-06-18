@@ -14,9 +14,9 @@ jobs:
       - name: Summary
         run: |
           echo "Pushing new image to DockerHub:";
-          echo "  " ${{ env.registry }}:${{env.dockerhub_tag_prefix}}v${{env.tag}};
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
           echo "Updating existing image in DockerHub:";
-          echo "  " ${{ env.registry }}:${{env.dockerhub_tag_prefix}}current;
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
 
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -26,12 +26,12 @@ jobs:
           sudo apt update;
           sudo apt-get install -y docker;
 
-      - name: Createa a new VRX Docker image
+      - name: Create a new VRX Docker image
         shell: bash
         run: docker/build.bash ${{env.build_docker_flags}} .;
 
       #- name: Tag versioned image
-      #  run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}v${{env.tag}};
+      #  run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
 
       - name: Tag current image
         run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
@@ -42,12 +42,12 @@ jobs:
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
 
-      - name: Push versioned image to DockerHub
-        uses: actions-hub/docker@master
-        env:
-          TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}v${{env.tag}}
-        with:
-          args: push ${IMAGE_TAG}
+      #- name: Push versioned image to DockerHub
+      #  uses: actions-hub/docker@master
+      #  env:
+      #    TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}}
+      #  with:
+      #    args: push ${IMAGE_TAG}
 
       - name: Push current image to DockerHub
         uses: actions-hub/docker@master
@@ -59,7 +59,7 @@ jobs:
   build-docker-image-nvidia-bionic-melodic-gazebo9:
     runs-on: ubuntu-latest
     env:
-      image_name: vrx
+      image_name: vrx_nvidia
       registry: osrf/vrx
       tag: ${GITHUB_REF#refs/tags/}
       dockerhub_tag_prefix: nvidia_
@@ -68,9 +68,9 @@ jobs:
       - name: Summary
         run: |
           echo "Pushing new image to DockerHub:";
-          echo "  " ${{ env.registry }}:${{env.dockerhub_tag_prefix}}v${{env.tag}};
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
           echo "Updating existing image in DockerHub:";
-          echo "  " ${{ env.registry }}:${{env.dockerhub_tag_prefix}}current;
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
 
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -80,12 +80,12 @@ jobs:
           sudo apt update;
           sudo apt-get install -y docker;
 
-      - name: Createa a new VRX Docker image
+      - name: Create a new VRX Docker image
         shell: bash
         run: docker/build.bash ${{env.build_docker_flags}} .;
 
       #- name: Tag versioned image
-      #  run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}v${{env.tag}};
+      #  run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
 
       - name: Tag current image
         run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
@@ -96,12 +96,12 @@ jobs:
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
 
-      - name: Push versioned image to DockerHub
-        uses: actions-hub/docker@master
-        env:
-          TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}v${{env.tag}}
-        with:
-          args: push ${IMAGE_TAG}
+      # - name: Push versioned image to DockerHub
+      #   uses: actions-hub/docker@master
+      #   env:
+      #     TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}}
+      #   with:
+      #     args: push ${IMAGE_TAG}
 
       - name: Push current image to DockerHub
         uses: actions-hub/docker@master
