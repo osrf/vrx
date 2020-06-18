@@ -70,12 +70,9 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
     ros-${DIST}-velodyne-simulator \
     ros-${DIST}-rqt \
     ros-${DIST}-rqt-common-plugins \
- && rosdep init \
  && apt clean
 
 RUN /bin/bash -c ". /opt/ros/${DIST}/setup.bash"
-
-RUN rosdep update
 
 # Set USER and GROUP
 ARG USER=developer
