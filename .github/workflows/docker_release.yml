@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       image_name: vrx
-      registry: osrf/${{image_name}}
+      registry: osrf/${{env.image_name}}
       tag: ${GITHUB_REF#refs/tags/}
     steps:
       - name: Summary
@@ -29,10 +29,10 @@ jobs:
         run: docker/build.bash .;
 
       - name: Tag versioned image
-        run: docker tag ${{image_name}}:latest ${{env.registry}}:${{env.tag}};
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.tag}};
 
       - name: Tag current image
-        run: docker tag ${{image_name}}:latest ${{env.registry}}:current;
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:current;
 
       - name: Login to docker hub
         uses: actions-hub/docker/login@master
