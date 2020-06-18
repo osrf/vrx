@@ -2,7 +2,7 @@ name: Release to DockerHub
 on: [push]
   
 jobs:
-  build_docker_image_nonvidia_bionic_melodic_gazebo9):
+  build-docker-image-nonvidia-bionic-melodic-gazebo9):
     runs-on: ubuntu-latest
     env:
       image_name: vrx
@@ -56,7 +56,7 @@ jobs:
         with:
           args: push ${IMAGE_TAG}
 
-  build_docker_image_nvidia_bionic_melodic_gazebo9):
+  build-docker-image-nvidia-bionic-melodic-gazebo9):
     runs-on: ubuntu-latest
     env:
       image_name: vrx
