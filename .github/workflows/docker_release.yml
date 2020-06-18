@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       image_name: vrx
-      registry: osrf/${{env.image_name}}
+      registry: osrf/vrx
       tag: ${GITHUB_REF#refs/tags/}
     steps:
       - name: Summary
