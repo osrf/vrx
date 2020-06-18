@@ -2,19 +2,21 @@ name: Release to DockerHub
 on: [push]
   
 jobs:
-  build_docker_image:
+  build_docker_image without Nvidia support (Ubuntu Bionic / ROS Melodic / Gazebo 9):
     runs-on: ubuntu-latest
     env:
       image_name: vrx
       registry: osrf/vrx
       tag: ${GITHUB_REF#refs/tags/}
+      dockerhub_tag_prefix:
+      build_docker_flags:
     steps:
       - name: Summary
         run: |
           echo "Pushing new image to DockerHub:";
-          echo "  " ${{ env.registry }}:${{env.tag}};
+          echo "  " ${{ env.registry }}:${{dockerhub_tag_prefix}}v${{env.tag}};
           echo "Updating existing image in DockerHub:";
-          echo "  " ${{ env.registry }}:current;
+          echo "  " ${{ env.registry }}:${{dockerhub_tag_prefix}}current;
 
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -26,13 +28,13 @@ jobs:
 
       - name: Createa a new VRX Docker image
         shell: bash
-        run: docker/build.bash .;
+        run: docker/build.bash ${{build_docker_flags}} .;
 
-      - name: Tag versioned image
-        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.tag}};
+      #- name: Tag versioned image
+      #  run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{dockerhub_tag_prefix}}v${{env.tag}};
 
       - name: Tag current image
-        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:current;
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{dockerhub_tag_prefix}}current;
 
       - name: Login to docker hub
         uses: actions-hub/docker/login@master
@@ -43,13 +45,67 @@ jobs:
       - name: Push versioned image to DockerHub
         uses: actions-hub/docker@master
         env:
-          TAG: ${{ env.registry }}:${{env.tag}}
+          TAG: ${{env.registry}}:${{dockerhub_tag_prefix}}v${{env.tag}}
         with:
           args: push ${IMAGE_TAG}
 
       - name: Push current image to DockerHub
         uses: actions-hub/docker@master
         env:
-          TAG: ${{ env.registry }}:current
+          TAG: ${{env.registry}}:${{dockerhub_tag_prefix}}current
+        with:
+          args: push ${IMAGE_TAG}
+
+  build_docker_image with Nvidia support (Ubuntu Bionic / ROS Melodic / Gazebo 9):
+    runs-on: ubuntu-latest
+    env:
+      image_name: vrx
+      registry: osrf/vrx
+      tag: ${GITHUB_REF#refs/tags/}
+      dockerhub_tag_prefix: nvidia_
+      build_docker_flags: -n
+    steps:
+      - name: Summary
+        run: |
+          echo "Pushing new image to DockerHub:";
+          echo "  " ${{ env.registry }}:${{dockerhub_tag_prefix}}v${{env.tag}};
+          echo "Updating existing image in DockerHub:";
+          echo "  " ${{ env.registry }}:${{dockerhub_tag_prefix}}current;
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install Docker
+        run: |
+          sudo apt update;
+          sudo apt-get install -y docker;
+
+      - name: Createa a new VRX Docker image
+        shell: bash
+        run: docker/build.bash ${{build_docker_flags}} .;
+
+      #- name: Tag versioned image
+      #  run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{dockerhub_tag_prefix}}v${{env.tag}};
+
+      - name: Tag current image
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{dockerhub_tag_prefix}}current;
+
+      - name: Login to docker hub
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Push versioned image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{env.registry}}:${{dockerhub_tag_prefix}}v${{env.tag}}
+        with:
+          args: push ${IMAGE_TAG}
+
+      - name: Push current image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{env.registry}}:${{dockerhub_tag_prefix}}current
         with:
           args: push ${IMAGE_TAG}
