@@ -1,10 +1,55 @@
 name: Release to DockerHub
 on: [push]
+  
 jobs:
   build_docker_image:
     runs-on: ubuntu-latest
     env:
-      registry: osrf/vrx
+      image_name: vrx
+      registry: osrf/${{image_name}}
       tag: ${GITHUB_REF#refs/tags/}
     steps:
-      - run: echo ${{env.tag}}
+      - name: Summary
+        run: |
+          echo "Pushing new image to DockerHub:";
+          echo "  " ${{ env.registry }}:${{env.tag}};
+          echo "Updating existing image in DockerHub:";
+          echo "  " ${{ env.registry }}:current;
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install Docker
+        run: |
+          sudo apt update;
+          sudo apt-get install -y docker;
+
+      - name: Createa a new VRX Docker image
+        shell: bash
+        run: docker/build.bash .;
+
+      - name: Tag versioned image
+        run: docker tag ${{image_name}}:latest ${{env.registry}}:${{env.tag}};
+
+      - name: Tag current image
+        run: docker tag ${{image_name}}:latest ${{env.registry}}:current;
+
+      - name: Login to docker hub
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Push versioned image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{ env.registry }}:${{env.tag}}
+        with:
+          args: push ${IMAGE_TAG}
+
+      - name: Push current image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{ env.registry }}:current
+        with:
+          args: push ${IMAGE_TAG}
