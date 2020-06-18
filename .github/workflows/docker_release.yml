@@ -2,7 +2,7 @@ name: Release to DockerHub
 on: [push]
   
 jobs:
-  build_docker_image without Nvidia support (Ubuntu Bionic / ROS Melodic / Gazebo 9):
+  build_docker_image_nonvidia_bionic_melodic_gazebo9):
     runs-on: ubuntu-latest
     env:
       image_name: vrx
@@ -56,7 +56,7 @@ jobs:
         with:
           args: push ${IMAGE_TAG}
 
-  build_docker_image with Nvidia support (Ubuntu Bionic / ROS Melodic / Gazebo 9):
+  build_docker_image_nvidia_bionic_melodic_gazebo9):
     runs-on: ubuntu-latest
     env:
       image_name: vrx
