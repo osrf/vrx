@@ -28,6 +28,10 @@ jobs:
           docker/build.bash .
           docker image list;
 
+      - name: Tag image
+        if: ${{ success() }}
+        run: docker tag ${{ matrix.image_name }}:latest ${{ env.registry }}:current
+
       - name: Login to docker hub
         if: ${{ success() }}
         uses: actions-hub/docker/login@master
@@ -40,6 +44,6 @@ jobs:
         uses: actions-hub/docker@master
         env:
           NAME: ${{ matrix.image_name }}
-          TAG: ${{ env.registry }}:${{ matrix.image_name }}:latest
+          TAG: ${{ env.registry }}:current
         with:
           args: push ${IMAGE_TAG}
