@@ -37,7 +37,7 @@ def main():
                   '.world ' +
                   rospy.get_param('world_xacro_target') + yaml_name +
                   str(num) + '.world.xacro')
-    print 'All ', len(coordinates), ' worlds generated'
+    print ('All ', len(coordinates), ' worlds generated')
 
 
 def world_gen(coordinate={}, master={}):

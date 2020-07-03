@@ -31,9 +31,9 @@ for Tp in Tps:
     for o,d in zip(omegas,delos):
         s.append(pm(o,omega_p))
         a.append(sqrt(2*pm(o,omega_p)*d))
-    print 2*pi/omega_p
-    print 2*pi/array(omegas)
-    print a     
+    print (2*pi/omega_p)
+    print (2*pi/array(omegas))
+    print (a)     
     plot(omegas,s,'o',label='Samples for s = %.2f'%scale)
 
 legend()    
