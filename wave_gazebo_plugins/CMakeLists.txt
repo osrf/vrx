@@ -130,11 +130,14 @@ add_library(wavegauge_plugin
 )
 
 target_link_libraries(wavegauge_plugin
+  WavefieldModelPlugin
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${WAVE_GAZEBO_LIBRARIES_LIST}
 )
+
+add_dependencies(wavegauge_plugin WavefieldModelPlugin)
 
 target_compile_options(wavegauge_plugin PRIVATE "-Wno-unknown-pragmas")
 

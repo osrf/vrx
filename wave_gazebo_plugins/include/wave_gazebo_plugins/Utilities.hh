@@ -21,26 +21,14 @@
 #ifndef _WAVE_GAZEBO_PLUGINS_UTILITIES_HH_
 #define _WAVE_GAZEBO_PLUGINS_UTILITIES_HH_
 
+#include <gazebo/gazebo.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/msgs/msgs.hh>
+
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
 #include <string>
-
-///////////////////////////////////////////////////////////////////////////////
-// Forward Declarations
-
-namespace gazebo
-{
-  namespace msgs
-  {
-    class Param_V;
-  }
-}
-
-namespace sdf
-{
-  class Element;
-}
 
 namespace asv
 {
