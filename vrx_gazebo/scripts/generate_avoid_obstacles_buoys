@@ -121,5 +121,5 @@ if __name__ == '__main__':
             N_xml += get_models_xml(arrN,obj)
 
     # Assemble full sdf
-    print HEADER + a3_xml + a5_xml + a7_xml + surmark46104_xml + N_xml + FOOTER
+    print (HEADER + a3_xml + a5_xml + a7_xml + surmark46104_xml + N_xml + FOOTER)
 

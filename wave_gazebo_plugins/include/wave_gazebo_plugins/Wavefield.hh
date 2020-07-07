@@ -23,27 +23,15 @@
 #ifndef _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
 #define _ASV_WAVE_SIM_GAZEBO_PLUGINS_WAVEFIELD_HH_
 
+#include <gazebo/gazebo.hh>
+#include <gazebo/common/common.hh>
+#include <gazebo/msgs/msgs.hh>
+
 #include <ignition/math/Vector2.hh>
 #include <ignition/math/Vector3.hh>
 
 #include <memory>
 #include <vector>
-
-///////////////////////////////////////////////////////////////////////////////
-// Forward Declarations
-
-namespace gazebo
-{
-  namespace msgs
-  {
-    class Param_V;
-  }
-}
-
-namespace sdf
-{
-  class Element;
-}
 
 namespace asv
 {
