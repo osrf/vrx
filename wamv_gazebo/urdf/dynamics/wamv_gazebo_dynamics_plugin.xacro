@@ -30,7 +30,7 @@
         <!-- Length discretization, AKA, "N" -->
         <length_n>2</length_n>
         <!-- Wave model -->
-        <wave_model>"${wave_model}"</wave_model>
+        <wave_model>${wave_model}</wave_model>
       </plugin>
     </gazebo>
   </xacro:macro>

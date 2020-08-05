@@ -179,8 +179,15 @@ namespace asv
     #endif
     if (wavefieldModel == nullptr)
     {
-      gzerr << "No Wavefield Model found with name '"
-            << _waveModelName << "'." << std::endl;
+      gzerr << "No Wavefield Model found with name <"
+            << _waveModelName << ">." << std::endl;
+
+      gzerr << "World contains following models:" << std::endl;
+      physics::Model_V models = _world->Models();
+      for (auto &model : models)
+      {
+	gzerr << "<" << model->GetScopedName() << ">" << std::endl;
+      }
       return nullptr;
     }
 

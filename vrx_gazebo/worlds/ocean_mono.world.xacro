@@ -36,12 +36,12 @@
 
   
     <!-- Waves -->
-    <!--
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves_mono/model.xacro"/>
     <xacro:ocean_waves_mono amplitude="0.0"/>
-    -->
+    <!--
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves/>
+    -->
 
     <!-- Wind -->
     <plugin name="wind" filename="libusv_gazebo_wind_plugin.so">

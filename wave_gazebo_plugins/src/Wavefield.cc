@@ -313,9 +313,9 @@ namespace asv
       }
       else
       {
-        gzerr<< "Wavefield model specified as <" << this->model
-              << "> which is not one of the two supported wavefield models: "
-              << "PMS or CWR or MONO!!!" << std::endl;
+        gzwarn << "Wavefield model specified as <" << this->model
+	       << "> which is not one of the two supported wavefield models: "
+	       << "PMS or CWR or MONO!!!" << std::endl;
       }
     }
   };
