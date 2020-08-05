@@ -17,7 +17,8 @@
   <xacro:arg name="pinger_namespace" default="pingers/"/>
   <!-- Note: this is only used for some sensors that do not correctly use the 
   robotNamespace parameter -->
-  <xacro:arg name="namespace" default="wamv"/>    
+  <xacro:arg name="namespace" default="wamv"/>
+  <xacro:arg name="wave_model" default="ocean_waves"/>
   <xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global" />
   <xacro:property name="camera_namespace" value="$(arg camera_namespace)" scope="global" />
   <xacro:property name="sensor_namespace" value="$(arg sensor_namespace)" scope="global" />
@@ -43,7 +44,8 @@
   <!-- === Thrusters === -->
   <!-- Use thruster yaml file if given -->
   <xacro:if value="$(arg yaml_thruster_generation)">
-    <xacro:wamv_gazebo thruster_layout="$(arg thruster_xacro_file)"/>
+    <xacro:wamv_gazebo thruster_layout="$(arg thruster_xacro_file)"
+		       wave_model="$(arg wave_model)"/>
   </xacro:if>
   
   <!-- Otherwise, add thrusters based on thruster_config variable -->
@@ -52,17 +54,21 @@
 
     <!-- Default WAM-V with two aft thrusters -->
     <xacro:if value="${thruster_conf == 'H'}">
-       <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"/>
+      <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_aft_thrusters.xacro"
+			 wave_model="$(arg wave_model)"/>
     </xacro:if>
 
     <!-- WAMV with "T" thruster configuration -->
     <xacro:if value="${thruster_conf == 'T'}">
-      <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"/>
+      <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_t_thrusters.xacro"
+			wave_model="$(arg wave_model)"/> 
+      
     </xacro:if>
 
     <!-- WAMV with "X" thruster configuration -->
     <xacro:if value="${thruster_conf == 'X'}">
-      <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_x_thrusters.xacro"/>
+      <xacro:wamv_gazebo thruster_layout="$(find wamv_gazebo)/urdf/thruster_layouts/wamv_x_thrusters.xacro"
+			  wave_model="$(arg wave_model)"/>
     </xacro:if>
   </xacro:unless>
 

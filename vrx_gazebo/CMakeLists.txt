@@ -278,6 +278,7 @@ xacro_add_files(
   worlds/wayfinding_task.world.xacro
   worlds/wind_test.world.xacro
   worlds/ocean.world.xacro
+  worlds/ocean_mono.world.xacro
   INORDER INSTALL DESTINATION worlds
 )
 # Generate obstacle course

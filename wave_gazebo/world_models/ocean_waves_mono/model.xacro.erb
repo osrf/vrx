@@ -22,7 +22,24 @@
   Modified to include wave field model and visual plugins.
 -->
 
-
+<%
+  # Wave model parameters
+  model = "PMS"     # Wave model, must be PMS or CWR
+  # period = ${period} # Peak wave period [s]
+  # gain = ${gain}  # Deterined at load time by the world xacro file
+  number = 3        # Number of component waves
+  scale = 1.5       # Spectrum sampling scale 
+  # direction_x = 1.0 # Direction of peak wave component 
+  # direction_y = 0.0
+  # angle = 0.4       # Delta direction for components
+  tau = 2.0         # Time constant for starting wave [s]
+  amplitude = 0.0  # No effect for PMS
+  steepness = 0.0  # Not yet supported
+  enableRtt = true
+  rttNoise = 0.1
+  refractOpacity = 0.2
+  reflectOpacity = 0.2
+%>
 
 <world xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="ocean_waves" params="gain:=0.1 period:=5
@@ -36,37 +53,37 @@
       <size>1000 1000</size>
       <cell_count>50 50</cell_count>
       <wave>
-	<model>PMS</model>
+				<model><%= model %></model>
         <period>${period}</period>
-        <number>3</number>
-        <scale>1.5</scale>
+        <number><%= number %></number>
+        <scale><%= scale %></scale>
 	<gain>${gain}</gain>
         <direction>${direction_x} ${direction_y}</direction>
         <angle>${angle}</angle>        
-        <tau>2.0</tau>
-        <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-        <steepness>0.0</steepness>
+        <tau><%= tau %></tau>
+        <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
+        <steepness><%= steepness %></steepness>
       </wave>
     </plugin>
 
     <link name="ocean_waves_link">
       <visual name="ocean_waves_visual">
         <plugin name="ocean_waves_visual_plugin" filename="libWavefieldVisualPlugin.so">
-          <enableRtt>true</enableRtt>
-          <rttNoise>0.1</rttNoise>
-          <refractOpacity>0.2</refractOpacity>
-          <reflectOpacity>0.2</reflectOpacity>
+          <enableRtt><%= enableRtt %></enableRtt>
+          <rttNoise><%= rttNoise %></rttNoise>
+          <refractOpacity><%= refractOpacity %></refractOpacity>
+          <reflectOpacity><%= reflectOpacity %></reflectOpacity>
           <wave>
-            <model>PMS</model>
+            <model><%= model %></model>
             <period>${period}</period>
-            <number>3</number>
-            <scale>1.5</scale>
+            <number><%= number %></number>
+            <scale><%= scale %></scale>
 	    <gain>${gain}</gain>
             <direction>${direction_x} ${direction_y}</direction>
             <angle>${angle}</angle>        
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-            <steepness>0.0</steepness>
+            <tau><%= tau %></tau>
+            <amplitude><%= amplitude %></amplitude>  <!-- No effect for the PMS model -->
+            <steepness><%= steepness %></steepness>
           </wave>
         </plugin>
         <geometry>

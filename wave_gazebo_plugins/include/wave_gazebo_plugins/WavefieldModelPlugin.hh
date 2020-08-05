@@ -103,7 +103,7 @@ namespace asv
   ///
   /// 13. <model> (string, default: default)
   ///   The model used to generate component waves.
-  ///   Should be either "PMS" or "CWR"
+  ///   Should be either "PMS" or "CWR" or "MONO"
   ///
   /// 14. <gain> (double, default: 1.0)
   ///   For PMS, the multiplier applied to component amplitudes.

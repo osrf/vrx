@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<!-- Just the ocean -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+<world name="OceanMono">
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+      <grid>0</grid>
+      <origin_visual>0</origin_visual>
+    </scene>
+    <!-- Charles River--> 
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>42.357</latitude_deg>
+      <longitude_deg>-71.083</longitude_deg>
+      <elevation>0.0</elevation>
+      <!-- For legacy gazebo reasons, need to rotate -->
+      <!--<heading_deg>180</heading_deg>-->
+    </spherical_coordinates>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>6 -14 5 0 0.3 1.9</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+  
+    <!-- Waves -->
+    <!--
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves_mono/model.xacro"/>
+    <xacro:ocean_waves_mono amplitude="0.0"/>
+    -->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves/>
+
+    <!-- Wind -->
+    <plugin name="wind" filename="libusv_gazebo_wind_plugin.so">
+      <wind_objs>
+        <wind_obj>
+          <name>wamv</name>
+          <link_name>base_link</link_name>
+          <coeff_vector>.5 .5 .33</coeff_vector>
+        </wind_obj>
+      </wind_objs>
+      <wind_direction>270.0</wind_direction> <!-- degrees -->
+      <wind_mean_velocity>0.0</wind_mean_velocity> <!-- m/s -->
+      <var_wind_gain_constants>0</var_wind_gain_constants>
+      <var_wind_time_constants>1</var_wind_time_constants>
+      <random_seed>0</random_seed> <!-- set to zero/empty to randomize -->
+      <update_rate>10</update_rate>
+    </plugin>
+  </world>
+</sdf>

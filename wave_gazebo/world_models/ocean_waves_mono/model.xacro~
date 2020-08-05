@@ -25,10 +25,9 @@
 
 
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="ocean_waves" params="gain:=0.1 period:=5
-                     direction_x:=1.0 direction_y:=0.0
-                     angle:=0.4">
-  <model name='ocean_waves'>
+  <xacro:macro name="ocean_waves_mono" params="amplitude:=0.1 period:=5
+                     direction_x:=1.0 direction_y:=0.0">
+  <model name='ocean_waves_mono'>
     <static>true</static>
     <plugin name="wavefield_plugin" filename="libWavefieldModelPlugin.so">
       <static>false</static>
@@ -36,16 +35,16 @@
       <size>1000 1000</size>
       <cell_count>50 50</cell_count>
       <wave>
-	<model>PMS</model>
+	<model>MONO</model>
         <period>${period}</period>
-        <number>3</number>
-        <scale>1.5</scale>
-	<gain>${gain}</gain>
+        <number>-1</number>
+        <scale>-1</scale>
+	<gain>-1</gain>
         <direction>${direction_x} ${direction_y}</direction>
-        <angle>${angle}</angle>        
+        <angle>-1</angle>        
         <tau>2.0</tau>
-        <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-        <steepness>0.0</steepness>
+        <amplitude>${amplitude}</amplitude> 
+        <steepness>-1</steepness>
       </wave>
     </plugin>
 
@@ -56,18 +55,18 @@
           <rttNoise>0.1</rttNoise>
           <refractOpacity>0.2</refractOpacity>
           <reflectOpacity>0.2</reflectOpacity>
-          <wave>
-            <model>PMS</model>
+	  <wave>
+	    <model>MONO</model>
             <period>${period}</period>
-            <number>3</number>
-            <scale>1.5</scale>
-	    <gain>${gain}</gain>
+            <number>-1</number>
+            <scale>-1</scale>
+	    <gain>-1</gain>
             <direction>${direction_x} ${direction_y}</direction>
-            <angle>${angle}</angle>        
+            <angle>-1</angle>        
             <tau>2.0</tau>
-            <amplitude>0.0</amplitude>  <!-- No effect for the PMS model -->
-            <steepness>0.0</steepness>
-          </wave>
+            <amplitude>${amplitude}</amplitude> 
+            <steepness>-1</steepness>
+	  </wave>
         </plugin>
         <geometry>
           <mesh>

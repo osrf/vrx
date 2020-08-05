@@ -258,7 +258,38 @@ namespace asv
           s * this->direction.X() + c * this->direction.Y());
         directions.push_back(d);
       }
+   }
+
+    /// \brief Recalculate for monochromatic wave field
+    public: void RecalculateMono()
+    {
+      // Update components
+      this->angularFrequencies.clear();
+      this->amplitudes.clear();
+      this->phases.clear();
+      this->wavenumbers.clear();
+      this->steepnesses.clear();
+      this->directions.clear();
+
+      // We interpret 'period' as single period [s],
+      // 'gain' as wave height [m]
+      // Derived mean values
+      this->angularFrequency = 2.0 * M_PI / this->period;
+      this->wavenumber = \
+        Physics::DeepWaterDispersionToWavenumber(this->angularFrequency);
+
+      this->amplitudes.push_back(this->amplitude);
+      this->angularFrequencies.push_back(this->angularFrequency);
+      this->phases.push_back(0.0);
+      this->steepnesses.push_back(0.0);
+      this->wavenumbers.push_back(this->wavenumber);
+      
+      // Direction
+      // Normalize direction
+      this->direction = Geometry::Normalize(this->direction);
+      directions.push_back(this->direction);
     }
+
     /// \brief Recalculate all derived quantities from inputs.
     public: void Recalculate()
     {
@@ -274,11 +305,17 @@ namespace asv
               << std::endl;
         this->RecalculateCmr();
       }
+      else if (!this->model.compare("MONO"))
+      {
+        gzmsg << "Using monochromatic wavefield model "
+              << std::endl;
+        this->RecalculateMono();
+      }
       else
       {
         gzwarn<< "Wavefield model specified as <" << this->model
               << "> which is not one of the two supported wavefield models: "
-              << "PMS or CWR!!!" << std::endl;
+              << "PMS or CWR or MONO!!!" << std::endl;
       }
     }
   };

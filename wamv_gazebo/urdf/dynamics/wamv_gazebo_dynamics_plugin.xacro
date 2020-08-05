@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="usv_dynamics_gazebo" params="name">
+  <xacro:macro name="usv_dynamics_gazebo" params="name wave_model">
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <gazebo>
       <plugin name="usv_dynamics_${name}" filename="libusv_gazebo_dynamics_plugin.so">
@@ -30,7 +30,7 @@
         <!-- Length discretization, AKA, "N" -->
         <length_n>2</length_n>
         <!-- Wave model -->
-        <wave_model>ocean_waves</wave_model>
+        <wave_model>"${wave_model}"</wave_model>
       </plugin>
     </gazebo>
   </xacro:macro>
