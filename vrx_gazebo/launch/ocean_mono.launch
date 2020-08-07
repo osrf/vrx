@@ -56,7 +56,7 @@
          locked:=$(arg wamv_locked)		   
          thruster_config:=$(arg thrust_config)
          vrx_sensors_enabled:=$(arg vrx_sensors_enabled)
-	 wave_model:=ocean_waves
+	 wave_model:=ocean_waves_mono
          namespace:=$(arg namespace) "/>
 
   <!-- Spawn model in Gazebo -->
