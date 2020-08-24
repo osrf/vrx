@@ -44,7 +44,14 @@ namespace gazebo
   /// <waterLevel>: Water height [m]. Default value is 0.5.
   /// <xDotU>: Added mass coeff, surge.
   /// <yDotV>: Added mass coeff, sway.
+  /// <zDotW>: Added mass coeff, heave
+  /// <kDotP>: Added mass coeff, roll
+  /// <mDotQ>: Added mass coeff, pitch
   /// <nDotR>: Added mass coeff, yaw
+  /// <yDotR>: Added mass coeff, sway-yaw
+  /// <nDotV>: Added mass coeff, yaw-sway
+  /// <zDotQ>: Added mass coeff, heave-pitch
+  /// <mDotW>: Added mass coeff, roll-heave
   /// <xU>: Linear drag coeff surge.
   /// <xUU>: Quadratic drag coeff surge.
   /// <yV>: Linear drag coeff sway.
@@ -115,8 +122,29 @@ namespace gazebo
     /// \brief Plugin Parameter: Added mass in sway, Y_\dot{v}.
     private: double paramYdotV;
 
+    /// \brief Plugin Parameter: Added mass in heave
+    private: double paramZdotW;
+
+    /// \brief Plugin Parameter: Added mass in roll
+    private: double paramKdotP;
+
+    /// \brief Plugin Parameter: Added mass in pitch
+    private: double paramMdotQ;
+
     /// \brief Plugin Parameter: Added mass in yaw, N_\dot{r}.
     private: double paramNdotR;
+
+    /// \brief Plugin Parameter: sway-yaw
+    private: double paramYdotR;
+
+    /// \brief Plugin Parameter: yaw-sway
+    private: double paramNdotV;
+
+    /// \brief Plugin Parameter: heave-pitch
+    private: double paramZdotQ;
+
+    /// \brief Plugin Parameter: roll-heave
+    private: double paramMdotW;
 
     /// \brief Plugin Parameter: Linear drag in surge.
     private: double paramXu;

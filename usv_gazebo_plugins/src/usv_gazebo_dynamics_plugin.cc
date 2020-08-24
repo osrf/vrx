@@ -91,7 +91,14 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->waterDensity     = this->SdfParamDouble(_sdf, "waterDensity", 997.7735);
   this->paramXdotU       = this->SdfParamDouble(_sdf, "xDotU"       , 5);
   this->paramYdotV       = this->SdfParamDouble(_sdf, "yDotV"       , 5);
+  this->paramZdotW       = this->SdfParamDouble(_sdf, "zDotW"       , 0.1);
+  this->paramKdotP       = this->SdfParamDouble(_sdf, "kDotP"       , 0.1);
+  this->paramMdotQ       = this->SdfParamDouble(_sdf, "mDotQ"       , 1);
   this->paramNdotR       = this->SdfParamDouble(_sdf, "nDotR"       , 1);
+  this->paramYdotR       = this->SdfParamDouble(_sdf, "yDotR"       , 0.0);
+  this->paramNdotV       = this->SdfParamDouble(_sdf, "nDotV"       , 0.0);
+  this->paramZdotQ       = this->SdfParamDouble(_sdf, "zDotQ"       , 0.0);
+  this->paramMdotW       = this->SdfParamDouble(_sdf, "mDotW"       , 0.0);
   this->paramXu          = this->SdfParamDouble(_sdf, "xU"          , 20);
   this->paramXuu         = this->SdfParamDouble(_sdf, "xUU"         , 0);
   this->paramYv          = this->SdfParamDouble(_sdf, "yV"          , 20);
@@ -157,11 +164,11 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->Ma = Eigen::MatrixXd(6, 6);
   this->Ma <<
     this->paramXdotU, 0,                0,   0,   0,   0,
-    0,                this->paramYdotV, 0,   0,   0,   0,
-    0,                0,                0.1, 0,   0,   0,
-    0,                0,                0,   0.1, 0,   0,
-    0,                0,                0,   0,   0.1, 0,
-    0,                0,                0,   0,   0,   this->paramNdotR;
+    0,                this->paramYdotV, 0,   0,   0,   this->paramYdotR,
+    0,                0,   this->paramZdotW, 0,   this->paramZdotQ,   0,
+    0,                0,                0,   this->paramKdotP, 0,   0,
+    0,                0,   this->paramMdotW,   0,   this->paramMdotQ, 0,
+    0,                this->paramNdotV, 0,   0,   0,   this->paramNdotR;
 }
 
 double UsvDynamicsPlugin::CircleSegment(double R, double h)
