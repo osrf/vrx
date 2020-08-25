@@ -92,7 +92,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->paramXdotU       = this->SdfParamDouble(_sdf, "xDotU"       , 5);
   this->paramYdotV       = this->SdfParamDouble(_sdf, "yDotV"       , 5);
   this->paramZdotW       = this->SdfParamDouble(_sdf, "zDotW"       , 0.1);
-  this->paramKdotP       = this->SdfParamDouble(_sdf, "kDotP"       , 0.1);
+  this->paramKdotP       = this->SdfParamDouble(_sdf, "kDotP"       , 1.0);
   this->paramMdotQ       = this->SdfParamDouble(_sdf, "mDotQ"       , 1);
   this->paramNdotR       = this->SdfParamDouble(_sdf, "nDotR"       , 1);
   this->paramYdotR       = this->SdfParamDouble(_sdf, "yDotR"       , 0.0);
