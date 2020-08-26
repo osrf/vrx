@@ -32,7 +32,7 @@ jobs:
 
       - name: Create a new VRX Docker image
         run: |
-          bash +xe ./build.bash ${{env.build_docker_flags}} ..;
+          bash +xe ./docker/build.bash ${{env.build_docker_flags}} .;
 
       - name: Tag versioned image
         run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
