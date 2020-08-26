@@ -25,12 +25,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      # - name: Install Docker
-      #   run: |
-      #     sudo apt update;
-      #     sudo apt-get remove docker docker-engine docker.io
-      #     sudo apt-get install -y docker.io;
-
       - name: Install Docker
         uses: docker-practice/actions-setup-docker@master
         with:
@@ -38,10 +32,8 @@ jobs:
           docker_channel: stable
 
       - name: Create a new VRX Docker image
-        run: |
-          ls /usr/local/bin/d*
-          ls /usr/bin/d*
-          bash +xe ./docker/build.bash ${{env.build_docker_flags}} .;
+        shell: bash
+        run: ./docker/build.bash ${{env.build_docker_flags}} .;
 
       - name: Tag versioned image
         run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
@@ -89,9 +81,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Docker
-        run: |
-          sudo apt update;
-          sudo apt-get install -y docker;
+        uses: docker-practice/actions-setup-docker@master
+        with:
+          docker_version: 18.09
+          docker_channel: stable
 
       - name: Create a new VRX Docker image
         shell: bash
