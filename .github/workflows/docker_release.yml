@@ -28,7 +28,7 @@ jobs:
       - name: Install Docker
         run: |
           sudo apt update;
-          sudo apt-get install -y docker;
+          sudo apt-get install -y docker.io;
 
       - name: Create a new VRX Docker image
         run: |
