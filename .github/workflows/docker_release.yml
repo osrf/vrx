@@ -32,6 +32,8 @@ jobs:
 
       - name: Create a new VRX Docker image
         run: |
+          ls /usr/local/bin/d*
+          ls /usr/bin/d*
           bash +xe ./docker/build.bash ${{env.build_docker_flags}} .;
 
       - name: Tag versioned image
