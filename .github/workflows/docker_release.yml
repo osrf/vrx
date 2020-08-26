@@ -32,7 +32,8 @@ jobs:
 
       - name: Create a new VRX Docker image
         run: |
-          cd docker
+          echo `pwd`
+          cd vrx/docker
           bash +xe ./build.bash ${{env.build_docker_flags}} .;
 
       - name: Tag versioned image
