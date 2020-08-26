@@ -67,6 +67,9 @@ then
 fi
 
 
+sudo apt update;
+sudo apt-get install -y docker;
+
 image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
 echo ".*" > "${1}"/.dockerignore
 docker build --rm -t $image_plus_tag -f "${1}"/docker/Dockerfile "${1}" $BUILD_BASE $BUILD_ROS_GAZ && \
