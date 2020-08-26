@@ -67,8 +67,9 @@ then
 fi
 
 
-sudo apt update;
-sudo apt-get install -y docker;
+sudo apt update
+sudo apt-get install -y docker
+docker --version
 
 image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
 echo ".*" > "${1}"/.dockerignore
