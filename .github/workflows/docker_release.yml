@@ -25,11 +25,11 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install Docker
-        run: |
-          sudo apt update;
-          sudo apt-get remove docker docker-engine docker.io
-          sudo apt-get install -y docker.io;
+      # - name: Install Docker
+      #   run: |
+      #     sudo apt update;
+      #     sudo apt-get remove docker docker-engine docker.io
+      #     sudo apt-get install -y docker.io;
 
       - name: Install Docker
         uses: docker-practice/actions-setup-docker@master
