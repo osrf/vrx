@@ -70,6 +70,7 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
     ros-${DIST}-velodyne-simulator \
     ros-${DIST}-rqt \
     ros-${DIST}-rqt-common-plugins \
+    python-rosdep \
  && apt clean
 
 RUN /bin/bash -c ". /opt/ros/${DIST}/setup.bash"
