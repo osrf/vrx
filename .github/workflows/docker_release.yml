@@ -31,8 +31,10 @@ jobs:
           sudo apt-get install -y docker;
 
       - name: Create a new VRX Docker image
-        shell: bash
-        run: docker/build.bash ${{env.build_docker_flags}} .;
+        shell:
+        run: |
+          cd docker
+          bash +xe ./build.bash ${{env.build_docker_flags}} .;
 
       - name: Tag versioned image
         run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
