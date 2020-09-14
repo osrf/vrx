@@ -142,11 +142,21 @@ namespace gazebo
     /// \brief Plugin Parameter: Linear drag in heave.
     private: double paramZw;
 
+
+    /// \brief Plugin Parameter: Quadratic drag in heave.
+    private: double paramZww;
+
     /// \brief Plugin Parameter: Linear drag in roll.
     private: double paramKp;
 
+    /// \brief Plugin Parameter: Quadratic drag in roll.
+    private: double paramKpp;
+
     /// \brief Plugin Parameter: Linear drag in pitch.
     private: double paramMq;
+
+    /// \brief Plugin Parameter: Quadratic drag in pitch.
+    private: double paramMqq;
 
     /// \brief Plugin Parameter: Linear drag in yaw.
     private: double paramNr;

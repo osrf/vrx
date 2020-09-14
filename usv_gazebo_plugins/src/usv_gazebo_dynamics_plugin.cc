@@ -100,8 +100,11 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->paramYv          = this->SdfParamDouble(_sdf, "yV"          , 20);
   this->paramYvv         = this->SdfParamDouble(_sdf, "yVV"         , 0);
   this->paramZw          = this->SdfParamDouble(_sdf, "zW"          , 20);
+  this->paramZww         = this->SdfParamDouble(_sdf, "zWW"         , 0);
   this->paramKp          = this->SdfParamDouble(_sdf, "kP"          , 20);
+  this->paramKpp         = this->SdfParamDouble(_sdf, "kPP"         , 0);
   this->paramMq          = this->SdfParamDouble(_sdf, "mQ"          , 20);
+  this->paramMqq         = this->SdfParamDouble(_sdf, "mQQ"         , 0);
   this->paramNr          = this->SdfParamDouble(_sdf, "nR"          , 20);
   this->paramNrr         = this->SdfParamDouble(_sdf, "nRR"         , 0);
   this->paramHullRadius  = this->SdfParamDouble(_sdf, "hullRadius"  , 0.213);
@@ -257,9 +260,9 @@ void UsvDynamicsPlugin::Update()
   // Drag
   Dmat(0, 0) = this->paramXu + this->paramXuu * std::abs(kVelLinearBody.X());
   Dmat(1, 1) = this->paramYv + this->paramYvv * std::abs(kVelLinearBody.Y());
-  Dmat(2, 2) = this->paramZw;
-  Dmat(3, 3) = this->paramKp;
-  Dmat(4, 4) = this->paramMq;
+  Dmat(2, 2) = this->paramZw + this->paramZww * std::abs(kVelLinearBody.Z());
+  Dmat(3, 3) = this->paramKp + this->paramKpp * std::abs(kVelAngularBody.X());
+  Dmat(4, 4) = this->paramMq + this->paramMqq * std::abs(kVelAngularBody.Y());
   Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(kVelAngularBody.Z());
   ROS_DEBUG_STREAM_THROTTLE(1.0, "Dmat :\n" << Dmat);
   const Eigen::VectorXd kDvec = -1.0 * Dmat * state;
