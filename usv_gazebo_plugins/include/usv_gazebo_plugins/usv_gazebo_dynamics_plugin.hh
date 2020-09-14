@@ -115,6 +115,15 @@ namespace gazebo
     /// \brief Plugin Parameter: Added mass in sway, Y_\dot{v}.
     private: double paramYdotV;
 
+    /// \brief Plugin Parameter: Added mass in heave, Z_\dot{w}.
+    private: double paramZdotW;
+
+    /// \brief Plugin Parameter: Added mass in roll, K_\dot{p}.
+    private: double paramKdotP;
+
+    /// \brief Plugin Parameter: Added mass in pitch, M_\dot{q}.
+    private: double paramMdotQ;
+    
     /// \brief Plugin Parameter: Added mass in yaw, N_\dot{r}.
     private: double paramNdotR;
 

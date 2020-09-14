@@ -91,6 +91,9 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->waterDensity     = this->SdfParamDouble(_sdf, "waterDensity", 997.7735);
   this->paramXdotU       = this->SdfParamDouble(_sdf, "xDotU"       , 5);
   this->paramYdotV       = this->SdfParamDouble(_sdf, "yDotV"       , 5);
+  this->paramZdotW       = this->SdfParamDouble(_sdf, "zDotW"       , 0.1);
+  this->paramKdotP       = this->SdfParamDouble(_sdf, "kDotP"       , 0.1);
+  this->paramMdotQ       = this->SdfParamDouble(_sdf, "mDotQ"       , 0.1);
   this->paramNdotR       = this->SdfParamDouble(_sdf, "nDotR"       , 1);
   this->paramXu          = this->SdfParamDouble(_sdf, "xU"          , 20);
   this->paramXuu         = this->SdfParamDouble(_sdf, "xUU"         , 0);
@@ -158,9 +161,9 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->Ma <<
     this->paramXdotU, 0,                0,   0,   0,   0,
     0,                this->paramYdotV, 0,   0,   0,   0,
-    0,                0,                0.1, 0,   0,   0,
-    0,                0,                0,   0.1, 0,   0,
-    0,                0,                0,   0,   0.1, 0,
+    0,                0,     this->paramZdotW, 0,   0,   0,
+    0,                0,                0,   this->paramKdotP, 0,   0,
+    0,                0,                0,   0,   this->paramMdotQ, 0,
     0,                0,                0,   0,   0,   this->paramNdotR;
 }
 
