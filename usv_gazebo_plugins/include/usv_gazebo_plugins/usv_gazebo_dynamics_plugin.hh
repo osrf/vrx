@@ -123,7 +123,7 @@ namespace gazebo
 
     /// \brief Plugin Parameter: Added mass in pitch, M_\dot{q}.
     private: double paramMdotQ;
-    
+
     /// \brief Plugin Parameter: Added mass in yaw, N_\dot{r}.
     private: double paramNdotR;
 
