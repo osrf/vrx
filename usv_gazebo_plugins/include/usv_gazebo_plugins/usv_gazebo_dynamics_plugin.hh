@@ -44,14 +44,20 @@ namespace gazebo
   /// <waterLevel>: Water height [m]. Default value is 0.5.
   /// <xDotU>: Added mass coeff, surge.
   /// <yDotV>: Added mass coeff, sway.
-  /// <nDotR>: Added mass coeff, yaw
+  /// <zDotW>: Added mass coeff, heave.
+  /// <kDotP>: Added mass coeff, roll.
+  /// <mDotQ>: Added mass coeff, pitch.
+  /// <nDotR>: Added mass coeff, yaw.
   /// <xU>: Linear drag coeff surge.
   /// <xUU>: Quadratic drag coeff surge.
   /// <yV>: Linear drag coeff sway.
   /// <yVV>: Quadratic drag coeff sway
   /// <zW>: Linear drag coeff heave.
-  /// <kP>: Linear drag coeff pitch.
-  /// <mQ>: Linear drag coeff roll.
+  /// <zWW>: Quadratic drag coeff heave.
+  /// <kP>: Linear drag coeff roll.
+  /// <kPP>: Quadratic drag coeff roll.
+  /// <mQ>: Linear drag coeff pitch.
+  /// <mQQ>: Quadratic drag coeff pitch.
   /// <nR>: Linear drag coeff yaw.
   /// <nRR>: Quadratic drag coeff yaw.
   /// <wave_n>: Number of waves to generate wave field.

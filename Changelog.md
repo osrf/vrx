@@ -1,5 +1,8 @@
 ## VRX 1
 
+1. New hydro params:
+    * [Pull request 214](https://github.com/osrf/vrx/pull/214)
+
 ### VRX 1.3.X
 
 1. Adding camera optical frame:
@@ -14,9 +17,9 @@
 
 1. Deterministic wind plugin:
     * [Pull request 157](https://bitbucket.org/osrf/vrx/pull-requests/157)
-    
+
 1. Waypoint marker visualization:
-    * [Pull request 162](https://bitbucket.org/osrf/vrx/pull-requests/162)    
+    * [Pull request 162](https://bitbucket.org/osrf/vrx/pull-requests/162)
 
 ### VRX 1.1
 
