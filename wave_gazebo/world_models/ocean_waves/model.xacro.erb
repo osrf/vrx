@@ -28,7 +28,7 @@
   # period = ${period} # Peak wave period [s]
   # gain = ${gain}  # Deterined at load time by the world xacro file
   number = 3        # Number of component waves
-  scale = 1.5       # Spectrum sampling scale 
+  # scale = 1.5       # Spectrum sampling scale 
   # direction_x = 1.0 # Direction of peak wave component 
   # direction_y = 0.0
   # angle = 0.4       # Delta direction for components
@@ -44,7 +44,7 @@
 <world xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="ocean_waves" params="gain:=0.1 period:=5
                      direction_x:=1.0 direction_y:=0.0
-                     angle:=0.4">
+                     angle:=0.4 scale:=1.5">
   <model name='ocean_waves'>
     <static>true</static>
     <plugin name="wavefield_plugin" filename="libWavefieldModelPlugin.so">
@@ -56,8 +56,8 @@
 				<model><%= model %></model>
         <period>${period}</period>
         <number><%= number %></number>
-        <scale><%= scale %></scale>
-	<gain>${gain}</gain>
+        <scale>${scale}</scale>
+        <gain>${gain}</gain>
         <direction>${direction_x} ${direction_y}</direction>
         <angle>${angle}</angle>        
         <tau><%= tau %></tau>
@@ -77,8 +77,8 @@
             <model><%= model %></model>
             <period>${period}</period>
             <number><%= number %></number>
-            <scale><%= scale %></scale>
-	    <gain>${gain}</gain>
+            <scale>${scale}</scale>
+            <gain>${gain}</gain>
             <direction>${direction_x} ${direction_y}</direction>
             <angle>${angle}</angle>        
             <tau><%= tau %></tau>
@@ -88,6 +88,7 @@
         </plugin>
         <geometry>
           <mesh>
+            <scale>${scale} ${scale} 1</scale>
             <uri>model://ocean_waves/meshes/mesh.dae</uri>
           </mesh>
         </geometry>
@@ -103,6 +104,7 @@
         <pose>0 0 -0.05 0 0 0</pose>  <!-- Offset to prevent rendering conflict -->
         <geometry>
           <mesh>
+            <scale>${scale} ${scale} 1</scale>
             <uri>model://ocean_waves/meshes/mesh_below.dae</uri>
           </mesh>
         </geometry>

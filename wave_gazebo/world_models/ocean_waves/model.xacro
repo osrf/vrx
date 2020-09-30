@@ -27,13 +27,13 @@
 <world xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="ocean_waves" params="gain:=0.1 period:=5
                      direction_x:=1.0 direction_y:=0.0
-                     angle:=0.4 size:=1000 scale:=1.5">
+                     angle:=0.4 scale:=1.5">
   <model name='ocean_waves'>
     <static>true</static>
     <plugin name="wavefield_plugin" filename="libWavefieldModelPlugin.so">
       <static>false</static>
       <update_rate>30</update_rate>
-      <size>${size} ${size}</size>
+      <size>1000 1000</size>
       <cell_count>50 50</cell_count>
       <wave>
 				<model>PMS</model>
