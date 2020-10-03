@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="usv_dynamics_gazebo" params="name">
+  <xacro:macro name="usv_dynamics_gazebo" params="name width:=2.4 length:=4.9">
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <gazebo>
       <plugin name="usv_dynamics_${name}" filename="libusv_gazebo_dynamics_plugin.so">
@@ -25,8 +25,8 @@
         <!-- General dimensions -->
         <!--<boatArea>2.2</boatArea>-->
         <hullRadius>0.213</hullRadius>
-        <boatWidth>2.4</boatWidth>
-        <boatLength>4.9</boatLength>
+        <boatWidth>${width}</boatWidth>
+        <boatLength>${length}</boatLength>
         <!-- Length discretization, AKA, "N" -->
         <length_n>2</length_n>
         <!-- Wave model -->
