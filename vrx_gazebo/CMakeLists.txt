@@ -307,6 +307,10 @@ install(DIRECTORY launch/
 install(PROGRAMS scripts/spawn_wamv.bash
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+# Install Python node file
+catkin_install_python(PROGRAMS nodes/twist2thrust.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(sandisland_test

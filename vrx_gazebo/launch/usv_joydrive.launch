@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="namespace" default="wamv"/>
+
   <!-- Joystick Driver -->
   <node pkg="joy" type="joy_node" name="joy">
     <param name="dev" value="/dev/input/js0"/>
@@ -16,7 +18,7 @@
 
   <!-- Convert Twist messages to Drive messages -->
   <node pkg="vrx_gazebo" type="twist2thrust.py" name="twist2thrust" output="screen">
-    <remap from="left_cmd" to="/wamv/thrusters/left_thrust_cmd"/>
-    <remap from="right_cmd" to="/wamv/thrusters/right_thrust_cmd"/>
+    <remap from="left_cmd" to="/$(arg namespace)/thrusters/left_thrust_cmd"/>
+    <remap from="right_cmd" to="/$(arg namespace)/thrusters/right_thrust_cmd"/>
   </node>
 </launch>
