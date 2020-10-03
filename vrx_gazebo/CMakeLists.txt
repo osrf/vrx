@@ -308,7 +308,9 @@ install(PROGRAMS scripts/spawn_wamv.bash
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # Install Python node file
-catkin_install_python(PROGRAMS nodes/twist2thrust.py
+catkin_install_python(PROGRAMS
+    nodes/twist2thrust.py
+    nodes/key2thrust_angle.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
