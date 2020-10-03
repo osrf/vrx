@@ -132,6 +132,26 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 
   gzmsg << "update rate  = " << this->updateRate << std::endl;
 
+  if (_sdf->HasElement("topic_wind_speed"))
+  {
+    gzmsg << "custom topic wind speed found" << std::endl;
+    this->topicWindSpeed =
+      _sdf->GetElement("topic_wind_speed")->Get<std::string>();
+    gzmsg << "New topic wind speed: " << this->topicWindSpeed << std::endl;
+  }
+
+  gzmsg << "topic wind speed  = " << this->topicWindSpeed << std::endl;
+
+  if (_sdf->HasElement("topic_wind_direction"))
+  {
+    gzmsg << "custom topic wind direction found" << std::endl;
+    this->topicWindDirection =
+      _sdf->GetElement("topic_wind_direction")->Get<std::string>();
+    gzmsg << "New topic wind dir: " << this->topicWindDirection << std::endl;
+  }
+
+  gzmsg << "topic wind direction  = " << this->topicWindDirection << std::endl;
+
   // Setting the  seed for the random generator.
   unsigned int seed = std::random_device {}();
   if (_sdf->HasElement("random_seed") &&
