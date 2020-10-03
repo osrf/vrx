@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <plugin xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro  name="wamv_gazebo_thruster_config" params="name">
+  <xacro:macro  name="wamv_gazebo_thruster_config" params="name enable_angle:=true">
     <thruster>
       <!-- Required Parameters -->
       <linkName>${name}_propeller_link</linkName>
@@ -8,7 +8,7 @@
       <engineJointName>${name}_chasis_engine_joint</engineJointName>
       <cmdTopic>${thruster_namespace}${name}_thrust_cmd</cmdTopic>
       <angleTopic>${thruster_namespace}${name}_thrust_angle</angleTopic>
-      <enableAngle>true</enableAngle>
+      <enableAngle>${enable_angle}</enableAngle>
 
       <!-- Optional Parameters -->
       <mappingType>1</mappingType>
