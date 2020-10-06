@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_pinger" params="name:='pinger' position:='0 0 0' orientation:='0 0 0'">
+  <xacro:macro name="wamv_pinger" params="name:='pinger' frameId:='wamv/pinger' position:='0 0 0' orientation:='0 0 0'">
     <link name="${name}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
@@ -22,7 +22,7 @@
     </joint>
     <gazebo>
       <plugin name="pinger_plugin" filename="libusv_gazebo_acoustic_pinger_plugin.so">
-        <frameId>wamv/pinger</frameId>
+        <frameId>${frameId}</frameId>
         <topicName>${namespace}/${sensor_namespace}${pinger_namespace}${name}/range_bearing</topicName>
         <setPositionTopicName>${namespace}/${sensor_namespace}${pinger_namespace}${name}/set_pinger_position</setPositionTopicName>
         <rangeNoise>
@@ -31,21 +31,21 @@
             <mean>0.0</mean>
             <stddev>3.0</stddev>
           </noise>
-        </rangeNoise>        
+        </rangeNoise>
         <bearingNoise>
           <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
             <stddev>0.01</stddev>
           </noise>
-        </bearingNoise>        
+        </bearingNoise>
         <elevationNoise>
           <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
             <stddev>0.01</stddev>
           </noise>
-        </elevationNoise>        
+        </elevationNoise>
       </plugin>
     </gazebo>
   </xacro:macro>
