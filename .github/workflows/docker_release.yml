@@ -2,7 +2,7 @@ name: Release to DockerHub
 on:
   push:
     tags:
-      - v*  # Launch DockerHub push on v* tags (e.g.: v1.2.1)
+      - 'v*'  # Launch DockerHub push on v* tags (e.g.: v1.2.1)
   
 jobs:
   release-docker-image-nonvidia-bionic-melodic-gazebo9:
