@@ -8,6 +8,8 @@
                          var_time:=1
                          seed:=''
                          ros_update_rate:=10
+                         topic_wind_speed:=/vrx/debug/wind/speed
+                         topic_wind_direction:=/vrx/debug/wind/direction
                          " >
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <plugin name="wind" filename="libusv_gazebo_wind_plugin.so">
@@ -20,6 +22,8 @@
       <var_wind_time_constants>${var_time}</var_wind_time_constants>
       <random_seed>${seed}</random_seed> <!-- set to zero/empty to randomize -->
       <update_rate>${ros_update_rate}</update_rate>
+      <topic_wind_speed>${topic_wind_speed}</topic_wind_speed>
+      <topic_wind_direction>${topic_wind_direction}</topic_wind_direction>
     </plugin>
   </xacro:macro>
 </world>

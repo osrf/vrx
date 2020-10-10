@@ -58,6 +58,10 @@ namespace gazebo
   /// publish, if set to a -1 it will publish every simulation iteration.
   /// "Station-keeping control of an unmanned surface vehicle exposed to
   /// current and wind disturbances".
+  ///
+  /// <topic_wind_speed>: The debug topic to advertise the wind speed.
+  ///
+  /// <topic_wind_direction>: The debug topic to advertise the wind direction.
   class UsvWindPlugin : public WorldPlugin
   {
     struct WindObj
