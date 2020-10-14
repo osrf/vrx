@@ -9,6 +9,7 @@
     P: Pitch orientation of the laser (from the laser's origin).
     Y: Yaw orientation of the laser (from the laser's origin).
     post_Y: Yaw orientation of the post (from the post's origin).
+    post_z_from: Z position of the post's base.
     update_rate: frequency to publish output, hz
     vertical_lasers: number of vertical lasers which spin about Z to generate output
     samples: number of samples during spin, higher is more dense but slows down simulation
@@ -23,13 +24,13 @@
   <xacro:macro name="wamv_3d_lidar" params="name
                                             x:=0.7 y:=0 z:=1.8
                                             R:=0 P:=0 Y:=0
-                                            post_Y:=0
+                                            post_Y:=0 post_z_from:=1.2965
                                             update_rate:=10 vertical_lasers:=16 samples:=1875 resolution:=0.1
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
                                             max_range:=130 noise_stddev:=0.01">
     <!-- Define length variables for link positioning -->
-    <xacro:property name="platform_z" value="1.2965"/>
+    <xacro:property name="platform_z" value="${post_z_from}"/>
     <xacro:property name="post_to_post_arm_x" value="0.03"/>
     <xacro:property name="post_arm_to_lidar_x" value="0.04"/>
     <xacro:property name="post_arm_to_lidar_z" value="0.05"/>
@@ -91,7 +92,7 @@
           iyz="0"/>
       </inertial>
     </link>
-    
+
     <!-- Sensor post arm -->
     <link name="${name}_post_arm_link">
       <visual name="${name}_post_arm_visual">
