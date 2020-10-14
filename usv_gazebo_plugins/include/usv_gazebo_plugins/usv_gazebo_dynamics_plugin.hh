@@ -44,14 +44,20 @@ namespace gazebo
   /// <waterLevel>: Water height [m]. Default value is 0.5.
   /// <xDotU>: Added mass coeff, surge.
   /// <yDotV>: Added mass coeff, sway.
-  /// <nDotR>: Added mass coeff, yaw
+  /// <zDotW>: Added mass coeff, heave.
+  /// <kDotP>: Added mass coeff, roll.
+  /// <mDotQ>: Added mass coeff, pitch.
+  /// <nDotR>: Added mass coeff, yaw.
   /// <xU>: Linear drag coeff surge.
   /// <xUU>: Quadratic drag coeff surge.
   /// <yV>: Linear drag coeff sway.
   /// <yVV>: Quadratic drag coeff sway
   /// <zW>: Linear drag coeff heave.
-  /// <kP>: Linear drag coeff pitch.
-  /// <mQ>: Linear drag coeff roll.
+  /// <zWW>: Quadratic drag coeff heave.
+  /// <kP>: Linear drag coeff roll.
+  /// <kPP>: Quadratic drag coeff roll.
+  /// <mQ>: Linear drag coeff pitch.
+  /// <mQQ>: Quadratic drag coeff pitch.
   /// <nR>: Linear drag coeff yaw.
   /// <nRR>: Quadratic drag coeff yaw.
   /// <wave_n>: Number of waves to generate wave field.
@@ -115,6 +121,15 @@ namespace gazebo
     /// \brief Plugin Parameter: Added mass in sway, Y_\dot{v}.
     private: double paramYdotV;
 
+    /// \brief Plugin Parameter: Added mass in heave, Z_\dot{w}.
+    private: double paramZdotW;
+
+    /// \brief Plugin Parameter: Added mass in roll, K_\dot{p}.
+    private: double paramKdotP;
+
+    /// \brief Plugin Parameter: Added mass in pitch, M_\dot{q}.
+    private: double paramMdotQ;
+
     /// \brief Plugin Parameter: Added mass in yaw, N_\dot{r}.
     private: double paramNdotR;
 
@@ -133,11 +148,21 @@ namespace gazebo
     /// \brief Plugin Parameter: Linear drag in heave.
     private: double paramZw;
 
+
+    /// \brief Plugin Parameter: Quadratic drag in heave.
+    private: double paramZww;
+
     /// \brief Plugin Parameter: Linear drag in roll.
     private: double paramKp;
 
+    /// \brief Plugin Parameter: Quadratic drag in roll.
+    private: double paramKpp;
+
     /// \brief Plugin Parameter: Linear drag in pitch.
     private: double paramMq;
+
+    /// \brief Plugin Parameter: Quadratic drag in pitch.
+    private: double paramMqq;
 
     /// \brief Plugin Parameter: Linear drag in yaw.
     private: double paramNr;
