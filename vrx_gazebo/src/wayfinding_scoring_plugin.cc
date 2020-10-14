@@ -97,14 +97,26 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
+  if (_sdf->HasElement("waypoints_topic"))
+  {
+    this->waypointsTopic = _sdf->Get<std::string>("waypoints_topic");
+  }
   this->waypointsPub =
     this->rosNode->advertise<geographic_msgs::GeoPath>(
       this->waypointsTopic, 10, true);
 
+  if (_sdf->HasElement("min_errors_topic"))
+  {
+    this->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
+  }
   this->minErrorsPub =
     this->rosNode->advertise<std_msgs::Float64MultiArray>(
       this->minErrorsTopic, 100);
 
+  if (_sdf->HasElement("mean_error_topic"))
+  {
+    this->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
+  }
   this->meanErrorPub =
     this->rosNode->advertise<std_msgs::Float64>(
       this->meanErrorTopic, 100);

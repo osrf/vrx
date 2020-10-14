@@ -82,11 +82,24 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
+  if (_sdf->HasElement("goal_topic"))
+  {
+    this->goalTopic = _sdf->Get<std::string>("goal_topic");
+  }
   this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(
     this->goalTopic, 10, true);
 
+  if (_sdf->HasElement("pose_error_topic"))
+  {
+    this->poseErrorTopic = _sdf->Get<std::string>("pose_error_topic");
+  }
   this->poseErrorPub = this->rosNode->advertise<std_msgs::Float64>(
     this->poseErrorTopic, 100);
+
+  if (_sdf->HasElement("rms_error_topic"))
+  {
+    this->meanErrorTopic = _sdf->Get<std::string>("rms_error_topic");
+  }
   this->meanErrorPub  = this->rosNode->advertise<std_msgs::Float64>(
     this->meanErrorTopic, 100);
 
