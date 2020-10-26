@@ -45,7 +45,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   // Get lat, lon and yaw from SDF
   if (!_sdf->HasElement("goal_pose") && !_sdf->HasElement("goal_pose_cart"))
   {
-    ROS_ERROR("Unable to find <goal_pose> element in SDF.");
+    ROS_ERROR("Found neither <goal_pose> nor <goal_pose_cart> element in SDF.");
     ROS_ERROR("Using default pose: 0 0 0");
   }
   else if (_sdf->HasElement("goal_pose"))
