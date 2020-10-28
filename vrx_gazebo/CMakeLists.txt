@@ -53,6 +53,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS wamv_gazebo wave_gazebo xacro gazebo_dev geographic_msgs std_msgs message_runtime
+  LIBRARIES scoring_plugin
 )
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}") 
@@ -303,6 +304,11 @@ install(DIRECTORY models/
 # Install all the launch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.hh"
+)
 
 install(PROGRAMS scripts/spawn_wamv.bash
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

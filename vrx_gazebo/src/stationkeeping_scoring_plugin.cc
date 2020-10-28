@@ -43,36 +43,69 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   // Get lat, lon and yaw from SDF
-  ignition::math::Vector3d latlonyaw(0, 0, 0);
-  if (!_sdf->HasElement("goal_pose"))
+  if (!_sdf->HasElement("goal_pose") && !_sdf->HasElement("goal_pose_cart"))
   {
-    ROS_ERROR("Unable to find <goal_pose> element in SDF.");
+    ROS_ERROR("Found neither <goal_pose> nor <goal_pose_cart> element in SDF.");
     ROS_ERROR("Using default pose: 0 0 0");
+  }
+  else if (_sdf->HasElement("goal_pose"))
+  {
+    if (_sdf->HasElement("goal_pose_cart"))
+    {
+      ROS_ERROR("Both goal_pose and goal_pose_cart were specified.");
+      ROS_ERROR("Ignoring goal_pose_cart.");
+    }
+
+    ignition::math::Vector3d latlonyaw =
+        _sdf->Get<ignition::math::Vector3d>("goal_pose");
+
+    // Store spherical 2D location
+    this->goalLat = latlonyaw.X();
+    this->goalLon = latlonyaw.Y();
+
+    // Convert lat/lon to local
+    // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
+    ignition::math::Vector3d scVec(this->goalLat, this->goalLon, 0.0);
+
+#if GAZEBO_MAJOR_VERSION >= 8
+    ignition::math::Vector3d cartVec =
+      _world->SphericalCoords()->LocalFromSpherical(scVec);
+#else
+    ignition::math::Vector3d cartVec =
+      _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+#endif
+
+    // Store local 2D location and yaw
+    this->goalX = cartVec.X();
+    this->goalY = cartVec.Y();
+    this->goalYaw = latlonyaw.Z();
   }
   else
   {
-    latlonyaw = _sdf->Get<ignition::math::Vector3d>("goal_pose");
-  }
-  // Store spherical 2D location
-  this->goalLat = latlonyaw.X();
-  this->goalLon = latlonyaw.Y();
+    ignition::math::Vector3d xyz =
+      _sdf->Get<ignition::math::Vector3d>("goal_pose_cart");
 
-  // Convert lat/lon to local
-  // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
-  ignition::math::Vector3d scVec(this->goalLat, this->goalLon, 0.0);
+    // Store local 2D location
+    this->goalX = xyz.X();
+    this->goalY = xyz.Y();
+
+    // Convert local to lat/lon
+    // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
+    ignition::math::Vector3d cartVec(this->goalX, this->goalY, xyz.Z());
 
 #if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Vector3d cartVec =
-  _world->SphericalCoords()->LocalFromSpherical(scVec);
+    ignition::math::Vector3d scVec =
+      _world->SphericalCoords()->SphericalFromLocal(cartVec);
 #else
-  ignition::math::Vector3d cartVec =
-  _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
+    ignition::math::Vector3d scVec =
+      _world->GetSphericalCoordinates()->SphericalFromLocal(cartVec);
 #endif
 
-  // Store local 2D location and yaw
-  this->goalX = cartVec.X();
-  this->goalY = cartVec.Y();
-  this->goalYaw = latlonyaw.Z();
+    // Store spherical 2D location
+    this->goalLat = scVec.X();
+    this->goalLon = scVec.Y();
+    this->goalYaw = scVec.Z();
+  }
 
   // Print some debugging messages
   gzmsg << "StationKeeping Goal, Spherical: Lat = " << this->goalLat
@@ -82,11 +115,24 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
   // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
+  if (_sdf->HasElement("goal_topic"))
+  {
+    this->goalTopic = _sdf->Get<std::string>("goal_topic");
+  }
   this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(
     this->goalTopic, 10, true);
 
+  if (_sdf->HasElement("pose_error_topic"))
+  {
+    this->poseErrorTopic = _sdf->Get<std::string>("pose_error_topic");
+  }
   this->poseErrorPub = this->rosNode->advertise<std_msgs::Float64>(
     this->poseErrorTopic, 100);
+
+  if (_sdf->HasElement("rms_error_topic"))
+  {
+    this->meanErrorTopic = _sdf->Get<std::string>("rms_error_topic");
+  }
   this->meanErrorPub  = this->rosNode->advertise<std_msgs::Float64>(
     this->meanErrorTopic, 100);
 
