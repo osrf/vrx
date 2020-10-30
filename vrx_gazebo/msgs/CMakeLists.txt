@@ -1,5 +1,11 @@
 find_package(Protobuf REQUIRED)
 
+# To remove policy warnings in CMake 3.10. See `cmake --help-policy CMP0071`
+if(POLICY CMP0071)
+  # Set to NEW to let AUTOMOC and AUTOUIC process generated files
+  cmake_policy(SET CMP0071 NEW)
+endif()
+
 set(PROTOBUF_IMPORT_DIRS)
 foreach(ITR ${GAZEBO_INCLUDE_DIRS})
   if(ITR MATCHES ".*gazebo-[0-11.]+$")
@@ -16,7 +22,7 @@ link_directories(
   ${GAZEBO_LIBRARY_DIRS}
 )
 
-set (msgs1
+set(msgs1
   light_buoy_colors.proto
 )
 PROTOBUF_GENERATE_CPP(PROTO_SRCS1 PROTO_HDRS ${msgs1})
@@ -28,7 +34,7 @@ target_link_libraries(light_buoy_colors_msgs
   ${GAZEBO_PROTO_LIBRARIES}
 )
 
-set (msgs2
+set(msgs2
   dock_placard.proto
 )
 PROTOBUF_GENERATE_CPP(PROTO_SRCS2 PROTO_HDRS ${msgs2})

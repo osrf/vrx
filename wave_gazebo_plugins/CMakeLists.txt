@@ -19,6 +19,12 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
 endif()
 
+# Set policy for CMake 3.1+. Use OLD policy to let FindBoost.cmake, dependency
+# of gazebo, use quoted variables in if()
+if(POLICY CMP0054)
+  cmake_policy(SET CMP0054 OLD)
+endif()
+
 ###############################################################################
 # Other dependencies...
 
