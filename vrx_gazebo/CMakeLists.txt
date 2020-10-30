@@ -7,13 +7,30 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
-set (CMAKE_AUTOMOC ON)
-set (CMAKE_AUTOUIC ON)
+# For Qt
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 
-find_package (Qt5Widgets REQUIRED)
-find_package (Qt5Core REQUIRED)
-find_package (Protobuf REQUIRED)
-find_package (gazebo REQUIRED)
+# To appease policy warnings in CMake 3.10+. See `cmake --help-policy CMP00##`
+if (POLICY CMP0071)
+  # Set to NEW to let AUTOMOC and AUTOUIC process generated files
+  cmake_policy(SET CMP0071 NEW)
+endif()
+# Set policy for CMake 3.1+, FindBoost.cmake dependency of gazebo uses quoted
+# variables in if()
+if(POLICY CMP0054)
+  cmake_policy(SET CMP0054 OLD)
+endif()
+if(POLICY CMP0046)
+  # Use OLD policy to be able to use *_generate_services_cpp before they exist,
+  # without error.
+  cmake_policy(SET CMP0046 OLD)
+endif()
+
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(gazebo REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   message_generation
@@ -184,7 +201,7 @@ install(TARGETS scan_dock_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-if("${GAZEBO_MAJOR_VERSION}" GREATER "7")
+if(${GAZEBO_MAJOR_VERSION} GREATER 7)
   # Plugin for Task Info GUI Overlay
   add_library(gui_task_widget SHARED ${headers_MOC}
          	src/gui_task_widget.cc
@@ -218,7 +235,7 @@ install(TARGETS perception_scoring_plugin
 )
 
 # Dock base files that need to be processed with erb
-set (dock_base_erb_files
+set(dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
   models/dock_2018_base/model.sdf.erb
   models/dock_2016_base_dynamic/model.sdf.erb
@@ -226,7 +243,7 @@ set (dock_base_erb_files
 )
 
 # Dock files that need to be processed with erb
-set (dock_erb_files
+set(dock_erb_files
   models/dock_2016/model.sdf.erb
   models/dock_2018/model.sdf.erb
   models/dock_2016_dynamic/model.sdf.erb
@@ -319,7 +336,7 @@ catkin_install_python(PROGRAMS
     nodes/key2thrust_angle.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-if (CATKIN_ENABLE_TESTING)
+if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(sandisland_test
                     test/sandisland.test
