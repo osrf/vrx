@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3 R:=0 P:=0 Y:=0">
+  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3 R:=0 P:=0 Y:=0 lat:=21.30996 lon:=-157.8901 elev:=0.0">
     <link name="${name}_link">
       <visual name="${name}_visual">
         <geometry>
@@ -46,9 +46,9 @@
              https://bitbucket.org/osrf/vrx/issues/64 -->
         <velocityTopicName>${namespace}/${sensor_namespace}gps/gps/fix_velocity</velocityTopicName>
         <!-- Location of origin of Gazebo Sand Island map -->
-        <referenceLatitude>21.30996</referenceLatitude>
-        <referenceLongitude>-157.8901</referenceLongitude>
-        <referenceAltitude>0</referenceAltitude>
+        <referenceLatitude>${lat}</referenceLatitude>
+        <referenceLongitude>${lon}</referenceLongitude>
+        <referenceAltitude>${elev}</referenceAltitude>
         <referenceHeading>90</referenceHeading>
         <offset>0.0 0.0 0.0</offset>
         <drift>0.0 0.0 0.0</drift>
