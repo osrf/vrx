@@ -49,6 +49,7 @@ RUN /bin/sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) 
  && apt-key add /tmp/gazebo.key \
  && apt update \
  && apt install -y \
+    python-rosdep \
     qtbase5-dev \
     libgles2-mesa-dev \
     ${GAZ} \
