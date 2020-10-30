@@ -11,19 +11,14 @@ endif()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-# To appease policy warnings in CMake 3.10+. See `cmake --help-policy CMP00##`
-if (POLICY CMP0071)
-  # Set to NEW to let AUTOMOC and AUTOUIC process generated files
-  cmake_policy(SET CMP0071 NEW)
-endif()
-# Set policy for CMake 3.1+, FindBoost.cmake dependency of gazebo uses quoted
-# variables in if()
+# Set policy for CMake 3.1+. Use OLD policy to let FindBoost.cmake, dependency
+# of gazebo, use quoted variables in if()
 if(POLICY CMP0054)
   cmake_policy(SET CMP0054 OLD)
 endif()
+# Use OLD policy to be able to use *_generate_services_cpp before they exist,
+# without error.
 if(POLICY CMP0046)
-  # Use OLD policy to be able to use *_generate_services_cpp before they exist,
-  # without error.
   cmake_policy(SET CMP0046 OLD)
 endif()
 
