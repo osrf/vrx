@@ -1,0 +1,116 @@
+name: Release to DockerHub
+on:
+  push:
+    tags:
+      - 'v*'  # Launch DockerHub push on v* tags (e.g.: v1.2.1)
+  
+jobs:
+  release-docker-image-nonvidia-bionic-melodic-gazebo9:
+    runs-on: ubuntu-latest
+    env:
+      image_name: vrx
+      registry: osrf/vrx
+      tag: ${GITHUB_REF#refs/tags/}
+      dockerhub_tag_prefix:
+      build_docker_flags:
+    steps:
+      - name: Summary
+        run: |
+          echo "Pushing new image to DockerHub:";
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
+          echo "Updating existing image in DockerHub:";
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install Docker
+        uses: docker-practice/actions-setup-docker@master
+        with:
+          docker_version: 18.09
+          docker_channel: stable
+
+      - name: Create a new VRX Docker image
+        shell: bash
+        run: ./docker/build.bash ${{env.build_docker_flags}} .;
+
+      - name: Tag versioned image
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
+
+      - name: Tag current image
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
+
+      - name: Login to docker hub
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Push versioned image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}}
+        with:
+          args: push ${IMAGE_TAG}
+
+      - name: Push current image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}current
+        with:
+          args: push ${IMAGE_TAG}
+
+  release-docker-image-nvidia-bionic-melodic-gazebo9:
+    runs-on: ubuntu-latest
+    env:
+      image_name: vrx_nvidia
+      registry: osrf/vrx
+      tag: ${GITHUB_REF#refs/tags/}
+      dockerhub_tag_prefix: nvidia_
+      build_docker_flags: -n
+    steps:
+      - name: Summary
+        run: |
+          echo "Pushing new image to DockerHub:";
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
+          echo "Updating existing image in DockerHub:";
+          echo "  " ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install Docker
+        uses: docker-practice/actions-setup-docker@master
+        with:
+          docker_version: 18.09
+          docker_channel: stable
+
+      - name: Create a new VRX Docker image
+        shell: bash
+        run: docker/build.bash ${{env.build_docker_flags}} .;
+
+      - name: Tag versioned image
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}};
+
+      - name: Tag current image
+        run: docker tag ${{env.image_name}}:latest ${{env.registry}}:${{env.dockerhub_tag_prefix}}current;
+
+      - name: Login to docker hub
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Push versioned image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}${{env.tag}}
+        with:
+          args: push ${IMAGE_TAG}
+
+      - name: Push current image to DockerHub
+        uses: actions-hub/docker@master
+        env:
+          TAG: ${{env.registry}}:${{env.dockerhub_tag_prefix}}current
+        with:
+          args: push ${IMAGE_TAG}
