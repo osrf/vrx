@@ -325,12 +325,6 @@ install(DIRECTORY include/
 install(PROGRAMS scripts/spawn_wamv.bash
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-# Install Python node file
-catkin_install_python(PROGRAMS
-    nodes/twist2thrust.py
-    nodes/key2thrust_angle.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(sandisland_test
@@ -340,7 +334,11 @@ if(CATKIN_ENABLE_TESTING)
 endif()
 
 # Python Scripts
-catkin_install_python(PROGRAMS bin/generate_wamv
+catkin_install_python(PROGRAMS
+    bin/generate_wamv
+    nodes/twist2thrust.py
+    nodes/key2thrust_angle.py
+    src/vrx_gazebo_python/generator_scripts/wamv_config/configure_wamv.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 

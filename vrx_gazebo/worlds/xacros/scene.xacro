@@ -8,7 +8,7 @@
         </clouds>
       </sky>
       <grid>0</grid>
-      <origin_visual> 0 </origin_visual>
+      <origin_visual>0</origin_visual>
       <xacro:insert_block name="fog"/>
       <ambient>
         <xacro:insert_block name="ambient"/>

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wayfinding" params="**wp_markers **waypoints">
+  <xacro:macro name="wayfinding" params="**wp_markers **waypoints namespace:=wamv">
     <plugin name="wayfinding_scoring_plugin"
             filename="libwayfinding_scoring_plugin.so">
-      <vehicle>wamv</vehicle>
+      <vehicle>${namespace}</vehicle>
       <task_name>wayfinding</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
       <waypoints>
@@ -14,10 +14,10 @@
       <running_state_duration>300</running_state_duration>
       <release_joints>
         <joint>
-          <name>wamv_external_pivot_joint</name>
+          <name>${namespace}_external_pivot_joint</name>
         </joint>
         <joint>
-          <name>wamv_external_riser</name>
+          <name>${namespace}_external_riser</name>
         </joint>
       </release_joints>
       <xacro:insert_block name="wp_markers" />
