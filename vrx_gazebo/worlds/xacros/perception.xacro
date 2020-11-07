@@ -2,7 +2,8 @@
 <world xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="perception" params="**model_includes
                                          **object_sequence
-                                         namespace:=wamv">
+                                         namespace:=wamv
+                                         competition:=vrx">
     <xacro:insert_block name="model_includes"/>"
       <plugin filename="libperception_scoring_plugin.so"
               name="perception_scoring_plugin">
@@ -12,6 +13,11 @@
       <initial_state_duration>10.0</initial_state_duration>
       <ready_state_duration>10.0</ready_state_duration>
       <running_state_duration>300</running_state_duration>
+
+      <task_info_topic>/${competition}/task/info</task_info_topic>
+      <contact_debug_topic>/${competition}/debug/contact</contact_debug_topic>
+      <landmark_topic>/${competition}/perception/landmark</landmark_topic>
+
       <!-- Parameters for PopulationPlugin -->
       <loop_forever>false</loop_forever>
       <frame>${namespace}</frame>
