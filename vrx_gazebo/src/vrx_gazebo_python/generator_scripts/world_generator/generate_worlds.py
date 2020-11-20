@@ -8,15 +8,17 @@ from .. utils import create_xacro_file
 
 
 def main():
+    competition_pkg = rospy.get_param('competition_pkg')
+    world_name = rospy.get_param('world_name')
     s = open(rospy.get_param('requested'))
     yaml_name = rospy.get_param('requested')[
         rospy.get_param('requested').rfind('/')+1:
         rospy.get_param('requested').rfind('.yaml')]
     # get the yaml as a dict
     master = yaml.safe_load(s)
-    # get lsit of all coordinates that the master dict maps out
+    # get list of all coordinates that the master dict maps out
     coordinates = linear_combinations(master)
-    # create a world xacro and subsiquent world file for each coordinate
+    # create a world xacro and subsequent world file for each coordinate
     for num, i in enumerate(coordinates):
         create_xacro_file(xacro_target=rospy.get_param('world_xacro_target') +
                           yaml_name + str(num) + '.world.xacro',
@@ -27,17 +29,18 @@ def main():
                           '<sdf version="1.6" ' +
                           'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
                           '<!-- COORDINATE: ' + str(i) + ' -->\n' +
-                          '<world name="robotx_example_course">\n' +
-                          '  <xacro:include filename="$(find vrx_gazebo)' +
+                          '<world name="' + world_name + '">\n' +
+                          '  <xacro:include filename="$(find ' +
+                          competition_pkg + ')' +
                           '/worlds/xacros/include_all_xacros.xacro" />\n' +
                           '  <xacro:include_all_xacros />\n',
                           boiler_plate_bot='</world>\n</sdf>')
-        os.system('rosrun xacro xacro --inorder -o' +
+        os.system('rosrun xacro xacro -o' +
                   rospy.get_param('world_target') + yaml_name + str(num) +
                   '.world ' +
                   rospy.get_param('world_xacro_target') + yaml_name +
                   str(num) + '.world.xacro')
-    print ('All ', len(coordinates), ' worlds generated')
+    print('All %d worlds generated' % len(coordinates))
 
 
 def world_gen(coordinate={}, master={}):
@@ -86,7 +89,7 @@ def linear_combinations(master={}):
     axies = OrderedDict()
     start = {}
     # make the starting spot and max
-    # NOTE:the start coordinate <= all coordinates on an axis <= axies max
+    # NOTE: the start coordinate <= all coordinates on an axis <= axies max
     for axis, value in master.iteritems():
         start[axis] = 0
         axies[axis] = value['steps']-1
