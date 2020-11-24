@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
+
+<!-- Generates competition worlds. Used by vrx-docker for competition
+     evaluation -->
+
 <launch>
+  <!-- Task configuration YAML file -->
   <arg name="requested"/>
   <param name="requested" value="$(arg requested)"/>
 
@@ -9,7 +14,7 @@
   <arg name="world_target"/>
   <param name="world_target" value="$(arg world_target)"/>
 
-  <arg name="competition_pkg" default="wamv"/>
+  <arg name="competition_pkg" default="vrx_gazebo"/>
   <param name="competition_pkg" value="$(arg competition_pkg)"/>
 
   <arg name="world_name" default="robotx_example_course"/>

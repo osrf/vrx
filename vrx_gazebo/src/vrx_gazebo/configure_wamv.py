@@ -2,11 +2,11 @@
 import rospy
 import os
 
-from compliance import Sensor_Compliance
-from compliance import Thruster_Compliance
+from vrx_gazebo.compliance import SensorCompliance
+from vrx_gazebo.compliance import ThrusterCompliance
 
-from .. utils import create_xacro_file
-from .. utils import add_gazebo_thruster_config
+from vrx_gazebo.utils import create_xacro_file
+from vrx_gazebo.utils import add_gazebo_thruster_config
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
     wamv_target = rospy.get_param('wamv_target')
     wamv_gazebo = rospy.get_param('wamv_gazebo')
 
-    create_urdf_command = ("rosrun xacro xacro --inorder -o " + wamv_target +
+    create_urdf_command = ("rosrun xacro xacro -o " + wamv_target +
                            " '" + wamv_gazebo + "'")
 
     # Add xacro files if created
@@ -82,7 +82,7 @@ def create_thruster_xacro():
     thruster_boiler_plate_bot = ''
 
     # Check if valid number of thrusters and valid thruster parameters
-    comp = Thruster_Compliance()
+    comp = ThrusterCompliance()
     thruster_num_test = comp.number_compliance
     thruster_param_test = comp.param_compliance
 
@@ -139,7 +139,7 @@ def create_sensor_xacro():
     sensor_boiler_plate_bot = '  </xacro:macro>\n</robot>'
 
     # Check if valid number of sensors and valid sensor parameters
-    comp = Sensor_Compliance()
+    comp = SensorCompliance()
     sensor_num_test = comp.number_compliance
     sensor_param_test = comp.param_compliance
 

@@ -4,7 +4,7 @@ import rospy
 import os
 from collections import OrderedDict
 
-from .. utils import create_xacro_file
+from vrx_gazebo.utils import create_xacro_file
 
 
 def main():

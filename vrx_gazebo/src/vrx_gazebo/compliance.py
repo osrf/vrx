@@ -1,20 +1,28 @@
 #!/usr/bin/env python
 import rospy
+import rospkg
 import numpy as np
+import os
 import yaml
-from .. import utils
+
+from vrx_gazebo.utils import get_macros
 
 
-class Sensor_Compliance:
+class SensorCompliance:
     def __init__(self):
+
+        rospack = rospkg.RosPack()
+        pkg_path = rospack.get_path('vrx_gazebo')
+        self.config_dir = os.path.join(pkg_path, 'config', 'wamv_config')
+
         # open sensor_compliance/bounding_boxes.yaml and all the boxes defined
-        self.boxes = find_boxes('sensor_compliance/bounding_boxes.yaml')
+        self.boxes = find_boxes(os.path.join(self.config_dir,
+            'sensor_compliance', 'bounding_boxes.yaml'))
         # look at all sensors in sensors directory and get the default params
         self.sensors_dir = rospy.get_param('sensors_dir') + '/'
-        self.default_parameters = utils.get_macros(self.sensors_dir)
-        self.dir = rospy.get_param('compliance_dir') + '/'
-        self.numeric = yaml.safe_load(open(self.dir +
-                                      'sensor_compliance/numeric.yaml'))
+        self.default_parameters = get_macros(self.sensors_dir)
+        self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
+            'sensor_compliance', 'numeric.yaml')))
         return
 
     def param_compliance(self, sensor_type, params={}):
@@ -24,9 +32,9 @@ class Sensor_Compliance:
         params = params.copy()
         if sensor_type not in self.default_parameters:
             rospy.logerr('%s is not defined anywhere under %s' %
-                         (sensor_type, self.dir))
+                         (sensor_type, self.config_dir))
         assert sensor_type in self.default_parameters,\
-            '%s is not defined anywhere under %s' % (sensor_type, self.dir)
+            '%s is not defined anywhere under %s' % (sensor_type, self.config_dir)
         for i in params:
             if i not in self.numeric[sensor_type]['allowed_params']:
                 rospy.logerr('%s parameter specification of %s not permitted' %
@@ -66,16 +74,20 @@ class Sensor_Compliance:
         return True
 
 
-class Thruster_Compliance:
+class ThrusterCompliance:
     def __init__(self):
+        rospack = rospkg.RosPack()
+        pkg_path = rospack.get_path('vrx_gazebo')
+        self.config_dir = os.path.join(pkg_path, 'config', 'wamv_config')
+
         # open thruster_compliance/bounding_boxes.yaml and the boxes defined
-        self.boxes = find_boxes('thruster_compliance/bounding_boxes.yaml')
+        self.boxes = find_boxes(os.path.join(self.config_dir,
+            'thruster_compliance', 'bounding_boxes.yaml'))
         # look at all sensors in sensors directory and get the default params
         self.thrusters_dir = rospy.get_param('thrusters_dir') + '/'
-        self.default_parameters = utils.get_macros(self.thrusters_dir)
-        self.dir = rospy.get_param('compliance_dir') + '/'
-        self.numeric = yaml.safe_load(open(self.dir +
-                                      'thruster_compliance/numeric.yaml'))
+        self.default_parameters = get_macros(self.thrusters_dir)
+        self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
+            'thruster_compliance', 'numeric.yaml')))
         return
 
     def param_compliance(self, thruster_type, params={}):
@@ -86,10 +98,10 @@ class Thruster_Compliance:
         params = params.copy()
         if thruster_type not in self.default_parameters:
             rospy.logerr('%s is not defined anywhere under %s' %
-                         (thruster_type, self.dir))
+                         (thruster_type, self.config_dir))
         assert thruster_type in self.default_parameters,\
             '%s is not defined anywhere under %s' % \
-            (thruster_type, self.dir)
+            (thruster_type, self.config_dir)
         for i in params:
             if i not in self.numeric[thruster_type]['allowed_params']:
                 rospy.logerr('%s parameter specification of not permitted' %
@@ -167,8 +179,8 @@ class Box:
 
 
 def find_boxes(box_yaml):
-    addrs = rospy.get_param('compliance_dir') + '/' + box_yaml
-    box_def = yaml.safe_load(open(addrs))
+    box_def = yaml.safe_load(open(box_yaml))
+
     boxes = []
 
     for name, properties in box_def.iteritems():
