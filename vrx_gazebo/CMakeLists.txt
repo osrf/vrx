@@ -28,15 +28,15 @@ find_package(Protobuf REQUIRED)
 find_package(gazebo REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
+  gazebo_dev
+  geographic_msgs
   message_generation
+  roscpp
+  rospy
+  std_msgs
   wamv_gazebo
   wave_gazebo
   xacro
-  gazebo_dev
-  geographic_msgs
-  std_msgs
-  rospy
-  roscpp
 )
 
 ########################
@@ -335,10 +335,8 @@ endif()
 
 # Python Scripts
 catkin_install_python(PROGRAMS
-    bin/generate_wamv
     nodes/twist2thrust.py
     nodes/key2thrust_angle.py
-    src/vrx_gazebo_python/generator_scripts/wamv_config/configure_wamv.py
+    scripts/generate_worlds
+    scripts/generate_wamv
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-

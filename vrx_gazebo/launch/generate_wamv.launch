@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
+
+<!-- Generate wamv given custom configurations. Used by vrx-docker for
+     competition evaluation -->
+
 <launch>
   <arg name="namespace" value="wamv_config"/>
 
@@ -17,8 +21,6 @@
     <param name="sensors_dir" value="$(find wamv_gazebo)/urdf/sensors"/>
     
     <param name="thrusters_dir" value="$(find wamv_description)/urdf/thrusters"/>
-
-    <param name="compliance_dir" value="$(find vrx_gazebo)/src/vrx_gazebo_python/generator_scripts/wamv_config"/>
 
     <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv" output="screen" required="true"/>
   </group>
