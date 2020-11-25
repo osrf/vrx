@@ -107,7 +107,7 @@ install(TARGETS usv_gazebo_acoustic_pinger_plugin
 # Generate demo world files from xacro and install
 xacro_add_files(
   worlds/buoyancy_plugin_demo.world.xacro
-  INORDER INSTALL DESTINATION worlds
+  INSTALL DESTINATION worlds
 )
 install(DIRECTORY worlds/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
