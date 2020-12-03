@@ -15,6 +15,8 @@
       <task_info_topic>/${competition}/task/info</task_info_topic>
       <contact_debug_topic>/${competition}/debug/contact</contact_debug_topic>
 
+      <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+
       <!-- Goal as Latitude, Longitude, Yaw -->
       <waypoints>
         <xacro:insert_block name="waypoints"/>

@@ -71,6 +71,12 @@
 /// publish every instant a collision with the wamv is happening.
 /// Default is /vrx/debug/contact.
 ///
+/// <per_plugin_exit_on_completion>: Specifies whether to shut down after
+/// completion, for this specific plugin.
+/// Different from environment variable VRX_EXIT_ON_COMPLETION, which is for
+/// every plugin in the current shell. Environment variable overwrites this
+/// parameter.
+///
 /// <initial_state_duration>: Optional parameter (double type) specifying the
 /// amount of seconds that the plugin will be in the "initial" state.
 ///
@@ -313,6 +319,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Score in case of timeout - added for Navigation task
   private: double timeoutScore = -1.0;
+
+  /// \brief Whether to shut down after last gate is crossed.
+  private: bool perPluginExitOnCompletion = true;
 };
 
 #endif

@@ -12,6 +12,8 @@
       <task_info_topic>/${competition}/task/info</task_info_topic>
       <contact_debug_topic>/${competition}/debug/contact</contact_debug_topic>
 
+      <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+
       <!-- Goal as Latitude, Longitude, Yaw -->
       <goal_pose>${lat} ${lon} ${heading}</goal_pose>
       <initial_state_duration>10</initial_state_duration>
