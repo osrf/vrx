@@ -18,6 +18,8 @@
       <contact_debug_topic>/${competition}/debug/contact</contact_debug_topic>
       <landmark_topic>/${competition}/perception/landmark</landmark_topic>
 
+      <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+
       <!-- Parameters for PopulationPlugin -->
       <loop_forever>false</loop_forever>
       <frame>${namespace}</frame>
