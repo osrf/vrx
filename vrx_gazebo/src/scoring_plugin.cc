@@ -349,6 +349,11 @@ bool ScoringPlugin::ParseSDFParameters()
       ("contact_debug_topic");
 
   // This is an optional element.
+  if (this->sdf->HasElement("per_plugin_exit_on_completion"))
+    this->perPluginExitOnCompletion = this->sdf->Get<bool>(
+      "per_plugin_exit_on_completion");
+
+  // This is an optional element.
   if (this->sdf->HasElement("initial_state_duration"))
   {
     double value = this->sdf->Get<double>("initial_state_duration");
@@ -437,26 +442,33 @@ bool ScoringPlugin::ParseJoints()
 
 void ScoringPlugin::Exit()
 {
-  if (char* env = std::getenv("VRX_EXIT_ON_COMPLETION"))
+  bool exit = this->perPluginExitOnCompletion;
+
+  char* env = std::getenv("VRX_EXIT_ON_COMPLETION");
+  if (env != nullptr && std::string(env) == "true")
   {
-    if (std::string(env) == "true")
-    {
-      // shutdown gazebo
-      gazebo::msgs::ServerControl msg;
-      msg.set_stop(true);
-      this->serverControlPub->Publish(msg);
-      // shutdown gazebo
-      if (ros::ok())
-        ros::shutdown();
-    }
+    // Overwrite class variable if environment variable is specified
+    exit = true;
+  }
+
+  if (exit)
+  {
+    // shutdown gazebo
+    gazebo::msgs::ServerControl msg;
+    msg.set_stop(true);
+    this->serverControlPub->Publish(msg);
+    // shutdown gazebo
+    if (ros::ok())
+      ros::shutdown();
   }
   else
   {
-    gzerr << "VRX_EXIT_ON_COMPLETION not set"
-      << " will not shutdown on ScoringPlugin::Exit()"
+    gzerr << "VRX_EXIT_ON_COMPLETION and <per_plugin_exit_on_completion> "
+      << "both not set, will not shutdown on ScoringPlugin::Exit()"
       << std::endl;
-    ROS_ERROR_STREAM("VRX_EXIT_ON_COMPLETION not set, will" <<
-              "not shutdown on ScoringPlugin::Exit()");
+    ROS_ERROR_STREAM(
+      "VRX_EXIT_ON_COMPLETION and <per_plugin_exit_on_completion> "
+      << "both not set, will not shutdown on ScoringPlugin::Exit()");
   }
   return;
 }
