@@ -99,7 +99,8 @@ def world_gen(coordinate={}, master={}, config_file=None):
                         world[macro_name].append({})
 
         # Only used for gymkhana task
-        if axis['yamls'] is not None and \
+        if 'yamls' in axis and \
+                axis['yamls'] is not None and \
                 coordinate[axis_name] in axis['yamls']:
             # Dump the subtree under this trial into a YAML file
             params = axis['yamls'][coordinate[axis_name]]
