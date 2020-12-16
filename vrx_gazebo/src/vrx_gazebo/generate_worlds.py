@@ -14,39 +14,54 @@ def main():
     yaml_name = rospy.get_param('requested')[
         rospy.get_param('requested').rfind('/')+1:
         rospy.get_param('requested').rfind('.yaml')]
+
     # get the yaml as a dict
     master = yaml.safe_load(s)
+
     # get list of all coordinates that the master dict maps out
     coordinates = linear_combinations(master)
-    # create a world xacro and subsequent world file for each coordinate
-    for num, i in enumerate(coordinates):
-        create_xacro_file(xacro_target=rospy.get_param('world_xacro_target') +
-                          yaml_name + str(num) + '.world.xacro',
 
-                          requested_macros=world_gen(coordinate=i,
-                                                     master=master),
-                          boiler_plate_top='<?xml version="1.0" ?>\n' +
-                          '<sdf version="1.6" ' +
-                          'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
-                          '<!-- COORDINATE: ' + str(i) + ' -->\n' +
-                          '<world name="' + world_name + '">\n' +
-                          '  <xacro:include filename="$(find ' +
-                          competition_pkg + ')' +
-                          '/worlds/xacros/include_all_xacros.xacro" />\n' +
-                          '  <xacro:include_all_xacros />\n',
-                          boiler_plate_bot='</world>\n</sdf>')
-        os.system('rosrun xacro xacro -o' +
-                  rospy.get_param('world_target') + yaml_name + str(num) +
-                  '.world ' +
-                  rospy.get_param('world_xacro_target') + yaml_name +
-                  str(num) + '.world.xacro')
+    # create a world xacro and subsequent world file for each coordinate
+    for world_num, coord in enumerate(coordinates):
+
+        world_file = rospy.get_param('world_target') + yaml_name + \
+            str(world_num) + '.world'
+        xacro_file = rospy.get_param('world_xacro_target') + yaml_name + \
+            str(world_num) + '.world.xacro'
+
+        # Only used for gymkhana task
+        config_file = rospy.get_param('config_target') + yaml_name + \
+            str(world_num) + '.yaml'
+
+        create_xacro_file(
+            xacro_target=rospy.get_param('world_xacro_target') +
+                yaml_name + str(world_num) + '.world.xacro',
+            requested_macros=world_gen(coordinate=coord, master=master,
+                config_file=config_file),
+            boiler_plate_top='<?xml version="1.0" ?>\n' +
+                '<sdf version="1.6" ' +
+                'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
+            '<!-- COORDINATE: ' + str(coord) + ' -->\n' +
+            '<world name="' + world_name + '">\n' +
+            '  <xacro:include filename="$(find ' + competition_pkg + ')' +
+                '/worlds/xacros/include_all_xacros.xacro" />\n' +
+            '  <xacro:include_all_xacros />\n',
+            boiler_plate_bot='</world>\n</sdf>')
+
+        # Convert xacro file to world file
+        os.system('rosrun xacro xacro -o ' + world_file + ' ' + xacro_file)
+
     print('All %d worlds generated' % len(coordinates))
 
 
-def world_gen(coordinate={}, master={}):
+def world_gen(coordinate={}, master={}, config_file=None):
     world = {}
+    # axis_name: root-level key
+    # axis: sub-tree from root-level key
     for axis_name, axis in master.iteritems():
+
         # if a sequence override defined for this axis at this step
+        # These are parameters to go into a xacro macro file
         if axis['sequence'] is not None and \
                 coordinate[axis_name] in axis['sequence']:
             # instances of macros already present in the world dict
@@ -60,6 +75,7 @@ def world_gen(coordinate={}, master={}):
                         world[i] = [{}]
                     else:
                         world[i] = axis['sequence'][coordinate[axis_name]][i]
+
         # for the non-sequence override case:
         else:
             for macro_name, macro_calls in axis['macros'].iteritems():
@@ -81,6 +97,16 @@ def world_gen(coordinate={}, master={}):
                         world[macro_name].append(evaluated_params)
                     else:
                         world[macro_name].append({})
+
+        # Only used for gymkhana task
+        if axis['yamls'] is not None and \
+                coordinate[axis_name] in axis['yamls']:
+            # Dump the subtree under this trial into a YAML file
+            params = axis['yamls'][coordinate[axis_name]]
+            config_stream = file(config_file, 'w')
+            yaml.dump(params, config_stream)
+            print("Generated %s" % config_file)
+
     return world
 
 
