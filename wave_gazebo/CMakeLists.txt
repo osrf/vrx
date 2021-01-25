@@ -45,5 +45,5 @@ xacro_add_files(
   worlds/ocean.world.xacro
   worlds/ocean_buoys.world.xacro
   worlds/ocean_wamv.world.xacro
-  INORDER INSTALL DESTINATION worlds
+  INSTALL DESTINATION worlds
 )

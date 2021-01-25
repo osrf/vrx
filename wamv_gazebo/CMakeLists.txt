@@ -19,7 +19,7 @@ catkin_package(
 # Generate urdf files from xacro and install
 xacro_add_files(
   urdf/wamv_gazebo.urdf.xacro
-  INORDER INSTALL DESTINATION urdf
+  INSTALL DESTINATION urdf
 )
 
 # Install meshes and textures
