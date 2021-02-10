@@ -329,7 +329,7 @@ void UsvDynamicsPlugin::Update()
       // double depth = WavefieldSampler::ComputeDepthDirectly(
       //  *waveParams, X, simTime);
       double depth = 0.0;
-      if(waveParams)
+      if (waveParams)
         depth = WavefieldSampler::ComputeDepthSimply(
         *waveParams, X, simTime);
 
