@@ -279,6 +279,13 @@ add_custom_target(dock_erb_generation ALL
     dock_base_erb_generation
 )
 
+set(XACRO_INLINE)
+if(DEFINED ENV{ROS_DISTRO})
+  if($ENV{ROS_DISTRO} STREQUAL "kinetic")
+    set(XACRO_INLINE INLINE)
+  endif()
+endif()
+
 # Generate world files from xacro and install
 xacro_add_files(
   worlds/example_course.world.xacro
@@ -291,7 +298,7 @@ xacro_add_files(
   worlds/wayfinding_task.world.xacro
   worlds/wind_test.world.xacro
   worlds/ocean.world.xacro
-  INSTALL DESTINATION worlds
+  ${XACRO_INLINE} INSTALL DESTINATION worlds
 )
 # Generate obstacle course
 add_custom_command(

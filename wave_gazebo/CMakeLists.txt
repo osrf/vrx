@@ -40,10 +40,17 @@ add_custom_target(model_erb_generation ALL
     ${model_files}
 )
 
+set(XACRO_INLINE)
+if(DEFINED ENV{ROS_DISTRO})
+  if($ENV{ROS_DISTRO} STREQUAL "kinetic")
+    set(XACRO_INLINE INLINE)
+  endif()
+endif()
+
 # Generate world files from xacro and install
 xacro_add_files(
   worlds/ocean.world.xacro
   worlds/ocean_buoys.world.xacro
   worlds/ocean_wamv.world.xacro
-  INSTALL DESTINATION worlds
+  ${XACRO_INLINE} INSTALL DESTINATION worlds
 )
