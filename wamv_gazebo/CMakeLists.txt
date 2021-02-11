@@ -16,10 +16,17 @@ catkin_package(
   CATKIN_DEPENDS wamv_description usv_gazebo_plugins xacro
 )
 
+set(XACRO_INORDER)
+if(DEFINED ENV{ROS_DISTRO})
+  if($ENV{ROS_DISTRO} STREQUAL "kinetic")
+    set(XACRO_INORDER INORDER)
+  endif()
+endif()
+
 # Generate urdf files from xacro and install
 xacro_add_files(
   urdf/wamv_gazebo.urdf.xacro
-  INORDER INSTALL DESTINATION urdf
+  ${XACRO_INORDER} INSTALL DESTINATION urdf
 )
 
 # Install meshes and textures
