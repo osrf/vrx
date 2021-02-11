@@ -104,17 +104,17 @@ install(TARGETS usv_gazebo_acoustic_pinger_plugin
   RUNTIME DESTINATION bin
 )
 
-set(XACRO_INLINE)
+set(XACRO_INORDER)
 if(DEFINED ENV{ROS_DISTRO})
   if($ENV{ROS_DISTRO} STREQUAL "kinetic")
-    set(XACRO_INLINE INLINE)
+    set(XACRO_INORDER INORDER)
   endif()
 endif()
 
 # Generate demo world files from xacro and install
 xacro_add_files(
   worlds/buoyancy_plugin_demo.world.xacro
-  ${XACRO_INLINE} INSTALL DESTINATION worlds
+  ${XACRO_INORDER} INSTALL DESTINATION worlds
 )
 install(DIRECTORY worlds/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)

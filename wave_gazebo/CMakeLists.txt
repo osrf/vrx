@@ -40,10 +40,10 @@ add_custom_target(model_erb_generation ALL
     ${model_files}
 )
 
-set(XACRO_INLINE)
+set(XACRO_INORDER)
 if(DEFINED ENV{ROS_DISTRO})
   if($ENV{ROS_DISTRO} STREQUAL "kinetic")
-    set(XACRO_INLINE INLINE)
+    set(XACRO_INORDER INORDER)
   endif()
 endif()
 
@@ -52,5 +52,5 @@ xacro_add_files(
   worlds/ocean.world.xacro
   worlds/ocean_buoys.world.xacro
   worlds/ocean_wamv.world.xacro
-  ${XACRO_INLINE} INSTALL DESTINATION worlds
+  ${XACRO_INORDER} INSTALL DESTINATION worlds
 )

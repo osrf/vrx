@@ -279,10 +279,10 @@ add_custom_target(dock_erb_generation ALL
     dock_base_erb_generation
 )
 
-set(XACRO_INLINE)
+set(XACRO_INORDER)
 if(DEFINED ENV{ROS_DISTRO})
   if($ENV{ROS_DISTRO} STREQUAL "kinetic")
-    set(XACRO_INLINE INLINE)
+    set(XACRO_INORDER INORDER)
   endif()
 endif()
 
@@ -298,7 +298,7 @@ xacro_add_files(
   worlds/wayfinding_task.world.xacro
   worlds/wind_test.world.xacro
   worlds/ocean.world.xacro
-  ${XACRO_INLINE} INSTALL DESTINATION worlds
+  ${XACRO_INORDER} INSTALL DESTINATION worlds
 )
 # Generate obstacle course
 add_custom_command(
