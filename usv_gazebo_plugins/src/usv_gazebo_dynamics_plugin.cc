@@ -330,8 +330,9 @@ void UsvDynamicsPlugin::Update()
       //  *waveParams, X, simTime);
       double depth = 0.0;
       if (waveParams)
-        depth = WavefieldSampler::ComputeDepthSimply(
-        *waveParams, X, simTime);
+      {
+        depth = WavefieldSampler::ComputeDepthSimply(*waveParams, X, simTime);
+      }
 
       // Vertical wave displacement.
       double dz = depth + X.Z();
