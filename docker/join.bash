@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #
-# Typical usage: ./join.bash vrx
+# Typical usage: ./join.bash <container_name>
 #
 
-IMG=$(basename $1)
+CONTAINER_ID=$1
 
 xhost +
-containerid=$(docker ps -aqf "ancestor=${IMG}")
-docker exec --privileged -e DISPLAY=${DISPLAY} -e LINES=`tput lines` -it ${containerid} bash
+docker exec --privileged -e DISPLAY=${DISPLAY} -e LINES=`tput lines` -it ${CONTAINER_ID} bash
 xhost -
