@@ -30,4 +30,3 @@ JOY=/dev/input/js0
 CONTAINER_NAME=vrx_noetic_runtime
 
 rocker --devices $JOY --dev-helpers --nvidia --x11 --user --home --name $CONTAINER_NAME --git vrx_noetic:latest
-
