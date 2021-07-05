@@ -292,6 +292,7 @@ xacro_add_files(
   worlds/navigation_task.world.xacro
   worlds/perception_task.world.xacro
   worlds/sandisland.world.xacro
+  worlds/sydneyregatta.world.xacro
   worlds/dock.world.xacro
   worlds/scan_and_dock.world.xacro
   worlds/stationkeeping_task.world.xacro
