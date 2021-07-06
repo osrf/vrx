@@ -94,13 +94,13 @@
   <link name="base_link">
   </link>
 
-  <joint name="dummy_joint" type = "fixed">
+  <joint name="${namespace}/dummy_joint" type = "fixed">
     <parent link="base_link"/>
-    <child link="dummy_link"/>
+    <child link="${namespace}/dummy_link"/>
   </joint>
 
   <!-- Basic model of the 16' WAM-V USV -->
-  <link name="dummy_link">
+  <link name="${namespace}/dummy_link">
     <visual>
       <geometry>
         <mesh filename="package://wamv_description/models/WAM-V-Base/mesh/WAM-V-Base.dae"/>

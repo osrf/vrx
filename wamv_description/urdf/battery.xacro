@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v-batteries">
   <xacro:macro name="battery" params="prefix position:='0 0 0' orientation:='0 0 0'">
-    <link name="${prefix}_battery_link">
+    <link name="${namespace}/${prefix}_battery_link">
       <visual name="${prefix}_battery_visual">
         <origin xyz="0 -1.03 -.45" rpy="0 0 0"/>
         <geometry>
@@ -26,10 +26,10 @@
           iyz="0"/>
       </inertial>
     </link>
-    <joint name ="${prefix}_chasis_battery_joint" type="fixed">
+    <joint name ="${namespace}/${prefix}_chasis_battery_joint" type="fixed">
       <origin xyz="${position}" rpy="${orientation}"/>
       <parent link="base_link"/>
-      <child link="${prefix}_battery_link"/>
+      <child link="${namespace}/${prefix}_battery_link"/>
     </joint>
   </xacro:macro>
 </robot>

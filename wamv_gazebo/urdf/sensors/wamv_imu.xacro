@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_imu" params="name:=imu x:=0.3 y:=0.5 z:=1.3 R:=0 P:=0 Y:=0 update_rate:=15">
-    <link name="${name}_link">
+    <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">>
         <geometry>
           <box size="0.05 0.025 0.005" />
@@ -15,17 +15,17 @@
         <inertia ixx="0.000083" ixy="0.0" ixz="0.0" iyy="0.000083" iyz="0.0" izz="0.0125"/>
       </inertial>
     </link>
-    <joint name="${name}_joint" type="revolute">
+    <joint name="${namespace}/${name}_joint" type="revolute">
       <axis xyz="0 0 1"/>
       <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
       <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}"/>
       <parent link="base_link"/>
-      <child link="${name}_link"/>
+      <child link="${namespace}/${name}_link"/>
     </joint>
     <gazebo>
       <plugin name="imu_plugin_${name}" filename="libhector_gazebo_ros_imu.so">
         <updateRate>${update_rate}</updateRate>
-        <bodyName>${name}_link</bodyName>
+        <bodyName>${namespace}/${name}_link</bodyName>
         <topicName>${namespace}/${sensor_namespace}imu/imu/data</topicName>
         <serviceName>${namespace}/${sensor_namespace}imu_service</serviceName>
         <!-- Manually prepend namespace to tf frame. -->

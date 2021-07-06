@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_pinger" params="name:='pinger' frameId:='wamv/pinger' position:='0 0 0' orientation:='0 0 0'">
-    <link name="${name}">
+    <link name="${namespace}/${name}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
@@ -15,10 +15,10 @@
         </geometry>
       </collision>
     </link>
-    <joint name="${name}_pinger_joint" type="fixed">
+    <joint name="${namespace}/${name}_pinger_joint" type="fixed">
       <origin xyz="${position}" rpy="${orientation}"/>
       <parent link="base_link"/>
-      <child link="${name}"/>
+      <child link="${namespace}/${name}"/>
     </joint>
     <gazebo>
       <plugin name="pinger_plugin" filename="libusv_gazebo_acoustic_pinger_plugin.so">

@@ -8,7 +8,7 @@
     <xacro:property name="post_arm_to_camera_z" value="0.027"/>
 
     <!-- Monocular Camera -->
-    <link name="${name}_link">
+    <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">
         <origin xyz="-0.033 0 0" rpy="0 0 ${pi/2}"/>
         <geometry>
@@ -42,7 +42,7 @@
 
     <!-- Define a link for the optical frame.  This will match the sensor frame and
          be oriented in the camera convention. -->
-    <link name="${name}_link_optical">
+    <link name="${namespace}/${name}_link_optical">
     </link>
 
     <!-- Define post length and mass based on desired z position of sensor -->
@@ -52,7 +52,7 @@
     <xacro:property name="post_radius" value="0.0076"/>
 
     <!-- Sensor post -->
-    <link name="${name}_post_link">
+    <link name="${namespace}/${name}_post_link">
       <visual>
         <geometry>
           <cylinder radius="${post_radius}" length="${post_length}"/>
@@ -79,7 +79,7 @@
     </link>
 
     <!-- Sensor post arm -->
-    <link name="${name}_post_arm_link">
+    <link name="${namespace}/${name}_post_arm_link">
       <visual name="${name}_post_arm_visual">
         <origin xyz="-0.038 0 -0.003" rpy="${radians(-60)} 0 ${-pi/2}"/>
         <geometry>
@@ -108,37 +108,37 @@
     <!-- Base to sensor post joint -->
     <xacro:property name="post_z" value="${platform_z+post_length/2}"/>
     <xacro:property name="post_to_camera_x" value="${post_to_post_arm_x+post_arm_to_camera_x}"/>
-    <joint name="base_to_${name}_post_joint" type="fixed">
+    <joint name="${namespace}/base_to_${name}_post_joint" type="fixed">
       <origin xyz="${x-(post_to_camera_x)*cos(post_Y)} ${y-(post_to_camera_x)*sin(post_Y)} ${post_z}" rpy="0 0 ${post_Y}" />
       <parent link="base_link" />
-      <child link="${name}_post_link" />
+      <child link="${namespace}/${name}_post_link" />
     </joint>
 
     <!-- Sensor post to sensor post arm joint -->
-    <joint name="${name}_post_to_${name}_post_arm_joint" type="fixed">
+    <joint name="${namespace}/${name}_post_to_${name}_post_arm_joint" type="fixed">
       <origin xyz="${post_to_post_arm_x} 0 ${z-post_z-post_arm_to_camera_z}" rpy="0 0 0" />
-      <parent link="${name}_post_link" />
-      <child link="${name}_post_arm_link" />
+      <parent link="${namespace}/${name}_post_link" />
+      <child link="${namespace}/${name}_post_arm_link" />
     </joint>
 
     <!-- Sensor post arm to camera joint -->
-    <joint name="${name}_post_arm_to_${name}_joint" type="fixed">
+    <joint name="${namespace}/${name}_post_arm_to_${name}_joint" type="fixed">
       <origin xyz="${post_arm_to_camera_x} 0 ${post_arm_to_camera_z}" rpy="${R} ${P} ${Y-post_Y}" />
-      <parent link="${name}_post_arm_link" />
-      <child link="${name}_link" />
+      <parent link="${namespace}/${name}_post_arm_link" />
+      <child link="${namespace}/${name}_link" />
     </joint>
 
     <!-- Camera to optical frame joint.  This is oriented to convert between ENU
          and camera conventions -->
-    <joint name="${name}_to_${name}_link_optical_joint" type="fixed">
+    <joint name="${namespace}/${name}_to_${name}_link_optical_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
-      <parent link="${name}_link" />
-      <child link="${name}_link_optical" />
+      <parent link="${namespace}/${name}_link" />
+      <child link="${namespace}/${name}_link_optical" />
     </joint>
 
 
     <!-- Gazebo camera setup -->
-    <gazebo reference="${name}_link">
+    <gazebo reference="${namespace}/${name}_link">
       <sensor type="camera" name="${name}_sensor">
         <update_rate>30.0</update_rate>
         <camera name="${name}_camera">
