@@ -91,11 +91,11 @@
     </collision>
   </xacro:macro>
 
-  <link name="base_link">
+  <link name="${namespace}/base_link">
   </link>
 
   <joint name="${namespace}/dummy_joint" type = "fixed">
-    <parent link="base_link"/>
+    <parent link="${namespace}/base_link"/>
     <child link="${namespace}/dummy_link"/>
   </joint>
 

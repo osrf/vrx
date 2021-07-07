@@ -125,7 +125,7 @@
     <xacro:property name="post_to_lidar_x" value="${post_to_post_arm_x+post_arm_to_lidar_x}"/>
     <joint name="${namespace}/base_to_${name}_post_joint" type="fixed">
       <origin xyz="${x-(post_to_lidar_x)*cos(post_Y)} ${y-(post_to_lidar_x)*sin(post_Y)} ${post_z}" rpy="0 0 ${post_Y}" />
-      <parent link="base_link" />
+      <parent link="${namespace}/base_link" />
       <child link="${namespace}/${name}_post_link" />
     </joint>
 

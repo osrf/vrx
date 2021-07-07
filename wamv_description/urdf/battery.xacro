@@ -28,7 +28,7 @@
     </link>
     <joint name ="${namespace}/${prefix}_chasis_battery_joint" type="fixed">
       <origin xyz="${position}" rpy="${orientation}"/>
-      <parent link="base_link"/>
+      <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${prefix}_battery_link"/>
     </joint>
   </xacro:macro>

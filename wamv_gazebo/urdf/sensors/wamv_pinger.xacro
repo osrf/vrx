@@ -17,7 +17,7 @@
     </link>
     <joint name="${namespace}/${name}_pinger_joint" type="fixed">
       <origin xyz="${position}" rpy="${orientation}"/>
-      <parent link="base_link"/>
+      <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}"/>
     </joint>
     <gazebo>

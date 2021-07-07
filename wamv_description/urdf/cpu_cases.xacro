@@ -33,7 +33,7 @@
   </link>
   <joint name ="${namespace}/chasis_cpu_cases_joint" type="fixed">
     <origin xyz="${position}" rpy="${orientation}"/>
-    <parent link="base_link"/>
+    <parent link="${namespace}/base_link"/>
     <child link="${namespace}/cpu_cases_link"/>
   </joint>
 </xacro:macro>
