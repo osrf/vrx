@@ -27,6 +27,9 @@
 
 IMG_NAME=$1
 JOY=/dev/input/js0
-CONTAINER_NAME=vrx_noetic_runtime
+# Split off ':latest' from IMG_NAME
+IFS=':' read -ra NAMES <<< "$IMG_NAME"
+CONTAINER_NAME="${NAMES[0]}_runtime"
+echo "Using image <$IMG_NAME> to start container <$CONTAINER_NAME>"
 
-rocker --devices $JOY --dev-helpers --nvidia --x11 --user --home --name $CONTAINER_NAME --git vrx_noetic:latest
+rocker --devices $JOY --dev-helpers --nvidia --x11 --user --home --name $CONTAINER_NAME --git $IMG_NAME
