@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v-two-engines">
   <!-- Macro for inserting an engine with its propeller. -->
   <xacro:macro name="engine" params="prefix position:='0 0 0' orientation:='0 0 0'">
-    <link name="${prefix}_engine_link">
+    <link name="${namespace}/${prefix}_engine_link">
       <visual>
         <geometry>
           <mesh filename="package://wamv_description/models/engine/mesh/engine.dae"/>
@@ -26,7 +26,7 @@
       </inertial>
     </link>
 
-    <link name="${prefix}_propeller_link">
+    <link name="${namespace}/${prefix}_propeller_link">
       <visual>
         <geometry>
           <mesh filename="package://wamv_description/models/propeller/mesh/propeller.dae"/>
@@ -44,18 +44,18 @@
       </inertial>
     </link>
 
-    <joint name="${prefix}_chasis_engine_joint" type="revolute">
+    <joint name="${namespace}/${prefix}_chasis_engine_joint" type="revolute">
       <axis xyz="0 0 1"/>
       <limit lower="${-pi}" upper="${pi}" effort="10" velocity="10"/>
       <origin xyz="${position}" rpy="${orientation}"/>
       <parent link="base_link"/>
-      <child link="${prefix}_engine_link"/>
+      <child link="${namespace}/${prefix}_engine_link"/>
     </joint>
 
-    <joint name="${prefix}_engine_propeller_joint" type="continuous">
+    <joint name="${namespace}/${prefix}_engine_propeller_joint" type="continuous">
       <axis rpy="0 0 0" xyz="1 0 0"/>
-      <parent link="${prefix}_engine_link"/>
-      <child link="${prefix}_propeller_link"/>
+      <parent link="${namespace}/${prefix}_engine_link"/>
+      <child link="${namespace}/${prefix}_propeller_link"/>
       <origin rpy="0 0 0" xyz="-0.278156 0 -0.509371"/>
       <limit effort="100" velocity="100" />
       <dynamics friction="0.05" damping="0.05" />
