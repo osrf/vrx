@@ -18,57 +18,23 @@
 #
 
 # Builds a Docker image.
-BUILD_BASE=""
-BUILD_ROS_GAZ=""
-image_name="vrx"
-
-POSITIONAL=()
-while [[ $# -gt 0 ]]
-do
-key="$1"
-
-case $key in
-    -n|--nvidia)
-    BUILD_BASE="--build-arg BASEIMG=nvidia/opengl:1.0-glvnd-devel-ubuntu18.04"
-    image_name="vrx_nvidia"
-    shift
-    ;;
-    -k|--kinetic)
-    BUILD_BASE="--build-arg BASEIMG=ubuntu:xenial"
-    image_name="vrx_gaz7"
-    BUILD_ROS_GAZ="--build-arg DIST=kinetic --build-arg GAZ=gazebo7"
-    shift
-    ;;
-    -K|--kinetic-nvidia)
-    BUILD_BASE="--build-arg BASEIMG=nvidia/opengl:1.1-glvnd-devel-ubuntu16.04"
-    image_name="vrx_nvidia_gaz7"
-    BUILD_ROS_GAZ="--build-arg DIST=kinetic --build-arg GAZ=gazebo7"
-    shift
-    ;;
-    *)    # unknown option
-    POSITIONAL+=("$1")
-    shift
-    ;;
-esac
-done
-
-set -- "${POSITIONAL[@]}"
+image_name=$(basename $1)
 
 if [ $# -lt 1 ]
 then
-    echo "Usage: $0 [-n --nvidia] <root of vrx repo>"
+    echo "Usage: $0 <path to directory containing Dockerfile>"
     exit 1
 fi
 
-if [ ! -f $1/docker/Dockerfile ]
+if [ ! -f "${1}"/Dockerfile ]
 then
     echo "Err: Directory does not contain a Dockerfile to build."
     exit 1
 fi
 
 image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
-echo ".*" > "${1}"/.dockerignore
-docker build --rm -t $image_plus_tag -f "${1}"/docker/Dockerfile "${1}" $BUILD_BASE $BUILD_ROS_GAZ && \
+docker build --rm -t $image_plus_tag -f "${1}"/Dockerfile "${1}" && \
 docker tag $image_plus_tag $image_name:latest && \
 echo "Built $image_plus_tag and tagged as $image_name:latest"
-rm "${1}"/.dockerignore
+echo "To run:"
+echo "./run.bash $image_name:latest"
