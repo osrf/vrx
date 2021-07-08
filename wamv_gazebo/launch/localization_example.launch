@@ -44,7 +44,8 @@
 
   <!-- Produces local odometry from GPS to be used in Kalman filter -->
   <node ns="wamv/robot_localization" pkg="robot_localization" type="navsat_transform_node"
-        name="navsat_transform_node" respawn="true" output="screen">       
+        name="navsat_transform_node" respawn="true" output="screen">      
+    <param name="tf_prefix" value="wamv"/> 
     <param name="frequency" value="60"/>
     <param name="magnetic_declination_radians" value="0"/>
     <param name="broadcast_utm_transform" value="true"/>
