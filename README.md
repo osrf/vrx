@@ -5,7 +5,7 @@ This repository is the home to the source code and software documentation for th
 This is an active development project.  We are adding and improving things all the time.  The project contains a simulation foundation, including an environment similar to the RobotX venue and description of the WAM-V platform.  It is intended as a first step for teams that would then extend the tools for their specific development needs.
 
 
-![VRX](images/sand_island.png)
+![VRX](images/sydney_regatta.png)
 ![Ubuntu CI](https://github.com/osrf/vrx/workflows/Ubuntu%20CI/badge.svg)
 
 ## Getting Started
