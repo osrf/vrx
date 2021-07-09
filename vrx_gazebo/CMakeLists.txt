@@ -289,9 +289,11 @@ endif()
 # Generate world files from xacro and install
 xacro_add_files(
   worlds/example_course.world.xacro
+  worlds/example_course_2019.world.xacro
   worlds/navigation_task.world.xacro
   worlds/perception_task.world.xacro
   worlds/sandisland.world.xacro
+  worlds/sydneyregatta.world.xacro
   worlds/dock.world.xacro
   worlds/scan_and_dock.world.xacro
   worlds/stationkeeping_task.world.xacro
