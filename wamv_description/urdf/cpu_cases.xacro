@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v-cpu_cases">
 <xacro:macro name="cpu_cases" params="position:='0 0 0' orientation:='0 0 0'">
-  <link name="cpu_cases_link">
+  <link name="${namespace}/cpu_cases_link">
     <visual name="cpu_cases_visual">
       <origin xyz="0.073 0 -1.53" rpy="0 0 0"/>
       <geometry>
@@ -31,10 +31,10 @@
         iyz="0"/>
     </inertial>
   </link>
-  <joint name ="chasis_cpu_cases_joint" type="fixed">
+  <joint name ="${namespace}/chasis_cpu_cases_joint" type="fixed">
     <origin xyz="${position}" rpy="${orientation}"/>
-    <parent link="base_link"/>
-    <child link="cpu_cases_link"/>
+    <parent link="${namespace}/base_link"/>
+    <child link="${namespace}/cpu_cases_link"/>
   </joint>
 </xacro:macro>
 </robot>
