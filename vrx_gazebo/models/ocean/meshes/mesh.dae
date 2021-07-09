@@ -10,7 +10,6 @@
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_images/>
   <library_geometries>
     <geometry id="shape0-mesh" name="shape0">
       <mesh>
@@ -56,7 +55,6 @@
       </mesh>
     </geometry>
   </library_geometries>
-  <library_controllers/>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="node" name="node" type="NODE">

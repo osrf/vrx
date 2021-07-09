@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3 R:=0 P:=0 Y:=0 lat:=21.30996 lon:=-157.8901 elev:=0.0 update_rate:=15">
-    <link name="${name}_link">
+    <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">
         <geometry>
           <mesh filename="package://wamv_gazebo/models/gps/mesh/gps.dae"/>
@@ -24,18 +24,18 @@
         <inertia ixx="0.006458" ixy="0.0" ixz="0.0" iyy="0.006458" iyz="0.0" izz="0.01125"/>
       </inertial>
     </link>
-    <joint name="${name}_joint" type="revolute">
+    <joint name="${namespace}/${name}_joint" type="revolute">
       <axis xyz="0 0 1"/>
       <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
       <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}" />
-      <parent link="base_link" />
-      <child link="${name}_link" />
+      <parent link="${namespace}/base_link" />
+      <child link="${namespace}/${name}_link" />
     </joint>
     <gazebo>
       <plugin name="gps_plugin_${name}" filename="libhector_gazebo_ros_gps.so">
         <updateRate>${update_rate}</updateRate>
         <alwaysOn>true</alwaysOn>
-        <bodyName>${name}_link</bodyName>
+        <bodyName>${namespace}/${name}_link</bodyName>
         <!-- Manually prepend namespace to tf frame. -->
         <frameId>${namespace}/${name}_link</frameId>
         <topicName>${namespace}/${sensor_namespace}gps/gps/fix</topicName>

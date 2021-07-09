@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v">
+  <!-- Required arg for melodic and kinetic... -->
+  <xacro:arg name="namespace" default="wamv"/>  
+  <xacro:property name="namespace" value="$(arg namespace)" scope="global" /> 
   <!-- Macro for creating the main collisions as simple shapes. -->
   <xacro:macro name="main_collisions" params="prefix reflect:=1">
     <!-- Main float -->
@@ -91,16 +94,16 @@
     </collision>
   </xacro:macro>
 
-  <link name="base_link">
+  <link name="${namespace}/base_link">
   </link>
 
-  <joint name="dummy_joint" type = "fixed">
-    <parent link="base_link"/>
-    <child link="dummy_link"/>
+  <joint name="${namespace}/dummy_joint" type = "fixed">
+    <parent link="${namespace}/base_link"/>
+    <child link="${namespace}/dummy_link"/>
   </joint>
 
   <!-- Basic model of the 16' WAM-V USV -->
-  <link name="dummy_link">
+  <link name="${namespace}/dummy_link">
     <visual>
       <geometry>
         <mesh filename="package://wamv_description/models/WAM-V-Base/mesh/WAM-V-Base.dae"/>

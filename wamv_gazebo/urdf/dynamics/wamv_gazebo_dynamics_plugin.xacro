@@ -4,7 +4,7 @@
     <!--Gazebo Plugin for simulating WAM-V dynamics-->
     <gazebo>
       <plugin name="usv_dynamics_${name}" filename="libusv_gazebo_dynamics_plugin.so">
-        <bodyName>base_link</bodyName>
+        <bodyName>${namespace}/base_link</bodyName>
         <!-- Must be same as the ocean model!-->
         <waterLevel>0</waterLevel>
         <waterDensity>997.8</waterDensity>

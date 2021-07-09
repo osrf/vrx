@@ -10,7 +10,6 @@
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_images/>
   <library_effects>
     <effect id="FloatingDockMaterial-effect">
       <profile_COMMON>
@@ -88,7 +87,6 @@
       </mesh>
     </geometry>
   </library_geometries>
-  <library_controllers/>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="FloatingDock3tile" name="FloatingDock3tile" type="NODE">

@@ -101,7 +101,6 @@
       </extra>
     </light>
   </library_lights>
-  <library_images/>
   <library_effects>
     <effect id="Material_001-effect">
       <profile_COMMON>
@@ -169,7 +168,6 @@
       </mesh>
     </geometry>
   </library_geometries>
-  <library_controllers/>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="Camera" name="Camera" type="NODE">
