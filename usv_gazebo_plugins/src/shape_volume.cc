@@ -113,6 +113,7 @@ std::string ShapeVolume::Display()
     case ShapeType::Sphere:
       return "Sphere";
   }
+  return "None";
 }
 
 //////////////////////////////////////////////////
