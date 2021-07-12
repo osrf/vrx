@@ -143,7 +143,7 @@
       <child link="${namespace}/${name}_link" />
     </joint>
 
-    <gazebo reference="${name}_link">
+    <gazebo reference="${namespace}/${name}_link">
       <sensor type="gpu_ray" name="${name}_sensor">
         <update_rate>${update_rate}</update_rate>
         <ray>
