@@ -264,6 +264,7 @@ void UsvDynamicsPlugin::Update()
   Dmat(3, 3) = this->paramKp + this->paramKpp * std::abs(kVelAngularBody.X());
   Dmat(4, 4) = this->paramMq + this->paramMqq * std::abs(kVelAngularBody.Y());
   Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(kVelAngularBody.Z());
+  ROS_DEBUG_STREAM_THROTTLE(1.0, "Cmat :\n" << Cmat);
   ROS_DEBUG_STREAM_THROTTLE(1.0, "Dmat :\n" << Dmat);
   const Eigen::VectorXd kDvec = -1.0 * Dmat * state;
   ROS_DEBUG_STREAM_THROTTLE(1.0, "Dvec :\n" << kDvec);

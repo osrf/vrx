@@ -19,6 +19,7 @@
 #include <tf/tf.h>
 #include <math.h>
 
+#include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/msgs/msgs.hh>
 
 #include <sstream>
@@ -26,6 +27,7 @@
 using namespace gazebo;
 
 // Register this plugin with the simulator
+// cppcheck-suppress unknownMacro
 GZ_REGISTER_GUI_PLUGIN(GUITaskWidget)
 
 /////////////////////////////////////////////////
