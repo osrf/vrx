@@ -153,10 +153,17 @@ else
   $CPPCHECK_BASE $CPPCHECK_CMD3 2>&1
 fi
 
+# Use python3 if python is not available in the system.
+if hash python 2>/dev/null; then
+  PYTHON_CMD=python
+else
+  PYTHON_CMD=python3
+fi
+
 # cpplint
 if [ $xmlout -eq 1 ]; then
-  (echo $CPPLINT_FILES | xargs python3 tools/cpplint.py 2>&1) \
-    | python3 tools/cpplint_to_cppcheckxml.py 2> $xmldir/cpplint.xml
+  (echo $CPPLINT_FILES | xargs $PYTHON_CMD tools/cpplint.py 2>&1) \
+    | $PYTHON_CMD tools/cpplint_to_cppcheckxml.py 2> $xmldir/cpplint.xml
 elif [ $QUICK_CHECK -eq 0 ]; then
-  echo $CPPLINT_FILES | xargs python3 tools/cpplint.py 2>&1
+  echo $CPPLINT_FILES | xargs $PYTHON_CMD tools/cpplint.py 2>&1
 fi
