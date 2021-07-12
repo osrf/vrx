@@ -564,6 +564,7 @@ namespace asv
 
     // Compute the target function and Jacobian. Also calculate pz,
     // the z-component of the Gerstner wave, which we essentially get for free.
+    // cppcheck-suppress constParameter
     auto wave_fdf = [=](auto x, auto p, auto t, auto& wp, auto& F, auto& J)
     {
       double pz = 0;
@@ -605,6 +606,7 @@ namespace asv
     // Simple multi-variate Newton solver -
     // this version returns the z-component of the
     // wave field at the desired point p.
+    // cppcheck-suppress constParameter
     auto solver = [=](auto& fdfunc, auto x0, auto p, auto t, \
                       auto& wp, auto tol, auto nmax)
     {

@@ -3,6 +3,35 @@ name: Ubuntu CI
 on: [pull_request]
 
 jobs:
+  test-gazebo11-noetic:
+
+    runs-on: ubuntu-20.04
+    container: 
+      image: npslearninglab/watery_robots:current
+    steps:
+      - run: sudo chown -R `whoami`:`whoami` .
+      - uses: actions/checkout@v2
+      - name: Install base dependencies
+        run: |
+          sudo apt update;
+          sudo apt-get -y install cppcheck protobuf-compiler;
+  
+      - name: Static code checking
+        run: sh tools/code_check.sh
+
+      - name: Set up workspace
+        run: |
+          mkdir -p /tmp/vrx_ws/src;
+          ln -s `pwd` /tmp/vrx_ws/src;
+
+      - name: Build and run tests
+        shell: bash
+        run: |
+          cd /tmp/vrx_ws;
+          source /opt/ros/noetic/setup.bash;
+          catkin_make -j1;
+          catkin_make run_tests -j1;
+
   test-gazebo9-melodic:
 
     runs-on: ubuntu-18.04

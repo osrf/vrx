@@ -209,7 +209,9 @@ if(${GAZEBO_MAJOR_VERSION} GREATER 7)
     ${QT_LIBRARIES}
   )
   qt5_use_modules(gui_task_widget Widgets)
-  add_dependencies(gui_task_widget ${catkin_EXPORTED_TARGETS})
+  add_dependencies(gui_task_widget
+    ${catkin_EXPORTED_TARGETS}
+    vrx_gazebo_generate_messages_cpp)
   install(TARGETS gui_task_widget
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -278,11 +278,7 @@ void UsvWindPlugin::Update()
   this->previousTime = currentTime;
 
   double publishingBuffer = 1/this->updateRate;
-  if (this->updateRate >= 0)
-  {
-    publishingBuffer = 1/this->updateRate;
-  }
-  else
+  if (this->updateRate < 0)
   {
     publishingBuffer = -1;
   }
