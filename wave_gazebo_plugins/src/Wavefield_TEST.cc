@@ -60,7 +60,7 @@ TEST(Wavefield, WaveSolver1D)
     return omega * omega / 9.8;
   };
 
-  auto wave = [=](auto x, auto t, auto& wp)
+  auto wave = [=](auto x, auto t, const auto& wp)
   {
     const double theta = wp.k * x - wp.omega * t;
     const double s = std::sin(theta);
@@ -68,7 +68,7 @@ TEST(Wavefield, WaveSolver1D)
     return px;
   };
 
-  auto wave_f = [=](auto x, auto p, auto t, auto& wp)
+  auto wave_f = [=](auto x, auto p, auto t, const auto& wp)
   {
     const double theta = wp.k * x - wp.omega * t;
     const double s = std::sin(theta);
@@ -76,7 +76,7 @@ TEST(Wavefield, WaveSolver1D)
     return f;
   };
 
-  auto wave_df = [=](auto x, auto p, auto t, auto& wp)
+  auto wave_df = [=](auto x, auto p, auto t, const auto& wp)
   {
     const double theta = wp.k * x - wp.omega * t;
     const double c = std::cos(theta);
@@ -84,7 +84,7 @@ TEST(Wavefield, WaveSolver1D)
     return df;
   };
 
-  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p,
+  auto solver = [=](const auto& func, const auto& dfunc, auto x0, auto p,
                     auto t, auto& wp, auto tol, auto nmax)
   {
     int n = 0;
@@ -202,7 +202,7 @@ TEST(Wavefield, WaveSolver2D)
     return J;
   };
 
-  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p,
+  auto solver = [=](const auto& func, const auto& dfunc, auto x0, auto p,
                     auto t, auto& wp, auto tol, auto nmax)
   {
     int n = 0;
@@ -344,7 +344,7 @@ TEST(Wavefield, NWaveSolver2D)
     return J;
   };
 
-  auto solver = [=](auto& func, auto& dfunc, auto x0, auto p,
+  auto solver = [=](const auto& func, const auto& dfunc, auto x0, auto p,
                     auto t, auto& wp, auto tol, auto nmax)
   {
     int n = 0;
@@ -442,6 +442,7 @@ TEST(Wavefield, NWaveFdFSolver2D)
     return p;
   };
 
+  // cppcheck-suppress constParameter
   auto wave_fdf = [=](auto x, auto p, auto t, auto& wp, auto& F, auto& J)
   {
     F(0) = p.x() - x.x();
@@ -473,6 +474,7 @@ TEST(Wavefield, NWaveFdFSolver2D)
     }
   };
 
+  // cppcheck-suppress constParameter
   auto solver = [=](auto& fdfunc, auto x0, auto p, auto t, auto& wp,
                     auto tol, auto nmax)
   {
