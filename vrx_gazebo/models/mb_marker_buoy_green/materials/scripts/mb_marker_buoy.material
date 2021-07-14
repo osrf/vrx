@@ -1,0 +1,12 @@
+material mb_marker_buoy/Green
+{
+  technique
+  {
+    pass ambient
+    {
+      ambient 0.0627 0.4392 0.2588
+      diffuse 0.0627 0.4392 0.2588
+      specular 0.0627 0.4392 0.2588 1 1
+    }
+  }
+}

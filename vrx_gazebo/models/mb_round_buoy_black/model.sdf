@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="mb_round_buoy_black">
+    <link name="link">
+      <inertial>
+        <pose>0 0 -2 0 0 0</pose>
+        <!-- Mass determined based on buoyancy geometry so object 
+             floats at mid-point of sphere -->
+        <mass>3.5</mass>
+        <!-- Mark only - based on cylinder -->
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <sphere>
+            <radius>0.25</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+	        <mesh><uri>model://mb_round_buoy_orange/meshes/mb_round_buoy.dae</uri></mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Black</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <wave_model>ocean_waves</wave_model>
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <linear_drag>25.0</linear_drag>
+      <angular_drag>2.0</angular_drag>
+      <buoyancy name="buoyancy_sphere">
+        <link_name>link</link_name>
+        <pose>0 0 0.02 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.235</radius>
+          </sphere>
+        </geometry>
+      </buoyancy>
+    </plugin>
+  </model>
+</sdf>
