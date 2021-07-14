@@ -1,0 +1,12 @@
+material mb_round_buoy/Orange
+{
+  technique
+  {
+    pass ambient
+    {
+      ambient 0.9921 0.1882 0
+      diffuse 0.9921 0.1882 0
+      specular 0.9921 0.1882 0 1 1
+    }
+  }
+}

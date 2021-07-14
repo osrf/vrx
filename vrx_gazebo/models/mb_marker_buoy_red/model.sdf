@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="mb_marker_buoy_red">
+    <link name="link">
+      <inertial>
+        <pose>0 0 -2 0 0 0</pose>
+        <!-- Mass determined based on buoyancy geometry so object 
+             floats at mid-point of sphere -->
+        <mass>20</mass>
+        <!-- Mark only - based on cylinder -->
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision_inner">
+        <pose>0 -0.02 0.02 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.15</radius>
+            <length>1.15</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="collision_outer">
+        <pose>0 0 -0.3 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.325</radius>
+            <length>0.1</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <pose>0 0 0 1.57079 0 0</pose>
+        <geometry>
+	        <mesh><uri>model://mb_marker_buoy_red/meshes/mb_marker_buoy.dae</uri></mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://mb_marker_buoy_red/materials/scripts/mb_marker_buoy.material</uri>
+            <name>mb_marker_buoy/Red</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <wave_model>ocean_waves</wave_model>
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <linear_drag>25.0</linear_drag>
+      <angular_drag>2.0</angular_drag>
+      <buoyancy name="buoyancy_sphere">
+        <link_name>link</link_name>
+        <pose>0 0 -0.12 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.325</radius>
+          </sphere>
+        </geometry>
+      </buoyancy>
+    </plugin>
+  </model>
+</sdf>
