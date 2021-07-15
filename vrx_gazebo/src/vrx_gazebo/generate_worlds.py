@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import yaml
 import rospy
 import os
@@ -58,7 +58,7 @@ def world_gen(coordinate={}, master={}, config_file=None):
     world = {}
     # axis_name: root-level key
     # axis: sub-tree from root-level key
-    for axis_name, axis in master.iteritems():
+    for axis_name, axis in iter(master.items()):
 
         # if a sequence override defined for this axis at this step
         # These are parameters to go into a xacro macro file
@@ -78,14 +78,14 @@ def world_gen(coordinate={}, master={}, config_file=None):
 
         # for the non-sequence override case:
         else:
-            for macro_name, macro_calls in axis['macros'].iteritems():
+            for macro_name, macro_calls in iter(axis['macros'].items()):
                 # if this one is new
                 if macro_name not in world:
                     world[macro_name] = []
                 for params in macro_calls:
                     if params is not None:
                         evaluated_params = {}
-                        for param, value in params.iteritems():
+                        for param, value in iter(params.items()):
                             # values flanked by ' evaluated as strings
                             if value[0] == "'" and value[-1] == "'":
                                 evaluated_params[param] = value[1:-1]
@@ -104,7 +104,7 @@ def world_gen(coordinate={}, master={}, config_file=None):
                 coordinate[axis_name] in axis['yamls']:
             # Dump the subtree under this trial into a YAML file
             params = axis['yamls'][coordinate[axis_name]]
-            config_stream = file(config_file, 'w')
+            config_stream = open(config_file, 'w')
             yaml.dump(params, config_stream)
             print("Generated %s" % config_file)
 
@@ -117,7 +117,7 @@ def linear_combinations(master={}):
     start = {}
     # make the starting spot and max
     # NOTE: the start coordinate <= all coordinates on an axis <= axies max
-    for axis, value in master.iteritems():
+    for axis, value in iter(master.items()):
         start[axis] = 0
         axies[axis] = value['steps']-1
     iterate(axies_max=axies, coordinates=combinations,
