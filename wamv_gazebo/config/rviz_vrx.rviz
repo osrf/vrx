@@ -3,7 +3,8 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Grid1
       Splitter Ratio: 0.5
     Tree Height: 445
   - Class: rviz/Selection
@@ -43,12 +44,12 @@ Visualization Manager:
       Name: Grid
       Normal Cell Count: 0
       Offset:
-        X: 532
-        Y: -162
-        Z: -0.11999999731779099
+        X: 0
+        Y: 0
+        Z: 0
       Plane: XY
       Plane Cell Count: 10
-      Reference Frame: <Fixed Frame>
+      Reference Frame: wamv/base_link
       Value: true
     - Alpha: 1
       Class: rviz/RobotModel
