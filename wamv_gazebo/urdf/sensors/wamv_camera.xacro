@@ -179,7 +179,7 @@
     </gazebo>
 
     <!-- Set color of post -->
-    <gazebo reference="${name}_post_link">
+    <gazebo reference="${namespace}/${name}_post_link">
       <material>Gazebo/Black</material>
     </gazebo>
   </xacro:macro>

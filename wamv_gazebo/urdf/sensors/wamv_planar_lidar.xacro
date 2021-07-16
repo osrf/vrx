@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_multibeam_laser" params="name x:=0.5 y:=0 z:=2 R:=0 P:=0 Y:=0">
-    <link name="${name}_link">
+    <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">>
         <geometry>
           <cylinder radius="0.025" length="0.1" />
@@ -11,12 +11,12 @@
         </material>
       </visual>
     </link>
-    <joint name="${name}_joint" type="fixed">
+    <joint name="${namespace}/${name}_joint" type="fixed">
       <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}" />
       <parent link="base_link" />
       <child link="${name}_link" />
     </joint>
-    <gazebo reference="${name}_link">
+    <gazebo reference="${namespace}/${name}_link">
       <sensor type="gpu_ray" name="multibeam_sensor_${name}">
         <update_rate>10</update_rate>
         <ray>
@@ -39,7 +39,7 @@
         </ray>
         <plugin name="multibeam_simulator" filename="libgazebo_ros_gpu_laser.so">
           <topicName>${namespace}/${sensor_namespace}lidars/${name}/scan</topicName>
-          <frameName>${name}_link</frameName>
+          <frameName>${namespace}/${name}_link</frameName>
         </plugin>
       </sensor>
     </gazebo>
