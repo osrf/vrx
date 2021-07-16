@@ -29,7 +29,7 @@ def create_xacro_file(xacro_target,
     """
     test_fail = False
     # Initialize xacro file
-    xacro_file = open(xacro_target, 'wb')
+    xacro_file = open(xacro_target, 'w')
     xacro_file.write(boiler_plate_top)
 
     # If requested_macros not given, then open yaml_file
@@ -89,7 +89,7 @@ def add_gazebo_thruster_config(xacro_target,
     Appends gazebo thruster config tags to 'xacro_target'
     """
     # Initialize xacro file for appending
-    xacro_file = open(xacro_target, 'ab')
+    xacro_file = open(xacro_target, 'a')
     xacro_file.write(boiler_plate_top)
 
     # If requested_macros not given, then open yaml_file
