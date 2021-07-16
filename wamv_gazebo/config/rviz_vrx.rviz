@@ -3,11 +3,7 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Axes1/Status1
-        - /Image1
-        - /Image2
-        - /Image3
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 445
   - Class: rviz/Selection
@@ -47,9 +43,9 @@ Visualization Manager:
       Name: Grid
       Normal Cell Count: 0
       Offset:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 532
+        Y: -162
+        Z: -0.11999999731779099
       Plane: XY
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
