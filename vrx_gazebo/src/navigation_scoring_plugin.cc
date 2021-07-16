@@ -292,7 +292,7 @@ void NavigationScoringPlugin::Update()
     else if (currentState == GateState::VEHICLE_BEFORE &&
              gate.state   == GateState::VEHICLE_AFTER)
     {
-      currentState = GateState::INVALID;
+      gate.state = GateState::INVALID;
       gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
             << std::endl;
       this->Fail();
