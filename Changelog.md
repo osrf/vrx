@@ -1,7 +1,20 @@
 ## VRX 1
 
+### VRX 1.4.X
+
 1. New hydro params:
     * [Pull request 214](https://github.com/osrf/vrx/pull/214)
+1. Migrate to Noetic and Gazebo 11 
+    * [Pull request 247](https://github.com/osrf/vrx/pull/247)
+1. Add Noetic Docker Image 
+    * [Pull request 248](https://github.com/osrf/vrx/pull/248)
+1. Updated CI test image for Noetic
+    * [Pull request 256](https://github.com/osrf/vrx/pull/256)
+1. Sydney International Regatta Centre arena mesh
+    * [Pull request 253](https://github.com/osrf/vrx/pull/253)
+1. Updated buoys for VRX 2022  
+    * [Pull request 264](https://github.com/osrf/vrx/pull/264)
+
 
 ### VRX 1.3.X
 
