@@ -7,7 +7,7 @@ jobs:
 
     runs-on: ubuntu-20.04
     container: 
-      image: npslearninglab/watery_robots:current
+      image: npslearninglab/watery_robots:noetic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
 
     runs-on: ubuntu-18.04
     container: 
-      image: osrf/vrx:current
+      image: npslearninglab/watery_robots:melodic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
