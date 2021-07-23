@@ -65,7 +65,7 @@ jobs:
 
     runs-on: ubuntu-18.04
     container: 
-      image: osrf/vrx:test_gaz7
+      image: npslearninglab/watery_robots:melodic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
