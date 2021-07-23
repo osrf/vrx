@@ -65,7 +65,7 @@ jobs:
 
     runs-on: ubuntu-18.04
     container: 
-      image: npslearninglab/watery_robots:melodic_current
+      image: npslearninglab/watery_robots:kinetic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
