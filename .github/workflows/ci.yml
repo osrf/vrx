@@ -14,7 +14,6 @@ jobs:
       - name: Install base dependencies
         run: |
           sudo apt update;
-          sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
         run: sh tools/code_check.sh
@@ -43,7 +42,6 @@ jobs:
       - name: Install base dependencies
         run: |
           sudo apt update;
-          sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
         run: sh tools/code_check.sh
@@ -72,7 +70,6 @@ jobs:
       - name: Install base dependencies
         run: |
           sudo apt update;
-          sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
         run: sh tools/code_check.sh
