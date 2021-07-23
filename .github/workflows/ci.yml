@@ -11,9 +11,6 @@ jobs:
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
-      - name: Install base dependencies
-        run: |
-          sudo apt update;
   
       - name: Static code checking
         run: sh tools/code_check.sh
@@ -39,9 +36,6 @@ jobs:
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
-      - name: Install base dependencies
-        run: |
-          sudo apt update;
   
       - name: Static code checking
         run: sh tools/code_check.sh
@@ -67,9 +61,6 @@ jobs:
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
-      - name: Install base dependencies
-        run: |
-          sudo apt update;
   
       - name: Static code checking
         run: sh tools/code_check.sh
