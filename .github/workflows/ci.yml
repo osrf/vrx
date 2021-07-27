@@ -7,14 +7,10 @@ jobs:
 
     runs-on: ubuntu-20.04
     container: 
-      image: npslearninglab/watery_robots:current
+      image: npslearninglab/watery_robots:noetic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
-      - name: Install base dependencies
-        run: |
-          sudo apt update;
-          sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
         run: sh tools/code_check.sh
@@ -36,14 +32,10 @@ jobs:
 
     runs-on: ubuntu-18.04
     container: 
-      image: osrf/vrx:current
+      image: npslearninglab/watery_robots:melodic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
-      - name: Install base dependencies
-        run: |
-          sudo apt update;
-          sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
         run: sh tools/code_check.sh
@@ -65,14 +57,10 @@ jobs:
 
     runs-on: ubuntu-18.04
     container: 
-      image: osrf/vrx:test_gaz7
+      image: npslearninglab/watery_robots:kinetic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - uses: actions/checkout@v2
-      - name: Install base dependencies
-        run: |
-          sudo apt update;
-          sudo apt-get -y install cppcheck protobuf-compiler;
   
       - name: Static code checking
         run: sh tools/code_check.sh

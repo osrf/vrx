@@ -22,6 +22,6 @@
     
     <param name="thrusters_dir" value="$(find wamv_description)/urdf/thrusters"/>
 
-    <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv" output="screen" required="true"/>
+    <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv.py" output="screen" required="true"/>
   </group>
 </launch>

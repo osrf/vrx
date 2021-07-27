@@ -305,13 +305,12 @@ xacro_add_files(
   ${XACRO_INORDER} INSTALL DESTINATION worlds
 )
 # Generate obstacle course
-# TODO Convert to Python3 for Noetic
-#add_custom_command(
-#  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
-#  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_avoid_obstacles_buoys
-#  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_avoid_obstacles_buoys --seed 1337 --a3 6 --a5 7 --a7 7 > ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
-#)
-#add_custom_target(${PROJECT_NAME}_generate_obstacle_course_buoys ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf)
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_avoid_obstacles_buoys.py
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_avoid_obstacles_buoys.py --seed 1337 --a3 6 --a5 7 --a7 7 > ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf
+)
+add_custom_target(${PROJECT_NAME}_generate_obstacle_course_buoys ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf)
 
 # Install all the config files
 install(DIRECTORY config/
@@ -349,6 +348,6 @@ endif()
 catkin_install_python(PROGRAMS
     nodes/twist2thrust.py
     nodes/key2thrust_angle.py
-    scripts/generate_worlds
-    scripts/generate_wamv
+    scripts/generate_worlds.py
+    scripts/generate_wamv.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
