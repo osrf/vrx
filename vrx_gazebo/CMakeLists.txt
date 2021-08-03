@@ -179,7 +179,10 @@ install(TARGETS wayfinding_scoring_plugin
 
 # Plugin for scoring gymkhana task
 add_library(gymkhana_scoring_plugin src/gymkhana_scoring_plugin.cc)
-target_link_libraries(gymkhana_scoring_plugin ${catkin_LIBRARIES})
+target_link_libraries(gymkhana_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin
+)
 
 install(TARGETS gymkhana_scoring_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

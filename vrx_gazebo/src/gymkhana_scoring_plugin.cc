@@ -43,11 +43,11 @@ void GymkhanaScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->rosNode.reset(new ros::NodeHandle());
 
   this->channelSub = this->rosNode->subscribe(
-    "/vorc/gymkhana_channel/task/info", 5,
+    "/vrx/gymkhana_channel/task/info", 5,
     &GymkhanaScoringPlugin::ChannelCallback, this);
 
   this->blackboxSub = this->rosNode->subscribe(
-    "/vorc/gymkhana_blackbox/task/info", 5,
+    "/vrx/gymkhana_blackbox/task/info", 5,
     &GymkhanaScoringPlugin::BlackboxCallback, this);
 }
 
