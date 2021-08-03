@@ -54,6 +54,12 @@
     </include>
   </group>
 
+  <!-- Load robot model -->
+  <!-- Determine which model -->
+  <arg name="h_config" value="$(eval int((thrust_config)=='H'))"/>
+  <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
+  <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
+
   <!-- For now - can only use the T configuration! -->
   <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
 
