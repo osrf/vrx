@@ -15,7 +15,7 @@
  *
 */
 
-#include "vorc_gazebo/gymkhana_scoring_plugin.hh"
+#include "vrx_gazebo/gymkhana_scoring_plugin.hh"
 #include <limits>
 
 /////////////////////////////////////////////////
