@@ -28,14 +28,14 @@
     <!-- The navigation course -->
     <include>
       <uri>model://short_navigation_course0</uri>
-      <pose>60 -362 0 0 0 3.55</pose>
+      <pose>524 -186 0 0 0 1.7</pose>
     </include>
 
     <!-- The obstacle course -->
     <include>
       <name>buoys</name>
       <uri>model://obstacle_course</uri>
-      <pose>140 -282 0 0 0 3.55</pose>
+      <pose>477 -275 0 0 0 -.6</pose>
     </include>
 
     <!-- Top-level scoring plugin -->
