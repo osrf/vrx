@@ -7,38 +7,38 @@
     <include>
       <name>red_bound_0</name>
       <pose>0 0 0 0 0 0</pose>
-      <uri>model://surmark950410</uri>
+      <uri>model://mb_marker_buoy_red</uri>
     </include>
 
     <include>
       <name>red_bound_1</name>
       <pose>-20 0 0 0 0 0</pose>
-      <uri>model://surmark950410</uri>
+      <uri>model://mb_marker_buoy_red</uri>
     </include>
 
     <include>
       <name>red_bound_2</name>
       <pose>-40 0 0 0 0 0</pose>
-      <uri>model://surmark950410</uri>
+      <uri>model://mb_marker_buoy_red</uri>
     </include>
 
     <!-- Port_border -->
     <include>
       <name>green_bound_0</name>
       <pose>0 -20 0.2 0 0 0</pose>
-      <uri>model://surmark46104</uri>
+      <uri>model://mb_marker_buoy_white</uri>
     </include>
 
     <include>
       <name>green_bound_1</name>
       <pose>-20 -20 0.2 0 0 0</pose>
-      <uri>model://surmark950400</uri>
+      <uri>model://mb_marker_buoy_green</uri>
     </include>
 
     <include>
       <name>green_bound_2</name>
       <pose>-40 -20 0.2 0 0 0</pose>
-      <uri>model://blue_totem</uri>
+      <uri>model://mb_marker_buoy_black</uri>
     </include>
   </model>
 
