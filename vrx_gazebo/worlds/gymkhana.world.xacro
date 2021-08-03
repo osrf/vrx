@@ -105,7 +105,7 @@
       <!-- Keep Gazebo running after this sub-task is completed -->
       <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
       <!-- Goal as Cartesian coordinates -->
-      <goal_pose_cart>116 -278 -5</goal_pose_cart>
+      <goal_pose_cart>483 -295.5 -5</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
