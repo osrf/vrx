@@ -123,6 +123,20 @@ install(TARGETS placard_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for controlling the ball shooter.
+add_library(ball_shooter_plugin src/ball_shooter_plugin.cc)
+target_link_libraries(placard_plugin
+  ${catkin_LIBRARIES}
+)
+add_dependencies(ball_shooter_plugin
+  ${catkin_EXPORTED_TARGETS}
+)
+install(TARGETS ball_shooter_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # A generic scoring plugin.
 add_library(scoring_plugin src/scoring_plugin.cc)
 target_link_libraries(scoring_plugin
