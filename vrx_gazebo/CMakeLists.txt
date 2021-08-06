@@ -7,6 +7,8 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
+add_compile_options(-std=c++17)
+
 # For Qt
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
