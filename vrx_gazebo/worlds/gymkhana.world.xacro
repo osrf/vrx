@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<!-- World containing sandisland model and some course challenges -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="gymkhana">
+    <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
+    <xacro:sydneyregatta />
+
+    <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves />
+
+    <!--Wind. Note, wind parameters are set in the plugin.-->
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
+    <xacro:usv_wind_gazebo
+      direction="270"
+      ros_update_rate="10"
+      topic_wind_speed="/vrx/debug/wind/speed"
+      topic_wind_direction="/vrx/debug/wind/direction">
+      <wind_objs>
+        <wind_obj>
+          <name>wamv</name>
+          <link_name>wamv/base_link</link_name>
+          <coeff_vector>.5 .5 .33</coeff_vector>
+        </wind_obj>
+      </wind_objs>
+    </xacro:usv_wind_gazebo>
+
+    <!-- The navigation course -->
+    <include>
+      <uri>model://short_navigation_course0</uri>
+      <pose>524 -186 0 0 0 1.7</pose>
+    </include>
+
+    <!-- The obstacle course -->
+    <include>
+      <name>buoys</name>
+      <uri>model://obstacle_course</uri>
+      <pose>477 -275 0 0 0 -.6</pose>
+    </include>
+
+    <!-- Top-level scoring plugin -->
+    <plugin name="gymkhana_scoring_plugin"
+            filename="libgymkhana_scoring_plugin.so">
+      <vehicle>wamv</vehicle>
+      <task_name>gymkhana</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/debug/contact</contact_debug_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <!-- Per-plugin flag, different from env var VRX_EXIT_ON_COMPLETION.
+           Respect top-level plugin finished status. -->
+      <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+    </plugin>
+
+    <!-- Scoring plugin for buoy channel portion -->
+    <plugin name="navigation_scoring_plugin"
+            filename="libnavigation_scoring_plugin.so">
+      <vehicle>wamv</vehicle>
+      <task_name>gymkhana_channel</task_name>
+      <task_info_topic>/vrx/gymkhana_channel/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/gymkhana_channel/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <collision_buffer>10</collision_buffer>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
+      <course_name>short_navigation_course_0</course_name>
+      <obstacle_penalty>10.0</obstacle_penalty>
+      <gates>
+        <gate>
+          <left_marker>red_bound_0</left_marker>
+          <right_marker>green_bound_0</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_1</left_marker>
+          <right_marker>green_bound_1</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_2</left_marker>
+          <right_marker>green_bound_2</right_marker>
+        </gate>
+      </gates>
+    </plugin>
+
+    <!-- Scoring plugin for acoustic pinger portion -->
+    <plugin name="stationkeeping_scoring_plugin"
+          filename="libstationkeeping_scoring_plugin.so">
+      <vehicle>wamv</vehicle>
+      <task_name>gymkhana_blackbox</task_name>
+      <rms_error_topic>/vrx/gymkhana_blackbox/rms_error</rms_error_topic>
+      <pose_error_topic>/vrx/gymkhana_blackbox/pose_error</pose_error_topic>
+      <goal_topic>/vrx/gymkhana_blackbox/goal</goal_topic>
+      <task_info_topic>/vrx/gymkhana_blackbox/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/gymkhana_blackbox/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <!-- Goal as Cartesian coordinates -->
+      <goal_pose_cart>483 -295.5 -5</goal_pose_cart>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
+      <markers>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
+      </markers>
+    </plugin>
+
+  </world>
+</sdf>

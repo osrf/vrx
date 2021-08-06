@@ -177,6 +177,19 @@ install(TARGETS wayfinding_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for scoring gymkhana task
+add_library(gymkhana_scoring_plugin src/gymkhana_scoring_plugin.cc)
+target_link_libraries(gymkhana_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin
+)
+
+install(TARGETS gymkhana_scoring_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Plugin for scoring the scan and dock task.
 add_library(scan_dock_scoring_plugin src/scan_dock_scoring_plugin.cc)
 target_link_libraries(scan_dock_scoring_plugin
@@ -292,6 +305,7 @@ endif()
 xacro_add_files(
   worlds/example_course.world.xacro
   worlds/example_course_2019.world.xacro
+  worlds/gymkhana.world.xacro
   worlds/navigation_task.world.xacro
   worlds/perception_task.world.xacro
   worlds/sandisland.world.xacro
@@ -346,6 +360,8 @@ endif()
 
 # Python Scripts
 catkin_install_python(PROGRAMS
+    nodes/pinger_visualization.py
+    nodes/set_pinger_position.py
     nodes/twist2thrust.py
     nodes/key2thrust_angle.py
     scripts/generate_worlds.py
