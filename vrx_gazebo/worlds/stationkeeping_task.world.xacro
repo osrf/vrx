@@ -25,7 +25,7 @@
       <vehicle>wamv</vehicle>
       <task_name>stationkeeping</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
-      <goal_pose>21.31091 -157.88868 0.0 </goal_pose>
+      <goal_pose>-33.724223 150.679736 0.0 </goal_pose>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
@@ -38,7 +38,7 @@
         </joint>
       </release_joints>
       <markers>
-        <scaling>0.2 0.2 2.0</scaling>
+        <scaling>20 20 20</scaling>
         <height>0.5</height>
       </markers>
     </plugin>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3 R:=0 P:=0 Y:=0 lat:=21.30996 lon:=-157.8901 elev:=0.0 update_rate:=15">
+  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3 R:=0 P:=0 Y:=0 lat:=-33.722690 lon:=150.673795 elev:=0.0 update_rate:=15">
     <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">
         <geometry>

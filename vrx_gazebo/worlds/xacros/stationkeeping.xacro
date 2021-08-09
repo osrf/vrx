@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="stationkeeping" params="**wp_markers lat:=21.31091 lon:=-157.88868 heading:=0.0 namespace:=wamv competition:=vrx">
+  <xacro:macro name="stationkeeping" params="**wp_markers lat:=-33.724223 lon:=150.679736 heading:=0.0 namespace:=wamv competition:=vrx">
     <plugin name="stationkeeping_scoring_plugin"
           filename="libstationkeeping_scoring_plugin.so">
       <vehicle>${namespace}</vehicle>
