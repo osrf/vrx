@@ -21,12 +21,13 @@
 #include <ros/ros.h>
 #include <std_msgs/Empty.h>
 #include <memory>
+#include <mutex>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
 
 namespace gazebo
 {
-/// \brief Simulate a ball shooter. A projectile (ball) is launched when a
+/// \brief Simulate a ball shooter. A projectile is launched when a
 /// ROS message is received. The ball is reused (teleported) from previous
 /// shots.
 ///
@@ -47,7 +48,6 @@ namespace gazebo
 ///
 /// * Optional parameters:
 /// <num_shots> - Number of shots allowed. Default to UINT_MAX.
-
 /// <shot_force> - Force (N) applied to the projectile. Default to 250 N.
 /// <topic> - Name of the ROS topic to shoot. Default to "/ball_shooter/fire".
 ///
@@ -89,7 +89,7 @@ class BallShooterPlugin : public ModelPlugin
   /// \brief The force (N) to be applied to the projectile.
   private: double shotForce = 250;
 
-  /// \brief Subscribes to the topic that shoots a new ball.
+  /// \brief Subscribes to the topic that shoots a new projectile.
   private: ros::Subscriber fireSub;
 
   /// \brief Pointer to the projectile model.

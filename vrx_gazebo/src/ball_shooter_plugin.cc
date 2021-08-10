@@ -15,14 +15,12 @@
  *
 */
 
-#include <mutex>
 #include <string>
-
-#include "vrx_gazebo/ball_shooter_plugin.hh"
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
+#include "vrx_gazebo/ball_shooter_plugin.hh"
 
 using namespace gazebo;
 
