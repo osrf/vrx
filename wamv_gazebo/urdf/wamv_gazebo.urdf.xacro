@@ -172,7 +172,7 @@
       <xacro:wamv_pinger name="pinger" position="1.0 0 -1.0" />
       
       <!-- Add ball shooter -->
-      <xacro:wamv_ball_shooter name="ball_shooter" position="0.55 0.35 1.4" />
+      <xacro:wamv_ball_shooter name="ball_shooter" position="0.55 0.35 1.4" orientation="0 -1.0472 0"/>
 
     </xacro:if>
   </xacro:unless>
