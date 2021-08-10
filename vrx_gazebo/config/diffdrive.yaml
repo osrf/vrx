@@ -21,7 +21,7 @@ teleop:
   turn_left_thruster:
     type: topic
     message_type: std_msgs/Float32
-    topic_name: left_thrust_angle
+    topic_name: /wamv/thrusters/left_thrust_angle
     axis_mappings:
       - axis: 2
         target: data
@@ -30,7 +30,7 @@ teleop:
   turn_right_thruster:
     type: topic
     message_type: std_msgs/Float32
-    topic_name: right_thrust_angle
+    topic_name: /wamv/thrusters/right_thrust_angle
     axis_mappings:
       - axis: 2
         target: data
