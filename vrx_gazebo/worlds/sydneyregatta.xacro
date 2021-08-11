@@ -81,5 +81,19 @@
       <pose>535 -145.86 1.70 0 0 -1.82</pose>
       <uri>model://ground_station</uri>
     </include>
+
+    <!-- A bowl to hold the blue projectile -->
+    <include>
+      <name>bowl</name>
+      <pose>533 -146.44 1.71 0 0 0</pose>
+      <uri>model://bowl</uri>
+    </include>
+
+    <!-- The projectile for the ball shooter -->
+    <include>
+      <name>blue_projectile</name>
+      <pose>533 -146.44 1.74 0 0 0</pose>
+      <uri>model://blue_projectile</uri>
+    </include>
   </xacro:macro>
 </world>

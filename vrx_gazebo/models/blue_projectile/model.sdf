@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="blue_projectile">
+    <link name="link">
+      <inertial>
+        <mass>0.04</mass>
+        <!-- Mark only - based on cylinder -->
+        <inertia>
+          <ixx>0.00002166</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>00002166</iyy>
+          <iyz>0</iyz>
+          <izz>00002166</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <sphere>
+            <radius>0.0285</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+	        <sphere>
+            <radius>0.0285</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://blue_projectile/materials/scripts/blue_projectile.material</uri>
+            <name>blue_projectile/Blue</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <wave_model>ocean_waves</wave_model>
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <linear_drag>25.0</linear_drag>
+      <angular_drag>2.0</angular_drag>
+      <buoyancy name="buoyancy_sphere">
+        <link_name>link</link_name>
+        <pose>0 0 -0.02 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.0285</radius>
+          </sphere>
+        </geometry>
+      </buoyancy>
+    </plugin>
+  </model>
+</sdf>

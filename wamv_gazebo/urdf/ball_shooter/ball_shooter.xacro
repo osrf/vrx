@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="wamv_ball_shooter" params="name:='ball_shooter' frameId:='wamv/ball_shooter' position:='0.55 0.35 1.4' orientation:='0 0 0'">
+    <link name="${namespace}/${name}_link">
+      <visual name="${name}_visual">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.3 0.3 0.2" />
+        </geometry>
+      </visual>
+      <collision name="${name}_collision">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.3 0.3 0.2" />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="1"/>
+        <inertia ixx="0.006458" ixy="0.0" ixz="0.0" iyy="0.006458" iyz="0.0" izz="0.01125"/>
+      </inertial>
+    </link>
+    <joint name="${namespace}/${name}_joint" type="revolute">
+      <axis xyz="0 0 1"/>
+      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+      <origin xyz="${position}" rpy="${orientation}"/>
+      <parent link="${namespace}/base_link"/>
+      <child link="${namespace}/${name}_link"/>
+    </joint>
+    <gazebo>
+      <plugin name="ball_shooter_plugin" filename="libball_shooter_plugin.so">
+        <projectile>
+          <model_name>blue_projectile</model_name>
+          <link_name>link</link_name>
+          <frame>wamv/ball_shooter_link</frame>
+          <pose>0.2 0 0 0 0 0</pose>
+        </projectile>
+        <shot_force>250</shot_force>
+        <topic>${namespace}/${shooter_namespace}${name}/fire</topic>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

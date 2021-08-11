@@ -14,4 +14,7 @@
   <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/lidar.xacro" />
   <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_p3d.xacro" />
   <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_pinger.xacro" />
+
+  <!-- Include ball shooter macros -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/ball_shooter/ball_shooter.xacro" />
 </robot>

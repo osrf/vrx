@@ -7,6 +7,8 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
+add_compile_options(-std=c++17)
+
 # For Qt
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -118,6 +120,20 @@ add_dependencies(placard_plugin
   dock_placard_msgs
 )
 install(TARGETS placard_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+# Plugin for controlling the ball shooter.
+add_library(ball_shooter_plugin src/ball_shooter_plugin.cc)
+target_link_libraries(placard_plugin
+  ${catkin_LIBRARIES}
+)
+add_dependencies(ball_shooter_plugin
+  ${catkin_EXPORTED_TARGETS}
+)
+install(TARGETS ball_shooter_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
