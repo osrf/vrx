@@ -59,7 +59,11 @@ void BallShooterPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   std::string projectileName =
     projectileElem->GetElement("model_name")->Get<std::string>();
+#if GAZEBO_MAJOR_VERSION >= 8
   this->projectileModel = world->ModelByName(projectileName);
+#else
+  this->projectileModel = world->GetModel(projectileName);
+#endif
   if (!this->projectileModel)
   {
     gzerr << "BallShooterPlugin: The model '" << projectileName
@@ -90,7 +94,11 @@ void BallShooterPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (projectileElem->HasElement("frame"))
   {
     frameName = projectileElem->Get<std::string>("frame");
+#if GAZEBO_MAJOR_VERSION >= 8
     this->frame = world->EntityByName(frameName);
+#else
+    this->frame = world->GetEntity(frameName);
+#endif
     if (!this->frame)
     {
       gzerr << "The frame '" << frameName << "' does not exist" << std::endl;
@@ -159,7 +167,11 @@ void BallShooterPlugin::Update()
   ignition::math::Pose3d projectilePose = this->pose;
   if (this->frame)
   {
+#if GAZEBO_MAJOR_VERSION >= 8
     auto framePose = this->frame->WorldPose();
+#else
+    auto framePose = this->frame->GetWorldPose().Ign();
+#endif
     ignition::math::Matrix4d transMat(framePose);
     ignition::math::Matrix4d poseLocal(this->pose);
     projectilePose = (transMat * poseLocal).Pose();
