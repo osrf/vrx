@@ -59,6 +59,7 @@ namespace gazebo
 ///     <frame>my_robot/ball_shooter_link</frame>
 ///     <pose>0.2 0 0 0 0 0</pose>
 ///   </projectile>
+///   <shot_force>250</shot_force>
 ///   <topic>my_robot/ball_shooter/fire</topic>
 /// </plugin>
 class BallShooterPlugin : public ModelPlugin
