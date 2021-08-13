@@ -49,7 +49,7 @@
         <referenceLatitude>${lat}</referenceLatitude>
         <referenceLongitude>${lon}</referenceLongitude>
         <referenceAltitude>${elev}</referenceAltitude>
-        <referenceHeading>90</referenceHeading>
+        <referenceHeading>270</referenceHeading>
         <offset>0.0 0.0 0.0</offset>
         <drift>0.0 0.0 0.0</drift>
         <gaussianNoise>0 0 0</gaussianNoise>
