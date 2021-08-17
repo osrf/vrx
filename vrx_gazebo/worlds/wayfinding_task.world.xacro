@@ -2,8 +2,8 @@
 <!-- World containing sandisland model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="robotx_wayfinding">
-    <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
-    <xacro:sandisland />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
+    <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves/>
@@ -27,15 +27,15 @@
       <waypoints>
         <!-- Approx. starting point of wamv -->
         <waypoint>
-          <pose>21.3109331464 -157.888576027 1.21756121843</pose>
+          <pose>-33.7226766699 150.6740630167 1.21756121843</pose>
         </waypoint>
         <!-- A waypoint -->
         <waypoint>
-          <pose>21.30996 -157.8901 1.0</pose>
+          <pose>-33.7220832884 150.67379127877 1.0</pose>
         </waypoint>
         <!-- Another waypoint -->
         <waypoint>
-          <pose>21.31 -157.89 1.0</pose>
+          <pose>-33.7226013209 150.67504609858 1.0</pose>
         </waypoint>
       </waypoints>
       <initial_state_duration>10</initial_state_duration>

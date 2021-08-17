@@ -2,8 +2,8 @@
 <!-- World containing sandisland model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="robotx_stationkeeping">
-    <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
-    <xacro:sandisland />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
+    <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves/>
@@ -25,7 +25,7 @@
       <vehicle>wamv</vehicle>
       <task_name>stationkeeping</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
-      <goal_pose>21.31091 -157.88868 0.0 </goal_pose>
+      <goal_pose>-33.722702498 150.67402097002 0.0 </goal_pose>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
