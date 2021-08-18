@@ -2,8 +2,8 @@
 <!-- World containing sandisland model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="perception_task_example">
-    <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
-    <xacro:sandisland />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
+    <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves/>
@@ -12,19 +12,19 @@
     <include>
       <name>red_0</name>
       <pose>-200 100 1 0 0 0</pose>
-      <uri>model://surmark950410</uri>
+      <uri>model://mb_marker_buoy_red</uri>
     </include>
 
     <include>
       <name>green_0</name>
       <pose>-200 102 1 0 0 0</pose>
-      <uri>model://surmark950400</uri>
+      <uri>model://mb_marker_buoy_green</uri>
     </include>
 
     <include>
       <name>black_0</name>
       <pose>-200 104 1 0 0 0</pose>
-      <uri>model://black_totem</uri>
+      <uri>model://mb_marker_buoy_black</uri>
     </include>
 
     <plugin filename="libperception_scoring_plugin.so"
@@ -44,19 +44,19 @@
       <object_sequence>
         <object>
           <time>5</time>
-          <type>surmark950410</type>
+          <type>mb_marker_buoy_red</type>
           <name>red_0</name>
           <pose>8 0 1 0 0 0</pose>
         </object>
         <object>
           <time>5</time>
-          <type>surmark950400</type>
+          <type>mb_marker_buoy_green</type>
           <name>green_0</name>
           <pose>8 2 1 0 0 0</pose>
         </object>
         <object>
           <time>15.0</time>
-          <type>black_totem</type>
+          <type>mb_marker_buoy_black</type>
           <name>black_0</name>
           <pose>8 -2 1 0 0 0</pose>
         </object>
