@@ -139,6 +139,22 @@ install(TARGETS ball_shooter_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for controlling the animal buoys .
+add_library(follow_plugin src/follow_plugin.cc)
+target_link_libraries(follow_plugin
+  ${catkin_LIBRARIES}
+  waypoint_markers
+)
+add_dependencies(follow_plugin
+  ${catkin_EXPORTED_TARGETS}
+  waypoint_markers
+)
+install(TARGETS follow_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # A generic scoring plugin.
 add_library(scoring_plugin src/scoring_plugin.cc)
 target_link_libraries(scoring_plugin
