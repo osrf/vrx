@@ -18,6 +18,7 @@
 #ifndef VRX_GAZEBO_FOLLOW_PLUGIN_HH_
 #define VRX_GAZEBO_FOLLOW_PLUGIN_HH_
 
+#include <vector>
 #include <gazebo/gazebo.hh>
 #include <ignition/math/Vector2.hh>
 #include <sdf/sdf.hh>
