@@ -130,11 +130,19 @@ void FollowPlugin::Update()
 
   // Direction vector to the goal from the model.
   ignition::math::Vector3d direction =
+#if GAZEBO_MAJOR_VERSION >= 8
     this->nextGoal - this->model->WorldPose().Pos();
+#else
+    this->nextGoal - this->model->GetWorldPose().Ign().Pos();
+#endif
 
   // Direction vector in the local frame of the model.
   ignition::math::Vector3d directionLocalFrame =
+#if GAZEBO_MAJOR_VERSION >= 8
     this->model->WorldPose().Rot().RotateVectorReverse(direction);
+#else
+    this->model->GetWorldPose().Ign().Rot().RotateVectorReverse(direction);
+#endif
 
   double range = directionLocalFrame.Length();
   ignition::math::Angle bearing(
