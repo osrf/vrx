@@ -24,7 +24,7 @@
           </mesh>
         </geometry>
       </collision>
-      <visual name= "Glass_visual">
+      <visual name="Glass_visual">
         <geometry>
           <mesh>
             <uri>model://ball_shooter/meshes/ball_shooter.dae</uri>
@@ -35,7 +35,7 @@
           </mesh>
         </geometry>
       </visual>
-      <visual name= "Launcher_visual">
+      <visual name="Launcher_visual">
         <geometry>
           <mesh>
             <uri>model://ball_shooter/meshes/ball_shooter.dae</uri>
