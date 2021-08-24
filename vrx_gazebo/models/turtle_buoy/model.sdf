@@ -17,35 +17,19 @@
           <izz>0.1</izz>
         </inertia>
       </inertial>
-      <collision name="collision_inner">
-        <pose>0 -0.02 0.02 0 0 0</pose>
+      <collision name="collision">
+        <pose>0.08 0 0.05 0 0 0</pose>
         <geometry>
           <cylinder>
-            <radius>0.15</radius>
-            <length>1.15</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="collision_outer">
-        <pose>0 0 -0.3 0 0 0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.325</radius>
-            <length>0.1</length>
+            <radius>0.35</radius>
+            <length>0.23</length>
           </cylinder>
         </geometry>
       </collision>
       <visual name="visual">
-        <pose>0 0 0 1.57079 0 0</pose>
         <geometry>
-	        <mesh><uri>model://mb_marker_buoy_red/meshes/mb_marker_buoy.dae</uri></mesh>
+	        <mesh><uri>model://turtle_buoy/meshes/turtle.dae</uri></mesh>
         </geometry>
-        <material>
-          <script>
-            <uri>model://mb_marker_buoy_red/materials/scripts/mb_marker_buoy.material</uri>
-            <name>mb_marker_buoy/Red</name>
-          </script>
-        </material>
       </visual>
     </link>
     <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
@@ -56,7 +40,7 @@
       <angular_drag>2.0</angular_drag>
       <buoyancy name="buoyancy_sphere">
         <link_name>link</link_name>
-        <pose>0 0 -0.12 0 0 0</pose>
+        <pose>0 0 0.2 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.325</radius>
@@ -71,11 +55,11 @@
         <waypoint>494 -172</waypoint>
         <waypoint>492 -168</waypoint>
       </waypoints>
-      <markers>
+      <!-- <markers>
         <material>Gazebo/Green</material>
         <scaling>0.2 0.2 2.0</scaling>
         <height>0.5</height>
-      </markers>
+      </markers> -->
     </plugin>
   </model>
 </sdf>
