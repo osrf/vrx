@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="ball_shooter">
+    <link name="link">
+      <inertial>
+        <pose>0 0 0.08 0 -1.8326 0</pose>
+        <mass>0.5</mass>
+        <!-- Mark only - based on cylinder -->
+        <inertia>
+          <ixx>0.001779166666666667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001779166666666667</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://ball_shooter/meshes/ball_shooter.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://ball_shooter/meshes/ball_shooter.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
