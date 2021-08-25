@@ -1,0 +1,12 @@
+material mb_marker_buoy/Red
+{
+  technique
+  {
+    pass ambient
+    {
+      ambient 0.7921 0.0039 0.0274
+      diffuse 0.7921 0.0039 0.0274
+      specular 0.7921 0.0039 0.0274 1 1
+    }
+  }
+}
