@@ -40,6 +40,11 @@ void WaypointMarkers::Load(sdf::ElementPtr _sdf)
   {
     this->height = _sdf->Get<double>("height");
   }
+
+  if (_sdf->HasElement("initial_id"))
+  {
+    this->id = _sdf->Get<int>("initial_id");
+  }
 }
 
 /////////////////////////////////////////////////
@@ -50,6 +55,13 @@ bool WaypointMarkers::IsAvailable()
 #else
   return false;
 #endif
+}
+
+/////////////////////////////////////////////////
+bool WaypointMarkers::DrawMarker(double _x, double _y, double _yaw,
+  std::string _text)
+{
+  return this->DrawMarker(this->id++, _x, _y, _yaw, _text);
 }
 
 /////////////////////////////////////////////////
