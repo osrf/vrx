@@ -38,9 +38,9 @@
 /// state.
 ///
 /// In the running state it calculates a 2D pose error distance between the
-/// vehicle and the goal as well as a running RMS error of all 2D pose errors
+/// vehicle and the goal as well as a running mean error of all 2D pose errors
 /// calculated so far. The current 2D pose error is published to a topic for
-/// pose error, and the RMS error is published to a task score topic. RMS error
+/// pose error, and the mean error is published to a task score topic. Mean error
 /// is also set as the score using the SetScore() method inherited from the
 /// parent. This causes it to also appear in the task information topic.
 ///
@@ -82,7 +82,7 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   private: std::string poseErrorTopic = "/vrx/station_keeping/pose_error";
 
   /// \brief Topic where mean pose error is published.
-  private: std::string meanErrorTopic = "/vrx/station_keeping/rms_error";
+  private: std::string meanErrorTopic = "/vrx/station_keeping/mean_pose_error";
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
