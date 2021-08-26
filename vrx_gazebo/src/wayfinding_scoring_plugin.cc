@@ -185,10 +185,12 @@ void WayfindingScoringPlugin::Update()
     const ignition::math::Vector3d wp = this->localWaypoints[i];
     double dx   =  wp.X() - robotPose.Pos().X();
     double dy   =  wp.Y() - robotPose.Pos().Y();
-    double dhdg =  abs(wp.Z() - currentHeading);
-    double headError = 1 - abs(dhdg - M_PI)/M_PI;
+    double dist = sqrt(pow(dx, 2) + pow(dy, 2));
+    double k    = 0.75;
+    double dhdg = abs(wp.Z() - currentHeading);
+    double headError = M_PI - abs(dhdg - M_PI);
 
-    double poseError =  sqrt(pow(dx, 2) + pow(dy, 2)) + headError;
+    double poseError =  dist + (pow(k,dist) * headError);
 
     // If this is the first time through, minError == poseError
     if (i == this->minErrors.size())
