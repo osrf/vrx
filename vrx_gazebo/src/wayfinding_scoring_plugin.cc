@@ -190,7 +190,7 @@ void WayfindingScoringPlugin::Update()
     double dhdg = abs(wp.Z() - currentHeading);
     double headError = M_PI - abs(dhdg - M_PI);
 
-    double poseError =  dist + (pow(k,dist) * headError);
+    double poseError =  dist + (pow(k, dist) * headError);
 
     // If this is the first time through, minError == poseError
     if (i == this->minErrors.size())

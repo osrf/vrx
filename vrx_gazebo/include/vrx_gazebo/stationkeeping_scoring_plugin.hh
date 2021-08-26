@@ -40,9 +40,9 @@
 /// In the running state it calculates a 2D pose error distance between the
 /// vehicle and the goal as well as a running mean error of all 2D pose errors
 /// calculated so far. The current 2D pose error is published to a topic for
-/// pose error, and the mean error is published to a task score topic. Mean error
-/// is also set as the score using the SetScore() method inherited from the
-/// parent. This causes it to also appear in the task information topic.
+/// pose error, and the mean error is published to a task score topic. Mean
+/// error is also set as the score using the SetScore() method inherited from
+/// the parent. This causes it to also appear in the task information topic.
 ///
 /// This plugin requires the following SDF parameters:
 ///
