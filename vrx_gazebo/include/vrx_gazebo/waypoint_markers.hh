@@ -91,7 +91,7 @@ class WaypointMarkers
   private: double height;
 
   /// \brief If an ID is not specified, the markers will start using this one.
-  private: int id;
+  private: int id = 0;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   /// \brief gazebo transport node
