@@ -97,7 +97,7 @@
     </include>
 
     <!-- wildlife buoys for testing -->
-    <include>
+    <!-- <include>
       <name>crocodile_buoy</name>
       <pose>532 -170 0 0 0 0</pose>
       <uri>model://crocodile_buoy</uri>
@@ -113,7 +113,7 @@
       <name>turtle_buoy</name>
       <pose>492 -170 0 0 0 0</pose>
       <uri>model://turtle_buoy</uri>
-    </include>
+    </include> -->
 
   </xacro:macro>
 </world>

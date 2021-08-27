@@ -183,6 +183,18 @@ install(TARGETS navigation_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for scoring the wildlife challenge task.
+add_library(wildlife_scoring_plugin src/wildlife_scoring_plugin.cc)
+target_link_libraries(wildlife_scoring_plugin
+  ${catkin_LIBRARIES}
+  scoring_plugin)
+add_dependencies(wildlife_scoring_plugin ${catkin_EXPORTED_TARGETS})
+install(TARGETS wildlife_scoring_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Plugin for scoring the station keeping challenge task.
 add_library(stationkeeping_scoring_plugin src/stationkeeping_scoring_plugin.cc)
 target_link_libraries(stationkeeping_scoring_plugin
@@ -335,19 +347,20 @@ endif()
 
 # Generate world files from xacro and install
 xacro_add_files(
+  worlds/dock.world.xacro
   worlds/example_course.world.xacro
   worlds/example_course_2019.world.xacro
   worlds/gymkhana.world.xacro
   worlds/navigation_task.world.xacro
-  worlds/perception_task.world.xacro
-  worlds/sandisland.world.xacro
-  worlds/sydneyregatta.world.xacro
-  worlds/dock.world.xacro
-  worlds/scan_and_dock.world.xacro
-  worlds/stationkeeping_task.world.xacro
-  worlds/wayfinding_task.world.xacro
-  worlds/wind_test.world.xacro
   worlds/ocean.world.xacro
+  worlds/perception_task.world.xacro
+  worlds/scan_and_dock.world.xacro
+  worlds/sandisland.world.xacro
+  worlds/stationkeeping_task.world.xacro
+  worlds/sydneyregatta.world.xacro
+  worlds/wayfinding_task.world.xacro
+  worlds/wildlife_task.world.xacro
+  worlds/wind_test.world.xacro
   ${XACRO_INORDER} INSTALL DESTINATION worlds
 )
 # Generate obstacle course

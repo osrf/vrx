@@ -17,7 +17,7 @@
           <izz>0.1</izz>
         </inertia>
       </inertial>
-      <collision name="collision">
+      <collision name="crocodile_collision">
         <pose>0 0 0.06 0 0 0</pose>
         <geometry>
           <box>
@@ -25,13 +25,13 @@
           </box>
         </geometry>
       </collision>
-      <visual name="visual">
+      <visual name="crocodile_visual">
         <geometry>
 	        <mesh><uri>model://crocodile_buoy/meshes/crocodile.dae</uri></mesh>
         </geometry>
       </visual>
     </link>
-    <plugin name="BuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+    <plugin name="CrocodrileBuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
       <wave_model>ocean_waves</wave_model>
       <fluid_density>1000</fluid_density>
       <fluid_level>0.0</fluid_level>
