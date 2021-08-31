@@ -289,7 +289,7 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
 #else
     const ignition::math::Pose3d pose = buoy.link->GetWorldPose().Ign();
     const ignition::math::Vector3d latlon =
-      this->world->GetSphericalCoords()->SphericalFromLocal(pose.Pos());
+      this->world->GetSphericalCoordinates()->SphericalFromLocal(pose.Pos());
 #endif
     const ignition::math::Quaternion<double> orientation = pose.Rot();
 
