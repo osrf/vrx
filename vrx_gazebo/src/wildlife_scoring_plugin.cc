@@ -40,8 +40,14 @@ void WildlifeScoringPlugin::Buoy::Update()
   if (this->state == BuoyState::CIRCUMNAVIGATED || !this->vehicleModel)
     return;
 
+#if GAZEBO_MAJOR_VERSION >= 8
   const ignition::math::Pose3d vehiclePose = this->vehicleModel->WorldPose();
   const ignition::math::Pose3d buoyPose = this->link->WorldPose();
+#else
+  const ignition::math::Pose3d vehiclePose =
+    this->vehicleModel->GetWorldPose().Ign();
+  const ignition::math::Pose3d buoyPose = this->link->GetWorldPose().Ign();
+#endif
   const double vehicleBuoyDistance = vehiclePose.Pos().Distance(buoyPose.Pos());
 
   if (this->state == BuoyState::NEVER_ENGAGED)
@@ -199,7 +205,11 @@ bool WildlifeScoringPlugin::AddBuoy(const std::string &_linkName,
     const std::string &_goal)
 {
   gazebo::physics::ModelPtr parentModel =
+#if GAZEBO_MAJOR_VERSION >= 8
     this->world->ModelByName(this->animalsModelName);
+#else
+    this->world->GetModel(this->animalsModelName);
+#endif
   // Sanity check: Make sure that the model exists.
   if (!parentModel)
   {
@@ -272,9 +282,15 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
   for (auto const &buoy : this->buoys)
   {
     // Conversion from Gazebo Cartesian coordinates to spherical.
+#if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Pose3d pose = buoy.link->WorldPose();
     const ignition::math::Vector3d latlon =
       this->world->SphericalCoords()->SphericalFromLocal(pose.Pos());
+#else
+    const ignition::math::Pose3d pose = buoy.link->GetWorldPose().Ign();
+    const ignition::math::Vector3d latlon =
+      this->world->GetSphericalCoords()->SphericalFromLocal(pose.Pos());
+#endif
     const ignition::math::Quaternion<double> orientation = pose.Rot();
 
     // Fill the GeoPoseStamped message.
