@@ -58,6 +58,7 @@
         <material>Gazebo/Red</material>
         <scaling>0.2 0.2 2.0</scaling>
         <height>0.5</height>
+        <initial_id>20</initial_id>
       </markers> -->
     </plugin>
   </model>
