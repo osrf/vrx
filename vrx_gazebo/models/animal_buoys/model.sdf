@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- A set of animal buoys -->
+<sdf version="1.6">
+  <model name="animal_buoys">
+
+    <include>
+      <name>crocodile_buoy</name>
+      <pose>20 0 0 0 0 0</pose>
+      <uri>model://crocodile_buoy</uri>
+    </include>
+
+    <include>
+      <name>platypus_buoy</name>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://platypus_buoy</uri>
+    </include>
+
+    <include>
+      <name>turtle_buoy</name>
+      <pose>-20 0 0 0 0 0</pose>
+      <uri>model://turtle_buoy</uri>
+    </include>
+
+  </model>
+</sdf>
