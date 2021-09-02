@@ -189,4 +189,3 @@ class NavigationScoringPlugin : public ScoringPlugin
 };
 
 #endif
-
