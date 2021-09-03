@@ -89,7 +89,6 @@
 ///   </buoys>
 ///   <engagement_distance>10.0</engagement_distance>
 ///   <time_bonus>30.0</time_bonus>
-///
 /// </plugin>
 class WildlifeScoringPlugin : public ScoringPlugin
 {

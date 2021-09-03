@@ -54,12 +54,12 @@
         <waypoint>554 -172</waypoint>
         <waypoint>552 -168</waypoint>
       </waypoints>
-      <markers>
+      <!-- <markers>
         <material>Gazebo/Red</material>
         <scaling>0.2 0.2 2.0</scaling>
         <height>0.5</height>
         <initial_id>20</initial_id>
-      </markers>
+      </markers> -->
     </plugin>
   </model>
 </sdf>
