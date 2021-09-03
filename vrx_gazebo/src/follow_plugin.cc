@@ -94,7 +94,7 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       int markerId = 0;
       for (const auto waypoint : this->localWaypoints)
       {
-        if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
+        if (!this->waypointMarkers.DrawMarker(waypoint.X(),
             waypoint.Y(), 0, std::to_string(markerId)))
         {
           gzerr << "Error creating visual marker" << std::endl;

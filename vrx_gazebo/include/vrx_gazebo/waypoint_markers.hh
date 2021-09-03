@@ -35,7 +35,9 @@
 ///           for marker. Default: Gazebo/Green
 /// scaling: Optional parameter (vector type) to specify marker scaling.
 ///          Default: 0.2 0.2 1.5
-/// height: Optional parameter (double type) height of marker above water
+/// height: Optional parameter (double type) height of marker above water.
+/// initial_id: Optional parameter (int type) to be used as initial ID when
+/// drawing markers without explicitly specifying ID.
 /// E.g.
 /// <markers>
 ///   <material>Gazebo/Green</material>
@@ -67,6 +69,15 @@ class WaypointMarkers
   public: bool DrawMarker(int _marker_id, double _x, double _y,
       double _yaw, std::string _text = "");
 
+  /// \brief Draw a new waypoint marker in Gazebo
+  /// \param[in] _x X coordinate of waypoint marker
+  /// \param[in] _y Y coordinate of waypoint marker
+  /// \param[in] _yaw orientation of waypoint marker in radians
+  /// \param[in] _text (optional) Text above waypoint marker
+  /// \return Returns true if marker is successfully sent to Gazebo
+  public: bool DrawMarker(double _x, double _y, double _yaw,
+    std::string _text = "");
+
   /// \brief Namespace for Gazebo markers
   private: std::string ns;
 
@@ -78,6 +89,9 @@ class WaypointMarkers
 
   /// \brief Height of marker above water
   private: double height;
+
+  /// \brief If an ID is not specified, the markers will start using this one.
+  private: int id = 0;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   /// \brief gazebo transport node
