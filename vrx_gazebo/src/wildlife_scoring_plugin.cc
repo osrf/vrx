@@ -109,7 +109,11 @@ WildlifeScoringPlugin::Buoy::Buoy(
     ignition::math::Vector3d offset;
     offset.X(this->engagementDistance * cos(alpha));
     offset.Y(this->engagementDistance * sin(alpha));
+#if GAZEBO_MAJOR_VERSION >= 8
     offset.Z(this->link->WorldPose().Pos().Z());
+#else
+    offset.Z(this->link->GetWorldPose().Ign().Pos().Z());
+#endif
 
     this->virtualGates.push_back(
       VirtualGate(_buoyLink, offset, _engagementDistance));
