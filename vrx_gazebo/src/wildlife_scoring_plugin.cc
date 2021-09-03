@@ -192,7 +192,7 @@ void WildlifeScoringPlugin::Buoy::Update()
                 << this->link->GetScopedName()
                 << " Virtual gate crossed counterclockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
-                << "\% completed)" << std::endl;
+                << "% completed)" << std::endl;
         }
         else
         {
@@ -201,7 +201,7 @@ void WildlifeScoringPlugin::Buoy::Update()
                 << this->link->GetScopedName()
                 << " Virtual gate incorrectly crossed counterclockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
-                << "\% completed)" << std::endl;
+                << "% completed)" << std::endl;
         }
       }
       else if (currentState == GateState::VEHICLE_BEFORE &&
@@ -216,7 +216,7 @@ void WildlifeScoringPlugin::Buoy::Update()
                 << this->link->GetScopedName()
                 << " Virtual gate crossed clockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
-                << "\% completed)" << std::endl;
+                << "% completed)" << std::endl;
         }
         else
         {
@@ -225,7 +225,7 @@ void WildlifeScoringPlugin::Buoy::Update()
                 << this->link->GetScopedName()
                 << " Virtual gate incorrectly crossed clockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
-                << "\% completed)" << std::endl;
+                << "% completed)" << std::endl;
         }
       }
 
