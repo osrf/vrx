@@ -28,15 +28,11 @@
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
-#include "vrx_gazebo/waypoint_markers.hh"
 
 /// \brief A plugin for computing the score of the wildlife task.
 /// This plugin derives from the generic ScoringPlugin class. Check out that
 /// plugin for other required SDF elements.
 /// This plugin uses the following SDF parameters:
-///
-/// * Required parameters:
-/// <animals_model_name>: The top level model containing all the buoy animals.
 ///
 /// * Optional parameters
 ///
@@ -45,13 +41,12 @@
 /// <buoys>: Specifies the collection of buoys to circumnavigate, avoid, etc.
 ///
 ///   <buoy>: A buoy to circumnavigate, avoid.
-///      <link_name>: The name of the main link in the buoy.
+///      <model_name>: The name of the model representing the buoy
+///      <link_name>: The name of the main link in the model.
 ///      <goal> "avoid", "circumnavigate_clockwise" or
 ///             "circumnavigate_counterclockwise"
 /// <engagement_distance>: At less or equal than this distance, the buoy is
 ///                        considered engaged. Defaults to 10 meters.
-/// <obstacle_penalty>: Specifies how many seconds are added per collision.
-///                     Defaults to 10 seconds.
 /// <time_bonus>: Time bonus granted for each goal reached. Defaults to 30 secs.
 ///
 /// Here's an example:
@@ -74,24 +69,25 @@
 ///   </release_joints>
 ///
 ///   <!-- wildlife specific parameters -->
-///   <animals_model_name>animal_buoys</animals_model_name>
 ///   <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
 ///   <buoys>
 ///     <buoy>
-///       <link_name>crocodile_buoy::link</link_name>
+///       <model_name>crocodile_buoy</model_name>
+///       <link_name>link</link_name>
 ///       <goal>avoid</goal>
 ///     </buoy>
 ///     <buoy>
-///       <link_name>platypus_buoy::link</link_name>
+///       <model_name>platypus_buoy</model_name>
+///       <link_name>link</link_name>
 ///       <goal>circumnavigate_clockwise</goal>
 ///     </buoy>
 ///     <buoy>
-///       <link_name>turtle_buoy::link</link_name>
+///       <model_name>turtle_buoy</model_name>
+///       <link_name>link</link_name>
 ///       <goal>circumnavigate_counterclockwise</goal>
 ///     </buoy>
 ///   </buoys>
 ///   <engagement_distance>10.0</engagement_distance>
-///   <obstacle_penalty>10.0</obstacle_penalty>
 ///   <time_bonus>30.0</time_bonus>
 ///
 /// </plugin>
@@ -223,7 +219,7 @@ class WildlifeScoringPlugin : public ScoringPlugin
     public: std::vector<VirtualGate> virtualGates;
 
     /// \brief The number of virtual gates currently crossed.
-    private: unsigned int numVirtualGatesCrossed = 0u;
+    public: unsigned int numVirtualGatesCrossed = 0u;
   };
 
   // Constructor.
@@ -239,10 +235,12 @@ class WildlifeScoringPlugin : public ScoringPlugin
   private: bool ParseBuoys(sdf::ElementPtr _sdf);
 
   /// \brief Register a new buoy.
+  /// \param[in] _modelName The name of the buoy's model.
   /// \param[in] _linkName The name of the main buoy's link.
   /// \param[in] _goal The goal associated to this buoy.
   /// \return True when the buoy has been registered or false otherwise.
-  private: bool AddBuoy(const std::string &_linkName,
+  private: bool AddBuoy(const std::string &_modelName,
+                        const std::string &_linkName,
                         const std::string &_goal);
 
   /// \brief Callback executed at every world update.
@@ -251,26 +249,21 @@ class WildlifeScoringPlugin : public ScoringPlugin
   /// \brief Publish a new ROS message with the animal locations.
   private: void PublishAnimalLocations();
 
-  /// \brief Decide if the goal for each buoy was completed and apply the bonus.
-  private: void ApplyTimeBonus();
+  /// \brief Compute the total bonus achieved.
+  /// \return The time bonus in seconds.
+  private: double TimeBonus() const;
 
   // Documentation inherited.
   private: void OnCollision() override;
 
   // Documentation inherited.
-  private: void OnFinished() override;
+  private: virtual void OnFinished() override;
 
   /// \brief All the buoys.
   private: std::vector<Buoy> buoys;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
-
-  /// \brief The number of WAM-V collisions.
-  private: unsigned int numCollisions = 0u;
-
-  /// \brief Number of points deducted per collision.
-  private: double obstaclePenalty = 10.0;
 
   /// \brief The name of the topic where the animal locations are published.
   private: std::string animalsTopic = "/vrx/wildlife_animals";
@@ -282,17 +275,14 @@ class WildlifeScoringPlugin : public ScoringPlugin
   /// engages with the buoy.
   private: double engagementDistance = 10.0;
 
-  /// \brief The name of the model containing all the animals.
-  private: std::string animalsModelName;
-
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
 
   /// \brief Publisher for the animal locations.
   private: ros::Publisher animalsPub;
 
-  /// \brief Waypoint visualization markers.
-  // private: std::unique_ptr<WaypointMarkers> waypointMarkers;
+  /// \brief True when a vehicle collision is detected.
+  private: std::atomic<bool> collisionDetected = false;
 };
 
 #endif

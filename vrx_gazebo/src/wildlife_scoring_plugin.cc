@@ -140,7 +140,7 @@ void WildlifeScoringPlugin::Buoy::Update()
     {
       // Transition to ENGAGED.
       this->state = BuoyState::ENGAGED;
-      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetName()
+      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetScopedName()
             << " Transition from NEVER_ENGAGED" << " to ENGAGED" << std::endl;
       return;
     }
@@ -151,7 +151,7 @@ void WildlifeScoringPlugin::Buoy::Update()
     {
       // Transition to ENGAGED.
       this->state = BuoyState::ENGAGED;
-      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetName()
+      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetScopedName()
             << " Transition from NOT_ENGAGED" << " to ENGAGED" << std::endl;
       return;
     }
@@ -162,7 +162,7 @@ void WildlifeScoringPlugin::Buoy::Update()
     {
       // Transition to NOT ENGAGED.
       this->state = BuoyState::NOT_ENGAGED;
-      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetName()
+      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetScopedName()
             << " Transition from ENGAGED" << " to NOT_ENGAGED" << std::endl;
 
       // You need to start over.
@@ -188,7 +188,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         if (this->goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE)
         {
           ++this->numVirtualGatesCrossed;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetName()
+          gzdbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link->GetScopedName()
                 << " Virtual gate crossed counterclockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "\% completed)" << std::endl;
@@ -196,7 +197,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         else
         {
           this->numVirtualGatesCrossed = 0u;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetName()
+          gzdbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link->GetScopedName()
                 << " Virtual gate incorrectly crossed counterclockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "\% completed)" << std::endl;
@@ -210,7 +212,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         if (this->goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE)
         {
           ++this->numVirtualGatesCrossed;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetName()
+          gzdbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link->GetScopedName()
                 << " Virtual gate crossed clockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "\% completed)" << std::endl;
@@ -218,7 +221,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         else
         {
           this->numVirtualGatesCrossed = 0u;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetName()
+          gzdbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link->GetScopedName()
                 << " Virtual gate incorrectly crossed clockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "\% completed)" << std::endl;
@@ -252,14 +256,6 @@ void WildlifeScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 {
   ScoringPlugin::Load(_world, _sdf);
 
-  // Parse the required <animals_model_name> element.
-  if (!_sdf->HasElement("animals_model_name"))
-  {
-    gzerr << "Unable to find <animals_model_name>" << std::endl;
-    return;
-  }
-  this->animalsModelName = _sdf->Get<std::string>("animals_model_name");
-
   // Parse the optional <animals_topic> element.
   if (_sdf->HasElement("animals_topic"))
     this->animalsTopic = _sdf->Get<std::string>("animals_topic");
@@ -267,10 +263,6 @@ void WildlifeScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   // Parse the optional <engagement_distance> element.
   if (_sdf->HasElement("engagement_distance"))
     this->engagementDistance = _sdf->Get<double>("engagement_distance");
-
-  // Parse the optional <obstacle_penalty> element.
-  if (_sdf->HasElement("obstacle_penalty"))
-    this->obstaclePenalty = _sdf->Get<double>("obstacle_penalty");
 
   // Parse the optional <time_bonus> element.
   if (_sdf->HasElement("time_bonus"))
@@ -288,33 +280,6 @@ void WildlifeScoringPlugin::Load(gazebo::physics::WorldPtr _world,
       return;
     }
   }
-
-//   // Parse the optional <markers> element.
-//   if (_sdf->HasElement("markers"))
-//   {
-//     this->waypointMarkers.reset(new WaypointMarkers(""));
-//     this->waypointMarkers->Load(_sdf->GetElement("markers"));
-
-//     // Debug: Draw a marker for each virtual buoy.
-//     int id = 0;
-//     for (auto const &buoy : this->buoys)
-//       for (auto const &virtualGate : buoy.virtualGates)
-//       {
-// #if GAZEBO_MAJOR_VERSION >= 8
-//         const auto leftMarkerPos =
-//           virtualGate.leftMarkerLink->WorldPose().Pos();
-// #else
-//         const auto leftMarkerPos =
-//           virtualGate.leftMarkerLink->GetWorldPose().Ign().Pos();
-// #endif
-//         const auto rightMarkerPos = leftMarkerPos + virtualGate.offset;
-//         if (!this->waypointMarkers->DrawMarker(id++, rightMarkerPos.X(),
-//              rightMarkerPos.Y(), rightMarkerPos.Z()))
-//         {
-//           gzerr << "Error creating visual marker" << std::endl;
-//         }
-//       }
-//   }
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
@@ -346,6 +311,16 @@ bool WildlifeScoringPlugin::ParseBuoys(sdf::ElementPtr _sdf)
   // Parse a new buoy.
   while (buoyElem)
   {
+    // The buoy's model.
+    if (!buoyElem->HasElement("model_name"))
+    {
+      gzerr << "Unable to find <buoys><buoy><model_name> element in SDF."
+            << std::endl;
+      return false;
+    }
+
+    const std::string buoyModelName = buoyElem->Get<std::string>("model_name");
+
     // The buoy's main link.
     if (!buoyElem->HasElement("link_name"))
     {
@@ -365,7 +340,7 @@ bool WildlifeScoringPlugin::ParseBuoys(sdf::ElementPtr _sdf)
     }
 
     const std::string buoyGoal = buoyElem->Get<std::string>("goal");
-    if (!this->AddBuoy(buoyLinkName, buoyGoal))
+    if (!this->AddBuoy(buoyModelName, buoyLinkName, buoyGoal))
       return false;
 
     // Parse the next buoy.
@@ -376,19 +351,18 @@ bool WildlifeScoringPlugin::ParseBuoys(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool WildlifeScoringPlugin::AddBuoy(const std::string &_linkName,
-    const std::string &_goal)
+bool WildlifeScoringPlugin::AddBuoy(const std::string &_modelName,
+    const std::string &_linkName, const std::string &_goal)
 {
-  gazebo::physics::ModelPtr parentModel =
 #if GAZEBO_MAJOR_VERSION >= 8
-    this->world->ModelByName(this->animalsModelName);
+  gazebo::physics::ModelPtr parentModel = this->world->ModelByName(_modelName);
 #else
-    this->world->GetModel(this->animalsModelName);
+  gazebo::physics::ModelPtr parentModel = this->world->GetModel(_modelName);
 #endif
   // Sanity check: Make sure that the model exists.
   if (!parentModel)
   {
-    gzerr << "Unable to find model [" << animalsModelName << "]" << std::endl;
+    gzerr << "Unable to find model [" << _modelName << "]" << std::endl;
     return false;
   }
 
@@ -442,6 +416,10 @@ void WildlifeScoringPlugin::Update()
     if (!buoy.vehicleModel)
       buoy.SetVehicleModel(this->vehicleModel);
 
+    // If a collision is detected, invalidate the circumnavigations.
+    if (this->collisionDetected)
+      buoy.numVirtualGatesCrossed = 0u;
+
     // Update the buoy state.
     buoy.Update();
 
@@ -455,13 +433,15 @@ void WildlifeScoringPlugin::Update()
     }
   }
 
+  this->collisionDetected = false;
+
   // Publish the location of the buoys.
   this->PublishAnimalLocations();
 
   if (taskCompleted)
   {
     gzmsg << "Course completed!" << std::endl;
-    this->ApplyTimeBonus();
+    this->SetScore(std::max(0.0, this->Score() - this->TimeBonus()));
     this->Finish();
   }
 }
@@ -517,11 +497,12 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
 //////////////////////////////////////////////////
 void WildlifeScoringPlugin::OnCollision()
 {
-  ++this->numCollisions;
+  gzdbg << "Collision detected, invalidating circumnavigations" << std::endl;
+  this->collisionDetected = true;
 }
 
 //////////////////////////////////////////////////
-void WildlifeScoringPlugin::ApplyTimeBonus()
+double WildlifeScoringPlugin::TimeBonus() const
 {
   // Check time bonuses.
   double totalBonus = 0;
@@ -544,16 +525,13 @@ void WildlifeScoringPlugin::ApplyTimeBonus()
     }
   }
 
-  // Apply the bonus.
-  this->ScoringPlugin::SetScore(
-    std::max(0.0, this->ScoringPlugin::Score() - totalBonus));
+  return totalBonus;
 }
 
 //////////////////////////////////////////////////
 void WildlifeScoringPlugin::OnFinished()
 {
-  this->ApplyTimeBonus();
-  this->SetTimeoutScore(this->Score());
+  this->SetTimeoutScore(std::max(0.0, this->Score() - this->TimeBonus()));
   ScoringPlugin::OnFinished();
 }
 
