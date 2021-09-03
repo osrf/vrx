@@ -19,6 +19,7 @@
 #define VRX_GAZEBO_WILDLIFE_SCORING_PLUGIN_HH_
 
 #include <ros/ros.h>
+#include <memory>
 #include <string>
 #include <vector>
 #include <gazebo/common/Events.hh>
@@ -27,6 +28,7 @@
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/scoring_plugin.hh"
+#include "vrx_gazebo/waypoint_markers.hh"
 
 /// \brief A plugin for computing the score of the wildlife task.
 /// This plugin derives from the generic ScoringPlugin class. Check out that
@@ -124,6 +126,61 @@ class WildlifeScoringPlugin : public ScoringPlugin
     CIRCUMNAVIGATED,
   };
 
+  /// \brief All gate states.
+  private: enum class GateState
+  {
+    /// \brief Not "in" the gate.
+    VEHICLE_OUTSIDE,
+
+    /// \brief Before the gate.
+    VEHICLE_BEFORE,
+
+    /// \brief After the gate.
+    VEHICLE_AFTER,
+
+    /// \brief Gate crossed!
+    CROSSED,
+  };
+
+  /// \brief A virtual gate to help detecting circumnavigation.
+  private: class VirtualGate
+  {
+    /// \brief Constructor.
+    /// \param[in] _leftMakerLink The link of the buoy.
+    /// \param[in] _offset The offset from the buoy that delimitates the gate.
+    /// \param[in] _width The width of the gate.
+    public: VirtualGate(const gazebo::physics::LinkPtr _leftMakerLink,
+                        const ignition::math::Vector3d &_offset,
+                        double _width);
+
+    /// \brief Where is the given robot pose with respect to the gate?
+    /// \param _robotWorldPose Pose of the robot, in the world frame.
+    /// \return The gate state given the current robot pose.
+    public: GateState IsPoseInGate(
+      const ignition::math::Pose3d &_robotWorldPose) const;
+
+    /// \brief Recalculate the pose of the gate.
+    public: void Update();
+
+    /// \brief The left marker (buoy).
+    public: const gazebo::physics::LinkPtr leftMarkerLink;
+
+    /// \brief The offset of the right marker with respect to the left marker
+    /// in world coordinates.
+    public: const ignition::math::Vector3d offset;
+
+    /// \brief The width of the gate in meters.
+    public: const double width;
+
+    /// \brief The center of the gate in the world frame. Note that the roll and
+    /// pitch are ignored. Only yaw is relevant and it points into the direction
+    /// in which the gate should be crossed.
+    public: ignition::math::Pose3d pose;
+
+    /// \brief The state of this gate.
+    public: GateState state = GateState::VEHICLE_OUTSIDE;
+  };
+
   /// \brief A buoy that is part of the wildlife task.
   private: class Buoy
   {
@@ -143,11 +200,18 @@ class WildlifeScoringPlugin : public ScoringPlugin
     /// \param[in] _vehicleModel The vehicle model pointer.
     public: void SetVehicleModel(gazebo::physics::ModelPtr _vehicleModel);
 
+    /// \brief The number of virtual gates;
+    private: const unsigned int kNumVirtualGates = 8u;
+
     /// \brief The buoy's main link.
-    public: gazebo::physics::LinkPtr link;
+    public: const gazebo::physics::LinkPtr link;
 
     /// \brief The goal.
-    public: BuoyGoal goal;
+    public: const BuoyGoal goal;
+
+    /// \brief The vehicle engages with the buoy when the distance between them
+    /// is lower or equal than this value.
+    public: const double engagementDistance;
 
     /// \brief The state of this buoy.
     public: BuoyState state = BuoyState::NEVER_ENGAGED;
@@ -155,9 +219,11 @@ class WildlifeScoringPlugin : public ScoringPlugin
     /// \brief Pointer to the vehicle that interacts with the buoy.
     public: gazebo::physics::ModelPtr vehicleModel;
 
-    /// \brief The vehicle engages with the buoy when the distance between them
-    /// is lower or equal than this value.
-    public: double engagementDistance;
+    /// \brief A collection of virtual gates around the buoy.
+    public: std::vector<VirtualGate> virtualGates;
+
+    /// \brief The number of virtual gates currently crossed.
+    private: unsigned int numVirtualGatesCrossed = 0u;
   };
 
   // Constructor.
@@ -182,14 +248,17 @@ class WildlifeScoringPlugin : public ScoringPlugin
   /// \brief Callback executed at every world update.
   private: void Update();
 
-  /// \brief Set the score to 0 and change the state to "finish".
-  private: void Fail();
-
   /// \brief Publish a new ROS message with the animal locations.
   private: void PublishAnimalLocations();
 
+  /// \brief Decide if the goal for each buoy was completed and apply the bonus.
+  private: void ApplyTimeBonus();
+
   // Documentation inherited.
   private: void OnCollision() override;
+
+  // Documentation inherited.
+  private: void OnFinished() override;
 
   /// \brief All the buoys.
   private: std::vector<Buoy> buoys;
@@ -221,6 +290,9 @@ class WildlifeScoringPlugin : public ScoringPlugin
 
   /// \brief Publisher for the animal locations.
   private: ros::Publisher animalsPub;
+
+  /// \brief Waypoint visualization markers.
+  // private: std::unique_ptr<WaypointMarkers> waypointMarkers;
 };
 
 #endif

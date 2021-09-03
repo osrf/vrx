@@ -50,10 +50,10 @@
     <plugin name="CrocodrileFollowPlugin" filename="libfollow_plugin.so">
       <link_name>link</link_name>
       <loop_forever>true</loop_forever>
-      <waypoints>
+      <!-- <waypoints>
         <waypoint>534 -172</waypoint>
         <waypoint>532 -168</waypoint>
-      </waypoints>
+      </waypoints> -->
       <!-- <markers>
         <material>Gazebo/Red</material>
         <scaling>0.2 0.2 2.0</scaling>

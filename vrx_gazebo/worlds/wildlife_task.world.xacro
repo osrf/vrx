@@ -8,7 +8,7 @@
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves/>
     <!--wind for the wamv-->
-    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
+    <!-- <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo direction = "270" ros_update_rate="10">
       <wind_objs>
         <wind_obj>
@@ -17,13 +17,13 @@
           <coeff_vector>.5 .5 .33</coeff_vector>
         </wind_obj>
       </wind_objs>
-    </xacro:usv_wind_gazebo>
+    </xacro:usv_wind_gazebo> -->
 
 
     <!-- The VRX animal buoys -->
     <include>
       <uri>model://animal_buoys</uri>
-      <pose>512 -170 0 0 0 0</pose>
+      <pose>512 -180 0 0 0 0</pose>
     </include>
 
     <!-- The scoring plugin -->
@@ -61,10 +61,16 @@
         </buoy>
       </buoys>
       <animals_model_name>animal_buoys</animals_model_name>
-      <engagement_distance>10.0</engagement_distance>
+      <engagement_distance>15.0</engagement_distance>
       <obstacle_penalty>10.0</obstacle_penalty>
       <time_bonus>30.0</time_bonus>
       <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
+      <markers>
+        <material>Gazebo/Red</material>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
+        <!-- <initial_id>100</initial_id> -->
+      </markers>
 
     </plugin>
 
