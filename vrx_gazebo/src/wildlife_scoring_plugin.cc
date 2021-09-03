@@ -448,7 +448,7 @@ void WildlifeScoringPlugin::Update()
     // We consider the task completed when all the circumnavigation goals have
     // been completed.
     if ((buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE ||
-         buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE) &&
+         buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE) &&
         buoy.state != BuoyState::CIRCUMNAVIGATED)
     {
       taskCompleted = false;

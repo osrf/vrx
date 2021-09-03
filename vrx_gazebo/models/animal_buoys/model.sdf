@@ -5,7 +5,7 @@
 
     <include>
       <name>crocodile_buoy</name>
-      <pose>20 0 0 0 0 0</pose>
+      <pose>40 0 0 0 0 0</pose>
       <uri>model://crocodile_buoy</uri>
     </include>
 
@@ -17,7 +17,7 @@
 
     <include>
       <name>turtle_buoy</name>
-      <pose>-20 0 0 0 0 0</pose>
+      <pose>-40 0 0 0 0 0</pose>
       <uri>model://turtle_buoy</uri>
     </include>
 
