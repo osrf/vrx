@@ -129,9 +129,9 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->poseErrorPub = this->rosNode->advertise<std_msgs::Float64>(
     this->poseErrorTopic, 100);
 
-  if (_sdf->HasElement("rms_error_topic"))
+  if (_sdf->HasElement("mean_error_topic"))
   {
-    this->meanErrorTopic = _sdf->Get<std::string>("rms_error_topic");
+    this->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
   }
   this->meanErrorPub  = this->rosNode->advertise<std_msgs::Float64>(
     this->meanErrorTopic, 100);
