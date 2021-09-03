@@ -281,7 +281,7 @@ class WildlifeScoringPlugin : public ScoringPlugin
   private: ros::Publisher animalsPub;
 
   /// \brief True when a vehicle collision is detected.
-  private: std::atomic<bool> collisionDetected = false;
+  private: std::atomic<bool> collisionDetected{false};
 };
 
 #endif
