@@ -10,7 +10,7 @@
     </include>
     <%
       # Constants
-      dock_x                = 4.5
+      dock_x                = 3.75
       dock_y                = 3
       dock_z                = 1.5
       dock_roll             = 0
@@ -97,6 +97,7 @@
               <visual>robotx_dock_2022::dock_2022_placard<%= i %>::link_symbols::visual_h_cross</visual>
               <visual>robotx_dock_2022::dock_2022_placard<%= i %>::link_symbols::visual_v_cross</visual>
 	            <visual>robotx_dock_2022::dock_2022_placard<%= i %>::link_symbols::visual_triangle</visual>
+              <visual>robotx_dock_2022::dock_2022_placard<%= i %>::link_symbols::visual_rectangle</visual>
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2022_placard<%= i %></robot_namespace>
@@ -128,6 +129,15 @@
           </geometry>
           <transparency>1</transparency>
 	      </visual>
+        <visual name="visual_rectangle">
+          <pose> 0 0 0 1.571 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 0.75 0.001</size>
+            </box>
+          </geometry>
+          <transparency>1</transparency>
+        </visual>
       </link>
       
       <joint name="placard_to_visual" type="fixed">

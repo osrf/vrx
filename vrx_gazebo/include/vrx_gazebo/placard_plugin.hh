@@ -40,22 +40,22 @@ namespace gazebo
 
 /// \brief Controls the shape and color of a symbol.
 ///
-/// It selects a shape (triangle, cross, circle) and a color (red, green, blue)
-/// and applies to the current symbol
+/// It selects a shape (triangle, cross, circle, rectangle) and a color
+/// (red, green, blue, yellow) and applies to the current symbol.
 /// This plugin can be configured with the following SDF tags:
 ///
-///   <shape> "triangle", "cross" or "circle". If ommited, the shape will be
-///           randomly selected.
-///   <color> "red", "green" or "blue". If ommited, the color will be
+///   <shape> "triangle", "cross", "circle" or "rectangle".
+///           If ommited, the shape will be randomly selected.
+///   <color> "red", "green", "blue" or "yellow". If ommited, the color will be
 ///           randomly selected.
 ///   <shuffle>: True if the topic for shuffling the sequence is enabled.
 ///   <robot_namespace> ROS namespace of Node, can be used to have multiple
-///                    plugins.
+///                     plugins.
 ///   <ros_shuffle_topic>: The ROS topic used to request color changes.
 ///   <gz_symbol_topic>: The gazebo topic subscribed to set symbol changes
-///     defaults to /<robot_namespace>/symbol
+///                      defaults to /<robot_namespace>/symbol
 ///   <visuals>: The set of visual symbols. It contains at least one visual:
-///     <visual>: A visual displaying a shape.
+///              <visual>: A visual displaying a shape.
 ///
 /// Here's an example:
 ///   <plugin name="placard1plugin" filename="libplacard_plugin.so">
@@ -76,6 +76,7 @@ class PlacardPlugin : public gazebo::VisualPlugin
   // Documentation inherited.
   public: PlacardPlugin();
 
+  // Documentation inherited.
   public: void Load(gazebo::rendering::VisualPtr _parent,
                     sdf::ElementPtr _sdf);
 
