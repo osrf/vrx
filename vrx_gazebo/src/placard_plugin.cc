@@ -21,10 +21,10 @@
 // Static initialization.
 std::map<std::string, std_msgs::ColorRGBA> PlacardPlugin::kColors =
   {
-    {"red",   CreateColor(1.0, 0.0, 0.0, 1.0)},
-    {"green", CreateColor(0.0, 1.0, 0.0, 1.0)},
-    {"blue",  CreateColor(0.0, 0.0, 1.0, 1.0)},
-    {"yellow",CreateColor(1.0, 1.0, 0.0, 1.0)},
+    {"red",    CreateColor(1.0, 0.0, 0.0, 1.0)},
+    {"green",  CreateColor(0.0, 1.0, 0.0, 1.0)},
+    {"blue",   CreateColor(0.0, 0.0, 1.0, 1.0)},
+    {"yellow", CreateColor(1.0, 1.0, 0.0, 1.0)},
   };
 
 std::vector<std::string> PlacardPlugin::kShapes =
