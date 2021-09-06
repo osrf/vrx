@@ -249,6 +249,11 @@ class DockChecker
 /// "circle", "cross", "rectangle". If this parameter is present, a ROS message
 /// will be sent in OnReady(). The vehicle should dock in the bay matching this
 /// color and shape.
+/// <targets>: Contains at least one of the following blocks:
+///   <target>: A shooting target. It has the following elements:
+///     <topic>: The name of the topic where the "libContainPlugin" publishes
+///              information for this target.
+///     <bonus_points>: The points awarded for hitting this target.
 ///
 /// Here's an example:
 /// <plugin name="scan_dock_scoring_plugin"
