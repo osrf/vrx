@@ -284,8 +284,10 @@ class DockChecker
 ///   <bays>
 ///     <bay>
 ///       <name>bay1</name>
-///       <internal_activation_topic>/vrx/dock_2022/bay_1/contain</internal_activation_topic>
-///       <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
+///       <internal_activation_topic>/vrx/dock_2022/bay_1/contain
+///       </internal_activation_topic>
+///       <external_activation_topic>/vrx/dock_2022/bay_1_external/contain
+///       </external_activation_topic>
 ///       <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>false</dock_allowed>
@@ -294,8 +296,10 @@ class DockChecker
 
 ///     <bay>
 ///       <name>bay2</name>
-///       <internal_activation_topic>/vrx/dock_2022/bay_2/contain</internal_activation_topic>
-///       <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
+///       <internal_activation_topic>/vrx/dock_2022/bay_2/contain
+///       </internal_activation_topic>
+///       <external_activation_topic>/vrx/dock_2022/bay_2_external/contain
+///       </external_activation_topic>
 ///       <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>true</dock_allowed>
@@ -304,8 +308,10 @@ class DockChecker
 
 ///     <bay>
 ///       <name>bay3</name>
-///       <internal_activation_topic>/vrx/dock_2022/bay_3/contain</internal_activation_topic>
-///       <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
+///       <internal_activation_topic>/vrx/dock_2022/bay_3/contain
+///       </internal_activation_topic>
+///       <external_activation_topic>/vrx/dock_2022/bay_3_external/contain
+///       </external_activation_topic>
 ///       <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>true</dock_allowed>
