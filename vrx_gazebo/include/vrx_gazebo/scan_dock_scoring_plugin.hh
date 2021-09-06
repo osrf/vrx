@@ -363,6 +363,15 @@ class ScanDockScoringPlugin : public ScoringPlugin
 
   /// \brief Expected color sequence.
   private: std::vector<std::string> expectedSequence;
+
+  /// \brief A mutex.
+  private: std::mutex mutex;
+
+  /// \brief The shooting bonus.
+  private: double shootingBonus = 0.0;
+
+  /// \brief Ignition Transport node used for communication.
+  private: ignition::transport::Node ignNode;
 };
 
 #endif
