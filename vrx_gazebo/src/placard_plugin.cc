@@ -21,13 +21,14 @@
 // Static initialization.
 std::map<std::string, std_msgs::ColorRGBA> PlacardPlugin::kColors =
   {
-    {"red",   CreateColor(1.0, 0.0, 0.0, 1.0)},
-    {"green", CreateColor(0.0, 1.0, 0.0, 1.0)},
-    {"blue",  CreateColor(0.0, 0.0, 1.0, 1.0)},
+    {"red",    CreateColor(1.0, 0.0, 0.0, 1.0)},
+    {"green",  CreateColor(0.0, 1.0, 0.0, 1.0)},
+    {"blue",   CreateColor(0.0, 0.0, 1.0, 1.0)},
+    {"yellow", CreateColor(1.0, 1.0, 0.0, 1.0)},
   };
 
 std::vector<std::string> PlacardPlugin::kShapes =
-  {"circle", "cross", "triangle"};
+  {"circle", "cross", "triangle", "rectangle"};
 
 /////////////////////////////////////////////////
 PlacardPlugin::PlacardPlugin():
@@ -93,13 +94,13 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
     &PlacardPlugin::ChangeSymbolTo, this);
 }
 
+//////////////////////////////////////////////////
 void PlacardPlugin::ChangeSymbolTo(gazebo::ConstDockPlacardPtr &_msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
   this->shape = _msg->shape();
   this->color = _msg->color();
 }
-
 
 //////////////////////////////////////////////////
 bool PlacardPlugin::ParseSDF(sdf::ElementPtr _sdf)

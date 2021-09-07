@@ -273,7 +273,7 @@ void ScoringPlugin::OnCollision()
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
-  // loop though collisions, if any include the wamv, increment collision
+  // loop through collisions, if any include the wamv, increment collision
   // counter
   for (unsigned int i = 0; i < _contacts->contact_size(); ++i) {
     std::string wamvCollisionStr1 = _contacts->contact(i).collision1();
@@ -284,8 +284,12 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
         wamvCollisionStr2.substr(0, wamvCollisionStr2.find("lump"));
 
     bool isWamvHit =
-        wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
-        wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_";
+      wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
+      wamvCollisionSubStr1 ==
+        "wamv::wamv/base_link::wamv/base_link_fixed_joint_"             ||
+      wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_" ||
+      wamvCollisionSubStr2 ==
+        "wamv::wamv/base_link::wamv/base_link_fixed_joint_";
     bool isHitBufferPassed = this->currentTime - this->lastCollisionTime >
                              gazebo::common::Time(CollisionBuffer, 0);
 

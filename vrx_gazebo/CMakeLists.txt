@@ -292,16 +292,20 @@ install(TARGETS perception_scoring_plugin
 set(dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
   models/dock_2018_base/model.sdf.erb
+  models/dock_2022_base/model.sdf.erb
   models/dock_2016_base_dynamic/model.sdf.erb
   models/dock_2018_base_dynamic/model.sdf.erb
+  models/dock_2022_base_dynamic/model.sdf.erb
 )
 
 # Dock files that need to be processed with erb
 set(dock_erb_files
   models/dock_2016/model.sdf.erb
   models/dock_2018/model.sdf.erb
+  models/dock_2022/model.sdf.erb
   models/dock_2016_dynamic/model.sdf.erb
   models/dock_2018_dynamic/model.sdf.erb
+  models/dock_2022_dynamic/model.sdf.erb
 )
 
 # Process the dock base erb files
@@ -355,6 +359,7 @@ xacro_add_files(
   worlds/ocean.world.xacro
   worlds/perception_task.world.xacro
   worlds/scan_and_dock.world.xacro
+  worlds/scan_dock_deliver.world.xacro
   worlds/sandisland.world.xacro
   worlds/stationkeeping_task.world.xacro
   worlds/sydneyregatta.world.xacro
