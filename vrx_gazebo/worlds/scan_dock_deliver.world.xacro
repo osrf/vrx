@@ -141,7 +141,7 @@
 
       <!-- Color sequence checker -->
       <robot_namespace>vrx</robot_namespace>
-      <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
+      <color_sequence_service>scan_dock_deliver/color_sequence</color_sequence_service>
       <color_1>blue</color_1>
       <color_2>green</color_2>
       <color_3>red</color_3>
