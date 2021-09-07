@@ -419,8 +419,10 @@ class ScanDockScoringPlugin : public ScoringPlugin
   /// \brief The shooting bonus.
   private: double shootingBonus = 0.0;
 
+#if GAZEBO_MAJOR_VERSION >= 8
   /// \brief Ignition Transport node used for communication.
   private: ignition::transport::Node ignNode;
+#endif
 };
 
 #endif

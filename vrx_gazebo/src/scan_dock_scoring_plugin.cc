@@ -560,6 +560,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
       }
       double bonusPoints = targetElem->Get<double>("bonus_points");
 
+#if GAZEBO_MAJOR_VERSION >= 8
       std::function<void(const ignition::msgs::Boolean&)> subCb =
         [this, bonusPoints](const ignition::msgs::Boolean &_msg)
       {
@@ -572,6 +573,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
       };
 
       this->ignNode.Subscribe(topic, subCb);
+#endif
 
       // Process the next target.
       targetElem = targetElem->GetNextElement();
