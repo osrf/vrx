@@ -190,7 +190,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: virtual void OnRunning();
 
   /// \brief Callback executed when the task state transition into "finished".
-  private: virtual void OnFinished();
+  protected: virtual void OnFinished();
 
   /// \brief Callback executed when a collision is detected for the WAMV.
   private: virtual void OnCollision();

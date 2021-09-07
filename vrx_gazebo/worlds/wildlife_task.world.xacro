@@ -22,8 +22,21 @@
 
     <!-- The VRX animal buoys -->
     <include>
-      <uri>model://animal_buoys</uri>
+      <name>crocodile_buoy</name>
+      <pose>552 -170 0 0 0 0</pose>
+      <uri>model://crocodile_buoy</uri>
+    </include>
+
+    <include>
+      <name>platypus_buoy</name>
       <pose>512 -170 0 0 0 0</pose>
+      <uri>model://platypus_buoy</uri>
+    </include>
+
+    <include>
+      <name>turtle_buoy</name>
+      <pose>472 -170 0 0 0 0</pose>
+      <uri>model://turtle_buoy</uri>
     </include>
 
     <!-- The scoring plugin -->
@@ -48,24 +61,24 @@
       <!-- wildlife specific parameters -->
       <buoys>
         <buoy>
-          <link_name>crocodile_buoy::link</link_name>
+          <model_name>crocodile_buoy</model_name>
+          <link_name>link</link_name>
           <goal>avoid</goal>
         </buoy>
         <buoy>
-          <link_name>platypus_buoy::link</link_name>
+          <model_name>platypus_buoy</model_name>
+          <link_name>link</link_name>
           <goal>circumnavigate_clockwise</goal>
         </buoy>
         <buoy>
-          <link_name>turtle_buoy::link</link_name>
+          <model_name>turtle_buoy</model_name>
+          <link_name>link</link_name>
           <goal>circumnavigate_counterclockwise</goal>
         </buoy>
       </buoys>
-      <animals_model_name>animal_buoys</animals_model_name>
       <engagement_distance>10.0</engagement_distance>
-      <obstacle_penalty>10.0</obstacle_penalty>
       <time_bonus>30.0</time_bonus>
       <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
-
     </plugin>
 
   </world>
