@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<!-- World containing sydneyregatta model and some course challenges -->
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="robotx_example_course">
+    <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
+    <xacro:sydneyregatta />
+    <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves/>
+    <!--wind for the wamv-->
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
+    <xacro:usv_wind_gazebo>
+      <wind_objs>
+        <wind_obj>
+          <name>wamv</name>
+          <link_name>base_link</link_name>
+          <coeff_vector>.5 .5 .33</coeff_vector>
+        </wind_obj>
+      </wind_objs>
+    </xacro:usv_wind_gazebo>
+
+    <!-- The light buoy -->
+    <include>
+      <uri>model://robotx_light_buoy</uri>
+      <pose>511 -218 0.25 0 0 0</pose>
+    </include>
+
+    <!-- The 2022 dock with the placards -->
+    <include>
+      <uri>model://dock_2022</uri>
+      <pose>554 -233 0 0 0 0</pose>
+    </include>
+
+    <!-- Uncomment to visualize the bay #1 activation zone -->
+    <!-- <model name="activation_placard1">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <pose>72.75 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 4 2</size>
+            </box>
+          </geometry>
+          <transparency>0.8</transparency>
+        </visual>
+      </link>
+    </model> -->
+
+    <!-- Uncomment to visualize the bay #2 activation zone -->
+    <!-- <model name="activation_placard2">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <pose>61.75 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 4 2</size>
+            </box>
+          </geometry>
+          <transparency>0.8</transparency>
+        </visual>
+      </link>
+    </model> -->
+
+  </world>
+</sdf>
