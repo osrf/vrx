@@ -51,8 +51,8 @@
       <link_name>link</link_name>
       <loop_forever>true</loop_forever>
       <waypoints>
-        <waypoint>534 -172</waypoint>
-        <waypoint>532 -168</waypoint>
+        <waypoint>554 -172</waypoint>
+        <waypoint>552 -168</waypoint>
       </waypoints>
       <!-- <markers>
         <material>Gazebo/Red</material>
