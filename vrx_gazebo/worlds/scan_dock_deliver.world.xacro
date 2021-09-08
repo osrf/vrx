@@ -148,7 +148,7 @@
 
       <!-- Dock checkers -->
       <dock_bonus_points>15</dock_bonus_points>
-      <correct_dock_bonus_points>20</correct_dock_bonus_points>
+      <correct_dock_bonus_points>5</correct_dock_bonus_points>
       <bays>
         <bay>
           <name>bay1</name>
