@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
-  <world name="perception_task_example">
+  <world name="vrx_perception">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
     <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
-    <xacro:ocean_waves/>
+    <xacro:ocean_waves scale="2.5"/>
     <!-- Include all the objects we plan to use for perception.
        Stash them out of the field of view for now -->
     <include>
