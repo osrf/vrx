@@ -13,7 +13,7 @@
       <wind_objs>
         <wind_obj>
           <name>wamv</name>
-          <link_name>base_link</link_name>
+          <link_name>wamv/base_link</link_name>
           <coeff_vector>0.5 0.5 0.33</coeff_vector>
         </wind_obj>
       </wind_objs>

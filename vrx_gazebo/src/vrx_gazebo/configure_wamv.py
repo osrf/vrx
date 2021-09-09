@@ -33,14 +33,14 @@ def main():
 
     # Add xacro files if created
     if received_thruster_yaml:
-        yaml = 'thruster_yaml'
-        thruster_xacro_target = yaml_to_xacro_extension(rospy.get_param(yaml))
+        thruster_yaml = rospy.get_param('thruster_yaml')
+        thruster_xacro_target = os.path.splitext(thruster_yaml)[0] + '.xacro'
         create_urdf_command += (" yaml_thruster_generation:=true "
                                 "thruster_xacro_file:=" +
                                 thruster_xacro_target)
     if received_sensor_yaml:
-        yaml = 'sensor_yaml'
-        sensor_xacro_target = yaml_to_xacro_extension(rospy.get_param(yaml))
+        sensor_yaml = rospy.get_param('sensor_yaml')
+        sensor_xacro_target = os.path.splitext(sensor_yaml)[0] + '.xacro'
         create_urdf_command += (" yaml_sensor_generation:=true "
                                 "sensor_xacro_file:=" + sensor_xacro_target)
 
@@ -67,7 +67,8 @@ def create_thruster_xacro():
                   thruster_yaml)
 
     # Set thruster xacro target
-    thruster_xacro_target = yaml_to_xacro_extension(thruster_yaml)
+    thruster_xacro_target = os.path.splitext(thruster_yaml)[0] + '.xacro'
+    rospy.loginfo('\nTrying to open %s \n' % thruster_xacro_target)
 
     # Things to start/open the macro
     thruster_boiler_plate_top = ('<?xml version="1.0"?>\n'
@@ -126,7 +127,7 @@ def create_sensor_xacro():
                   sensor_yaml)
 
     # Set sensor xacro target
-    sensor_xacro_target = yaml_to_xacro_extension(sensor_yaml)
+    sensor_xacro_target = os.path.splitext(sensor_yaml)[0] + '.xacro'
 
     # Things to start/open the macro
     sensor_boiler_plate_top = ('<?xml version="1.0"?>\n'
@@ -151,6 +152,3 @@ def create_sensor_xacro():
                              num_test=sensor_num_test,
                              param_test=sensor_param_test)
 
-
-def yaml_to_xacro_extension(string):
-    return string[0:string.index('.')] + '.xacro'
