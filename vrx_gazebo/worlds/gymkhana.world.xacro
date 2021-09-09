@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
-  <world name="gymkhana">
+  <world name="vrx_gymkhana">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
     <xacro:sydneyregatta />
 
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
-    <xacro:ocean_waves />
+    <xacro:ocean_waves scale="2.5"/>
 
     <!--Wind. Note, wind parameters are set in the plugin.-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
@@ -97,7 +97,7 @@
           filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>
       <task_name>gymkhana_blackbox</task_name>
-      <rms_error_topic>/vrx/gymkhana_blackbox/rms_error</rms_error_topic>
+      <mean_error_topic>/vrx/gymkhana_blackbox/mean_pose_error</mean_error_topic>
       <pose_error_topic>/vrx/gymkhana_blackbox/pose_error</pose_error_topic>
       <goal_topic>/vrx/gymkhana_blackbox/goal</goal_topic>
       <task_info_topic>/vrx/gymkhana_blackbox/task/info</task_info_topic>

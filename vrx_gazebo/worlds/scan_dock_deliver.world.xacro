@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <!-- World containing sydneyregatta model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
-  <world name="robotx_example_course">
+  <world name="vrx_scan_dock_deliver">
     <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
     <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
-    <xacro:ocean_waves/>
+    <xacro:ocean_waves scale="2.5"/>
     <!--wind for the wamv-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo>
