@@ -49,7 +49,7 @@ class GymkhanaScoringPlugin : public ScoringPlugin
   private: void OnCollision() override;
 
   // Documentation inherited.
-  private: virtual void OnFinished() override;
+  private: void OnFinished() override;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -72,7 +72,7 @@ class GymkhanaScoringPlugin : public ScoringPlugin
   /// \brief The number of WAM-V collisions.
   private: unsigned int numCollisions = 0;
 
-  /// \brief Number of points deducted per collision.
+  /// \brief Penalty added per collision.
   private: double obstaclePenalty = 0.1;
 };
 
