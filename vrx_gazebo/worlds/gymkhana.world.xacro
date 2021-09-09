@@ -65,7 +65,7 @@
       <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>60</running_state_duration>
+      <running_state_duration>300</running_state_duration>
       <collision_buffer>10</collision_buffer>
       <release_joints>
         <joint>
