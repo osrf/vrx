@@ -123,6 +123,9 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Cumulative 2D RMS error in meters.
   private: double meanError;
 
+  /// \brief Weighting factor used in the heading error calculation.
+  private: double k = 0.75;
+
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: gazebo::common::Timer timer;
 
