@@ -129,9 +129,9 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->poseErrorPub = this->rosNode->advertise<std_msgs::Float64>(
     this->poseErrorTopic, 100);
 
-  if (_sdf->HasElement("rms_error_topic"))
+  if (_sdf->HasElement("mean_error_topic"))
   {
-    this->meanErrorTopic = _sdf->Get<std::string>("rms_error_topic");
+    this->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
   }
   this->meanErrorPub  = this->rosNode->advertise<std_msgs::Float64>(
     this->meanErrorTopic, 100);
@@ -187,12 +187,14 @@ void StationkeepingScoringPlugin::Update()
   #endif
 
   double currentHeading = robotPose.Rot().Euler().Z();
-  double dx   =  this->goalX - robotPose.Pos().X();
-  double dy   =  this->goalY - robotPose.Pos().Y();
-  double dhdg =  abs(this->goalYaw - currentHeading);
-  double headError = 1 - abs(dhdg - M_PI)/M_PI;
+  double dx   = this->goalX - robotPose.Pos().X();
+  double dy   = this->goalY - robotPose.Pos().Y();
+  double dist = sqrt(pow(dx, 2) + pow(dy, 2));
+  double k    = 0.75;
+  double dhdg = abs(this->goalYaw - currentHeading);
+  double headError = M_PI - abs(dhdg - M_PI);
 
-  this->poseError  = sqrt(pow(dx, 2) + pow(dy, 2)) + headError;
+  this->poseError  =  dist + (pow(k, dist) * headError);
   this->totalPoseError += this->poseError;
   this->sampleCount++;
 

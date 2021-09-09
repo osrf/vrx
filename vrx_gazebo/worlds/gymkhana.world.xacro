@@ -97,7 +97,7 @@
           filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>
       <task_name>gymkhana_blackbox</task_name>
-      <rms_error_topic>/vrx/gymkhana_blackbox/rms_error</rms_error_topic>
+      <mean_error_topic>/vrx/gymkhana_blackbox/mean_pose_error</mean_error_topic>
       <pose_error_topic>/vrx/gymkhana_blackbox/pose_error</pose_error_topic>
       <goal_topic>/vrx/gymkhana_blackbox/goal</goal_topic>
       <task_info_topic>/vrx/gymkhana_blackbox/task/info</task_info_topic>
