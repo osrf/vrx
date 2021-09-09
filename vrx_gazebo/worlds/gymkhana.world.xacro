@@ -106,7 +106,7 @@
       <!-- Keep Gazebo running after this sub-task is completed -->
       <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
       <!-- Disable heading error -->
-      <heading_weight>0</heading_weight>
+      <head_error_on>false</head_error_on>
       <!-- Goal as Cartesian coordinates -->
       <goal_pose_cart>483 -295.5 -5</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
