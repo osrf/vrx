@@ -532,6 +532,54 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
       _sdf->GetElement("correct_dock_bonus_points")->Get<double>();
   }
 
+  // Optional: the shooting targets.
+  if (_sdf->HasElement("targets"))
+  {
+    // We require at least one <target> element.
+    auto targetsElem = _sdf->GetElement("targets");
+    if (!targetsElem->HasElement("target"))
+    {
+      ROS_ERROR("<targets><target> not found");
+      return false;
+    }
+
+    auto targetElem = targetsElem->GetElement("target");
+    while (targetElem)
+    {
+      if (!targetElem->HasElement("topic"))
+      {
+        ROS_ERROR("<targets><target><topic> not found");
+        return false;
+      }
+      std::string topic = targetElem->Get<std::string>("topic");
+
+      if (!targetElem->HasElement("bonus_points"))
+      {
+        ROS_ERROR("<targets><target><bonus_points> not found");
+        return false;
+      }
+      double bonusPoints = targetElem->Get<double>("bonus_points");
+
+#if GAZEBO_MAJOR_VERSION >= 8
+      std::function<void(const ignition::msgs::Boolean&)> subCb =
+        [this, bonusPoints](const ignition::msgs::Boolean &_msg)
+      {
+        // The projectile hit the target!
+        if (_msg.data())
+        {
+          std::lock_guard<std::mutex> lock(this->mutex);
+          this->shootingBonus = bonusPoints;
+        }
+      };
+
+      this->ignNode.Subscribe(topic, subCb);
+#endif
+
+      // Process the next target.
+      targetElem = targetElem->GetNextElement();
+    }
+  }
+
   return true;
 }
 
@@ -601,6 +649,16 @@ void ScanDockScoringPlugin::Update()
     // docking in all possible bays.
     this->Finish();
     break;
+  }
+
+  // Check the shooting targets.
+  {
+    std::lock_guard<std::mutex> lock(this->mutex);
+    if (this->shootingBonus > 0)
+    {
+      this->SetScore(this->Score() + this->shootingBonus);
+      shootingBonus = 0;
+    }
   }
 }
 
