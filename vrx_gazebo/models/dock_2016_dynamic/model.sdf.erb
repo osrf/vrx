@@ -74,15 +74,15 @@
     <model name="dock_2016_placard<%= i %>">
       <pose><%=placard_x%> <%=placard_y%> <%=placard_z%> <%=placard_roll%> <%=placard_pitch%> <%=placard_yaw%></pose>
       <include>
-        <pose> 0 0 0.25 0 0 0</pose>
+        <pose>0 0 0.25 0 0 0</pose>
         <uri>model://placard</uri>
       </include>
       <link name="link_symbols">
         <inertial>
           <mass>0.01</mass>
         </inertial>
-        <pose> 0 0.1 0.75 0 0 0 </pose>
-	<visual name="visual_circle">
+        <pose>0 0.1 0.75 0 0 0</pose>
+        <visual name="visual_circle">
           <pose>0 0 0 1.571 0 0</pose>
           <geometry>
             <cylinder>
@@ -96,7 +96,7 @@
               <visual>robotx_dock_2016::dock_2016_placard<%= i %>::link_symbols::visual_circle</visual>
               <visual>robotx_dock_2016::dock_2016_placard<%= i %>::link_symbols::visual_h_cross</visual>
               <visual>robotx_dock_2016::dock_2016_placard<%= i %>::link_symbols::visual_v_cross</visual>
-	      <visual>robotx_dock_2016::dock_2016_placard<%= i %>::link_symbols::visual_triangle</visual>
+              <visual>robotx_dock_2016::dock_2016_placard<%= i %>::link_symbols::visual_triangle</visual>
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2016_placard<%= i %></robot_namespace>
@@ -120,14 +120,14 @@
             </box>
           </geometry>
           <transparency>1</transparency>
-	</visual>
+        </visual>
         <visual name="visual_triangle">
           <pose> -0.5 0 -0.5 1.571 0 0</pose>
           <geometry>
             <mesh><uri>model://symbol_triangle/mesh/triangle.dae</uri></mesh>
           </geometry>
           <transparency>1</transparency>
-	  </visual>
+        </visual>
       </link>
       
       <joint name="placard_to_visual" type="fixed">

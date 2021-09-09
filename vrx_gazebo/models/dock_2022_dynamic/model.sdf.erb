@@ -9,7 +9,7 @@
     </include>
     <%
       # Constants
-      dock_x                = 3.75
+      dock_x                = 5.75
       dock_y                = 3
       dock_z                = 1.5
       dock_roll             = 0
@@ -81,7 +81,7 @@
         <inertial>
           <mass>0.01</mass>
         </inertial>
-        <pose> 0 0.1 0 0 0 0 </pose>
+        <pose>0 0.1 0 0 0 0</pose>
 	      <visual name="visual_circle">
           <pose>0 0 0 1.571 0 0</pose>
           <geometry>
@@ -138,6 +138,38 @@
           </geometry>
           <transparency>1</transparency>
         </visual>
+
+        <!-- Uncomment to see the activation areas -->
+        <!-- <visual name="visual_activation_big_box_<%= i %>">
+          <pose>0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.5 0.5</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+
+        <visual name="visual_activation_small_box_<%= i %>">
+          <pose>-0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.25 0.5 0.25</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual> -->
+
       </link>
       
       <joint name="placard_to_visual" type="fixed">
@@ -145,6 +177,46 @@
         <parent>placard::link</parent>    
         <child>link_symbols</child>
       </joint>
+
+      <!-- Uncomment to see the activation areas -->
+      <!-- For visualizing ContainPlugin volume
+           Make sure that the size and location are consistent with plugin -->
+      <!-- <link name="bay_visualization">
+        <visual name="bay_box">
+          <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+          <geometry>
+            <box>
+              <size>1.5 4 2</size>
+            </box>
+          </geometry>
+          <transparency>0.0</transparency>
+        </visual>
+        <visual name="bay_box_exterior">
+          <pose frame="placard::link">0 -9.5 -1.5 0 0 0</pose>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Red</name>
+            </script>
+          </material>
+          <geometry>
+            <box>
+              <size>5.5 1.5 2</size>
+            </box>
+          </geometry>
+          <transparency>0.0</transparency>
+        </visual>
+      </link>
+      <joint name="placard_to_bay" type="fixed">
+        <child>placard::link</child>
+        <parent>bay_visualization</parent>
+      </joint> -->
 
     </model>
     <%
