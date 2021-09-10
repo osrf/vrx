@@ -253,7 +253,7 @@ void NavigationScoringPlugin::Update()
   // Current score
   this->ScoringPlugin::SetScore(std::min(this->GetRunningStateDuration(),
     this->ElapsedTime().Double() +
-    this->numCollisions * this->obstaclePenalty) / this->numGates);
+    this->GetNumCollisions() * this->obstaclePenalty) / this->numGates);
 
 #if GAZEBO_MAJOR_VERSION >= 8
   const auto robotPose = this->vehicleModel->WorldPose();

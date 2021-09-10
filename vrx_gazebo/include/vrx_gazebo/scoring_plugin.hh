@@ -163,10 +163,13 @@ class ScoringPlugin : public gazebo::WorldPlugin
   protected: void SetTimeoutScore(double _timeoutScore);
 
   /// \brief Get the timeoutScore
-  protected: double GetTimeoutScore();
+  protected: double GetTimeoutScore() const;
 
   /// \brief Get running duration
-  protected: double GetRunningStateDuration();
+  protected: double GetRunningStateDuration() const;
+
+  /// \brief Get the number of WAM-V collisions.
+  protected: unsigned int GetNumCollisions() const;
 
   /// \brief Callback executed at every world update.
   private: void Update();
