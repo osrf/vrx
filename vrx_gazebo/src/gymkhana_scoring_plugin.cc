@@ -102,15 +102,9 @@ void GymkhanaScoringPlugin::BlackboxCallback(
 }
 
 //////////////////////////////////////////////////
-void GymkhanaScoringPlugin::OnCollision()
-{
-  ++this->numCollisions;
-}
-
-//////////////////////////////////////////////////
 void GymkhanaScoringPlugin::OnFinished()
 {
-  double penalty = this->numCollisions * this->obstaclePenalty;
+  double penalty = this->GetNumCollisions() * this->obstaclePenalty;
 
   if (this->Score() < std::numeric_limits<double>::max())
     this->SetTimeoutScore(this->Score() + penalty);

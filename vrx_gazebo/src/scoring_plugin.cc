@@ -205,6 +205,7 @@ void ScoringPlugin::UpdateTaskMessage()
   this->taskMsg.remaining_time.fromSec(this->remainingTime.Double());
   this->taskMsg.timed_out = this->timedOut;
   this->taskMsg.score = this->score;
+  this->taskMsg.num_collisions = this->numCollisions;
 }
 
 //////////////////////////////////////////////////
@@ -269,6 +270,7 @@ void ScoringPlugin::OnFinished()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnCollision()
 {
+  ++this->numCollisions;
 }
 
 //////////////////////////////////////////////////
@@ -482,12 +484,17 @@ void ScoringPlugin::SetTimeoutScore(double _timeoutScore)
   this->timeoutScore = _timeoutScore;
 }
 
-double ScoringPlugin::GetTimeoutScore()
+double ScoringPlugin::GetTimeoutScore() const
 {
   return this->timeoutScore;
 }
 
-double ScoringPlugin::GetRunningStateDuration()
+double ScoringPlugin::GetRunningStateDuration() const
 {
   return this->runningStateDuration;
+}
+
+unsigned int ScoringPlugin::GetNumCollisions() const
+{
+  return this->numCollisions;
 }
