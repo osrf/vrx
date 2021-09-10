@@ -430,7 +430,7 @@ void PerceptionScoringPlugin::OnAttempt(
 //////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "PerceptionScoringPlugin::OnRunning" << std::endl;
   // Quit if ros plugin was not loaded
   if (!ros::isInitialized())
   {

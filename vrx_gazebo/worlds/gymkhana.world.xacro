@@ -51,6 +51,7 @@
       <!-- Per-plugin flag, different from env var VRX_EXIT_ON_COMPLETION.
            Respect top-level plugin finished status. -->
       <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+      <obstacle_penalty>1</obstacle_penalty>
     </plugin>
 
     <!-- Scoring plugin for buoy channel portion -->
@@ -104,6 +105,8 @@
       <contact_debug_topic>/vrx/gymkhana_blackbox/debug/contact</contact_debug_topic>
       <!-- Keep Gazebo running after this sub-task is completed -->
       <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <!-- Disable heading error -->
+      <head_error_on>false</head_error_on>
       <!-- Goal as Cartesian coordinates -->
       <goal_pose_cart>483 -295.5 -5</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
