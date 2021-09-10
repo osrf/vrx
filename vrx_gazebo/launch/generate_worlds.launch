@@ -24,6 +24,6 @@
   <arg name="world_name" default="robotx_example_course"/>
   <param name="world_name" value="$(arg world_name)"/>
 
-  <node name="world_gen" pkg="vrx_gazebo" type="generate_worlds" required="true"
+  <node name="world_gen" pkg="vrx_gazebo" type="generate_worlds.py" required="true"
     output="screen"/>
 </launch>
