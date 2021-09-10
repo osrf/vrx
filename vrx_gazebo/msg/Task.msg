@@ -23,3 +23,6 @@ bool timed_out
 
 # The score.
 float64 score
+
+# Number of collisions.
+uint32 num_collisions

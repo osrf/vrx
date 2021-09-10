@@ -322,6 +322,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Whether to shut down after last gate is crossed.
   private: bool perPluginExitOnCompletion = true;
+
+  /// \brief Number of WAM-V collisions.
+  private: unsigned int numCollisions = 0u;
 };
 
 #endif

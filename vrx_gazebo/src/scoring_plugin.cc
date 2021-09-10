@@ -205,6 +205,7 @@ void ScoringPlugin::UpdateTaskMessage()
   this->taskMsg.remaining_time.fromSec(this->remainingTime.Double());
   this->taskMsg.timed_out = this->timedOut;
   this->taskMsg.score = this->score;
+  this->taskMsg.num_collisions = this->numCollisions;
 }
 
 //////////////////////////////////////////////////
@@ -237,19 +238,19 @@ void ScoringPlugin::ReleaseVehicle()
 
   this->lockJointNames.clear();
 
-  gzmsg << "Vehicle released" << std::endl;
+  gzmsg << "ScoringPlugin::Vehicle released" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
-  gzmsg << "OnReady" << std::endl;
+  gzmsg << "ScoringPlugin::OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "ScoringPlugin::OnRunning" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -269,6 +270,7 @@ void ScoringPlugin::OnFinished()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnCollision()
 {
+  ++this->numCollisions;
 }
 
 //////////////////////////////////////////////////
