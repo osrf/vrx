@@ -136,6 +136,9 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->meanErrorPub  = this->rosNode->advertise<std_msgs::Float64>(
     this->meanErrorTopic, 100);
 
+  if (_sdf->HasElement("head_error_on"))
+    this->headErrorOn = _sdf->Get<bool>("head_error_on");
+
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&StationkeepingScoringPlugin::Update, this));
 
@@ -194,7 +197,10 @@ void StationkeepingScoringPlugin::Update()
   double dhdg = abs(this->goalYaw - currentHeading);
   double headError = M_PI - abs(dhdg - M_PI);
 
-  this->poseError  =  dist + (pow(k, dist) * headError);
+  if (this->headErrorOn)
+    this->poseError = dist + (pow(k, dist) * headError);
+  else
+    this->poseError = dist;
   this->totalPoseError += this->poseError;
   this->sampleCount++;
 
@@ -218,7 +224,8 @@ void StationkeepingScoringPlugin::Update()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::PublishGoal()
 {
-  gzmsg << "Publishing Goal coordinates" << std::endl;
+  gzmsg << "<StationkeepingScoringPlugin> Publishing Goal coordinates"
+        << std::endl;
   geographic_msgs::GeoPoseStamped goal;
 
   // populating GeoPoseStamped... must be a better way?
@@ -241,7 +248,7 @@ void StationkeepingScoringPlugin::PublishGoal()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnReady()
 {
-  gzmsg << "OnReady" << std::endl;
+  gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
 
   this->PublishGoal();
 }
@@ -249,7 +256,7 @@ void StationkeepingScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
 
   this->timer.Start();
 }
