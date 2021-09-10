@@ -224,7 +224,8 @@ void StationkeepingScoringPlugin::Update()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::PublishGoal()
 {
-  gzmsg << "Publishing Goal coordinates" << std::endl;
+  gzmsg << "<StationkeepingScoringPlugin> Publishing Goal coordinates"
+        << std::endl;
   geographic_msgs::GeoPoseStamped goal;
 
   // populating GeoPoseStamped... must be a better way?
@@ -247,7 +248,7 @@ void StationkeepingScoringPlugin::PublishGoal()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnReady()
 {
-  gzmsg << "OnReady" << std::endl;
+  gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
 
   this->PublishGoal();
 }
@@ -255,7 +256,7 @@ void StationkeepingScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
 
   this->timer.Start();
 }

@@ -237,19 +237,19 @@ void ScoringPlugin::ReleaseVehicle()
 
   this->lockJointNames.clear();
 
-  gzmsg << "Vehicle released" << std::endl;
+  gzmsg << "ScoringPlugin::Vehicle released" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
-  gzmsg << "OnReady" << std::endl;
+  gzmsg << "ScoringPlugin::OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "ScoringPlugin::OnRunning" << std::endl;
 }
 
 //////////////////////////////////////////////////
