@@ -45,6 +45,9 @@ class GymkhanaScoringPlugin : public ScoringPlugin
   /// \brief Callback for black box station-keeping portion's scoring plugin
   protected: void BlackboxCallback(const vrx_gazebo::Task::ConstPtr& msg);
 
+  // Documentation inherited.
+  private: void OnFinished() override;
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
@@ -62,6 +65,9 @@ class GymkhanaScoringPlugin : public ScoringPlugin
 
   /// \brief Cumulative error from black box station keeping portion
   private: double blackboxScore = 0.0;
+
+  /// \brief Penalty added per collision.
+  private: double obstaclePenalty = 0.1;
 };
 
 #endif

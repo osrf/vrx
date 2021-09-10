@@ -234,7 +234,7 @@ void WayfindingScoringPlugin::Update()
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::PublishWaypoints()
 {
-  gzmsg << "Publishing Waypoints" << std::endl;
+  gzmsg << "<WayfindingScoringPlugin> Publishing Waypoints" << std::endl;
   geographic_msgs::GeoPoseStamped wp_msg;
   geographic_msgs::GeoPath path_msg;
 
@@ -262,7 +262,7 @@ void WayfindingScoringPlugin::PublishWaypoints()
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::OnReady()
 {
-  gzmsg << "OnReady" << std::endl;
+  gzmsg << "WayfindingScoringPlugin::OnReady" << std::endl;
   this->PublishWaypoints();
 }
 
@@ -270,7 +270,7 @@ void WayfindingScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "WayfindingScoringPlugin::OnRunning" << std::endl;
   this->timer.Start();
 }
 

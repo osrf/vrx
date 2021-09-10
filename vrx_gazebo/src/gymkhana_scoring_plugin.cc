@@ -36,6 +36,10 @@ void GymkhanaScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   // Base class, also binds the update method for the base class
   ScoringPlugin::Load(_world, _sdf);
 
+  // Optional <obstacle_penalty> element.
+  if (_sdf->HasElement("obstacle_penalty"))
+    this->obstaclePenalty = _sdf->Get<double>("obstacle_penalty");
+
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GymkhanaScoringPlugin::Update, this));
 
@@ -95,6 +99,17 @@ void GymkhanaScoringPlugin::BlackboxCallback(
   {
     this->blackboxScore = msg->score;
   }
+}
+
+//////////////////////////////////////////////////
+void GymkhanaScoringPlugin::OnFinished()
+{
+  double penalty = this->GetNumCollisions() * this->obstaclePenalty;
+
+  if (this->Score() < std::numeric_limits<double>::max())
+    this->SetTimeoutScore(this->Score() + penalty);
+
+  ScoringPlugin::OnFinished();
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GymkhanaScoringPlugin)
