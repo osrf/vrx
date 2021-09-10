@@ -21,5 +21,8 @@ duration remaining_time
 # True if task timed out.
 bool timed_out
 
+# Number of collisions.
+uint32 num_collisions
+
 # The score.
 float64 score
