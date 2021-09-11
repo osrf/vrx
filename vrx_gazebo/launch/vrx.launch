@@ -15,6 +15,9 @@
   <arg name="wamv_locked" default="false" />
   <!-- Start paused? -->
   <arg name="paused" default="false"/>
+  <!-- Acoustic pinger position(s) -->
+  <arg name="pinger_params" default="$(find vrx_gazebo)/config/pinger.yaml"/>
+
   <!-- Initial USV location and attitude-->
   <arg name="x" default="-546" />
   <arg name="y" default="170" />
@@ -63,4 +66,11 @@
         args="-x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg R) -P $(arg P) -Y $(arg Y)
               -urdf -param $(arg namespace)/robot_description -model wamv"/>
+
+  <!-- Set the pinger location -->
+  <node name="set_pinger_position" pkg="vrx_gazebo" type="set_pinger_position.py" output="screen">
+    <rosparam command="load" file="$(arg pinger_params)" />
+  </node>
+  <node name="pinger_visualization" pkg="vrx_gazebo" type="pinger_visualization.py" />
+
 </launch>
