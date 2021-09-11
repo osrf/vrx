@@ -29,7 +29,7 @@
 
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>478 -148.66 13.58 0 0.25 -0.21</pose>
+	<pose>-486.644 168.428 10.8275 -0 0.072344 3.04886</pose>
         <view_controller>orbit</view_controller>
       </camera>
       <!--<plugin name="GUITaskWidget" filename="libgui_task_widget.so"/>-->
@@ -38,47 +38,47 @@
     <include>
       <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
       to go into the model file to change the altitutde/height!-->
-      <pose> 0 0 0.2 0 0 3.14 </pose>
+      <pose> 0 0 0.2 0 0 0 </pose>
       <uri>model://sydney_regatta</uri>
     </include>
 
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>
-      <pose>527.17 -154.75 0.45 0.22 0 0</pose>
+      <pose>-546 155.5 0.775 -0.182 0 0</pose>
       <uri>model://post</uri>
     </include>
     <include>
       <name>post_1</name>
-      <pose>535.67 -155.52 0.63 0.195 0 0</pose>
+      <pose>-540 155.52 0.638 -0.1365 0  0</pose>
       <uri>model://post</uri>
     </include>
     <include>
       <name>post_2</name>
-      <pose>544.54 -157.43 0.494 0.22 0 0</pose>
+      <pose>-553.7 157.5 0.55 -0.13 0 0 </pose>
       <uri>model://post</uri>
     </include>
 
     <!-- Antenna for communication with the WAM-V -->
     <include>
-      <pose>531.21 -148.89 1.5 0 0 2.90</pose>
+      <pose>-540 152 0.64 0 0 -0.1</pose>
       <uri>model://antenna</uri>
     </include>
 
     <!-- ground station tents -->
     <include>
       <name>ground_station_0</name>
-      <pose>541.11 -147.3 1.70 0 0 -1.82</pose>
+      <pose>-555 150.8 1.63 0 0.062 1.4</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_1</name>
-      <pose>538.04 -146.6 1.70 0 0 -1.82</pose>
+      <pose>-547.6 150.8 1.512 0 0.062 1.4</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_2</name>
-      <pose>535 -145.86 1.70 0 0 -1.82</pose>
+      <pose>-541 148.9 1.60 0 0.055 1.4</pose>
       <uri>model://ground_station</uri>
     </include>
 
