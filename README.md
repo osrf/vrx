@@ -5,8 +5,7 @@ This repository is the home to the source code and software documentation for th
 * We also welcome users with simulation needs beyond RobotX. As we continue to improve the environment we hope to offer support to an wide range of potential applications.
 
 ## The VRX Competition
-The VRX environment is also the "virtual venue" for the [VRX Competition](https://github.com/osrf/vrx/wiki).
-* Please see our Wiki for tutorials and links to registration and documentation relevant to the virtual competition. 
+The VRX environment is also the "virtual venue" for the [VRX Competition](https://github.com/osrf/vrx/wiki). Please see our Wiki for tutorials and links to registration and documentation relevant to the virtual competition. 
 
 ![VRX](images/sydney_regatta.png)
 ![Ubuntu CI](https://github.com/osrf/vrx/workflows/Ubuntu%20CI/badge.svg)
