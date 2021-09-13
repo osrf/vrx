@@ -163,10 +163,13 @@ class ScoringPlugin : public gazebo::WorldPlugin
   protected: void SetTimeoutScore(double _timeoutScore);
 
   /// \brief Get the timeoutScore
-  protected: double GetTimeoutScore();
+  protected: double GetTimeoutScore() const;
 
   /// \brief Get running duration
-  protected: double GetRunningStateDuration();
+  protected: double GetRunningStateDuration() const;
+
+  /// \brief Get the number of WAM-V collisions.
+  protected: unsigned int GetNumCollisions() const;
 
   /// \brief Callback executed at every world update.
   private: void Update();
@@ -190,7 +193,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: virtual void OnRunning();
 
   /// \brief Callback executed when the task state transition into "finished".
-  private: virtual void OnFinished();
+  protected: virtual void OnFinished();
 
   /// \brief Callback executed when a collision is detected for the WAMV.
   private: virtual void OnCollision();
@@ -322,6 +325,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Whether to shut down after last gate is crossed.
   private: bool perPluginExitOnCompletion = true;
+
+  /// \brief Number of WAM-V collisions.
+  private: unsigned int numCollisions = 0u;
 };
 
 #endif

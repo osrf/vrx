@@ -166,9 +166,6 @@ class NavigationScoringPlugin : public ScoringPlugin
   /// \brief Set the score to 0 and change to state to "finish".
   private: void Fail();
 
-  // Documentation inherited.
-  private: void OnCollision() override;
-
   // Name of Course
   private: gazebo::physics::ModelPtr course;
 
@@ -180,9 +177,6 @@ class NavigationScoringPlugin : public ScoringPlugin
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
-
-  /// \brief The number of WAM-V collisions.
-  private: unsigned int numCollisions = 0;
 
   /// \brief Number of points deducted per collision.
   private: double obstaclePenalty = 10.0;

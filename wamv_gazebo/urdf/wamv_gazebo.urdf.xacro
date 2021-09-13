@@ -140,9 +140,9 @@
       <xacro:wamv_pinger name="pinger" position="1.0 0 -1.0" />
     </xacro:if>
 
-    <!-- Add ball shooter (default pitch angle: -15 deg) -->
+    <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
     <xacro:if value="$(arg ball_shooter_enabled)">
-      <xacro:wamv_ball_shooter name="ball_shooter" position="0.54 0.30 1.296" orientation="0 -0.261799 0"/>
+      <xacro:wamv_ball_shooter name="ball_shooter" position="0.54 0.30 1.296" orientation="0 -1.04 0"/>
     </xacro:if>
     
     <!-- ==== VRX sensor configuration ==== -->
@@ -171,8 +171,8 @@
       <!-- Add pinger -->
       <xacro:wamv_pinger name="pinger" position="1.0 0 -1.0" />
       
-      <!-- Add ball shooter (default pitch angle: -15 deg) -->
-      <xacro:wamv_ball_shooter name="ball_shooter" position="0.54 0.30 1.296" orientation="0 -0.261799 0"/>
+      <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
+      <xacro:wamv_ball_shooter name="ball_shooter" position="0.54 0.30 1.296" orientation="0 -1.04 0"/>
 
     </xacro:if>
   </xacro:unless>

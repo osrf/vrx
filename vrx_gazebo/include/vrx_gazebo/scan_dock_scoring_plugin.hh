@@ -246,16 +246,21 @@ class DockChecker
 /// Default value is 10.
 /// <symbol>: Required string with format <COLOR>_<SHAPE>, where
 /// color can be "red", "green", "blue", "yellow" and color can be "triangle",
-/// "circle", "cross". If this parameter is present, a ROS message will be
-/// sent in OnReady(). The vehicle should dock in the bay matching this color
-/// and shape.
+/// "circle", "cross", "rectangle". If this parameter is present, a ROS message
+/// will be sent in OnReady(). The vehicle should dock in the bay matching this
+/// color and shape.
+/// <targets>: Contains at least one of the following blocks:
+///   <target>: A shooting target. It has the following elements:
+///     <topic>: The name of the topic where the "libContainPlugin" publishes
+///              information for this target.
+///     <bonus_points>: The points awarded for hitting this target.
 ///
 /// Here's an example:
 /// <plugin name="scan_dock_scoring_plugin"
 ///               filename="libscan_dock_scoring_plugin.so">
 ///   <!-- Parameters for scoring_plugin -->
 ///   <vehicle>wamv</vehicle>
-///   <task_name>scan_dock</task_name>
+///   <task_name>scan_dock_deliver</task_name>
 ///   <initial_state_duration>3</initial_state_duration>
 ///   <ready_state_duration>3</ready_state_duration>
 ///   <running_state_duration>300</running_state_duration>
@@ -271,37 +276,81 @@ class DockChecker
 ///   <!-- Color sequence checker -->
 ///   <robot_namespace>vrx</robot_namespace>
 ///   <color_sequence_service>scan_dock/color_sequence</color_sequence_service>
-///   <color_1>red</color_1>
+///   <color_1>blue</color_1>
 ///   <color_2>green</color_2>
-///   <color_3>blue</color_3>
+///   <color_3>red</color_3>
 ///
 ///   <!-- Dock checkers -->
 ///   <bays>
 ///     <bay>
 ///       <name>bay1</name>
-///       <internal_activation_topic>
-///         /vrx/dock_2018/bay_1_internal/contain
+///       <internal_activation_topic>/vrx/dock_2022/bay_1/contain
 ///       </internal_activation_topic>
-///       <external_activation_topic>
-///         /vrx/dock_2018/bay_1_external/contain
+///       <external_activation_topic>/vrx/dock_2022/bay_1_external/contain
 ///       </external_activation_topic>
+///       <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
 ///       <min_dock_time>10.0</min_dock_time>
 ///       <dock_allowed>false</dock_allowed>
-///     </bay>
-///
-///     <bay>
-///       <name>bay2</name>
-///       <internal_activation_topic>
-///         /vrx/dock_2018/bay_2_internal/contain
-///       </internal_activation_topic>
-///       <external_activation_topic>
-///         /vrx/dock_2018/bay_2_external/contain
-///       </external_activation_topic>
-///       <min_dock_time>10.0</min_dock_time>
-///       <dock_allowed>true</dock_allowed>
 ///       <symbol>red_circle</symbol>
 ///     </bay>
+
+///     <bay>
+///       <name>bay2</name>
+///       <internal_activation_topic>/vrx/dock_2022/bay_2/contain
+///       </internal_activation_topic>
+///       <external_activation_topic>/vrx/dock_2022/bay_2_external/contain
+///       </external_activation_topic>
+///       <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
+///       <min_dock_time>10.0</min_dock_time>
+///       <dock_allowed>true</dock_allowed>
+///       <symbol>blue_circle</symbol>
+///     </bay>
+
+///     <bay>
+///       <name>bay3</name>
+///       <internal_activation_topic>/vrx/dock_2022/bay_3/contain
+///       </internal_activation_topic>
+///       <external_activation_topic>/vrx/dock_2022/bay_3_external/contain
+///       </external_activation_topic>
+///       <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
+///       <min_dock_time>10.0</min_dock_time>
+///       <dock_allowed>true</dock_allowed>
+///       <symbol>yellow_rectangle</symbol>
+///     </bay>
 ///   </bays>
+///
+///   <!-- Shooting targets -->
+///   <targets>
+///     <!-- Placard #1 -->
+///     <target>
+///       <topic>vrx/dock_2022_placard1_big_hole/contain</topic>
+///       <bonus_points>5</bonus_points>
+///     </target>
+///     <target>
+///       <topic>vrx/dock_2022_placard1_small_hole/contain</topic>
+///       <bonus_points>10</bonus_points>
+///     </target>
+
+///     <!-- Placard #2 -->
+///     <target>
+///       <topic>vrx/dock_2022_placard2_big_hole/contain</topic>
+///       <bonus_points>5</bonus_points>
+///     </target>
+///     <target>
+///       <topic>vrx/dock_2022_placard2_small_hole/contain</topic>
+///       <bonus_points>10</bonus_points>
+///     </target>
+
+///     <!-- Placard #3 -->
+///     <target>
+///       <topic>vrx/dock_2022_placard3_big_hole/contain</topic>
+///       <bonus_points>5</bonus_points>
+///     </target>
+///     <target>
+///       <topic>vrx/dock_2022_placard3_small_hole/contain</topic>
+///       <bonus_points>10</bonus_points>
+///     </target>
+///   </targets>
 /// </plugin>
 class ScanDockScoringPlugin : public ScoringPlugin
 {
@@ -363,6 +412,17 @@ class ScanDockScoringPlugin : public ScoringPlugin
 
   /// \brief Expected color sequence.
   private: std::vector<std::string> expectedSequence;
+
+  /// \brief A mutex.
+  private: std::mutex mutex;
+
+  /// \brief The shooting bonus.
+  private: double shootingBonus = 0.0;
+
+#if GAZEBO_MAJOR_VERSION >= 8
+  /// \brief Ignition Transport node used for communication.
+  private: ignition::transport::Node ignNode;
+#endif
 };
 
 #endif

@@ -185,10 +185,12 @@ void WayfindingScoringPlugin::Update()
     const ignition::math::Vector3d wp = this->localWaypoints[i];
     double dx   =  wp.X() - robotPose.Pos().X();
     double dy   =  wp.Y() - robotPose.Pos().Y();
-    double dhdg =  abs(wp.Z() - currentHeading);
-    double headError = 1 - abs(dhdg - M_PI)/M_PI;
+    double dist = sqrt(pow(dx, 2) + pow(dy, 2));
+    double k    = 0.75;
+    double dhdg = abs(wp.Z() - currentHeading);
+    double headError = M_PI - abs(dhdg - M_PI);
 
-    double poseError =  sqrt(pow(dx, 2) + pow(dy, 2)) + headError;
+    double poseError =  dist + (pow(k, dist) * headError);
 
     // If this is the first time through, minError == poseError
     if (i == this->minErrors.size())
@@ -232,7 +234,7 @@ void WayfindingScoringPlugin::Update()
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::PublishWaypoints()
 {
-  gzmsg << "Publishing Waypoints" << std::endl;
+  gzmsg << "<WayfindingScoringPlugin> Publishing Waypoints" << std::endl;
   geographic_msgs::GeoPoseStamped wp_msg;
   geographic_msgs::GeoPath path_msg;
 
@@ -260,7 +262,7 @@ void WayfindingScoringPlugin::PublishWaypoints()
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::OnReady()
 {
-  gzmsg << "OnReady" << std::endl;
+  gzmsg << "WayfindingScoringPlugin::OnReady" << std::endl;
   this->PublishWaypoints();
 }
 
@@ -268,7 +270,7 @@ void WayfindingScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "WayfindingScoringPlugin::OnRunning" << std::endl;
   this->timer.Start();
 }
 

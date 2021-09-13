@@ -28,7 +28,7 @@ using namespace gazebo;
 void BallShooterPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   gazebo::physics::WorldPtr world =
-    gazebo::physics::get_world("robotx_example_course");
+    gazebo::physics::get_world();
 
   GZ_ASSERT(_model != nullptr, "Received NULL model pointer");
 

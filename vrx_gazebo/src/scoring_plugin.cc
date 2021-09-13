@@ -205,6 +205,7 @@ void ScoringPlugin::UpdateTaskMessage()
   this->taskMsg.remaining_time.fromSec(this->remainingTime.Double());
   this->taskMsg.timed_out = this->timedOut;
   this->taskMsg.score = this->score;
+  this->taskMsg.num_collisions = this->numCollisions;
 }
 
 //////////////////////////////////////////////////
@@ -237,19 +238,19 @@ void ScoringPlugin::ReleaseVehicle()
 
   this->lockJointNames.clear();
 
-  gzmsg << "Vehicle released" << std::endl;
+  gzmsg << "ScoringPlugin::Vehicle released" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
-  gzmsg << "OnReady" << std::endl;
+  gzmsg << "ScoringPlugin::OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
-  gzmsg << "OnRunning" << std::endl;
+  gzmsg << "ScoringPlugin::OnRunning" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -269,11 +270,12 @@ void ScoringPlugin::OnFinished()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnCollision()
 {
+  ++this->numCollisions;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
-  // loop though collisions, if any include the wamv, increment collision
+  // loop through collisions, if any include the wamv, increment collision
   // counter
   for (unsigned int i = 0; i < _contacts->contact_size(); ++i) {
     std::string wamvCollisionStr1 = _contacts->contact(i).collision1();
@@ -284,8 +286,12 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
         wamvCollisionStr2.substr(0, wamvCollisionStr2.find("lump"));
 
     bool isWamvHit =
-        wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
-        wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_";
+      wamvCollisionSubStr1 == "wamv::base_link::base_link_fixed_joint_" ||
+      wamvCollisionSubStr1 ==
+        "wamv::wamv/base_link::wamv/base_link_fixed_joint_"             ||
+      wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_" ||
+      wamvCollisionSubStr2 ==
+        "wamv::wamv/base_link::wamv/base_link_fixed_joint_";
     bool isHitBufferPassed = this->currentTime - this->lastCollisionTime >
                              gazebo::common::Time(CollisionBuffer, 0);
 
@@ -478,12 +484,17 @@ void ScoringPlugin::SetTimeoutScore(double _timeoutScore)
   this->timeoutScore = _timeoutScore;
 }
 
-double ScoringPlugin::GetTimeoutScore()
+double ScoringPlugin::GetTimeoutScore() const
 {
   return this->timeoutScore;
 }
 
-double ScoringPlugin::GetRunningStateDuration()
+double ScoringPlugin::GetRunningStateDuration() const
 {
   return this->runningStateDuration;
+}
+
+unsigned int ScoringPlugin::GetNumCollisions() const
+{
+  return this->numCollisions;
 }

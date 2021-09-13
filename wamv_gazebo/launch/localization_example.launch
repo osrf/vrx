@@ -51,7 +51,7 @@
     <param name="broadcast_utm_transform" value="true"/>
     <param name="wait_for_datum" value="true"/>
     <param name="use_odometry_yaw" value="true"/>
-    <rosparam param="datum">[21.30996, -157.8901]</rosparam>
+    <rosparam param="datum">[-33.73, 150.67]</rosparam>
     <param name="yaw_offset" value="0"/>
     <param name="publish_filtered_gps" value="true"/>
     <remap to="/wamv/sensors/gps/gps/fix" from="/wamv/robot_localization/gps/fix" />
