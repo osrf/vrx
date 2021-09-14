@@ -195,13 +195,13 @@
       <!-- Goal as Latitude, Longitude, Yaw -->
        <waypoints>
         <waypoint>
-          <pose>-33.722611 150.673901 1.0</pose>
+          <pose>-33.722462 150.674268 1.0</pose>
         </waypoint>
         <waypoint>
-          <pose>-33.722574 150.6742881 1.0</pose>
+          <pose>-33.722925 150.675304 1.0</pose>
         </waypoint>
         <waypoint>
-          <pose>-33.722680 150.674606 1.0</pose>
+          <pose>-33.7226908 150.6751165 1.0</pose>
         </waypoint>
       </waypoints>
       <initial_state_duration>10</initial_state_duration>
