@@ -45,40 +45,40 @@
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>
-      <pose>-546 155.5 0.775 -0.182 0 0</pose>
+      <pose>-535.916809 154.362869 0.675884 -0.17182 0.030464 -0.005286</pose>
       <uri>model://post</uri>
     </include>
     <include>
       <name>post_1</name>
-      <pose>-540 155.52 0.638 -0.1365 0  0</pose>
+      <pose>-527.48999 153.854782 0.425844 -0.1365 0  0</pose>
       <uri>model://post</uri>
     </include>
     <include>
       <name>post_2</name>
-      <pose>-553.7 157.5 0.55 -0.13 0 0 </pose>
+      <pose>-544.832825 156.671951 0.499025 -0.162625 0 0 </pose>
       <uri>model://post</uri>
     </include>
 
     <!-- Antenna for communication with the WAM-V -->
     <include>
-      <pose>-540 152 0.64 0 0 -0.1</pose>
+      <pose>-531.06366 147.669403 -0.059409 0 0 -0.1</pose>
       <uri>model://antenna</uri>
     </include>
 
     <!-- ground station tents -->
     <include>
       <name>ground_station_0</name>
-      <pose>-555 150.8 1.63 0 0.062 1.4</pose>
+      <pose>-540.796448 146.493744 1.671421 -0.00834 0.01824 1.301726</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_1</name>
-      <pose>-547.6 150.8 1.512 0 0.062 1.4</pose>
+      <pose>-537.622681 145.827896 1.681931 -0.00603 0.018667 1.301571</pose>
       <uri>model://ground_station</uri>
     </include>
     <include>
       <name>ground_station_2</name>
-      <pose>-541 148.9 1.60 0 0.055 1.4</pose>
+      <pose>-534.550537 144.910400 1.720474 -0.004994 0.020798 1.301492</pose>
       <uri>model://ground_station</uri>
     </include>
 

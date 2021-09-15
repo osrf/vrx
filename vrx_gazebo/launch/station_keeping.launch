@@ -13,8 +13,8 @@
   <arg name="namespace" default="wamv"/>
 
   <!-- Initial USV location and attitude-->
-  <arg name="x" default="532" />
-  <arg name="y" default="-162" />
+  <arg name="x" default="-532" />
+  <arg name="y" default="162" />
   <arg name="z" default="0.1" />
   <arg name="P" default="0" />
   <arg name="R" default="0" />
