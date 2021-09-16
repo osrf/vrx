@@ -108,7 +108,7 @@
       <!-- Disable heading error -->
       <head_error_on>false</head_error_on>
       <!-- Goal as Cartesian coordinates -->
-      <goal_pose_cart>483 -295.5 -5</goal_pose_cart>
+      <goal_pose_cart>-483 295.5 0</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
