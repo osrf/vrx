@@ -18,6 +18,10 @@
   <!-- Acoustic pinger position(s) -->
   <arg name="pinger_params" default="$(find vrx_gazebo)/config/pinger.yaml"/>
 
+  <!-- Acoustic pinger position(s) -->
+  <arg name="pinger_params" default="$(find vrx_gazebo)/config/pinger.yaml"/>
+
+
   <!-- Initial USV location and attitude-->
   <arg name="x" default="-532" />
   <arg name="y" default="162" />
