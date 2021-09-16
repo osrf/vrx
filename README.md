@@ -1,16 +1,18 @@
 # Virtual RobotX (VRX)
+This repository is the home to the source code and software documentation for the VRX simulation environment, which supports simulation of unmanned surface vehicles in marine environments.
+* Designed in coordination with RobotX organizers, this project provides arenas and tasks similar to those featured in past and future RobotX competitions, as well as a description of the WAM-V platform.
+* For RobotX competitors this simulation environment is intended as a first step toward developing tools prototyping solutions in advance of physical on-water testing.
+* We also welcome users with simulation needs beyond RobotX. As we continue to improve the environment we hope to offer support to an wide range of potential applications.
 
-This repository is the home to the source code and software documentation for the VRX Simulation and the VRX Challenge.  [Challenge documentation](https://github.com/osrf/vrx/wiki/documentation) is available on the project wiki, including links to registration information and documentation of the tasks and technical specifications.
-  
-This is an active development project.  We are adding and improving things all the time.  The project contains a simulation foundation, including an environment similar to the RobotX venue and description of the WAM-V platform.  It is intended as a first step for teams that would then extend the tools for their specific development needs.
-
+## The VRX Competition
+The VRX environment is also the "virtual venue" for the [VRX Competition](https://github.com/osrf/vrx/wiki). Please see our Wiki for tutorials and links to registration and documentation relevant to the virtual competition. 
 
 ![VRX](images/sydney_regatta.png)
 ![Ubuntu CI](https://github.com/osrf/vrx/workflows/Ubuntu%20CI/badge.svg)
 
 ## Getting Started
 
- * Watch the [Release 1.2 Highlight Video](https://youtu.be/0Q2ehhmSz0Q)
+ * Watch the [Release 1.5 Highlight Video](https://youtu.be/-2BP2P3CHYw)
  * The [VRX Wiki](https://github.com/osrf/vrx/wiki) provides documentation and tutorials.
  * The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
  * For technical problems, please us the [project issue tracker](https://github.com/osrf/vrx/issues) to describe your problem or request support. 
@@ -31,8 +33,7 @@ If you use the VRX simulation in your work, please cite our summary publication,
 ```
 
 ## Contributing
-
-The simulation tools under active development to support the RobotX teams.  We are starting simple with the important fundamental aspects of the robot and environment, but will rely on the community to develop additional functionality around their particular use cases.
+This project is under active development to support the VRX and RobotX teams. We are adding and improving things all the time. Our primary focus is to provide the fundamental aspects of the robot and environment, but we rely on the community to develop additional functionality around their particular use cases.
 
 If you have any questions about these topics, or would like to work on other aspects, please contribute.  You can contact us directly (see below), submit an [issue](https://github.com/osrf/vrx/issues) or, better yet, submit a [pull request](https://github.com/osrf/vrx/pulls/)!
 
@@ -43,4 +44,5 @@ We continue to receive important improvements from the community.  We have done 
 ## Contacts
 
  * Carlos Aguero <caguero@openrobotics.org>
+ * Michael McCarrin <mrmccarr@nps.edu>
  * Brian Bingham <bbingham@nps.edu>
