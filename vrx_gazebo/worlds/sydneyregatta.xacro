@@ -29,7 +29,9 @@
 
     <gui fullscreen='0'>
       <camera name='user_camera'>
-	<pose>-478.101746 148.200836 13.203143 0.0 0.248344 2.936862</pose>
+        <pose>-478.101746 148.200836 13.203143 0.0 0.248344 2.936862</pose>
+        <!--<pose frame=''>441.023743 -233.373352 236.544739 0.000011 1.482001 -0.804067</pose>-->
+        <!--<pose frame=''>-441.023743 233.373352 236.544739 0.000011 1.482001 -2.336</pose>-->
         <view_controller>orbit</view_controller>
       </camera>
       <!--<plugin name="GUITaskWidget" filename="libgui_task_widget.so"/>-->
