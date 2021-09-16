@@ -61,7 +61,7 @@
 
     <!-- Antenna for communication with the WAM-V -->
     <include>
-      <pose>-531.06366 147.669403 -0.059409 0 0 -0.1</pose>
+      <pose>-531.063721 147.668579 1.59471 -0.068142 0 -0.1</pose>
       <uri>model://antenna</uri>
     </include>
 
