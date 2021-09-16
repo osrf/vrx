@@ -23,19 +23,19 @@
     <!-- The VRX animal buoys -->
     <include>
       <name>crocodile_buoy</name>
-      <pose>552 -170 0 0 0 0</pose>
+      <pose>-552 170 0 0 0 3.14</pose>
       <uri>model://crocodile_buoy</uri>
     </include>
 
     <include>
       <name>platypus_buoy</name>
-      <pose>512 -170 0 0 0 0</pose>
+      <pose>-512 170 0 0 0 3.14</pose>
       <uri>model://platypus_buoy</uri>
     </include>
 
     <include>
       <name>turtle_buoy</name>
-      <pose>472 -170 0 0 0 0</pose>
+      <pose>-472 170 0 0 0 3.14</pose>
       <uri>model://turtle_buoy</uri>
     </include>
 
