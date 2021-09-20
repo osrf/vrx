@@ -106,7 +106,7 @@
   <link name="${namespace}/dummy_link">
     <visual>
       <geometry>
-        <mesh filename="package://wamv_description/models/WAM-V-Base/mesh/WAM-V-Base.dae"/>
+        <mesh filename="file://$(find wamv_description)/models/WAM-V-Base/mesh/WAM-V-Base.dae"/>
       </geometry>
     </visual>
 

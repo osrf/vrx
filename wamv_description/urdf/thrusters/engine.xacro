@@ -5,7 +5,7 @@
     <link name="${namespace}/${prefix}_engine_link">
       <visual>
         <geometry>
-          <mesh filename="package://wamv_description/models/engine/mesh/engine.dae"/>
+          <mesh filename="file://$(find wamv_description)/models/engine/mesh/engine.dae"/>
         </geometry>
       </visual>
       <collision name="${prefix}_engine_vertical_axis_collision">
@@ -29,7 +29,7 @@
     <link name="${namespace}/${prefix}_propeller_link">
       <visual>
         <geometry>
-          <mesh filename="package://wamv_description/models/propeller/mesh/propeller.dae"/>
+          <mesh filename="file://$(find wamv_description)/models/propeller/mesh/propeller.dae"/>
         </geometry>
       </visual>
       <collision name="${prefix}_propeller_collision">
