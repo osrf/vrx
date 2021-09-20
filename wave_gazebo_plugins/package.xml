@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>wave_gazebo_plugins</name>
   <version>1.3.0</version>
   <description>
@@ -13,7 +13,7 @@
 
   <author email="rhys.mainwaring@me.com">Rhys Mainwaring</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>eigen</build_depend>
 
@@ -21,6 +21,6 @@
   <exec_depend>gazebo_ros</exec_depend>
 
   <export>
-    <gazebo_ros plugin_path="${prefix}/lib"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
