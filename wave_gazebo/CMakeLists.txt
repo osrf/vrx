@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(wave_gazebo)
 
 # We need erb to process the model erb files.
@@ -7,13 +7,10 @@ if(NOT ERB_EXE_PATH)
   message(FATAL_ERROR "Could not find the `erb` tool.  Try `sudo apt-get install ruby`")
 endif()
 
-find_package(catkin REQUIRED COMPONENTS
-  xacro
-)
+find_package(ament_cmake REQUIRED)
+find_package(xacro REQUIRED)
 
-catkin_package(
-  CATKIN_DEPENDS xacro
-)
+ament_export_dependencies(xacro)
 
 # Model files to be processed with erb
 set (xacro_erb_files
@@ -33,24 +30,20 @@ foreach(_erb ${xacro_erb_files})
 endforeach()
 
 install(DIRECTORY world_models/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/world_models)
+  DESTINATION share/${PROJECT_NAME}/world_models)
 
 add_custom_target(model_erb_generation ALL
   DEPENDS
     ${model_files}
 )
 
-set(XACRO_INORDER)
-if(DEFINED ENV{ROS_DISTRO})
-  if($ENV{ROS_DISTRO} STREQUAL "kinetic")
-    set(XACRO_INORDER INORDER)
-  endif()
-endif()
-
 # Generate world files from xacro and install
 xacro_add_files(
   worlds/ocean.world.xacro
   worlds/ocean_buoys.world.xacro
   worlds/ocean_wamv.world.xacro
-  ${XACRO_INORDER} INSTALL DESTINATION worlds
+  INSTALL DESTINATION worlds
 )
+
+
+ament_package()

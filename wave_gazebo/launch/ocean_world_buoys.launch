@@ -50,7 +50,7 @@
   <!-- Load robot model -->
   <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
   <param name="$(arg namespace)/robot_description"
-         command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
+         command="$(find xacro)/xacro '$(arg urdf)'
          thruster_config:=$(arg thrust_config)
          camera_enabled:=$(arg camera_enabled)
          gps_enabled:=$(arg gps_enabled)
