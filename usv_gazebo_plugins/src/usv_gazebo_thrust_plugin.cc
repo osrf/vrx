@@ -16,7 +16,8 @@
 */
 
 #include <boost/algorithm/clamp.hpp>
-#include <ros/time.h>
+#include <rclcpp/time.hpp>
+#include <rclcpp/logging.hpp>
 
 #include <cmath>
 #include <functional>
@@ -42,10 +43,10 @@ Thruster::Thruster(UsvThrust *_parent)
 }
 
 //////////////////////////////////////////////////
-void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
+void Thruster::OnThrustCmd(const std_msgs::msg::Float32::SharedPtr _msg)
 {
   // When we get a new thrust command!
-  ROS_DEBUG_STREAM("New thrust command! " << _msg->data);
+  RCLCPP_DEBUG_STREAM(this->plugin->rosnode->get_logger(), "New thrust command! " << _msg->data);
   std::lock_guard<std::mutex> lock(this->plugin->mutex);
   #if GAZEBO_MAJOR_VERSION >= 8
     this->lastCmdTime = this->plugin->world->SimTime();
@@ -56,10 +57,10 @@ void Thruster::OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg)
 }
 
 //////////////////////////////////////////////////
-void Thruster::OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg)
+void Thruster::OnThrustAngle(const std_msgs::msg::Float32::SharedPtr _msg)
 {
   // When we get a new thrust angle!
-  ROS_DEBUG_STREAM("New thrust angle! " << _msg->data);
+  RCLCPP_DEBUG_STREAM(this->plugin->rosnode->get_logger(), "New thrust angle! " << _msg->data);
   std::lock_guard<std::mutex> lock(this->plugin->mutex);
   this->desiredAngle = boost::algorithm::clamp(_msg->data, -this->maxAngle,
                                                this->maxAngle);
@@ -71,13 +72,13 @@ double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
 {
   if (!_sdfPtr->HasElement(_paramName))
   {
-    ROS_INFO_STREAM("Parameter <" << _paramName << "> not found: "
+    RCLCPP_INFO_STREAM(rosnode->get_logger(), "Parameter <" << _paramName << "> not found: "
                     "Using default value of <" << _defaultVal << ">.");
     return _defaultVal;
   }
 
   double val = _sdfPtr->Get<double>(_paramName);
-  ROS_DEBUG_STREAM("Parameter found - setting <" << _paramName <<
+  RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Parameter found - setting <" << _paramName <<
                    "> to <" << val << ">.");
   return val;
 }
@@ -85,7 +86,9 @@ double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
 //////////////////////////////////////////////////
 void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
-  ROS_DEBUG("Loading usv_gazebo_thrust_plugin");
+  this->rosnode = gazebo_ros::Node::Get(_sdf);
+
+  RCLCPP_DEBUG(rosnode->get_logger(), "Loading usv_gazebo_thrust_plugin");
   this->model = _parent;
   this->world = this->model->GetWorld();
 
@@ -94,12 +97,12 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("robotNamespace"))
   {
     nodeNamespace = _sdf->Get<std::string>("robotNamespace") + "/";
-    ROS_INFO_STREAM("Thruster namespace <" << nodeNamespace << ">");
+    RCLCPP_INFO_STREAM(rosnode->get_logger(), "Thruster namespace <" << nodeNamespace << ">");
   }
 
   this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", 1.0);
 
-  ROS_DEBUG_STREAM("Loading thrusters from SDF");
+  RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Loading thrusters from SDF");
 
   // For each thruster
   int thrusterCounter = 0;
@@ -111,7 +114,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       // Instatiate
       Thruster thruster(this);
 
-      ROS_DEBUG_STREAM("Thruster #" << thrusterCounter);
+      RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Thruster #" << thrusterCounter);
 
       // REQUIRED PARAMETERS
       // Find link by name in SDF
@@ -121,17 +124,17 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         thruster.link = this->model->GetLink(linkName);
         if (!thruster.link)
         {
-          ROS_ERROR_STREAM("Could not find a link by the name <" << linkName
+          RCLCPP_ERROR_STREAM(rosnode->get_logger(), "Could not find a link by the name <" << linkName
             << "> in the model!");
         }
         else
         {
-          ROS_DEBUG_STREAM("Thruster added to link <" << linkName << ">");
+          RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Thruster added to link <" << linkName << ">");
         }
       }
       else
       {
-        ROS_ERROR_STREAM("Please specify a link name for each thruster!");
+        RCLCPP_ERROR_STREAM(rosnode->get_logger(), "Please specify a link name for each thruster!");
       }
 
       // Parse out propellor joint name
@@ -142,18 +145,18 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         thruster.propJoint = this->model->GetJoint(propName);
         if (!thruster.propJoint)
         {
-          ROS_ERROR_STREAM("Could not find a propellor joint by the name of <"
+          RCLCPP_ERROR_STREAM(rosnode->get_logger(), "Could not find a propellor joint by the name of <"
             << propName << "> in the model!");
         }
         else
         {
-          ROS_DEBUG_STREAM("Propellor joint <" << propName <<
+          RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Propellor joint <" << propName <<
             "> added to thruster");
         }
       }
       else
       {
-        ROS_ERROR_STREAM("No propJointName SDF parameter for thruster #"
+        RCLCPP_ERROR_STREAM(rosnode->get_logger(), "No propJointName SDF parameter for thruster #"
           << thrusterCounter);
       }
 
@@ -165,18 +168,18 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
         thruster.engineJoint = this->model->GetJoint(engineName);
         if (!thruster.engineJoint)
         {
-          ROS_ERROR_STREAM("Could not find a engine joint by the name of <" <<
+          RCLCPP_ERROR_STREAM(rosnode->get_logger(), "Could not find a engine joint by the name of <" <<
             engineName << "> in the model!");
         }
         else
         {
-          ROS_DEBUG_STREAM("Engine joint <" << engineName <<
+          RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Engine joint <" << engineName <<
             "> added to thruster");
         }
       }
       else
       {
-        ROS_ERROR_STREAM("No engineJointName SDF parameter for thruster #"
+        RCLCPP_ERROR_STREAM(rosnode->get_logger(), "No engineJointName SDF parameter for thruster #"
           << thrusterCounter);
       }
 
@@ -187,7 +190,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
       else
       {
-        ROS_ERROR_STREAM("Please specify a cmdTopic (for ROS subscription) "
+        RCLCPP_ERROR_STREAM(rosnode->get_logger(), "Please specify a cmdTopic (for ROS subscription) "
           "for each thruster!");
       }
 
@@ -198,7 +201,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
       else
       {
-        ROS_ERROR_STREAM("Please specify a angleTopic (for ROS subscription) "
+        RCLCPP_ERROR_STREAM(rosnode->get_logger(), "Please specify a angleTopic (for ROS subscription) "
           "for each thruster!");
       }
 
@@ -209,7 +212,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
       else
       {
-        ROS_ERROR_STREAM("Please specify for each thruster if it should enable "
+        RCLCPP_ERROR_STREAM(rosnode->get_logger(), "Please specify for each thruster if it should enable "
           "angle adjustment (for ROS subscription)!");
       }
 
@@ -218,13 +221,13 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       if (thrusterSDF->HasElement("mappingType"))
       {
         thruster.mappingType = thrusterSDF->Get<int>("mappingType");
-        ROS_DEBUG_STREAM("Parameter found - setting <mappingType> to <" <<
+        RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Parameter found - setting <mappingType> to <" <<
           thruster.mappingType << ">.");
       }
       else
       {
         thruster.mappingType = 0;
-        ROS_INFO_STREAM("Parameter <mappingType> not found: "
+        RCLCPP_INFO_STREAM(rosnode->get_logger(), "Parameter <mappingType> not found: "
           "Using default value of <" << thruster.mappingType << ">.");
       }
 
@@ -244,18 +247,15 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
   else
   {
-    ROS_WARN_STREAM("No 'thruster' tags in description - how will you move?");
+    RCLCPP_WARN_STREAM(rosnode->get_logger(), "No 'thruster' tags in description - how will you move?");
   }
-  ROS_DEBUG_STREAM("Found " << thrusterCounter << " thrusters");
-
-  // Initialize the ROS node and subscribe to cmd_drive
-  this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
+  RCLCPP_DEBUG_STREAM(rosnode->get_logger(), "Found " << thrusterCounter << " thrusters");
 
   // Advertise joint state publisher to view engines and propellers in rviz
   // TODO: consider throttling joint_state pub for performance
   // (every OnUpdate may be too frequent).
   this->jointStatePub =
-    this->rosnode->advertise<sensor_msgs::JointState>("joint_states", 1);
+    this->rosnode->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1);
   this->jointStateMsg.name.resize(2 * thrusters.size());
   this->jointStateMsg.position.resize(2 * thrusters.size());
   this->jointStateMsg.velocity.resize(2 * thrusters.size());
@@ -269,16 +269,16 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       this->thrusters[i].propJoint->GetName();
 
     // Subscribe to commands for each thruster.
-    this->thrusters[i].cmdSub = this->rosnode->subscribe(
-      this->thrusters[i].cmdTopic, 1, &Thruster::OnThrustCmd,
-      &this->thrusters[i]);
+    this->thrusters[i].cmdSub = this->rosnode->create_subscription<std_msgs::msg::Float32>(
+      this->thrusters[i].cmdTopic, 1, 
+      std::bind(&Thruster::OnThrustCmd, &this->thrusters[i], std::placeholders::_1));
 
     // Subscribe to angles for each thruster.
     if (this->thrusters[i].enableAngle)
     {
-      this->thrusters[i].angleSub = this->rosnode->subscribe(
-        this->thrusters[i].angleTopic, 1, &Thruster::OnThrustAngle,
-        &this->thrusters[i]);
+      this->thrusters[i].angleSub = this->rosnode->create_subscription<std_msgs::msg::Float32>(
+        this->thrusters[i].angleTopic, 1, 
+        std::bind(&Thruster::OnThrustAngle, &this->thrusters[i], std::placeholders::_1));
     }
   }
 
@@ -349,7 +349,7 @@ void UsvThrust::Update()
       if (dtc > this->cmdTimeout && this->cmdTimeout > 0.0)
       {
         this->thrusters[i].currCmd = 0.0;
-        ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << i << "] Cmd Timeout");
+        RCLCPP_DEBUG_STREAM_THROTTLE(rosnode->get_logger(), *rosnode->get_clock(), 1.0, "[" << i << "] Cmd Timeout");
       }
 
       // Adjust thruster engine joint angle with PID
@@ -373,7 +373,7 @@ void UsvThrust::Update()
                                           this->thrusters[i].maxForceRev);
           break;
         default:
-            ROS_FATAL_STREAM("Cannot use mappingType=" <<
+            RCLCPP_FATAL_STREAM(rosnode->get_logger(), "Cannot use mappingType=" <<
               this->thrusters[i].mappingType);
             break;
       }
@@ -387,8 +387,8 @@ void UsvThrust::Update()
   }
 
   // Publish the propeller joint state
-  this->jointStateMsg.header.stamp = ros::Time::now();
-  this->jointStatePub.publish(this->jointStateMsg);
+  this->jointStateMsg.header.stamp = rosnode->now();
+  this->jointStatePub->publish(this->jointStateMsg);
 }
 
 //////////////////////////////////////////////////

@@ -18,7 +18,7 @@
 #ifndef USV_GAZEBO_PLUGINS_WIND_HH_
 #define USV_GAZEBO_PLUGINS_WIND_HH_
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <memory>
 #include <random>
 #include <string>
@@ -27,6 +27,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <ignition/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo_ros/node.hpp>
 
 #include <sdf/sdf.hh>
 
@@ -129,13 +130,13 @@ namespace gazebo
     private: double varVel;
 
     /// \brief ROS node handle.
-    private: std::unique_ptr<ros::NodeHandle> rosNode;
+    private: gazebo_ros::Node::SharedPtr rosNode;
 
     /// \brief Publisher for wind speed.
-    private: ros::Publisher windSpeedPub;
+    private: rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr windSpeedPub;
 
     /// \brief Publisher for wind direction.
-    private: ros::Publisher windDirectionPub;
+    private: rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr windDirectionPub;
 
     /// \brief Topic where the wind speed is published.
     private: std::string topicWindSpeed = "/vrx/debug/wind/speed";

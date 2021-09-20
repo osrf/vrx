@@ -15,7 +15,6 @@
  *
 */
 
-#include <ros/ros.h>
 #include <tf2/LinearMath/Transform.h>
 
 #include <cmath>
@@ -43,13 +42,13 @@ double UsvDynamicsPlugin::SdfParamDouble(sdf::ElementPtr _sdfPtr,
 {
   if (!_sdfPtr->HasElement(_paramName))
   {
-    ROS_INFO_STREAM("Parameter <" << _paramName << "> not found: "
+    RCLCPP_INFO_STREAM(rosNode->get_logger(), "Parameter <" << _paramName << "> not found: "
                     "Using default value of <" << _defaultVal << ">.");
     return _defaultVal;
   }
 
   double val = _sdfPtr->Get<double>(_paramName);
-  ROS_DEBUG_STREAM("Parameter found - setting <" << _paramName <<
+  RCLCPP_DEBUG_STREAM(rosNode->get_logger(), "Parameter found - setting <" << _paramName <<
                   "> to <" << val << ">.");
   return val;
 }
@@ -57,7 +56,9 @@ double UsvDynamicsPlugin::SdfParamDouble(sdf::ElementPtr _sdfPtr,
 //////////////////////////////////////////////////
 void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  ROS_DEBUG("Loading usv_gazebo_dynamics_plugin");
+  this->rosNode = gazebo_ros::Node::Get(_sdf);
+
+  RCLCPP_DEBUG(rosNode->get_logger(), "Loading usv_gazebo_dynamics_plugin");
   this->world = _model->GetWorld();
 
   // Get parameters from SDF
@@ -67,24 +68,24 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     this->link = _model->GetLink();
     linkName = this->link->GetName();
-    ROS_INFO_STREAM("Did not find SDF parameter bodyName");
+    RCLCPP_INFO_STREAM(rosNode->get_logger(), "Did not find SDF parameter bodyName");
   }
   else
   {
     linkName = _sdf->GetElement("bodyName")->Get<std::string>();
     this->link = _model->GetLink(linkName);
 
-    ROS_DEBUG_STREAM("Found SDF parameter bodyName as <" << linkName<< ">");
+    RCLCPP_DEBUG_STREAM(rosNode->get_logger(), "Found SDF parameter bodyName as <" << linkName<< ">");
   }
   if (!this->link)
   {
-    ROS_FATAL("usv_gazebo_dynamics_plugin error: bodyName: %s does not exist\n",
+    RCLCPP_FATAL(rosNode->get_logger(), "usv_gazebo_dynamics_plugin error: bodyName: %s does not exist\n",
       linkName.c_str());
     return;
   }
   else
   {
-    ROS_DEBUG_STREAM("USV Dynamics Model Link Name = " << linkName);
+    RCLCPP_DEBUG_STREAM(rosNode->get_logger(), "USV Dynamics Model Link Name = " << linkName);
   }
 
   this->waterLevel       = this->SdfParamDouble(_sdf, "waterLevel"  , 0.5);
@@ -114,7 +115,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (!_sdf->HasElement("length_n"))
   {
     int defaultVal = 2;
-    ROS_INFO_STREAM("Parameter <length_n> not found: "
+    RCLCPP_INFO_STREAM(rosNode->get_logger(), "Parameter <length_n> not found: "
                     "Using default value of <" << defaultVal << ">.");
     this->paramLengthN = defaultVal;
   }
@@ -143,9 +144,9 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   #endif
 
   // Report some of the pertinent parameters for verification
-  ROS_DEBUG("USV Dynamics Parameters: From URDF XACRO model definition");
-  ROS_DEBUG_STREAM("Vessel Mass (rigid-body): " << kMass);
-  ROS_DEBUG_STREAM("Vessel Inertia Vector (rigid-body): X:" << kInertia[0] <<
+  RCLCPP_DEBUG(rosNode->get_logger(), "USV Dynamics Parameters: From URDF XACRO model definition");
+  RCLCPP_DEBUG_STREAM(rosNode->get_logger(), "Vessel Mass (rigid-body): " << kMass);
+  RCLCPP_DEBUG_STREAM(rosNode->get_logger(), "Vessel Inertia Vector (rigid-body): X:" << kInertia[0] <<
                   " Y:" << kInertia[1] << " Z:" << kInertia[2]);
 
   // Initialize time and odometry position
@@ -187,6 +188,8 @@ void UsvDynamicsPlugin::Update()
       this->world, this->waveModelName);
   }
 
+  auto& clock = *this->rosNode->get_clock();
+
   #if GAZEBO_MAJOR_VERSION >= 8
     const common::Time kTimeNow = this->world->SimTime();
   #else
@@ -211,7 +214,7 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Vector3d kVelLinearBody =
       this->link->GetRelativeLinearVel().Ign();
   #endif
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel linear: " << kVelLinearBody);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 0.5, "Vel linear: " << kVelLinearBody);
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Vector3d kVelAngularBody =
@@ -220,7 +223,7 @@ void UsvDynamicsPlugin::Update()
     const ignition::math::Vector3d kVelAngularBody =
       this->link->GetRelativeAngularVel().Ign();
   #endif
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Vel angular: " << kVelAngularBody);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 0.5, "Vel angular: " << kVelAngularBody);
 
   // Estimate the linear and angular accelerations.
   // Note the the GetRelativeLinearAccel() and AngularAccel() functions
@@ -228,11 +231,11 @@ void UsvDynamicsPlugin::Update()
   const ignition::math::Vector3d kAccelLinearBody =
     (kVelLinearBody - this->prevLinVel) / dt;
   this->prevLinVel = kVelLinearBody;
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel linear: " << kAccelLinearBody);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 0.5, "Accel linear: " << kAccelLinearBody);
   const ignition::math::Vector3d kAccelAngularBody =
     (kVelAngularBody - this->prevAngVel) / dt;
   this->prevAngVel = kVelAngularBody;
-  ROS_DEBUG_STREAM_THROTTLE(0.5, "Accel angular: " << kAccelAngularBody);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 0.5, "Accel angular: " << kAccelAngularBody);
 
   // Create state and derivative of state (accelerations)
   Eigen::VectorXd stateDot = Eigen::VectorXd(6);
@@ -248,8 +251,8 @@ void UsvDynamicsPlugin::Update()
 
   // Added Mass
   const Eigen::VectorXd kAmassVec = -1.0 * this->Ma * stateDot;
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "stateDot: \n" << stateDot);
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "amassVec :\n" << kAmassVec);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "stateDot: \n" << stateDot);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "amassVec :\n" << kAmassVec);
 
   // Coriolis - added mass components
   Cmat(0, 5) = this->paramYdotV * kVelLinearBody.Y();
@@ -264,10 +267,10 @@ void UsvDynamicsPlugin::Update()
   Dmat(3, 3) = this->paramKp + this->paramKpp * std::abs(kVelAngularBody.X());
   Dmat(4, 4) = this->paramMq + this->paramMqq * std::abs(kVelAngularBody.Y());
   Dmat(5, 5) = this->paramNr + this->paramNrr * std::abs(kVelAngularBody.Z());
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "Cmat :\n" << Cmat);
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "Dmat :\n" << Dmat);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "Cmat :\n" << Cmat);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "Dmat :\n" << Dmat);
   const Eigen::VectorXd kDvec = -1.0 * Dmat * state;
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "Dvec :\n" << kDvec);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "Dvec :\n" << kDvec);
 
   // Vehicle frame transform
   tf2::Quaternion vq = tf2::Quaternion();
@@ -280,7 +283,7 @@ void UsvDynamicsPlugin::Update()
   const Eigen::VectorXd kForceSum = kAmassVec + kDvec;
 
   // Forces in fixed frame
-  ROS_DEBUG_STREAM_THROTTLE(1.0, "forceSum :\n" << kForceSum);
+  RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "forceSum :\n" << kForceSum);
 
   // Add dynamic forces/torques to link at CG
   this->link->AddRelativeForce(
@@ -308,15 +311,15 @@ void UsvDynamicsPlugin::Update()
       bpntW = xformV * bpnt;
 
       // Debug
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << ii << "," << jj <<
+      RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "[" << ii << "," << jj <<
           "] grid points" << bpnt.x() << "," << bpnt.y() << "," << bpnt.z());
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << kEuler);
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "in water frame" << bpntW.x() << "," <<
+      RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "v frame euler " << kEuler);
+      RCLCPP_DEBUG_STREAM_THROTTLE(rosNode->get_logger(), clock, 1.0, "in water frame" << bpntW.x() << "," <<
           bpntW.y() << "," << bpntW.z());
 
       // Vertical location of boat grid point in world frame
       const float kDdz = kPose.Pos().Z() + bpntW.z();
-      ROS_DEBUG_STREAM("Z, pose: " << kPose.Pos().Z() << ", bpnt: "
+      RCLCPP_DEBUG_STREAM(rosNode->get_logger(), "Z, pose: " << kPose.Pos().Z() << ", bpnt: "
         << bpntW.z() << ", dd: " << kDdz);
 
       // Find vertical displacement of wave field
@@ -346,7 +349,7 @@ void UsvDynamicsPlugin::Update()
       const float kBuoyForce = CircleSegment(this->paramHullRadius, deltaZ) *
         this->paramBoatLength/(static_cast<float>(this->paramLengthN)) *
         GRAVITY * this->waterDensity;
-      ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
+      RCLCPP_DEBUG_STREAM(rosNode->get_logger(), "buoyForce: " << kBuoyForce);
 
       // Apply force at grid point
       // From web, Appears that position is in the link frame

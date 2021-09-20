@@ -15,7 +15,7 @@
  *
 */
 
-#include <std_msgs/Float64.h>
+#include <std_msgs/msg/float64.hpp>
 #include <functional>
 #include <gazebo/common/Console.hh>
 #include "usv_gazebo_plugins/usv_gazebo_wind_plugin.hh"
@@ -30,6 +30,8 @@ UsvWindPlugin::UsvWindPlugin()
 //////////////////////////////////////////////////
 void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 {
+  this->rosNode = gazebo_ros::Node::Get(_sdf);
+
   if (char* env_dbg = std::getenv("VRX_DEBUG"))
   {
     gzdbg << std::string(env_dbg) <<std::endl;
@@ -171,11 +173,9 @@ void UsvWindPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
 #endif
   this->varVel = 0;
 
-  // Initialize ROS transport.
-  this->rosNode.reset(new ros::NodeHandle());
   this->windSpeedPub =
-      this->rosNode->advertise<std_msgs::Float64>(this->topicWindSpeed, 100);
-  this->windDirectionPub = this->rosNode->advertise<std_msgs::Float64>(
+      this->rosNode->create_publisher<std_msgs::msg::Float64>(this->topicWindSpeed, 100);
+  this->windDirectionPub = this->rosNode->create_publisher<std_msgs::msg::Float64>(
       this->topicWindDirection, 100);
 
   // Listen to the update event. This event is broadcast every
@@ -285,13 +285,13 @@ void UsvWindPlugin::Update()
   // Publishing the wind speed and direction
   if ((currentTime - this->lastPublishTime > publishingBuffer) && this->debug)
   {
-    std_msgs::Float64 windSpeedMsg;
-    std_msgs::Float64 windDirectionMsg;
+    std_msgs::msg::Float64 windSpeedMsg;
+    std_msgs::msg::Float64 windDirectionMsg;
     windSpeedMsg.data = velocity;
     windDirectionMsg.data =
         atan2(this->windDirection[1], this->windDirection[0]) * 180 / M_PI;
-    this->windSpeedPub.publish(windSpeedMsg);
-    this->windDirectionPub.publish(windDirectionMsg);
+    this->windSpeedPub->publish(windSpeedMsg);
+    this->windDirectionPub->publish(windDirectionMsg);
     this->lastPublishTime = currentTime;
   }
 }

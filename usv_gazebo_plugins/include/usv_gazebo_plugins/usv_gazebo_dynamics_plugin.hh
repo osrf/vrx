@@ -26,6 +26,7 @@
 #include <ignition/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
 #include <sdf/sdf.hh>
+#include <gazebo_ros/node.hpp>
 
 #include "wave_gazebo_plugins/Wavefield.hh"
 #include "wave_gazebo_plugins/WavefieldEntity.hh"
@@ -211,6 +212,9 @@ namespace gazebo
 
     /// \brief The wave parameters.
     private: std::shared_ptr<const asv::WaveParameters> waveParams;
+
+    /// \brief Pointer to the ros node.
+    private: gazebo_ros::Node::SharedPtr rosNode;
   };
 }
 

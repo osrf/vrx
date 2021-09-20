@@ -1,45 +1,68 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(usv_gazebo_plugins)
 
-# Set policy for CMake 3.1+. Use OLD policy to let FindBoost.cmake, dependency
-# of gazebo, use quoted variables in if()
-if(POLICY CMP0054)
-  cmake_policy(SET CMP0054 OLD)
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
 endif()
 
-find_package(catkin REQUIRED COMPONENTS gazebo_dev roscpp message_generation xacro wave_gazebo_plugins usv_msgs)
+# Default to C++17
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(gazebo_dev REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(xacro REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(usv_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(wave_gazebo_plugins REQUIRED)
 
-###################################
-## catkin specific configuration ##
-###################################
 
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS message_runtime gazebo_dev roscpp wave_gazebo_plugins
-)
-
-# Plugins require c++11
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-
-include_directories( include
-  ${catkin_INCLUDE_DIRS}
+set(INCLUDE_DIRS include 
+  ${sensor_msgs_INCLUDE_DIRS}
+  ${gazebo_dev_INCLUDE_DIRS} 
+  ${rclcpp_INCLUDE_DIRS} 
+  ${std_msgs_INCLUDE_DIRS} 
   ${EIGEN3_INCLUDE_DIRS}
+  ${wave_gazebo_plugins_INCLUDE_DIRS}
+  ${geometry_msgs_INCLUDE_DIRS}
+  ${usv_msgs_INCLUDE_DIRS}
 )
+
+include_directories(${INCLUDE_DIRS})
+
 link_directories(
-  ${catkin_LIBRARY_DIRS}
+  ${ament_cmake_LIBRARY_DIRS}
+  ${rclcpp_LIBRARY_DIRS}
+  ${gazebo_dev_LIBRARY_DIRS}
+  ${geometry_msgs_LIBRARY_DIRS}
+  ${std_msgs_LIBRARY_DIRS}
+  ${sensor_msgs_LIBRARY_DIRS}
+  ${wave_gazebo_plugins_LIBRARY_DIRS}
+  ${GAZEBO_LIBRARY_DIRS}
 )
 
 ## Declare a C++ library
-add_library(buoyancy_gazebo_plugin
+add_library(buoyancy_gazebo_plugin SHARED
   src/buoyancy_gazebo_plugin.cc
   src/shape_volume.cc
   src/polyhedron_volume.cc
 )
 target_link_libraries(buoyancy_gazebo_plugin
-  ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${Eigen_LIBRARIES}
+  ${wave_gazebo_plugins_LIBRARIES}
 )
 install(TARGETS buoyancy_gazebo_plugin
   ARCHIVE DESTINATION lib
@@ -48,12 +71,14 @@ install(TARGETS buoyancy_gazebo_plugin
 )
 
 ## Declare a C++ library
-add_library(usv_gazebo_dynamics_plugin
+add_library(usv_gazebo_dynamics_plugin SHARED
   src/usv_gazebo_dynamics_plugin.cc
 )
 target_link_libraries(usv_gazebo_dynamics_plugin
-  ${catkin_LIBRARIES}
   ${Eigen_LIBRARIES}
+  ${gazebo_dev_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${wave_gazebo_plugins_LIBRARIES}
 )
 install(TARGETS usv_gazebo_dynamics_plugin
   ARCHIVE DESTINATION lib
@@ -62,12 +87,16 @@ install(TARGETS usv_gazebo_dynamics_plugin
 )
 
 ## Declare a C++ library
-add_library(usv_gazebo_thrust_plugin
+add_library(usv_gazebo_thrust_plugin SHARED
   src/usv_gazebo_thrust_plugin.cc
 )
 target_link_libraries(usv_gazebo_thrust_plugin
-  ${catkin_LIBRARIES}
-  ${Eigen_LIBRARIES}
+  ${ament_cmake_LIBRARIES}
+  ${sensor_msgs_LIBRARIES}
+  ${std_msgs_LIBRARIES}
+  ${GAZEBO_LIBRARIES} 
+  ${gazebo_dev_LIBRARIES}
+  ${rclcpp_LIBRARIES} 
 )
 install(TARGETS usv_gazebo_thrust_plugin
   ARCHIVE DESTINATION lib
@@ -76,12 +105,14 @@ install(TARGETS usv_gazebo_thrust_plugin
 )
 
 ## Declare a C++ library
-add_library(usv_gazebo_wind_plugin
+add_library(usv_gazebo_wind_plugin SHARED
   src/usv_gazebo_wind_plugin.cc
 )
 target_link_libraries(usv_gazebo_wind_plugin
-  ${catkin_LIBRARIES}
+  ${ament_cmake_LIBRARIES}
   ${Eigen_LIBRARIES}
+  ${GAZEBO_LIBRARIES} 
+  ${rclcpp_LIBRARIES}
 )
 install(TARGETS usv_gazebo_wind_plugin
   ARCHIVE DESTINATION lib
@@ -90,13 +121,15 @@ install(TARGETS usv_gazebo_wind_plugin
 )
 
 ## Declare a C++ library
-add_library(usv_gazebo_acoustic_pinger_plugin
+add_library(usv_gazebo_acoustic_pinger_plugin SHARED
   src/acoustic_pinger_plugin.cc
 )
-add_dependencies(usv_gazebo_acoustic_pinger_plugin usv_msgs_generate_messages_cpp)
+
 target_link_libraries(usv_gazebo_acoustic_pinger_plugin
-  ${catkin_LIBRARIES}
+  ${ament_cmake_LIBRARIES}
   ${Eigen_LIBRARIES}
+  ${GAZEBO_LIBRARIES} 
+  ${rclcpp_LIBRARIES}
 )
 install(TARGETS usv_gazebo_acoustic_pinger_plugin
   ARCHIVE DESTINATION lib
@@ -104,26 +137,34 @@ install(TARGETS usv_gazebo_acoustic_pinger_plugin
   RUNTIME DESTINATION bin
 )
 
-set(XACRO_INORDER)
-if(DEFINED ENV{ROS_DISTRO})
-  if($ENV{ROS_DISTRO} STREQUAL "kinetic")
-    set(XACRO_INORDER INORDER)
-  endif()
-endif()
+ament_target_dependencies(usv_gazebo_acoustic_pinger_plugin
+  rclcpp
+  usv_msgs
+  geometry_msgs
+)
+
+ament_export_libraries(buoyancy_gazebo_plugin)
+ament_export_libraries(usv_gazebo_dynamics_plugin)
+ament_export_libraries(usv_gazebo_thrust_plugin)
+ament_export_libraries(usv_gazebo_wind_plugin)
+ament_export_libraries(usv_gazebo_acoustic_pinger_plugin)
 
 # Generate demo world files from xacro and install
 xacro_add_files(
   worlds/buoyancy_plugin_demo.world.xacro
-  ${XACRO_INORDER} INSTALL DESTINATION worlds
+  INSTALL DESTINATION worlds
 )
 install(DIRECTORY worlds/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
+        DESTINATION share/${PROJECT_NAME}/worlds)
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
   # buoyancy plugin test
-  catkin_add_gtest(buoyancy_plugin_test test/buoyancy_test.cc)
+  ament_add_gtest(buoyancy_plugin_test test/buoyancy_test.cc)
   target_link_libraries(buoyancy_plugin_test buoyancy_gazebo_plugin)
 endif()
 
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+        DESTINATION include)
+
+ament_package()

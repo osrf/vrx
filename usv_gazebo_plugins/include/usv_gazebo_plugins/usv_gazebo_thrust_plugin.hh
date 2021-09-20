@@ -18,9 +18,9 @@
 #ifndef USV_GAZEBO_PLUGINS_THRUST_HH
 #define USV_GAZEBO_PLUGINS_THRUST_HH
 
-#include <ros/ros.h>
-#include <std_msgs/Float32.h>
-#include <sensor_msgs/JointState.h>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/float32.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -29,6 +29,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo_ros/node.hpp>
 #include <sdf/sdf.hh>
 
 namespace gazebo
@@ -45,11 +46,11 @@ namespace gazebo
 
     /// \brief Callback for new thrust commands.
     /// \param[in] _msg The thrust message to process.
-    public: void OnThrustCmd(const std_msgs::Float32::ConstPtr &_msg);
+    public: void OnThrustCmd(const std_msgs::msg::Float32::SharedPtr _msg);
 
     /// \brief Callback for new thrust angle commands.
     /// \param[in] _msg The thrust angle message to process.
-    public: void OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg);
+    public: void OnThrustAngle(const std_msgs::msg::Float32::SharedPtr _msg);
 
     /// \brief Maximum abs val of incoming command.
     public: double maxCmd;
@@ -73,7 +74,7 @@ namespace gazebo
     public: std::string cmdTopic;
 
     /// \brief Subscription to thruster commands.
-    public: ros::Subscriber cmdSub;
+    public: rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr cmdSub;
 
     /// \brief If true, thruster will have adjustable angle.
     ///        If false, thruster will have constant angle.
@@ -83,7 +84,7 @@ namespace gazebo
     public: std::string angleTopic;
 
     /// \brief Subscription to thruster commands.
-    public: ros::Subscriber angleSub;
+    public: rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr angleSub;
 
     /// \brief Current, most recent command.
     public: double currCmd;
@@ -252,7 +253,7 @@ namespace gazebo
     public: std::mutex mutex;
 
     /// \brief The ROS node handler used for communications.
-    private: std::unique_ptr<ros::NodeHandle> rosnode;
+    public: gazebo_ros::Node::SharedPtr rosnode;
 
     /// \brief Pointer to the Gazebo world, retrieved when the model is loaded.
     public: physics::WorldPtr world;
@@ -271,10 +272,10 @@ namespace gazebo
     private: event::ConnectionPtr updateConnection;
 
     /// \brief For publishing to /joint_state with propeller state.
-    private: ros::Publisher jointStatePub;
+    private: rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr jointStatePub;
 
     /// \brief The propeller message state.
-    private: sensor_msgs::JointState jointStateMsg;
+    private: sensor_msgs::msg::JointState jointStateMsg;
   };
 }
 

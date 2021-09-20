@@ -43,9 +43,10 @@
  *  
  */
 
-#include <usv_msgs/RangeBearing.h>
 #include <cmath>
 #include <ignition/math/Pose3.hh>
+//#include "rclcpp/qos.hpp"
+#include "rclcpp/logging.hpp"
 #include "usv_gazebo_plugins/acoustic_pinger_plugin.hh"
 
 using namespace gazebo;
@@ -68,14 +69,15 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
   // Store pointer to model for later use.
   this->model = _parent;
+  this->rosNode = gazebo_ros::Node::Get(_sdf);
 
   // From gazebo_ros_color plugin.
   GZ_ASSERT(_parent != nullptr, "Received NULL model pointer");
 
   // Make sure the ROS node for Gazebo has already been initialised.
-  if (!ros::isInitialized())
+  if (!rclcpp::ok())
   {
-    ROS_FATAL_STREAM_NAMED("usv_gazebo_acoustic_pinger_plugin", "A ROS node for"
+    RCLCPP_FATAL(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin", "A ROS node for"
       " Gazebo hasn't been initialised, unable to load plugin. Load the Gazebo "
       "system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
@@ -94,7 +96,7 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ns = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
   {
-    ROS_DEBUG_NAMED("usv_gazebo_acoustic_pinger_plugin",
+    RCLCPP_DEBUG(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin",
       "missing <robotNamespace>, defaulting to %s", ns.c_str());
   }
 
@@ -109,7 +111,7 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     topicName = _sdf->GetElement("topicName")->Get<std::string>();
   else
   {
-    ROS_INFO_NAMED("usv_gazebo_acoustic_pinger_plugin",
+    RCLCPP_INFO(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin",
       "missing <topicName>, defaulting to %s", topicName.c_str());
   }
 
@@ -122,7 +124,7 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
   else
   {
-    ROS_INFO_NAMED("usv_gazebo_acoustic_pinger_plugin",
+    RCLCPP_INFO(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin",
       "missing <setPositionTopicName>, defaulting to %s", topicName.c_str());
   }
 
@@ -150,13 +152,13 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     }
     else
     {
-      ROS_WARN("usv_gazebo_acoustic_pinger_plugin: "
+      RCLCPP_WARN(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin: "
                "The rangeNoise SDF element must contain noise tag");
     }
   }
   else
   {
-    ROS_INFO("usv_gazebo_acoustic_pinger_plugin: "
+    RCLCPP_INFO(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin: "
              "No rangeNoise tag found, no noise added to measurements");
   }
 
@@ -173,13 +175,13 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     }
     else
     {
-      ROS_WARN("usv_gazebo_acoustic_pinger_plugin: "
+      RCLCPP_WARN(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin: "
                "The bearingNoise SDF element must contain noise tag");
     }
   }
   else
   {
-    ROS_INFO("usv_gazebo_acoustic_pinger_plugin: "
+    RCLCPP_INFO(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin: "
              "No bearingNoise tag found, no noise added to measurements");
   }
 
@@ -195,26 +197,23 @@ void AcousticPinger::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     }
     else
     {
-      ROS_WARN("usv_gazebo_acoustic_pinger_plugin: "
+      RCLCPP_WARN(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin: "
                "The elevationNoise SDF element must contain noise tag");
     }
   }
   else
   {
-    ROS_INFO("usv_gazebo_acoustic_pinger_plugin: "
+    RCLCPP_INFO(rosNode->get_logger(), "usv_gazebo_acoustic_pinger_plugin: "
              "No elevationNoise tag found, no noise added to measurements");
   }
 
-  // initialise the ros handle.
-  this->rosNodeHandle.reset(new ros::NodeHandle(ns));
-
   // setup the publisher.
   this->rangeBearingPub =
-    this->rosNodeHandle->advertise<usv_msgs::RangeBearing>(
+    this->rosNode->create_publisher<usv_msgs::msg::RangeBearing>(
       std::string(topicName), 1);
 
-  this->setPositionSub = this->rosNodeHandle->subscribe(
-    setPositionTopicName, 1, &AcousticPinger::PingerPositionCallback, this);
+  this->setPositionSub = this->rosNode->create_subscription<geometry_msgs::msg::Vector3>(
+    setPositionTopicName, 1, std::bind(&AcousticPinger::PingerPositionCallback, this, std::placeholders::_1));
 
   // Initialise the time with world time.
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -286,9 +285,9 @@ void AcousticPinger::Update()
       elevation  = this->elevationNoise->Apply(elevation);
 
     // Publish a ROS message.
-    usv_msgs::RangeBearing msg;
+    usv_msgs::msg::RangeBearing msg;
     // generate ROS header. Sequence number is automatically populated.
-    msg.header.stamp = ros::Time(this->lastUpdateTime.sec,
+    msg.header.stamp = rclcpp::Time(this->lastUpdateTime.sec,
       this->lastUpdateTime.nsec);
     // frame_id is neccesary for finding the tf transform.  The frame_id is
     // specified in the sdf file.
@@ -299,13 +298,13 @@ void AcousticPinger::Update()
     msg.elevation = elevation;
 
     // publish range and bearing message.
-    this->rangeBearingPub.publish(msg);
+    this->rangeBearingPub->publish(msg);
   }
 }
 
 //////////////////////////////////////////////////
 void AcousticPinger::PingerPositionCallback(
-  const geometry_msgs::Vector3ConstPtr &_pos)
+  const geometry_msgs::msg::Vector3::SharedPtr _pos)
 {
   // Mutex added to prevent simulataneous reads and writes of mutex.
   std::lock_guard<std::mutex> lock(this->mutex);
