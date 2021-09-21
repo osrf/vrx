@@ -2,7 +2,7 @@
 <!-- World containing sydneyregatta model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="vrx_scan_dock_deliver">
-    <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/vrx/2022/sydneyregatta.xacro" />
     <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>

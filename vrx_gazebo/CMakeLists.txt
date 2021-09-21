@@ -351,23 +351,24 @@ endif()
 
 # Generate world files from xacro and install
 xacro_add_files(
-  worlds/dock.world.xacro
-  worlds/example_course.world.xacro
-  worlds/example_course_2019.world.xacro
-  worlds/gymkhana.world.xacro
-  worlds/navigation_task.world.xacro
-  worlds/ocean.world.xacro
-  worlds/perception_task.world.xacro
-  worlds/scan_and_dock.world.xacro
-  worlds/scan_dock_deliver.world.xacro
-  worlds/sandisland.world.xacro
-  worlds/stationkeeping_task.world.xacro
-  worlds/sydneyregatta.world.xacro
-  worlds/wayfinding_task.world.xacro
-  worlds/wildlife_task.world.xacro
-  worlds/wind_test.world.xacro
+  worlds/vrx/2019/dock.world.xacro
+  worlds/vrx/2019/example_course_2019.world.xacro
+  worlds/vrx/2019/navigation_task.world.xacro
+  worlds/vrx/2019/ocean.world.xacro
+  worlds/vrx/2019/sandisland.world.xacro
+  worlds/vrx/2019/scan_and_dock.world.xacro
+  worlds/vrx/2019/wind_test.world.xacro
+  worlds/vrx/2022/example_course.world.xacro
+  worlds/vrx/2022/gymkhana.world.xacro
+  worlds/vrx/2022/perception_task.world.xacro
+  worlds/vrx/2022/scan_dock_deliver.world.xacro
+  worlds/vrx/2022/stationkeeping_task.world.xacro
+  worlds/vrx/2022/sydneyregatta.world.xacro
+  worlds/vrx/2022/wayfinding_task.world.xacro
+  worlds/vrx/2022/wildlife_task.world.xacro
   ${XACRO_INORDER} INSTALL DESTINATION worlds
 )
+
 # Generate obstacle course
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/models/robotx_2018_qualifying_avoid_obstacles_buoys/model.sdf

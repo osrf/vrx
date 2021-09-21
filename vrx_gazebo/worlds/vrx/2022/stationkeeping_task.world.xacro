@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
-  <world name="vrx_wayfinding">
-    <xacro:include filename="$(find vrx_gazebo)/worlds/sydneyregatta.xacro" />
+  <world name="vrx_stationkeeping">
+    <xacro:include filename="$(find vrx_gazebo)/worlds/vrx/2022/sydneyregatta.xacro" />
     <xacro:sydneyregatta />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
@@ -19,25 +19,13 @@
       </wind_objs>
     </xacro:usv_wind_gazebo>
 
-    <plugin name="wayfinding_scoring_plugin"
-            filename="libwayfinding_scoring_plugin.so">
+
+  <plugin name="stationkeeping_scoring_plugin"
+          filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>
-      <task_name>wayfinding</task_name>
+      <task_name>stationkeeping</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
-      <waypoints>
-        <!-- Approx. starting point of wamv -->
-        <waypoint>
-          <pose>-33.7226766699 150.6740630167 1.21756121843</pose>
-        </waypoint>
-        <!-- A waypoint -->
-        <waypoint>
-          <pose>-33.7220832884 150.67379127877 1.0</pose>
-        </waypoint>
-        <!-- Another waypoint -->
-        <waypoint>
-          <pose>-33.7226013209 150.67504609858 1.0</pose>
-        </waypoint>
-      </waypoints>
+      <goal_pose>-33.722702498 150.67402097002 3.14159 </goal_pose>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
