@@ -28,14 +28,14 @@
     <!-- The navigation course -->
     <include>
       <uri>model://short_navigation_course0</uri>
-      <pose>524 -186 0 0 0 1.7</pose>
+      <pose>-524 186 0 0 0 -1.44</pose>
     </include>
 
     <!-- The obstacle course -->
     <include>
       <name>buoys</name>
       <uri>model://obstacle_course</uri>
-      <pose>477 -275 0 0 0 -.6</pose>
+      <pose>-477 275 0 0 0 2.54</pose>
     </include>
 
     <!-- Top-level scoring plugin -->
@@ -108,7 +108,7 @@
       <!-- Disable heading error -->
       <head_error_on>false</head_error_on>
       <!-- Goal as Cartesian coordinates -->
-      <goal_pose_cart>483 -295.5 -5</goal_pose_cart>
+      <goal_pose_cart>-483 295.5 0</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>

@@ -7,6 +7,8 @@
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves scale="2.5"/>
+
+    <!--Wind-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
     <xacro:usv_wind_gazebo>
       <wind_objs>
@@ -21,47 +23,46 @@
     <!-- The light buoy -->
     <include>
       <uri>model://robotx_light_buoy</uri>
-      <pose>511 -218 0.25 0 0 0</pose>
+      <pose>-511 218 0.25 0 0 3.14</pose>
     </include>
 
     <!-- The 2022 dock with the placards -->
     <include>
       <uri>model://dock_2022</uri>
-      <pose>554 -233 0 0 0 0</pose>
+      <pose>-554 233 0 0 0 3.14</pose>
     </include>
 
     <!-- The VRX animal buoys -->
     <include>
       <name>crocodile_buoy</name>
-      <pose>552 -170 0 0 0 0</pose>
+      <pose>-552 170 0 0 0 0</pose>
       <uri>model://crocodile_buoy</uri>
     </include>
 
     <include>
       <name>platypus_buoy</name>
-      <pose>512 -170 0 0 0 0</pose>
+      <pose>-512 170 0 0 0 0</pose>
       <uri>model://platypus_buoy</uri>
     </include>
 
     <include>
       <name>turtle_buoy</name>
-      <pose>472 -170 0 0 0 0</pose>
+      <pose>-472 170 0 0 0 0</pose>
       <uri>model://turtle_buoy</uri>
     </include>
 
     <!-- The navigation course -->
     <include>
       <uri>model://short_navigation_course0</uri>
-      <pose>475 -185 0 0 0 1.0</pose>
+      <pose>-475 185 0 0 0 -2.14</pose>
     </include>
 
     <!-- The obstacle course -->
     <include>
       <name>buoys</name>
       <uri>model://obstacle_course</uri>
-      <pose>420 -295 0 0 0 1.1</pose>
+      <pose>-420 295 0 0 0 -2.04</pose>
     </include>
-
 
   </world>
 </sdf>

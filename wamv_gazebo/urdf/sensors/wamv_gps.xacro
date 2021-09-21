@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3 R:=0 P:=0 Y:=0 lat:=-33.724223 lon:=150.679736 elev:=0.0 update_rate:=15">
+  <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3
+				       R:=0 P:=0 Y:=0 update_rate:=15">
     <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">
         <geometry>
@@ -21,7 +22,8 @@
       </collision>
       <inertial>
         <mass value="1"/>
-        <inertia ixx="0.006458" ixy="0.0" ixz="0.0" iyy="0.006458" iyz="0.0" izz="0.01125"/>
+        <inertia ixx="0.006458" ixy="0.0" ixz="0.0"
+		 iyy="0.006458" iyz="0.0" izz="0.01125"/>
       </inertial>
     </link>
     <joint name="${namespace}/${name}_joint" type="revolute">
@@ -45,11 +47,12 @@
              See Issue #64 in VRX project for details
              https://bitbucket.org/osrf/vrx/issues/64 -->
         <velocityTopicName>${namespace}/${sensor_namespace}gps/gps/fix_velocity</velocityTopicName>
-        <!-- Location of origin of Gazebo Sand Island map -->
-        <referenceLatitude>${lat}</referenceLatitude>
-        <referenceLongitude>${lon}</referenceLongitude>
-        <referenceAltitude>${elev}</referenceAltitude>
-        <referenceHeading>270</referenceHeading>
+        <!-- Tell the plugin to use the spherical_coordiantes parameters
+	     from SDF.
+	     https://github.com/tu-darmstadt-ros-pkg/hector_gazebo/blob/melodic-devel/hector_gazebo_plugins/src/gazebo_ros_gps.cpp#L101
+	-->
+	<useWorldSphericalCoordinates>true</useWorldSphericalCoordinates>
+
         <offset>0.0 0.0 0.0</offset>
         <drift>0.0 0.0 0.0</drift>
         <gaussianNoise>0 0 0</gaussianNoise>
