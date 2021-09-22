@@ -13,14 +13,14 @@
   <arg name="verbose" default="false"/>
 
   <!-- Resume the logic in empty_world.launch, over-riding a number of arguments -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find wave_gazebo)/worlds/ocean.world" />
-    <arg name="paused" value="$(arg paused)" />
-    <arg name="use_sim_time" value="$(arg use_sim_time)" />
-    <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)" />
-    <arg name="gui" value="$(arg gui)" />
-    <arg name="recording" value="$(arg recording)" />
-    <arg name="debug" value="$(arg debug)" />
-    <arg name="verbose" value="$(arg verbose)" />
+  <include file="$(find-pkg-share gazebo_ros)/launch/empty_world.launch">
+    <arg name="world" value="$(find-pkg-share wave_gazebo)/worlds/ocean.world" />
+    <arg name="pause" value="$(var paused)" />
+    <arg name="use_sim_time" value="$(var use_sim_time)" />
+    <arg name="extra_gazebo_args" value="$(var extra_gazebo_args)" />
+    <arg name="gui" value="$(var gui)" />
+    <arg name="recording" value="$(var recording)" />
+    <arg name="debug" value="$(var debug)" />
+    <arg name="verbose" value="$(var verbose)" />
   </include>
 </launch>

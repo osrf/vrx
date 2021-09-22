@@ -36,32 +36,37 @@
   <arg name="ground_truth_enabled" default="true" />
 
   <!-- Resume the logic in empty_world.launch, over-riding a number of arguments -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find wave_gazebo)/worlds/ocean_buoys.world" />
-    <arg name="paused" value="$(arg paused)" />
-    <arg name="use_sim_time" value="$(arg use_sim_time)" />
-    <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)" />
-    <arg name="gui" value="$(arg gui)" />
-    <arg name="recording" value="$(arg recording)" />
-    <arg name="debug" value="$(arg debug)" />
-    <arg name="verbose" value="$(arg verbose)" />
+  <include file="$(find-pkg-share gazebo_ros)/launch/empty_world.launch">
+    <arg name="world" value="$(find-pkg-share wave_gazebo)/worlds/ocean_buoys.world" />
+    <arg name="pause" value="$(var paused)" />
+    <arg name="use_sim_time" value="$(var use_sim_time)" />
+    <arg name="extra_gazebo_args" value="$(var extra_gazebo_args)" />
+    <arg name="gui" value="$(var gui)" />
+    <arg name="recording" value="$(var recording)" />
+    <arg name="debug" value="$(var debug)" />
+    <arg name="verbose" value="$(var verbose)" />
   </include>
 
   <!-- Load robot model -->
-  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
-  <param name="$(arg namespace)/robot_description"
-         command="$(find xacro)/xacro '$(arg urdf)'
-         thruster_config:=$(arg thrust_config)
-         camera_enabled:=$(arg camera_enabled)
-         gps_enabled:=$(arg gps_enabled)
-         imu_enabled:=$(arg imu_enabled)
-         lidar_enabled:=$(arg lidar_enabled)
-         ground_truth_enabled:=$(arg ground_truth_enabled)
-         namespace:=$(arg namespace) "/>
+  <arg name="urdf" default="$(find-pkg-share wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
+  <arg name="cmd" 
+      default="$(exec-in-pkg xacro xacro) '$(var urdf)' 
+      > $(find-pkg-share wamv_gazebo)/urdf/robot_description
+      thruster_config:=$(var thrust_config)
+      camera_enabled:=$(var camera_enabled)
+      gps_enabled:=$(var gps_enabled)
+      imu_enabled:=$(var imu_enabled)
+      lidar_enabled:=$(var lidar_enabled)
+      ground_truth_enabled:=$(var ground_truth_enabled)
+      namespace:=$(var namespace)"/>
 
-  <!-- Spawn WAMV model in Gazebo -->
-  <node name="spawn_model_wamv" pkg="gazebo_ros" type="spawn_model"
-  args="-x $(arg x) -y $(arg y) -z $(arg z)
-        -R $(arg R) -P $(arg P) -Y $(arg Y)
-        -urdf -param $(arg namespace)/robot_description -model wamv "/>
+  <executable cmd="$(var cmd)" name="robot_description" output="screen" shell="true" />
+
+  <arg name="generated_urdf" default="$(find-pkg-share wamv_gazebo)/urdf/robot_description"/>
+
+  <!-- Spawn model in Gazebo -->
+  <node name="spawn_entity" pkg="gazebo_ros" exec="spawn_entity.py" respawn="false" output="screen"
+  args="-x $(var x) -y $(var y) -z $(var z)
+        -R $(var R) -P $(var P) -Y $(var Y)
+        -entity $(var namespace) -file $(var generated_urdf)"/>
 </launch>
