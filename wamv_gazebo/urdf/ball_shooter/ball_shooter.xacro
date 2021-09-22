@@ -8,7 +8,7 @@
              be parallel to the ground -->
         <origin xyz="0 0 0" rpy="0 0.261799 0" />
         <geometry>
-          <mesh filename="package://vrx_gazebo/models/ball_shooter/meshes/ball_shooter.dae"/>
+          <mesh filename="file://$(find vrx_gazebo)/models/ball_shooter/meshes/ball_shooter.dae"/>
         </geometry>
       </visual>
       <!-- Uncomment to see the pose where the ball is teleported -->

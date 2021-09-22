@@ -5,7 +5,7 @@
     <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">
         <geometry>
-          <mesh filename="package://wamv_gazebo/models/gps/mesh/gps.dae"/>
+          <mesh filename="file://$(find wamv_gazebo)/models/gps/mesh/gps.dae"/>
         </geometry>
       </visual>
       <collision name="${name}_collision_base">

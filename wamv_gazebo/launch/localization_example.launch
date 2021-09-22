@@ -2,15 +2,15 @@
 <!-- Example of ROS localization using the example wamv with sensors -->
 <launch>
   <!-- Publishes static joint transforms (lidar, cameras, etc) to /tf -->
-  <node ns="wamv" pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub"/>
+  <node ns="wamv" pkg="robot_state_publisher" exec="robot_state_publisher" name="rob_st_pub"/>
 
   <!-- Publishes revolute joint static transforms (gps and imu) to /tf -->
-  <node ns="wamv" pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
+  <node ns="wamv" pkg="joint_state_publisher" exec="joint_state_publisher" name="joint_state_publisher">
     <param name="gui" value="false" />
   </node>
 
   <!-- Kalman filter fusing imu and gps into combined odometry/tf -->
-  <node ns="wamv/robot_localization" pkg="robot_localization" type="ekf_localization_node"
+  <node ns="wamv/robot_localization" pkg="robot_localization" exec="ekf_localization_node"
         name="ekf_localization" clear_params="false">
     <param name="sensor_timeout" value="2.0"/>
     <param name="two_d_mode" value="false"/>
@@ -43,7 +43,7 @@
   </node>
 
   <!-- Produces local odometry from GPS to be used in Kalman filter -->
-  <node ns="wamv/robot_localization" pkg="robot_localization" type="navsat_transform_node"
+  <node ns="wamv/robot_localization" pkg="robot_localization" exec="navsat_transform_node"
         name="navsat_transform_node" respawn="true" output="screen">      
     <param name="tf_prefix" value="wamv"/> 
     <param name="frequency" value="60"/>

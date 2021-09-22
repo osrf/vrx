@@ -40,7 +40,7 @@
       <visual name="${name}_visual">
         <origin xyz="0 0 -0.035" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://vrx_gazebo/models/3d_lidar/mesh/3d_lidar.dae"/>
+          <mesh filename="file://$(find vrx_gazebo)/models/3d_lidar/mesh/3d_lidar.dae"/>
         </geometry>
       </visual>
       <collision name="${name}_collision">
@@ -98,7 +98,7 @@
       <visual name="${name}_post_arm_visual">
         <origin xyz="-0.038 0 -0.003" rpy="${radians(-60)} 0 ${-pi/2}"/>
         <geometry>
-          <mesh filename="package://vrx_gazebo/models/sensor_post/mesh/sensor_post_arm.dae"/>
+          <mesh filename="file://$(find vrx_gazebo)/models/sensor_post/mesh/sensor_post_arm.dae"/>
         </geometry>
       </visual>
       <collision name="${name}_post_arm_collision">

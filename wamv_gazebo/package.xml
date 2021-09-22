@@ -12,7 +12,7 @@
   <url type="bugtracker">http://github.com/osrf/vrx/issues</url>
   <author email="briansbingham@gmail.com">Brian Bingham</author>
   <author email="caguero@osrfoundation.org">Carlos Aguero</author>
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>gazebo_plugins</depend>
   <depend>hector_gazebo_plugins</depend>
   <depend>robot_localization</depend>
@@ -20,4 +20,7 @@
   <depend>velodyne_gazebo_plugins</depend>
   <depend>wamv_description</depend>
   <depend>xacro</depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
