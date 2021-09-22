@@ -18,9 +18,9 @@
 #ifndef VRX_GAZEBO_LIGHT_BUOY_PLUGIN_HH_
 #define VRX_GAZEBO_LIGHT_BUOY_PLUGIN_HH_
 
-#include <ros/ros.h>
-#include <std_msgs/ColorRGBA.h>
-#include <std_msgs/Empty.h>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/color_rgba.hpp>
+#include <std_msgs/msg/empty.hpp>
 #include <light_buoy_colors.pb.h>
 #include <array>
 #include <cstdint>
@@ -29,6 +29,7 @@
 #include <utility>
 #include <vector>
 #include <gazebo/gazebo.hh>
+#include <gazebo_ros/node.hpp>
 #include <sdf/sdf.hh>
 
 namespace gazebo
@@ -79,13 +80,13 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   public: void Load(gazebo::rendering::VisualPtr _parent,
                     sdf::ElementPtr _sdf);
 
-  /// \brief Creates a std_msgs::ColorRGBA message from 4 doubles.
+  /// \brief Creates a std_msgs::msg::ColorRGBA message from 4 doubles.
   /// \param[in] _r Red.
   /// \param[in] _g Green.
   /// \param[in] _b Blue.
   /// \param[in] _a Alpha.
   /// \return The ColorRGBA message.
-  private: static std_msgs::ColorRGBA CreateColor(const double _r,
+  private: static std_msgs::msg::ColorRGBA CreateColor(const double _r,
                                                   const double _g,
                                                   const double _b,
                                                   const double _a);
@@ -104,7 +105,7 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
 
   /// \brief ROS callback for generating a new color pattern.
   /// \param[in] _msg Not used.
-  private: void ChangePattern(const std_msgs::Empty::ConstPtr &_msg);
+  private: void ChangePattern(const std_msgs::msg::Empty::SharedPtr _msg);
 
   /// \brief Gazebo callback for changing light to a specific color pattern.
   /// \param[in] _msg New color sequence.
@@ -115,7 +116,7 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
 
   /// \def Colors_t
   /// \brief A pair of RGBA color and its name as a string.
-  private: using Colors_t = std::pair<std_msgs::ColorRGBA, std::string>;
+  private: using Colors_t = std::pair<std_msgs::msg::ColorRGBA, std::string>;
 
   /// \def Pattern_t
   /// \brief The current pattern to display, pattern[3] and pattern[4]
@@ -142,10 +143,10 @@ class LightBuoyPlugin : public gazebo::VisualPlugin
   private: bool shuffleEnabled = true;
 
   /// \brief Subscriber to generate and display a new color sequence.
-  private: ros::Subscriber changePatternSub;
+  private: rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr changePatternSub;
 
-  /// \brief ROS Node handle.
-  private: ros::NodeHandle nh;
+  /// \brief Pointer to the ROS node.
+  private: gazebo_ros::Node::SharedPtr node;
 
   // \brief Gazebo Node
   private: gazebo::transport::NodePtr gzNode;

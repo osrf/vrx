@@ -18,11 +18,12 @@
 #ifndef VRX_GAZEBO_BALL_SHOOTER_PLUGIN_HH_
 #define VRX_GAZEBO_BALL_SHOOTER_PLUGIN_HH_
 
-#include <ros/ros.h>
-#include <std_msgs/Empty.h>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/empty.hpp>
 #include <memory>
 #include <mutex>
 #include <gazebo/gazebo.hh>
+#include <gazebo_ros/node.hpp>
 #include <sdf/sdf.hh>
 
 namespace gazebo
@@ -76,13 +77,13 @@ class BallShooterPlugin : public ModelPlugin
 
   /// \brief Callback function called when receiving a new fire message.
   /// \param[in] _msg Unused.
-  private: void OnFire(const std_msgs::Empty::ConstPtr &_msg);
+  private: void OnFire(const std_msgs::msg::Empty::SharedPtr _msg);
 
   /// \brief Protect some member variables used in the callback.
   private: std::mutex mutex;
 
-  /// \brief Nodehandle used to integrate with the ROS system.
-  private: std::unique_ptr<ros::NodeHandle> rosNodeHandle;
+  /// \brief Pointer to the ROS node.
+  private: gazebo_ros::Node::SharedPtr node;
 
   /// \brief Number of shots allowed.
   private: unsigned int remainingShots = UINT_MAX;
@@ -91,7 +92,7 @@ class BallShooterPlugin : public ModelPlugin
   private: double shotForce = 250;
 
   /// \brief Subscribes to the topic that shoots a new projectile.
-  private: ros::Subscriber fireSub;
+  private: rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr fireSub;
 
   /// \brief Pointer to the projectile model.
   private: physics::ModelPtr projectileModel;

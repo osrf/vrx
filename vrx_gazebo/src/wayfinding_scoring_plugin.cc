@@ -15,11 +15,6 @@
  *
 */
 
-#include <geographic_msgs/GeoPoseStamped.h>
-#include <geographic_msgs/GeoPath.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Float64MultiArray.h>
-#include <std_msgs/String.h>
 #include <cmath>
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/SphericalCoordinates.hh>
@@ -95,31 +90,27 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     waypointElem = waypointElem->GetNextElement("waypoint");
   }
 
-  // Setup ROS node and publisher
-  this->rosNode.reset(new ros::NodeHandle());
+  // Setup the publishers
   if (_sdf->HasElement("waypoints_topic"))
   {
     this->waypointsTopic = _sdf->Get<std::string>("waypoints_topic");
   }
-  this->waypointsPub =
-    this->rosNode->advertise<geographic_msgs::GeoPath>(
-      this->waypointsTopic, 10, true);
+  this->waypointsPub = this->node->create_publisher<geographic_msgs::msg::GeoPath>(
+    this->waypointsTopic, 10);
 
   if (_sdf->HasElement("min_errors_topic"))
   {
     this->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
   }
-  this->minErrorsPub =
-    this->rosNode->advertise<std_msgs::Float64MultiArray>(
-      this->minErrorsTopic, 100);
+  this->minErrorsPub = this->node->create_publisher<std_msgs::msg::Float64MultiArray>(
+    this->minErrorsTopic, 100);
 
   if (_sdf->HasElement("mean_error_topic"))
   {
     this->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
   }
-  this->meanErrorPub =
-    this->rosNode->advertise<std_msgs::Float64>(
-      this->meanErrorTopic, 100);
+  this->meanErrorPub = this->node->create_publisher<std_msgs::msg::Float64>(
+    this->meanErrorTopic, 100);
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&WayfindingScoringPlugin::Update, this));
@@ -168,8 +159,8 @@ void WayfindingScoringPlugin::Update()
   if (this->ScoringPlugin::TaskState() != "running")
     return;
 
-  std_msgs::Float64MultiArray minErrorsMsg;
-  std_msgs::Float64 meanErrorMsg;
+  std_msgs::msg::Float64MultiArray minErrorsMsg;
+  std_msgs::msg::Float64 meanErrorMsg;
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
@@ -211,7 +202,7 @@ void WayfindingScoringPlugin::Update()
   this->meanError = currentTotalError / this->localWaypoints.size();
 
   // Set up multi array dimensions
-  minErrorsMsg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  minErrorsMsg.layout.dim.push_back(std_msgs::msg::MultiArrayDimension());
   minErrorsMsg.layout.dim[0].label = "minimum errors";
   minErrorsMsg.layout.dim[0].size = this->localWaypoints.size();
   minErrorsMsg.layout.dim[0].stride = this->localWaypoints.size();
@@ -222,8 +213,8 @@ void WayfindingScoringPlugin::Update()
   // Publish at 1 Hz.
   if (this->timer.GetElapsed() >= gazebo::common::Time(1.0))
   {
-    this->minErrorsPub.publish(minErrorsMsg);
-    this->meanErrorPub.publish(meanErrorMsg);
+    this->minErrorsPub->publish(minErrorsMsg);
+    this->meanErrorPub->publish(meanErrorMsg);
     this->timer.Reset();
     this->timer.Start();
   }
@@ -235,10 +226,10 @@ void WayfindingScoringPlugin::Update()
 void WayfindingScoringPlugin::PublishWaypoints()
 {
   gzmsg << "<WayfindingScoringPlugin> Publishing Waypoints" << std::endl;
-  geographic_msgs::GeoPoseStamped wp_msg;
-  geographic_msgs::GeoPath path_msg;
+  geographic_msgs::msg::GeoPoseStamped wp_msg;
+  geographic_msgs::msg::GeoPath path_msg;
 
-  path_msg.header.stamp = ros::Time::now();
+  path_msg.header.stamp = node->now();
 
   for (auto wp : this->sphericalWaypoints)
   {
@@ -253,10 +244,10 @@ void WayfindingScoringPlugin::PublishWaypoints()
     wp_msg.pose.orientation.z = orientation.Z();
     wp_msg.pose.orientation.w = orientation.W();
 
-    wp_msg.header.stamp = ros::Time::now();
+    wp_msg.header.stamp = node->now();
     path_msg.poses.push_back(wp_msg);
   }
-  this->waypointsPub.publish(path_msg);
+  this->waypointsPub->publish(path_msg);
 }
 
 //////////////////////////////////////////////////

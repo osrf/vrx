@@ -23,31 +23,32 @@
 /////////////////////////////////////////////////
 ColorSequenceChecker::ColorSequenceChecker(
   const std::vector<std::string> &_expectedColors,
-  const std::string &_rosNameSpace, const std::string &_rosColorSequenceService)
+  const std::string &_rosColorSequenceService,
+  gazebo_ros::Node::SharedPtr _node)
   : expectedSequence(_expectedColors),
-    ns(_rosNameSpace),
-    colorSequenceService(_rosColorSequenceService)
+    colorSequenceService(_rosColorSequenceService),
+    node(_node)
 {
   // Quit if ros plugin was not loaded
-  if (!ros::isInitialized())
+  if (!rclcpp::ok())
   {
-    ROS_ERROR("ROS was not initialized.");
+    RCLCPP_ERROR(node->get_logger(), "ROS was not initialized.");
     return;
   }
-  this->nh = ros::NodeHandle(this->ns);
 }
 
 /////////////////////////////////////////////////
 void ColorSequenceChecker::Enable()
 {
-  this->colorSequenceServer = this->nh.advertiseService(
-    this->colorSequenceService, &ColorSequenceChecker::OnColorSequence, this);
+  this->colorSequenceServer = this->node->create_service<vrx_gazebo::srv::ColorSequence>
+      (this->colorSequenceService, 
+      std::bind(&ColorSequenceChecker::OnColorSequence, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 /////////////////////////////////////////////////
 void ColorSequenceChecker::Disable()
 {
-  this->colorSequenceServer.shutdown();
+  this->colorSequenceServer.reset();
 }
 
 /////////////////////////////////////////////////
@@ -64,20 +65,17 @@ bool ColorSequenceChecker::Correct() const
 
 /////////////////////////////////////////////////
 bool ColorSequenceChecker::OnColorSequence(
-  ros::ServiceEvent<vrx_gazebo::ColorSequence::Request,
-    vrx_gazebo::ColorSequence::Response> &_event)
+  const std::shared_ptr<vrx_gazebo::srv::ColorSequence::Request> req,
+          std::shared_ptr<vrx_gazebo::srv::ColorSequence::Response> res)
 {
-  ROS_INFO_NAMED("ColorSequenceChecker", "Color sequence submission received");
-
-  const vrx_gazebo::ColorSequence::Request &req = _event.getRequest();
-  vrx_gazebo::ColorSequence::Response &res = _event.getResponse();
+  RCLCPP_INFO(node->get_logger(), "Color sequence submission received");
 
   {
     // Sanity check: Only one color sequence submission is allowed.
     if (this->colorSequenceReceived)
     {
-      ROS_ERROR("The color sequence has already been submitted");
-      res.success = false;
+      RCLCPP_ERROR(node->get_logger(), "The color sequence has already been submitted");
+      res->success = false;
       return false;
     }
 
@@ -87,14 +85,14 @@ bool ColorSequenceChecker::OnColorSequence(
   // Sanity check: Make sure that we have the expected color sequence.
   if (this->expectedSequence.size() != 3u)
   {
-    ROS_ERROR("The color sequence is not of size 3 - will be ignored.");
-    res.success = false;
+    RCLCPP_ERROR(node->get_logger(), "The color sequence is not of size 3 - will be ignored.");
+    res->success = false;
     return false;
   }
 
-  std::string color1 = req.color1;
-  std::string color2 = req.color2;
-  std::string color3 = req.color3;
+  std::string color1 = req->color1;
+  std::string color2 = req->color2;
+  std::string color3 = req->color3;
 
   std::transform(color1.begin(), color1.end(), color1.begin(), ::tolower);
   std::transform(color2.begin(), color2.end(), color2.begin(), ::tolower);
@@ -107,17 +105,17 @@ bool ColorSequenceChecker::OnColorSequence(
       color3 == this->expectedSequence[2];
   if (this->correctSequence)
   {
-    ROS_INFO_NAMED("ColorSequenceChecker", "Received color sequence is "
+    RCLCPP_INFO(node->get_logger(), "Received color sequence is "
       "correct.  Additional points will be scored.");
   }
   else
   {
-    ROS_INFO_NAMED("ColorSequenceChecker", "Received color sequence is "
+    RCLCPP_INFO(node->get_logger(), "Received color sequence is "
       "not correct. No additional points.");
   }
 
   // The submission is considered correct even if the sequence is wrong.
-  res.success = true;
+  res->success = true;
   return true;
 }
 
@@ -127,36 +125,26 @@ DockChecker::DockChecker(const std::string &_name,
   const std::string &_externalActivationTopic,
   const double _minDockTime,
   const bool _dockAllowed, const std::string &_worldName,
-  const std::string &_rosNameSpace, const std::string &_announceSymbol,
-  const std::string &_gzSymbolTopic)
+  const std::string &_announceSymbol,
+  const std::string &_gzSymbolTopic,
+  gazebo_ros::Node::SharedPtr _node)
   : name(_name),
     internalActivationTopic(_internalActivationTopic),
     externalActivationTopic(_externalActivationTopic),
     minDockTime(_minDockTime),
     dockAllowed(_dockAllowed),
-    ns(_rosNameSpace),
-    gzSymbolTopic(_gzSymbolTopic)
+    gzSymbolTopic(_gzSymbolTopic),
+    node(_node)
 {
   this->timer.Stop();
   this->timer.Reset();
 
   this->announceSymbol.data = _announceSymbol;
 
-  this->node.reset(new gazebo::transport::Node());
-  this->node->Init();
-
-  // Subscriber to receive ContainPlugin updates.
-#if GAZEBO_MAJOR_VERSION >= 8
   this->ignNode.Subscribe(this->internalActivationTopic,
     &DockChecker::OnInternalActivationEvent, this);
   this->ignNode.Subscribe(this->externalActivationTopic,
     &DockChecker::OnExternalActivationEvent, this);
-#else
-  this->containSub = this->node->Subscribe(this->internalActivationTopic,
-    &DockChecker::OnInternalActivationEvent, this);
-  this->containSub = this->node->Subscribe(this->externalActivationTopic,
-    &DockChecker::OnExternalActivationEvent, this);
-#endif
 }
 
 /////////////////////////////////////////////////
@@ -181,23 +169,21 @@ bool DockChecker::Allowed() const
 void DockChecker::AnnounceSymbol()
 {
   // Override the docks own sdf parameters
-  this->dockPlacardPub = this->node->Advertise
-    <dock_placard_msgs::msgs::DockPlacard>(gzSymbolTopic);
+  this->dockPlacardPub = this->node->create_publisher
+    <dock_placard_msgs::msgs::DockPlacard>(gzSymbolTopic, 1);
   dock_placard_msgs::msgs::DockPlacard symbol;
   symbol.set_color(announceSymbol.data.substr
     (0, announceSymbol.data.find("_")));
   symbol.set_shape(announceSymbol.data.substr
     (announceSymbol.data.find("_")+1));
-  this->dockPlacardPub->Publish(symbol);
+  this->dockPlacardPub->publish(symbol);
 
   if (this->dockAllowed)
   {
-    // Initialize ROS transport.
-    this->nh.reset(new ros::NodeHandle());
     this->symbolPub =
-      this->nh->advertise<std_msgs::String>(this->symbolTopic, 1, true);
+      this->node->create_publisher<std_msgs::msg::String>(this->symbolTopic, 1);
 
-    this->symbolPub.publish(this->announceSymbol);
+    this->symbolPub->publish(this->announceSymbol);
   }
 }
 
@@ -217,7 +203,6 @@ void DockChecker::Update()
   }
 }
 
-#if GAZEBO_MAJOR_VERSION >= 8
 /////////////////////////////////////////////////
 void DockChecker::OnInternalActivationEvent(const ignition::msgs::Boolean &_msg)
 {
@@ -271,65 +256,9 @@ void DockChecker::OnExternalActivationEvent(const ignition::msgs::Boolean &_msg)
   gzdbg << "[" << this->name << "] OnExternalActivationEvent(): "
         << _msg.data() << std::endl;
 }
-#else
-/////////////////////////////////////////////////
-void DockChecker::OnInternalActivationEvent(ConstIntPtr &_msg)
-{
-  // Currently docked.
-  if (_msg->data() == 1)
-  {
-    this->timer.Start();
-    gzmsg << "Entering internal dock activation zone, transitioning to "
-          << "<docking> state in [" << this->name << "]." << std::endl;
-  }
-
-  // Currently undocked.
-  if (_msg->data() == 0)
-  {
-    this->timer.Stop();
-    this->timer.Reset();
-    if (this->AnytimeDocked())
-    {
-      gzmsg << "Leaving internal dock activation zone in [" << this->name
-            << "] after required time - transitioning to <exited> state."
-            << std::endl;
-    }
-    else
-    {
-      gzmsg << "Leaving internal dock activation zone in [" << this->name
-            << "] early - transitioning back to <undocked> state."
-            << std::endl;
-    }
-  }
-
-  gzdbg << "[" << this->name << "] OnInternalActivationEvent(): "
-        << _msg->data() << std::endl;
-}
-
-/////////////////////////////////////////////////
-void DockChecker::OnExternalActivationEvent(ConstIntPtr &_msg)
-{
-  this->atEntrance = _msg->data() == 1;
-
-  if (this->atEntrance)
-  {
-    gzmsg << "Entering external dock activation zone in [" << this->name
-          << "]" << std::endl;
-  }
-  else
-  {
-    gzmsg << "Leaving external dock activation zone in [" << this->name
-          << "]" << std::endl;
-  }
-
-  gzdbg << "[" << this->name << "] OnExternalActivationEvent(): "
-        << _msg->data() << std::endl;
-}
-#endif
 
 //////////////////////////////////////////////////
-ScanDockScoringPlugin::ScanDockScoringPlugin():
-  node (new gazebo::transport::Node())
+ScanDockScoringPlugin::ScanDockScoringPlugin()
 {
 }
 
@@ -337,7 +266,6 @@ ScanDockScoringPlugin::ScanDockScoringPlugin():
 void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     sdf::ElementPtr _sdf)
 {
-  this->node->Init();
   ScoringPlugin::Load(_world, _sdf);
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
@@ -348,8 +276,8 @@ void ScanDockScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&ScanDockScoringPlugin::Update, this));
 
-  this->lightBuoySequencePub = this->node->Advertise
-    <light_buoy_colors_msgs::msgs::LightBuoyColors>(this->colorTopic);
+  this->lightBuoySequencePub = this->node->create_publisher
+    <light_buoy_colors_msgs::msgs::LightBuoyColors>(this->colorTopic, 10);
 }
 
 //////////////////////////////////////////////////
@@ -380,7 +308,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
   {
     if (!_sdf->HasElement(colorIndex))
     {
-      ROS_ERROR("<%s> missing", colorIndex);
+      RCLCPP_ERROR(node->get_logger(), "<%s> missing", colorIndex);
       return false;
     }
 
@@ -391,7 +319,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     if (color != "red"  && color != "green" &&
         color != "blue" && color != "yellow")
     {
-      ROS_ERROR("Invalid color [%s]", color.c_str());
+      RCLCPP_ERROR(node->get_logger(), "Invalid color [%s]", color.c_str());
       return false;
     }
     this->expectedSequence.push_back(color);
@@ -418,21 +346,21 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
   if (this->enableColorChecker)
   {
     this->colorChecker.reset(
-      new ColorSequenceChecker(this->expectedSequence, ns,
-                                colorSequenceService));
+      new ColorSequenceChecker(this->expectedSequence, 
+                                colorSequenceService, node));
   }
 
   // Required: Parse the bays.
   if (!_sdf->HasElement("bays"))
   {
-    ROS_ERROR("<bays> missing");
+    RCLCPP_ERROR(node->get_logger(), "<bays> missing");
     return false;
   }
 
   auto baysElem = _sdf->GetElement("bays");
   if (!baysElem->HasElement("bay"))
   {
-    ROS_ERROR("<bay> missing");
+    RCLCPP_ERROR(node->get_logger(), "<bay> missing");
     return false;
   }
 
@@ -442,7 +370,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: bay name.
     if (!bayElem->GetElement("name"))
     {
-      ROS_ERROR("<bays::bay::name> missing");
+      RCLCPP_ERROR(node->get_logger(), "<bays::bay::name> missing");
       return false;
     }
     std::string bayName = bayElem->Get<std::string>("name");
@@ -450,7 +378,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: internal_activation topic.
     if (!bayElem->GetElement("internal_activation_topic"))
     {
-      ROS_ERROR("<bays::bay::internal_activation_topic> missing");
+      RCLCPP_ERROR(node->get_logger(), "<bays::bay::internal_activation_topic> missing");
       return false;
     }
     std::string internalActivationTopic =
@@ -459,7 +387,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: external_activation topic.
     if (!bayElem->GetElement("external_activation_topic"))
     {
-      ROS_ERROR("<bays::bay::external_activation_topic> missing");
+      RCLCPP_ERROR(node->get_logger(), "<bays::bay::external_activation_topic> missing");
       return false;
     }
     std::string externalActivationTopic =
@@ -468,7 +396,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: gazebo symbol topic.
     if (!bayElem->GetElement("symbol_topic"))
     {
-      ROS_ERROR("<bays::bay::symbol_topic> missing");
+      RCLCPP_ERROR(node->get_logger(), "<bays::bay::symbol_topic> missing");
       return false;
     }
     std::string symbolTopic = bayElem->Get<std::string>("symbol_topic");
@@ -476,7 +404,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: minimum time to be considered "docked".
     if (!bayElem->GetElement("min_dock_time"))
     {
-      ROS_ERROR("<bays::bay::min_dock_time> missing");
+      RCLCPP_ERROR(node->get_logger(), "<bays::bay::min_dock_time> missing");
       return false;
     }
     double minDockTime = bayElem->Get<double>("min_dock_time");
@@ -484,7 +412,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     // Required: dock allowed.
     if (!bayElem->GetElement("dock_allowed"))
     {
-      ROS_ERROR("<bays::bay::dock_allowed> missing");
+      RCLCPP_ERROR(node->get_logger(), "<bays::bay::dock_allowed> missing");
       return false;
     }
     bool dockAllowed = bayElem->Get<bool>("dock_allowed");
@@ -492,24 +420,18 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     std::string announceSymbol = "";
     if (!bayElem->HasElement("symbol"))
     {
-      ROS_ERROR("<bays::bay::symbol> not found");
+      RCLCPP_ERROR(node->get_logger(), "<bays::bay::symbol> not found");
     }
     announceSymbol =
       bayElem->GetElement("symbol")->Get<std::string>();
 
 
     // Create a new dock checker.
-    #if GAZEBO_MAJOR_VERSION >= 8
-      std::unique_ptr<DockChecker> dockChecker(
-        new DockChecker(bayName, internalActivationTopic,
-          externalActivationTopic, minDockTime, dockAllowed,
-          this->world->Name(), ns, announceSymbol, symbolTopic));
-    #else
-      std::unique_ptr<DockChecker> dockChecker(
-        new DockChecker(bayName, internalActivationTopic,
-          externalActivationTopic, minDockTime, dockAllowed,
-          this->world->GetName(), ns, announceSymbol, symbolTopic));
-    #endif
+    std::unique_ptr<DockChecker> dockChecker(
+      new DockChecker(bayName, internalActivationTopic,
+        externalActivationTopic, minDockTime, dockAllowed,
+        this->world->Name(), 
+        announceSymbol, symbolTopic, node));
 
     // Add the dock checker.
     this->dockCheckers.push_back(std::move(dockChecker));
@@ -539,7 +461,7 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     auto targetsElem = _sdf->GetElement("targets");
     if (!targetsElem->HasElement("target"))
     {
-      ROS_ERROR("<targets><target> not found");
+      RCLCPP_ERROR(node->get_logger(), "<targets><target> not found");
       return false;
     }
 
@@ -548,14 +470,14 @@ bool ScanDockScoringPlugin::ParseSDF(sdf::ElementPtr _sdf)
     {
       if (!targetElem->HasElement("topic"))
       {
-        ROS_ERROR("<targets><target><topic> not found");
+        RCLCPP_ERROR(node->get_logger(), "<targets><target><topic> not found");
         return false;
       }
       std::string topic = targetElem->Get<std::string>("topic");
 
       if (!targetElem->HasElement("bonus_points"))
       {
-        ROS_ERROR("<targets><target><bonus_points> not found");
+        RCLCPP_ERROR(node->get_logger(), "<targets><target><bonus_points> not found");
         return false;
       }
       double bonusPoints = targetElem->Get<double>("bonus_points");
@@ -679,7 +601,7 @@ void ScanDockScoringPlugin::OnRunning()
   colors.set_color_1(this->expectedSequence[0]);
   colors.set_color_2(this->expectedSequence[1]);
   colors.set_color_3(this->expectedSequence[2]);
-  lightBuoySequencePub->Publish(colors);
+  lightBuoySequencePub->publish(colors);
 
   if (this->enableColorChecker)
   {

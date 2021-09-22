@@ -18,7 +18,9 @@
 #ifndef VRX_GAZEBO_WILDLIFE_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_WILDLIFE_SCORING_PLUGIN_HH_
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+#include <geographic_msgs/msg/geo_pose_stamped.hpp>
+#include <geographic_msgs/msg/geo_path.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -274,11 +276,11 @@ class WildlifeScoringPlugin : public ScoringPlugin
   /// engages with the buoy.
   private: double engagementDistance = 10.0;
 
-  /// \brief ROS node handle.
-  private: std::unique_ptr<ros::NodeHandle> rosNode;
+  /// \brief Pointer to the ROS node.
+  private: gazebo_ros::Node::SharedPtr node;
 
   /// \brief Publisher for the animal locations.
-  private: ros::Publisher animalsPub;
+  private: rclcpp::Publisher<geographic_msgs::msg::GeoPath>::SharedPtr animalsPub;
 
   /// \brief True when a vehicle collision is detected.
   private: std::atomic<bool> collisionDetected{false};

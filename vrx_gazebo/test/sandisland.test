@@ -1,6 +1,8 @@
 <launch>
-  <include file="$(find vrx_gazebo)/launch/sandisland.launch">
+  <include file="$(find-pkg-share vrx_gazebo)/launch/sandisland.launch">
     <arg name="gui" value="false" />
   </include>
-  <test test-name="sandisland_test" pkg="vrx_gazebo" type="sandisland_test" />
+
+  <!-- <executable cmd="$(exec-in-pkg vrx_gazebo sandisland_test)" name="sandisland_test" output="screen" shell="true" /> -->
+  <executable cmd="ros2 run vrx_gazebo sandisland_test" name="sandisland_test" output="screen" shell="true" />
 </launch>

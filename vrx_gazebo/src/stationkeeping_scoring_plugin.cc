@@ -15,7 +15,6 @@
  *
 */
 
-#include <std_msgs/Float64.h>
 #include <cmath>
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/SphericalCoordinates.hh>
@@ -45,15 +44,15 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   // Get lat, lon and yaw from SDF
   if (!_sdf->HasElement("goal_pose") && !_sdf->HasElement("goal_pose_cart"))
   {
-    ROS_ERROR("Found neither <goal_pose> nor <goal_pose_cart> element in SDF.");
-    ROS_ERROR("Using default pose: 0 0 0");
+    RCLCPP_ERROR(node->get_logger(), "Found neither <goal_pose> nor <goal_pose_cart> element in SDF.");
+    RCLCPP_ERROR(node->get_logger(), "Using default pose: 0 0 0");
   }
   else if (_sdf->HasElement("goal_pose"))
   {
     if (_sdf->HasElement("goal_pose_cart"))
     {
-      ROS_ERROR("Both goal_pose and goal_pose_cart were specified.");
-      ROS_ERROR("Ignoring goal_pose_cart.");
+      RCLCPP_ERROR(node->get_logger(), "Both goal_pose and goal_pose_cart were specified.");
+      RCLCPP_ERROR(node->get_logger(), "Ignoring goal_pose_cart.");
     }
 
     ignition::math::Vector3d latlonyaw =
@@ -113,27 +112,26 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   gzmsg << "StationKeeping Goal, Local: X = " << this->goalX
         << " Y = " << this->goalY << " Yaw = " << this->goalYaw << std::endl;
 
-  // Setup ROS node and publisher
-  this->rosNode.reset(new ros::NodeHandle());
+  // Setup the publishers
   if (_sdf->HasElement("goal_topic"))
   {
     this->goalTopic = _sdf->Get<std::string>("goal_topic");
   }
-  this->goalPub = this->rosNode->advertise<geographic_msgs::GeoPoseStamped>(
-    this->goalTopic, 10, true);
+  this->goalPub = this->node->create_publisher<geographic_msgs::msg::GeoPoseStamped>(
+    this->goalTopic, 10);
 
   if (_sdf->HasElement("pose_error_topic"))
   {
     this->poseErrorTopic = _sdf->Get<std::string>("pose_error_topic");
   }
-  this->poseErrorPub = this->rosNode->advertise<std_msgs::Float64>(
+  this->poseErrorPub = this->node->create_publisher<std_msgs::msg::Float64>(
     this->poseErrorTopic, 100);
 
   if (_sdf->HasElement("mean_error_topic"))
   {
     this->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
   }
-  this->meanErrorPub  = this->rosNode->advertise<std_msgs::Float64>(
+  this->meanErrorPub = this->node->create_publisher<std_msgs::msg::Float64>(
     this->meanErrorTopic, 100);
 
   if (_sdf->HasElement("head_error_on"))
@@ -180,8 +178,8 @@ void StationkeepingScoringPlugin::Update()
   if (this->ScoringPlugin::TaskState() != "running")
     return;
 
-  std_msgs::Float64 poseErrorMsg;
-  std_msgs::Float64 meanErrorMsg;
+  std_msgs::msg::Float64 poseErrorMsg;
+  std_msgs::msg::Float64 meanErrorMsg;
 
   #if GAZEBO_MAJOR_VERSION >= 8
     const auto robotPose = this->vehicleModel->WorldPose();
@@ -212,8 +210,8 @@ void StationkeepingScoringPlugin::Update()
   // Publish at 1 Hz.
   if (this->timer.GetElapsed() >= gazebo::common::Time(1.0))
   {
-    this->poseErrorPub.publish(poseErrorMsg);
-    this->meanErrorPub.publish(meanErrorMsg);
+    this->poseErrorPub->publish(poseErrorMsg);
+    this->meanErrorPub->publish(meanErrorMsg);
     this->timer.Reset();
     this->timer.Start();
   }
@@ -226,7 +224,7 @@ void StationkeepingScoringPlugin::PublishGoal()
 {
   gzmsg << "<StationkeepingScoringPlugin> Publishing Goal coordinates"
         << std::endl;
-  geographic_msgs::GeoPoseStamped goal;
+  geographic_msgs::msg::GeoPoseStamped goal;
 
   // populating GeoPoseStamped... must be a better way?
   goal.pose.position.latitude  = this->goalLat;
@@ -240,9 +238,9 @@ void StationkeepingScoringPlugin::PublishGoal()
   goal.pose.orientation.z = orientation.Z();
   goal.pose.orientation.w = orientation.W();
 
-  goal.header.stamp = ros::Time::now();
+  goal.header.stamp = node->now();
 
-  this->goalPub.publish(goal);
+  this->goalPub->publish(goal);
 }
 
 //////////////////////////////////////////////////

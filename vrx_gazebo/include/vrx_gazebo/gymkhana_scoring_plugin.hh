@@ -18,8 +18,8 @@
 #ifndef VORC_GAZEBO_GYMKHANA_SCORING_PLUGIN_HH_
 #define VORC_GAZEBO_GYMKHANA_SCORING_PLUGIN_HH_
 
-#include <ros/ros.h>
-#include <vrx_gazebo/Task.h>
+#include <rclcpp/rclcpp.hpp>
+#include <vrx_gazebo/msg/task.hpp>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/World.hh>
 #include <vrx_gazebo/scoring_plugin.hh>
@@ -40,10 +40,10 @@ class GymkhanaScoringPlugin : public ScoringPlugin
   private: void Update();
 
   /// \brief Callback for channel navigation portion's scoring plugin
-  protected: void ChannelCallback(const vrx_gazebo::Task::ConstPtr& msg);
+  protected: void ChannelCallback(const vrx_gazebo::msg::Task::SharedPtr msg);
 
   /// \brief Callback for black box station-keeping portion's scoring plugin
-  protected: void BlackboxCallback(const vrx_gazebo::Task::ConstPtr& msg);
+  protected: void BlackboxCallback(const vrx_gazebo::msg::Task::SharedPtr msg);
 
   // Documentation inherited.
   private: void OnFinished() override;
@@ -51,14 +51,11 @@ class GymkhanaScoringPlugin : public ScoringPlugin
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief ROS node handle.
-  private: std::unique_ptr<ros::NodeHandle> rosNode;
-
   /// \brief ROS subscriber to channel navigation portion scoring plugin
-  private: ros::Subscriber channelSub;
+  public: rclcpp::Subscription<vrx_gazebo::msg::Task>::SharedPtr channelSub;
 
   /// \brief ROS subscriber to black box acoustic pinger portion scoring plugin
-  private: ros::Subscriber blackboxSub;
+  public: rclcpp::Subscription<vrx_gazebo::msg::Task>::SharedPtr blackboxSub;
 
   /// \brief Whether buoy channel portion has been completed
   private: bool channelCrossed = false;

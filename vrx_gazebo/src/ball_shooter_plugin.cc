@@ -27,15 +27,16 @@ using namespace gazebo;
 //////////////////////////////////////////////////
 void BallShooterPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  gazebo::physics::WorldPtr world =
-    gazebo::physics::get_world();
+  gazebo::physics::WorldPtr world = _model->GetWorld();
+
+  this->node = gazebo_ros::Node::Get(_sdf);
 
   GZ_ASSERT(_model != nullptr, "Received NULL model pointer");
 
   // Make sure the ROS node for Gazebo has already been initialised.
-  if (!ros::isInitialized())
+  if (!rclcpp::ok())
   {
-    ROS_FATAL_STREAM_NAMED("ball_shooter_plugin", "A ROS node for"
+    RCLCPP_FATAL_STREAM(node->get_logger(), "A ROS node for"
       " Gazebo hasn't been initialised, unable to load plugin. Load the Gazebo "
       "system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
@@ -130,29 +131,26 @@ void BallShooterPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("shot_force"))
     this->shotForce = _sdf->GetElement("shot_force")->Get<double>();
 
-  // Initialise the ros handle.
-  this->rosNodeHandle.reset(new ros::NodeHandle());
-
-  this->fireSub = this->rosNodeHandle->subscribe(
-    topic, 1, &BallShooterPlugin::OnFire, this);
+  this->fireSub = node->create_subscription<std_msgs::msg::Empty>(
+    topic, 1, std::bind(&BallShooterPlugin::OnFire, this, std::placeholders::_1));
 
   // Connect the update function to the world update event.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
     std::bind(&BallShooterPlugin::Update, this));
 
   // Debug output.
-  ROS_INFO_NAMED("ball_shooter_plugin", "<projectile><model_name>: %s",
+  RCLCPP_INFO(node->get_logger(), "<projectile><model_name>: %s",
     projectileName.c_str());
-  ROS_INFO_NAMED("ball_shooter_plugin", "<projectile><link_name>: %s",
+  RCLCPP_INFO(node->get_logger(), "<projectile><link_name>: %s",
     projectileLinkName.c_str());
-  ROS_INFO_NAMED("ball_shooter_plugin", "<frame>: %s", frameName.c_str());
-  ROS_INFO_NAMED("ball_shooter_plugin",
+  RCLCPP_INFO(node->get_logger(), "<frame>: %s", frameName.c_str());
+  RCLCPP_INFO(node->get_logger(), 
     "<num_shots>: %u", this->remainingShots);
-  ROS_INFO_NAMED("ball_shooter_plugin", "<pose>: {%f %f %f %f %f %f",
+  RCLCPP_INFO(node->get_logger(), "<pose>: {%f %f %f %f %f %f",
     this->pose.Pos().X(), this->pose.Pos().Y(), this->pose.Pos().Z(),
     this->pose.Rot().Roll(), this->pose.Rot().Pitch(), this->pose.Rot().Yaw());
-  ROS_INFO_NAMED("ball_shooter_plugin", "<shot_force>: %f", this->shotForce);
-  ROS_INFO_NAMED("ball_shooter_plugin", "<topic>: %s", topic.c_str());
+  RCLCPP_INFO(node->get_logger(), "<shot_force>: %f", this->shotForce);
+  RCLCPP_INFO(node->get_logger(), "<topic>: %s", topic.c_str());
 }
 
 //////////////////////////////////////////////////
@@ -190,7 +188,7 @@ void BallShooterPlugin::Update()
 }
 
 //////////////////////////////////////////////////
-void BallShooterPlugin::OnFire(const std_msgs::Empty::ConstPtr &_msg)
+void BallShooterPlugin::OnFire(const std_msgs::msg::Empty::SharedPtr _msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
 

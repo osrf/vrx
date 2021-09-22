@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vrx_gazebo)/config/custom_rosconsole.conf"/>
+  <set_env name="ROSCONSOLE_CONFIG_FILE" value="$(find-pkg-share vrx_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find vrx_gazebo)/worlds/example_course_2019.world" />
+  <arg name="world" default="$(find-pkg-share vrx_gazebo)/worlds/example_course_2019.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
@@ -33,34 +33,42 @@
   <arg name="vrx_sensors_enabled" default="true" />
 
   <!-- Start Gazebo with the world file -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name"   value="$(arg world)"/>
-    <arg name="verbose"      value="$(arg verbose)"/>
-    <arg name="paused"       value="$(arg paused)"/>
+  <include file="$(find-pkg-share gazebo_ros)/launch/gazebo.launch.py">
+    <arg name="world"   value="$(var world)"/>
+    <arg name="verbose" value="$(var verbose)"/>
+    <arg name="pause"   value="$(var paused)"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui"          value="$(arg gui)" />
-    <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
+    <arg name="gui"     value="$(var gui)"/>
+    <arg name="extra_gazebo_args" value="$(var extra_gazebo_args)"/>
   </include>
 
   <!-- Load robot model -->
   <!-- Determine which model -->
-  <arg name="h_config" value="$(eval int((thrust_config)=='H'))"/>
-  <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
-  <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
+  <let name="h_config" value="$(eval '\'$(var thrust_config)\' == \'H\'')" />
+  <let name="t_config" value="$(eval '\'$(var thrust_config)\' == \'T\'')" />
+  <let name="x_config" value="$(eval '\'$(var thrust_config)\' == \'X\'')" />
 
   <!-- For now - can only use the T configuration! -->
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
+  <group if="$(var t_config)">
+    <arg name="urdf" default="$(find-pkg-share wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
 
-  <param name="$(arg namespace)/robot_description"
-         command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
-         locked:=$(arg wamv_locked)		   
-         thruster_config:=$(arg thrust_config)
-         vrx_sensors_enabled:=$(arg vrx_sensors_enabled)
-         namespace:=$(arg namespace) "/>
+    <arg name="cmd" 
+         default="$(exec-in-pkg xacro xacro) '$(var urdf)' 
+         > $(find-pkg-share wamv_gazebo)/urdf/robot_description
+         locked:=$(var wamv_locked)
+         thruster_config:=$(var thrust_config)
+         vrx_sensors_enabled:=$(var vrx_sensors_enabled)
+         namespace:=$(var namespace)"/>
 
-  <!-- Spawn model in Gazebo -->
-  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
-        args="-x $(arg x) -y $(arg y) -z $(arg z)
-              -R $(arg R) -P $(arg P) -Y $(arg Y)
-              -urdf -param $(arg namespace)/robot_description -model wamv"/>
+    <executable cmd="$(var cmd)" name="robot_description" output="screen" shell="true" />
+
+    <arg name="generated_urdf" default="$(find-pkg-share wamv_gazebo)/urdf/robot_description"/>
+
+    <!-- Spawn model in Gazebo -->
+    <node name="spawn_entity" pkg="gazebo_ros" exec="spawn_entity.py" respawn="false" output="screen"
+          args="-x $(var x) -y $(var y) -z $(var z) 
+                -R $(var R) -P $(var P) -Y $(var Y) 
+                -entity $(var namespace) -file $(var generated_urdf)"/>
+  </group>
+
 </launch>

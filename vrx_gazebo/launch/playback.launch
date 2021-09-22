@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Extra gazebo arguments -->
-  <arg name="log_file"/>
+  <arg name="log_file" default=""/>
 
   <!-- If true, start in paused state -->
   <arg name="paused"  default="false"/>
@@ -9,13 +9,13 @@
   <arg name="verbose" default="false"/>
 
   <!-- Needed to find the WAM-V model during playback -->
-  <env name="GAZEBO_MODEL_PATH" value="$(find wamv_description)/models:$(find wamv_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)"/>
+  <set_env name="GAZEBO_MODEL_PATH" value="$(find-pkg-share wamv_description)/models:$(find-pkg-share wamv_gazebo)/models:$(env GAZEBO_MODEL_PATH)"/>
 
   <!-- Start Gazebo with the recorded log file -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="extra_gazebo_args" value="-p $(arg log_file)"/>
-    <arg name="paused" value="$(arg paused)"/>
-    <arg name="verbose" value="$(arg verbose)"/>
+  <include file="$(find-pkg-share gazebo_ros)/launch/gazebo.launch.py">
+    <arg name="extra_gazebo_args" value="-p $(var log_file)"/>
+    <arg name="pause"   value="$(var paused)"/>
+    <arg name="verbose" value="$(var verbose)"/>
   </include>
 
 </launch>

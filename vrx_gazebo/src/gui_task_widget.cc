@@ -16,7 +16,7 @@
 */
 #include "gui_task_widget.hh"
 
-#include <tf/tf.h>
+#include <tf2/LinearMath/Transform.h>
 #include <math.h>
 
 #include <gazebo/gui/GuiPlugin.hh>
@@ -37,18 +37,15 @@ GUITaskWidget::GUITaskWidget()
     //// cppcheck-suppress 3;
     windPixmap(150, 150), windPainter(&(this->windPixmap)),
     // setup pixmap and painter for contact
-    contactPixmap(150, 150), contactPainter(&(this->contactPixmap)),
-    // set the time for most recent contact
-    contactTime(ros::Time::now())
+    contactPixmap(150, 150), contactPainter(&(this->contactPixmap))
 {
 #if GAZEBO_MAJOR_VERSION >= 8
   // initialize ros if that hasnt happened yet
-  if (!ros::isInitialized())
+  if (!rclcpp::ok())
   {
     int argc = 0;
     char** argv = NULL;
-    ros::init(argc, argv, "gazebo", ros::init_options::NoSigintHandler |
-              ros::init_options::AnonymousName);
+    rclcpp::init(argc, argv);
   }
 
   // Set the frame background and foreground colors
@@ -99,22 +96,34 @@ GUITaskWidget::GUITaskWidget()
   this->move(10, 10);
   this->resize(600, 170);
 
-  this->node.reset(new ros::NodeHandle);
+  // Create the node
+  this->node = std::make_shared<rclcpp::Node>("gazebo");
+
   // Subscribe to tasks topic (ROS)
-  this->taskSub = this->node->subscribe("/vrx/task/info", 1,
-      &GUITaskWidget::OnTaskInfo, this);
+  this->taskSub = this->node->create_subscription<vrx_gazebo::msg::Task>(
+    "/vrx/task/info", 1, 
+    std::bind(&GUITaskWidget::OnTaskInfo, this, std::placeholders::_1));
   // Subscribe to wind speed topic (ROS)
-  this->windSpeedSub = this->node->subscribe("/vrx/debug/wind/speed", 1,
-      &GUITaskWidget::OnWindSpeed, this);
+  this->windSpeedSub = this->node->create_subscription<std_msgs::msg::Float64>(
+    "/vrx/debug/wind/speed", 1, 
+    std::bind(&GUITaskWidget::OnWindSpeed, this, std::placeholders::_1));
   // Subscribe to wind direction topic (ROS)
-  this->windDirectionSub = this->node->subscribe("/vrx/debug/wind/direction", 1,
-      &GUITaskWidget::OnWindDirection, this);
+  this->windDirectionSub = this->node->create_subscription<std_msgs::msg::Float64>(
+    "/vrx/debug/wind/direction", 1, 
+    std::bind(&GUITaskWidget::OnWindDirection, this, std::placeholders::_1));
   // Subscribe to link states topic (ROS)
-  this->linkStateSub = this->node->subscribe("/gazebo/link_states", 1,
-      &GUITaskWidget::OnLinkStates, this);
+  this->linkStateSub = this->node->create_subscription<gazebo_msgs::msg::LinkStates>(
+    "/gazebo/link_states", 1, 
+    std::bind(&GUITaskWidget::OnLinkStates, this, std::placeholders::_1));
   // Subscribe to contact topic (ROS)
-  this->contactSub = this->node->subscribe("/vrx/debug/contact", 1,
-      &GUITaskWidget::OnContact, this);
+  this->contactSub = this->node->create_subscription<vrx_gazebo::msg::Contact>(
+    "/vrx/debug/contact", 1, 
+    std::bind(&GUITaskWidget::OnContact, this, std::placeholders::_1));
+
+  rclcpp::spin(this->node);
+
+  // set the time for most recent contact
+  contactTime = node->now();
 #endif
 }
 
@@ -124,7 +133,7 @@ GUITaskWidget::~GUITaskWidget()
 }
 
 /////////////////////////////////////////////////
-void GUITaskWidget::OnContact(const vrx_gazebo::Contact::ConstPtr &_msg)
+void GUITaskWidget::OnContact(const vrx_gazebo::msg::Contact::SharedPtr _msg)
 {
   // put red over anything preivously present
   // as to write on a red back ground
@@ -139,12 +148,12 @@ void GUITaskWidget::OnContact(const vrx_gazebo::Contact::ConstPtr &_msg)
   this->contactPainter.drawText(QPoint(10, 30),
     QString::fromStdString(_msg->collision2));
   // update time of last contact
-  this->contactTime = ros::Time::now();
+  this->contactTime = node->now();
   // send pixmap to gzserver
   this->SetContact(this->contactPixmap);
 }
 /////////////////////////////////////////////////
-void GUITaskWidget::OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg)
+void GUITaskWidget::OnLinkStates(const gazebo_msgs::msg::LinkStates::SharedPtr _msg)
 {
   // find wamv base_link in all the links reported
   unsigned int c = 0;
@@ -155,17 +164,17 @@ void GUITaskWidget::OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg)
     ++c;
   }
   // get yaw (heading) of wamv
-  tf::Quaternion q(_msg->pose[c].orientation.x,
+  tf2::Quaternion q(_msg->pose[c].orientation.x,
                    _msg->pose[c].orientation.y,
                    _msg->pose[c].orientation.z,
                    _msg->pose[c].orientation.w);
-  tf::Matrix3x3 m(q);
+  tf2::Matrix3x3 m(q);
   double roll, pitch;
   // update wamvHeading
   m.getRPY(roll, pitch, this->wamvHeading);
   // if the last collision was greater than 1 sec ago,
   // make contact widget all gray
-  if ((ros::Time::now() - this->contactTime) > ros::Duration(1))
+  if ((node->now() - this->contactTime) > rclcpp::Duration(1))
   {
     this->contactPixmap.fill(Qt::gray);
     this->SetContact(this->contactPixmap);
@@ -173,7 +182,7 @@ void GUITaskWidget::OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-void GUITaskWidget::OnWindDirection(const std_msgs::Float64::ConstPtr &_msg)
+void GUITaskWidget::OnWindDirection(const std_msgs::msg::Float64::SharedPtr _msg)
 {
   // draw gray background
   this->windPixmap.fill(Qt::gray);
@@ -208,14 +217,14 @@ void GUITaskWidget::OnWindDirection(const std_msgs::Float64::ConstPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-void GUITaskWidget::OnWindSpeed(const std_msgs::Float64::ConstPtr &_msg)
+void GUITaskWidget::OnWindSpeed(const std_msgs::msg::Float64::SharedPtr _msg)
 {
   // update windSpeed
   this->windSpeed = _msg->data;
 }
 
 /////////////////////////////////////////////////
-void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
+void GUITaskWidget::OnTaskInfo(const vrx_gazebo::msg::Task::SharedPtr _msg)
 {
   std::ostringstream taskInfoStream;
   taskInfoStream.str("");
@@ -223,13 +232,13 @@ void GUITaskWidget::OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg)
   taskInfoStream << "Task Name: " << _msg->name << "\n";
   taskInfoStream << "Task Phase: " << _msg->state << "\n";
   taskInfoStream << "Ready Time: " <<
-    this->FormatTime(_msg->ready_time.toSec()) << "\n";
+    this->FormatTime(_msg->ready_time.sec) << "\n";
   taskInfoStream << "Running Time: " <<
-    this->FormatTime(_msg->running_time.toSec()) << "\n";
+    this->FormatTime(_msg->running_time.sec) << "\n";
   taskInfoStream << "Elapsed Time: " <<
-    this->FormatTime(_msg->elapsed_time.toSec()) << "\n";
+    this->FormatTime(_msg->elapsed_time.sec) << "\n";
   taskInfoStream << "Remaining Time: " <<
-    this->FormatTime(_msg->remaining_time.toSec()) << "\n";
+    this->FormatTime(_msg->remaining_time.sec) << "\n";
   taskInfoStream << "Timed out: ";
   if (_msg->timed_out)
     taskInfoStream << "true" << "\n";

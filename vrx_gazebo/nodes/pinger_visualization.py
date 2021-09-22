@@ -33,8 +33,13 @@
 #
 
 import math
-import rospy
+import rclpy
 
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import HistoryPolicy
+from rclpy.qos import ReliabilityPolicy
+from rclpy.qos import QoSProfile
 from geometry_msgs.msg import Point
 from usv_msgs.msg import RangeBearing
 from visualization_msgs.msg import Marker
@@ -45,23 +50,29 @@ message suitable for use with rviz.
 """
 
 
-class PingerVisualisation:
+class PingerVisualisation(Node):
     """Class used to store the parameters and variables for the script.
     """
     def __init__(self):
         """Initialise and run the class."""
-        rospy.init_node("pinger_visualisation")
+        super().__init__("pinger_visualisation")
+
+        # Define a qos with latching properties
+        qos = QoSProfile(
+              history=HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+              depth=1,
+              durability=DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+              reliability=ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE
+              )
 
         # Startup a publisher of the marker messages
-        self.markerPub = rospy.Publisher("/wamv/sensors/pingers/pinger/marker/signal", Marker,
-                                         queue_size=10, latch=True)
+        self.markerPub = self.create_publisher(Marker, 
+            "/wamv/sensors/pingers/pinger/marker/signal", qos_profile=qos)
 
         # Start subscriber
-        self.pingerSub = rospy.Subscriber("/wamv/sensors/pingers/pinger/range_bearing",
-                                          RangeBearing, self.pingerCallback)
+        self.pingerSub = self.create_subscription(RangeBearing, 
+            "/wamv/sensors/pingers/pinger/range_bearing", self.pingerCallback, qos_profile=10)
 
-        # Spin until closed
-        rospy.spin()
 
     # Callback to handle an incoming range bearing message
     def pingerCallback(self, msg):
@@ -82,9 +93,9 @@ class PingerVisualisation:
         visMsg.action = Marker.ADD
 
         # Position will be specified by start and end points.
-        visMsg.pose.position.x = 0
-        visMsg.pose.position.y = 0
-        visMsg.pose.position.z = 0
+        visMsg.pose.position.x = 0.0
+        visMsg.pose.position.y = 0.0
+        visMsg.pose.position.z = 0.0
         visMsg.pose.orientation.x = 0.0
         visMsg.pose.orientation.y = 0.0
         visMsg.pose.orientation.z = 0.0
@@ -105,9 +116,9 @@ class PingerVisualisation:
         # points. Origin is a 0,0. Since the visualisation is in the sensor
         # frame, arrow should start at the sensor.
         startPoint = Point()
-        startPoint.x = 0
-        startPoint.y = 0
-        startPoint.z = 0
+        startPoint.x = 0.0
+        startPoint.y = 0.0
+        startPoint.z = 0.0
         visMsg.points.append(startPoint)
 
         # Finish at the estimated pinger position.
@@ -121,5 +132,13 @@ class PingerVisualisation:
         self.markerPub.publish(visMsg)
 
 
-if __name__ == '__main__':
+def main(args=None):
+    rclpy.init(args=args)
     pinger = PingerVisualisation()
+    rclpy.spin(pinger)
+    pinger.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

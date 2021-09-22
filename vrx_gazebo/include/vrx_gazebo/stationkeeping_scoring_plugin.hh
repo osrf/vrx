@@ -18,8 +18,9 @@
 #ifndef VRX_GAZEBO_STATIONKEEPING_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_STATIONKEEPING_SCORING_PLUGIN_HH_
 
-#include <geographic_msgs/GeoPoseStamped.h>
-#include <ros/ros.h>
+#include <geographic_msgs/msg/geo_pose_stamped.hpp>
+#include <std_msgs/msg/float64.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <memory>
 #include <string>
 #include <gazebo/common/Events.hh>
@@ -84,17 +85,14 @@ class StationkeepingScoringPlugin : public ScoringPlugin
   /// \brief Topic where mean pose error is published.
   private: std::string meanErrorTopic = "/vrx/station_keeping/mean_pose_error";
 
-  /// \brief ROS node handle.
-  private: std::unique_ptr<ros::NodeHandle> rosNode;
-
   /// \brief Publisher for the goal.
-  private: ros::Publisher goalPub;
+  private: rclcpp::Publisher<geographic_msgs::msg::GeoPoseStamped>::SharedPtr goalPub;
 
   /// \brief Publisher for the combined 2D pose error.
-  private: ros::Publisher poseErrorPub;
+  private: rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr poseErrorPub;
 
   /// \brief Publisher for the current mean error.
-  private: ros::Publisher meanErrorPub;
+  private: rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr meanErrorPub;
 
   /// \brief Goal pose in local (Gazebo) coordinates.
   private: double goalX;

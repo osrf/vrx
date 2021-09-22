@@ -5,25 +5,22 @@
 
 <launch>
   <!-- Task configuration YAML file -->
-  <arg name="requested"/>
-  <param name="requested" value="$(arg requested)"/>
-
-  <arg name="world_xacro_target"/>
-  <param name="world_xacro_target" value="$(arg world_xacro_target)"/>
-
-  <arg name="world_target"/>
-  <param name="world_target" value="$(arg world_target)"/>
+  <arg name="requested" default=""/>
+  <arg name="world_xacro_target" default=""/>
+  <arg name="world_target" default=""/>
 
   <!-- Only used for gymkhana task for pinger position configuration YAML -->
   <arg name="config_target" default=""/>
-  <param name="config_target" value="$(arg config_target)"/>
-
   <arg name="competition_pkg" default="vrx_gazebo"/>
-  <param name="competition_pkg" value="$(arg competition_pkg)"/>
-
   <arg name="world_name" default="robotx_example_course"/>
-  <param name="world_name" value="$(arg world_name)"/>
 
-  <node name="world_gen" pkg="vrx_gazebo" type="generate_worlds.py" required="true"
-    output="screen"/>
+  <node name="world_gen" pkg="vrx_gazebo" exec="generate_worlds" required="true" output="screen">
+    <param name="requested" value="$(var requested)"/>
+    <param name="world_xacro_target" value="$(var world_xacro_target)"/>
+    <param name="world_target" value="$(var world_target)"/>
+    <param name="config_target" value="$(var config_target)"/>
+    <param name="competition_pkg" value="$(var competition_pkg)"/>
+    <param name="world_name" value="$(var world_name)"/>
+  </node>
+
 </launch>

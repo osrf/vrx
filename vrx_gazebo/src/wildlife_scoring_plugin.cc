@@ -15,8 +15,6 @@
  *
 */
 
-#include <geographic_msgs/GeoPoseStamped.h>
-#include <geographic_msgs/GeoPath.h>
 #include <algorithm>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
@@ -260,6 +258,8 @@ void WildlifeScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 {
   ScoringPlugin::Load(_world, _sdf);
 
+  this->node = gazebo_ros::Node::Get(_sdf);
+
   // Parse the optional <animals_topic> element.
   if (_sdf->HasElement("animals_topic"))
     this->animalsTopic = _sdf->Get<std::string>("animals_topic");
@@ -288,11 +288,9 @@ void WildlifeScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   // Setup ROS node and publisher
-  this->rosNode.reset(new ros::NodeHandle());
-
   this->animalsPub =
-    this->rosNode->advertise<geographic_msgs::GeoPath>(
-      this->animalsTopic, 10, true);
+    this->node->create_publisher<geographic_msgs::msg::GeoPath>(
+      this->animalsTopic, 10);
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&WildlifeScoringPlugin::Update, this));
@@ -453,8 +451,8 @@ void WildlifeScoringPlugin::Update()
 //////////////////////////////////////////////////
 void WildlifeScoringPlugin::PublishAnimalLocations()
 {
-  geographic_msgs::GeoPath geoPathMsg;
-  geoPathMsg.header.stamp = ros::Time::now();
+  geographic_msgs::msg::GeoPath geoPathMsg;
+  geoPathMsg.header.stamp = node->now();
 
   for (auto const &buoy : this->buoys)
   {
@@ -471,8 +469,8 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
     const ignition::math::Quaternion<double> orientation = pose.Rot();
 
     // Fill the GeoPoseStamped message.
-    geographic_msgs::GeoPoseStamped geoPoseMsg;
-    geoPoseMsg.header.stamp = ros::Time::now();
+    geographic_msgs::msg::GeoPoseStamped geoPoseMsg;
+    geoPoseMsg.header.stamp = node->now();
 
     // We set the buoy type based on its goal.
     if (buoy.goal == BuoyGoal::AVOID)
@@ -495,7 +493,7 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
     // Add the GeoPoseStamped message to the GeoPath message that we publish.
     geoPathMsg.poses.push_back(geoPoseMsg);
   }
-  this->animalsPub.publish(geoPathMsg);
+  this->animalsPub->publish(geoPathMsg);
 }
 
 //////////////////////////////////////////////////

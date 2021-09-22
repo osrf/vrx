@@ -43,16 +43,14 @@ void GymkhanaScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GymkhanaScoringPlugin::Update, this));
 
-  // Setup ROS node and publisher
-  this->rosNode.reset(new ros::NodeHandle());
-
-  this->channelSub = this->rosNode->subscribe(
+  // Setup publisher
+  this->channelSub = this->node->create_subscription<vrx_gazebo::msg::Task>(
     "/vrx/gymkhana_channel/task/info", 5,
-    &GymkhanaScoringPlugin::ChannelCallback, this);
+    std::bind(&GymkhanaScoringPlugin::ChannelCallback, this, std::placeholders::_1));
 
-  this->blackboxSub = this->rosNode->subscribe(
+  this->blackboxSub = this->node->create_subscription<vrx_gazebo::msg::Task>(
     "/vrx/gymkhana_blackbox/task/info", 5,
-    &GymkhanaScoringPlugin::BlackboxCallback, this);
+    std::bind(&GymkhanaScoringPlugin::BlackboxCallback, this, std::placeholders::_1));
 }
 
 /////////////////////////////////////////////////
@@ -76,7 +74,7 @@ void GymkhanaScoringPlugin::Update()
 
 /////////////////////////////////////////////////
 void GymkhanaScoringPlugin::ChannelCallback(
-  const vrx_gazebo::Task::ConstPtr& msg)
+  const vrx_gazebo::msg::Task::SharedPtr msg)
 {
   if (msg)
   {
@@ -93,7 +91,7 @@ void GymkhanaScoringPlugin::ChannelCallback(
 
 /////////////////////////////////////////////////
 void GymkhanaScoringPlugin::BlackboxCallback(
-  const vrx_gazebo::Task::ConstPtr& msg)
+  const vrx_gazebo::msg::Task::SharedPtr msg)
 {
   if (msg)
   {

@@ -17,9 +17,9 @@
 #ifndef _GUI_TASK_WIDGET_HH_
 #define _GUI_TASK_WIDGET_HH_
 
-#include <ros/ros.h>
-#include <vrx_gazebo/Task.h>
-#include <vrx_gazebo/Contact.h>
+#include <rclcpp/rclcpp.hpp>
+#include <vrx_gazebo/msg/task.hpp>
+#include <vrx_gazebo/msg/contact.hpp>
 
 #include <string>
 #include <vector>
@@ -27,8 +27,9 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #include <gazebo/transport/transport.hh>
-#include "std_msgs/Float64.h"
-#include "gazebo_msgs/LinkStates.h"
+#include <gazebo_ros/node.hpp>
+#include <std_msgs/msg/float64.hpp>
+#include <gazebo_msgs/msg/link_states.hpp>
 
 namespace gazebo
 {
@@ -56,23 +57,23 @@ namespace gazebo
 
     /// \brief Callback that received task info messages.
     /// \param[in] _msg Task info message that is received.
-    protected: void OnTaskInfo(const vrx_gazebo::Task::ConstPtr &_msg);
+    protected: void OnTaskInfo(const vrx_gazebo::msg::Task::SharedPtr _msg);
 
     /// \brief Callback that received wind speed messages.
     /// \param[in] _msg windspeed info message that is received.
-    protected: void OnWindSpeed(const std_msgs::Float64::ConstPtr &_msg);
+    protected: void OnWindSpeed(const std_msgs::msg::Float64::SharedPtr _msg);
 
     /// \brief Callback that received wind direction messages.
     /// \param[in] _msg wind direction info message that is received.
-    protected: void OnWindDirection(const std_msgs::Float64::ConstPtr &_msg);
+    protected: void OnWindDirection(const std_msgs::msg::Float64::SharedPtr _msg);
 
     /// \brief Callback that receives link state messages.
     /// \param[in] _msg wind direction info message that is received.
-    protected: void OnLinkStates(const gazebo_msgs::LinkStates::ConstPtr &_msg);
+    protected: void OnLinkStates(const gazebo_msgs::msg::LinkStates::SharedPtr _msg);
 
     /// \brief Callback that receives Contact messages.
     /// \param[in] _msg wind direction info message that is received.
-    protected: void OnContact(const vrx_gazebo::Contact::ConstPtr &_msg);
+    protected: void OnContact(const vrx_gazebo::msg::Contact::SharedPtr _msg);
 
     /// \brief Helper function to format time string.
     /// \param[in] _msg Time message.
@@ -80,25 +81,25 @@ namespace gazebo
     private: std::string FormatTime(unsigned int sec) const;
 
     /// \brief A ros NodeHandle
-    private: std::unique_ptr<ros::NodeHandle> node;
+    private: std::shared_ptr<rclcpp::Node> node;
 
     /// \brief Subscriber to Task messages.
-    private: ros::Subscriber taskSub;
+    private: rclcpp::Subscription<vrx_gazebo::msg::Task>::SharedPtr taskSub;
 
     /// \brief Subscriber to wind Speed messages.
-    private: ros::Subscriber windSpeedSub;
+    private: rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr windSpeedSub;
 
     /// \brief Subscriber to wind direction messages.
-    private: ros::Subscriber windDirectionSub;
+    private: rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr windDirectionSub;
 
     /// \brief Subscriber to link state messages.
-    private: ros::Subscriber linkStateSub;
+    private: rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr linkStateSub;
 
     /// \brief Subscriber to contact messages.
-    private: ros::Subscriber contactSub;
+    private: rclcpp::Subscription<vrx_gazebo::msg::Contact>::SharedPtr contactSub;
 
     /// \brief Last time contact occurred
-    private: ros::Time contactTime;
+    private: rclcpp::Time contactTime;
 
     /// \brief Pixmap for the wind and wamv direction compass
     private: QPixmap windPixmap;

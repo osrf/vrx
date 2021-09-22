@@ -24,7 +24,7 @@
 
 #if GAZEBO_MAJOR_VERSION >= 8
   #include <ignition/msgs.hh>
-  #include <ignition/transport.hh>
+  #include <ignition/transport/Node.hh>
 #endif
 
 /// \brief This class is used to display waypoint markers.

@@ -14,8 +14,13 @@
 # limitations under the License.
 
 import random
-import rospy
+import rclpy
 
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import HistoryPolicy
+from rclpy.qos import ReliabilityPolicy
+from rclpy.qos import QoSProfile
 from geometry_msgs.msg import Vector3
 from usv_msgs.msg import RangeBearing
 from visualization_msgs.msg import Marker
@@ -32,70 +37,88 @@ are available, the node will default to the origin.
 """
 
 
-class PingerPosition:
+class PingerPosition(Node):
     """Class used to store the parameters and variables for the script.
     """
     def __init__(self):
         """Initialise and run the class."""
-        rospy.init_node("set_pinger_position")
+        super().__init__("set_pinger_position", allow_undeclared_parameters=True, automatically_declare_parameters_from_overrides=True)
 
         # Load the positions of the pingers.
         self.pingerPositions = list()
         i = 1
-        while rospy.has_param('~position_' + str(i)):
-            self.pingerPositions.append(rospy.get_param('~position_' + str(i)))
+
+        while self.has_parameter('position_' + str(i)):
+            pos = self.get_parameter('position_' + str(i)).get_parameter_value().double_array_value
+            self.pingerPositions.append(pos)
             i = i + 1
+
+        # Define a qos with latching properties
+        qos = QoSProfile(
+              history=HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+              depth=1,
+              durability=DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
+              reliability=ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE
+              )
 
         # If there are no matching positions, initialise to the origin.
         if i == 1:
             self.pingerPositions.append([0, 0, 0])
-        self.pingerPub = rospy.Publisher("/wamv/sensors/pingers/pinger/set_pinger_position",
-                                         Vector3, queue_size=10, latch=True)
-        self.markerPub = rospy.Publisher("/wamv/sensors/pingers/pinger/marker/ground_truth", Marker,
-                                         queue_size=10, latch=True)
+        self.pingerPub = self.create_publisher(Vector3, 
+            "/wamv/sensors/pingers/pinger/set_pinger_position", qos_profile=qos)
 
-        while not rospy.is_shutdown():
+        self.markerPub = self.create_publisher(Marker, 
+            "/wamv/sensors/pingers/pinger/marker/ground_truth", qos_profile=qos)
 
-            # Choose a position for the pinger.
-            position = random.choice(self.pingerPositions)
+        # Change position every 10 seconds.
+        self.update_timer = self.create_timer(10, self.update)
 
-            # Create a vector message.
-            msg = Vector3()
-            msg.x = position[0]
-            msg.y = position[1]
-            msg.z = position[2]
-            self.pingerPub.publish(msg)
+    def update(self):
+        # Choose a position for the pinger.
+        position = random.choice(self.pingerPositions)
 
-            msg = Marker()
-            msg.header.frame_id = "/map"
-            msg.header.stamp = rospy.get_rostime()
-            msg.ns = ""
-            msg.id = 0
-            msg.type = Marker.SPHERE
-            msg.action = Marker.ADD
+        # Create a vector message.
+        msg = Vector3()
+        msg.x = float (position[0])
+        msg.y = float (position[1])
+        msg.z = float (position[2])
+        self.pingerPub.publish(msg)
 
-            msg.pose.position.x = position[0]
-            msg.pose.position.y = position[1]
-            msg.pose.position.z = position[2]
-            msg.pose.orientation.x = 0.0
-            msg.pose.orientation.y = 0.0
-            msg.pose.orientation.z = 0.0
-            msg.pose.orientation.w = 1.0
+        msg = Marker()
+        msg.header.frame_id = "/map"
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.ns = ""
+        msg.id = 0
+        msg.type = Marker.SPHERE
+        msg.action = Marker.ADD
 
-            msg.scale.x = 1.0
-            msg.scale.y = 1.0
-            msg.scale.z = 1.0
+        msg.pose.position.x = float(position[0])
+        msg.pose.position.y = float(position[1])
+        msg.pose.position.z = float(position[2])
+        msg.pose.orientation.x = 0.0
+        msg.pose.orientation.y = 0.0
+        msg.pose.orientation.z = 0.0
+        msg.pose.orientation.w = 1.0
 
-            msg.color.r = 1.0
-            msg.color.g = 0.0
-            msg.color.b = 0.0
-            msg.color.a = 1.0
+        msg.scale.x = 1.0
+        msg.scale.y = 1.0
+        msg.scale.z = 1.0
 
-            self.markerPub.publish(msg)
+        msg.color.r = 1.0
+        msg.color.g = 0.0
+        msg.color.b = 0.0
+        msg.color.a = 1.0
 
-            # Change position every 10 seconds.
-            rospy.sleep(10.)
+        self.markerPub.publish(msg)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    pinger = PingerPosition()
+    rclpy.spin(pinger)
+    pinger.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
-    pinger = PingerPosition()
+    main()

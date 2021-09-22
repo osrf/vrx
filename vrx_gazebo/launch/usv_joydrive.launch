@@ -3,22 +3,21 @@
   <arg name="namespace" default="wamv"/>
 
   <!-- Joystick Driver -->
-  <node pkg="joy" type="joy_node" name="joy">
+  <node pkg="joy" exec="joy_node" name="joy">
     <param name="dev" value="/dev/input/js0"/>
     <!--<param name="autorepeat_rate" type="double" value="10.0" />  -->
-    <param name="autorepeat_rate" value="10"/>
+    <param name="autorepeat_rate" value="10.0"/>
   </node>
 
   <!-- Joystick Teleop -->
-  <rosparam file="$(find vrx_gazebo)/config/diffdrive.yaml"
-            command="load"/>
-  <node pkg="joy_teleop" type="joy_teleop.py" name="joy_teleop">
+  <node pkg="joy_teleop" exec="joy_teleop" name="joy_teleop">
+    <param from="$(find-pkg-share vrx_gazebo)/config/diffdrive.yaml"/>
     <remap from="cmd_vel" to="cmd_vel" />
   </node>
 
   <!-- Convert Twist messages to Drive messages -->
-  <node pkg="vrx_gazebo" type="twist2thrust.py" name="twist2thrust" output="screen">
-    <remap from="left_cmd" to="/$(arg namespace)/thrusters/left_thrust_cmd"/>
-    <remap from="right_cmd" to="/$(arg namespace)/thrusters/right_thrust_cmd"/>
+  <node pkg="vrx_gazebo" exec="twist2thrust.py" name="twist2thrust" output="screen">
+    <remap from="left_cmd" to="/$(var namespace)/thrusters/left_thrust_cmd"/>
+    <remap from="right_cmd" to="/$(var namespace)/thrusters/right_thrust_cmd"/>
   </node>
 </launch>

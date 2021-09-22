@@ -18,31 +18,64 @@
 #ifndef ROBOTX_GAZEBO_TEST_HELPERS_HH_
 #define ROBOTX_GAZEBO_TEST_HELPERS_HH_
 
-#include <gazebo_msgs/ModelStates.h>
-#include <ros/ros.h>
+#include <gazebo_msgs/srv/get_model_list.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
+#include <chrono>
+
+using namespace std::literals::chrono_literals;
+
 
 /// \brief Check whether a model exists on simulation.
 /// \param[in] _name The model name.
-/// \param[in] _timeout Maximum timeout to wait for a model.
+/// \param[in] _timeout Timeout to wait for the service.
+/// \param[in] _retries Number of times it will call the service.
 /// \return True when the model was found or false otherwise.
-bool ModelExists(const std::string &_name,
-                 const ros::WallDuration _timeout = ros::WallDuration(5, 0))
+bool ModelExists(const std::string &_name, const int _timeout = 10000, const int _retries = 10)
 {
-  ros::WallTime timeout = ros::WallTime::now() + _timeout;
-  while (ros::WallTime::now() < timeout)
-  {
-    gazebo_msgs::ModelStatesConstPtr modelStates =
-      ros::topic::waitForMessage<gazebo_msgs::ModelStates>(
-        std::string("/gazebo/model_states"), ros::Duration(0.1));
+  std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("sandisland_test");
+  rclcpp::Client<gazebo_msgs::srv::GetModelList>::SharedPtr client =
+    node->create_client<gazebo_msgs::srv::GetModelList>("get_model_list");
 
-    if (!modelStates) continue;
-    for (auto model : modelStates->name)
-    {
-      if (model == _name)
-        return true;
+  auto request = std::make_shared<gazebo_msgs::srv::GetModelList::Request>();
+
+  while (!client->wait_for_service(std::chrono::milliseconds(_timeout))) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(node->get_logger(), "Interrupted while waiting for the service.");
+      return false;
     }
+
+    RCLCPP_INFO(node->get_logger(), "Service not available.");
+    return false;
   }
-  return false;
+
+  int tries(0);
+  bool model_exists(false);
+
+  rclcpp::Rate rate(std::chrono::milliseconds(5000));
+
+  while (model_exists == false && tries < _retries) {
+    auto result = client->async_send_request(request);
+
+    // Wait for the result.
+    if (rclcpp::spin_until_future_complete(node, result) == rclcpp::FutureReturnCode::SUCCESS)
+    {
+      for (auto model : result.get()->model_names)
+      {
+        if (model == _name) {
+          model_exists = true;
+          break;
+        }
+      }
+    } else {
+      RCLCPP_ERROR(node->get_logger(), "Failed to call service get_model_list");
+    }
+
+    tries++;
+    rate.sleep();
+  }
+
+  return model_exists;
 }
+
 #endif

@@ -55,6 +55,9 @@ TEST_F(SandislandTest, OceanExists)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "sandisland_test");
-  return RUN_ALL_TESTS();
+  rclcpp::init(argc, argv);
+  int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+
+  return result;
 }

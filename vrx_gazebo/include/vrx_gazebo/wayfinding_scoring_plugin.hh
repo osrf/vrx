@@ -18,7 +18,11 @@
 #ifndef VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+#include <geographic_msgs/msg/geo_pose_stamped.hpp>
+#include <geographic_msgs/msg/geo_path.hpp>
+#include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -92,17 +96,14 @@ class WayfindingScoringPlugin : public ScoringPlugin
   /// \brief Topic where the current average minimum error is published.
   private: std::string meanErrorTopic = "/vrx/wayfinding/mean_error";
 
-  /// \brief ROS node handle.
-  private: std::unique_ptr<ros::NodeHandle> rosNode;
-
   /// \brief Publisher for the goal.
-  private: ros::Publisher waypointsPub;
+  private: rclcpp::Publisher<geographic_msgs::msg::GeoPath>::SharedPtr waypointsPub;
 
   /// \brief Publisher for the combined 2D pose error.
-  private: ros::Publisher minErrorsPub;
+  private: rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr minErrorsPub;
 
   /// \brief Publisher for the current rms error.
-  private: ros::Publisher meanErrorPub;
+  private: rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr meanErrorPub;
 
   /// \brief Vector containing waypoints as 3D vectors of doubles representing
   /// X Y yaw, where X and Y are local (Gazebo) coordinates.

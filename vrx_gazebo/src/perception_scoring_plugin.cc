@@ -329,8 +329,7 @@ void PerceptionScoringPlugin::OnUpdate()
       // increment the atempt balance for this new obj
       this->attemptBal += 1;
       obj.StartTrial(this->frame);
-      ROS_INFO_NAMED("PerceptionScoring",
-        "New Attempt Balance: %d", this->attemptBal);
+      RCLCPP_INFO(node->get_logger(), "PerceptionScoring New Attempt Balance: %d", this->attemptBal);
     }
     // if time to despawn and object
     if (this->ElapsedTime() > obj.time + obj.duration &&
@@ -346,8 +345,7 @@ void PerceptionScoringPlugin::OnUpdate()
       // Add the score for this object.
       this->SetScore(this->Score() + obj.error);
 
-      ROS_INFO_NAMED("PerceptionScoring",
-        "New Attempt Balance: %d", this->attemptBal);
+      RCLCPP_INFO(node->get_logger(), "PerceptionScoring New Attempt Balance: %d", this->attemptBal);
     }
   }
   // if we have finished
@@ -357,12 +355,12 @@ void PerceptionScoringPlugin::OnUpdate()
     // publish string summarizing the objects
     for (auto& obj : this->objects)
     {
-      ROS_INFO_NAMED("PerceptionScoring", "%s", obj.Str().c_str());
+      RCLCPP_INFO(node->get_logger(), "PerceptionScoring %s", obj.Str().c_str());
     }
 
     // Run score is the mean error per object.
     this->SetScore(this->Score() / this->objects.size());
-    ROS_INFO_NAMED("Perception run score: ", "%f", this->Score());
+    RCLCPP_INFO(node->get_logger(), "Perception run score: %f", this->Score());
 
     // if loop, restart
     if (this->loopForever)
@@ -379,21 +377,19 @@ void PerceptionScoringPlugin::OnUpdate()
 
 /////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnAttempt(
-  const geographic_msgs::GeoPoseStamped::ConstPtr &_msg)
+  const geographic_msgs::msg::GeoPoseStamped::SharedPtr _msg)
 {
   // only accept an attempt if there are any in the attempt balance
   if (this->attemptBal == 0)
   {
-    ROS_WARN_NAMED("PerceptionScoring",
-      "Attempt Balance is 0, no attempts currently allowed. Ignoring.");
+    RCLCPP_WARN(node->get_logger(), "PerceptionScoring Attempt Balance is 0, no attempts currently allowed. Ignoring.");
     return;
   }
   else
   {
     // burn one attempt
     this->attemptBal -= 1;
-    ROS_INFO_NAMED("PerceptionScoring",
-      "New Attempt Balance: %d", this->attemptBal);
+    RCLCPP_INFO(node->get_logger(), "PerceptionScoring New Attempt Balance: %d", this->attemptBal);
   }
   for (auto& obj : this->objects)
   {
@@ -432,16 +428,16 @@ void PerceptionScoringPlugin::OnRunning()
 {
   gzmsg << "PerceptionScoringPlugin::OnRunning" << std::endl;
   // Quit if ros plugin was not loaded
-  if (!ros::isInitialized())
+  if (!rclcpp::ok())
   {
-    ROS_ERROR("ROS was not initialized.");
+    RCLCPP_ERROR(node->get_logger(), "ROS was not initialized.");
     return;
   }
 
   // Subscribe
-  this->nh = ros::NodeHandle(this->ns);
-  this->objectSub = this->nh.subscribe(this->objectTopic, 1,
-    &PerceptionScoringPlugin::OnAttempt, this);
+  this->objectSub = this->node->create_subscription<geographic_msgs::msg::GeoPoseStamped>(
+    this->objectTopic, 1,
+    std::bind(&PerceptionScoringPlugin::OnAttempt, this, std::placeholders::_1));
 }
 
 //////////////////////////////////////////////////

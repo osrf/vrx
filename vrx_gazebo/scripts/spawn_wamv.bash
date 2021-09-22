@@ -105,7 +105,7 @@ wait_until_gzserver_is_up
 
 # If input urdf is a xacro file, convert xacro to a urdf file
 final_urdf=/tmp/my_urdf.urdf
-rosrun xacro xacro --inorder -o $final_urdf $urdf
+ros2 run xacro xacro -o $final_urdf $urdf
 
 # Remove <package>/models
 sed -e "s/vrx_gazebo\/models\///g" -i $final_urdf

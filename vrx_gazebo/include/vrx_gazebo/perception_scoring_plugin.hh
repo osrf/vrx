@@ -23,8 +23,8 @@
 #ifndef VRX_GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_PERCEPTION_SCORING_PLUGIN_HH_
 
-#include <geographic_msgs/GeoPoseStamped.h>
-#include <ros/ros.h>
+#include <geographic_msgs/msg/geo_pose_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <vector>
 #include <memory>
 #include <string>
@@ -163,7 +163,7 @@ class PerceptionScoringPlugin : public ScoringPlugin
   protected: void OnUpdate();
 
   private: void OnAttempt(
-    const geographic_msgs::GeoPoseStamped::ConstPtr &_msg);
+    const geographic_msgs::msg::GeoPoseStamped::SharedPtr _msg);
 
   /// \brief Restart the object population list
   private: void Restart();
@@ -182,11 +182,8 @@ class PerceptionScoringPlugin : public ScoringPlugin
   /// \brief ROS topic where the object id/pose is received.
   private: std::string objectTopic;
 
-  /// \brief ROS Node handle.
-  private: ros::NodeHandle nh;
-
   /// \brief ROS subscriber
-  private: ros::Subscriber objectSub;
+  private: rclcpp::Subscription<geographic_msgs::msg::GeoPoseStamped>::SharedPtr objectSub;
 
   /// \brief World pointer.
   public: gazebo::physics::WorldPtr world;

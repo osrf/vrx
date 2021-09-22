@@ -18,8 +18,9 @@
 #ifndef VRX_GAZEBO_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_SCORING_PLUGIN_HH_
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <gazebo/msgs/gz_string.pb.h>
+#include <gazebo_ros/node.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -29,8 +30,8 @@
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include <gazebo/transport/transport.hh>
-#include "vrx_gazebo/Task.h"
-#include "vrx_gazebo/Contact.h"
+#include <vrx_gazebo/msg/task.hpp>
+#include <vrx_gazebo/msg/contact.hpp>
 
 /// \brief A plugin that provides common functionality to any scoring plugin.
 /// This plugin defines four different task states:
@@ -303,22 +304,22 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: std::string taskState = "initial";
 
   /// \brief The next task message to be published.
-  protected: vrx_gazebo::Task taskMsg;
+  protected: vrx_gazebo::msg::Task taskMsg;
 
   /// \brief ROS Contact Msg.
-  private: vrx_gazebo::Contact contactMsg;
+  private: vrx_gazebo::msg::Contact contactMsg;
 
   /// \brief The name of the joints to be dettached during ReleaseVehicle().
   private: std::vector<std::string> lockJointNames;
 
-  /// \brief ROS node handle.
-  private: std::unique_ptr<ros::NodeHandle> rosNode;
+  /// \brief Pointer to the ROS node.
+  protected: gazebo_ros::Node::SharedPtr node;
 
   /// \brief Publisher for the task state.
-  protected: ros::Publisher taskPub;
+  protected: rclcpp::Publisher<vrx_gazebo::msg::Task>::SharedPtr taskPub;
 
   /// \brief Publisher for the collision.
-  private: ros::Publisher contactPub;
+  private: rclcpp::Publisher<vrx_gazebo::msg::Contact>::SharedPtr contactPub;
 
   /// \brief Score in case of timeout - added for Navigation task
   private: double timeoutScore = -1.0;

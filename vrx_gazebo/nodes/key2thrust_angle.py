@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rospy
+import rclpy
 from std_msgs.msg import Float32
 
 import math
@@ -61,18 +61,20 @@ def __gen_ch_getter(echo):
     return __fun
 
 
-if __name__ == "__main__":
+def main(args=None):
     # Setup getch function
     getch = __gen_ch_getter(False)
 
+    rclpy.init(args=args)
+
     # Setup ros publishers and node
-    left_pub = rospy.Publisher('left_thrust_angle', Float32, queue_size=1)
-    right_pub = rospy.Publisher('right_thrust_angle', Float32, queue_size=1)
-    rospy.init_node('key2thrust_angle')
+    node = rclpy.create_node('key2thrust_angle')
+    left_pub = node.create_publisher(Float32, "left_thrust_angle", qos_profile=10)
+    right_pub = node.create_publisher(Float32, "right_thrust_angle", qos_profile=10)
 
     # Initialize current angle and angle speed
     thrust_angle_speed = 0.1
-    max_angle = rospy.get_param("~max_angle", math.pi / 2)
+    max_angle = node.declare_parameter("max_angle", math.pi / 2).get_parameter_value().double_value
     curr_angle = 0
     num_prints = 0
 
@@ -117,6 +119,13 @@ if __name__ == "__main__":
     finally:
         # Send 0 angle command at end
         angle_msg = Float32()
-        angle_msg.data = 0
+        angle_msg.data = 0.0
         left_pub.publish(angle_msg)
         right_pub.publish(angle_msg)
+
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

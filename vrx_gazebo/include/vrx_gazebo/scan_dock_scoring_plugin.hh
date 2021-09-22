@@ -18,20 +18,20 @@
 #ifndef VRX_GAZEBO_SCAN_DOCK_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_SCAN_DOCK_SCORING_PLUGIN_HH_
 
-#include <ros/ros.h>
-#include <std_msgs/String.h>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <light_buoy_colors.pb.h>
 #include <dock_placard.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
 #include <gazebo/gazebo.hh>
-#if GAZEBO_MAJOR_VERSION >= 8
-  #include <ignition/transport/Node.hh>
-#endif
+#include <gazebo_ros/node.hpp>
+#include <ignition/transport/Node.hh>
 #include <sdf/sdf.hh>
-#include "vrx_gazebo/ColorSequence.h"
-#include "vrx_gazebo/scoring_plugin.hh"
+#include <vrx_gazebo/srv/color_sequence.hpp>
+#include <vrx_gazebo/scoring_plugin.hh>
+
 
 /// \brief A class to monitor if the color sequence reported matches the color
 /// displayed in the light buoy.
@@ -39,12 +39,12 @@ class ColorSequenceChecker
 {
   /// \brief Constructor.
   /// \param[in] _expectedColors The sequence of expected colors.
-  /// \param[in] _rosNameSpace ROS namespace.
   /// \param[in] _rosColorSequenceService The ROS service used to receive
   /// the color submisison.
+  /// \param[in] _node Pointer to the ROS node
   public: ColorSequenceChecker(const std::vector<std::string> &_expectedColors,
-                               const std::string &_rosNameSpace,
-                               const std::string &_rosColorSequenceService);
+                               const std::string &_rosColorSequenceService,
+                               gazebo_ros::Node::SharedPtr _node);
   /// \brief Enable the ROS submission service.
   public: void Enable();
 
@@ -64,24 +64,20 @@ class ColorSequenceChecker
   /// \param[in] _request Contains the submission.
   /// \param[out] _res The Response. Note that this will be true even if the
   /// reported sequence is incorrect.
-  private: bool OnColorSequence(
-    ros::ServiceEvent<vrx_gazebo::ColorSequence::Request,
-      vrx_gazebo::ColorSequence::Response> &_event);
+  private: bool OnColorSequence(const std::shared_ptr<vrx_gazebo::srv::ColorSequence::Request> request,
+          std::shared_ptr<vrx_gazebo::srv::ColorSequence::Response> response);
 
   /// \brief The expected color sequence.
   private: std::vector<std::string> expectedSequence;
 
-  /// \brief ROS namespace.
-  private: std::string ns;
-
   /// \brief ROS topic where the color sequence should be sent.
   private: std::string colorSequenceService;
 
-  /// \brief ROS Node handle.
-  private: ros::NodeHandle nh;
+  /// \brief Pointer to the ROS node.
+  private: gazebo_ros::Node::SharedPtr node;
 
   /// \brief Service to generate and display a new color sequence.
-  private: ros::ServiceServer colorSequenceServer;
+  private: rclcpp::Service<vrx_gazebo::srv::ColorSequence>::SharedPtr colorSequenceServer;
 
   /// \brief Whether the color sequence has been received or not.
   private: bool colorSequenceReceived = false;
@@ -105,15 +101,16 @@ class DockChecker
   /// \param[in] _dockAllowed Whether is allowed to dock in this bay or not.
   /// \param[in] _worldName Gazebo world name.
   /// \param[in] _announceSymbol Optional symbol to announce via ROS.
+  /// \param[in] _node Pointer to the ROS node
   public: DockChecker(const std::string &_name,
                       const std::string &_internalActivationTopic,
                       const std::string &_exteriorActivationTopic,
                       const double _minDockTime,
                       const bool _dockAllowed,
                       const std::string &_worldName,
-                      const std::string &_rosNameSpace,
                       const std::string &_announceSymbol,
-                      const std::string &_gzSymbolTopic);
+                      const std::string &_gzSymbolTopic,
+                      gazebo_ros::Node::SharedPtr _node);
 
   /// \brief The name of this checker.
   public: std::string name;
@@ -138,20 +135,12 @@ class DockChecker
   /// \brief Callback triggered when the vehicle enters or exits the activation
   /// zone.
   /// \param[in] _msg The current state (0: exiting, 1: entering).
-#if GAZEBO_MAJOR_VERSION >= 8
   private: void OnInternalActivationEvent(const ignition::msgs::Boolean &_msg);
-#else
-  private: void OnInternalActivationEvent(ConstIntPtr &_msg);
-#endif
 
   /// \brief Callback triggered when the vehicle enters or exits the activation
   /// zone.
   /// \param[in] _msg The current state (0: exiting, 1: entering).
-#if GAZEBO_MAJOR_VERSION >= 8
   private: void OnExternalActivationEvent(const ignition::msgs::Boolean &_msg);
-#else
-  private: void OnExternalActivationEvent(ConstIntPtr &_msg);
-#endif
 
   /// \brief The gazebo topic used to receive notifications
   /// from the internal activation zone.
@@ -174,16 +163,11 @@ class DockChecker
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: gazebo::common::Timer timer;
 
-#if GAZEBO_MAJOR_VERSION >= 8
   /// \brief Ignition Transport node used for communication.
   private: ignition::transport::Node ignNode;
-#endif
 
-  /// \brief Create a node for communication.
-  private: gazebo::transport::NodePtr node;
-
-  /// \brief Subscriber to receive notifications from the contain plugin.
-  private: gazebo::transport::SubscriberPtr containSub;
+  /// \brief Pointer to the ROS node
+  private: gazebo_ros::Node::SharedPtr node;
 
   /// \brief Whether the vehicle has successfully docked or not.
   private: bool anytimeDocked = false;
@@ -192,22 +176,16 @@ class DockChecker
   private: bool atEntrance = false;
 
   /// \brief Color and shape of symbol to announce. E.g.: red_cross, blue_circle
-  private: std_msgs::String announceSymbol;
-
-  /// \brief ROS namespace.
-  private: std::string ns;
-
-  /// \brief ROS Node handle.
-  private: std::unique_ptr<ros::NodeHandle> nh;
+  private: std_msgs::msg::String announceSymbol;
 
   /// \brief Publisher for the symbol.
-  private: ros::Publisher symbolPub;
+  private: rclcpp::Publisher<std_msgs::msg::String>::SharedPtr symbolPub;
 
   /// \brief ROS topic where the target symbol will be published.
   private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
 
   /// \brief Publish the placard symbols
-  private: gazebo::transport::PublisherPtr dockPlacardPub;
+  private: rclcpp::Publisher<dock_placard_msgs::msgs::DockPlacard>::SharedPtr dockPlacardPub;
 };
 
 /// \brief A plugin for computing the score of the scan and dock task.
@@ -374,11 +352,8 @@ class ScanDockScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   private: void OnRunning() override;
 
-  /// \brief gazebo Node
-  private: gazebo::transport::NodePtr node;
-
   /// \brief Publish the color sequence
-  private: gazebo::transport::PublisherPtr lightBuoySequencePub;
+  private: rclcpp::Publisher<light_buoy_colors_msgs::msgs::LightBuoyColors>::SharedPtr lightBuoySequencePub;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;

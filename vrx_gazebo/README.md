@@ -6,7 +6,7 @@ This package provides gazebo models, plugins, and examples for simulating the [R
 ## Usage
 To launch gazebo with an example course layout and WAM-V platform, run:
 
-```roslaunch vrx_gazebo sandisland.launch```
+```ros2 launch vrx_gazebo sandisland.launch```
 
 
 ## Course models
