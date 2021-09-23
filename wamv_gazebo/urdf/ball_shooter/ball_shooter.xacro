@@ -30,9 +30,10 @@
         <inertia ixx="0.001779167" ixy="0.0" ixz="0.0" iyy="0.001779167" iyz="0.0" izz="0.000225"/>
       </inertial>
     </link>
-    <joint name="${namespace}/${name}_joint" type="revolute">
+    <!-- <joint name="${namespace}/${name}_joint" type="revolute"> -->
+    <joint name="${namespace}/${name}_joint" type="fixed">
       <axis xyz="0 0 1"/>
-      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+      <!-- <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/> -->
       <origin xyz="${position}" rpy="${orientation}"/>
       <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}_link"/>

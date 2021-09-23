@@ -172,7 +172,7 @@
       <xacro:wamv_pinger name="pinger" position="1.0 0 -1.0" />
       
       <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
-      <xacro:wamv_ball_shooter name="ball_shooter" position="0.54 0.30 1.296" orientation="0 -1.04 0"/>
+      <!-- <xacro:wamv_ball_shooter name="ball_shooter" position="0.54 0.30 1.296" orientation="0 -1.04 0"/> -->
 
     </xacro:if>
   </xacro:unless>
