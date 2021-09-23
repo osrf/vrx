@@ -126,9 +126,9 @@
     </xacro:if>
     
     <!-- Add 3D LIDAR -->
-    <xacro:if value="$(arg lidar_enabled)">
+    <!-- <xacro:if value="$(arg lidar_enabled)">
       <xacro:lidar name="lidar_wamv" y="-0.3" type="16_beam"/>
-    </xacro:if>
+    </xacro:if> -->
     
     <!-- Add P3D ground truth -->
     <xacro:if value="$(arg ground_truth_enabled)">
@@ -166,7 +166,7 @@
       <xacro:wamv_imu name="imu_wamv" y="-0.2" />
     
       <!-- Add 3D LIDAR -->
-      <xacro:lidar name="lidar_wamv" type="16_beam"/>
+      <!-- <xacro:lidar name="lidar_wamv" type="16_beam"/> -->
 
       <!-- Add pinger -->
       <xacro:wamv_pinger name="pinger" position="1.0 0 -1.0" />
