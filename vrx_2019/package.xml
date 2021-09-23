@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>vrx_2019</name>
+  <version>1.5.0</version>
+  <description>
+    This package contains Gazebo worlds for simulating environments of the
+    VRX 2019 event. There are ROS launch scripts that may be used to launch a
+    Gazebo session and load a world and models using `roslaunch`.
+  </description>
+
+  <maintainer email="caguero@openrobotics.org">Carlos Agüero</maintainer>
+  <license>TBD</license>
+  <author email="caguero@openrobotics.org">Carlos Agüero</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>vrx_gazebo</depend>
+  <depend>wamv_gazebo</depend>
+  <depend>xacro</depend>
+</package>

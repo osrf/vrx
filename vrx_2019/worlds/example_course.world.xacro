@@ -2,7 +2,7 @@
 <!-- World containing sandisland model and some course challenges -->
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <world name="robotx_example_course">
-    <xacro:include filename="$(find vrx_gazebo)/worlds/sandisland.xacro" />
+    <xacro:include filename="$(find vrx_2019)/worlds/sandisland.xacro" />
     <xacro:sandisland />
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>

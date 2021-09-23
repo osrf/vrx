@@ -2,19 +2,16 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vrx_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find vrx_gazebo)/worlds/example_course_2019.world" />
+  <arg name="world" default="$(find vrx_2019)/worlds/wayfinding_task.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
-  <arg name="verbose" default="false"/>
+  <arg name="verbose" default="true"/>
   <!-- Set various other gazebo arguments-->
   <arg name="extra_gazebo_args" default=""/>
   <!-- Start in a default namespace -->
   <arg name="namespace" default="wamv"/>
-  <!-- Do we lock the vessel to the world? -->
-  <arg name="wamv_locked" default="false" />
-  <!-- Start paused? -->
-  <arg name="paused" default="false"/>
+
   <!-- Initial USV location and attitude-->
   <arg name="x" default="158" />
   <arg name="y" default="108" />
@@ -29,31 +26,27 @@
        X = "holonomic" configuration -->
   <arg name="thrust_config" default="T" />
 
+  <!-- Do we lock the vessel to the world? -->
+  <arg name="wamv_locked" default="true" />
+
   <!-- Do we load the VRX sensor suite? -->
   <arg name="vrx_sensors_enabled" default="true" />
 
   <!-- Start Gazebo with the world file -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name"   value="$(arg world)"/>
-    <arg name="verbose"      value="$(arg verbose)"/>
-    <arg name="paused"       value="$(arg paused)"/>
+    <arg name="world_name" value="$(arg world)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+    <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui"          value="$(arg gui)" />
+    <arg name="gui" value="$(arg gui)" />
     <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
   </include>
 
-  <!-- Load robot model -->
-  <!-- Determine which model -->
-  <arg name="h_config" value="$(eval int((thrust_config)=='H'))"/>
-  <arg name="t_config" value="$(eval int((thrust_config)=='T'))"/>
-  <arg name="x_config" value="$(eval int((thrust_config)=='X'))"/>
-
-  <!-- For now - can only use the T configuration! -->
-  <arg if="$(arg t_config)" name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
-
+   <!-- Load robot model -->
+  <arg name="urdf" default="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
   <param name="$(arg namespace)/robot_description"
          command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg urdf)'
-         locked:=$(arg wamv_locked)		   
+         locked:=$(arg wamv_locked)
          thruster_config:=$(arg thrust_config)
          vrx_sensors_enabled:=$(arg vrx_sensors_enabled)
          namespace:=$(arg namespace) "/>
@@ -62,5 +55,5 @@
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
         args="-x $(arg x) -y $(arg y) -z $(arg z)
               -R $(arg R) -P $(arg P) -Y $(arg Y)
-              -urdf -param $(arg namespace)/robot_description -model wamv"/>
+              -urdf -param $(arg namespace)/robot_description -model wamv "/>
 </launch>
