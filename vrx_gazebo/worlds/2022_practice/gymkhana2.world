@@ -15,6 +15,11 @@
       </sky>
       <grid>0</grid>
       <origin_visual>0</origin_visual>
+      <fog>
+        <type>linear</type>
+        <color>0.7 0.7 0.7 1</color>
+        <density>0.1</density>
+      </fog>
     </scene>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
@@ -45,14 +50,14 @@
 
     <!-- The navigation course -->
     <include>
-      <uri>model://short_navigation_course0</uri>
+      <uri>model://short_navigation_course2</uri>
       <pose>-524 186 0 0 0 -1.44</pose>
     </include>
 
     <!-- The obstacle course -->
     <include>
       <name>buoys</name>
-      <uri>model://obstacle_course0</uri>
+      <uri>model://obstacle_course2</uri>
       <pose>-477 275 0 0 0 2.54</pose>
     </include>
 
@@ -122,8 +127,8 @@
           <period>5.0</period>
           <number>3</number>
           <scale>2.5</scale>
-          <gain>0.0</gain>
-          <direction>1.0 0.0</direction>
+          <gain>0.8</gain>
+          <direction>-0.6 -0.32</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
           <amplitude>0.0</amplitude>
@@ -140,11 +145,11 @@
             <reflectOpacity>0.2</reflectOpacity>
             <wave>
               <model>PMS</model>
-              <period>7.0</period>
+              <period>5.0</period>
               <number>3</number>
               <scale>2.5</scale>
-              <gain>0.0</gain>
-              <direction>1.0 0.0</direction>
+              <gain>0.8</gain>
+              <direction>-0.6 -0.32</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
               <amplitude>0.0</amplitude>
@@ -194,10 +199,10 @@
         <coeff_vector>.5 .5 .33</coeff_vector>
       </wind_obj>
       <!-- Wind -->
-      <wind_direction>240</wind_direction>
+      <wind_direction>355</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>0</wind_mean_velocity>
-      <var_wind_gain_constants>0</var_wind_gain_constants>
+      <wind_mean_velocity>9.0</wind_mean_velocity>
+      <var_wind_gain_constants>5.0</var_wind_gain_constants>
       <var_wind_time_constants>1</var_wind_time_constants>
       <random_seed>10</random_seed>
       <!-- set to zero/empty to randomize -->
@@ -240,7 +245,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <course_name>short_navigation_course_0</course_name>
+      <course_name>short_navigation_course_2</course_name>
       <obstacle_penalty>10.0</obstacle_penalty>
       <gates>
         <gate>
@@ -273,7 +278,7 @@
       <!-- Disable heading error -->
       <head_error_on>false</head_error_on>
       <!-- Goal as Cartesian coordinates -->
-      <goal_pose_cart>-503 302.5 0</goal_pose_cart>
+      <goal_pose_cart>-483 290 0</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
