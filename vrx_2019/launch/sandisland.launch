@@ -2,7 +2,7 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vrx_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find vrx_gazebo)/worlds/example_course_2019.world" />
+  <arg name="world" default="$(find vrx_2019)/worlds/example_course.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->

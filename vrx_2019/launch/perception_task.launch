@@ -2,7 +2,7 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find vrx_gazebo)/config/custom_rosconsole.conf"/>
   <!-- Gazebo world to load -->
-  <arg name="world" default="$(find vrx_gazebo)/worlds/scan_and_dock.world" />
+  <arg name="world" default="$(find vrx_2019)/worlds/perception_task.world" />
   <!-- If true, run gazebo GUI -->
   <arg name="gui" default="true" />
   <!-- If true, run gazebo in verbose mode -->
@@ -11,6 +11,8 @@
   <arg name="extra_gazebo_args" default=""/>
   <!-- Start in a default namespace -->
   <arg name="namespace" default="wamv"/>
+
+  <arg name="paused" default="false"/>
 
   <!-- Initial USV location and attitude-->
   <arg name="x" default="158" />
@@ -36,7 +38,7 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name"   value="$(arg world)"/>
     <arg name="verbose"      value="$(arg verbose)"/>
-    <arg name="paused"       value="false"/>
+    <arg name="paused"       value="$(arg paused)"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui"          value="$(arg gui)" />
     <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
