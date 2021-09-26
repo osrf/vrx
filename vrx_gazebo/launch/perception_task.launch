@@ -46,18 +46,15 @@
 
   <!-- Load robot model -->
   <arg name="urdf" default="$(find-pkg-share wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
-
+  <arg name="generated_urdf" default="$(find-pkg-share wamv_gazebo)/urdf/robot_description"/>
   <arg name="cmd" 
-        default="$(exec-in-pkg xacro xacro) '$(var urdf)' 
-        > $(find-pkg-share wamv_gazebo)/urdf/robot_description
+        default="$(exec-in-pkg xacro xacro) '$(var urdf)' > $(var generated_urdf)
         locked:=$(var wamv_locked)
         thruster_config:=$(var thrust_config)
         vrx_sensors_enabled:=$(var vrx_sensors_enabled)
         namespace:=$(var namespace)"/>
 
   <executable cmd="$(var cmd)" name="robot_description" output="screen" shell="true" />
-
-  <arg name="generated_urdf" default="$(find-pkg-share wamv_gazebo)/urdf/robot_description"/>
 
   <!-- Spawn model in Gazebo -->
   <node name="spawn_entity" pkg="gazebo_ros" exec="spawn_entity.py" respawn="false" output="screen"

@@ -54,10 +54,9 @@
 
   <!-- Load robot model -->
   <arg name="urdf" default="$(find-pkg-share wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
-
+  <arg name="generated_urdf" default="$(find-pkg-share wamv_gazebo)/urdf/robot_description"/>
   <arg name="cmd" 
-        default="$(exec-in-pkg xacro xacro) '$(var urdf)' 
-        > $(find-pkg-share wamv_gazebo)/urdf/robot_description
+        default="$(exec-in-pkg xacro xacro) '$(var urdf)' > $(var generated_urdf)
         thruster_config:=$(var thrust_config)
         camera_enabled:=$(var camera_enabled)
         gps_enabled:=$(var gps_enabled)
@@ -67,8 +66,6 @@
         namespace:=$(var namespace)"/>
 
   <executable cmd="$(var cmd)" name="robot_description" output="screen" shell="true" />
-
-  <arg name="generated_urdf" default="$(find-pkg-share wamv_gazebo)/urdf/robot_description"/>
 
   <!-- Spawn model in Gazebo, script depending on non_competition_mode -->
   <group if="$(var non_competition_mode)">
