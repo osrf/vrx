@@ -58,7 +58,7 @@
     <include>
       <name>buoys</name>
       <uri>model://obstacle_course2</uri>
-      <pose>-477 275 0 0 0 2.54</pose>
+      <pose>-530 250 0 0 0 1.17</pose>
     </include>
 
     <!-- The posts for securing the WAM-V -->
