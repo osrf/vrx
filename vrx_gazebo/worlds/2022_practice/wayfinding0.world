@@ -125,8 +125,9 @@
             <refractOpacity>0.2</refractOpacity>
             <reflectOpacity>0.2</reflectOpacity>
             <wave>
+          <!-- No effect for the PMS model
               <model>PMS</model>
-              <period>7.0</period>
+              <period>5.0</period>
               <number>3</number>
               <scale>2.5</scale>
               <gain>0.0</gain>
@@ -196,13 +197,13 @@
       <!-- Goal as Latitude, Longitude, Yaw -->
        <waypoints>
         <waypoint>
-          <pose>-33.722611 150.673901 1.0</pose>
+          <pose>-33.722611 150.674051 1.0</pose>
         </waypoint>
         <waypoint>
-          <pose>-33.722574 150.6742881 1.0</pose>
+          <pose>-33.722574 150.6744381 0.0</pose>
         </waypoint>
         <waypoint>
-          <pose>-33.722680 150.674606 1.0</pose>
+          <pose>-33.722680 150.674756 -1.0</pose>
         </waypoint>
       </waypoints>
       <initial_state_duration>10</initial_state_duration>
