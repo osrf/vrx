@@ -202,7 +202,10 @@
           <pose>-33.722418 150.673634 1.0</pose>
         </waypoint>
         <waypoint>
-          <pose>-33.722106 150.673663 -2.0</pose>
+          <pose>-33.722106 150.673663 0.5</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722006 150.674110 -3</pose>
         </waypoint>
       </waypoints>
       <initial_state_duration>10</initial_state_duration>
