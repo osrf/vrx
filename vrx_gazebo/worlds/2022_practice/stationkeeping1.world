@@ -105,10 +105,10 @@
         <cell_count>50 50</cell_count>
         <wave>
           <model>PMS</model>
-          <period>5.0</period>
+          <period>7.0</period>
           <number>3</number>
           <scale>2.5</scale>
-          <gain>0.0</gain>
+          <gain>0.2</gain>
           <direction>1.0 0.0</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
@@ -129,7 +129,7 @@
               <period>7.0</period>
               <number>3</number>
               <scale>2.5</scale>
-              <gain>0.0</gain>
+              <gain>0.2</gain>
               <direction>1.0 0.0</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
@@ -185,7 +185,7 @@
       <wind_mean_velocity>5</wind_mean_velocity>
       <var_wind_gain_constants>2.0</var_wind_gain_constants>
       <var_wind_time_constants>1</var_wind_time_constants>
-      <random_seed>10</random_seed>
+      <random_seed>15</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
     </plugin>
@@ -193,7 +193,7 @@
       <vehicle>wamv</vehicle>
       <task_name>stationkeeping</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
-      <goal_pose>-33.7226700 150.6740600 0.0 </goal_pose>
+      <goal_pose>-33.7226700 150.6740600 2.0 </goal_pose>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
