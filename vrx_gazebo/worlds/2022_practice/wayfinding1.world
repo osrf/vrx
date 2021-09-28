@@ -105,10 +105,10 @@
         <cell_count>50 50</cell_count>
         <wave>
           <model>PMS</model>
-          <period>6.0</period>
+          <period>8.0</period>
           <number>3</number>
           <scale>2.5</scale>
-          <gain>0.1</gain>
+          <gain>0.2</gain>
           <direction>0.5 0.5</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
@@ -126,10 +126,10 @@
             <reflectOpacity>0.2</reflectOpacity>
             <wave>
               <model>PMS</model>
-              <period>6.0</period>
+              <period>8.0</period>
               <number>3</number>
               <scale>2.5</scale>
-              <gain>0.1</gain>
+              <gain>0.2</gain>
               <direction>0.5 0.5</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
@@ -182,10 +182,10 @@
       <!-- Wind -->
       <wind_direction>315</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>20.0</wind_mean_velocity>
-      <var_wind_gain_constants>0.5</var_wind_gain_constants>
+      <wind_mean_velocity>4.0</wind_mean_velocity>
+      <var_wind_gain_constants>2.0</var_wind_gain_constants>
       <var_wind_time_constants>1</var_wind_time_constants>
-      <random_seed>10</random_seed>
+      <random_seed>15</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
     </plugin>
@@ -202,7 +202,7 @@
           <pose>-33.722418 150.673634 1.0</pose>
         </waypoint>
         <waypoint>
-          <pose>-33.722106 150.673663 1.0</pose>
+          <pose>-33.722106 150.673663 -2.0</pose>
         </waypoint>
       </waypoints>
       <initial_state_duration>10</initial_state_duration>
