@@ -108,7 +108,7 @@
           <period>10.0</period>
           <number>3</number>
           <scale>2.5</scale>
-          <gain>0.1</gain>
+          <gain>0.3</gain>
           <direction>-0.5 0.25</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
@@ -129,7 +129,7 @@
               <period>10.0</period>
               <number>3</number>
               <scale>2.5</scale>
-              <gain>0.1</gain>
+              <gain>0.3</gain>
               <direction>-0.5 0.25</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
@@ -201,8 +201,13 @@
       <uri>model://mb_marker_buoy_green</uri>
     </include>
     <include>
-      <name>black_round</name>
+      <name>black_round_0</name>
       <pose>-200 106 1 0 0 0</pose>
+      <uri>model://mb_round_buoy_black</uri>
+    </include>
+    <include>
+      <name>black_round_1</name>
+      <pose>-200 112 1 0 0 0</pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
     <include>
@@ -247,19 +252,19 @@
           <time>15.0</time>
           <type>mb_round_buoy_orange</type>
           <name>orange_round</name>
-          <pose>8.3 -1.0 0.7 0 0 0</pose>
+          <pose>6.0 -1.0 0.7 0 0 0</pose>
         </object>
         <object>
           <time>25.0</time>
-          <type>mb_marker_buoy_white</type>
-          <name>white_0</name>
+          <type>mb_round_buoy_black</type>
+          <name>black_round_0</name>
           <pose>4.9 1.32 0.2 0 0 0</pose>
         </object>
         <object>
           <time>25.0</time>
           <type>mb_round_buoy_black</type>
-          <name>black_round</name>
-          <pose>4.9 0.5 0.2 0 0 0</pose>
+          <name>black_round_1</name>
+          <pose>4.7 0.7 0.2 0 0 0</pose>
         </object>
         <object>
           <time>35.0</time>
@@ -270,7 +275,7 @@
         <object>
           <time>35.0</time>
           <type>mb_round_buoy_black</type>
-          <name>black_round</name>
+          <name>black_round_0</name>
           <pose>6.1 0.2 0.2 0 0 0</pose>
         </object>
       </object_sequence>
