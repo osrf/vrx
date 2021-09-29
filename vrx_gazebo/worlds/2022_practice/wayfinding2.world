@@ -18,7 +18,7 @@
       <fog>
         <type>linear</type>
         <color>0.7 0.7 0.7 1</color>
-        <density>0.15</density>
+        <density>0.05</density>
       </fog>
     </scene>
     <spherical_coordinates>
@@ -187,10 +187,10 @@
       <!-- Wind -->
       <wind_direction>240</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>0</wind_mean_velocity>
-      <var_wind_gain_constants>0</var_wind_gain_constants>
-      <var_wind_time_constants>1</var_wind_time_constants>
-      <random_seed>10</random_seed>
+      <wind_mean_velocity>8.0</wind_mean_velocity>
+      <var_wind_gain_constants>2.0</var_wind_gain_constants>
+      <var_wind_time_constants>2</var_wind_time_constants>
+      <random_seed>9</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
     </plugin>
@@ -204,10 +204,16 @@
           <pose>-33.722462 150.674268 1.0</pose>
         </waypoint>
         <waypoint>
+          <pose>-33.722262 150.674800 -1.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.7226908 150.6751165 0.0</pose>
+        </waypoint>
+        <waypoint>
           <pose>-33.722925 150.675304 1.0</pose>
         </waypoint>
         <waypoint>
-          <pose>-33.7226908 150.6751165 1.0</pose>
+          <pose>-33.7226908 150.6755165 -2.5</pose>
         </waypoint>
       </waypoints>
       <initial_state_duration>10</initial_state_duration>
