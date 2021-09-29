@@ -126,7 +126,7 @@
             <reflectOpacity>0.2</reflectOpacity>
             <wave>
               <model>PMS</model>
-              <period>7.0</period>
+              <period>5.0</period>
               <number>3</number>
               <scale>2.5</scale>
               <gain>0.0</gain>
