@@ -105,11 +105,11 @@
         <cell_count>50 50</cell_count>
         <wave>
           <model>PMS</model>
-          <period>10.0</period>
+          <period>8.0</period>
           <number>3</number>
           <scale>2.5</scale>
           <gain>0.3</gain>
-          <direction>-0.5 0.25</direction>
+          <direction>0.0 -1.0</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
           <amplitude>0.0</amplitude>
@@ -126,11 +126,11 @@
             <reflectOpacity>0.2</reflectOpacity>
             <wave>
               <model>PMS</model>
-              <period>10.0</period>
+              <period>8.0</period>
               <number>3</number>
               <scale>2.5</scale>
               <gain>0.3</gain>
-              <direction>-0.5 0.25</direction>
+              <direction>0.0 -1.0</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
               <amplitude>0.0</amplitude>
