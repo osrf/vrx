@@ -15,11 +15,6 @@
       </sky>
       <grid>0</grid>
       <origin_visual>0</origin_visual>
-      <fog>
-        <type>linear</type>
-        <color>0.7 0.7 0.7 1</color>
-        <density>0.1</density>
-      </fog>
     </scene>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
