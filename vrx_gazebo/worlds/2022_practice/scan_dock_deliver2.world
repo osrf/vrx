@@ -6,6 +6,35 @@
 <sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- COORDINATE: {'environment': 0, 'constant': 0} -->
   <world name="robotx_example_course" xmlns:xacro="http://ros.org/wiki/xacro">
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+      <grid>0</grid>
+      <origin_visual>0</origin_visual>
+      <ambient>0.19 0.19 0.19 1</ambient>
+    </scene>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>-33.724223</latitude_deg>
+      <longitude_deg>150.679736</longitude_deg>
+      <elevation>0.0</elevation>
+      <heading_deg>0.0</heading_deg>
+    </spherical_coordinates>
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+     <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose frame="">-478.101746 148.200836 13.203143 0.0 0.248344 2.936862</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+      <!--<plugin name="GUITaskWidget" filename="libgui_task_widget.so"/>-->
+    </gui>
     <include>
       <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
       to go into the model file to change the altitutde/height!-->
@@ -23,41 +52,6 @@
     <include>
       <uri>model://dock_2022</uri>
       <pose>-540 210 0 0 0 3.14</pose>
-    </include>
-
-    <scene>
-      <sky>
-        <clouds>
-          <speed>12</speed>
-        </clouds>
-      </sky>
-      <grid>0</grid>
-      <origin_visual>0</origin_visual>
-    </scene>
-    <spherical_coordinates>
-      <surface_model>EARTH_WGS84</surface_model>
-      <world_frame_orientation>ENU</world_frame_orientation>
-      <latitude_deg>-33.724223</latitude_deg>
-      <longitude_deg>150.679736</longitude_deg>
-      <elevation>0.0</elevation>
-      <heading_deg>0.0</heading_deg>
-    </spherical_coordinates>
-    <!-- A global light source -->
-    <include>
-      <uri>model://sun</uri>
-    </include>
-    <gui fullscreen="0">
-      <camera name="user_camera">
-        <pose frame="">-478.101746 148.200836 13.203143 0.0 0.248344 2.936862</pose>
-        <view_controller>orbit</view_controller>
-      </camera>
-      <!--<plugin name="GUITaskWidget" filename="libgui_task_widget.so"/>-->
-    </gui>
-     <include>
-      <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
-      to go into the model file to change the altitutde/height!-->
-      <pose> 0 0 0.2 0 0 0 </pose>
-      <uri>model://sydney_regatta</uri>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -123,7 +117,7 @@
         <cell_count>50 50</cell_count>
         <wave>
           <model>PMS</model>
-          <period>2.0</period>
+          <period>4.0</period>
           <number>3</number>
           <scale>2.5</scale>
           <gain>0.5</gain>
@@ -144,7 +138,7 @@
             <reflectOpacity>0.2</reflectOpacity>
             <wave>
               <model>PMS</model>
-              <period>2.0</period>
+              <period>4.0</period>
               <number>3</number>
               <scale>2.5</scale>
               <gain>0.5</gain>

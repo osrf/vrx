@@ -15,6 +15,7 @@
       </sky>
       <grid>0</grid>
       <origin_visual>0</origin_visual>
+      <ambient>0.5 0.5 0.5 1</ambient>
     </scene>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
@@ -46,14 +47,14 @@
     <!-- The navigation course -->
     <include>
       <uri>model://short_navigation_course1</uri>
-      <pose>-524 186 0 0 0 -1.44</pose>
+      <pose>-535 180 0 0 0 -1.44</pose>
     </include>
 
     <!-- The obstacle course -->
     <include>
       <name>buoys</name>
       <uri>model://obstacle_course1</uri>
-      <pose>-477 275 0 0 0 0.44</pose>
+      <pose>-500 250 0 0 0 0.44</pose>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -273,7 +274,7 @@
       <!-- Disable heading error -->
       <head_error_on>false</head_error_on>
       <!-- Goal as Cartesian coordinates -->
-      <goal_pose_cart>-495 315 0</goal_pose_cart>
+      <goal_pose_cart>-495 265 0</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>

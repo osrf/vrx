@@ -18,8 +18,9 @@
       <fog>
         <type>linear</type>
         <color>0.7 0.7 0.7 1</color>
-        <density>0.05</density>
+        <density>0.1</density>
       </fog>
+      <ambient>0.28 0.28 0.28 1</ambient>
     </scene>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
