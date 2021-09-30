@@ -5,43 +5,43 @@
   <model name="obstacle_course1">
     <include>
       <name>mb_round_buoy_black_0</name>
-      <pose>56.84848062 59.2614612521 0.0 0 0 0 </pose>
+      <pose>11.75309579 -44.04348694 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_black_1</name>
-      <pose>56.9804067204 8.39663411782 0.0 0 0 0 </pose>
+      <pose>-4.38017291 -31.00932693 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_black_2</name>
-      <pose>-39.9569402425 -59.6380114707 0.0 0 0 0 </pose>
+      <pose>22.6568676   -0.92141124 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_black_3</name>
-      <pose>40.5935528521 0.420855757631 0.0 0 0 0 </pose>
+      <pose>44.09486489   5.66663984 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_black_4</name>
-      <pose>45.1471787907 -1.58774897319 0.0 0 0 0 </pose>
+      <pose>32.17463149 -15.94637324 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_black_5</name>
-      <pose>37.4966413916 -23.6251778906 0.0 0 0 0 </pose>
+      <pose>-6.94456804 -2.61300114 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_black_6</name>
-      <pose>46.2135293014 -5.59469145311 0.0 0 0 0 </pose>
+      <pose>-50.40281825 -61.06834745 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_black</uri>
     </include>
 
@@ -65,13 +65,13 @@
 
     <include>
       <name>mb_round_buoy_orange_0</name>
-      <pose>59.628595207 -32.2043953768 0.0 0 0 0 </pose>
+      <pose>-22.30202998   7.58586649 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_orange</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_orange_1</name>
-      <pose>51.0184408248 -44.8771143523 0.0 0 0 0 </pose>
+      <pose>33.86021685  14.50500992 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_orange</uri>
     </include>
 
@@ -83,13 +83,13 @@
 
     <include>
       <name>mb_round_buoy_orange_3</name>
-      <pose>4.82024240714 5.70282780335 0.0 0 0 0 </pose>
+      <pose>-23.77126376  27.34241072 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_orange</uri>
     </include>
 
     <include>
       <name>mb_round_buoy_orange_4</name>
-      <pose>-10.7269893388 -31.6245175746 0.0 0 0 0 </pose>
+      <pose>-16.29351304 -24.97527506 0.0 0 0 0 </pose>
       <uri>model://mb_round_buoy_orange</uri>
     </include>
 
