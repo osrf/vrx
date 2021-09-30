@@ -45,19 +45,19 @@
     <!-- The VRX animal buoys -->
     <include>
       <name>crocodile_buoy</name>
-      <pose>-520 180 0 0 0 0</pose>
+      <pose>-500 190 0 0 0 0</pose>
       <uri>model://crocodile_buoy</uri>
     </include>
 
     <include>
       <name>platypus_buoy</name>
-      <pose>-500 210 0 0 0 0</pose>
+      <pose>-480 220 0 0 0 0</pose>
       <uri>model://platypus_buoy</uri>
     </include>
 
     <include>
       <name>turtle_buoy</name>
-      <pose>-550 230 0 0 0 0</pose>
+      <pose>-460 250 0 0 0 0</pose>
       <uri>model://turtle_buoy</uri>
     </include>
 
@@ -127,7 +127,7 @@
           <period>4.5</period>
           <number>3</number>
           <scale>2.5</scale>
-          <gain>0.75</gain>
+          <gain>0.4</gain>
           <direction>0.83 -0.75</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
@@ -148,7 +148,7 @@
               <period>4.5</period>
               <number>3</number>
               <scale>2.5</scale>
-              <gain>0.75</gain>
+              <gain>0.4</gain>
               <direction>0.83 -0.75</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
@@ -201,7 +201,7 @@
       <!-- Wind -->
       <wind_direction>359</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>7.35</wind_mean_velocity>
+      <wind_mean_velocity>6.35</wind_mean_velocity>
       <var_wind_gain_constants>4.1</var_wind_gain_constants>
       <var_wind_time_constants>1</var_wind_time_constants>
       <random_seed>11</random_seed>
