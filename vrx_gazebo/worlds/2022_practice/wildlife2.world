@@ -15,11 +15,6 @@
       </sky>
       <grid>0</grid>
       <origin_visual>0</origin_visual>
-      <fog>
-        <type>linear</type>
-        <color>0.7 0.7 0.7 1</color>
-        <density>0.05</density>
-      </fog>
     </scene>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
@@ -45,6 +40,25 @@
       to go into the model file to change the altitutde/height!-->
       <pose> 0 0 0.2 0 0 0 </pose>
       <uri>model://sydney_regatta</uri>
+    </include>
+
+    <!-- The VRX animal buoys -->
+    <include>
+      <name>crocodile_buoy</name>
+      <pose>-520 180 0 0 0 0</pose>
+      <uri>model://crocodile_buoy</uri>
+    </include>
+
+    <include>
+      <name>platypus_buoy</name>
+      <pose>-500 210 0 0 0 0</pose>
+      <uri>model://platypus_buoy</uri>
+    </include>
+
+    <include>
+      <name>turtle_buoy</name>
+      <pose>-550 230 0 0 0 0</pose>
+      <uri>model://turtle_buoy</uri>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -110,11 +124,11 @@
         <cell_count>50 50</cell_count>
         <wave>
           <model>PMS</model>
-          <period>5.0</period>
+          <period>4.5</period>
           <number>3</number>
           <scale>2.5</scale>
-          <gain>0.8</gain>
-          <direction>-0.95 0.1</direction>
+          <gain>0.75</gain>
+          <direction>0.83 -0.75</direction>
           <angle>0.4</angle>
           <tau>2.0</tau>
           <amplitude>0.0</amplitude>
@@ -131,11 +145,11 @@
             <reflectOpacity>0.2</reflectOpacity>
             <wave>
               <model>PMS</model>
-              <period>5.0</period>
+              <period>4.5</period>
               <number>3</number>
               <scale>2.5</scale>
-              <gain>0.8</gain>
-              <direction>-0.95 0.1</direction>
+              <gain>0.75</gain>
+              <direction>0.83 -0.75</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
               <amplitude>0.0</amplitude>
@@ -185,40 +199,25 @@
         <coeff_vector>.5 .5 .33</coeff_vector>
       </wind_obj>
       <!-- Wind -->
-      <wind_direction>244</wind_direction>
+      <wind_direction>359</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>8.0</wind_mean_velocity>
-      <var_wind_gain_constants>2.0</var_wind_gain_constants>
-      <var_wind_time_constants>2</var_wind_time_constants>
-      <random_seed>9</random_seed>
+      <wind_mean_velocity>7.35</wind_mean_velocity>
+      <var_wind_gain_constants>4.1</var_wind_gain_constants>
+      <var_wind_time_constants>1</var_wind_time_constants>
+      <random_seed>11</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
     </plugin>
-
-    <plugin filename="libwayfinding_scoring_plugin.so" name="wayfinding_scoring_plugin">
+    <!-- The scoring plugin -->
+    <plugin name="wildlife_scoring_plugin"
+            filename="libwildlife_scoring_plugin.so">
+      <!-- Common parameters -->
       <vehicle>wamv</vehicle>
-      <task_name>wayfinding</task_name>
-      <!-- Goal as Latitude, Longitude, Yaw -->
-       <waypoints>
-        <waypoint>
-          <pose>-33.722462 150.674268 1.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.722262 150.674800 -1.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.7226908 150.6751165 0.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.722925 150.675304 1.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.7226908 150.6755165 -2.5</pose>
-        </waypoint>
-      </waypoints>
+      <task_name>wildlife_course</task_name>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
+      <collision_buffer>10</collision_buffer>
       <release_joints>
         <joint>
           <name>wamv_external_pivot_joint</name>
@@ -227,10 +226,28 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <markers>
-        <scaling>0.2 0.2 2.0</scaling>
-        <height>0.5</height>
-      </markers>
+
+      <!-- wildlife specific parameters -->
+      <buoys>
+        <buoy>
+          <model_name>crocodile_buoy</model_name>
+          <link_name>link</link_name>
+          <goal>avoid</goal>
+        </buoy>
+        <buoy>
+          <model_name>platypus_buoy</model_name>
+          <link_name>link</link_name>
+          <goal>circumnavigate_clockwise</goal>
+        </buoy>
+        <buoy>
+          <model_name>turtle_buoy</model_name>
+          <link_name>link</link_name>
+          <goal>circumnavigate_counterclockwise</goal>
+        </buoy>
+      </buoys>
+      <engagement_distance>10.0</engagement_distance>
+      <time_bonus>30.0</time_bonus>
+      <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
     </plugin>
   </world>
 </sdf>
