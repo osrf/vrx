@@ -31,8 +31,8 @@ std::vector<std::string> PlacardPlugin::kShapes =
   {"circle", "cross", "triangle", "rectangle"};
 
 /////////////////////////////////////////////////
-PlacardPlugin::PlacardPlugin():
-  gzNode(new gazebo::transport::Node())
+PlacardPlugin::PlacardPlugin()
+  :gzNode(new gazebo::transport::Node())
 {
 }
 

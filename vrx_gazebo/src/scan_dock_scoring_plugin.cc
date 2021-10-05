@@ -328,8 +328,8 @@ void DockChecker::OnExternalActivationEvent(ConstIntPtr &_msg)
 #endif
 
 //////////////////////////////////////////////////
-ScanDockScoringPlugin::ScanDockScoringPlugin():
-  node (new gazebo::transport::Node())
+ScanDockScoringPlugin::ScanDockScoringPlugin()
+  : node(new gazebo::transport::Node())
 {
 }
 
