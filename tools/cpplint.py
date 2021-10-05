@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #
 # Copyright (c) 2009 Google Inc. All rights reserved.
 #
@@ -79,6 +79,7 @@ We do a small hack, which is to ignore //'s with "'s after them on the
 same line, but it is far from perfect (in either direction).
 """
 
+from __future__ import absolute_import
 import codecs
 import getopt
 import math  # for log
@@ -88,6 +89,20 @@ import sre_compile
 import string
 import sys
 import unicodedata
+
+# Trick for Python 2/3 compatibility with slightly higher fidelity to original
+try:
+  xrange          # Python 2
+except NameError:
+  xrange = range  # Python 3
+  unicode = str
+else:
+  # Change stderr to write with replacement characters so we don't die
+  # if we try to print something containing non-ASCII characters.
+  sys.stderr = codecs.StreamReaderWriter(sys.stderr,
+                                         codecs.getreader('utf8'),
+                                         codecs.getwriter('utf8'),
+                                         'replace')
 
 
 _USAGE = """
@@ -559,7 +574,7 @@ class _CppLintState(object):
 
   def PrintErrorCounts(self):
     """Print a summary of errors by category, and the total."""
-    for category, count in self.errors_by_category.iteritems():
+    for category, count in self.errors_by_category.items():
       sys.stderr.write('Category \'%s\' errors found: %d\n' %
                        (category, count))
     sys.stderr.write('Total errors found: %d\n' % self.error_count)
@@ -651,7 +666,7 @@ class _FunctionState(object):
     trigger = base_trigger * 2**_VerboseLevel()
 
     if self.lines_in_function > trigger:
-      error_level = int(math.log(self.lines_in_function / base_trigger, 2))
+      error_level = int(math.log(self.lines_in_function // base_trigger, 2))
       # 50 => 0, 100 => 1, 200 => 2, 400 => 3, 800 => 4, 1600 => 5, ...
       if error_level > 5:
         error_level = 5
@@ -2448,7 +2463,7 @@ def _GetTextInside(text, start_pattern):
 
   # Give opening punctuations to get the matching close-punctuations.
   matching_punctuation = {'(': ')', '{': '}', '[': ']'}
-  closing_punctuation = set(matching_punctuation.itervalues())
+  closing_punctuation = set(matching_punctuation.values())
 
   # Find the position to start extracting text.
   match = re.search(start_pattern, text, re.M)
@@ -2882,10 +2897,10 @@ _HEADERS_CONTAINING_TEMPLATES = (
 _RE_PATTERN_STRING = re.compile(r'\bstring\b')
 
 _re_pattern_algorithm_header = []
-for _template in ('copy', 'max', 'min', 'min_element', 'sort', 'swap',
+for _template in ('copy', 'max', 'min', 'min_element', 'sort', 'swap', 
                   'transform'):
-  # Match max<type>(..., ...), max(..., ...), but not foo->max, foo.max or
-  # type::max().
+  # Match max<type>(..., ...), max(..., ...), 
+  # but not foo->max, foo.max or type::max().
   _re_pattern_algorithm_header.append(
       (re.compile(r'[^>.]\b' + _template + r'(<.*?>)?\([^\)]'),
        _template,
@@ -3330,13 +3345,6 @@ def ParseArguments(args):
 
 def main():
   filenames = ParseArguments(sys.argv[1:])
-
-  # Change stderr to write with replacement characters so we don't die
-  # if we try to print something containing non-ASCII characters.
-  sys.stderr = codecs.StreamReaderWriter(sys.stderr,
-                                         codecs.getreader('utf8'),
-                                         codecs.getwriter('utf8'),
-                                         'replace')
 
   _cpplint_state.ResetErrorCounts()
   for filename in filenames:
