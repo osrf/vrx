@@ -44,13 +44,13 @@
     <include>
       <name>green_bound_2</name>
       <pose>-40 -10 0.2 0 0 0</pose>
-      <uri>model://mb_marker_buoy_black</uri>
+      <uri>model://mb_marker_buoy_green</uri>
     </include>
 
     <include>
       <name>green_bound_3</name>
       <pose>-60 0 0.2 0 0 0</pose>
-      <uri>model://mb_marker_buoy_white</uri>
+      <uri>model://mb_marker_buoy_black</uri>
     </include>
   </model>
 

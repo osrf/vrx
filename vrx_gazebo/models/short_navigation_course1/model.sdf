@@ -44,7 +44,7 @@
     <include>
       <name>green_bound_2</name>
       <pose>-36 -18 0.2 0 0 0</pose>
-      <uri>model://mb_marker_buoy_black</uri>
+      <uri>model://mb_marker_buoy_green</uri>
     </include>
 
     <include>
