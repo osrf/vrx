@@ -199,9 +199,8 @@ Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
   // origin is at cog of the object.
   double h = fluidLevel - (pose.Pos().Z() - r);
 
-  if (h <= 0) {
+  if (h <= 0)
     return output;
-  }
 
   // limits of integration
   double intLimitLower = -r;
@@ -213,7 +212,8 @@ Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
   output.centroid.X() = pose.Pos().X();
   output.centroid.Y() = pose.Pos().Y();
 
-  if (output.volume > 0) {
+  if (output.volume > 0)
+  {
     // centroid is always centered to object in X and Y plane
     output.centroid.X() = pose.Pos().X();
     output.centroid.Y() = pose.Pos().Y();

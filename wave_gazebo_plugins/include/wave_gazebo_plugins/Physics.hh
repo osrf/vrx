@@ -23,7 +23,6 @@
 
 namespace asv
 {
-
 ///////////////////////////////////////////////////////////////////////////////
 // Physics
   /// \brief A collection of static methods for various physics calculations.

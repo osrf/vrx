@@ -23,7 +23,8 @@
 
 /////////////////////////////////////////////////
 ScoringPlugin::ScoringPlugin()
-    : WorldPlugin(), gzNode(new gazebo::transport::Node()) {
+    : WorldPlugin(), gzNode(new gazebo::transport::Node())
+{
 }
 
 void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
@@ -274,10 +275,12 @@ void ScoringPlugin::OnCollision()
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
+void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts)
+  {
   // loop through collisions, if any include the wamv, increment collision
   // counter
-  for (unsigned int i = 0; i < _contacts->contact_size(); ++i) {
+  for (unsigned int i = 0; i < _contacts->contact_size(); ++i)
+  {
     std::string wamvCollisionStr1 = _contacts->contact(i).collision1();
     std::string wamvCollisionStr2 = _contacts->contact(i).collision2();
     std::string wamvCollisionSubStr1 =
@@ -296,14 +299,16 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts) {
                              gazebo::common::Time(CollisionBuffer, 0);
 
     // publish a Contact MSG
-    if (isWamvHit && this->debug) {
+    if (isWamvHit && this->debug)
+    {
       this->contactMsg.header.stamp = ros::Time::now();
       this->contactMsg.collision1 = _contacts->contact(i).collision1();
       this->contactMsg.collision2 = _contacts->contact(i).collision2();
       this->contactPub.publish(this->contactMsg);
     }
 
-    if (isWamvHit && isHitBufferPassed) {
+    if (isWamvHit && isHitBufferPassed)
+    {
       this->collisionCounter++;
       gzmsg << "[" << this->collisionCounter
             << "] New collision counted between ["

@@ -15,8 +15,8 @@
  *
 */
 
-#include "vrx_gazebo/gymkhana_scoring_plugin.hh"
 #include <limits>
+#include "vrx_gazebo/gymkhana_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
 GymkhanaScoringPlugin::GymkhanaScoringPlugin()
