@@ -328,7 +328,7 @@
           <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <dock_allowed>false</dock_allowed>
-          <symbol>blue_circle</symbol>
+          <symbol>blue_rectangle</symbol>
         </bay>
 
         <bay>
@@ -337,7 +337,7 @@
           <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>true</dock_allowed>
+          <dock_allowed>false</dock_allowed>
           <symbol>red_cross</symbol>
         </bay>
 
@@ -347,8 +347,8 @@
           <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>false</dock_allowed>
-          <symbol>yellow_rectangle</symbol>
+          <dock_allowed>true</dock_allowed>
+          <symbol>yellow_circle</symbol>
         </bay>
       </bays>
 
