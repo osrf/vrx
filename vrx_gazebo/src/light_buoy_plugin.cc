@@ -77,8 +77,8 @@ void LightBuoyPlugin::InitializeAllPatterns()
 }
 
 //////////////////////////////////////////////////
-LightBuoyPlugin::LightBuoyPlugin() :
-  gzNode(new gazebo::transport::Node())
+LightBuoyPlugin::LightBuoyPlugin()
+  : gzNode(new gazebo::transport::Node())
 {
 }
 

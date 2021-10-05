@@ -193,12 +193,14 @@ void StationkeepingScoringPlugin::Update()
   double dx   = this->goalX - robotPose.Pos().X();
   double dy   = this->goalY - robotPose.Pos().Y();
   double dist = sqrt(pow(dx, 2) + pow(dy, 2));
-  double k    = 0.75;
   double dhdg = abs(this->goalYaw - currentHeading);
   double headError = M_PI - abs(dhdg - M_PI);
 
   if (this->headErrorOn)
+  {
+    double k    = 0.75;
     this->poseError = dist + (pow(k, dist) * headError);
+  }
   else
     this->poseError = dist;
   this->totalPoseError += this->poseError;

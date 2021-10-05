@@ -80,7 +80,7 @@ void BuoyancyObject::Load(const physics::ModelPtr model,
     {
       this->shape = std::move(ShapeVolume::makeShape(geometry));
     }
-    catch (...)
+    catch(...)
     {
       throw;
     }
@@ -92,7 +92,8 @@ void BuoyancyObject::Load(const physics::ModelPtr model,
 }
 
 //////////////////////////////////////////////////
-std::string BuoyancyObject::Disp() {
+std::string BuoyancyObject::Disp()
+{
   std::stringstream ss;
   ss << "Buoyancy object\n"
       << "\tlink: " << linkName << "[" << linkId << "]\n"
@@ -153,7 +154,8 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
           << std::endl;
     for (sdf::ElementPtr buoyancyElem = _sdf->GetElement("buoyancy");
         buoyancyElem;
-        buoyancyElem = buoyancyElem->GetNextElement("buoyancy")) {
+        buoyancyElem = buoyancyElem->GetNextElement("buoyancy"))
+    {
       try
       {
         BuoyancyObject buoyObj = BuoyancyObject();
@@ -188,7 +190,7 @@ void BuoyancyPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         gzmsg << buoyObj.Disp() << std::endl;
         buoyancyObjects.push_back(std::move(buoyObj));
       }
-      catch (const std::exception& e)
+      catch(const std::exception& e)
       {
         gzwarn << e.what() << std::endl;
       }
@@ -235,7 +237,8 @@ void BuoyancyPlugin::OnUpdate()
     this->lastSimTime = simTime;
 
     // get wave height for each link
-    for (auto& link : this->linkMap) {
+    for (auto& link : this->linkMap)
+    {
       auto linkPtr = link.second;
       #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Pose3d linkFrame = linkPtr->WorldPose();

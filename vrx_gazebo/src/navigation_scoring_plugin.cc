@@ -15,11 +15,11 @@
  *
 */
 
-#include "vrx_gazebo/navigation_scoring_plugin.hh"
 #include <cmath>
 #include <gazebo/common/Assert.hh>
 #include <gazebo/common/Console.hh>
 #include <gazebo/physics/Link.hh>
+#include "vrx_gazebo/navigation_scoring_plugin.hh"
 
 /////////////////////////////////////////////////
 NavigationScoringPlugin::Gate::Gate(
