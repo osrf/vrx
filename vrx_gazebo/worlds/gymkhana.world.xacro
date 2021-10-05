@@ -40,7 +40,7 @@
 
     <!-- Top-level scoring plugin -->
     <plugin name="gymkhana_scoring_plugin"
-            filename="libgymkhana_scoring_plugin.so">
+            filename="libgymkhana_vrx_scoring_plugin.so">
       <vehicle>wamv</vehicle>
       <task_name>gymkhana</task_name>
       <task_info_topic>/vrx/task/info</task_info_topic>
