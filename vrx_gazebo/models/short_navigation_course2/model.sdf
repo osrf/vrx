@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!-- Model for the short navigation course -->
+<sdf version="1.6">
+  <model name="short_navigation_course_2">
+
+    <!-- Starboard_border -->
+    <include>
+      <name>red_bound_0</name>
+      <pose>0 12 0 0 0 0</pose>
+      <uri>model://mb_marker_buoy_red</uri>
+    </include>
+
+    <include>
+      <name>red_bound_1</name>
+      <pose>-20 22 0 0 0 0</pose>
+      <uri>model://mb_marker_buoy_red</uri>
+    </include>
+
+    <include>
+      <name>red_bound_2</name>
+      <pose>-40 0 0 0 0 0</pose>
+      <uri>model://mb_marker_buoy_red</uri>
+    </include>
+
+    <include>
+      <name>red_bound_3</name>
+      <pose>-60 12 0 0 0 0</pose>
+      <uri>model://mb_marker_buoy_red</uri>
+    </include>
+
+    <!-- Port_border -->
+    <include>
+      <name>green_bound_0</name>
+      <pose>0 0 0.2 0 0 0</pose>
+      <uri>model://mb_marker_buoy_white</uri>
+    </include>
+
+    <include>
+      <name>green_bound_1</name>
+      <pose>-20 12 0.2 0 0 0</pose>
+      <uri>model://mb_marker_buoy_green</uri>
+    </include>
+
+    <include>
+      <name>green_bound_2</name>
+      <pose>-40 -10 0.2 0 0 0</pose>
+      <uri>model://mb_marker_buoy_green</uri>
+    </include>
+
+    <include>
+      <name>green_bound_3</name>
+      <pose>-60 0 0.2 0 0 0</pose>
+      <uri>model://mb_marker_buoy_black</uri>
+    </include>
+  </model>
+
+</sdf>
