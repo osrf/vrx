@@ -98,6 +98,9 @@
 ///   <joint>: This block should contain a <name> element with the name of the
 ///   joint to release.
 ///
+/// <silent>: Optional element (boolean type) specifying if we want to
+/// avoid showing the state messages.
+///
 /// Here's an example:
 /// <plugin name="scoring_plugin"
 ///         filename="libscoring_plugin.so">
@@ -227,6 +230,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
   /// \brief Last collision time.
   protected: gazebo::common::Time lastCollisionTime;
 
+  /// \brief Silent mode enabled?
+  protected: bool silent = false;
+
   /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr gzNode;
 
@@ -282,7 +288,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: gazebo::common::Time remainingTime;
 
   /// \brief Collision buffer.
-  private: float CollisionBuffer = 3.0;
+  private: float collisionBuffer = 3.0;
 
   /// \brief Collisions counter.
   private: int collisionCounter = 0;

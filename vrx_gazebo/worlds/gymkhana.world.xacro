@@ -91,6 +91,7 @@
           <right_marker>green_bound_2</right_marker>
         </gate>
       </gates>
+      <silent>true</silent>
     </plugin>
 
     <!-- Scoring plugin for acoustic pinger portion -->
@@ -124,6 +125,7 @@
         <scaling>0.2 0.2 2.0</scaling>
         <height>0.5</height>
       </markers>
+      <silent>true</silent>
     </plugin>
 
   </world>
