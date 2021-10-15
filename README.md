@@ -2,7 +2,7 @@
 This repository is the home to the source code and software documentation for the VRX simulation environment, which supports simulation of unmanned surface vehicles in marine environments.
 * Designed in coordination with RobotX organizers, this project provides arenas and tasks similar to those featured in past and future RobotX competitions, as well as a description of the WAM-V platform.
 * For RobotX competitors this simulation environment is intended as a first step toward developing tools prototyping solutions in advance of physical on-water testing.
-* We also welcome users with simulation needs beyond RobotX. As we continue to improve the environment we hope to offer support to an wide range of potential applications.
+* We also welcome users with simulation needs beyond RobotX. As we continue to improve the environment, we hope to offer support to a wide range of potential applications.
 
 ## The VRX Competition
 The VRX environment is also the "virtual venue" for the [VRX Competition](https://github.com/osrf/vrx/wiki). Please see our Wiki for tutorials and links to registration and documentation relevant to the virtual competition. 
@@ -15,7 +15,7 @@ The VRX environment is also the "virtual venue" for the [VRX Competition](https:
  * Watch the [Release 1.5 Highlight Video](https://youtu.be/-2BP2P3CHYw)
  * The [VRX Wiki](https://github.com/osrf/vrx/wiki) provides documentation and tutorials.
  * The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
- * For technical problems, please us the [project issue tracker](https://github.com/osrf/vrx/issues) to describe your problem or request support. 
+ * For technical problems, please use the [project issue tracker](https://github.com/osrf/vrx/issues) to describe your problem or request support. 
 
 ## Reference
 
