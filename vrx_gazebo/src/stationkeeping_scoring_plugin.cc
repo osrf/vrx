@@ -250,7 +250,8 @@ void StationkeepingScoringPlugin::PublishGoal()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnReady()
 {
-  gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
+  if (!this->silent)
+    gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
 
   this->PublishGoal();
 }
@@ -258,11 +259,11 @@ void StationkeepingScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
-  gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
+  if (!this->silent)
+    gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
 
   this->timer.Start();
 }
-
 
 // Register plugin with gazebo
 GZ_REGISTER_WORLD_PLUGIN(StationkeepingScoringPlugin)
