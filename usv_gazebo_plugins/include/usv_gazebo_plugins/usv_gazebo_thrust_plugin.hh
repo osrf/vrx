@@ -275,6 +275,12 @@ namespace gazebo
 
     /// \brief The propeller message state.
     private: sensor_msgs::JointState jointStateMsg;
+
+    /// \brief Update rate (Hz) of the joint ROS publisher.
+    private: double publisherRate = 100.0;
+
+    /// \brief The last time we publish joints.
+    private: common::Time prevUpdateTime;
   };
 }
 

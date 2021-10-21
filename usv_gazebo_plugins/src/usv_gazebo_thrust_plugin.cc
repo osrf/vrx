@@ -99,6 +99,9 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   this->cmdTimeout = this->SdfParamDouble(_sdf, "cmdTimeout", 1.0);
 
+  // Parse joint publisher update rate
+  this->publisherRate = this->SdfParamDouble(_sdf, "publisherRate", 100.0);
+
   ROS_DEBUG_STREAM("Loading thrusters from SDF");
 
   // For each thruster
@@ -251,6 +254,12 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Initialize the ROS node and subscribe to cmd_drive
   this->rosnode.reset(new ros::NodeHandle(nodeNamespace));
 
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->prevUpdateTime = this->world->SimTime();
+  #else
+    this->prevUpdateTime = this->world->GetSimTime();
+  #endif
+
   // Advertise joint state publisher to view engines and propellers in rviz
   // TODO: consider throttling joint_state pub for performance
   // (every OnUpdate may be too frequent).
@@ -387,8 +396,13 @@ void UsvThrust::Update()
   }
 
   // Publish the propeller joint state
-  this->jointStateMsg.header.stamp = ros::Time::now();
-  this->jointStatePub.publish(this->jointStateMsg);
+  if (now - this->prevUpdateTime >= (1 / this->publisherRate))
+  {
+    this->jointStateMsg.header.stamp = ros::Time::now();
+    this->jointStatePub.publish(this->jointStateMsg);
+
+    this->prevUpdateTime = now;
+  }
 }
 
 //////////////////////////////////////////////////
