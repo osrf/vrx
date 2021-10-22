@@ -239,25 +239,30 @@ void ScoringPlugin::ReleaseVehicle()
 
   this->lockJointNames.clear();
 
-  gzmsg << "ScoringPlugin::Vehicle released" << std::endl;
+  if (!this->silent)
+    gzmsg << "ScoringPlugin::Vehicle released" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
-  gzmsg << "ScoringPlugin::OnReady" << std::endl;
+  if (!this->silent)
+    gzmsg << "ScoringPlugin::OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
-  gzmsg << "ScoringPlugin::OnRunning" << std::endl;
+  if (!this->silent)
+    gzmsg << "ScoringPlugin::OnRunning" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
-  gzmsg << ros::Time::now() << "  OnFinished" << std::endl;
+  if (!this->silent)
+    gzmsg << ros::Time::now() << "  OnFinished" << std::endl;
+
   // If a timeoutScore was specified, use it.
   if (this->timedOut && this->timeoutScore > 0.0)
   {
@@ -296,7 +301,7 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts)
       wamvCollisionSubStr2 ==
         "wamv::wamv/base_link::wamv/base_link_fixed_joint_";
     bool isHitBufferPassed = this->currentTime - this->lastCollisionTime >
-                             gazebo::common::Time(CollisionBuffer, 0);
+                             gazebo::common::Time(this->collisionBuffer, 0);
 
     // publish a Contact MSG
     if (isWamvHit && this->debug)
@@ -310,10 +315,13 @@ void ScoringPlugin::OnCollisionMsg(ConstContactsPtr &_contacts)
     if (isWamvHit && isHitBufferPassed)
     {
       this->collisionCounter++;
-      gzmsg << "[" << this->collisionCounter
-            << "] New collision counted between ["
-            << _contacts->contact(i).collision1() << "] and ["
-            << _contacts->contact(i).collision2() << "]" << std::endl;
+      if (!this->silent)
+      {
+        gzmsg << "[" << this->collisionCounter
+              << "] New collision counted between ["
+              << _contacts->contact(i).collision1() << "] and ["
+              << _contacts->contact(i).collision2() << "]" << std::endl;
+      }
       // Uncomment to get details of collisions
       // gzdbg << _contacts->contact(i).DebugString() << std::endl;
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -407,7 +415,13 @@ bool ScoringPlugin::ParseSDFParameters()
   // This is an optional element.
   if (this->sdf->HasElement("collision_buffer"))
   {
-    this->CollisionBuffer = this->sdf->Get<float>("collision_buffer");
+    this->collisionBuffer = this->sdf->Get<float>("collision_buffer");
+  }
+
+  // This is an optional element.
+  if (this->sdf->HasElement("silent"))
+  {
+    this->silent = this->sdf->Get<bool>("silent");
   }
 
   return this->ParseJoints();
