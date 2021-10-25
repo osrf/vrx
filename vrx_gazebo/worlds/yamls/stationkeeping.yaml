@@ -1,0 +1,133 @@
+constant:
+    steps: 1
+    macros:
+        sydneyregatta_minus_scene: 
+            -
+    sequence:
+
+environment:
+    steps: 3
+    macros:
+        stationkeeping:
+            -
+        ocean_waves:
+            -
+        usv_wind_gazebo:
+            -
+        scene_macro:
+            -
+    sequence:
+        0:
+            stationkeeping:
+                - lat: "-33.7227180"
+                  lon: "150.6740310"
+                  heading: "0.00"
+                  /**wp_markers: "
+                  <markers>
+
+                  <scaling>0.2 0.2 2.0</scaling>
+
+                  <height>0.5</height>
+
+                  </markers>"
+            ocean_waves:
+                - gain: 0.0
+                  period: 5.0
+                  scale: 2.5
+                  direction_x: 1.0
+                  direction_y: 0.0
+            usv_wind_gazebo:
+                - mean_vel: 0.0
+                  var_gain: 0
+                  var_time: 1
+                  seed: 10
+                  direction: 240
+                  /**wind_objs: "
+                  <wind_obj>
+
+                  <name>wamv</name>
+
+                  <link_name>wamv/base_link</link_name>
+
+                  <coeff_vector>.5 .5 .33</coeff_vector>
+
+                  </wind_obj>"
+            scene_macro:
+                - /**fog: ""
+                  /**ambient: "1 1 1 1"
+        1:
+            stationkeeping:
+                - lat: "-33.7226700"
+                  lon: "150.6740600"
+                  heading: "2.00"
+                  /**wp_markers: "
+                  <markers>
+
+                  <scaling>0.2 0.2 2.0</scaling>
+
+                  <height>0.5</height>
+
+                  </markers>"
+            ocean_waves:
+                - gain: 0.2
+                  period: 7.0
+                  scale: 2.5
+                  direction_x: 1.0
+                  direction_y: 0.0
+            usv_wind_gazebo:
+                - mean_vel: 5.0
+                  var_gain: 2.0
+                  var_time: 1
+                  seed: 15
+                  direction: 120
+                  /**wind_objs: "
+                  <wind_obj>
+
+                  <name>wamv</name>
+
+                  <link_name>wamv/base_link</link_name>
+
+                  <coeff_vector> .5 .5 .33</coeff_vector>
+
+                  </wind_obj>"
+            scene_macro:
+                - /**fog: ""
+                  /**ambient: "0.3 0.3 0.3 1"
+        2:
+            stationkeeping:
+                - lat: "-33.7226643"
+                  lon: "150.673947"
+                  heading: "-1.00"
+                  /**wp_markers: "
+                  <markers>
+
+                  <scaling>0.2 0.2 2.0</scaling>
+
+                  <height>0.5</height>
+
+                  </markers>"
+            ocean_waves:
+                - gain: 0.7
+                  period: 6.0
+                  scale: 2.5
+                  direction_x: 0.4
+                  direction_y: 0.85
+            usv_wind_gazebo:
+                - mean_vel: 7.0
+                  var_gain: 1.5
+                  var_time: 1
+                  seed: 12
+                  direction: 265
+                  /**wind_objs: "
+                  <wind_obj>
+
+                  <name>wamv</name>
+
+                  <link_name>wamv/base_link</link_name>
+
+                  <coeff_vector> .5 .5 .33</coeff_vector>
+
+                  </wind_obj>"
+            scene_macro:
+                - /**fog: ""
+                  /**ambient: "0.3 0.3 0.3 1"
