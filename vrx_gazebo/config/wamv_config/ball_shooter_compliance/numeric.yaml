@@ -1,0 +1,5 @@
+wamv_ball_shooter:
+    num: 1
+    allowed_params:
+        position
+        orientation
