@@ -8,6 +8,71 @@ import yaml
 from vrx_gazebo.utils import get_macros
 
 
+class BallShooterCompliance:
+    def __init__(self):
+
+        rospack = rospkg.RosPack()
+        pkg_path = rospack.get_path('vrx_gazebo')
+        self.config_dir = os.path.join(pkg_path, 'config', 'wamv_config')
+
+        # open ball_shooter_compliance/bounding_boxes.yaml and all the boxes defined
+        self.boxes = find_boxes(os.path.join(self.config_dir,
+            'sensor_compliance', 'bounding_boxes.yaml'))
+        # look at all sensors in sensors directory and get the default params
+        self.ball_dir = rospy.get_param('ball_shooter_dir') + '/'
+        self.default_parameters = get_macros(self.ball_dir)
+        self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
+            'ball_shooter_compliance', 'numeric.yaml')))
+        return
+
+    def param_compliance(self, sensor_type, params={}):
+        # given an instance of ball shooter with parameters
+        # = params, is it in compliance
+        # check if ball shooter is allowed
+        params = params.copy()
+        if sensor_type not in self.default_parameters:
+            rospy.logerr('%s is not defined anywhere under %s' %
+                        (sensor_type, self.config_dir))
+        assert sensor_type in self.default_parameters,\
+            '%s is not defined anywhere under %s' % (sensor_type, self.config_dir)
+        for i in params:
+            if i not in self.numeric[sensor_type]['allowed_params']:
+                rospy.logerr('%s parameter specification of %s not permitted' % 
+                            (i, sensor_type))
+
+        # add the default params to params if not specified
+        for i in self.default_parameters[sensor_type]:
+            if i not in params:
+                params[i] = self.default_parameters[sensor_type][i]
+        if 'x' and 'y' and 'z' in params:
+            xyz = np.array([float(params['x']),
+                            float(params['y']),
+                            float(params['z'])])
+            for box in self.boxes:
+                if box.fit(xyz):
+                    return True
+            rospy.logerr('%s %s is out of bounds' % 
+                        (sensor_type, params['name']))
+            rospy.logerr('%s is at xyz=(%s, %s, %s), %s' % 
+                          (sensor_type, params['name'], 
+                           xyz[0], xyz[1], xyz[2],
+                           'must fit in at last one of the following boxes ' +
+                           'with remaining space:'))
+            for box in self.boxes:
+                rospy.logerr(' %s' % str(box))
+            return False
+        else:
+            return True
+
+    def number_compliance(self, sensor_type, n):
+        # ie: are n ball shooters allowed?
+        if n > self.numeric[sensor_type]['num']:
+            rospy.logerr('Too many ball shooters requested')
+            rospy.logerr(' maximum of %s allowed' %
+                         (self.numeric['num']))
+            return False
+        return True
+
 class SensorCompliance:
     def __init__(self):
 
