@@ -13,6 +13,9 @@
     <arg name="thruster_yaml" default="$(find vrx_gazebo)/src/vrx_gazebo_python/generator_scripts/wamv_config/example_thruster_config.yaml"/>
     <param name="thruster_yaml" value="$(arg thruster_yaml)"/>
 
+    <arg name="ball_shooter_yaml" default="$(find vrx_gazebo)/src/vrx_gazebo_python/generator_scripts/wamv_config/example_ball_shooter_config.yaml"/>
+    <param name="ball_shooter_yaml" value="$(arg ball_shooter_yaml)"/>
+
     <arg name="wamv_target"/>
     <param name="wamv_target" value="$(arg wamv_target)"/>
 
@@ -21,6 +24,8 @@
     <param name="sensors_dir" value="$(find wamv_gazebo)/urdf/sensors"/>
     
     <param name="thrusters_dir" value="$(find wamv_description)/urdf/thrusters"/>
+
+    <param name="ball_shooter_dir" value="$(find wamv_gazebo)/urdf/ball_shooter"/>
 
     <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv.py" output="screen" required="true"/>
   </group>
