@@ -4,6 +4,7 @@ import os
 
 from vrx_gazebo.compliance import SensorCompliance
 from vrx_gazebo.compliance import ThrusterCompliance
+from vrx_gazebo.compliance import BallShooterCompliance
 
 from vrx_gazebo.utils import create_xacro_file
 from vrx_gazebo.utils import add_gazebo_thruster_config
@@ -15,6 +16,7 @@ def main():
     # Check if yaml files were given
     received_thruster_yaml = len(rospy.get_param('thruster_yaml')) > 0
     received_sensor_yaml = len(rospy.get_param('sensor_yaml')) > 0
+    received_ball_yaml = len(rospy.get_param('ball_shooter_yaml')) > 0
 
     # Setup thruster xacro
     if received_thruster_yaml:
@@ -23,6 +25,10 @@ def main():
     # Setup sensor xacro
     if received_sensor_yaml:
         sensor_compliant = create_sensor_xacro()
+
+    # Setup ball shooter xacro
+    if received_ball_yaml:
+        ball_compliant = create_ball_shooter_xacro()
 
     # Setup command to generate WAM-V urdf file
     wamv_target = rospy.get_param('wamv_target')
@@ -44,12 +50,20 @@ def main():
         create_urdf_command += (" yaml_sensor_generation:=true "
                                 "sensor_xacro_file:=" + sensor_xacro_target)
 
+    if received_ball_yaml:
+        ball_yaml = rospy.get_param('ball_shooter_yaml')
+        ball_xacro_target = os.path.splitext(ball_yaml)[0] + '.xacro'
+        create_urdf_command += (" yaml_ball_shooter_generation:=true "
+                                "ball_shooter_xacro_file:=" + ball_xacro_target)
+
     # Create urdf and print to console
+    print('CHECK HERE')
+    print(create_urdf_command)
     os.system(create_urdf_command)
-    if not (thruster_compliant and sensor_compliant):
-        rospy.logerr('\nThis sensor/thruster configuration is NOT compliant ' +
-                     'with the (current) VRX constraints. A urdf file will ' +
-                     'be created, but please note that the above errors ' +
+    if not (thruster_compliant and sensor_compliant and ball_compliant):
+        rospy.logerr('\nThis sensor/thruster/ball shooter configuration is NOT ' +
+                     'compliant with the (current) VRX constraints. A urdf file ' +
+                     'will be created, but please note that the above errors ' +
                      'must be fixed for this to be a valid configuration ' +
                      'for the VRX competition.\n')
 
@@ -152,3 +166,39 @@ def create_sensor_xacro():
                              num_test=sensor_num_test,
                              param_test=sensor_param_test)
 
+
+def create_ball_shooter_xacro():
+    """
+    Purpose: Create a ball shooter xacro file using the given
+             rosparameters
+    """
+    # Get yaml files for ball shooter pose
+    ball_shooter_yaml = rospy.get_param('ball_shooter_yaml')
+    # rospy.loginfo('\nUsing %s as the ball shooter configuration yaml file\n'
+                  # ball_shooter_yaml)
+
+    # Set ball shooter xacro target 
+    ball_xacro_target = os.path.splitext(ball_shooter_yaml)[0] + '.xacro'
+
+    # Things to start/open the macro
+    ball_boiler_plate_top = ('<?xml version="1.0"?>\n'
+                             '<robot '
+                             'xmlns:xacro="http://ros.org/wiki/xacro" '
+                             'name="wam-v-ball-shooter">\n' +
+                             '  <xacro:macro name="yaml_ball_shooter">\n')
+
+    # Things to close the macro 
+    ball_boiler_plate_bot = '  </xacro:macro>\n</robot>'
+
+    # Check if valid number of ball shooters valid ball shooter parameters
+    comp = BallShooterCompliance()
+    ball_num_test = comp.number_compliance
+    ball_param_test = comp.param_compliance
+
+    # Create ball shooter xacro with ball shooter macros
+    return create_xacro_file(yaml_file=ball_shooter_yaml,
+                             xacro_target=ball_xacro_target,
+                             boiler_plate_top=ball_boiler_plate_top,
+                             boiler_plate_bot=ball_boiler_plate_bot,
+                             num_test=ball_num_test,
+                             param_test=ball_param_test)
