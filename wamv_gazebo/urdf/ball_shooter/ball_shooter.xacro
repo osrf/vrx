@@ -51,7 +51,7 @@
       <axis xyz="0 0 1"/>
       <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
       <origin xyz="${position}" rpy="0 0 ${yaw}"/>
-      <parent link="wamv/base_link"/>
+      <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}_base_link"/>
     </joint>
     <joint name="${namespace}/${name}_launcher_joint" type="revolute">
