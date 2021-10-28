@@ -23,3 +23,7 @@ lidar:
     - name: lidar_wamv
       type: 16_beam
       P: ${radians(8)}
+wamv_ball_shooter:
+    - name: ball_shooter
+      position: "0.55 0.35 1.4"
+      orientation: "0 0 0"
