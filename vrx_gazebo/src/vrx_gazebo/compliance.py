@@ -8,43 +8,43 @@ import yaml
 from vrx_gazebo.utils import get_macros
 
 
-class SensorCompliance:
+class ComponentCompliance:
     def __init__(self):
 
         rospack = rospkg.RosPack()
         pkg_path = rospack.get_path('vrx_gazebo')
         self.config_dir = os.path.join(pkg_path, 'config', 'wamv_config')
 
-        # open sensor_compliance/bounding_boxes.yaml and all the boxes defined
+        # open component_compliance/bounding_boxes.yaml and all the boxes defined
         self.boxes = find_boxes(os.path.join(self.config_dir,
-            'sensor_compliance', 'bounding_boxes.yaml'))
-        # look at all sensors in sensors directory and get the default params
-        self.sensors_dir = rospy.get_param('components_dir') + '/'
-        self.default_parameters = get_macros(self.sensors_dir)
+            'component_compliance', 'bounding_boxes.yaml'))
+        # look at all components in components directory and get the default params
+        self.components_dir = rospy.get_param('components_dir') + '/'
+        self.default_parameters = get_macros(self.components_dir)
 
         self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
-            'sensor_compliance', 'numeric.yaml')))
+            'component_compliance', 'numeric.yaml')))
         return
 
-    def param_compliance(self, sensor_type, params={}):
-        # ie: given an instance of sensor_type = 'wamv_camera'
+    def param_compliance(self, component_type, params={}):
+        # ie: given an instance of component_type = 'wamv_camera'
         # with parameters = params, is this camera in compliance
-        # check if the sensor is allowed
+        # check if the component is allowed
         params = params.copy()
-        if sensor_type not in self.default_parameters:
+        if component_type not in self.default_parameters:
             rospy.logerr('%s is not defined anywhere under %s' %
-                         (sensor_type, self.config_dir))
-        assert sensor_type in self.default_parameters,\
-            '%s is not defined anywhere under %s' % (sensor_type, self.config_dir)
+                         (component_type, self.config_dir))
+        assert component_type in self.default_parameters,\
+            '%s is not defined anywhere under %s' % (component_type, self.config_dir)
         for i in params:
-            if i not in self.numeric[sensor_type]['allowed_params']:
+            if i not in self.numeric[component_type]['allowed_params']:
                 rospy.logerr('%s parameter specification of %s not permitted' %
-                             (i, sensor_type))
+                             (i, component_type))
 
         # add the default params to params if not specified
-        for i in self.default_parameters[sensor_type]:
+        for i in self.default_parameters[component_type]:
             if i not in params:
-                params[i] = self.default_parameters[sensor_type][i]
+                params[i] = self.default_parameters[component_type][i]
         if 'x' and 'y' and 'z' in params:
             xyz = np.array([float(params['x']),
                             float(params['y']),
@@ -53,9 +53,9 @@ class SensorCompliance:
                 if box.fit(xyz):
                     return True
             rospy.logerr('%s %s is out of bounds' %
-                         (sensor_type, params['name']))
+                         (component_type, params['name']))
             rospy.logerr('%s %s is at xyz=(%s, %s, %s), %s' %
-                         (sensor_type, params['name'],
+                         (component_type, params['name'],
                           xyz[0], xyz[1], xyz[2],
                           'must fit in at least one of the following boxes ' +
                           'with remaining space:'))
@@ -65,12 +65,12 @@ class SensorCompliance:
         else:
             return True
 
-    def number_compliance(self, sensor_type, n):
+    def number_compliance(self, component_type, n):
         # ie: are n wamv_cameras allowed?
-        if n > self.numeric[sensor_type]['num']:
-            rospy.logerr('Too many %s requested' % sensor_type)
+        if n > self.numeric[component_type]['num']:
+            rospy.logerr('Too many %s requested' % component_type)
             rospy.logerr('  maximum of %s %s allowed' %
-                         (self.numeric[sensor_type]['num'], sensor_type))
+                         (self.numeric[component_type]['num'], component_type))
             return False
         return True
 
@@ -84,7 +84,7 @@ class ThrusterCompliance:
         # open thruster_compliance/bounding_boxes.yaml and the boxes defined
         self.boxes = find_boxes(os.path.join(self.config_dir,
             'thruster_compliance', 'bounding_boxes.yaml'))
-        # look at all sensors in sensors directory and get the default params
+        # look at all thrusters in thrusters directory and get the default params
         self.thrusters_dir = rospy.get_param('thrusters_dir') + '/'
         self.default_parameters = get_macros(self.thrusters_dir)
         self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
@@ -114,7 +114,7 @@ class ThrusterCompliance:
             if i not in params:
                 params[i] = self.default_parameters[thruster_type][i]
         # right now the ONLY compliance check we have is to make sure that
-        # the sensors are in at least one of the boxes
+        # the thrusters are in at least one of the boxes
         xyz = np.array([float(j) for j in [i for i in
                                            params['position'].split(' ')
                                            if i != '']])
