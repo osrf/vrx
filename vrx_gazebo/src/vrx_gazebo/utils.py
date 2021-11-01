@@ -146,13 +146,6 @@ def get_macros(directory):
     return macros
 
 
-def get_ball_shooter_macro(macros, directory):
-    xacro_files = get_macro_files(directory)
-    for i in xacro_files:
-        name, params = parse_xacro_file(i)
-        macros[name] = params
-
-
 def get_macro_files(directory):
     xacro_files = [directory+'/'+f for f in os.listdir(directory)
                    if os.path.isfile(os.path.join(directory, f)) and

@@ -14,7 +14,7 @@ def main():
     rospy.init_node("wamv_generator", anonymous=True)
     # Check if yaml files were given
     received_thruster_yaml = len(rospy.get_param('thruster_yaml')) > 0
-    received_sensor_yaml = len(rospy.get_param('sensor_yaml')) > 0
+    received_sensor_yaml = len(rospy.get_param('component_yaml')) > 0
 
     # Setup thruster xacro
     if received_thruster_yaml:
@@ -39,7 +39,7 @@ def main():
                                 "thruster_xacro_file:=" +
                                 thruster_xacro_target)
     if received_sensor_yaml:
-        sensor_yaml = rospy.get_param('sensor_yaml')
+        sensor_yaml = rospy.get_param('component_yaml')
         sensor_xacro_target = os.path.splitext(sensor_yaml)[0] + '.xacro'
         create_urdf_command += (" yaml_sensor_generation:=true "
                                 "sensor_xacro_file:=" + sensor_xacro_target)
@@ -47,7 +47,7 @@ def main():
     # Create urdf and print to console
     os.system(create_urdf_command)
     if not (thruster_compliant and sensor_compliant):
-        rospy.logerr('\nThis sensor/thruster configuration is NOT compliant ' +
+        rospy.logerr('\nThis component/thruster configuration is NOT compliant ' +
                      'with the (current) VRX constraints. A urdf file will ' +
                      'be created, but please note that the above errors ' +
                      'must be fixed for this to be a valid configuration ' +
@@ -122,12 +122,12 @@ def create_sensor_xacro():
              rosparameters
     """
     # Get yaml files for sensor number and pose
-    sensor_yaml = rospy.get_param('sensor_yaml')
+    component_yaml = rospy.get_param('component_yaml')
     rospy.loginfo('\nUsing %s as the sensor configuration yaml file\n' %
-                  sensor_yaml)
+                  component_yaml)
 
     # Set sensor xacro target
-    sensor_xacro_target = os.path.splitext(sensor_yaml)[0] + '.xacro'
+    sensor_xacro_target = os.path.splitext(component_yaml)[0] + '.xacro'
 
     # Things to start/open the macro
     sensor_boiler_plate_top = ('<?xml version="1.0"?>\n'
@@ -145,7 +145,7 @@ def create_sensor_xacro():
     sensor_param_test = comp.param_compliance
 
     # Create sensor xacro with sensor macros
-    return create_xacro_file(yaml_file=sensor_yaml,
+    return create_xacro_file(yaml_file=component_yaml,
                              xacro_target=sensor_xacro_target,
                              boiler_plate_top=sensor_boiler_plate_top,
                              boiler_plate_bot=sensor_boiler_plate_bot,

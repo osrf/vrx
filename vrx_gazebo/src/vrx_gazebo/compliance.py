@@ -5,7 +5,7 @@ import numpy as np
 import os
 import yaml
 
-from vrx_gazebo.utils import get_macros, get_ball_shooter_macro
+from vrx_gazebo.utils import get_macros
 
 
 class SensorCompliance:
@@ -19,10 +19,8 @@ class SensorCompliance:
         self.boxes = find_boxes(os.path.join(self.config_dir,
             'sensor_compliance', 'bounding_boxes.yaml'))
         # look at all sensors in sensors directory and get the default params
-        self.sensors_dir = rospy.get_param('sensors_dir') + '/'
-        self.ball_shooter_dir = rospy.get_param('ball_shooter_dir') + '/'
+        self.sensors_dir = rospy.get_param('components_dir') + '/'
         self.default_parameters = get_macros(self.sensors_dir)
-        get_ball_shooter_macro(self.default_parameters, self.ball_shooter_dir)
 
         self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
             'sensor_compliance', 'numeric.yaml')))
