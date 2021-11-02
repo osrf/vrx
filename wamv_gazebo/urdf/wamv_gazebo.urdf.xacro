@@ -28,8 +28,8 @@
   <xacro:property name="namespace" value="$(arg namespace)" scope="global" />      
   
   <!-- Sensor yaml file -->
-  <xacro:arg name="yaml_sensor_generation" default="false"/>
-  <xacro:arg name="sensor_xacro_file" default = ""/>
+  <xacro:arg name="yaml_component_generation" default="false"/>
+  <xacro:arg name="component_xacro_file" default = ""/>
 
   <!-- Thruster yaml file -->
   <xacro:arg name="yaml_thruster_generation" default="false"/>
@@ -99,9 +99,9 @@
 
   <!-- === Sensors === -->
   <!-- Use sensor yaml file if given -->
-  <xacro:if value="$(arg yaml_sensor_generation)">
-    <xacro:include filename="$(arg sensor_xacro_file)"/>
-    <xacro:yaml_sensors />
+  <xacro:if value="$(arg yaml_component_generation)">
+    <xacro:include filename="$(arg component_xacro_file)"/>
+    <xacro:yaml_components />
 
     <!-- Add CPU Cases -->
     <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
@@ -109,7 +109,7 @@
   </xacro:if>
   
   <!-- Otherwise, add sensors based on enable variables -->
-  <xacro:unless value="$(arg yaml_sensor_generation)">
+  <xacro:unless value="$(arg yaml_component_generation)">
     <!-- Add a front camera -->
     <xacro:if value="$(arg camera_enabled)">
       <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}" />
