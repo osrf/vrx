@@ -17,8 +17,6 @@ wamv_gps:
 wamv_imu:
     - name: imu_wamv
       y: -0.2
-wamv_p3d:
-    - name: p3d_wamv
 lidar:
     - name: lidar_wamv
       type: 16_beam
