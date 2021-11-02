@@ -19,7 +19,8 @@
     <param name="base_link_frame" value="wamv/base_link"/>
     <param name="world_frame" value="wamv/odom"/>
     <param name="publish_tf" value="true"/>
-    <param name="frequency" value="60"/>
+    <param name="frequency" value="5"/>
+    <param name="transform_timeout" value="0.15"/>
     <param name="imu0" value="/wamv/sensors/imu/imu/data"/>
     <!-- IMU measures orientation, angular velocity, and linear acceleration -->
     <rosparam param="imu0_config">[false, false, false,
@@ -46,7 +47,7 @@
   <node ns="wamv/robot_localization" pkg="robot_localization" type="navsat_transform_node"
         name="navsat_transform_node" respawn="true" output="screen">      
     <param name="tf_prefix" value="wamv"/> 
-    <param name="frequency" value="60"/>
+    <param name="frequency" value="5"/>
     <param name="magnetic_declination_radians" value="0"/>
     <param name="broadcast_utm_transform" value="true"/>
     <param name="wait_for_datum" value="true"/>
@@ -54,6 +55,7 @@
     <rosparam param="datum">[-33.73, 150.67]</rosparam>
     <param name="yaw_offset" value="0"/>
     <param name="publish_filtered_gps" value="true"/>
+    <param name="transform_timeout" value="0.15"/>
     <remap to="/wamv/sensors/gps/gps/fix" from="/wamv/robot_localization/gps/fix" />
   </node>
 </launch>
