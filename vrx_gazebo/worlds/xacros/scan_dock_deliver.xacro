@@ -11,7 +11,6 @@
     lb_x:=90 lb_y:=70 lb_z:=0 lb_R:=0 lb_P:=0 lb_Y:=0
     enable_color_checker:=false
 		task_name:=scan_dock_deliver">
-    <!-- The 2018 dock with the two placards -->
     <include>
       <uri>model://${uri}</uri>
       <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose>
