@@ -26,8 +26,6 @@
     </xacro:if>
 
     <!-- Plugin to detect if the projectile entered the hole -->
-    <!-- Debug: Run this command to face this hole -->
-    <!-- gz model -m wamv -x -555.21 -y 229.75 -z 0 -Y 3.14159 -->
     <plugin name="contain_placard1_big_plugin" filename="libContainPlugin.so">
       <enabled>true</enabled>
       <entity>blue_projectile::link</entity>
@@ -41,8 +39,6 @@
     </plugin>
 
     <!-- Plugin to detect if the projectile entered the hole -->
-    <!-- Debug: Run this command to face this hole -->
-    <!-- gz model -m wamv -x -555.28 -y 230.32 -z 0 -Y 3.01159 -->
     <plugin name="contain_placard1_small_plugin" filename="libContainPlugin.so">
       <enabled>true</enabled>
       <entity>blue_projectile::link</entity>
@@ -56,8 +52,6 @@
     </plugin>
 
     <!-- Plugin to detect if the projectile entered the hole -->
-    <!-- Debug: Run this command to face this hole -->
-    <!-- gz model -m wamv -x -555.21 -y 223.75 -z 0 -Y 3.14159 -->
     <plugin name="contain_placard2_big_plugin" filename="libContainPlugin.so">
       <enabled>true</enabled>
       <entity>blue_projectile::link</entity>
@@ -71,8 +65,6 @@
     </plugin>
 
     <!-- Plugin to detect if the projectile entered the hole -->
-    <!-- Debug: Run this command to face this hole -->
-    <!-- gz model -m wamv -x -555.25 -y 223.75 -z 0 -Y 2.91159 -->
     <plugin name="contain_placard2_small_plugin" filename="libContainPlugin.so">
       <enabled>true</enabled>
       <entity>blue_projectile::link</entity>
@@ -86,8 +78,6 @@
     </plugin>
 
     <!-- Plugin to detect if the projectile entered the hole -->
-    <!-- Debug: Run this command to face this hole -->
-    <!-- gz model -m wamv -x -555.25 -y 217.75 -z 0 -Y 3.14159 -->
     <plugin name="contain_placard3_big_plugin" filename="libContainPlugin.so">
       <enabled>true</enabled>
       <entity>blue_projectile::link</entity>
@@ -101,8 +91,6 @@
     </plugin>
 
     <!-- Plugin to detect if the projectile entered the hole -->
-    <!-- Debug: Run this command to face this hole -->
-    <!-- gz model -m wamv -x -555.25 -y 217.75 -z 0 -Y 2.89159 -->
     <plugin name="contain_placard3_small_plugin" filename="libContainPlugin.so">
       <enabled>true</enabled>
       <entity>blue_projectile::link</entity>
