@@ -58,7 +58,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <course_name>${nav_uri}</course_name>
+      <course_name>${name}_navigation_course</course_name>
       <obstacle_penalty>10.0</obstacle_penalty>
       <gates>
         <xacro:insert_block name="gates"/>
