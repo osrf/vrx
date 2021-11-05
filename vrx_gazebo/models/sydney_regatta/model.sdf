@@ -104,7 +104,7 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <uri>file://sydney_regatta/meshes/sydney_regatta_shore.dae</uri>
           </mesh>
         </geometry>
       </collision>
