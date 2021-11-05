@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_ball_shooter" params="name:='ball_shooter' frameId:='wamv/ball_shooter' position:='0.55 0.35 1.4' pitch:='0' yaw:='0'">
+  <xacro:macro name="wamv_ball_shooter" params="name:='ball_shooter' frameId:='wamv/ball_shooter' x:=0.55 y:=0.35 z:=1.4 pitch:='0' yaw:='0'">
 
     <link name="${namespace}/${name}_base_link">
       <visual name="${name}_base_visual">
@@ -50,7 +50,7 @@
     <joint name="${namespace}/${name}_base_joint" type="revolute">
       <axis xyz="0 0 1"/>
       <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
-      <origin xyz="${position}" rpy="0 0 ${yaw}"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 ${yaw}"/>
       <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}_base_link"/>
     </joint>
