@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_3d_lidar.xacro"/>
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_3d_lidar.xacro"/>
   <xacro:macro name="lidar"
                params = "type:='16_beam'
                          name

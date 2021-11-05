@@ -6,15 +6,15 @@
   <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_dynamics_plugin.xacro" />
 
   <!-- Include sensor macros -->
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_camera.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_gps.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_imu.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_planar_lidar.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_3d_lidar.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/lidar.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_p3d.xacro" />
-  <xacro:include filename="$(find wamv_gazebo)/urdf/sensors/wamv_pinger.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_camera.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_gps.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_imu.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_planar_lidar.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_3d_lidar.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/lidar.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_p3d.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_pinger.xacro" />
 
   <!-- Include ball shooter macros -->
-  <xacro:include filename="$(find wamv_gazebo)/urdf/ball_shooter/ball_shooter.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/ball_shooter.xacro" />
 </robot>
