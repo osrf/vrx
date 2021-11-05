@@ -97,17 +97,10 @@
       <uri>model://ground_station</uri>
     </include>
     
-    <!-- A bowl to hold the blue projectile -->
-    <include>
-      <name>bowl</name>
-      <pose>-532.625305 145.492416 1.71 -0.0198 -0.001374 -0.000236</pose>
-      <uri>model://bowl</uri>
-    </include>
-
     <!-- The projectile for the ball shooter -->
     <include>
       <name>blue_projectile</name>
-      <pose>-532.625305 145.492416 1.715 0 0 0</pose>
+      <pose>-545 60 0.03 0 0 0</pose>
       <uri>model://blue_projectile</uri>
     </include>
 
