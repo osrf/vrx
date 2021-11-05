@@ -18,6 +18,7 @@
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/dock.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scan_and_dock.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/wayfinding.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/wildlife.xacro" />
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/insert_model.xacro" />
   </xacro:macro>
 </world>
