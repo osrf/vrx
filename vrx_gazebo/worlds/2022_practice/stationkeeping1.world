@@ -184,7 +184,7 @@
     </plugin>
     <plugin filename="libstationkeeping_scoring_plugin.so" name="stationkeeping_scoring_plugin">
       <vehicle>wamv</vehicle>
-      <task_name>stationkeeping</task_name>
+      <task_name>station_keeping</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
       <goal_pose>-33.7226700 150.6740600 2.0 </goal_pose>
       <initial_state_duration>10</initial_state_duration>

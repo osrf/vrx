@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="wildlife" params="**animal_includes
+                                       **animal_buoys
+                                       namespace:=wamv
+                                       competition:=vrx">
+    <xacro:insert_block name="animal_includes"/>
+    <!-- The scoring plugin -->
+    <plugin name="wildlife_scoring_plugin"
+            filename="libwildlife_scoring_plugin.so">
+      <!-- Common parameters -->
+      <vehicle>${namespace}</vehicle>
+      <task_name>wildlife</task_name>
+      <initial_state_duration>10.0</initial_state_duration>
+      <ready_state_duration>10.0</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <collision_buffer>10</collision_buffer>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
+
+      <!-- wildlife specific parameters -->
+      <buoys>
+        <xacro:insert_block name="animal_buoys"/>
+      </buoys>
+      <engagement_distance>10.0</engagement_distance>
+      <time_bonus>30.0</time_bonus>
+      <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
+    </plugin>
+  </xacro:macro>
+</world>
