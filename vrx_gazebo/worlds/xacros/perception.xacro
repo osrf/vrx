@@ -4,7 +4,7 @@
                                          **object_sequence
                                          namespace:=wamv
                                          competition:=vrx">
-    <xacro:insert_block name="model_includes"/>"
+    <xacro:insert_block name="model_includes"/>
       <plugin filename="libperception_scoring_plugin.so"
               name="perception_scoring_plugin">
       <!-- Parameters for ScoringPlugin base class -->
