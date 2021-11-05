@@ -16,7 +16,7 @@
       <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose>
     </include>
 
-    <!-- Add a ligth buoy if doing Scan and Dock -->
+    <!-- Add a light buoy if doing Scan and Dock -->
     <xacro:if value="${light_buoy_present}">
       <include>
         <uri>model://robotx_light_buoy</uri>
