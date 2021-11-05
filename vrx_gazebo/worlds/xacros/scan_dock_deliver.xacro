@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!-- World containing sandisland model and some course challenges -->
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="dock" params="model_name:=robotx_dock_2018
+  <xacro:macro name="scan_dock_deliver" params="model_name:=robotx_dock_2022
     uri:=dock_2018 x:=60 y:=-2.75 z:=0 
     R:=0 P:=0 Y:=0 bay1_allowed:=false bay1_symbol:=red_circle 
     bay2_allowed:=true bay2_symbol:=blue_cross
