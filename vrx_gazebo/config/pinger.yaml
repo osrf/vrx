@@ -1,1 +1,2 @@
-position_1: [ -483, 295.5, 0]
+position_1: [ -483, 295.5, 0] # Comment out for `acoustic_pinger_tutorial`
+#position_1: [ 65.0,-47.5,-2] # Uncomment for `acoustic_pinger_tutorial`
