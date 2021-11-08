@@ -1,5 +1,32 @@
 ## VRX 1
 
+### VRX 1.6.0
+1. Improve Sydney Regatta performance 
+    * [Pull Request 380](https://github.com/osrf/vrx/pull/380)
+
+1. Update and extend generate worlds capability to include new tasks
+    * [Pull Request 383](https://github.com/osrf/vrx/pull/383)
+    * [Pull Request 390](https://github.com/osrf/vrx/pull/390)
+    * [Pull Request 391](https://github.com/osrf/vrx/pull/391)
+    * [Pull Request 392](https://github.com/osrf/vrx/pull/392)
+
+1. Improve ball shooter
+    * [Pull Request 379](https://github.com/osrf/vrx/pull/379)
+    * [Pull Request 384](https://github.com/osrf/vrx/pull/384)
+    * [Pull Request 385](https://github.com/osrf/vrx/pull/385)
+    * [Pull Request 386](https://github.com/osrf/vrx/pull/386)
+
+1. Other bug fixes and minor enhancements
+    * [Pull Request 371](https://github.com/osrf/vrx/pull/371)
+    * [Pull Request 375](https://github.com/osrf/vrx/pull/375)
+    * [Pull Request 378](https://github.com/osrf/vrx/pull/378)
+    * [Pull Request 382](https://github.com/osrf/vrx/pull/382)
+    * [Pull Request 386](https://github.com/osrf/vrx/pull/386)
+    * [Pull Request 387](https://github.com/osrf/vrx/pull/387)
+    * [Pull Request 388](https://github.com/osrf/vrx/pull/388)
+    * [Pull Request 389](https://github.com/osrf/vrx/pull/389)
+    * [Pull Request 394](https://github.com/osrf/vrx/pull/394)
+
 ### VRX 1.5.X
 1. New VRX example with 2022 course elements 
     * [Pull Request 359](https://github.com/osrf/vrx/pull/359) 
