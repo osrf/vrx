@@ -1,6 +1,9 @@
 ## VRX 1
 
 ### VRX 1.6.0
+1. Update pinger.yaml to support 2019 and 2022 worlds
+    * [Pull Request 394](https://github.com/osrf/vrx/pull/394)
+
 1. Improve Sydney Regatta performance 
     * [Pull Request 380](https://github.com/osrf/vrx/pull/380)
 
@@ -26,6 +29,7 @@
     * [Pull Request 388](https://github.com/osrf/vrx/pull/388)
     * [Pull Request 389](https://github.com/osrf/vrx/pull/389)
     * [Pull Request 394](https://github.com/osrf/vrx/pull/394)
+    * [Pull Request 374](https://github.com/osrf/vrx/pull/374)
 
 ### VRX 1.5.X
 1. New VRX example with 2022 course elements 
