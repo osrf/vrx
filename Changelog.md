@@ -21,6 +21,7 @@
 
 1. Other bug fixes and minor enhancements
     * [Pull Request 371](https://github.com/osrf/vrx/pull/371)
+    * [Pull Request 374](https://github.com/osrf/vrx/pull/374)
     * [Pull Request 375](https://github.com/osrf/vrx/pull/375)
     * [Pull Request 378](https://github.com/osrf/vrx/pull/378)
     * [Pull Request 382](https://github.com/osrf/vrx/pull/382)
@@ -28,7 +29,6 @@
     * [Pull Request 387](https://github.com/osrf/vrx/pull/387)
     * [Pull Request 388](https://github.com/osrf/vrx/pull/388)
     * [Pull Request 389](https://github.com/osrf/vrx/pull/389)
-    * [Pull Request 374](https://github.com/osrf/vrx/pull/374)
 
 ### VRX 1.5.X
 1. New VRX example with 2022 course elements 
