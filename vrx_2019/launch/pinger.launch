@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="set_pinger_position" pkg="vrx_gazebo" type="set_pinger_position.py" output="screen">
+    <rosparam command="load" file="$(find vrx_2019)/config/pinger.yaml" />
+  </node>
+  <node name="pinger_visualization" pkg="vrx_gazebo" type="pinger_visualization.py" />
+</launch>
