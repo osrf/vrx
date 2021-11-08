@@ -28,7 +28,6 @@
     * [Pull Request 387](https://github.com/osrf/vrx/pull/387)
     * [Pull Request 388](https://github.com/osrf/vrx/pull/388)
     * [Pull Request 389](https://github.com/osrf/vrx/pull/389)
-    * [Pull Request 394](https://github.com/osrf/vrx/pull/394)
     * [Pull Request 374](https://github.com/osrf/vrx/pull/374)
 
 ### VRX 1.5.X
