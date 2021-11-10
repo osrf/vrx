@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="gymkhana" params="name='gymkhana' 
+   nav_uri:=short_navigation_course0
+   obstacle_uri:=obstacle_course
+   nx:=-524 ny:=186 nz:=0 nR:=0 nP:=0 nY:=-1.44 
+   ox:=-477 oy:=275 oz:=0 oR:=0 oP:=0 oY:=2.54 
+   gx:=-483 gy:=295.5 
+   running_duration:=300 **gates">
+    <!-- The navigation course -->
+    <include>
+      <name>${name}_navigation_course</name>
+      <uri>model://${nav_uri}</uri>
+      <pose>${nx} ${ny} ${nz} ${nR} ${nP} ${nY}</pose>
+    </include>
+
+    <!-- The obstacle course -->
+    <include>
+      <name>${name}_obstacle_course</name>
+      <uri>model://${obstacle_uri}</uri>
+      <pose>${ox} ${oy} ${oz} ${oR} ${oP} ${oY}</pose>
+    </include>
+
+    <!-- Top-level scoring plugin -->
+    <plugin name="gymkhana_scoring_plugin"
+            filename="libgymkhana_vrx_scoring_plugin.so">
+      <vehicle>wamv</vehicle>
+      <task_name>${name}</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/debug/contact</contact_debug_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>${running_duration}</running_state_duration>
+      <!-- Per-plugin flag, different from env var VRX_EXIT_ON_COMPLETION.
+           Respect top-level plugin finished status. -->
+      <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+      <obstacle_penalty>1</obstacle_penalty>
+    </plugin>
+
+    <!-- Scoring plugin for buoy channel portion -->
+    <plugin name="navigation_scoring_plugin"
+            filename="libnavigation_scoring_plugin.so">
+      <vehicle>wamv</vehicle>
+      <task_name>gymkhana_channel</task_name>
+      <task_info_topic>/vrx/gymkhana_channel/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/gymkhana_channel/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>${running_duration}</running_state_duration>
+      <collision_buffer>10</collision_buffer>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
+      <course_name>${name}_navigation_course</course_name>
+      <obstacle_penalty>10.0</obstacle_penalty>
+      <gates>
+        <xacro:insert_block name="gates"/>
+       </gates>
+      <silent>true</silent>
+    </plugin>
+
+    <!-- Scoring plugin for acoustic pinger portion -->
+    <plugin name="stationkeeping_scoring_plugin"
+          filename="libstationkeeping_scoring_plugin.so">
+      <vehicle>wamv</vehicle>
+      <task_name>gymkhana_blackbox</task_name>
+      <mean_error_topic>/vrx/gymkhana_blackbox/mean_pose_error</mean_error_topic>
+      <pose_error_topic>/vrx/gymkhana_blackbox/pose_error</pose_error_topic>
+      <goal_topic>/vrx/gymkhana_blackbox/goal</goal_topic>
+      <task_info_topic>/vrx/gymkhana_blackbox/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/gymkhana_blackbox/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <!-- Disable heading error -->
+      <head_error_on>false</head_error_on>
+      <!-- Goal as Cartesian coordinates -->
+      <goal_pose_cart>${gx} ${gy} 0</goal_pose_cart>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>${running_duration}</running_state_duration>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
+      <markers>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
+      </markers>
+      <silent>true</silent>
+    </plugin>
+
+  </xacro:macro>
+</world>
