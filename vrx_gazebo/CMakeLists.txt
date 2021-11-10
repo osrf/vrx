@@ -288,6 +288,22 @@ install(TARGETS perception_scoring_plugin
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+# Plugin for converting to spherical coordinates.
+add_library(geo_coord_world_plugin src/geo_coord_world_plugin.cc)
+target_link_libraries(geo_coord_world_plugin
+  ${catkin_LIBRARIES}
+)
+add_dependencies(geo_coord_world_plugin
+  ${catkin_EXPORTED_TARGETS}
+  vrx_gazebo_generate_messages_cpp
+  vrx_gazebo_generate_services_cpp
+)
+install(TARGETS geo_coord_world_plugin
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Dock base files that need to be processed with erb
 set(dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
@@ -359,6 +375,7 @@ xacro_add_files(
   worlds/sydneyregatta.world.xacro
   worlds/wayfinding_task.world.xacro
   worlds/wildlife_task.world.xacro
+  worlds/sydneyregatta_spherical.world.xacro
   ${XACRO_INORDER} INSTALL DESTINATION worlds
 )
 # Generate obstacle course

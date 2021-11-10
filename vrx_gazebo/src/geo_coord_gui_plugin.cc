@@ -75,7 +75,14 @@ bool GeoCoordGUIPlugin::OnMouseMove(const common::MouseEvent &_event)
         return false;
     }
     ignition::math::Vector3d spherical_coord;
-    spherical_coord = GET THE SPHERICAL COORDINATES SOMEHOW ? ::PositionTransform(mouse_loc, GLOBAL, SPHERICAL); //how do we import the spherical coordinates?
+        // Conversion from Gazebo Cartesian coordinates to spherical.
+#if GAZEBO_MAJOR_VERSION >= 8
+    const ignition::math::Vector3d latlon =
+      this->world->SphericalCoords()->SphericalFromLocal(mouse_loc);
+#else
+    const ignition::math::Vector3d latlon =
+      this->world->GetSphericalCoordinates()->SphericalFromLocal(mouse_loc);
+#endif
     this->SetDispCoord(QString::fromStdString(
-        spherical_coord.X() + spherical_coord.Y())); //convert to string?
+        latlon.X() + latlong.Y())); //convert to string?
 }
