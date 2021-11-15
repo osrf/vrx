@@ -5,6 +5,8 @@ import sys
 import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
+from vrx_gazebo.srv import BallShooter
+from std_msgs.msg import Empty
 
 class Node():
     def __init__(self,linear_scaling,angular_scaling,keyboard=False):
@@ -15,6 +17,7 @@ class Node():
         self.left_msg =None
         self.right_msg =None
         self.keyboard = keyboard
+        self.shooter_pub = None
 
     def callback(self,data):
         rospy.logdebug("RX: Twist "+rospy.get_caller_id())
@@ -45,6 +48,9 @@ class Node():
         self.left_pub.publish(self.left_msg)
         self.right_pub.publish(self.right_msg)
 
+    def handle_ball_shooter(self,req):
+        self.shooter_pub.publish()
+        return True
 
 if __name__ == '__main__':
 
@@ -70,6 +76,10 @@ if __name__ == '__main__':
 
     # Subscriber
     rospy.Subscriber("cmd_vel",Twist,node.callback)
+
+    # Service - adds functionality to shoot via joystick
+    sub = rospy.Service('ball_shooter', BallShooter, node.handle_ball_shooter)
+    node.shooter_pub = rospy.Publisher("/wamv/shooters/ball_shooter/fire", Empty,queue_size=1)
 
     try:
         rospy.spin()
