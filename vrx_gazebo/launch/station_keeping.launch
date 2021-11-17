@@ -9,6 +9,8 @@
   <arg name="verbose" default="false"/>
   <!-- Set various other gazebo arguments-->
   <arg name="extra_gazebo_args" default=""/>
+  <!-- Start in paused state?-->
+  <arg name="paused" default="false"/>
   <!-- Start in a default namespace -->
   <arg name="namespace" default="wamv"/>
 
