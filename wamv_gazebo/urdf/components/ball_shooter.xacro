@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="wamv_ball_shooter" params="name:='ball_shooter' frameId:='wamv/ball_shooter' x:=0.55 y:=0.35 z:=1.4 pitch:='0' yaw:='0'">
+
+    <link name="${namespace}/${name}_base_link">
+      <visual name="${name}_base_visual">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://vrx_gazebo/models/ball_shooter/meshes/ball_shooter_base.dae"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <origin xyz="-0.02 0 0.05" rpy="0 0 0" />
+        <mass value="0.5"/>
+        <inertia ixx="0.00083" ixy="0.0" ixz="0.0" iyy="0.00052083" iyz="0.0" izz="0.00052083"/>
+      </inertial>
+    </link>
+
+    <link name="${namespace}/${name}_launcher_link">
+      <visual name="${name}_launcher_visual">
+        <!-- The cylinder has a -15deg pitch. We compensate for that here.
+             That way, if the user passes a 0 deg rotation the cylinder will
+             be parallel to the ground -->
+        <!-- <origin xyz="-0.0204 0 0.107877" rpy="0 0.261799 0" /> -->
+        <origin xyz="0 0 0" rpy="0 0.261799 0" />
+        <geometry>
+          <mesh filename="package://vrx_gazebo/models/ball_shooter/meshes/ball_shooter_launcher.dae"/>
+        </geometry>
+      </visual>
+      <!-- Uncomment to see the pose where the ball is teleported -->
+      <!-- <visual name="${name}_visual_ball">
+        <origin xyz="0.14 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.0285"/>
+        </geometry>
+      </visual> -->
+      <collision name="${name}_collision">
+        <origin xyz="0 0 0" rpy="0 0.261799 0" />
+        <geometry>
+          <box size="0.3 0.3 0.2" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 -1.5708 0" />
+        <mass value="0.5"/>
+        <inertia ixx="0.001779167" ixy="0.0" ixz="0.0" iyy="0.001779167" iyz="0.0" izz="0.000225"/>
+      </inertial>
+    </link>
+
+    <joint name="${namespace}/${name}_base_joint" type="revolute">
+      <axis xyz="0 0 1"/>
+      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 ${yaw}"/>
+      <parent link="${namespace}/base_link"/>
+      <child link="${namespace}/${name}_base_link"/>
+    </joint>
+    <joint name="${namespace}/${name}_launcher_joint" type="revolute">
+      <axis xyz="0 0 1"/>
+      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+      <origin xyz="-0.0204 0 0.107877" rpy="0 ${pitch} 0"/>
+      <parent link="${namespace}/${name}_base_link"/>
+      <child link="${namespace}/${name}_launcher_link"/>
+    </joint>
+    <gazebo>
+      <plugin name="ball_shooter_plugin" filename="libball_shooter_plugin.so">
+        <projectile>
+          <model_name>blue_projectile</model_name>
+          <link_name>link</link_name>
+          <frame>wamv/ball_shooter_launcher_link</frame>
+          <pose>0.14 0 0 0 0 0</pose>
+        </projectile>
+        <num_shots>4</num_shots>
+        <shot_force>300</shot_force>
+        <topic>${namespace}/${shooter_namespace}${name}/fire</topic>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

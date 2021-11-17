@@ -193,12 +193,14 @@ void StationkeepingScoringPlugin::Update()
   double dx   = this->goalX - robotPose.Pos().X();
   double dy   = this->goalY - robotPose.Pos().Y();
   double dist = sqrt(pow(dx, 2) + pow(dy, 2));
-  double k    = 0.75;
   double dhdg = abs(this->goalYaw - currentHeading);
   double headError = M_PI - abs(dhdg - M_PI);
 
   if (this->headErrorOn)
+  {
+    double k    = 0.75;
     this->poseError = dist + (pow(k, dist) * headError);
+  }
   else
     this->poseError = dist;
   this->totalPoseError += this->poseError;
@@ -248,7 +250,8 @@ void StationkeepingScoringPlugin::PublishGoal()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnReady()
 {
-  gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
+  if (!this->silent)
+    gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
 
   this->PublishGoal();
 }
@@ -256,11 +259,11 @@ void StationkeepingScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnRunning()
 {
-  gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
+  if (!this->silent)
+    gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
 
   this->timer.Start();
 }
-
 
 // Register plugin with gazebo
 GZ_REGISTER_WORLD_PLUGIN(StationkeepingScoringPlugin)

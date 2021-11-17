@@ -1,0 +1,265 @@
+<?xml version="1.0" ?>
+<!-- World containing sandisland model and some course challenges -->
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="scan_dock_deliver" params="model_name:=robotx_dock_2022
+    uri:=dock_2018 x:=60 y:=-2.75 z:=0 
+    R:=0 P:=0 Y:=0 bay1_allowed:=false bay1_symbol:=red_circle 
+    bay2_allowed:=true bay2_symbol:=blue_cross
+    bay3_allowed:=false bay3_symbol:=blue_cross
+    light_buoy_present:=false 
+    color_1:=blue color_2:=green color_3:=red
+    lb_x:=90 lb_y:=70 lb_z:=0 lb_R:=0 lb_P:=0 lb_Y:=0
+    enable_color_checker:=false
+		task_name:=scan_dock_deliver">
+    <include>
+      <uri>model://${uri}</uri>
+      <pose>${x} ${y} ${z} ${R} ${P} ${Y}</pose>
+    </include>
+
+    <!-- Add a light buoy if doing Scan and Dock -->
+    <xacro:if value="${light_buoy_present}">
+      <include>
+        <uri>model://robotx_light_buoy</uri>
+        <pose>${lb_x} ${lb_y} ${lb_z} ${lb_R} ${lb_P} ${lb_Y}</pose>
+      </include>
+    </xacro:if>
+
+    <!-- Plugin to detect if the projectile entered the hole -->
+    <plugin name="contain_placard1_big_plugin" filename="libContainPlugin.so">
+      <enabled>true</enabled>
+      <entity>blue_projectile::link</entity>
+      <namespace>vrx/dock_2022_placard1_big_hole</namespace>
+      <pose frame="robotx_dock_2022::dock_2022_placard1::link_symbols">0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.5 0.5 0.5</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- Plugin to detect if the projectile entered the hole -->
+    <plugin name="contain_placard1_small_plugin" filename="libContainPlugin.so">
+      <enabled>true</enabled>
+      <entity>blue_projectile::link</entity>
+      <namespace>vrx/dock_2022_placard1_small_hole</namespace>
+      <pose frame="robotx_dock_2022::dock_2022_placard1::link_symbols">-0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.25 0.5 0.25</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- Plugin to detect if the projectile entered the hole -->
+    <plugin name="contain_placard2_big_plugin" filename="libContainPlugin.so">
+      <enabled>true</enabled>
+      <entity>blue_projectile::link</entity>
+      <namespace>vrx/dock_2022_placard2_big_hole</namespace>
+      <pose frame="robotx_dock_2022::dock_2022_placard2::link_symbols">0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.5 0.5 0.5</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- Plugin to detect if the projectile entered the hole -->
+    <plugin name="contain_placard2_small_plugin" filename="libContainPlugin.so">
+      <enabled>true</enabled>
+      <entity>blue_projectile::link</entity>
+      <namespace>vrx/dock_2022_placard2_small_hole</namespace>
+      <pose frame="robotx_dock_2022::dock_2022_placard2::link_symbols">-0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.25 0.5 0.25</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- Plugin to detect if the projectile entered the hole -->
+    <plugin name="contain_placard3_big_plugin" filename="libContainPlugin.so">
+      <enabled>true</enabled>
+      <entity>blue_projectile::link</entity>
+      <namespace>vrx/dock_2022_placard3_big_hole</namespace>
+      <pose frame="robotx_dock_2022::dock_2022_placard3::link_symbols">0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.5 0.5 0.5</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- Plugin to detect if the projectile entered the hole -->
+    <plugin name="contain_placard3_small_plugin" filename="libContainPlugin.so">
+      <enabled>true</enabled>
+      <entity>blue_projectile::link</entity>
+      <namespace>vrx/dock_2022_placard3_small_hole</namespace>
+      <pose frame="robotx_dock_2022::dock_2022_placard3::link_symbols">-0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.25 0.5 0.25</size>
+        </box>
+      </geometry>
+    </plugin>
+      
+    <!-- The scoring plugin -->
+    <plugin name="scan_dock__deliver_scoring_plugin"
+            filename="libscan_dock_scoring_plugin.so">
+      <!-- Parameters for scoring_plugin -->
+      <vehicle>wamv</vehicle>
+      <task_name>${task_name}</task_name>
+      <initial_state_duration>3</initial_state_duration>
+      <ready_state_duration>3</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
+
+      <!-- Color sequence checker -->
+      <robot_namespace>vrx</robot_namespace>
+      <color_sequence_service>scan_dock_deliver/color_sequence</color_sequence_service>
+      <color_1>${color_1}</color_1>
+      <color_2>${color_2}</color_2>
+      <color_3>${color_3}</color_3>
+      
+      <!-- Dock checkers -->
+      <dock_bonus_points>15</dock_bonus_points>
+      <correct_dock_bonus_points>5</correct_dock_bonus_points>
+      <bays>
+        <bay>
+          <name>bay1</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_1/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <dock_allowed>${bay1_allowed}</dock_allowed>
+          <symbol>${bay1_symbol}</symbol>
+        </bay>
+ 
+        <bay>
+          <name>bay2</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_2/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <dock_allowed>${bay2_allowed}</dock_allowed>
+          <symbol>${bay2_symbol}</symbol>
+        </bay>
+        <bay>
+          <name>bay3</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_3/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <dock_allowed>${bay3_allowed}</dock_allowed>
+          <symbol>${bay3_symbol}</symbol>
+        </bay>
+      </bays>
+
+      <!-- Shooting targets -->
+      <targets>
+        <!-- Placard #1 -->
+        <target>
+          <topic>vrx/dock_2022_placard1_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>vrx/dock_2022_placard1_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+
+        <!-- Placard #2 -->
+        <target>
+          <topic>vrx/dock_2022_placard2_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>vrx/dock_2022_placard2_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+
+        <!-- Placard #3 -->
+        <target>
+          <topic>vrx/dock_2022_placard3_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>vrx/dock_2022_placard3_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+      </targets>
+
+    </plugin>
+
+    <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
+    <plugin name="vehicle_docked_bay1" filename="libContainPlugin.so">
+      <entity>wamv::wamv/base_link</entity>
+      <namespace>vrx/dock_2022/bay_1</namespace>
+      <pose frame="${model_name}::dock_2022_placard1::placard::link">0 -4.5 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>1.5 4 2</size>
+        </box>
+      </geometry>
+    </plugin>
+    <plugin name="vehicle_docked_bay1_exterior" filename="libContainPlugin.so">
+      <entity>wamv::wamv/base_link</entity>
+      <namespace>vrx/dock_2022/bay_1_external</namespace>
+      <pose frame="${model_name}::dock_2022_placard1::placard::link">0 -9.5 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>5.5 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- Triggers a message when the vehicle enters and exits the bay #2 -->
+    <plugin name="vehicle_docked_bay2" filename="libContainPlugin.so">
+      <entity>wamv::wamv/base_link</entity>
+      <namespace>vrx/dock_2022/bay_2</namespace>
+      <pose frame="${model_name}::dock_2022_placard2::placard::link">0 -4.5 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>1.5 4 2</size>
+        </box>
+      </geometry>
+    </plugin>
+    <plugin name="vehicle_docked_bay2_exterior" filename="libContainPlugin.so">
+      <entity>wamv::wamv/base_link</entity>
+      <namespace>vrx/dock_2022/bay_2_external</namespace>
+      <pose frame="${model_name}::dock_2022_placard2::placard::link">0 -9.5 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>5.5 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- Triggers a message when the vehicle enters and exits the bay #3 -->
+    <plugin name="vehicle_docked_bay3" filename="libContainPlugin.so">
+      <entity>wamv::wamv/base_link</entity>
+      <namespace>vrx/dock_2022/bay_3</namespace>
+      <pose frame="${model_name}::dock_2022_placard3::placard::link">0 -4.5 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>1.5 4 2</size>
+        </box>
+      </geometry>
+    </plugin>
+    <plugin filename="libContainPlugin.so" name="vehicle_docked_bay3_exterior">
+      <entity>wamv::wamv/base_link</entity>
+      <namespace>vrx/dock_2022/bay_3_external</namespace>
+      <pose frame="${model_name}::dock_2022_placard3::placard::link">0 -9.5 -1.5 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>5.5 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
+  </xacro:macro>
+</world>

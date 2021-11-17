@@ -1,0 +1,84 @@
+<?xml version="1.0" ?>
+<!-- Macro to insert the sydneyregatta into the world -->
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="sydneyregatta_minus_scene">
+    <!-- Estimated latitude/longitude of sydneyregatta
+	 from satellite imagery -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>-33.724223</latitude_deg>
+      <longitude_deg>150.679736</longitude_deg>
+      <elevation>0.0</elevation>
+      <heading_deg>0.0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>-478.101746 148.200836 13.203143 0.0 0.248344 2.936862</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+      <!--<plugin name="GUITaskWidget" filename="libgui_task_widget.so"/>-->
+    </gui>
+
+    <include>
+      <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
+      to go into the model file to change the altitutde/height!-->
+      <pose> 0 0 0.2 0 0 0 </pose>
+      <uri>model://sydney_regatta</uri>
+    </include>
+
+    <!-- The posts for securing the WAM-V -->
+    <include>
+      <name>post_0</name>
+      <pose>-535.916809 154.362869 0.675884 -0.17182 0.030464 -0.005286</pose>
+      <uri>model://post</uri>
+    </include>
+    <include>
+      <name>post_1</name>
+      <pose>-527.48999 153.854782 0.425844 -0.1365 0  0</pose>
+      <uri>model://post</uri>
+    </include>
+    <include>
+      <name>post_2</name>
+      <pose>-544.832825 156.671951 0.499025 -0.162625 0 0 </pose>
+      <uri>model://post</uri>
+    </include>
+
+    <!-- Antenna for communication with the WAM-V -->
+    <include>
+      <pose>-531.063721 147.668579 1.59471 -0.068142 0 -0.1</pose>
+      <uri>model://antenna</uri>
+    </include>
+
+    <!-- ground station tents -->
+    <include>
+      <name>ground_station_0</name>
+      <pose>-540.796448 146.493744 1.671421 -0.00834 0.01824 1.301726</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <name>ground_station_1</name>
+      <pose>-537.622681 145.827896 1.681931 -0.00603 0.018667 1.301571</pose>
+      <uri>model://ground_station</uri>
+    </include>
+    <include>
+      <name>ground_station_2</name>
+      <pose>-534.550537 144.910400 1.720474 -0.004994 0.020798 1.301492</pose>
+      <uri>model://ground_station</uri>
+    </include>
+
+    <!-- The projectile for the ball shooter -->
+    <include>
+      <name>blue_projectile</name>
+      <pose>-545 60 0.03 0 0 0</pose>
+      <uri>model://blue_projectile</uri>
+    </include>
+
+  </xacro:macro>
+</world>

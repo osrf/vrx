@@ -44,7 +44,7 @@
             filename="libwildlife_scoring_plugin.so">
       <!-- Common parameters -->
       <vehicle>wamv</vehicle>
-      <task_name>wildlife_course</task_name>
+      <task_name>wildlife</task_name>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>

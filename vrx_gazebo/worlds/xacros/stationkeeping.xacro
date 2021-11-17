@@ -4,7 +4,7 @@
     <plugin name="stationkeeping_scoring_plugin"
           filename="libstationkeeping_scoring_plugin.so">
       <vehicle>${namespace}</vehicle>
-      <task_name>stationkeeping</task_name>
+      <task_name>station_keeping</task_name>
 
       <rms_error_topic>/${competition}/station_keeping/rms_error</rms_error_topic>
       <pose_error_topic>/${competition}/station_keeping/pose_error</pose_error_topic>
