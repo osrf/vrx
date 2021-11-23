@@ -54,6 +54,7 @@ add_message_files(
 add_service_files(
   FILES
   ColorSequence.srv
+  BallShooter.srv
 )
 
 # Python scripts setup

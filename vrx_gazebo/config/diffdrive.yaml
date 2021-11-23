@@ -35,3 +35,12 @@ teleop:
       - axis: 2
         target: data
         scale: -1.0
+  
+  ball_shooter:
+    type: service
+    interface_type: vrx_gazebo/srv/BallShooter
+    service_name: /ball_shooter
+    service_request: 
+      shoot: true
+    buttons: [6]
+    

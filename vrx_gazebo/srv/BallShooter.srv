@@ -1,0 +1,5 @@
+# Ball shooter service
+
+bool shoot
+---
+bool success
