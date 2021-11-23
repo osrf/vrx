@@ -7,9 +7,14 @@
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves scale="2.5"/>
-    <!--wind for the wamv-->
+    <!--Wind-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
-    <xacro:usv_wind_gazebo>
+    <xacro:usv_wind_gazebo
+	direction="270"
+	mean_vel="0"
+	var_gain="0"
+	var_time="10"
+	seed="42">
       <wind_objs>
         <wind_obj>
           <name>wamv</name>
