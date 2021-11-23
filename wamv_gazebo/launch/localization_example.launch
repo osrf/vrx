@@ -2,6 +2,9 @@
 <!-- Example of ROS localization using the example wamv with sensors -->
 <launch>
 
+  <!-- Supress tf warnings -->
+  <rosparam param="silent_tf_failure">true</rosparam>
+
   <!-- Kalman filter fusing imu and gps into combined odometry/tf -->
   <node ns="wamv/robot_localization" pkg="robot_localization" type="ekf_localization_node"
         name="ekf_localization" clear_params="false">
