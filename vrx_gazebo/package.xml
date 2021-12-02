@@ -21,13 +21,13 @@
   <depend>geographic_msgs</depend>
   <depend>joy</depend>
   <depend>joy_teleop</depend>
-  <depend>message_runtime</depend>
   <depend>rclcpp</depend>
-  <depend>rospy</depend>
+  <depend>rclpy</depend>
   <depend>std_msgs</depend>
   <depend>wamv_gazebo</depend>
   <depend>wave_gazebo</depend>
   <depend>xacro</depend>
+  <depend>xterm</depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
   <export>
