@@ -109,7 +109,7 @@ def main(args=None):
 
             # Publish thrust angle
             angle_msg = Float32()
-            angle_msg.data = curr_angle
+            angle_msg.data = float(curr_angle)
             left_pub.publish(angle_msg)
             right_pub.publish(angle_msg)
 
