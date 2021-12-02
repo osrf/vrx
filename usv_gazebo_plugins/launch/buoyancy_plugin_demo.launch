@@ -9,7 +9,7 @@
 
   <!-- Start Gazebo with the world file -->
   <include file="$(find-pkg-share gazebo_ros)/launch/gazebo.launch.py">
-    <arg name="world_name"   value="$(var world)"/>
+    <arg name="world"   value="$(var world)"/>
     <arg name="verbose"      value="$(var verbose)"/>
     <arg name="paused"       value="true"/>
     <arg name="use_sim_time" value="true"/>
