@@ -345,25 +345,26 @@ install(PROGRAMS scripts/spawn_wamv.bash
   DESTINATION lib/${PROJECT_NAME})
 
 # Generate world files from xacro and install
-xacro_add_files(
-  worlds/dock.world.xacro
-  worlds/example_course.world.xacro
-  worlds/example_course_2019.world.xacro
-  worlds/gymkhana.world.xacro
-  worlds/navigation_task.world.xacro
-  worlds/ocean.world.xacro
-  worlds/perception_task.world.xacro
-  worlds/scan_and_dock.world.xacro
-  worlds/scan_dock_deliver.world.xacro
-  worlds/sandisland.world.xacro
-  worlds/stationkeeping_task.world.xacro
-  worlds/sydneyregatta.world.xacro
-  worlds/wayfinding_task.world.xacro
-  worlds/wildlife_task.world.xacro
-  worlds/wind_test.world.xacro
-  INSTALL DESTINATION worlds
-)
-
+if(ADD_XACRO)
+  xacro_add_files(
+    worlds/dock.world.xacro
+    worlds/example_course.world.xacro
+    worlds/example_course_2019.world.xacro
+    worlds/gymkhana.world.xacro
+    worlds/navigation_task.world.xacro
+    worlds/ocean.world.xacro
+    worlds/perception_task.world.xacro
+    worlds/scan_and_dock.world.xacro
+    worlds/scan_dock_deliver.world.xacro
+    worlds/sandisland.world.xacro
+    worlds/stationkeeping_task.world.xacro
+    worlds/sydneyregatta.world.xacro
+    worlds/wayfinding_task.world.xacro
+    worlds/wildlife_task.world.xacro
+    worlds/wind_test.world.xacro
+    INSTALL DESTINATION worlds
+  )
+endif()
 
 if(AMENT_ENABLE_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
