@@ -38,7 +38,7 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   #if GAZEBO_MAJOR_VERSION >= 8
     this->modelPose = model->WorldPose();
   #else
-    this->modelPose = model->GetWorldPose();
+    this->modelPose = model->GetWorldPose().Ign();
   #endif
   // Parse the optional <distance> field.
   if (_sdf->HasElement("distance"))
