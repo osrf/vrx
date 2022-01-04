@@ -35,8 +35,11 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   GZ_ASSERT(_model != nullptr, "Received NULL model pointer");
   this->model = _model;
-  this->modelPose = model->WorldPose();
-
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->modelPose = model->WorldPose();
+  #else
+    this->modelPose = model->GetWorldPose();
+  #endif
   // Parse the optional <distance> field.
   if (_sdf->HasElement("distance"))
   {
