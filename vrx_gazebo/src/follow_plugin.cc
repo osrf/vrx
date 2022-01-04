@@ -35,7 +35,14 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   GZ_ASSERT(_model != nullptr, "Received NULL model pointer");
   this->model = _model;
+  this->modelPose = model->WorldPose();
 
+  // Parse the optional <distance> field.
+  if (_sdf->HasElement("distance"))
+  {
+    auto distElem = _sdf->GetElement("distance");
+    dist = distElem->Get<double>();
+  }
   // Parse the optional <waypoints> element.
   if (_sdf->HasElement("waypoints"))
   {
@@ -64,7 +71,38 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       waypointElem = waypointElem->GetNextElement("waypoint");
     }
   }
-
+  // If no waypoints present, check for the <circle> element and parse.
+  else if (_sdf->HasElement("circle"))
+  {
+    gzmsg << "Circle element activated" << std::endl;
+    // Get the current model position in global coordinates.  Create local vectors 
+    // that represent a path along a circle of radius dist.
+    ignition::math::Vector2d position(this->modelPose.Pos().X(), this->modelPose.Pos().Y());
+    double angle = 0;
+    ignition::math::Vector2d vec(dist/2, 0);
+    for (int i=0; i<8; i++)
+    {
+      // Add the local vector to the current position.  Store global position as a waypoint.
+      this->localWaypoints.push_back(position+vec);
+      angle += M_PI/4;
+      vec.Set(dist/2*cos(angle), dist/2*sin(angle));
+      gzmsg << "Entered circle waypoint " << position+vec << std::endl;
+    }
+  }
+  // If no waypoints or circle, check for the <line> element and parse.
+  else if (_sdf->HasElement("line"))
+  {
+    this->waypointLine = _sdf->Get<double>("line");
+    // Create a relative vector in the direction of waypointLine and of length dist.
+    ignition::math::Vector2d lineVec(dist*cos(waypointLine*M_PI/180), 
+          dist*sin(waypointLine*M_PI/180));
+    ignition::math::Vector2d position(this->modelPose.Pos().X(), this->modelPose.Pos().Y());
+    // Add the initial model position and calculated endpoint as waypoints.
+    this->localWaypoints.push_back(position);
+    this->localWaypoints.push_back(position+lineVec);
+    gzmsg << "Entered line waypoints " << position << ", " << position+lineVec << std::endl;
+  }
+    
   // Parse the required <link_name> element.
   if (!_sdf->HasElement("link_name"))
   {

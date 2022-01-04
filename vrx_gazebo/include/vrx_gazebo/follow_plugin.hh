@@ -19,8 +19,10 @@
 #define VRX_GAZEBO_FOLLOW_PLUGIN_HH_
 
 #include <vector>
+#include <cmath>
 #include <gazebo/gazebo.hh>
 #include <ignition/math/Vector2.hh>
+#include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/waypoint_markers.hh"
 
@@ -49,6 +51,11 @@ namespace gazebo
 ///              the model should navigate through. This block should contain at
 ///              least one of these blocks:
 ///                <waypoint>: This block should contain the X, Y of a waypoint.
+/// <line>: Element that indicates the model should travel in "line" mode.
+///         The block should contain the relative direction from the initial 
+///         position in which the vehicle should move, specified in the world
+///         frame.
+/// <circle>: Element that indicates the model should travel in "circle" mode.
 ///
 /// Here's an example:
 /// <plugin name="CrocodrileFollowPlugin" filename="libfollow_plugin.so">
@@ -82,6 +89,9 @@ class FollowPlugin : public ModelPlugin
   /// \brief Pointer to the model link.
   private: physics::LinkPtr link;
 
+  /// \brief The initial pose of the model relative to the world frame.
+  private: ignition::math::Pose3d modelPose;
+
   /// \brief True if the model should continue looping though the waypoints.
   private: bool loopForever = false;
 
@@ -98,6 +108,14 @@ class FollowPlugin : public ModelPlugin
   /// \brief When the model is at this angle or closer we won't try to rotate.
   /// Units are in degrees.
   private: double bearingGoal = 2.0;
+
+  /// \brief The relative bearing towards which the model travels in line mode.
+  /// Units are in degrees.  
+  private: double waypointLine = 0;
+
+  /// \brief A parameter that defines the distance or radius of motion.
+  /// Units are meters.
+  private: double dist = 10;
 
   /// \brief The next position to reach.
   private: ignition::math::Vector3d nextGoal;
