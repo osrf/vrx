@@ -52,7 +52,7 @@ namespace gazebo
 ///              least one of these blocks:
 ///                <waypoint>: This block should contain the X, Y of a waypoint.
 /// <line>: Element that indicates the model should travel in "line" mode.
-///         The block should contain the relative direction from the initial 
+///         The block should contain the relative direction from the initial
 ///         position in which the vehicle should move, specified in the world
 ///         frame.
 /// <circle>: Element that indicates the model should travel in "circle" mode.
@@ -110,7 +110,7 @@ class FollowPlugin : public ModelPlugin
   private: double bearingGoal = 2.0;
 
   /// \brief The relative bearing towards which the model travels in line mode.
-  /// Units are in degrees.  
+  /// Units are in degrees.
   private: double waypointLine = 0;
 
   /// \brief A parameter that defines the distance or radius of motion.
