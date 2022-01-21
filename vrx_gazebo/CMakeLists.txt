@@ -394,13 +394,13 @@ install(DIRECTORY include/
 install(PROGRAMS scripts/spawn_wamv.bash
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(sandisland_test
-                    test/sandisland.test
-                    test/sandisland.cc)
-  target_link_libraries(sandisland_test ${catkin_LIBRARIES})
-endif()
+#if(CATKIN_ENABLE_TESTING)
+#  find_package(rostest REQUIRED)
+#  add_rostest_gtest(sandisland_test
+#                    test/sandisland.test
+#                    test/sandisland.cc)
+#  target_link_libraries(sandisland_test ${catkin_LIBRARIES})
+#endif()
 
 # Python Scripts
 catkin_install_python(PROGRAMS
