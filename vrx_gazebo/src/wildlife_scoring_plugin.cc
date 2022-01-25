@@ -461,13 +461,13 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
     // Conversion from Gazebo Cartesian coordinates to spherical.
 #if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Pose3d pose = buoy.link->WorldPose();
-    const ignition::math::Vector3d position = 
+    const ignition::math::Vector3d position =
       this->world->SphericalCoords()->GlobalFromLocal(pose.Pos());
     const ignition::math::Vector3d latlon =
       this->world->SphericalCoords()->SphericalFromLocal(position);
 #else
     const ignition::math::Pose3d pose = buoy.link->GetWorldPose().Ign();
-    const ignition::math::Vector3d position = 
+    const ignition::math::Vector3d position =
       this->world->GetSphericalCoordinates()->GlobalFromLocal(pose.Pos());
     const ignition::math::Vector3d latlon =
       this->world->GetSphericalCoordinates()->SphericalFromLocal(position);
