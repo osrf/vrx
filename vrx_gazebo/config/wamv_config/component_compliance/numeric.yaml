@@ -62,7 +62,7 @@ wamv_ball_shooter:
         yaw
         name
 wamv_pinger:
-    num: 0
+    num: 1
     allowed_params:
         position
         name
