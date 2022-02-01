@@ -15,6 +15,7 @@
  *
 */
 
+#include <cmath>
 #include <string>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
@@ -44,7 +45,7 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("distance"))
   {
     auto distElem = _sdf->GetElement("distance");
-    dist = distElem->Get<double>();
+    this->dist = distElem->Get<double>();
   }
   // Parse the optional <waypoints> element.
   if (_sdf->HasElement("waypoints"))
@@ -79,19 +80,19 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     gzmsg << "Circle element activated" << std::endl;
     // Get the current model position in global coordinates.  Create
-    // local vectorsthat represent a path along a circle of radius dist.
+    // local vectors that represent a path along a circle of radius dist.
     ignition::math::Vector2d position(this->modelPose.Pos().X(),
                                       this->modelPose.Pos().Y());
     double angle = 0;
-    ignition::math::Vector2d vec(dist/2, 0);
+    ignition::math::Vector2d vec(this->dist / 2, 0);
     for (int i = 0; i < 8; i++)
     {
       // Add the local vector to the current position.  Store global
       // position as a waypoint.
-      this->localWaypoints.push_back(position+vec);
-      angle += M_PI/4;
-      vec.Set(dist/2*cos(angle), dist/2*sin(angle));
-      gzmsg << "Entered circle waypoint " << position+vec << std::endl;
+      this->localWaypoints.push_back(position + vec);
+      angle += M_PI / 4;
+      vec.Set(this->dist / 2 * cos(angle), this->dist / 2 * sin(angle));
+      gzmsg << "Entered circle waypoint " << position + vec << std::endl;
     }
   }
   // If no waypoints or circle, check for the <line> element and parse.
@@ -100,8 +101,9 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->waypointLine = _sdf->Get<double>("line");
     // Create a relative vector in the direction of waypointLine and of
     // length dist.
-    ignition::math::Vector2d lineVec(dist*cos(waypointLine*M_PI/180),
-          dist*sin(waypointLine*M_PI/180));
+    ignition::math::Vector2d lineVec(
+      this->dist * cos(waypointLine * M_PI / 180),
+      this->dist * sin(waypointLine * M_PI / 180));
     ignition::math::Vector2d position(this->modelPose.Pos().X(),
                                       this->modelPose.Pos().Y());
     // Add the initial model position and calculated endpoint as waypoints.
