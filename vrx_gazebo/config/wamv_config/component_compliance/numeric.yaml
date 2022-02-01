@@ -61,3 +61,8 @@ wamv_ball_shooter:
         pitch
         yaw
         name
+wamv_pinger:
+    num: 1
+    allowed_params:
+        position
+        name
