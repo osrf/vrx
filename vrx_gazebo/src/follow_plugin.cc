@@ -109,14 +109,14 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     {
       auto dirElem = lineElem->GetElement("direction");
       direction = dirElem->Get<double>();
-    }    
+    }
     // Parse the optional <length> field.  If absent, use the default (10).
     if (lineElem->HasElement("length"))
     {
       auto lenElem = lineElem->GetElement("length");
       length = lenElem->Get<double>();
-    }    
-    
+    }
+
     // Create a relative vector in the direction of "direction" and of
     // length "length".
     ignition::math::Vector2d lineVec(
