@@ -18,11 +18,11 @@
 #ifndef VRX_GAZEBO_FOLLOW_PLUGIN_HH_
 #define VRX_GAZEBO_FOLLOW_PLUGIN_HH_
 
-#include <cmath>
 #include <vector>
+#include <cmath>
 #include <gazebo/gazebo.hh>
-#include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector2.hh>
+#include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
 #include "vrx_gazebo/waypoint_markers.hh"
 
@@ -52,13 +52,19 @@ namespace gazebo
 ///              least one of these blocks:
 ///                <waypoint>: This block should contain the X, Y of a waypoint.
 /// <line>: Element that indicates the model should travel in "line" mode.
-///         The block should contain the relative direction from the initial
-///         position in which the vehicle should move, specified in the world
-///         frame.
+///         The block may contain the relative direction and distance from the 
+///         initial position in which the vehicle should move, specified in the 
+///         world frame.
+///           <direction>:  Relative direction in the world frame for the vehicle
+///                         to travel.
+///           <length>:     Distance in that direction for the vehicle to travel.
 /// <circle>: Element that indicates the model should travel in "circle" mode.
+///           The block may contain the desired radius of the circle about the 
+///           vehicle's initial position
+///           <radius>:  Radius of circular path to travel.
 ///
-/// Here's an example:
-/// <plugin name="CrocodrileFollowPlugin" filename="libfollow_plugin.so">
+/// Here are three examples:
+/// <plugin name="CrocodileFollowPlugin" filename="libfollow_plugin.so">
 ///   <link_name>link</link_name>
 ///   <loop_forever>true</loop_forever>
 ///   <waypoints>
@@ -70,6 +76,21 @@ namespace gazebo
 ///     <scaling>0.2 0.2 2.0</scaling>
 ///     <height>0.5</height>
 ///   </markers>
+/// </plugin>
+/// <plugin name='PlatypusFollowPlugin' filename='libfollow_plugin.so'>
+///   <link_name>link</link_name>
+///   <loop_forever>true</loop_forever>
+///   <line>
+///     <direction>340</direction>
+///     <length>10</length>
+///   </line>
+/// </plugin>
+/// <plugin name='TurtleFollowPlugin' filename='libfollow_plugin.so'>
+///   <link_name>link</link_name>
+///   <loop_forever>true</loop_forever>
+///   <circle>
+///      <radius>2</radius>
+///   </circle>
 /// </plugin>
 class FollowPlugin : public ModelPlugin
 {
@@ -108,14 +129,6 @@ class FollowPlugin : public ModelPlugin
   /// \brief When the model is at this angle or closer we won't try to rotate.
   /// Units are in degrees.
   private: double bearingGoal = 2.0;
-
-  /// \brief The relative bearing towards which the model travels in line mode.
-  /// Units are in degrees.
-  private: double waypointLine = 0;
-
-  /// \brief A parameter that defines the distance or radius of motion.
-  /// Units are meters.
-  private: double dist = 10;
 
   /// \brief The next position to reach.
   private: ignition::math::Vector3d nextGoal;
