@@ -34,14 +34,14 @@ namespace gazebo
 /// in sequence. The movement is generated applying force and torque to one of
 /// of the model links. It's also possible to loop through the waypoints for
 /// generating a never ending trajectory.
-/// Waypoints may be inserted manually via the <waypoints> element, or 
+/// Waypoints may be inserted manually via the <waypoints> element, or
 /// generated relative to the model's initial position via the <line> or
 /// <circle> elements.  Only one of these options should be used.
 ///
 /// This plugin requires the following SDF parameters:
 /// * Required parameters:
 /// <link_name>: The name of the link within the model where the force/torque
-///              will be applied when moving the vehicke.
+///              will be applied when moving the vehicle.
 ///
 /// * Optional parameters:
 /// <loop_forever>: When true, all waypoints will be visited continously in a
