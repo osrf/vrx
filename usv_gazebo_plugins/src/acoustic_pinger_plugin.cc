@@ -271,7 +271,7 @@ void AcousticPinger::Update()
     // using the atan2 function of the x and y components of the transformed
     // vector.  The elevation is calculated from the length of the 2D only
     // and the z component of the sensor frame vector.
-    double bearing = atan2(directionSensorFrame.Y(), directionSensorFrame.X());
+    double bearing = -atan2(directionSensorFrame.Y(), directionSensorFrame.X());
     double range = directionSensorFrame.Length();
     double elevation =
       atan2(directionSensorFrame.Z(), directionSensorFrame2d.Length());
