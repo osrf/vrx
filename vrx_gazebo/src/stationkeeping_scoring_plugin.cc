@@ -66,14 +66,8 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     // Convert lat/lon to local
     // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
     ignition::math::Vector3d scVec(this->goalLat, this->goalLon, 0.0);
-
-#if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Vector3d cartVec =
       this->sc.LocalFromSphericalPosition(scVec);
-#else
-    ignition::math::Vector3d cartVec =
-      _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
-#endif
 
     // Store local 2D location and yaw
     this->goalX = cartVec.X();
@@ -93,7 +87,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
     ignition::math::Vector3d cartVec(this->goalX, this->goalY, xyz.Z());
 
-#if GAZEBO_MAJOR_VERSION >= 8
+#if GAZEBO_MAJOR_VERSION >= 11
     // There's a known bug with the SphericalFromLocal() computation.
     // We use our own SphericalCoordinates object from Ignition Math and we call
     // PositionTransform() directly containing the correct version.
@@ -103,6 +97,11 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
         ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL);
     scVec.X(IGN_RTOD(scVec.X()));
     scVec.Y(IGN_RTOD(scVec.Y()));
+#elif GAZEBO_MAJOR_VERSION >= 8
+    const ignition::math::Vector3d position =
+      _world->SphericalCoords()->GlobalFromLocal(cartVec);
+    ignition::math::Vector3d scVec =
+      _world->SphericalCoords()->SphericalFromLocal(position);
 #else
     const ignition::math::Vector3d position =
       _world->GetSphericalCoordinates()->GlobalFromLocal(cartVec);

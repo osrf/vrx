@@ -22,7 +22,6 @@
 #include <std_msgs/String.h>
 #include <cmath>
 #include <gazebo/common/Console.hh>
-#include <gazebo/common/SphericalCoordinates.hh>
 #include <ignition/math/Quaternion.hh>
 #include <ignition/math/Vector3.hh>
 #include <gazebo/physics/Model.hh>
@@ -72,13 +71,8 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     //  snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
     ignition::math::Vector3d scVec(latlonyaw.X(), latlonyaw.Y(), 0.0);
 
-#if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Vector3d cartVec =
       this->sc.LocalFromSphericalPosition(scVec);
-#else
-    ignition::math::Vector3d cartVec =
-      _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
-#endif
 
     cartVec.Z() = latlonyaw.Z();
 

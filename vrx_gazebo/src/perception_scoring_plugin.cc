@@ -407,13 +407,9 @@ void PerceptionScoringPlugin::OnAttempt(
       // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
       ignition::math::Vector3d scVec(_msg->pose.position.latitude,
         _msg->pose.position.longitude, 0);
-      #if GAZEBO_MAJOR_VERSION >= 8
-        ignition::math::Vector3d cartVec =
-          this->sc.LocalFromSphericalPosition(scVec);
-      #else
-        ignition::math::Vector3d cartVec =
-        this->world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
-      #endif
+      ignition::math::Vector3d cartVec =
+        this->sc.LocalFromSphericalPosition(scVec);
+
       // Get current pose of the current object
       #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Pose3d truePose = obj.modelPtr->WorldPose();
