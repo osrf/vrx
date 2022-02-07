@@ -472,7 +472,7 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
     latlon.X(IGN_RTOD(latlon.X()));
     latlon.Y(IGN_RTOD(latlon.Y()));
 #elif GAZEBO_MAJOR_VERSION >= 8
-    const ignition::math::Pose3d pose = buoy.link->WorldPose().Ign();
+    const ignition::math::Pose3d pose = buoy.link->WorldPose();
     const ignition::math::Vector3d position =
       this->world->SphericalCoords()->GlobalFromLocal(pose.Pos());
     const ignition::math::Vector3d latlon =
