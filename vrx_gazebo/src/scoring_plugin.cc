@@ -44,7 +44,11 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   }
 
   // Initialize spherical coordinates.
+#if GAZEBO_MAJOR_VERSION >= 8
   auto gzSC = _world->SphericalCoords();
+#else
+  auto gzSC = _world->GetSphericalCoordinates();
+#endif
   this->sc.SetLatitudeReference(gzSC->LatitudeReference());
   this->sc.SetLongitudeReference(gzSC->LongitudeReference());
   this->sc.SetElevationReference(gzSC->GetElevationReference());
