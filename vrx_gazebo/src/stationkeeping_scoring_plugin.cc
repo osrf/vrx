@@ -105,7 +105,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     scVec.Y(IGN_RTOD(scVec.Y()));
 #else
     const ignition::math::Vector3d position =
-      this->world->SphericalCoords()->GlobalFromLocal(cartVec);
+      _world->GetSphericalCoordinates()->GlobalFromLocal(cartVec);
     ignition::math::Vector3d scVec =
       _world->GetSphericalCoordinates()->SphericalFromLocal(position);
 #endif
