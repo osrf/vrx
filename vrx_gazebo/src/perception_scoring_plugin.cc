@@ -409,7 +409,7 @@ void PerceptionScoringPlugin::OnAttempt(
         _msg->pose.position.longitude, 0);
       #if GAZEBO_MAJOR_VERSION >= 8
         ignition::math::Vector3d cartVec =
-        this->world->SphericalCoords()->LocalFromSpherical(scVec);
+          this->sc.LocalFromSphericalPosition(scVec);
       #else
         ignition::math::Vector3d cartVec =
         this->world->GetSphericalCoordinates()->LocalFromSpherical(scVec);

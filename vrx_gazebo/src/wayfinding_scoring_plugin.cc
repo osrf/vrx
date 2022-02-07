@@ -74,7 +74,7 @@ void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
 #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Vector3d cartVec =
-      _world->SphericalCoords()->LocalFromSpherical(scVec);
+      this->sc.LocalFromSphericalPosition(scVec);
 #else
     ignition::math::Vector3d cartVec =
       _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);

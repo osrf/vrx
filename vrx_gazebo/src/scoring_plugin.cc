@@ -43,6 +43,13 @@ void ScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     return;
   }
 
+  // Initialize spherical coordinates.
+  auto gzSC = _world->SphericalCoords();
+  this->sc.SetLatitudeReference(gzSC->LatitudeReference());
+  this->sc.SetLongitudeReference(gzSC->LongitudeReference());
+  this->sc.SetElevationReference(gzSC->GetElevationReference());
+  this->sc.SetHeadingOffset(gzSC->HeadingOffset());
+
   this->readyTime.Set(this->initialStateDuration);
   this->runningTime = this->readyTime + this->readyStateDuration;
   this->finishTime = this->runningTime + this->runningStateDuration;

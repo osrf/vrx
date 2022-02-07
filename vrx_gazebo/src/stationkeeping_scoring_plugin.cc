@@ -69,7 +69,7 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 
 #if GAZEBO_MAJOR_VERSION >= 8
     ignition::math::Vector3d cartVec =
-      _world->SphericalCoords()->LocalFromSpherical(scVec);
+      this->sc.LocalFromSphericalPosition(scVec);
 #else
     ignition::math::Vector3d cartVec =
       _world->GetSphericalCoordinates()->LocalFromSpherical(scVec);
@@ -94,11 +94,20 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     ignition::math::Vector3d cartVec(this->goalX, this->goalY, xyz.Z());
 
 #if GAZEBO_MAJOR_VERSION >= 8
+    // There's a known bug with the SphericalFromLocal() computation.
+    // We use our own SphericalCoordinates object from Ignition Math and we call
+    // PositionTransform() directly containing the correct version.
     ignition::math::Vector3d scVec =
-      _world->SphericalCoords()->SphericalFromLocal(cartVec);
+      this->sc.PositionTransform(cartVec,
+        ignition::math::SphericalCoordinates::CoordinateType::LOCAL2,
+        ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL);
+    scVec.X(IGN_RTOD(scVec.X()));
+    scVec.Y(IGN_RTOD(scVec.Y()));
 #else
+    const ignition::math::Vector3d position =
+      this->world->SphericalCoords()->GlobalFromLocal(cartVec);
     ignition::math::Vector3d scVec =
-      _world->GetSphericalCoordinates()->SphericalFromLocal(cartVec);
+      _world->GetSphericalCoordinates()->SphericalFromLocal(position);
 #endif
 
     // Store spherical 2D location
