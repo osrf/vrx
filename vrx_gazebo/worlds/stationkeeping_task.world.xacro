@@ -7,9 +7,14 @@
     <!--Waves-->
     <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
     <xacro:ocean_waves scale="2.5"/>
-    <!--wind for the wamv-->
+    <!--Wind-->
     <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
-    <xacro:usv_wind_gazebo>
+    <xacro:usv_wind_gazebo
+	direction="270"
+	mean_vel="0"
+	var_gain="0"
+	var_time="10"
+	seed="42">
       <wind_objs>
         <wind_obj>
           <name>wamv</name>
@@ -23,7 +28,7 @@
   <plugin name="stationkeeping_scoring_plugin"
           filename="libstationkeeping_scoring_plugin.so">
       <vehicle>wamv</vehicle>
-      <task_name>stationkeeping</task_name>
+      <task_name>station_keeping</task_name>
       <!-- Goal as Latitude, Longitude, Yaw -->
       <goal_pose>-33.722702498 150.67402097002 3.14159 </goal_pose>
       <initial_state_duration>10</initial_state_duration>

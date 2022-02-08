@@ -1,16 +1,7 @@
 <?xml version="1.0" ?>
 <!-- Macro to insert the sydneyregatta into the world -->
 <world xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="sydneyregatta">
-    <scene>
-      <sky>
-        <clouds>
-          <speed>12</speed>
-        </clouds>
-      </sky>
-      <grid>0</grid>
-      <origin_visual>0</origin_visual>
-    </scene>
+  <xacro:macro name="sydneyregatta_minus_scene">
     <!-- Estimated latitude/longitude of sydneyregatta
 	 from satellite imagery -->
     <spherical_coordinates>

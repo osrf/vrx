@@ -7,11 +7,11 @@ thruster_compliance_star_aft:
         size: '1 1 1.2'
         capacity: '1'
 thruster_compliance_port_for:
-        pose: '1 1 0 0 0 0'
+        pose: '1.25 1 0 0 0 0'
         size: '1 1 1.2'
         capacity: '1'
 thruster_compliance_star_for:
-        pose: '1 -1 0 0 0 0'
+        pose: '1.25 -1 0 0 0 0'
         size: '1 1 1.2'
         capacity: '1'
 thruster_compliance_middle:

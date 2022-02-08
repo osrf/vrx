@@ -4,6 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
         - /PointCloud2_Lidar1
       Splitter Ratio: 0.5
     Tree Height: 228
@@ -56,7 +57,12 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        wamv/ball_shooter_link:
+        wamv/ball_shooter_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wamv/ball_shooter_launcher_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -119,6 +125,16 @@ Visualization Manager:
           Show Trail: false
           Value: true
         wamv/imu_wamv_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wamv/lateral_engine_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wamv/lateral_propeller_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -211,9 +227,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        utm:
+        wamv/ball_shooter_base_link:
           Value: true
-        wamv/ball_shooter_link:
+        wamv/ball_shooter_launcher_link:
           Value: true
         wamv/base_link:
           Value: true
@@ -241,6 +257,10 @@ Visualization Manager:
           Value: true
         wamv/imu_wamv_link:
           Value: true
+        wamv/lateral_engine_link:
+          Value: true
+        wamv/lateral_propeller_link:
+          Value: true
         wamv/left_battery_link:
           Value: true
         wamv/left_engine_link:
@@ -261,8 +281,6 @@ Visualization Manager:
           Value: true
         wamv/middle_right_camera_post_link:
           Value: true
-        wamv/odom:
-          Value: true
         wamv/pinger:
           Value: true
         wamv/right_battery_link:
@@ -278,51 +296,52 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        wamv/odom:
-          utm:
+        wamv/base_link:
+          wamv/ball_shooter_base_link:
+            wamv/ball_shooter_launcher_link:
+              {}
+          wamv/cpu_cases_link:
             {}
-          wamv/base_link:
-            wamv/ball_shooter_link:
-              {}
-            wamv/cpu_cases_link:
-              {}
-            wamv/dummy_link:
-              {}
-            wamv/front_left_camera_post_link:
-              wamv/front_left_camera_post_arm_link:
-                wamv/front_left_camera_link:
-                  wamv/front_left_camera_link_optical:
-                    {}
-            wamv/front_right_camera_post_link:
-              wamv/front_right_camera_post_arm_link:
-                wamv/front_right_camera_link:
-                  wamv/front_right_camera_link_optical:
-                    {}
-            wamv/gps_wamv_link:
-              {}
-            wamv/imu_wamv_link:
-              {}
-            wamv/left_battery_link:
-              {}
-            wamv/left_engine_link:
-              wamv/left_propeller_link:
-                {}
-            wamv/lidar_wamv_post_link:
-              wamv/lidar_wamv_post_arm_link:
-                wamv/lidar_wamv_link:
+          wamv/dummy_link:
+            {}
+          wamv/front_left_camera_post_link:
+            wamv/front_left_camera_post_arm_link:
+              wamv/front_left_camera_link:
+                wamv/front_left_camera_link_optical:
                   {}
-            wamv/middle_right_camera_post_link:
-              wamv/middle_right_camera_post_arm_link:
-                wamv/middle_right_camera_link:
-                  wamv/middle_right_camera_link_optical:
-                    {}
-            wamv/pinger:
+          wamv/front_right_camera_post_link:
+            wamv/front_right_camera_post_arm_link:
+              wamv/front_right_camera_link:
+                wamv/front_right_camera_link_optical:
+                  {}
+          wamv/gps_wamv_link:
+            {}
+          wamv/imu_wamv_link:
+            {}
+          wamv/lateral_engine_link:
+            wamv/lateral_propeller_link:
               {}
-            wamv/right_battery_link:
+          wamv/left_battery_link:
+            {}
+          wamv/left_engine_link:
+            wamv/left_propeller_link:
               {}
-            wamv/right_engine_link:
-              wamv/right_propeller_link:
+          wamv/lidar_wamv_post_link:
+            wamv/lidar_wamv_post_arm_link:
+              wamv/lidar_wamv_link:
                 {}
+          wamv/middle_right_camera_post_link:
+            wamv/middle_right_camera_post_arm_link:
+              wamv/middle_right_camera_link:
+                wamv/middle_right_camera_link_optical:
+                  {}
+          wamv/pinger:
+            {}
+          wamv/right_battery_link:
+            {}
+          wamv/right_engine_link:
+            wamv/right_propeller_link:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz/Image
@@ -393,7 +412,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: wamv/odom
+    Fixed Frame: wamv/base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -417,7 +436,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 11.585390090942383
+      Distance: 10.19514274597168
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -433,9 +452,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.1303986757993698
+      Pitch: 0.2903987169265747
       Target Frame: wamv/base_link
-      Yaw: 5.103583335876465
+      Yaw: 3.348565101623535
     Saved: ~
 Window Geometry:
   Displays:
@@ -454,4 +473,4 @@ Window Geometry:
     collapsed: false
   Width: 1504
   X: 582
-  Y: 159
+  Y: 129
