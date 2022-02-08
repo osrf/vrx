@@ -474,7 +474,7 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
 #elif GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Pose3d pose = buoy.link->WorldPose();
     ignition::math::Vector3d latlon =
-      _world->SphericalCoords()->PositionTransform(pose.Pos(),
+      this->world->SphericalCoords()->PositionTransform(pose.Pos(),
         gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
         gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
     latlon.X(IGN_RTOD(latlon.X()));
@@ -482,7 +482,7 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
 #else
     const ignition::math::Pose3d pose = buoy.link->GetWorldPose().Ign();
     ignition::math::Vector3d latlon =
-      _world->GetSphericalCoordinates()->PositionTransform(pose.Pos(),
+      this->world->GetSphericalCoordinates()->PositionTransform(pose.Pos(),
         gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
         gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
     latlon.X(IGN_RTOD(latlon.X()));
