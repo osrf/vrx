@@ -15,6 +15,7 @@
  *
 */
 
+#include <cmath>
 #include <string>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
@@ -35,6 +36,11 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   GZ_ASSERT(_model != nullptr, "Received NULL model pointer");
   this->model = _model;
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->modelPose = model->WorldPose();
+  #else
+    this->modelPose = model->GetWorldPose().Ign();
+  #endif
 
   // Parse the optional <waypoints> element.
   if (_sdf->HasElement("waypoints"))
@@ -64,7 +70,66 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       waypointElem = waypointElem->GetNextElement("waypoint");
     }
   }
+  // If no waypoints present, check for the <circle> element and parse.
+  else if (_sdf->HasElement("circle"))
+  {
+    gzmsg << "Circle element activated" << std::endl;
+    auto circleElem = _sdf->GetElement("circle");
+    double radius = 5;
+    // Parse the optional <radius> field.  If absent, use the default (5).
+    if (circleElem->HasElement("radius"))
+    {
+      auto radElem = circleElem->GetElement("radius");
+      radius = radElem->Get<double>();
+    }
+    // Get the current model position in global coordinates.  Create
+    // local vectors that represent a path along a rough circle.
+    ignition::math::Vector2d position(this->modelPose.Pos().X(),
+                                      this->modelPose.Pos().Y());
+    double angle = 0;
+    ignition::math::Vector2d vec(radius / 2, 0);
+    for (int i = 0; i < 8; i++)
+    {
+      // Add the local vector to the current position.  Store global
+      // position as a waypoint.
+      this->localWaypoints.push_back(position + vec);
+      angle += M_PI / 4;
+      vec.Set(radius / 2 * cos(angle), radius/ 2 * sin(angle));
+      gzmsg << "Entered circle waypoint " << position + vec << std::endl;
+    }
+  }
+  // If no waypoints or circle, check for the <line> element and parse.
+  else if (_sdf->HasElement("line"))
+  {
+    auto lineElem = _sdf->GetElement("line");
+    double direction = 0;
+    double length = 10;
+    // Parse the optional <direction> field.  If absent, use the default (0).
+    if (lineElem->HasElement("direction"))
+    {
+      auto dirElem = lineElem->GetElement("direction");
+      direction = dirElem->Get<double>();
+    }
+    // Parse the optional <length> field.  If absent, use the default (10).
+    if (lineElem->HasElement("length"))
+    {
+      auto lenElem = lineElem->GetElement("length");
+      length = lenElem->Get<double>();
+    }
 
+    // Create a relative vector in the direction of "direction" and of
+    // length "length".
+    ignition::math::Vector2d lineVec(
+      length * cos(direction * M_PI / 180),
+      length * sin(direction * M_PI / 180));
+    ignition::math::Vector2d position(this->modelPose.Pos().X(),
+                                      this->modelPose.Pos().Y());
+    // Add the initial model position and calculated endpoint as waypoints.
+    this->localWaypoints.push_back(position);
+    this->localWaypoints.push_back(position+lineVec);
+    gzmsg << "Entered line waypoints " << position << ", " << position+lineVec
+          << std::endl;
+  }
   // Parse the required <link_name> element.
   if (!_sdf->HasElement("link_name"))
   {
