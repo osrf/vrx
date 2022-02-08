@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="turtle_static">
+    <link name="link">
+      <inertial>
+        <pose>0 0 -2 0 0 0</pose>
+        <!-- Mass determined based on buoyancy geometry so object 
+             floats at mid-point of sphere -->
+        <mass>20</mass>
+        <!-- Mark only - based on cylinder -->
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0</iyz>
+          <izz>0.1</izz>
+        </inertia>
+      </inertial>
+      <collision name="turtle_collision">
+        <pose>0.08 0 0.05 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.35</radius>
+            <length>0.23</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="turtle_visual">
+        <geometry>
+	        <mesh><uri>model://turtle_buoy/meshes/turtle.dae</uri></mesh>
+        </geometry>
+      </visual>
+    </link>
+    <plugin name="TurtleBuoyancyPlugin" filename="libbuoyancy_gazebo_plugin.so">
+      <wave_model>ocean_waves</wave_model>
+      <fluid_density>1000</fluid_density>
+      <fluid_level>0.0</fluid_level>
+      <linear_drag>25.0</linear_drag>
+      <angular_drag>2.0</angular_drag>
+      <buoyancy name="buoyancy_sphere">
+        <link_name>link</link_name>
+        <pose>0 0 0.2 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.325</radius>
+          </sphere>
+        </geometry>
+      </buoyancy>
+    </plugin>
+  </model>
+</sdf>
