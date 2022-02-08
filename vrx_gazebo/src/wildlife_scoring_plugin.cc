@@ -473,16 +473,20 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
     latlon.Y(IGN_RTOD(latlon.Y()));
 #elif GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Pose3d pose = buoy.link->WorldPose();
-    const ignition::math::Vector3d position =
-      this->world->SphericalCoords()->GlobalFromLocal(pose.Pos());
-    const ignition::math::Vector3d latlon =
-      this->world->SphericalCoords()->SphericalFromLocal(position);
+    ignition::math::Vector3d latlon =
+      _world->SphericalCoords()->PositionTransform(pose.Pos(),
+        gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
+        gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
+    latlon.X(IGN_RTOD(latlon.X()));
+    latlon.Y(IGN_RTOD(latlon.Y()));
 #else
     const ignition::math::Pose3d pose = buoy.link->GetWorldPose().Ign();
-    const ignition::math::Vector3d position =
-      this->world->GetSphericalCoordinates()->GlobalFromLocal(pose.Pos());
-    const ignition::math::Vector3d latlon =
-      this->world->GetSphericalCoordinates()->SphericalFromLocal(position);
+    ignition::math::Vector3d latlon =
+      _world->GetSphericalCoordinates()->PositionTransform(pose.Pos(),
+        gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
+        gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
+    latlon.X(IGN_RTOD(latlon.X()));
+    latlon.Y(IGN_RTOD(latlon.Y()));
 #endif
     const ignition::math::Quaternion<double> orientation = pose.Rot();
 

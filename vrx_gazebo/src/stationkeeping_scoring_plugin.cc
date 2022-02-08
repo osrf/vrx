@@ -98,15 +98,19 @@ void StationkeepingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
     scVec.X(IGN_RTOD(scVec.X()));
     scVec.Y(IGN_RTOD(scVec.Y()));
 #elif GAZEBO_MAJOR_VERSION >= 8
-    const ignition::math::Vector3d position =
-      _world->SphericalCoords()->GlobalFromLocal(cartVec);
     ignition::math::Vector3d scVec =
-      _world->SphericalCoords()->SphericalFromLocal(position);
+      _world->SphericalCoords()->PositionTransform(cartVec,
+        gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
+        gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
+    scVec.X(IGN_RTOD(scVec.X()));
+    scVec.Y(IGN_RTOD(scVec.Y()));
 #else
-    const ignition::math::Vector3d position =
-      _world->GetSphericalCoordinates()->GlobalFromLocal(cartVec);
     ignition::math::Vector3d scVec =
-      _world->GetSphericalCoordinates()->SphericalFromLocal(position);
+      _world->GetSphericalCoordinates()->PositionTransform(cartVec,
+        gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
+        gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
+    scVec.X(IGN_RTOD(scVec.X()));
+    scVec.Y(IGN_RTOD(scVec.Y()));
 #endif
 
     // Store spherical 2D location
