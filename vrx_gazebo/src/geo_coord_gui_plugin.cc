@@ -21,7 +21,7 @@
 #include <gazebo/gui/MouseEventHandler.hh>
 #include <gazebo/rendering/Scene.hh>
 #include <gazebo/rendering/UserCamera.hh>
-#include "geo_coord_gui_plugin.hh"
+#include "vrx_gazebo/geo_coord_gui_plugin.hh"
 
 using namespace gazebo;
 
@@ -45,17 +45,20 @@ GeoCoordGUIPlugin::GeoCoordGUIPlugin() : GUIPlugin()
     this->resize(250, 100);
 
     // Create display box for geo position
-    QLabel *posLabel = new QLAbel(tr("00.0000N, 00.0000W"));
+    QLabel *posLabel = new QLabel(tr("00.0000N, 00.0000W"));
     frameLayout->addWidget(posLabel);
 
     gui::MouseEventHandler::Instance()->AddMoveFilter("geo_coord",
                                                       std::bind(&GeoCoordGUIPlugin::OnMouseMove, this, std::placeholders::_1));
 
-    this->camera = gui::get_active_camera();
+
     connect(this, SIGNAL(SetDispCoord(QString)),
             posLabel, SLOT(setText(QString)), Qt::QueuedConnection);
-    this->node = transport::NodePtr(new transport::Node());
-    this->node->Init();
+    this->gzNode = transport::NodePtr(new transport::Node());
+    this->gzNode->Init();
+    this->mousePub = this->gzNode->Advertise<gazebo::msgs::Vector3d>
+    (mouseGeoTopic);
+    gzmsg << "Publishing on " << mouseGeoTopic << std::endl;
 }
 
 GeoCoordGUIPlugin::~GeoCoordGUIPlugin()
@@ -64,25 +67,26 @@ GeoCoordGUIPlugin::~GeoCoordGUIPlugin()
 
 void GeoCoordGUIPlugin::Load(sdf::ElementPtr _elem)
 {
+      //  this->camera = gazebo::gui::get_active_camera();
 }
 
 bool GeoCoordGUIPlugin::OnMouseMove(const common::MouseEvent &_event)
 {
-    ignition::math::Vector3d mouse_loc;
+/*     ignition::math::Vector3d mouse_loc;
     if (!this->camera->GetScene()->FirstContact(
             this->camera, _event.Pos(), mouse_loc))
     {
         return false;
     }
-    ignition::math::Vector3d spherical_coord;
-        // Conversion from Gazebo Cartesian coordinates to spherical.
-#if GAZEBO_MAJOR_VERSION >= 8
-    const ignition::math::Vector3d latlon =
-      this->world->SphericalCoords()->SphericalFromLocal(mouse_loc);
+    gazebo::msgs::Vector3d mouse_msg;
+#if GAZEBO_MAJOR_VERSION < 6
+    gazebo::msgs::Set(&mouse_msg, gazebo::math::Vector3(mouse_loc.X, mouse_loc.Y, mouse_loc.Z));
 #else
-    const ignition::math::Vector3d latlon =
-      this->world->GetSphericalCoordinates()->SphericalFromLocal(mouse_loc);
+    gazebo::msgs::Set(&mouse_msg, mouse_loc);
 #endif
-    this->SetDispCoord(QString::fromStdString(
-        latlon.X() + latlong.Y())); //convert to string?
+
+    this->mousePub->Publish(mouse_msg);
+    // this->SetDispCoord(QString::fromStdString(
+    //     latlon.X() + latlong.Y())); //convert to string? */
+    return true;
 }

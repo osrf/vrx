@@ -17,15 +17,17 @@ void GeoCoordWorldPlugin::Load(gazebo::physics::WorldPtr _world,
 
   // Initialize ROS transport.
   this->rosNode.reset(new ros::NodeHandle());
-
-  mouseGeoPub = gzNode->Advertise<gazebo::msgs::Vector3d>
+  this->gzNode = gazebo::transport::NodePtr(new gazebo::transport::Node());
+  this->gzNode->Init();
+  mouseGeoPub = this->gzNode->Advertise<gazebo::msgs::Vector3d>
     (mouseGeoTopic);
-  mouseWorldSub = gzNode->Subscribe(mouseWorldTopic, &GeoCoordWorldPlugin::mouseCallback, this);
+  mouseWorldSub = this->gzNode->Subscribe(mouseWorldTopic, &GeoCoordWorldPlugin::mouseCallback, this);
 }
 
 void GeoCoordWorldPlugin::mouseCallback(ConstVector3dPtr &msg_loc)
 {
-  ignition::math::Vector3d mouse_loc(msg_loc->x(), msg_loc->y(), msg_loc->z());
+  // Invert local coordinates to account for SphericalCoordinates local frame bug
+  ignition::math::Vector3d mouse_loc(-msg_loc->x(), -msg_loc->y(), msg_loc->z());
 
         // Conversion from Gazebo Cartesian coordinates to spherical.
 #if GAZEBO_MAJOR_VERSION >= 8

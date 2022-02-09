@@ -15,17 +15,22 @@
  *
 */
 
-#ifndef VRX_GAZEBO_GEO_COORD_PLUGIN_HH_
-#define VRX_GAZEBO_GEO_COORD_PLUGIN_HH_
+#ifndef VRX_GAZEBO_GEO_COORD_GUI_PLUGIN_HH_
+#define VRX_GAZEBO_GEO_COORD_GUI_PLUGIN_HH_
 
+#include <gazebo/gazebo.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/gui/GuiPlugin.hh>
+#include <sdf/sdf.hh>
 
 #ifndef Q_MOC_RUN
 #include <gazebo/transport/transport.hh>
-#include <gazebo/gui/gui.hh>
+// #include <gazebo/gui/gui.hh>
 #endif
-
+//#include "gazebo/gui/QTestFixture.hh"
+//#include "gazebo/gui/GuiIface.hh"
+//#include "gazebo/gui/MainWindow.hh"
+//#include "gazebo/gui/Projection_TEST.hh"
 namespace gazebo
 {
     class GAZEBO_VISIBLE GeoCoordGUIPlugin : public GUIPlugin
@@ -39,6 +44,9 @@ namespace gazebo
     public:
         virtual ~GeoCoordGUIPlugin();
 
+    protected:
+       void Load(sdf::ElementPtr _elem);
+
     signals:
         void SetDispCoord(QString _string);
         
@@ -48,14 +56,21 @@ namespace gazebo
 
         // Just guessing here - Node used to establish communication with gzserver.
     private:
-        transport::NodePtr node;
+        gazebo::transport::NodePtr gzNode;
 
     private:
-        transport::PublisherPtr factoryPub;
+        transport::PublisherPtr mousePub;
 
         // Camera to get scene information and convert mouse xy to scene coords.
     private:
+    rendering::ScenePtr scene;
         rendering::UserCameraPtr camera;
-    }
+
+          /// \brief Topic where the transformed mouse coordinate is published.
+    private: std::string mouseGeoTopic = "/vrx/mouse_geo_loc";
+
+        /// \brief Topic where world frame mouse coordinate is published.
+    private: std::string mouseWorldTopic = "/vrx/mouse_world_loc";
+    };
 }
 #endif
