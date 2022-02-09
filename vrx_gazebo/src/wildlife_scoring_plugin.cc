@@ -459,35 +459,18 @@ void WildlifeScoringPlugin::PublishAnimalLocations()
   for (auto const &buoy : this->buoys)
   {
     // Conversion from Gazebo Cartesian coordinates to spherical.
-#if GAZEBO_MAJOR_VERSION >= 11
+#if GAZEBO_MAJOR_VERSION >= 8
     const ignition::math::Pose3d pose = buoy.link->WorldPose();
-
-    // There's a known bug with the SphericalFromLocal() computation.
-    // We use our own SphericalCoordinates object from Ignition Math and we call
-    // PositionTransform() directly containing the correct version.
-    ignition::math::Vector3d latlon =
-      this->sc.PositionTransform(pose.Pos(),
-        ignition::math::SphericalCoordinates::CoordinateType::LOCAL2,
-        ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL);
-    latlon.X(IGN_RTOD(latlon.X()));
-    latlon.Y(IGN_RTOD(latlon.Y()));
-#elif GAZEBO_MAJOR_VERSION >= 8
-    const ignition::math::Pose3d pose = buoy.link->WorldPose();
-    ignition::math::Vector3d latlon =
-      this->world->SphericalCoords()->PositionTransform(pose.Pos(),
-        gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
-        gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
-    latlon.X(IGN_RTOD(latlon.X()));
-    latlon.Y(IGN_RTOD(latlon.Y()));
 #else
     const ignition::math::Pose3d pose = buoy.link->GetWorldPose().Ign();
-    ignition::math::Vector3d latlon =
-      this->world->GetSphericalCoordinates()->PositionTransform(pose.Pos(),
-        gazebo::common::SphericalCoordinates::CoordinateType::GLOBAL,
-        gazebo::common::SphericalCoordinates::CoordinateType::SPHERICAL);
+#endif
+
+    auto in = ignition::math::SphericalCoordinates::CoordinateType::GLOBAL;
+    auto out = ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL;
+    auto latlon = this->sc.PositionTransform(pose.Pos(), in, out);
     latlon.X(IGN_RTOD(latlon.X()));
     latlon.Y(IGN_RTOD(latlon.Y()));
-#endif
+
     const ignition::math::Quaternion<double> orientation = pose.Rot();
 
     // Fill the GeoPoseStamped message.
