@@ -19,28 +19,30 @@ class GeoCoordWorldPlugin : public gazebo::WorldPlugin
   protected: void Load(gazebo::physics::WorldPtr _world,
                        sdf::ElementPtr _sdf);
 
-  protected: void mouseCallback(ConstVector3dPtr &msg_loc);
-
   /// \brief A world pointer.
-  protected: gazebo::physics::WorldPtr world;  
-  
-  /// \brief Topic where the transformed mouse coordinate is published.
-  private: std::string mouseGeoTopic = "/vrx/mouse_geo_loc";
+  protected: gazebo::physics::WorldPtr world; 
 
-    /// \brief Topic where world frame mouse coordinate is published.
-  private: std::string mouseWorldTopic = "/vrx/mouse_world_loc";
+  /// \brief A pointer to the sdf.
+  protected: sdf::ElementPtr _sdf; 
+  
+  /// \brief Topic where the transformed coordinate is published.
+  private: std::string geoTopic = "/vrx/mouse_geo_loc";
+
+    /// \brief Topic where world frame coordinate is published.
+  private: std::string worldTopic = "/vrx/mouse_world_loc";
   
   /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr gzNode;
 
-    /// \brief ROS node handle.
-  private: std::unique_ptr<ros::NodeHandle> rosNode;
+  /// \brief Publisher for the geo frame coordinates.
+  private: gazebo::transport::PublisherPtr geoPub;
 
-  /// \brief Publisher for the geo frame mouse coordinate.
-  private: gazebo::transport::PublisherPtr mouseGeoPub;
+  /// \brief Subscriber for the world frame coordinates.
+    private: gazebo::transport::SubscriberPtr worldSub;
 
-  /// \brief Subscriber for the world frame mouse coordinate.
-    private: gazebo::transport::SubscriberPtr mouseWorldSub;
+  /// \brief Callback for worldSub topic.  Converts received world
+  ///        frame coordinates to lat/ long and republishes on geoPub.
+  protected: void callback(ConstVector3dPtr &msg_loc);
 };
 
 #endif

@@ -19,18 +19,18 @@
 #include <ignition/math/Vector3.hh>
 #include <gazebo/gui/Conversions.hh>
 #include <gazebo/gui/MouseEventHandler.hh>
+#include <gazebo/gui/KeyEventHandler.hh>
 #include <gazebo/rendering/Scene.hh>
 #include <gazebo/rendering/UserCamera.hh>
-#include "vrx_gazebo/geo_coord_gui_plugin.hh"
+#include "geo_coord_gui_plugin.hh"
 
 using namespace gazebo;
 
-// Register plugin with Gazebo
-GZ_REGISTER_GUI_PLUGIN(GeoCoordGUIPlugin)
 
 //////////////////////////////////////////////////
 GeoCoordGUIPlugin::GeoCoordGUIPlugin() : GUIPlugin()
 {
+#if GAZEBO_MAJOR_VERSION >= 8
     // set up frames for GUI overlay
     QHBoxLayout *mainLayout = new QHBoxLayout;
     QFrame *mainFrame = new QFrame();
@@ -42,51 +42,74 @@ GeoCoordGUIPlugin::GeoCoordGUIPlugin() : GUIPlugin()
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     this->setLayout(mainLayout);
-    this->resize(250, 100);
+    this->resize(200, 15);
 
-    // Create display box for geo position
-    QLabel *posLabel = new QLabel(tr("00.0000N, 00.0000W"));
-    frameLayout->addWidget(posLabel);
+    // Add a QLineEdit widget.  Should be a QLabel but the text
+    // is not clearing correctly between updates - fix TBD.
+    QLineEdit *posDisplay = new QLineEdit();
+    frameLayout->addWidget(posDisplay);
 
+    // Bind GeoCoordGUIPlugin::OnMouseMove so the function is 
+    // called when the mouse moves, and create the connection 
+    // to update the displayed coordinates
     gui::MouseEventHandler::Instance()->AddMoveFilter("geo_coord",
-                                                      std::bind(&GeoCoordGUIPlugin::OnMouseMove, this, std::placeholders::_1));
+        std::bind(&GeoCoordGUIPlugin::OnMouseMove, this,
+        std::placeholders::_1));
+    connect(this, SIGNAL(SetDispCoord(QString)), posDisplay,
+        SLOT(setText(QString)), Qt::QueuedConnection);
 
-
-    connect(this, SIGNAL(SetDispCoord(QString)),
-            posLabel, SLOT(setText(QString)), Qt::QueuedConnection);
+    // Initialize transport and create pub/sub    
     this->gzNode = transport::NodePtr(new transport::Node());
-    this->gzNode->Init();
+    this->gzNode->Init("mouse_loc_handler");
     this->mousePub = this->gzNode->Advertise<gazebo::msgs::Vector3d>
-    (mouseGeoTopic);
-    gzmsg << "Publishing on " << mouseGeoTopic << std::endl;
+        (mouseWorldTopic);
+    this->mouseSub = this->gzNode->Subscribe(mouseGeoTopic,
+        &GeoCoordGUIPlugin::OnLatLong, this);
+
+#endif
 }
 
 GeoCoordGUIPlugin::~GeoCoordGUIPlugin()
 {
 }
 
+// Get the camera for use in transforming mouse positions.
 void GeoCoordGUIPlugin::Load(sdf::ElementPtr _elem)
 {
-      //  this->camera = gazebo::gui::get_active_camera();
+    this->camera = gazebo::gui::get_active_camera();
 }
 
+// Every time the mouse moves, this function is triggered.
+// Convert mouse location to world frame coordinates of first contact,
+// then publish the coordinates.
 bool GeoCoordGUIPlugin::OnMouseMove(const common::MouseEvent &_event)
 {
-/*     ignition::math::Vector3d mouse_loc;
+    ignition::math::Vector3d mouse_loc;
     if (!this->camera->GetScene()->FirstContact(
             this->camera, _event.Pos(), mouse_loc))
     {
         return false;
     }
     gazebo::msgs::Vector3d mouse_msg;
+
 #if GAZEBO_MAJOR_VERSION < 6
-    gazebo::msgs::Set(&mouse_msg, gazebo::math::Vector3(mouse_loc.X, mouse_loc.Y, mouse_loc.Z));
+    gazebo::msgs::Set(&mouse_msg, gazebo::math::Vector3(mouse_loc.X,
+        mouse_loc.Y, mouse_loc.Z));
 #else
     gazebo::msgs::Set(&mouse_msg, mouse_loc);
 #endif
 
     this->mousePub->Publish(mouse_msg);
-    // this->SetDispCoord(QString::fromStdString(
-    //     latlon.X() + latlong.Y())); //convert to string? */
     return true;
 }
+// Subscriber callback for receipt of the transformed position.
+// Triggers SetDispCoord SIGNAL to update the position GUI display.
+void GeoCoordGUIPlugin::OnLatLong(ConstVector3dPtr &_msg)
+{
+    std::stringstream temp;
+    temp << _msg->x() << ", " << _msg->y();
+    this->SetDispCoord(QString::fromStdString(temp.str()));
+}
+
+// Register plugin with Gazebo
+GZ_REGISTER_GUI_PLUGIN(GeoCoordGUIPlugin)

@@ -23,24 +23,23 @@
 #include <gazebo/gui/GuiPlugin.hh>
 #include <sdf/sdf.hh>
 
+
 #ifndef Q_MOC_RUN
 #include <gazebo/transport/transport.hh>
-// #include <gazebo/gui/gui.hh>
 #endif
-//#include "gazebo/gui/QTestFixture.hh"
-//#include "gazebo/gui/GuiIface.hh"
-//#include "gazebo/gui/MainWindow.hh"
-//#include "gazebo/gui/Projection_TEST.hh"
+#include "gazebo/gui/GuiIface.hh"
+
+
 namespace gazebo
 {
     class GAZEBO_VISIBLE GeoCoordGUIPlugin : public GUIPlugin
     {
         Q_OBJECT
-        // Constructor
+        /// \brief Constructor
     public:
         GeoCoordGUIPlugin();
 
-        // Destructor
+        /// \brief Destructor
     public:
         virtual ~GeoCoordGUIPlugin();
 
@@ -50,27 +49,29 @@ namespace gazebo
     signals:
         void SetDispCoord(QString _string);
         
-        // Figure this out later - update the display every time the mouse moves.
+        /// \brief Update the display every time the mouse moves.
     protected:
         bool OnMouseMove(const common::MouseEvent &_event);
 
-        // Just guessing here - Node used to establish communication with gzserver.
+        /// \brief Node used to establish communication with gzserver.
     private:
         gazebo::transport::NodePtr gzNode;
 
     private:
-        transport::PublisherPtr mousePub;
-
-        // Camera to get scene information and convert mouse xy to scene coords.
-    private:
-    rendering::ScenePtr scene;
+        /// \brief Camera to get scene info and convert GUI xy to coords.
         rendering::UserCameraPtr camera;
 
-          /// \brief Topic where the transformed mouse coordinate is published.
-    private: std::string mouseGeoTopic = "/vrx/mouse_geo_loc";
-
+    private:
+        /// \brief Pub/sub for coordinates pre- and post- transform.
+        transport::PublisherPtr mousePub;
+        transport::SubscriberPtr mouseSub;
+        /// \brief Topic where the transformed mouse coordinate is published.
+        std::string mouseGeoTopic = "/vrx/mouse_geo_loc";
         /// \brief Topic where world frame mouse coordinate is published.
-    private: std::string mouseWorldTopic = "/vrx/mouse_world_loc";
+        std::string mouseWorldTopic = "/vrx/mouse_world_loc";
+    protected: 
+        /// \brief Callback to display received lat/ long position on GUI.
+        void OnLatLong(ConstVector3dPtr &_msg);
     };
 }
 #endif

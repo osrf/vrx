@@ -24,6 +24,10 @@ if(POLICY CMP0046)
   cmake_policy(SET CMP0046 OLD)
 endif()
 
+if(POLICY CMP0100)
+  cmake_policy(SET CMP0100 NEW)
+endif()
+
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Protobuf REQUIRED)
@@ -299,25 +303,35 @@ add_dependencies(geo_coord_world_plugin
   vrx_gazebo_generate_messages_cpp
   vrx_gazebo_generate_services_cpp
 )
+
 install(TARGETS geo_coord_world_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-add_library(geo_coord_gui_plugin src/geo_coord_gui_plugin.cc)
-target_link_libraries(geo_coord_gui_plugin
-  ${catkin_LIBRARIES}
-)
-add_dependencies(geo_coord_gui_plugin
-  ${catkin_EXPORTED_TARGETS}
-  vrx_gazebo_generate_messages_cpp
-  vrx_gazebo_generate_services_cpp
-)
-install(TARGETS geo_coord_gui_plugin
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+
+if(${GAZEBO_MAJOR_VERSION} GREATER 7)
+
+
+  add_library(geo_coord_gui_plugin SHARED ${headers_MOC} src/geo_coord_gui_plugin.cc)
+    
+  target_link_libraries(geo_coord_gui_plugin
+    ${GAZEBO_LIBRARIES}
+    ${Qt5Core_LIBRARIES}
+    ${Qt5Widgets_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${catkin_LIBRARIES}
+  )
+
+
+  install(TARGETS geo_coord_gui_plugin
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+
+endif()
+
 # Dock base files that need to be processed with erb
 set(dock_base_erb_files
   models/dock_2016_base/model.sdf.erb
