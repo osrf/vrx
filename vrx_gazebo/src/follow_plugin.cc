@@ -75,7 +75,7 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     gzmsg << "Circle element activated" << std::endl;
     auto circleElem = _sdf->GetElement("circle");
-    double radius = 5;
+    double radius = 2.5;
     // Parse the optional <radius> field.  If absent, use the default (5).
     if (circleElem->HasElement("radius"))
     {
@@ -87,14 +87,14 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     ignition::math::Vector2d position(this->modelPose.Pos().X(),
                                       this->modelPose.Pos().Y());
     double angle = 0;
-    ignition::math::Vector2d vec(radius / 2, 0);
+    ignition::math::Vector2d vec(radius, 0);
     for (int i = 0; i < 8; i++)
     {
       // Add the local vector to the current position.  Store global
       // position as a waypoint.
       this->localWaypoints.push_back(position + vec);
       angle += M_PI / 4;
-      vec.Set(radius / 2 * cos(angle), radius/ 2 * sin(angle));
+      vec.Set(radius * cos(angle), radius * sin(angle));
       gzmsg << "Entered circle waypoint " << position + vec << std::endl;
     }
   }
