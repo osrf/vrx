@@ -26,6 +26,7 @@
 #include <gazebo/common/Events.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Time.hh>
+#include <ignition/math/SphericalCoordinates.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include <gazebo/transport/transport.hh>
@@ -232,6 +233,9 @@ class ScoringPlugin : public gazebo::WorldPlugin
 
   /// \brief Silent mode enabled?
   protected: bool silent = false;
+
+  /// \brief Spherical coordinates conversions.
+  protected: ignition::math::SphericalCoordinates sc;
 
   /// \brief gazebo node pointer
   private: gazebo::transport::NodePtr gzNode;

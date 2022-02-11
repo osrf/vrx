@@ -42,7 +42,7 @@ namespace asv
   class WaveParametersPrivate;
 
   /// \brief A class to manage the parameters for generating a wave
-    /// in a wave field.
+  /// in a wave field.
   class WaveParameters
   {
     /// \brief Destructor.
@@ -185,19 +185,19 @@ namespace asv
   class WavefieldSampler
   {
     /// \brief Compute the depth at a point directly
-        /// (no sampling or interpolation).
+    /// (no sampling or interpolation).
     ///
     /// This method solves for (x, y) that when input into the
-        /// Gerstner wave function
+    /// Gerstner wave function
     /// gives the coordinates of the supplied parameter
-        /// _point (_point.x(), _point.y()),
+    /// _point (_point.x(), _point.y()),
     /// and also computes the wave height pz at this point.
     /// The depth h = pz - point.z().
     /// This is a numerical method that uses a multi-variate
-        /// Newton solver to solve
+    /// Newton solver to solve
     /// the two dimensional non-linear system. In general it is not as fast as
     /// sampling from a discretised wave field with an efficient
-        /// line intersection algorithm.
+    /// line intersection algorithm.
     ///
     /// \param[in] _waveParams  Gerstner wave parameters.
     /// \param[in] _point       The point at which we want the depth.
