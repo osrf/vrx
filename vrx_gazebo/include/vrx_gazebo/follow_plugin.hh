@@ -54,16 +54,15 @@ namespace gazebo
 ///              the model should navigate through. This block should contain at
 ///              least one of these blocks:
 ///                <waypoint>: This block should contain the X, Y of a waypoint.
-/// <line>: Element that indicates the model should travel in "line" mode.
-///         The block may contain the relative direction and distance from the
-///         initial position in which the vehicle should move, specified in the
-///         world frame.
-///          <direction>:  Relative direction (degrees) in the world frame for
-///                        the vehicle to travel.
-///          <length>:     Distance (meters) for the vehicle to travel.
+/// <line>: Element that specifies a direction and distance from the model's
+///         initial position where a waypoint should be created.  The model's
+///         initial position is also added as a waypoint.
+///          <direction>:  Relative direction (radians) in the model's frame for
+///                        second waypoint.
+///          <length>:     Distance (meters) at which to establish second waypoint.
 /// <circle>: Element that indicates the model should travel in "circle" mode.
-///           The block may contain the desired radius of the circle about the
-///           vehicle's initial position
+///           The block must contain the desired radius of the circle about the
+///           vehicle's initial position.
 ///           <radius>:  Radius (meters) of circular path to travel.
 ///
 /// Here are three examples:
@@ -84,7 +83,7 @@ namespace gazebo
 ///   <link_name>link</link_name>
 ///   <loop_forever>true</loop_forever>
 ///   <line>
-///     <direction>340</direction>
+///     <direction>1.5</direction>
 ///     <length>10</length>
 ///   </line>
 /// </plugin>
