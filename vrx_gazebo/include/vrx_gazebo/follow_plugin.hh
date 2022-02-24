@@ -59,7 +59,7 @@ namespace gazebo
 ///         initial position is also added as a waypoint.
 ///          <direction>:  Relative direction (radians) in the model's frame for
 ///                        second waypoint.
-///          <length>:     Distance (meters) at which to establish second waypoint.
+///          <length>:     Distance (meters) at which to set second waypoint.
 /// <circle>: Element that indicates the model should travel in "circle" mode.
 ///           The block must contain the desired radius of the circle about the
 ///           vehicle's initial position.
