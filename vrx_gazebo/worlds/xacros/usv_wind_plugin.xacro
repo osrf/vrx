@@ -5,7 +5,7 @@
                          direction:=270
                          mean_vel:=0
                          var_gain:=0
-                         var_time:=1
+                         var_time:=2
                          seed:=''
                          ros_update_rate:=10
                          topic_wind_speed:=/vrx/debug/wind/speed
