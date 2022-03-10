@@ -73,28 +73,30 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // If no waypoints present, check for the <circle> element and parse.
   else if (_sdf->HasElement("circle"))
   {
-    gzmsg << "Circle element activated" << std::endl;
     auto circleElem = _sdf->GetElement("circle");
-    double radius = 5;
-    // Parse the optional <radius> field.  If absent, use the default (5).
-    if (circleElem->HasElement("radius"))
+
+    // <radius> element is required
+    if (!circleElem->HasElement("radius"))
     {
-      auto radElem = circleElem->GetElement("radius");
-      radius = radElem->Get<double>();
+      gzerr << "FollowPlugin: Unable to find <circle><radius> element "
+            << "in SDF." << std::endl;
+      return;
     }
+    auto radius = circleElem->Get<double>("radius");
+
     // Get the current model position in global coordinates.  Create
     // local vectors that represent a path along a rough circle.
     ignition::math::Vector2d position(this->modelPose.Pos().X(),
                                       this->modelPose.Pos().Y());
     double angle = 0;
-    ignition::math::Vector2d vec(radius / 2, 0);
+    ignition::math::Vector2d vec(radius, 0);
     for (int i = 0; i < 8; i++)
     {
       // Add the local vector to the current position.  Store global
       // position as a waypoint.
       this->localWaypoints.push_back(position + vec);
       angle += M_PI / 4;
-      vec.Set(radius / 2 * cos(angle), radius/ 2 * sin(angle));
+      vec.Set(radius * cos(angle), radius * sin(angle));
       gzmsg << "Entered circle waypoint " << position + vec << std::endl;
     }
   }
@@ -102,33 +104,39 @@ void FollowPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   else if (_sdf->HasElement("line"))
   {
     auto lineElem = _sdf->GetElement("line");
-    double direction = 0;
-    double length = 10;
-    // Parse the optional <direction> field.  If absent, use the default (0).
-    if (lineElem->HasElement("direction"))
-    {
-      auto dirElem = lineElem->GetElement("direction");
-      direction = dirElem->Get<double>();
-    }
-    // Parse the optional <length> field.  If absent, use the default (10).
-    if (lineElem->HasElement("length"))
-    {
-      auto lenElem = lineElem->GetElement("length");
-      length = lenElem->Get<double>();
-    }
 
-    // Create a relative vector in the direction of "direction" and of
-    // length "length".
-    ignition::math::Vector2d lineVec(
-      length * cos(direction * M_PI / 180),
-      length * sin(direction * M_PI / 180));
+    // <direction> element is required
+    if (!lineElem->HasElement("direction"))
+    {
+      gzerr << "FollowPlugin: Unable to find <line><direction> element "
+            << "in SDF." << std::endl;
+      return;
+    }
+    auto direction = lineElem->Get<ignition::math::Angle>("direction");
+
+    // <length> element is required
+    if (!lineElem->HasElement("length"))
+    {
+      gzerr << "FollowPlugin: Unable to find <line><length> element "
+            << "in SDF." << std::endl;
+      return;
+    }
+    auto length = lineElem->Get<double>("length");
+
+    // Create a vector in the direction of "direction" and of
+    // length "length".  Convert it to the model's reference frame.
+    ignition::math::Vector3d lineVec(
+      length * cos(direction.Radian()),
+      length * sin(direction.Radian()), 0);
     ignition::math::Vector2d position(this->modelPose.Pos().X(),
                                       this->modelPose.Pos().Y());
+    ignition::math::Vector3d p = this->modelPose.CoordPositionAdd(lineVec);
+    ignition::math::Vector2d p2D = {p.X(), p.Y()};
+
     // Add the initial model position and calculated endpoint as waypoints.
     this->localWaypoints.push_back(position);
-    this->localWaypoints.push_back(position+lineVec);
-    gzmsg << "Entered line waypoints " << position << ", " << position+lineVec
-          << std::endl;
+    this->localWaypoints.push_back(p2D);
+    gzmsg << "Entered line waypoints " << position << ", " << p2D << std::endl;
   }
   // Parse the required <link_name> element.
   if (!_sdf->HasElement("link_name"))
