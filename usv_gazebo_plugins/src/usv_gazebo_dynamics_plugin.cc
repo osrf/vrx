@@ -80,6 +80,12 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     ROS_FATAL("usv_gazebo_dynamics_plugin error: bodyName: %s does not exist\n",
       linkName.c_str());
+    ROS_FATAL("Model links are...");
+    gazebo::physics::Link_V links = _model->GetLinks();
+    for (auto & link : links)
+    {
+      ROS_FATAL_STREAM(link->GetName());
+    }
     return;
   }
   else
