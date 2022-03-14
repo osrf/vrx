@@ -160,7 +160,7 @@
       <!-- in degrees -->
       <wind_mean_velocity>3.7</wind_mean_velocity>
       <var_wind_gain_constants>3.0</var_wind_gain_constants>
-      <var_wind_time_constants>1</var_wind_time_constants>
+      <var_wind_time_constants>2</var_wind_time_constants>
       <random_seed>12</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
