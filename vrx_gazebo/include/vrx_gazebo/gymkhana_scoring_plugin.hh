@@ -23,6 +23,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/World.hh>
+#include <ignition/math/Vector3.hh>
 #include <vrx_gazebo/scoring_plugin.hh>
 
 class GymkhanaScoringPlugin : public ScoringPlugin
@@ -46,7 +47,7 @@ class GymkhanaScoringPlugin : public ScoringPlugin
   /// \brief Callback for black box station-keeping portion's scoring plugin
   protected: void BlackboxCallback(const vrx_gazebo::Task::ConstPtr& msg);
 
-  /// \brief Set the pinger location periodically.
+  /// \brief Set the pinger location.
   private: void SetPingerPosition() const;
 
   // Documentation inherited.
