@@ -15,6 +15,7 @@
  *
 */
 
+#include <geometry_msgs/Vector3.h>
 #include <limits>
 #include "vrx_gazebo/gymkhana_scoring_plugin.hh"
 
@@ -46,6 +47,31 @@ void GymkhanaScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   // Setup ROS node and publisher
   this->rosNode.reset(new ros::NodeHandle());
 
+  // Set the topic to be used to publish the sensor message.
+  std::string setPositionTopicName = "/pinger/set_pinger_position";
+  if (_sdf->HasElement("set_position_topic_name"))
+  {
+    setPositionTopicName =
+      _sdf->GetElement("set_position_topic_name")->Get<std::string>();
+  }
+
+  // Set the pinger position.
+  if (_sdf->HasElement("pinger_position"))
+  {
+    this->pingerPosition =
+      _sdf->Get<ignition::math::Vector3d>("pinger_position");
+  }
+
+  #if GAZEBO_MAJOR_VERSION >= 8
+    this->lastSetPingerPositionTime = this->world->SimTime();
+  #else
+    this->lastSetPingerPositionTime = this->world->GetSimTime();
+  #endif
+
+  this->setPingerPub =
+    this->rosNode->advertise<geometry_msgs::Vector3>(
+      setPositionTopicName, 1, true);
+
   this->channelSub = this->rosNode->subscribe(
     "/vrx/gymkhana_channel/task/info", 5,
     &GymkhanaScoringPlugin::ChannelCallback, this);
@@ -58,6 +84,20 @@ void GymkhanaScoringPlugin::Load(gazebo::physics::WorldPtr _world,
 /////////////////////////////////////////////////
 void GymkhanaScoringPlugin::Update()
 {
+  // Set the pinger position every 10 seconds.
+  #if GAZEBO_MAJOR_VERSION >= 8
+    gazebo::common::Time now = this->world->SimTime();
+  #else
+    gazebo::common::Time now = this->world->GetSimTime();
+  #endif
+  gazebo::common::Time elapsedTime = now - this->lastSetPingerPositionTime;
+
+  if (elapsedTime.Double() >= 10.0)
+  {
+    this->SetPingerPosition();
+    this->lastSetPingerPositionTime = now;
+  }
+
   // Nothing to do if the task is not in "running" state.
   if (this->ScoringPlugin::TaskState() != "running")
     return;
@@ -99,6 +139,16 @@ void GymkhanaScoringPlugin::BlackboxCallback(
   {
     this->blackboxScore = msg->score;
   }
+}
+
+/////////////////////////////////////////////////
+void GymkhanaScoringPlugin::SetPingerPosition() const
+{
+  geometry_msgs::Vector3 position;
+  position.x = this->pingerPosition.X();
+  position.y = this->pingerPosition.Y();
+  position.z = this->pingerPosition.Z();
+  this->setPingerPub.publish(position);
 }
 
 //////////////////////////////////////////////////
