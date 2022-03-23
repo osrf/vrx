@@ -21,7 +21,9 @@
 #include <ros/ros.h>
 #include <vrx_gazebo/Task.h>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Time.hh>
 #include <gazebo/physics/World.hh>
+#include <ignition/math/Vector3.hh>
 #include <vrx_gazebo/scoring_plugin.hh>
 
 class GymkhanaScoringPlugin : public ScoringPlugin
@@ -45,6 +47,9 @@ class GymkhanaScoringPlugin : public ScoringPlugin
   /// \brief Callback for black box station-keeping portion's scoring plugin
   protected: void BlackboxCallback(const vrx_gazebo::Task::ConstPtr& msg);
 
+  /// \brief Set the pinger location.
+  private: void SetPingerPosition() const;
+
   // Documentation inherited.
   private: void OnFinished() override;
 
@@ -53,6 +58,9 @@ class GymkhanaScoringPlugin : public ScoringPlugin
 
   /// \brief ROS node handle.
   private: std::unique_ptr<ros::NodeHandle> rosNode;
+
+  /// \brief ROS publisher to set the pinger position.
+  private: ros::Publisher setPingerPub;
 
   /// \brief ROS subscriber to channel navigation portion scoring plugin
   private: ros::Subscriber channelSub;
@@ -68,6 +76,12 @@ class GymkhanaScoringPlugin : public ScoringPlugin
 
   /// \brief Penalty added per collision.
   private: double obstaclePenalty = 0.1;
+
+  /// \brief Position of the pinger.
+  private: ignition::math::Vector3d pingerPosition = {0, 0, 0};
+
+  /// \brief Last time we published a pinger position.
+  private: gazebo::common::Time lastSetPingerPositionTime;
 };
 
 #endif

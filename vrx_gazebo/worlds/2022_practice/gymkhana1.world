@@ -205,6 +205,8 @@
            Respect top-level plugin finished status. -->
       <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
       <obstacle_penalty>1</obstacle_penalty>
+      <set_position_topic_name>/wamv/sensors/pingers/pinger/set_pinger_position</set_position_topic_name>
+      <pinger_position>-495 265 0</pinger_position>
     </plugin>
     <!-- Scoring plugin for buoy channel portion -->
     <plugin filename="libnavigation_scoring_plugin.so" name="navigation_scoring_plugin">
