@@ -136,29 +136,74 @@ def world_gen(coordinate={}, master={}, config_file=None):
 
 def linear_combinations(master={}):
     combinations = []
-    axies = OrderedDict()
+    axes = OrderedDict()
     start = {}
     # make the starting spot and max
     # NOTE: the start coordinate <= all coordinates on an axis <= axies max
-    for axis, value in iter(master.items()):
-        start[axis] = 0
-        axies[axis] = value['steps']-1
-    iterate(axies_max=axies, coordinates=combinations,
-            current_coordinate=start)
+    for key, value in iter(master.items()):
+        start[key] = 0
+        axes[key] = value['steps']-1
+    iterate(axes_max=axes, coordinates=combinations, current_coordinate=start)
     return combinations
+# """
+# Reconstructing how this works right now:
+# 
+# For each top level key, the above function adds
+# {keyname:0} to the start dictionary and
+# {keyname: steps - 1} to the "axes" dictionary
+# 
+# Then it passes these dictionaries by reference to the crazy recursive function
+# below
+# 
+# That function starts by appending the start dictionary (which should be all
+# keys with a value of 0 to the empty "combinations" list, making it a list
+# of dictionaries.
+# 
+# Then it checks whether the dictionary "axes_max" is equal to the current
+# coordinate.
+# 
+# So, in other words, whether the current coordinate is a dictionary
+# in which the key values are equal to the step values for that key -1.
+# 
+# If it is equal, it returns.
+# 
+# If not, it enters a loop through the keys in the "current coordinate" dictionary
+# 
+# And checks that the value for that key is less than its value in the max dictionary
+# 
+# If it is, it increments the value and breaks the loop
+# 
+# If not, it super weirdly sets it to 0 and keeps going.
+# 
+# Then it calls itself recursively, but the axes_max dictionary never changes
+# 
+# In other words, all this code does is produce a big list of dictionaries in which
+# the keys never change, but the values increment from 0 to some max value defined
+# for the key.
+# 
+# This is not a good way to do that.
+# 
+# [
+# {k1:0, k2:0,k3:0},
+# {k1:1, k2:0, k3:0},
+# 
+# ]
+# 
+# """
 
 
-def iterate(axies_max={}, coordinates=[], current_coordinate={}):
+
+def iterate(axes_max={}, coordinates=[], current_coordinate={}):
     coordinates.append(current_coordinate.copy())
     # if we are at the max coordinate, return
-    if axies_max == current_coordinate:
+    if axes_max == current_coordinate:
         return
     else:
         for axis in current_coordinate:
-            if current_coordinate[axis] < axies_max[axis]:
+            if current_coordinate[axis] < axes_max[axis]:
                 current_coordinate[axis] += 1
                 break
             else:
                 current_coordinate[axis] = 0
-        iterate(axies_max=axies_max, coordinates=coordinates,
+        iterate(axes_max=axes_max, coordinates=coordinates,
                 current_coordinate=current_coordinate)
