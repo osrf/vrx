@@ -27,10 +27,15 @@ def main():
     # Setup command to generate WAM-V urdf file
     wamv_target = rospy.get_param('wamv_target')
     wamv_gazebo = rospy.get_param('wamv_gazebo')
+    wamv_locked = rospy.get_param('wamv_locked')
 
     create_urdf_command = ("rosrun xacro xacro -o " + wamv_target +
                            " '" + wamv_gazebo + "'")
 
+    if wamv_locked:
+        create_urdf_command += (" locked:=" +
+                                str(wamv_locked))
+    
     # Add xacro files if created
     if received_thruster_yaml:
         thruster_yaml = rospy.get_param('thruster_yaml')
