@@ -33,19 +33,13 @@ def main():
         config_file = rospy.get_param('config_target') + yaml_name + \
             str(world_num) + '.yaml'
 
+        xacro_top = make_xacro_top(coord, world_name)
         create_xacro_file(
             xacro_target=rospy.get_param('world_xacro_target') +
                 yaml_name + str(world_num) + '.world.xacro',
             requested_macros=world_gen(coordinate=coord, master=master,
                 config_file=config_file),
-            boiler_plate_top='<?xml version="1.0" ?>\n' +
-                '<sdf version="1.6" ' +
-                'xmlns:xacro="http://ros.org/wiki/xacro">\n' +
-            '<!-- COORDINATE: ' + str(coord) + ' -->\n' +
-            '<world name="' + world_name + '">\n' +
-            '  <xacro:include filename="$(find ' + competition_pkg + ')' +
-                '/worlds/xacros/include_all_xacros.xacro" />\n' +
-            '  <xacro:include_all_xacros />\n',
+            boiler_plate_top=xacro_top,
             boiler_plate_bot='</world>\n</sdf>')
 
         # Convert xacro file to world file
@@ -53,6 +47,35 @@ def main():
 
     print('All %d worlds generated' % len(coordinates))
 
+def make_xacro_top(coord, world_name):
+  coord_comment  = '<!-- COORDINATE: ' + str(coord) + ' -->'
+  world_name_el  = '<world name="' + world_name + '">'
+  xacro_includes = """\
+  <xacro:include filename="$(find vrx_2019)/worlds/sandisland.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/sandisland_minus_scene.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/sydneyregatta_minus_scene.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scene.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/nav_challenge.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro" />
+  <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/perception.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/stationkeeping.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/dock.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scan_and_dock.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/wayfinding.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/wildlife.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scan_dock_deliver.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/gymkhana.xacro" />
+  <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/insert_model.xacro" />
+  """
+
+  xacro_top = '<?xml version="1.0" ?>\n'\
+              '<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">\n'
+
+  xacro_top += coord_comment + '\n'
+  xacro_top += world_name_el + '\n'
+  xacro_top += xacro_includes + '\n'
+  return xacro_top
 
 def world_gen(coordinate={}, master={}, config_file=None):
     world = {}
