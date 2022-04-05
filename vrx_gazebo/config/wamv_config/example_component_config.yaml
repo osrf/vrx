@@ -25,6 +25,7 @@ wamv_camera:
       R: 0.0
       P: ${radians(15)}
       Y: 0.0
+      post_Y: 0.0
 wamv_gps:
     - name: gps_wamv
       x: -0.85
