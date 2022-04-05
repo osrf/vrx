@@ -1,5 +1,6 @@
 wamv_camera:
     - name: front_left_camera
+      visualize: False
       x: 0.75
       y: 0.1
       z: 1.5
