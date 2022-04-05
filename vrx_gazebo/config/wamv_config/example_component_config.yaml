@@ -51,6 +51,7 @@ lidar:
       R: 0.0
       P: ${radians(8)}
       Y: 0.0
+      post_Y: 0.0
 wamv_ball_shooter:
     - name: ball_shooter
       x: 0.55 
