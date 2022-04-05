@@ -16,7 +16,10 @@ wamv_camera:
     - name: far_left_camera
       x: 0.75
       y: 0.3
+      z: 1.5
+      R: 0.0
       P: ${radians(15)}
+      Y: 0.0
 wamv_gps:
     - name: gps_wamv
       x: -0.85
