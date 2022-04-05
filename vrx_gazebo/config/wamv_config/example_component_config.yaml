@@ -51,4 +51,4 @@ wamv_ball_shooter:
       y: -0.3 
       z: 1.3
       pitch: ${radians(-20)}
-      yaw: 0
+      yaw: 0.0
