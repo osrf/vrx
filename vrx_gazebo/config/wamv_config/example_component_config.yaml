@@ -9,7 +9,10 @@ wamv_camera:
     - name: front_right_camera
       x: 0.75
       y: -0.1
+      z: 1.5
+      R: 0.0
       P: ${radians(15)}
+      Y: 0.0
     - name: far_left_camera
       x: 0.75
       y: 0.3
