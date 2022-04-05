@@ -7,6 +7,7 @@ wamv_camera:
       R: 0.0
       P: ${radians(15)}
       Y: 0.0
+      post_Y: 0.0
     - name: front_right_camera
       visualize: False
       x: 0.75
