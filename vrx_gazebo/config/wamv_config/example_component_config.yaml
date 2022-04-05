@@ -23,6 +23,11 @@ wamv_camera:
 wamv_gps:
     - name: gps_wamv
       x: -0.85
+      y: 0.0
+      z: 1.3
+      R: 0.0
+      P: 0.0
+      Y: 0.0
 wamv_imu:
     - name: imu_wamv
       y: -0.2
