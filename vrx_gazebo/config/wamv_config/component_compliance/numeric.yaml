@@ -9,6 +9,7 @@ wamv_camera:
         P
         Y
         post_Y
+        visualize
 
 wamv_gps:
     num: 1
