@@ -123,9 +123,12 @@ void GymkhanaScoringPlugin::ChannelCallback(
     // Determine whether channel has been crossed before timeout
     if (!this->channelCrossed)
     {
-      if (msg->state == "finished" && !msg->timed_out)
+      if (msg->state == "finished")
       {
-        this->channelCrossed = true;
+        if (msg->score == this->ScoringPlugin::GetTimeoutScore())
+          this->Finish();
+        else
+          this->channelCrossed = true;
       }
     }
   }
