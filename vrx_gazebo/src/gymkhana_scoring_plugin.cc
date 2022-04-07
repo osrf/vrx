@@ -110,7 +110,7 @@ void GymkhanaScoringPlugin::Update()
   }
   else
   {
-    this->ScoringPlugin::SetScore(std::numeric_limits<double>::max());
+    this->ScoringPlugin::SetScore(this->ScoringPlugin::GetTimeoutScore());
   }
 }
 
