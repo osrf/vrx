@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sandwich_description</name>
+  <version>1.3.0</version>
+  <description>This package provides a URDF model of sandwich boat</description>
+  <maintainer email="crvogt@nps.edu">Carson Vogt</maintainer>
+  <license>Apache 2.0</license>
+  <url type="website">http://wiki.ros.org/sandwich_description</url>
+  <url type="bugtracker">http://github.com/osrf/vrx/issues</url>
+  <author email="crvogt@nps.edu">Carson vogt</author>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>xacro</depend>
+</package>
