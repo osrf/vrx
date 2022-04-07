@@ -35,4 +35,5 @@
 			<child link="$(arg namespace)/sandwich_link"/>
 		</joint>
 
-	
+	</xacro:macro>
+</robot>
