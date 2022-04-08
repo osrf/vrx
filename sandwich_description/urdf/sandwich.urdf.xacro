@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<!-- "Dummy" base link to eliminate root link inertia warning -->
+	<link name="sandwich/base_link"/>
+
+	<!-- Main link -->
+	<link name="sandwich/sandwich_link">
+		<inertial>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<mass value="2"/>
+			<inertia
+				ixx="5.0" ixy="0.0" ixz="0.0"
+				iyy="3.6" iyz="0.0"
+				izz="1.7"/>
+		</inertial>
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<goemetry>
+				<mesh filename="file://$(find sandwich_description)/models/sandwich_base/sandwich.dae" scale="1 1 1"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="file://$(find sandwich_description)/models/sandwich_base/sandwich.dae" scale="1 1 1"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="sandwich/sandwich_base_joint" type="fixed">
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<parent link="sandwich/base_link"/>
+		<child link="sandwich/sandwich_link"/>
+	</joint>
+</robot>

@@ -32,7 +32,7 @@
   <xacro:arg name="component_xacro_file" default = ""/>
 
   <!-- Thruster yaml file -->
-  <xacro:arg name="yaml_thruster_generation" default="false"/>
+  <xacro:arg name="yaml_thruster_generation" default="true"/>
   <xacro:arg name="thruster_xacro_file" default = ""/>
 
   <!-- === The WAM-V platform === -->
@@ -105,7 +105,7 @@
 
     <!-- Add CPU Cases -->
     <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
-    <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
+    <xacro:cpu_cases position="2.5 0 1.53" orientation="0 0 0"/>
   </xacro:if>
   
   <!-- Otherwise, add sensors based on enable variables -->
