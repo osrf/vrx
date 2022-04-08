@@ -3,11 +3,11 @@
 	<xacro:arg name="locked" default="false"/>
 	<!-- Include macros for dynamics plugins -->
 	<!-- TODO -->
-	<!-- <xacro:include filename="(find sandwich_description)/urdf/macros.xacros"/> -->
+	<xacro:include filename="$(find sandwich_description)/urdf/macros.xacro"/>
 
 	<!-- Attach hydrodynamics plugin -->
 	<!-- TODO -->
-	<!-- <xacro:usv_dynamics_gazebo name="sandwich_dynamics_plugin"/> -->
+	<xacro:usv_dynamics_gazebo name="sandwich_dynamics_plugin"/>
 
 	<!-- Robot mesh -->
 	<xacro:include filename="$(find sandwich_description)/urdf/sandwich.urdf.xacro"/>
@@ -18,9 +18,9 @@
 
 	<!-- Thrusters -->
 	<!-- TODO -->
-	<!-- <xacro:arg name="thruster_namespace" default="thruster/"/> -->
-	<!-- <xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global"/> -->
-	<!-- <xacro:include filename="$(find sandwich_description)/urdf/thruster.xacro"/> -->
+	<xacro:arg name="thruster_namespace" default="thruster/"/>
+	<xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global"/>
+	<xacro:include filename="$(find sandwich_description)/urdf/thruster.xacro"/>
 
 	<!-- Decide if we lock the robot to the world -->
 	<xacro:if value="$(arg locked)">

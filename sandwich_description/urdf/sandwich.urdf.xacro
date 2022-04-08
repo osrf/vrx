@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="sandwich">
 
 	<!-- "Dummy" base link to eliminate root link inertia warning -->
 	<link name="sandwich/base_link"/>
@@ -16,7 +16,7 @@
 		</inertial>
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0"/>
-			<goemetry>
+			<geometry>
 				<mesh filename="file://$(find sandwich_description)/models/sandwich_base/sandwich.dae" scale="1 1 1"/>
 			</geometry>
 		</visual>

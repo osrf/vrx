@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!-- Includes all macros in this package so they don't need to be included individually -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="sandwich">
+
+	<!-- Include sensor macros -->
+	<xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_camera.xacro"/>
+
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_gps.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_imu.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_planar_lidar.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_3d_lidar.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/lidar.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_p3d.xacro" />
+  <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_pinger.xacro" />
+
+  <!-- Include dynamics macros -->
+  <xacro:include filename="$(find sandwich_description)/urdf/sandwich_dynamics_plugin.xacro" />
+
+</robot>

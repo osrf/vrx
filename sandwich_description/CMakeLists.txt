@@ -11,7 +11,7 @@ if(DEFINED ENV{ROS_DISTRO})
 endif()
 
 xacro_add_files(
-  urdf/sandwich_base.urdf.xacro
+  urdf/sandwich.urdf.xacro
     ${XACRO_INORDER} INSTALL DESTINATION urdf
 )
 
