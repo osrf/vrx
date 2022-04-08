@@ -7,6 +7,10 @@
   <arg name="namespace" value="wamv_config"/>
 
   <group ns="$(arg namespace)">
+	  
+    <arg name="wamv_locked" default="false"/>
+    <param name="wamv_locked" value="$(arg wamv_locked)"/>
+
     <arg name="component_yaml" default="$(find vrx_gazebo)/config/wamv_config/example_component_config.yaml"/>
     <param name="component_yaml" value="$(arg component_yaml)"/>
 
