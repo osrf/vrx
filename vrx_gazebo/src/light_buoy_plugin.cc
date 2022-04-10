@@ -136,7 +136,7 @@ void LightBuoyPlugin::Load(gazebo::rendering::VisualPtr _parent,
 
   gzNode->Init();
   this->colorSub = this->gzNode->Subscribe
-    (this->gzColorsTopic, &LightBuoyPlugin::ChangePatternTo, this);
+    (this->gzColorsTopic, &LightBuoyPlugin::ChangePatternTo, this, true);
 }
 
 //////////////////////////////////////////////////
