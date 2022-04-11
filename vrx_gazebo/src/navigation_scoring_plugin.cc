@@ -140,12 +140,6 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   // Save number of gates
   this->numGates = this->gates.size();
 
-  // Set default score in case of timeout.
-  double timeoutScore = 2.0 * this->GetRunningStateDuration() /
-                        static_cast<double>(this->numGates);
-  gzmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
-  this->ScoringPlugin::SetTimeoutScore(timeoutScore);
-
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(

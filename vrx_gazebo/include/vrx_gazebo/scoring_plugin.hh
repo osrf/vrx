@@ -331,7 +331,7 @@ class ScoringPlugin : public gazebo::WorldPlugin
   private: ros::Publisher contactPub;
 
   /// \brief Score in case of timeout - added for Navigation task
-  private: double timeoutScore = -1.0;
+  private: double timeoutScore = 200.0;
 
   /// \brief Whether to shut down after last gate is crossed.
   private: bool perPluginExitOnCompletion = true;
