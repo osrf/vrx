@@ -1,5 +1,65 @@
 ## VRX 1
 
+### VRX 1.6.1
+1. VRX 2022 Examples and Usability Enhancements
+    * [Pull Request 397](https://github.com/osrf/vrx/pull/397) 
+    * [Pull Request 404](https://github.com/osrf/vrx/pull/404) 
+    * [Pull Request 443](https://github.com/osrf/vrx/pull/443) 
+    * [Pull Request 448](https://github.com/osrf/vrx/pull/448) 
+
+Enable shooting the ball with the joystick 
+Example cleanup
+Adding 2022/phase2 worlds and extra models 
+Update example_component_config.yaml and numeric.yaml for generating compliant WAM-V URDFs 
+
+1. Enforce Compliance with VRX 2022 Competition Guidelines
+    * [Pull Request 405](https://github.com/osrf/vrx/pull/405) 
+    * [Pull Request 432](https://github.com/osrf/vrx/pull/432) 
+    * [Pull Request 446](https://github.com/osrf/vrx/pull/446) 
+    * [Pull Request 449](https://github.com/osrf/vrx/pull/449) 
+    * [Pull Request 452](https://github.com/osrf/vrx/pull/452) 
+
+Update the allowed region for the thrusters 
+updating all var_wind_time 1 to 2 to keep within the envelope 
+Fixed the generate urdf scripts such that we can pass in "locked" parameter. 
+Finish Gymkhana when failing crossing the navigation channel 
+Made placard symbol subscriber enable latching 
+
+1. Pinger support
+    * [Pull Request 424](https://github.com/osrf/vrx/pull/424) 
+    * [Pull Request 438](https://github.com/osrf/vrx/pull/439) 
+    * [Pull Request 439](https://github.com/osrf/vrx/pull/439) 
+
+added ability to add wamv_pinger to component.yaml 
+Fix pinger location in gymkhana task 
+Removed set pinger position node from vrx.launch as well 
+
+1. Enhance wildlife follow plugin
+    * [Pull Request 416](https://github.com/osrf/vrx/pull/416) 
+    * [Pull Request 429](https://github.com/osrf/vrx/pull/429) 
+Usability improvements for follow_plugin (wildlife) 
+Jessica/phase2 updates 
+
+1. Workaround for Ignition Math FromLocal bug
+    * [Pull Request 428](https://github.com/osrf/vrx/pull/428) 
+
+1. Resolve Robot Localization TF Warnings
+    * [Pull Request 402](https://github.com/osrf/vrx/pull/402) 
+
+1. Other minor fixes and enhancements
+    * [Pull Request 400](https://github.com/osrf/vrx/pull/400) 
+    * [Pull Request 408](https://github.com/osrf/vrx/pull/408) 
+    * [Pull Request 411](https://github.com/osrf/vrx/pull/411) 
+    * [Pull Request 419](https://github.com/osrf/vrx/pull/419) 
+    * [Pull Request 422](https://github.com/osrf/vrx/pull/422) 
+
+Adding wind and paused to stationkeeping demonstrations 
+add namespace to p3d base link name 
+Update perception_task.launch to include correct path to perception_task.world 
+fixed generate_wamv.launch 
+Fix tests 
+
+
 ### VRX 1.6.0
 1. Update pinger.yaml to support 2019 and 2022 worlds
     * [Pull Request 394](https://github.com/osrf/vrx/pull/394)
