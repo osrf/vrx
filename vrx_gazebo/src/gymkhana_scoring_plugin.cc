@@ -110,7 +110,7 @@ void GymkhanaScoringPlugin::Update()
   }
   else
   {
-    this->ScoringPlugin::SetScore(this->ScoringPlugin::GetTimeoutScore());
+    this->ScoringPlugin::SetScore(200);
   }
 }
 
@@ -125,7 +125,7 @@ void GymkhanaScoringPlugin::ChannelCallback(
     {
       if (msg->state == "finished")
       {
-        if (msg->score == this->ScoringPlugin::GetTimeoutScore())
+        if (msg->score == 200)
           this->Finish();
         else
           this->channelCrossed = true;
@@ -158,9 +158,7 @@ void GymkhanaScoringPlugin::SetPingerPosition() const
 void GymkhanaScoringPlugin::OnFinished()
 {
   double penalty = this->GetNumCollisions() * this->obstaclePenalty;
-
-  if (this->Score() < std::numeric_limits<double>::max())
-    this->SetTimeoutScore(this->Score() + penalty);
+  this->SetTimeoutScore(this->Score() + penalty);
 
   ScoringPlugin::OnFinished();
 }
