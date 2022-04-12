@@ -158,9 +158,7 @@ void GymkhanaScoringPlugin::SetPingerPosition() const
 void GymkhanaScoringPlugin::OnFinished()
 {
   double penalty = this->GetNumCollisions() * this->obstaclePenalty;
-
-  if (this->Score() < std::numeric_limits<double>::max())
-    this->SetTimeoutScore(this->Score() + penalty);
+  this->SetTimeoutScore(this->Score() + penalty);
 
   ScoringPlugin::OnFinished();
 }
