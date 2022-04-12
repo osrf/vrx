@@ -110,7 +110,7 @@ void GymkhanaScoringPlugin::Update()
   }
   else
   {
-    this->ScoringPlugin::SetScore(this->ScoringPlugin::GetTimeoutScore());
+    this->ScoringPlugin::SetScore(200);
   }
 }
 
@@ -125,7 +125,7 @@ void GymkhanaScoringPlugin::ChannelCallback(
     {
       if (msg->state == "finished")
       {
-        if (msg->score == this->ScoringPlugin::GetTimeoutScore())
+        if (msg->score == 200)
           this->Finish();
         else
           this->channelCrossed = true;
