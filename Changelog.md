@@ -1,5 +1,42 @@
 ## VRX 1
 
+### VRX 1.6.1
+1. VRX 2022 Examples and Usability Enhancements
+    * [Pull Request 397](https://github.com/osrf/vrx/pull/397) 
+    * [Pull Request 404](https://github.com/osrf/vrx/pull/404) 
+    * [Pull Request 443](https://github.com/osrf/vrx/pull/443) 
+    * [Pull Request 448](https://github.com/osrf/vrx/pull/448) 
+
+1. Enforce Compliance with VRX 2022 Competition Guidelines
+    * [Pull Request 405](https://github.com/osrf/vrx/pull/405) 
+    * [Pull Request 432](https://github.com/osrf/vrx/pull/432) 
+    * [Pull Request 446](https://github.com/osrf/vrx/pull/446) 
+    * [Pull Request 449](https://github.com/osrf/vrx/pull/449) 
+    * [Pull Request 452](https://github.com/osrf/vrx/pull/452) 
+
+1. Pinger support
+    * [Pull Request 424](https://github.com/osrf/vrx/pull/424) 
+    * [Pull Request 438](https://github.com/osrf/vrx/pull/439) 
+    * [Pull Request 439](https://github.com/osrf/vrx/pull/439) 
+
+1. Enhance wildlife follow plugin
+    * [Pull Request 416](https://github.com/osrf/vrx/pull/416) 
+    * [Pull Request 429](https://github.com/osrf/vrx/pull/429) 
+
+1. Workaround for Ignition Math FromLocal bug
+    * [Pull Request 428](https://github.com/osrf/vrx/pull/428) 
+
+1. Resolve Robot Localization TF Warnings
+    * [Pull Request 402](https://github.com/osrf/vrx/pull/402) 
+
+1. Other minor fixes and enhancements
+    * [Pull Request 400](https://github.com/osrf/vrx/pull/400) 
+    * [Pull Request 408](https://github.com/osrf/vrx/pull/408) 
+    * [Pull Request 411](https://github.com/osrf/vrx/pull/411) 
+    * [Pull Request 419](https://github.com/osrf/vrx/pull/419) 
+    * [Pull Request 422](https://github.com/osrf/vrx/pull/422) 
+
+
 ### VRX 1.6.0
 1. Update pinger.yaml to support 2019 and 2022 worlds
     * [Pull Request 394](https://github.com/osrf/vrx/pull/394)

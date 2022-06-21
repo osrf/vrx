@@ -141,8 +141,7 @@ void NavigationScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->numGates = this->gates.size();
 
   // Set default score in case of timeout.
-  double timeoutScore = 2.0 * this->GetRunningStateDuration() /
-                        static_cast<double>(this->numGates);
+  double timeoutScore = 200;
   gzmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
   this->ScoringPlugin::SetTimeoutScore(timeoutScore);
 

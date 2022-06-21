@@ -91,7 +91,7 @@ void PlacardPlugin::Load(gazebo::rendering::VisualPtr _parent,
 
   this->gzNode->Init();
   this->symbolSub = gzNode->Subscribe(this->symbolSubTopic,
-    &PlacardPlugin::ChangeSymbolTo, this);
+    &PlacardPlugin::ChangeSymbolTo, this, true);
 }
 
 //////////////////////////////////////////////////
