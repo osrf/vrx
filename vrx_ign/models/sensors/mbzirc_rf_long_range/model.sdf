@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="mbzirc_rf_long_range">
+    <link name="sensor_link">
+      <inertial>
+        <mass>0.005</mass>
+        <inertia>
+          <ixx>8.33e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>8.33e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.33e-06</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <frame name="mount_point"/>
+    <plugin
+      filename="libRFRange.so"
+      name="ignition::gazebo::systems::RFRangeSensor">
+      <!-- this overrides default RF Range system settings in the world -->
+      <range_config>
+        <max_range>500000.0</max_range>
+        <fading_exponent>2.6</fading_exponent>
+        <l0>40</l0>
+        <sigma>0.02</sigma>
+        <rssi_1>-5</rssi_1>
+      </range_config>
+      <radio_config>
+        <tx_power>35</tx_power>
+        <noise_floor>-90</noise_floor>
+      </radio_config>
+    </plugin>
+  </model>
+</sdf>

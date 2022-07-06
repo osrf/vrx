@@ -1,0 +1,296 @@
+<?xml version="1.0" ?>
+<!--
+
+-->
+<sdf version="1.6">
+  <world name="usv_max_speed">
+    <physics name="40ms" type="dart">
+      <max_step_size>0.04</max_step_size>
+      <real_time_factor>0.0</real_time_factor>
+    </physics>
+
+    <plugin
+      filename="ignition-gazebo-user-commands-system"
+      name="ignition::gazebo::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-scene-broadcaster-system"
+      name="ignition::gazebo::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-physics-system"
+      name="ignition::gazebo::systems::Physics">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-sensors-system"
+      name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-contact-system"
+      name="ignition::gazebo::systems::Contact">
+    </plugin>
+
+    <scene>
+      <sky></sky>
+      <grid>false</grid>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_platform">
+      <static>true</static>
+      <pose>0 0 -0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 20 3</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 20 3</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>
+        water_plane
+      </uri>
+    </include>
+
+    <include>
+      <name>Vessel A</name>
+      <pose>25 25 0.3 0 0.0 -1.0</pose>
+      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/Vessel A</uri>
+      <plugin
+        filename="libSurface.so"
+        name="ignition::gazebo::systems::Surface">
+        <link_name>link</link_name>
+        <vehicle_length>6</vehicle_length>
+        <vehicle_width>3.3</vehicle_width>
+        <hull_radius>0.27</hull_radius>
+        <fluid_level>0.45</fluid_level>
+
+        <!-- Waves -->
+        <wavefield>
+          <size>1000 1000</size>
+          <cell_count>50 50</cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5</period>
+            <number>3</number>
+            <scale>1.5</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+
+      <plugin
+        filename="libSimpleHydrodynamics.so"
+        name="ignition::gazebo::systems::SimpleHydrodynamics">
+        <link_name>link</link_name>
+        <!-- Added mass -->
+        <xDotU>0.0</xDotU>
+        <yDotV>0.0</yDotV>
+        <nDotR>0.0</nDotR>
+        <!-- Linear and quadratic drag -->
+        <xU>51.3</xU>
+        <xUU>72.4</xUU>
+        <yV>40.0</yV>
+        <yVV>0.0</yVV>
+        <zW>500.0</zW>
+        <kP>50.0</kP>
+        <mQ>50.0</mQ>
+        <nR>400.0</nR>
+        <nRR>0.0</nRR>
+      </plugin>
+    </include>
+
+    <model name="small_box_a">
+      <pose>24 26.5 0.5 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+          <ixx>0.0066667</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0066667</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0066667</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 0.2 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>0 0 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.2 0.2 0.2</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <model name="small_box_a_duplicate">
+      <pose>24.2 26.5 0.5 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+          <ixx>0.0066667</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0066667</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0066667</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 0.2 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>0 0 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.2 0.2 0.2</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+
+    <model name="large_box_a">
+      <pose>24.9 24.85 0.65 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>10</mass>
+          <inertia>
+          <ixx>0.26667</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.26667</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.26667</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.4 0.4 0.4</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>0 1 0</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.4 0.4 0.4</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <model name="large_box_a_duplicate">
+      <pose>24.9 25.0 0.65 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>10</mass>
+          <inertia>
+          <ixx>0.26667</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.26667</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.26667</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.4 0.4 0.4</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>0 1 0</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.4 0.4 0.4</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <model name="ocean_entity_detector">
+      <static>true</static>
+      <!-- This plugin detects when target objects are dropped into the ocean
+           at the defined region. A message is published on the <topic> when
+           these events occur -->
+      <plugin filename="libEntityDetector.so"
+              name="mbzirc::EntityDetector">
+        <topic>/mbzirc/target_object_detector/dropped</topic>
+        <pose>0 0 -20 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>140 140 5</size>
+          </box>
+        </geometry>
+      </plugin>
+    </model>
+
+  </world>
+</sdf>

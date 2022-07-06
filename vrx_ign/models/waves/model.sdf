@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="waves">
+    <static>true</static>
+    <link name="link">
+      <visual name= "wave_visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/mesh.dae</uri>
+          </mesh>
+        </geometry>
+        <plugin
+            filename="libWaveVisual.so"
+            name="ignition::gazebo::systems::WaveVisual">
+          <shader>
+            <vertex>materials/programs/GerstnerWaves_vs_330.glsl</vertex>
+            <fragment>materials/programs/GerstnerWaves_fs_330.glsl</fragment>
+          </shader>
+          <wavefield>
+            <size>1000 1000</size>
+            <cell_count>50 50</cell_count>
+            <wave>
+              <model>PMS</model>
+              <period>5</period>
+              <number>3</number>
+              <scale>1.1</scale>
+              <gain>0.3</gain>
+              <direction>1 0</direction>
+              <angle>0.4</angle>
+              <tau>2.0</tau>
+              <amplitude>0.0</amplitude>
+              <steepness>0.0</steepness>
+            </wave>
+          </wavefield>
+        </plugin>
+        <visibility_flags>8</visibility_flags>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="water_plane">
+    <static>true</static>
+    <link name="link">
+      <visual name= "Water_visual">
+        <geometry>
+          <plane>
+            <size>180 180</size>
+          </plane>
+        </geometry>
+        <transparency>0.05</transparency>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo>0 0 1 1</albedo>
+              <albedo_map>materials/textures/Water_Albedo.jpg</albedo_map>
+              <normal_map>materials/textures/Water_Normal.jpg</normal_map>
+              <environment_map>materials/textures/skybox_lowres.dds</environment_map>
+              <roughness>0</roughness>
+              <metalness>0.5</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

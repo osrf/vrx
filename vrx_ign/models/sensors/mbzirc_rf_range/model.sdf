@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="vrx_rf_range">
+    <link name="sensor_link">
+      <inertial>
+        <mass>0.005</mass>
+        <inertia>
+          <ixx>8.33e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>8.33e-06</iyy>
+          <iyz>0</iyz>
+          <izz>8.33e-06</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <frame name="mount_point"/>
+    <plugin
+      filename="libRFRange.so"
+      name="ignition::gazebo::systems::RFRangeSensor">
+    </plugin>
+  </model>
+</sdf>
