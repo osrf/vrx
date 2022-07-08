@@ -46,7 +46,6 @@ install(
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
-  SimpleHydrodynamics
   Surface
   WaveVisual
 )
@@ -60,6 +59,10 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     Waves
   )
 endforeach()
+
+install(
+  TARGETS ${VRX_IGN_PLUGINS}
+  DESTINATION lib)
 
 ament_python_install_package(
   vrx_ign

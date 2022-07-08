@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.6">
+  <model name="sydneyregatta">
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+    <link name="link">
+      <visual name="visual_terrain">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>Terrain</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_concrete">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>ConcreteDark</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_dock_dark">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>DockDark</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_metal_galvanized">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>MetalGalvanized</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_dock">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>Dock</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_windows_dark">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>Windows_Dark</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_roof">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>RoofCorrugated</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_wall">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>Wall</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="visual_branches">
+        <geometry>
+          <mesh>
+            <uri>model://sydney_regatta/meshes/sydney_regatta.dae</uri>
+            <submesh>
+              <name>TreeDiffuse</name>
+            </submesh>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://sydney_regatta/materials/scripts/</uri>
+            <uri>model://sydney_regatta/materials/textures/</uri>
+            <name>SydneyTree/Branch</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>file://sydney_regatta/meshes/sydney_regatta_shore.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

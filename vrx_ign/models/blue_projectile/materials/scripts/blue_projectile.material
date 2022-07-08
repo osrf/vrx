@@ -1,0 +1,12 @@
+material blue_projectile/Blue
+{
+  technique
+  {
+    pass ambient
+    {
+      ambient 0.3176 0.6118 0.8353
+      diffuse 0.3176 0.6118 0.8353
+      specular 0.3176 0.6118 0.8353 1 1
+    }
+  }
+}
