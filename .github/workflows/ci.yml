@@ -36,6 +36,7 @@ jobs:
       image: npslearninglab/watery_robots:melodic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
+      - run: ls -laR /__w
       - uses: actions/checkout@v2
   
       - name: Static code checking
