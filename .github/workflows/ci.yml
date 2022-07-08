@@ -11,7 +11,8 @@ jobs:
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - run: ls -laR /__w
-      - uses: actions/checkout@v2
+      - id: developer
+        uses: actions/checkout@v2
   
       - name: Static code checking
         run: sh tools/code_check.sh
