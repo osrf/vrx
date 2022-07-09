@@ -7,7 +7,7 @@ jobs:
 
     runs-on: ubuntu-20.04
     container: 
-      image: npslearninglab/watery_robots:noetic_current
+      image: npslearninglab/watery_robots:noetic_test
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - run: ls -laR /__w
