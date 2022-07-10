@@ -18,6 +18,18 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+set(msg_files
+  "msg/Task.msg"
+  "msg/Contact.msg"
+ )
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+)
+ament_export_dependencies(rosidl_default_runtime)
+
 
 add_executable(optical_frame_publisher src/optical_frame_publisher.cc)
 ament_target_dependencies(optical_frame_publisher
