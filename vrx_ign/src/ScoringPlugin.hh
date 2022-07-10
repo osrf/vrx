@@ -30,6 +30,10 @@
 #include <ignition/math/SphericalCoordinates.hh>
 #include <sdf/sdf.hh>
 
+#include "vrx_ros/msg/contact.hpp"
+#include "vrx_ros/msg/task.hpp"
+
+
 namespace ignition
 {
 namespace gazebo
@@ -142,7 +146,8 @@ class ScoringPlugin
         private: bool ParseJoints();
 
         /// \brief A world pointer.
-        protected: ignition::physics::World3dPtr world;
+        //TODO: How to define world ptr?
+        // protected: ignition::physics::World3dPtr world;
 
         /// \brief The name of the task.
         protected: std::string taskName = "undefined";
@@ -151,7 +156,8 @@ class ScoringPlugin
         protected: std::string vehicleName;
 
         /// \brief Pointer to the vehicle to score.
-        protected: ignition::physics::Model3dPtr vehicleModel;
+        //TODO: How to define model ptr?
+        // protected: ignition::physics::Model3dPtr vehicleModel;
 
         /// \brief Last collision time.
         protected: ignition::common::Time lastCollisionTime;
@@ -170,6 +176,7 @@ class ScoringPlugin
         
         /// \brief gazebo server control publisher
         // TODO
+        ignition::transport::Node::Publisher *serverControlPub;
 
         /// \brief Topic where the task stats are published.
         private: std::string taskInfoTopic = "/vrx/task/info";
@@ -229,33 +236,37 @@ class ScoringPlugin
         private: bool timedOut = false;
 
         /// \brief Time at which the last message was sent.
-        private: ignition::common::Time lastStatsSent = gazebo::common::Time::Zero;
+        private: ignition::common::Time lastStatsSent;
 
         /// \brief The task state.
         private: std::string taskState = "initial";
         
         /// \brief The next task message to be published.
         //TODO: Create Ros2 task msg, include and declare
+        private: vrx_ros::msg::Task taskMsg;
 
         /// \brief ROS Contact Msg.
         //TODO: Create ros2 contact msg, include and declare
+        private: vrx_ros::msg::Contact contactMsg;
 
         /// \brief The name of the joints to be dettached during ReleaseVehicle().
         private: std::vector<std::string> lockJointNames;
 
         /// \brief ROS node handle.
-        //TODO: ROS2 equivalet of node handle
+        //TODO: ROS2 equivalet of node handle??
         //private: std::unique_ptr<ros::NodeHandle> rosNode;
 
         /// \brief Publisher for the task state.
         //TODO: declare ros2 pub
+        protected: rclcpp::Publisher<vrx_ros::msg::Task> taskPub;
         // protected: ros::Publisher taskPub;
 
         /// \brief Publisher for the collision.
         //TODO declare ros2 pub
+        private: rclcpp::Publisher<vrx_ros::msg::Contact> contactPub;
         // private: ros::Publisher contactPub;
 
-        
+
         /// \brief Score in case of timeout - added for Navigation task
         private: double timeoutScore = -1;
 

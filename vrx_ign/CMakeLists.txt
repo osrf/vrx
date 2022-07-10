@@ -2,8 +2,12 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 
 project(vrx_ign)
 
+include_directories("/opt/ros/galactic/include")
+include_directories("~/vrx_ros2_ws/install/vrx_ros/include")
+
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(rclcpp REQUIRED)
 
 find_package(ignition-gazebo6 REQUIRED)
 set(IGN_GAZEBO_VER ${ignition-gazebo6_VERSION_MAJOR})
@@ -21,9 +25,10 @@ set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 find_package(ignition-rendering6 REQUIRED)
 set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
 find_package(sdformat12 REQUIRED)
+find_package(ignition-physics4 REQUIRED)
+set(IGN_PHYSICS_VER ${ignition-physics4_VERSION_MAJOR})
 
 find_package(std_msgs REQUIRED)
-
 #============================================================================
 # Hooks
 ament_environment_hooks("hooks/resource_paths.dsv.in")
@@ -49,6 +54,8 @@ list(APPEND VRX_IGN_PLUGINS
   SimpleHydrodynamics
   Surface
   WaveVisual
+  DummyPlugin
+  ScoringPlugin
 )
 
 foreach(PLUGIN ${VRX_IGN_PLUGINS})
@@ -57,6 +64,7 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-gazebo${IGN_GAZEBO_VER}::core
     ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+    ignition-physics${IGN_PHYSICS_VER}::ignition-physics${IGN_PHYSICS_VER}
     Waves
   )
 endforeach()
