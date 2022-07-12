@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<sdf version="1.6" xmlns:xacro="http://ros.org/wiki/xacro">
+  <world name="marina">
+    <xacro:include filename="$(find vorc_gazebo)/worlds/marina.xacro" />
+    <xacro:marina />
+
+    <!--Waves-->
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+    <xacro:ocean_waves scale="2.6"/>
+
+    <!--Wind. Note, wind parameters are set in the plugin.-->
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro"/>
+    <xacro:usv_wind_gazebo topic_wind_speed="/vorc/debug/wind/speed"
+        topic_wind_direction="/vorc/debug/wind/direction">
+      <wind_objs>
+        <wind_obj>
+          <name>cora</name>
+          <link_name>base_link</link_name>
+          <coeff_vector>0.5 0.5 0.33</coeff_vector>
+        </wind_obj>
+      </wind_objs>
+    </xacro:usv_wind_gazebo>
+  </world>
+</sdf>

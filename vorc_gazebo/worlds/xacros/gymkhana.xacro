@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="gymkhana" params="
+    namespace:=cora competition:=vorc
+    nav_name='short_navigation_course_0' nav_uri:=short_navigation_course0
+    nav_x:=60 nav_y:=-362 nav_z:=0 nav_R:=0 nav_P:=0 nav_Y:=3.55
+    obs_name='gymkhana_obs' obs_uri:=obstacle_course
+    obs_x:=140 obs_y:=-282 obs_z:=0 obs_R:=0 obs_P:=0 obs_Y:=3.55
+    pinger_x:=116 pinger_y:=-278 pinger_z:=-5
+    running_duration:=300
+    **wp_markers **gates">
+
+    <!-- The navigation course -->
+    <include>
+      <name>${nav_name}</name>
+      <uri>model://${nav_uri}</uri>
+      <pose>${nav_x} ${nav_y} ${nav_z} ${nav_R} ${nav_P} ${nav_Y}</pose>
+    </include>
+
+    <!-- The obstacle course -->
+    <include>
+      <name>${obs_name}</name>
+      <uri>model://${obs_uri}</uri>
+      <pose>${obs_x} ${obs_y} ${obs_z} ${obs_R} ${obs_P} ${obs_Y}</pose>
+    </include>
+
+    <!-- Top-level scoring plugin -->
+    <plugin name="gymkhana_scoring_plugin"
+            filename="libgymkhana_scoring_plugin.so">
+      <vehicle>${namespace}</vehicle>
+      <task_name>gymkhana</task_name>
+      <task_info_topic>/${competition}/task/info</task_info_topic>
+      <contact_debug_topic>/${competition}/debug/contact</contact_debug_topic>
+      <!-- Per-plugin flag, different from env var VRX_EXIT_ON_COMPLETION.
+           Respect top-level plugin finished status. -->
+      <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>${running_duration}</running_state_duration>
+    </plugin>
+
+    <!-- Scoring plugin for buoy channel portion -->
+    <plugin name="navigation_scoring_plugin"
+            filename="libnavigation_scoring_plugin.so">
+      <vehicle>${namespace}</vehicle>
+      <task_name>gymkhana_channel</task_name>
+      <task_info_topic>/${competition}/gymkhana_channel/task/info</task_info_topic>
+      <contact_debug_topic>/${competition}/gymkhana_channel/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>${running_duration}</running_state_duration>
+      <collision_buffer>10</collision_buffer>
+      <release_joints>
+        <joint>
+          <name>${namespace}_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>${namespace}_external_riser</name>
+        </joint>
+      </release_joints>
+      <course_name>${nav_name}</course_name>
+      <obstacle_penalty>10.0</obstacle_penalty>
+      <gates>
+        <xacro:insert_block name="gates"/>
+      </gates>
+    </plugin>
+
+    <!-- Scoring plugin for acoustic pinger portion -->
+    <plugin name="stationkeeping_scoring_plugin"
+          filename="libstationkeeping_scoring_plugin.so">
+      <vehicle>${namespace}</vehicle>
+      <task_name>gymkhana_blackbox</task_name>
+      <rms_error_topic>/${competition}/gymkhana_blackbox/rms_error</rms_error_topic>
+      <pose_error_topic>/${competition}/gymkhana_blackbox/pose_error</pose_error_topic>
+      <goal_topic>/${competition}/gymkhana_blackbox/goal</goal_topic>
+      <task_info_topic>/${competition}/gymkhana_blackbox/task/info</task_info_topic>
+      <contact_debug_topic>/${competition}/gymkhana_blackbox/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <!-- Goal as Cartesian coordinates -->
+      <goal_pose_cart>${pinger_x} ${pinger_y} ${pinger_z}</goal_pose_cart>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>${running_duration}</running_state_duration>
+      <release_joints>
+        <joint>
+          <name>${namespace}_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>${namespace}_external_riser</name>
+        </joint>
+      </release_joints>
+      <xacro:insert_block name="wp_markers" />
+    </plugin>
+
+  </xacro:macro>
+</world>

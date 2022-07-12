@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Dummy link, which usv_gazebo_thrust_plugin looks for -->
+  <link name="left_engine_link">
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.00889245" ixy="0.0" ixz="0.0" iyy="0.00911125" iyz="0.0" izz="0.00078125"/>
+    </inertial>
+  </link>
+
+  <!-- No additional collision, since propeller is inside robot body -->
+  <link name="left_propeller_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://cora_description/models/meshes/propellerL.dae"/>
+      </geometry>
+      <material name="left_propeller_material">
+        <diffuse>1.0 1.0 1.0</diffuse>
+        <specular>1.0 1.0 1.0</specular>
+        <pbr>
+          <metal>
+            <albedo_map>package://cora_description/models/materials/textures/Boat_Albedo.png</albedo_map>
+            <metalness_map>package://cora_description/models/materials/textures/Boat_Metalness.png</metalness_map>
+            <roughness_map>package://cora_description/models/materials/textures/Boat_Roughness.png</roughness_map>
+          </metal>
+        </pbr>
+        <!-- fallback to script if no PBR support-->
+        <script>
+          <uri>package://cora_description/models/materials/scripts/</uri>
+          <uri>package://cora_description/models/materials/textures/</uri>
+          <name>UrbanTile/Boat_Diffuse</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.008545" ixy="0.0" ixz="0.0" iyy="0.008545" iyz="0.0" izz="0.0144"/>
+    </inertial>
+  </link>
+
+  <!-- Dummy joint, which usv_gazebo_thrust_plugin looks for -->
+  <joint name="left_chasis_engine_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <origin rpy="0 0 0" xyz="-6.103 0.911 0.016"/>
+    <parent link="cora/base_link"/>
+    <child link="left_engine_link"/>
+    <limit lower="${-pi}" upper="${pi}" effort="10" velocity="10"/>
+  </joint>
+
+  <joint name="left_engine_propeller_joint" type="continuous">
+    <axis rpy="0 0 0" xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="left_engine_link"/>
+    <child link="left_propeller_link"/>
+    <limit effort="100" velocity="100" />
+    <dynamics friction="0.05" damping="0.05" />
+  </joint>
+
+  <!-- Dummy link, which usv_gazebo_thrust_plugin looks for -->
+  <link name="right_engine_link">
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.00889245" ixy="0.0" ixz="0.0" iyy="0.00911125" iyz="0.0" izz="0.00078125"/>
+    </inertial>
+  </link>
+
+  <!-- No additional collision, since propeller is inside robot body -->
+  <link name="right_propeller_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://cora_description/models/meshes/propellerR.dae"/>
+      </geometry>
+      <material name="right_propeller_material">
+        <diffuse>1.0 1.0 1.0</diffuse>
+        <specular>1.0 1.0 1.0</specular>
+        <pbr>
+          <metal>
+            <albedo_map>package://cora_description/models/materials/textures/Boat_Albedo.png</albedo_map>
+            <metalness_map>package://cora_description/models/materials/textures/Boat_Metalness.png</metalness_map>
+            <roughness_map>package://cora_description/models/materials/textures/Boat_Roughness.png</roughness_map>
+          </metal>
+        </pbr>
+        <!-- fallback to script if no PBR support-->
+        <script>
+          <uri>package://cora_description/models/materials/scripts/</uri>
+          <uri>package://cora_description/models/materials/textures/</uri>
+          <name>UrbanTile/Boat_Diffuse</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.008545" ixy="0.0" ixz="0.0" iyy="0.008545" iyz="0.0" izz="0.0144"/>
+    </inertial>
+  </link>
+
+  <!-- Dummy joint, which usv_gazebo_thrust_plugin looks for -->
+  <joint name="right_chasis_engine_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <origin rpy="0 0 0" xyz="-6.103 -0.911 0.016"/>
+    <parent link="cora/base_link"/>
+    <child link="right_engine_link"/>
+    <limit lower="${-pi}" upper="${pi}" effort="10" velocity="10"/>
+  </joint>
+
+  <joint name="right_engine_propeller_joint" type="continuous">
+    <axis rpy="0 0 0" xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="right_engine_link"/>
+    <child link="right_propeller_link"/>
+    <limit effort="100" velocity="100" />
+    <dynamics friction="0.05" damping="0.05" />
+  </joint>
+
+  <gazebo>
+    <plugin name="cora_gazebo_thrust" filename="libusv_gazebo_thrust_plugin.so">
+      <cmdTimeout>1.0</cmdTimeout>
+      <robotNamespace>${namespace}</robotNamespace>
+      <xacro:include filename="$(find cora_description)/urdf/cora_thruster_config.xacro" />
+      <!-- Angle must be disabled for VORC -->
+      <xacro:cora_thruster_config name="left" />
+      <xacro:cora_thruster_config name="right" />
+    </plugin>
+  </gazebo>
+
+</robot>

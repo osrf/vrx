@@ -1,0 +1,13 @@
+material UrbanTile/Buoy01_Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Buoy01_Albedo.png
+      }
+    }
+  }
+}
