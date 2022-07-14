@@ -19,15 +19,19 @@
 #define VRX_GAZEBO_SCORING_PLUGIN_HH_
 
 #include <rclcpp/rclcpp.hpp>
+#include <builtin_interfaces/msg/time.hpp>
 #include <memory>
 #include <string>
 #include <vector>
-#include <ignition/math/SphericalCoordinates.hh>
 #include <ignition/gazebo/System.hh>
 #include <ignition/common.hh>
 #include <ignition/transport.hh>
+#include <ignition/msgs.hh>
 #include <ignition/physics.hh>
 #include <ignition/math/SphericalCoordinates.hh>
+#include <ignition/gazebo/components/SphericalCoordinates.hh>
+#include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/World.hh>
 #include <sdf/sdf.hh>
 
 #include "vrx_ros/msg/contact.hpp"
@@ -108,7 +112,8 @@ class ScoringPlugin
                     const ignition::gazebo::EntityComponentManager &_ecm) override;
 
         /// \brief Update all time-related variables.
-        private: void UpdateTime();
+        std::chrono::duration<double> simTime;
+        private: void UpdateTime(const std::chrono::duration<double> _simTime);
 
         /// \brief Update the state of the current task.
         private: void UpdateTaskState();
@@ -133,7 +138,7 @@ class ScoringPlugin
 
         /// \brief Callback function when collision occurs in the world.
         /// \param[in] _contacts List of all collisions from last simulation iteration
-        private: void OnCollisionMsg(ignition::msgs::ConstContactsSharedPtr &_contacts);
+        private: void OnCollisionMsg(const ignition::msgs::Contacts &_contacts);
 
         /// \brief Parse all SDF parameters.
         /// \return True when all parameters were successfully parsed or false
@@ -147,7 +152,8 @@ class ScoringPlugin
 
         /// \brief A world pointer.
         //TODO: How to define world ptr?
-        // protected: ignition::physics::World3dPtr world;
+        // protected: std::shared_ptr<World::World> world;
+        protected: World world;
 
         /// \brief The name of the task.
         protected: std::string taskName = "undefined";
@@ -158,6 +164,7 @@ class ScoringPlugin
         /// \brief Pointer to the vehicle to score.
         //TODO: How to define model ptr?
         // protected: ignition::physics::Model3dPtr vehicleModel;
+        protected: std::unique_ptr<Entity> vehicleModel;
 
         /// \brief Last collision time.
         protected: ignition::common::Time lastCollisionTime;
@@ -169,14 +176,14 @@ class ScoringPlugin
         protected: ignition::math::SphericalCoordinates sc;
 
         /// \brief gazebo node pointer
-        private: ignition::transport::Node *gzNode;
+        private: std::unique_ptr<ignition::transport::Node> gzNode;
 
         /// \brief Collision detection node subscriber
-        // TODO
+        // TODO - Verify if ignition requires a subscriber object
         
         /// \brief gazebo server control publisher
         // TODO
-        ignition::transport::Node::Publisher *serverControlPub;
+        std::unique_ptr<ignition::transport::Node::Publisher> serverControlPub;
 
         /// \brief Topic where the task stats are published.
         private: std::string taskInfoTopic = "/vrx/task/info";
@@ -191,7 +198,7 @@ class ScoringPlugin
         private: double score = 0.0;
 
         /// \brief Pointer to the SDF plugin element.
-        private: sdf::ElementPtr sdf;
+        private: std::shared_ptr<const sdf::Element> sdf; 
 
         /// \brief Duration (seconds) of the initial state.
         private: double initialStateDuration = 30.0;
@@ -254,16 +261,16 @@ class ScoringPlugin
 
         /// \brief ROS node handle.
         //TODO: ROS2 equivalet of node handle??
-        //private: std::unique_ptr<ros::NodeHandle> rosNode;
+        private: std::unique_ptr<rclcpp::Node> rosNode;
 
         /// \brief Publisher for the task state.
         //TODO: declare ros2 pub
-        protected: rclcpp::Publisher<vrx_ros::msg::Task> taskPub;
+        protected: rclcpp::Publisher<vrx_ros::msg::Task>::SharedPtr taskPub;
         // protected: ros::Publisher taskPub;
 
         /// \brief Publisher for the collision.
         //TODO declare ros2 pub
-        private: rclcpp::Publisher<vrx_ros::msg::Contact> contactPub;
+        private: rclcpp::Publisher<vrx_ros::msg::Contact>::SharedPtr contactPub;
         // private: ros::Publisher contactPub;
 
 
