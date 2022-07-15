@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/opt/ros/noetic/**",
+                "/usr/include/gazebo-11/**",
+                "~/source_installations/**",
+                "/home/aremvy/vrx_ws/src/vrx/**",
+                "/home/aremvy/vrx_ws/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang-10",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
