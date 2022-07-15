@@ -10,7 +10,9 @@ jobs:
       image: npslearninglab/watery_robots:noetic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v2.4.2
+        with:
+            set-safe-directory: false
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
   
