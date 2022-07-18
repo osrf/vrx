@@ -51,8 +51,11 @@ namespace gazebo
     /// \param[in] _msg The thrust angle message to process.
     public: void OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg);
 
-    /// \brief Maximum abs val of incoming command.
+    /// \brief Maximum val of incoming command.
     public: double maxCmd;
+
+    /// \brief Minimum val of incoming command.
+    public: double minCmd;
 
     /// \brief Max forward force in Newtons.
     public: double maxForceFwd;
@@ -134,8 +137,10 @@ namespace gazebo
   ///   Optional elements:
   ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear),
   ///   default is 0
-  ///   <maxCmd>:Maximum (abs val) of thrust commands,
+  ///   <maxCmd>:Maximum of thrust commands,
   ///   defualt is 1.0
+  ///   <minCmd>:Minimum of thrust commands,
+  ///   defualt is -1.0
   ///   <maxForceFwd>: Maximum forward force [N].
   ///   default is 250.0 N
   ///   <maxForceRev>: Maximum reverse force [N].
@@ -159,6 +164,7 @@ namespace gazebo
   ///        <enableAngle>false</enableAngle>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
+  ///        <minCmd>-1.0</minCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
   ///        <maxAngle>1.57</maxAngle>
@@ -172,6 +178,7 @@ namespace gazebo
   ///        <enableAngle>false</enableAngle>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
+  ///        <minCmd>-1.0</minCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
   ///        <maxAngle>1.57</maxAngle>
@@ -208,6 +215,7 @@ namespace gazebo
     /// \return Value scaled and saturated.
     private: double ScaleThrustCmd(const double _cmd,
                                    const double _max_cmd,
+                                   const double _min_cmd,
                                    const double _max_pos,
                                    const double _max_neg) const;
 
