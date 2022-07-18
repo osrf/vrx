@@ -13,6 +13,7 @@
       <!-- Optional Parameters -->
       <mappingType>1</mappingType>
       <maxCmd>1.0</maxCmd>
+      <minCmd>-1.0</minCmd>
       <maxForceFwd>250.0</maxForceFwd>
       <maxForceRev>-100.0</maxForceRev>
       <maxAngle>${pi/2}</maxAngle>
