@@ -366,6 +366,12 @@ void UsvThrust::Update()
       // Adjust thruster engine joint angle with PID
       this->RotateEngine(i, now - this->thrusters[i].lastAngleUpdateTime);
 
+      // Apply input command clamping
+      this->thrusters[i].currCmd = std::min(this->thrusters[i].currCmd,
+                                            this->thrusters[i].maxCmd);
+      this->thrusters[i].currCmd = std::max(this->thrusters[i].currCmd,
+                                            this->thrusters[i].minCmd);
+
       // Apply the thrust mapping
       ignition::math::Vector3d tforcev(0, 0, 0);
       switch (this->thrusters[i].mappingType)
@@ -389,6 +395,10 @@ void UsvThrust::Update()
               this->thrusters[i].mappingType);
             break;
       }
+
+      // Apply thrust clamping
+      tforcev.X() = std::max(tforcev.X(), this->thrusters[i].maxForceFwd);
+      tforcev.X() = std::min(tforcev.X(), this->thrusters[i].maxForceRev);
 
       // Apply force for each thruster
       this->thrusters[i].link->AddLinkForce(tforcev);
