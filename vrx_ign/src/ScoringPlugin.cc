@@ -38,21 +38,27 @@ void ScoringPlugin::Configure(const Entity &_entity,
     this->sc.SetElevationReference(gzSC->ElevationReference());
     this->sc.SetHeadingOffset(gzSC->HeadingOffset());
 
-    this->readyTime.Set(this->initialStateDuration);
+    this->readyTime.set_sec(std::floor(this->initialStateDuration));
+    this->readyTime.set_nsec()
     this->runningTime.Set((this->readyTime).Double()+  this->readyStateDuration);
     this->finishTime.Set((this->runningTime).Double() + this->runningStateDuration);
 
     // Prepopulate the task msg.
-    this->taskMsg.name = this->taskName;
-    this->taskMsg.ready_time = builtin_interfaces::msg::Time
+    this->taskMsg["name"] = this->taskName;
+    this->taskMsg["ready_time"] = builtin_interfaces::msg::Time
                                 (rclcpp::Time(this->readyTime.sec,this->readyTime.nsec));
-    this->taskMsg.running_time = builtin_interfaces::msg::Time
+    this->taskMsg["running_time"] = builtin_interfaces::msg::Time
                                 (rclcpp::Time(this->runningTime.sec,this->runningTime.nsec));
     this->UpdateTaskMessage();
 
     // Initialize ROS transport
-    this->taskPub = rosNode->create_publisher<vrx_ros::msg::Task>(this->taskInfoTopic, 100);
-    this->contactPub = rosNode->create_publisher<vrx_ros::msg::Contact>(this->contactDebugTopic, 100);
+    // this->taskPub = rosNode->create_publisher<vrx_ros::msg::Task>(this->taskInfoTopic, 100);
+    // this->contactPub = rosNode->create_publisher<vrx_ros::msg::Contact>(this->contactDebugTopic, 100);
+
+    this->taskPub = std::make_unique<ignition::transport::Node::Publisher>
+        (gzNode->Advertise<ignition::msgs::Param_V>(this->taskInfoTopic));
+    this->contactPub = std::make_unique<ignition::transport::Node::Publisher>
+        (gzNode->Advertise<ignition::msgs::Contact>(this->contactDebugTopic));
 
     // TODO: Verify - Is this needed in Ignition?
     // gzNode->Init();
@@ -174,15 +180,15 @@ void ScoringPlugin::UpdateTaskState()
 //////////////////////////////////////////////////
 void ScoringPlugin::UpdateTaskMessage()
 {
-    this->taskMsg.state = this->taskState;
+    this->taskMsg["state"] = this->taskState;
 
-    this->taskMsg.elapsed_time = builtin_interfaces::msg::Duration
+    this->taskMsg["elapsed_time"] = builtin_interfaces::msg::Duration
                 (rclcpp::Duration(this->elapsedTime.sec,this->elapsedTime.nsec));
-    this->taskMsg.remaining_time = builtin_interfaces::msg::Duration
+    this->taskMsg["remaining_time"] = builtin_interfaces::msg::Duration
                 (rclcpp::Duration(this->remainingTime.sec,this->remainingTime.nsec));
-    this->taskMsg.timed_out = this->timedOut;
-    this->taskMsg.score = this->score;
-    this->taskMsg.num_collisions = this->numCollisions;
+    this->taskMsg["timed_out"] = this->timedOut;
+    this->taskMsg["score"] = this->score;
+    this->taskMsg["num_collisions"] = this->numCollisions;
 }
 
 //////////////////////////////////////////////////
@@ -193,7 +199,7 @@ void ScoringPlugin::PublishStats()
   // We publish stats at 1Hz.
   if (this->currentTime - this->lastStatsSent >= ignition::common::Time(1, 0))
   {
-    this->taskPub->publish(this->taskMsg);
+    this->taskPub->Publish(this->taskMsg);
     this->lastStatsSent = this->currentTime;
   }
 }
@@ -228,7 +234,7 @@ void ScoringPlugin::OnFinished()
     this->score = this->timeoutScore;
   }
   this->UpdateTaskMessage();
-  this->taskPub->publish(this->taskMsg);
+  this->taskPub->Publish(this->taskMsg);
   this->Exit();
 }
 
@@ -267,10 +273,10 @@ void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
     // publish a Contact MSG
     if (isWamvHit && this->debug)
     {
-        this->contactMsg.header.stamp = rosNode->now();
-        this->contactMsg.collision1 = _contacts.contact(i).collision1().name();
-        this->contactMsg.collision2 = _contacts.contact(i).collision2().name();
-        this->contactPub->publish(this->contactMsg);
+        this->contactMsg.header.stamp = rosNode->now(); //TODO: ignition::msgs::Time
+        this->contactMsg.collision1 = _contacts.contact(i).collision1(); //Entity
+        this->contactMsg.collision2 = _contacts.contact(i).collision2(); //Entity
+        this->contactPub->Publish(this->contactMsg);
     }
 
     if (isWamvHit && isHitBufferPassed)

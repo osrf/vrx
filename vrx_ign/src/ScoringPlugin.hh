@@ -33,6 +33,10 @@
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/World.hh>
 #include <sdf/sdf.hh>
+#include <ignition/msgs/any.pb.h>
+#include <ignition/msgs/param.pb.h>
+#include <ignition/msgs/param_v.pb.h>
+#include "ignition/gazebo/Util.hh"
 
 #include "vrx_ros/msg/contact.hpp"
 #include "vrx_ros/msg/task.hpp"
@@ -81,7 +85,7 @@ class ScoringPlugin
 
         /// \brief Elapsed time in the running state.
         /// \return The elapsed time in the running state.
-        protected: ignition::common::Time ElapsedTime() const;
+        protected: ignition::msgs::Time ElapsedTime() const;
 
         /// \brief Remaining time in the running state.
         /// \return The remaining time in the running state.
@@ -182,7 +186,6 @@ class ScoringPlugin
         // TODO - Verify if ignition requires a subscriber object
         
         /// \brief gazebo server control publisher
-        // TODO
         std::unique_ptr<ignition::transport::Node::Publisher> serverControlPub;
 
         /// \brief Topic where the task stats are published.
@@ -250,27 +253,54 @@ class ScoringPlugin
         
         /// \brief The next task message to be published.
         //TODO: Create Ros2 task msg, include and declare
-        private: vrx_ros::msg::Task taskMsg;
+        // private: vrx_ros::msg::Task taskMsg; //TODO: Relace with ignition message
+        ignition::msgs::Param_V taskMsg;
+        auto *param = taskMsg.add_param()->mutable_params();
+        ignition::msgs::Any taskMsgName, taskMsgState, 
+                taskMsgReadyTime, taskMsgRunningTime, taskMsgElapsedTime, taskMsgRemainingTime,
+                taskMsgTimedOut, taskMsgNumCollisions, taskMsgScore;
+        
+        taskMsgName.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
+        taskMsgState.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
+        taskMsgReadyTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+        taskMsgRunningTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+        taskMsgElapsedTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+        taskMsgRemainingTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+        taskMsgTimedOut.set_type(ignition::msgs::Any_ValueType::Any_ValueType_BOOLEAN);
+        taskMsgNumCollisions.set_type(ignition::msgs::Any_ValueType::Any_ValueType_INT32);
+        taskMsgScore.set_type(ignition::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+
+        (*param)["name"] = taskMsgName;
+        (*param)["state"] = taskMsgState;
+        (*param)["ready_time"] = taskMsgReadyTime;
+        (*param)["running_time"] = taskMsgRunningTime;
+        (*param)["elapsed_time"] = taskMsgElapsedTime;
+        (*param)["remaining_time"] = taskMsgRemainingTime;
+        (*param)["timed_out"] = taskMsgTimedOut;
+        (*param)["num_collisions"] = taskMsgNumCollisions;
+        (*param)["score"] = taskMsgScore;
 
         /// \brief ROS Contact Msg.
-        //TODO: Create ros2 contact msg, include and declare
-        private: vrx_ros::msg::Contact contactMsg;
+        // private: vrx_ros::msg::Contact contactMsg; //Replaced with ignition messages
+        private: ignition::msgs::Contact contactMsg;
 
         /// \brief The name of the joints to be dettached during ReleaseVehicle().
         private: std::vector<std::string> lockJointNames;
 
         /// \brief ROS node handle.
         //TODO: ROS2 equivalet of node handle??
-        private: std::unique_ptr<rclcpp::Node> rosNode;
+        // private: std::unique_ptr<rclcpp::Node> rosNode; //Use gzNode
 
         /// \brief Publisher for the task state.
-        //TODO: declare ros2 pub
-        protected: rclcpp::Publisher<vrx_ros::msg::Task>::SharedPtr taskPub;
+        //Replaced with ignition messages
+        protected: std::unique_ptr<ignition::transport::Node::Publisher> taskPub;
+        // protected: rclcpp::Publisher<vrx_ros::msg::Task>::SharedPtr taskPub;
         // protected: ros::Publisher taskPub;
 
         /// \brief Publisher for the collision.
-        //TODO declare ros2 pub
-        private: rclcpp::Publisher<vrx_ros::msg::Contact>::SharedPtr contactPub;
+        //Replaced with ignition messages
+        private: std::unique_ptr<ignition::transport::Node::Publisher> contactPub;
+        // private: rclcpp::Publisher<vrx_ros::msg::Contact>::SharedPtr contactPub;
         // private: ros::Publisher contactPub;
 
 
