@@ -38,12 +38,37 @@ void ScoringPlugin::Configure(const Entity &_entity,
     this->sc.SetElevationReference(gzSC->ElevationReference());
     this->sc.SetHeadingOffset(gzSC->HeadingOffset());
 
-    this->readyTime.set_sec(std::floor(this->initialStateDuration));
-    this->readyTime.set_nsec()
+    this->readyTime.Set(std::floor(this->initialStateDuration));
     this->runningTime.Set((this->readyTime).Double()+  this->readyStateDuration);
     this->finishTime.Set((this->runningTime).Double() + this->runningStateDuration);
 
     // Prepopulate the task msg.
+    taskMsgName.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
+    taskMsgState.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
+    taskMsgReadyTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+    taskMsgRunningTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+    taskMsgElapsedTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+    taskMsgRemainingTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
+    taskMsgTimedOut.set_type(ignition::msgs::Any_ValueType::Any_ValueType_BOOLEAN);
+    taskMsgNumCollisions.set_type(ignition::msgs::Any_ValueType::Any_ValueType_INT32);
+    taskMsgScore.set_type(ignition::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+
+    taskMsgName.set_string_value(this->taskName);
+    taskMsgReadyTime.set_allocated_time_value(ignition::msgs::Time );
+    taskMsgRunningTime.set_allocated_time_value(ignition::msgs::Time );
+    
+    this->taskMsgParam = this->taskMsg.add_param()->mutable_params();
+
+    (*(this->taskMsgParam))["name"] = this->taskMsgName;
+    (*(this->taskMsgParam))["state"] = this->taskMsgState;
+    (*(this->taskMsgParam))["ready_time"] = this->taskMsgReadyTime;
+    (*(this->taskMsgParam))["running_time"] = this->taskMsgRunningTime;
+    (*(this->taskMsgParam))["elapsed_time"] = this->taskMsgElapsedTime;
+    (*(this->taskMsgParam))["remaining_time"] = this->taskMsgRemainingTime;
+    (*(this->taskMsgParam))["timed_out"] = this->taskMsgTimedOut;
+    (*(this->taskMsgParam))["num_collisions"] = this->taskMsgNumCollisions;
+    (*(this->taskMsgParam))["score"] = this->taskMsgScore;
+    
     this->taskMsg["name"] = this->taskName;
     this->taskMsg["ready_time"] = builtin_interfaces::msg::Time
                                 (rclcpp::Time(this->readyTime.sec,this->readyTime.nsec));
@@ -180,15 +205,29 @@ void ScoringPlugin::UpdateTaskState()
 //////////////////////////////////////////////////
 void ScoringPlugin::UpdateTaskMessage()
 {
-    this->taskMsg["state"] = this->taskState;
+    
+    // this->taskMsgParam["state"] = this->taskState;
+    this->taskMsgState.set_string_value(this->taskState);
+    (*(this->taskMsgParam))["state"] = this->taskMsgState;
 
-    this->taskMsg["elapsed_time"] = builtin_interfaces::msg::Duration
+
+
+    this->taskMsgParam["elapsed_time"] = builtin_interfaces::msg::Duration
                 (rclcpp::Duration(this->elapsedTime.sec,this->elapsedTime.nsec));
-    this->taskMsg["remaining_time"] = builtin_interfaces::msg::Duration
+    this->taskMsgParam["remaining_time"] = builtin_interfaces::msg::Duration
                 (rclcpp::Duration(this->remainingTime.sec,this->remainingTime.nsec));
-    this->taskMsg["timed_out"] = this->timedOut;
-    this->taskMsg["score"] = this->score;
-    this->taskMsg["num_collisions"] = this->numCollisions;
+    
+    // this->taskMsgParam["timed_out"] = this->timedOut;
+    this->taskMsgTimedOut.set_bool_value(this->timedOut);
+    (*(this->taskMsgParam))["timed_out"] = this->taskMsgTimedOut;
+
+    // this->taskMsgParam["score"] = this->score;
+    this->taskMsgScore.set_double_value(this->score);
+    (*(this->taskMsgParam))["score"] = this->taskMsgScore;
+    
+    // this->taskMsgParam["num_collisions"] = this->numCollisions;
+    this->taskMsgNumCollisions.set_int_value(this->numCollisions);
+    (*(this->taskMsgParam))["num_collisions"] = this->taskMsgNumCollisions;
 }
 
 //////////////////////////////////////////////////
@@ -273,9 +312,9 @@ void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
     // publish a Contact MSG
     if (isWamvHit && this->debug)
     {
-        this->contactMsg.header.stamp = rosNode->now(); //TODO: ignition::msgs::Time
-        this->contactMsg.collision1 = _contacts.contact(i).collision1(); //Entity
-        this->contactMsg.collision2 = _contacts.contact(i).collision2(); //Entity
+        this->contactMsg.header().stamp = rosNode->now(); //TODO: ignition::msgs::Time
+        this->contactMsg.collision1() = _contacts.contact(i).collision1(); //Entity
+        this->contactMsg.collision2() = _contacts.contact(i).collision2(); //Entity
         this->contactPub->Publish(this->contactMsg);
     }
 

@@ -255,31 +255,12 @@ class ScoringPlugin
         //TODO: Create Ros2 task msg, include and declare
         // private: vrx_ros::msg::Task taskMsg; //TODO: Relace with ignition message
         ignition::msgs::Param_V taskMsg;
-        auto *param = taskMsg.add_param()->mutable_params();
         ignition::msgs::Any taskMsgName, taskMsgState, 
                 taskMsgReadyTime, taskMsgRunningTime, taskMsgElapsedTime, taskMsgRemainingTime,
                 taskMsgTimedOut, taskMsgNumCollisions, taskMsgScore;
         
-        taskMsgName.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
-        taskMsgState.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
-        taskMsgReadyTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
-        taskMsgRunningTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
-        taskMsgElapsedTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
-        taskMsgRemainingTime.set_type(ignition::msgs::Any_ValueType::Any_ValueType_TIME);
-        taskMsgTimedOut.set_type(ignition::msgs::Any_ValueType::Any_ValueType_BOOLEAN);
-        taskMsgNumCollisions.set_type(ignition::msgs::Any_ValueType::Any_ValueType_INT32);
-        taskMsgScore.set_type(ignition::msgs::Any_ValueType::Any_ValueType_DOUBLE);
-
-        (*param)["name"] = taskMsgName;
-        (*param)["state"] = taskMsgState;
-        (*param)["ready_time"] = taskMsgReadyTime;
-        (*param)["running_time"] = taskMsgRunningTime;
-        (*param)["elapsed_time"] = taskMsgElapsedTime;
-        (*param)["remaining_time"] = taskMsgRemainingTime;
-        (*param)["timed_out"] = taskMsgTimedOut;
-        (*param)["num_collisions"] = taskMsgNumCollisions;
-        (*param)["score"] = taskMsgScore;
-
+        google::protobuf::Map< std::string, ignition::msgs::Any>* taskMsgParam;
+        
         /// \brief ROS Contact Msg.
         // private: vrx_ros::msg::Contact contactMsg; //Replaced with ignition messages
         private: ignition::msgs::Contact contactMsg;
