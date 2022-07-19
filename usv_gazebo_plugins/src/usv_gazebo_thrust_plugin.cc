@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <functional>
+#include <vector>
 
 #include "usv_gazebo_plugins/usv_gazebo_thrust_plugin.hh"
 
@@ -80,6 +81,36 @@ double UsvThrust::SdfParamDouble(sdf::ElementPtr _sdfPtr,
   ROS_DEBUG_STREAM("Parameter found - setting <" << _paramName <<
                    "> to <" << val << ">.");
   return val;
+}
+
+//////////////////////////////////////////////////
+std::vector<double> UsvThrust::SdfParamVector(sdf::ElementPtr _sdfPtr,
+  const std::string &_paramName, const std::string _defaultValString) const
+{
+  if (!_sdfPtr->HasElement(_paramName))
+  {
+    ROS_INFO_STREAM("Parameter <" << _paramName << "> not found: "
+                    "Using default value of <" << _defaultValString << ">.");
+    std::vector<double> _defaultVal = StrToVector(_defaultValString);
+    return _defaultVal;
+  }
+
+  std::string valString = _sdfPtr->Get<std::string>(_paramName);
+  std::vector<double> val = StrToVector(valString);
+  ROS_DEBUG_STREAM("Parameter found - setting <" << _paramName <<
+                   "> to <" << valString << ">.");
+  return val;
+}
+
+//////////////////////////////////////////////////
+std::vector<double> UsvThrust::StrToVector(std::string _input) const
+{
+  std::vector<double> output;
+  std::string buf;
+  std::stringstream ss(_input);
+  while (ss >> buf)
+    output.push_back(std::stod(buf));
+  return output;
 }
 
 //////////////////////////////////////////////////
@@ -240,6 +271,33 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       thruster.maxAngle = this->SdfParamDouble(thrusterSDF, "maxAngle",
                                                M_PI / 2);
 
+      if (thruster.mappingType == 2)
+      {
+        std::string defaultCmdValuesString = std::to_string(thruster.minCmd)
+                                             + " "
+                                             + std::to_string(thruster.maxCmd);
+        std::vector<double> cmdValues = this->SdfParamVector(thrusterSDF,
+                                                    "cmdValues",
+                                                    defaultCmdValuesString);
+        std::string defaultForceValuesString =
+                                        std::to_string(thruster.maxForceRev)
+                                        + " "
+                                        + std::to_string(thruster.maxForceFwd);
+        std::vector<double> forceValues = this->SdfParamVector(thrusterSDF,
+                                                    "forceValues",
+                                                    defaultForceValuesString);
+        if (cmdValues.size() != forceValues.size())
+          ROS_FATAL_STREAM("cmdValues and forceValues size must match!");
+
+        if (cmdValues.size() < 1)
+          ROS_FATAL_STREAM("need at least one cmdValues/forceValues pair!");
+
+        for (size_t i = 0; i < cmdValues.size(); ++i)
+        {
+          thruster.cmdForceMap[cmdValues[i]] = forceValues[i];
+        }
+      }
+
       // Push to vector and increment
       this->thrusters.push_back(thruster);
       thrusterSDF = thrusterSDF->GetNextElement("thruster");
@@ -343,6 +401,41 @@ double UsvThrust::GlfThrustCmd(const double _cmd,
 }
 
 //////////////////////////////////////////////////
+double UsvThrust::LinearInterpThrustCmd(const double _cmd,
+  const std::map<double, double> _cmdForceMap) const
+{
+  double val = 0.0;
+
+  // first element whose key is NOT considered to go before _cmd
+  auto iter = _cmdForceMap.lower_bound(_cmd);
+
+  if (iter == _cmdForceMap.end())
+  {
+    // all keys are considered to go before
+    // last element is closest
+    return _cmdForceMap.rbegin()->second;
+  }
+
+  double i1 = iter->first;
+  double o1 = iter->second;
+
+  if (iter == _cmdForceMap.begin())
+    return o1;
+
+  iter--;
+
+  double i0 = iter->first;
+  double o0 = iter->second;
+
+  double w1 = _cmd - i0;
+  double w0 = i1 - _cmd;
+
+  val = (o0*w0 + o1*w1)/(w0 + w1);
+
+  return val;
+}
+
+//////////////////////////////////////////////////
 void UsvThrust::Update()
 {
   #if GAZEBO_MAJOR_VERSION >= 8
@@ -389,6 +482,11 @@ void UsvThrust::Update()
                                           this->thrusters[i].maxCmd,
                                           this->thrusters[i].maxForceFwd,
                                           this->thrusters[i].maxForceRev);
+          break;
+        case 2:
+          tforcev.X() = this->LinearInterpThrustCmd(
+                            this->thrusters[i].currCmd,
+                            this->thrusters[i].cmdForceMap);
           break;
         default:
             ROS_FATAL_STREAM("Cannot use mappingType=" <<
