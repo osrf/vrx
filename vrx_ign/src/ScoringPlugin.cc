@@ -38,9 +38,9 @@ void ScoringPlugin::Configure(const Entity &_entity,
     this->sc.SetElevationReference(gzSC->ElevationReference());
     this->sc.SetHeadingOffset(gzSC->HeadingOffset());
 
-    this->readyTime.Set(std::floor(this->initialStateDuration));
-    this->runningTime.Set((this->readyTime).Double()+  this->readyStateDuration);
-    this->finishTime.Set((this->runningTime).Double() + this->runningStateDuration);
+    this->readyTime = std::chrono::duration<double>(this->initialStateDuration);
+    this->runningTime = this->readyTime +  std::chrono::duration<double>(this->readyStateDuration);
+    this->finishTime = this->runningTime + std::chrono::duration<double>(this->runningStateDuration);
 
     // Prepopulate the task msg.
     taskMsgName.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
@@ -54,8 +54,14 @@ void ScoringPlugin::Configure(const Entity &_entity,
     taskMsgScore.set_type(ignition::msgs::Any_ValueType::Any_ValueType_DOUBLE);
 
     taskMsgName.set_string_value(this->taskName);
-    taskMsgReadyTime.set_allocated_time_value(ignition::msgs::Time );
-    taskMsgRunningTime.set_allocated_time_value(ignition::msgs::Time );
+
+    ignition::msgs::Time readyTimeMsg, runningTimeMsg;
+    
+    readyTimeMsg.set_sec(this->readyTime.count());
+    this->taskMsgReadyTime.set_allocated_time_value(&readyTimeMsg);
+
+    runningTimeMsg.set_sec(this->runningTime.count());
+    this->taskMsgRunningTime.set_allocated_time_value(&runningTimeMsg);
     
     this->taskMsgParam = this->taskMsg.add_param()->mutable_params();
 
@@ -69,11 +75,11 @@ void ScoringPlugin::Configure(const Entity &_entity,
     (*(this->taskMsgParam))["num_collisions"] = this->taskMsgNumCollisions;
     (*(this->taskMsgParam))["score"] = this->taskMsgScore;
     
-    this->taskMsg["name"] = this->taskName;
-    this->taskMsg["ready_time"] = builtin_interfaces::msg::Time
-                                (rclcpp::Time(this->readyTime.sec,this->readyTime.nsec));
-    this->taskMsg["running_time"] = builtin_interfaces::msg::Time
-                                (rclcpp::Time(this->runningTime.sec,this->runningTime.nsec));
+
+    // this->taskMsg["ready_time"] = builtin_interfaces::msg::Time
+    //                             (rclcpp::Time(this->readyTime.sec,this->readyTime.nsec));
+    // this->taskMsg["running_time"] = builtin_interfaces::msg::Time
+    //                             (rclcpp::Time(this->runningTime.sec,this->runningTime.nsec));
     this->UpdateTaskMessage();
 
     // Initialize ROS transport
@@ -130,13 +136,13 @@ std::string ScoringPlugin::TaskState() const
 }
 
 //////////////////////////////////////////////////
-ignition::common::Time ScoringPlugin::ElapsedTime() const
+std::chrono::duration<double> ScoringPlugin::ElapsedTime() const
 {
   return this->elapsedTime;
 }
 
 //////////////////////////////////////////////////
-ignition::common::Time ScoringPlugin::RemainingTime() const
+std::chrono::duration<double> ScoringPlugin::RemainingTime() const
 {
   return this->remainingTime;
 }
@@ -167,11 +173,11 @@ void ScoringPlugin::PostUpdate(const ignition::gazebo::UpdateInfo &_info,
 //////////////////////////////////////////////////
 void ScoringPlugin::UpdateTime(const std::chrono::duration<double> _simTime)
 {
-    this->currentTime = ignition::common::Time(std::chrono::duration_cast<std::chrono::duration<double> >(_simTime).count());
-
+    // this->currentTime = ignition::common::Time(std::chrono::duration_cast<std::chrono::duration<double> >(_simTime).count());
+    this->currentTime = _simTime;
     this->elapsedTime = this->currentTime - this->runningTime;
     this->remainingTime = this->finishTime - this->currentTime;
-    this->timedOut = this->remainingTime <= ignition::common::Time(0,0);
+    this->timedOut = this->remainingTime <= std::chrono::duration<double>(0.0);
 }
 
 //////////////////////////////////////////////////
@@ -210,12 +216,23 @@ void ScoringPlugin::UpdateTaskMessage()
     this->taskMsgState.set_string_value(this->taskState);
     (*(this->taskMsgParam))["state"] = this->taskMsgState;
 
+    ignition::msgs::Time elapsedTimeMsg, remainingTimeMsg;
+    
+    elapsedTimeMsg.set_sec(this->elapsedTime.count());
+    this->taskMsgElapsedTime.set_allocated_time_value(&elapsedTimeMsg);
+
+    remainingTimeMsg.set_sec(this->remainingTime.count());
+    this->taskMsgRemainingTime.set_allocated_time_value(&remainingTimeMsg);
+    
+    (*(this->taskMsgParam))["elapsed_time"] = this->taskMsgElapsedTime;
+    (*(this->taskMsgParam))["remaining_time"] = this->taskMsgRemainingTime;
+    // this->taskMsgParam = this->taskMsg.add_param()->mutable_params();
 
 
-    this->taskMsgParam["elapsed_time"] = builtin_interfaces::msg::Duration
-                (rclcpp::Duration(this->elapsedTime.sec,this->elapsedTime.nsec));
-    this->taskMsgParam["remaining_time"] = builtin_interfaces::msg::Duration
-                (rclcpp::Duration(this->remainingTime.sec,this->remainingTime.nsec));
+    // this->taskMsgParam["elapsed_time"] = builtin_interfaces::msg::Duration
+    //             (rclcpp::Duration(this->elapsedTime.sec,this->elapsedTime.nsec));
+    // this->taskMsgParam["remaining_time"] = builtin_interfaces::msg::Duration
+    //             (rclcpp::Duration(this->remainingTime.sec,this->remainingTime.nsec));
     
     // this->taskMsgParam["timed_out"] = this->timedOut;
     this->taskMsgTimedOut.set_bool_value(this->timedOut);
@@ -236,7 +253,7 @@ void ScoringPlugin::PublishStats()
   this->UpdateTaskMessage();
 
   // We publish stats at 1Hz.
-  if (this->currentTime - this->lastStatsSent >= ignition::common::Time(1, 0))
+  if (this->currentTime - this->lastStatsSent >= std::chrono::duration<double>(1.0))
   {
     this->taskPub->Publish(this->taskMsg);
     this->lastStatsSent = this->currentTime;
@@ -265,7 +282,7 @@ void ScoringPlugin::OnRunning()
 void ScoringPlugin::OnFinished()
 {
   if (!this->silent)
-    ignmsg << rosNode->now().seconds() << "  OnFinished" << std::endl;
+    ignmsg << this->simTime.count() << "  OnFinished" << std::endl;
 
   // If a timeoutScore was specified, use it.
   if (this->timedOut && this->timeoutScore > 0.0)
@@ -306,15 +323,20 @@ void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
         wamvCollisionSubStr2 == "wamv::base_link::base_link_fixed_joint_" ||
         wamvCollisionSubStr2 ==
         "wamv::wamv/base_link::wamv/base_link_fixed_joint_";
-    bool isHitBufferPassed = this->currentTime - this->lastCollisionTime >
-                                ignition::common::Time(this->collisionBuffer, 0);
+    bool isHitBufferPassed = this->currentTime - this->lastCollisionTime > std::chrono::duration<double>(this->collisionBuffer);
 
     // publish a Contact MSG
     if (isWamvHit && this->debug)
-    {
-        this->contactMsg.header().stamp = rosNode->now(); //TODO: ignition::msgs::Time
-        this->contactMsg.collision1() = _contacts.contact(i).collision1(); //Entity
-        this->contactMsg.collision2() = _contacts.contact(i).collision2(); //Entity
+    {   
+        ignition::msgs::Time currentTimeMsg; //TODO: Set time to current time
+        ignition::msgs::Header *h; //TODO: Set headet stamp to time msg
+        ignition::msgs::Entity collision1 = _contacts.contact(i).collision1();
+        ignition::msgs::Entity collision2 = _contacts.contact(i).collision2();
+
+
+        this->contactMsg.set_allocated_header(h); // rosNode->now(); //TODO: ignition::msgs::Time
+        this->contactMsg.set_allocated_collision1(&collision1); //Entity
+        this->contactMsg.set_allocated_collision2(&collision1); //Entity
         this->contactPub->Publish(this->contactMsg);
     }
 
@@ -331,7 +353,8 @@ void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
         // Uncomment to get details of collisions
         // igndbg << _contacts.contact(i).DebugString() << std::endl;
 
-        this->lastCollisionTime.Set(std::chrono::duration_cast<std::chrono::duration<double> >(this->simTime).count());
+        //this->lastCollisionTime.Set(std::chrono::duration_cast<std::chrono::duration<double> >(this->simTime).count());
+        this->lastCollisionTime = this->simTime;
         this->collisionList.push_back(
             _contacts.contact(i).collision1().name() +
             std::string(" || ") + _contacts.contact(i).collision2().name());

@@ -85,11 +85,11 @@ class ScoringPlugin
 
         /// \brief Elapsed time in the running state.
         /// \return The elapsed time in the running state.
-        protected: ignition::msgs::Time ElapsedTime() const;
+        protected: std::chrono::duration<double> ElapsedTime() const;
 
         /// \brief Remaining time in the running state.
         /// \return The remaining time in the running state.
-        protected: ignition::common::Time RemainingTime() const;
+        protected: std::chrono::duration<double> RemainingTime() const;
 
         /// \brief Finish the current task.
         /// This will set the "finished" flag in the task message to true.
@@ -171,7 +171,7 @@ class ScoringPlugin
         protected: std::unique_ptr<Entity> vehicleModel;
 
         /// \brief Last collision time.
-        protected: ignition::common::Time lastCollisionTime;
+        protected: std::chrono::duration<double> lastCollisionTime;
 
         /// \brief Silent mode enabled?
         protected: bool silent = false;
@@ -213,22 +213,22 @@ class ScoringPlugin
         protected: double runningStateDuration = 300.0;
 
         /// \brief Absolute time specifying the start of the ready state.
-        private: ignition::common::Time readyTime;
+        private: std::chrono::duration<double> readyTime;
 
         /// \brief Absolute time specifying the start of the running state.
-        private: ignition::common::Time runningTime;
+        private: std::chrono::duration<double> runningTime;
 
         /// \brief Absolute time specifying the start of the finish state.
-        private: ignition::common::Time finishTime;
+        private: std::chrono::duration<double> finishTime;
 
         /// \brief Current time (simulation).
-        private: ignition::common::Time currentTime;
+        private: std::chrono::duration<double> currentTime;
 
         // \brief Elapsed time since the start of the task (running state).
-        private: ignition::common::Time elapsedTime;
+        private: std::chrono::duration<double> elapsedTime;
 
         /// \brief Remaining time since the start of the task (running state).
-        private: ignition::common::Time remainingTime;
+        private: std::chrono::duration<double> remainingTime;
 
         /// \brief Collision buffer.
         private: float collisionBuffer = 3.0;
@@ -240,13 +240,13 @@ class ScoringPlugin
         private: std::vector<std::string> collisionList;
 
         /// \brief Collisions timestamps.
-        private: std::vector<ignition::common::Time> collisionTimestamps;
+        private: std::vector<std::chrono::duration<double> > collisionTimestamps;
 
         /// \brief Whether the current task has timed out or not.
         private: bool timedOut = false;
 
         /// \brief Time at which the last message was sent.
-        private: ignition::common::Time lastStatsSent;
+        private: std::chrono::duration<double> lastStatsSent;
 
         /// \brief The task state.
         private: std::string taskState = "initial";
