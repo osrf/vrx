@@ -21,14 +21,7 @@ jobs:
             ref: galactic 
             path: ros_ign
        
-      - name: Set up workspace
-        run: |
-          mkdir -p /tmp/vrx_ws/src;
-          ln -s `pwd` /tmp/vrx_ws/src;
+     - name: Compile and test
+        id: ci
+        uses: ignition-tooling/action-ignition-ci@focal
 
-      - name: Build and run tests
-        shell: bash
-        run: |
-          cd /tmp/vrx_ws;
-          source /opt/ros/galactic/setup.bash;
-          IGNITION_VERSION=fortress colcon build --merge-install --executor sequential;
