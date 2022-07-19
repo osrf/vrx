@@ -10,18 +10,27 @@ jobs:
       image: npslearninglab/watery_robots:galactic_current
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
-      - uses: actions/checkout@v2.4.0
+      - name: Checkout vrx
+        uses: actions/checkout@v2.4.0
         with:
             ref: gazebosim
             path: vrx
 
-      - uses: actions/checkout@v2.4.0
+      - name: Checkout Gazebosim 
+        uses: actions/checkout@v2.4.0
         with:
             repository: ignitionrobotics/ros_ign
             ref: galactic 
             path: ros_ign
        
-     - name: Compile and test
-        id: ci
-        uses: ignition-tooling/action-ignition-ci@focal
+      - name: Set up workspace
+        run: |
+          mkdir -p /tmp/vrx_ws/src;
+          ln -s `pwd` /tmp/vrx_ws/src;
 
+      - name: Build and run tests
+        shell: bash
+        run: |
+          cd /tmp/vrx_ws;
+          source /opt/ros/galactic/setup.bash;
+          IGNITION_VERSION=fortress colcon build --merge-install --executor sequential;
