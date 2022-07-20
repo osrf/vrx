@@ -18,8 +18,6 @@
 #ifndef VRX_GAZEBO_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_SCORING_PLUGIN_HH_
 
-#include <rclcpp/rclcpp.hpp>
-#include <builtin_interfaces/msg/time.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -37,9 +35,6 @@
 #include <ignition/msgs/param.pb.h>
 #include <ignition/msgs/param_v.pb.h>
 #include "ignition/gazebo/Util.hh"
-
-#include "vrx_ros/msg/contact.hpp"
-#include "vrx_ros/msg/task.hpp"
 
 
 namespace ignition
@@ -252,8 +247,6 @@ class ScoringPlugin
         private: std::string taskState = "initial";
         
         /// \brief The next task message to be published.
-        //TODO: Create Ros2 task msg, include and declare
-        // private: vrx_ros::msg::Task taskMsg; //TODO: Relace with ignition message
         ignition::msgs::Param_V taskMsg;
         ignition::msgs::Any taskMsgName, taskMsgState, 
                 taskMsgReadyTime, taskMsgRunningTime, taskMsgElapsedTime, taskMsgRemainingTime,
@@ -267,10 +260,6 @@ class ScoringPlugin
 
         /// \brief The name of the joints to be dettached during ReleaseVehicle().
         private: std::vector<std::string> lockJointNames;
-
-        /// \brief ROS node handle.
-        //TODO: ROS2 equivalet of node handle??
-        // private: std::unique_ptr<rclcpp::Node> rosNode; //Use gzNode
 
         /// \brief Publisher for the task state.
         //Replaced with ignition messages

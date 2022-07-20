@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 
 project(vrx_ign)
 
-include_directories("/opt/ros/galactic/include")
-include_directories("~/vrx_ros2_ws/install/vrx_ros/include")
-
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)

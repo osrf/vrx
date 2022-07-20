@@ -18,7 +18,6 @@ void ScoringPlugin::Configure(const Entity &_entity,
                            EntityComponentManager &_ecm,
                            EventManager &_eventMgr)
 {
-    // TODO: GZ_ASSERT equivalent (WorldPtr world & ElementPtr sdf)
     // this->world = _world
     this->world = World(_entity); //TODO: verify: Is this how world is accessed?
     this->sdf = _sdf;
@@ -304,7 +303,6 @@ void ScoringPlugin::OnCollision()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
 {
-    //TODO: Implement
     // loop through collisions, if any include the wamv, increment collision
     // counter
     for (unsigned int i = 0; i < _contacts.contact_size(); ++i)
@@ -328,15 +326,16 @@ void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
     // publish a Contact MSG
     if (isWamvHit && this->debug)
     {   
-        ignition::msgs::Time currentTimeMsg; //TODO: Set time to current time
+        ignition::msgs::Time currentTimeMsg;
         ignition::msgs::Header *h; //TODO: Set headet stamp to time msg
         ignition::msgs::Entity collision1 = _contacts.contact(i).collision1();
         ignition::msgs::Entity collision2 = _contacts.contact(i).collision2();
 
+        currentTimeMsg.set_sec(this->simTime.count());
 
         this->contactMsg.set_allocated_header(h); // rosNode->now(); //TODO: ignition::msgs::Time
-        this->contactMsg.set_allocated_collision1(&collision1); //Entity
-        this->contactMsg.set_allocated_collision2(&collision1); //Entity
+        this->contactMsg.set_allocated_collision1(&collision1);
+        this->contactMsg.set_allocated_collision2(&collision1);
         this->contactPub->Publish(this->contactMsg);
     }
 
@@ -510,9 +509,6 @@ void ScoringPlugin::Exit()
     ignition::msgs::ServerControl msg;
     msg.set_stop(true);
     this->serverControlPub->Publish(msg);
-    // shutdown gazebo
-    if (rclcpp::ok())
-      rclcpp::shutdown();
   }
   else
   {
