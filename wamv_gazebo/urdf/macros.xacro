@@ -4,6 +4,8 @@
        name="WAM-V">
   <!-- Include dynamics macros -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/dynamics/wamv_gazebo_dynamics_plugin.xacro" />
+  <!-- Include buoyancy macros -->
+  <xacro:include filename="$(find wamv_gazebo)/urdf/buoyancy/wamv_buoyancy_plugin.xacro" />
 
   <!-- Include sensor macros -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/components/wamv_camera.xacro" />

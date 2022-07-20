@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="usv_buoyancy_gazebo" params="name length:=4.9">
+    <!--Gazebo Plugin for simulating WAM-V buoyancy-->
+    <gazebo>
+      <plugin name="usv_buoyancy_${name}_hull_left" filename="libbuoyancy_gazebo_plugin.so">
+        <!-- Wave model -->
+        <wave_model>ocean_waves</wave_model>
+        <fluid_density>997.8</fluid_density>
+        <fluid_level>0</fluid_level>
+
+        <linear_drag>0</linear_drag>
+        <angular_drag>0</angular_drag>
+
+        <buoyancy>
+          <link_name>${namespace}/base_link</link_name>
+          <!-- pose info from wamv_base.urdf.xacro/${prefix}_float-->
+          <pose>0 -1.03 0.2 0 1.57 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.213</radius>
+              <length>${length}</length>
+            </cylinder>
+          </geometry>
+        </buoyancy>
+      </plugin>
+
+      <plugin name="usv_buoyancy_${name}_hull_right" filename="libbuoyancy_gazebo_plugin.so">
+        <!-- Wave model -->
+        <wave_model>ocean_waves</wave_model>
+        <fluid_density>997.8</fluid_density>
+        <fluid_level>0</fluid_level>
+
+        <linear_drag>0</linear_drag>
+        <angular_drag>0</angular_drag>
+
+        <buoyancy>
+          <link_name>${namespace}/base_link</link_name>
+          <!-- pose info from wamv_base.urdf.xacro/${prefix}_float-->
+          <pose>0 1.03 0.2 0 1.57 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.213</radius>
+              <length>${length}</length>
+            </cylinder>
+          </geometry>
+        </buoyancy>
+      </plugin>
+
+    </gazebo>
+  </xacro:macro>
+</robot>
