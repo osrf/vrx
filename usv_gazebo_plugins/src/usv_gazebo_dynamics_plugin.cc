@@ -170,11 +170,6 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     0,                0,                0,   0,   0,   this->paramNdotR;
 }
 
-double UsvDynamicsPlugin::CircleSegment(double R, double h)
-{
-  return R*R*acos( (R-h)/R ) - (R-h)*sqrt(2*R*h-h*h);
-}
-
 //////////////////////////////////////////////////
 void UsvDynamicsPlugin::Update()
 {
@@ -287,75 +282,6 @@ void UsvDynamicsPlugin::Update()
     ignition::math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
   this->link->AddRelativeTorque(
     ignition::math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));
-
-  // Loop over boat grid points
-  // Grid point location in boat frame - might be able to precalculate these?
-  tf2::Vector3 bpnt(0, 0, 0);
-  // Grid point location in world frame
-  tf2::Vector3 bpntW(0, 0, 0);
-  // For each hull
-  for (int ii = 0; ii < 2; ii++)
-  {
-  // Grid point in boat frame
-  bpnt.setY((ii*2.0-1.0)*this->paramBoatWidth/2.0);
-  // For each length segment
-    for (int jj = 1; jj <= this->paramLengthN; jj++)
-    {
-      bpnt.setX(((jj - 0.5) / (static_cast<float>(this->paramLengthN)) - 0.5) *
-        this->paramBoatLength);
-
-      // Transform from vessel to water/world frame
-      bpntW = xformV * bpnt;
-
-      // Debug
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "[" << ii << "," << jj <<
-          "] grid points" << bpnt.x() << "," << bpnt.y() << "," << bpnt.z());
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "v frame euler " << kEuler);
-      ROS_DEBUG_STREAM_THROTTLE(1.0, "in water frame" << bpntW.x() << "," <<
-          bpntW.y() << "," << bpntW.z());
-
-      // Vertical location of boat grid point in world frame
-      const float kDdz = kPose.Pos().Z() + bpntW.z();
-      ROS_DEBUG_STREAM("Z, pose: " << kPose.Pos().Z() << ", bpnt: "
-        << bpntW.z() << ", dd: " << kDdz);
-
-      // Find vertical displacement of wave field
-      // World location of grid point
-      ignition::math::Vector3d X;
-      X.X() = kPose.Pos().X() + bpntW.x();
-      X.Y() = kPose.Pos().Y() + bpntW.y();
-
-      // Compute the depth at the grid point.
-      double simTime = kTimeNow.Double();
-      // double depth = WavefieldSampler::ComputeDepthDirectly(
-      //  *waveParams, X, simTime);
-      double depth = 0.0;
-      if (waveParams)
-      {
-        depth = WavefieldSampler::ComputeDepthSimply(*waveParams, X, simTime);
-      }
-
-      // Vertical wave displacement.
-      double dz = depth + X.Z();
-
-      // Total z location of boat grid point relative to water surface
-      double  deltaZ = (this->waterLevel + dz) - kDdz;
-      deltaZ = std::max(deltaZ, 0.0);  // enforce only upward buoy force
-      deltaZ = std::min(deltaZ, this->paramHullRadius);
-      // Buoyancy force at grid point
-      const float kBuoyForce = CircleSegment(this->paramHullRadius, deltaZ) *
-        this->paramBoatLength/(static_cast<float>(this->paramLengthN)) *
-        GRAVITY * this->waterDensity;
-      ROS_DEBUG_STREAM("buoyForce: " << kBuoyForce);
-
-      // Apply force at grid point
-      // From web, Appears that position is in the link frame
-      // and force is in world frame
-      this->link->AddForceAtRelativePosition(
-        ignition::math::Vector3d(0, 0, kBuoyForce),
-        ignition::math::Vector3d(bpnt.x(), bpnt.y(), bpnt.z()));
-    }
-  }
 }
 
 GZ_REGISTER_MODEL_PLUGIN(UsvDynamicsPlugin);
