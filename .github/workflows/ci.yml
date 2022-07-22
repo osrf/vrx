@@ -34,5 +34,5 @@ jobs:
           cd /tmp/vrx_ws;
           source /opt/ros/galactic/setup.bash;
           IGNITION_VERSION=fortress colcon build --merge-install --executor sequential;
-          IGNITION_VERSION=fortress colcon test --merge-install --executor sequential --return-code-on-test-failure --event-handlers console_direct+;
+          IGNITION_VERSION=fortress colcon test --merge-install --executor sequential --packages-skip-regex ros_ign* --return-code-on-test-failure --event-handlers console_direct+;
  
