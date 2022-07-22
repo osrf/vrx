@@ -23,11 +23,15 @@ jobs:
             ref: galactic 
             path: ros_ign
   
-      - name: Compile and test
-        id: ci
-        uses: gazebo-tooling/action-gz-ci@focal
-        with:
-          codecov-enabled: true
-          doxygen-enabled: true
-          cmake-args: '-DBUILD_TESTING=1'
+      - name: Set up workspace
+        run: |
+          mkdir -p /tmp/vrx_ws/src;
+          ln -s `pwd` /tmp/vrx_ws/src;
 
+      - name: Build and run tests
+        shell: bash
+        run: |
+          cd /tmp/vrx_ws;
+          source /opt/ros/galactic/setup.bash;
+          IGNITION_VERSION=fortress colcon build --merge-install --executor sequential;
+          IGNITION_VERSION=fortress colcon test --merge-install --executor sequential;
