@@ -57,38 +57,4 @@ install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME})
 
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-
-  find_package(ament_cmake_gtest REQUIRED)
-  find_package(launch_testing_ament_cmake REQUIRED)
-  ament_find_gtest()
-
-  add_executable(test_ros_api test/ros_api/test_ros_api.cc)
-  ament_target_dependencies(test_ros_api
-    geometry_msgs
-    rclcpp
-    rosgraph_msgs
-    ros_ign_interfaces
-    sensor_msgs
-    std_msgs
-    tf2_msgs
-  )
-  target_link_libraries(test_ros_api
-    ${GTEST_LIBRARIES}
-  )
-  target_include_directories(test_ros_api PUBLIC ${GTEST_INCLUDE_DIRS})
-
-  install(TARGETS
-    test_ros_api
-    DESTINATION lib/${PROJECT_NAME}
-  )
-
-  add_launch_test(test/launch/test_ros_api.launch.py
-    TIMEOUT 300
-  )
-endif()
-
 ament_package()
