@@ -86,6 +86,11 @@ namespace buoyancy
                                            double l,
                                            int n);
 
+    /// \brief Generate a mesh polyhedron centered at origin
+    /// @param filename: filename of mesh
+    /// @return Polyhedron object
+    public: static Polyhedron makeMesh(std::string filename);
+
     /// \brief Compute full volume and center of buoyancy of the polyhedron
     /// @return Volume object with volume and centroid
     public: Volume ComputeFullVolume();
@@ -98,6 +103,10 @@ namespace buoyancy
     public: Volume SubmergedVolume(const ignition::math::Vector3d &x,
                                    const ignition::math::Quaterniond &q,
                                    Plane &plane);
+
+    /// \brief Get Object vertices
+    /// @return Vertices of the polyhedron
+    public: std::vector<ignition::math::Vector3d> GetVertices();
 
     /// \brief Computes volume and centroid of tetrahedron
     /// tetrahedron formed by triangle + arbitrary point

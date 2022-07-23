@@ -33,7 +33,8 @@ namespace buoyancy
     None,
     Box,
     Sphere,
-    Cylinder
+    Cylinder,
+    Mesh
   };
 
   /// \brief Parent shape object for volume objects
@@ -141,6 +142,28 @@ namespace buoyancy
 
     /// \brief Radius of sphere
     double r;
+  };
+
+  /// \brief Mesh shape volume
+  struct MeshVolume : public ShapeVolume
+  {
+    /// \brief Default constructor
+    /// @param filename: filename of the mesh
+    explicit MeshVolume(std::string filename);
+
+    /// \brief Display string for mesh shape
+    std::string Display() override;
+
+    // Documentation inherited.
+    Volume CalculateVolume(const ignition::math::Pose3d& pose,
+                           double fluidLevel) override;
+
+    /// \brief Filename of mesh
+    std::string filename;
+
+    private:
+    /// \brief Polyhedron defining a mesh
+    Polyhedron polyhedron;
   };
 
   /// \brief Custom exception for parsing errors
