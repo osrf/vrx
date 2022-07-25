@@ -15,9 +15,6 @@
  *
  */
 
-#include "Wavefield.hh"
-#include "WaveVisual.hh"
-
 #include <list>
 #include <chrono>
 #include <mutex>
@@ -38,6 +35,9 @@
 #include "ignition/gazebo/rendering/Events.hh"
 #include "ignition/gazebo/rendering/RenderUtil.hh"
 #include "ignition/gazebo/Util.hh"
+
+#include "Wavefield.hh"
+#include "WaveVisual.hh"
 
 using namespace ignition;
 using namespace gazebo;
