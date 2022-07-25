@@ -74,14 +74,6 @@ namespace vrx
                 const ignition::gazebo::UpdateInfo &_info,
                 ignition::gazebo::EntityComponentManager &_ecm) override;
 
-    /// \brief Convenience function for calculating the area of circle segment.
-    /// \param[in] _r Radius of circle.
-    /// \param[in] _h Height of the chord line.
-    /// \return The area.
-    /// \ref https://www.mathopenref.com/segmentareaht.html
-    private: double CircleSegment(double _r,
-                                  double _h) const;
-
     /// \brief Private data pointer.
     private: std::unique_ptr<SurfacePrivate> dataPtr;
   };
