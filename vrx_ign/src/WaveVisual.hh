@@ -15,20 +15,14 @@
  *
 */
 
-#ifndef IGNITION_GAZEBO_SYSTEMS_WAVEVISUAL_HH_
-#define IGNITION_GAZEBO_SYSTEMS_WAVEVISUAL_HH_
+#ifndef VRX_WAVEVISUAL_HH_
+#define VRX_WAVEVISUAL_HH_
 
 #include <memory>
 
 #include "ignition/gazebo/System.hh"
 
-namespace ignition
-{
-namespace gazebo
-{
-// Inline bracket to help doxygen filtering.
-inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
-namespace systems
+namespace vrx
 {
   // Forward declaration
   class WaveVisualPrivate;
@@ -43,9 +37,9 @@ namespace systems
   /// <wavefield>  Wavefield parameters - see Wavefield.hh
   ///
   class WaveVisual
-      : public System,
-        public ISystemConfigure,
-        public ISystemPreUpdate
+      : public ignition::gazebo::System,
+        public ignition::gazebo::ISystemConfigure,
+        public ignition::gazebo::ISystemPreUpdate
   {
     /// \brief Constructor
     public: WaveVisual();
@@ -54,10 +48,10 @@ namespace systems
     public: ~WaveVisual() override;
 
     // Documentation inherited
-    public: void Configure(const Entity &_entity,
+    public: void Configure(const ignition::gazebo::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
-                           EntityComponentManager &_ecm,
-                           EventManager &_eventMgr) final;
+                           ignition::gazebo::EntityComponentManager &_ecm,
+                           ignition::gazebo::EventManager &_eventMgr) final;
 
     /// Documentation inherited
     public: void PreUpdate(
@@ -67,9 +61,6 @@ namespace systems
     /// \brief Private data pointer
     private: std::unique_ptr<WaveVisualPrivate> dataPtr;
   };
-  }
-}
-}
 }
 
 #endif

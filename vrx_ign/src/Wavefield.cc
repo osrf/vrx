@@ -28,7 +28,7 @@
 #include "Wavefield.hh"
 
 using namespace ignition;
-using namespace gazebo;
+using namespace vrx;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Utilities
@@ -41,7 +41,7 @@ std::ostream& operator<<(std::ostream &_os, const std::vector<double> &_vec)
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Private data for the WavefieldParameters.
-class ignition::gazebo::WavefieldPrivate
+class vrx::WavefieldPrivate
 {
   /// \brief Constructor.
   public: WavefieldPrivate():

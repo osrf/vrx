@@ -41,9 +41,9 @@
 
 using namespace ignition;
 using namespace gazebo;
-using namespace systems;
+using namespace vrx;
 
-class ignition::gazebo::systems::WaveVisualPrivate
+class vrx::WaveVisualPrivate
 {
   /// \brief Path to vertex shader
   public: std::string vertexShaderUri;
@@ -419,10 +419,9 @@ void WaveVisualPrivate::OnUpdate()
   }
 }
 
-IGNITION_ADD_PLUGIN(WaveVisual,
+IGNITION_ADD_PLUGIN(vrx::WaveVisual,
                     ignition::gazebo::System,
                     WaveVisual::ISystemConfigure,
                     WaveVisual::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(WaveVisual,
-  "ignition::gazebo::systems::WaveVisual")
+IGNITION_ADD_PLUGIN_ALIAS(WaveVisual, "vrx::WaveVisual")

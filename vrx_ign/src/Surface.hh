@@ -14,20 +14,14 @@
  * limitations under the License.
  *
  */
-#ifndef IGNITION_GAZEBO_SYSTEMS_SURFACE_HH_
-#define IGNITION_GAZEBO_SYSTEMS_SURFACE_HH_
+#ifndef VRX_SURFACE_HH_
+#define VRX_SURFACE_HH_
 
 #include <memory>
 #include <ignition/gazebo/System.hh>
 #include <sdf/sdf.hh>
 
-namespace ignition
-{
-namespace gazebo
-{
-// Inline bracket to help doxygen filtering.
-inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
-namespace systems
+namespace vrx
 {
   // Forward declaration
   class SurfacePrivate;
@@ -59,9 +53,9 @@ namespace systems
   ///   <hull_radius>0.213</hull_radius>
   /// </plugin>
   class Surface
-      : public System,
-        public ISystemConfigure,
-        public ISystemPreUpdate
+      : public ignition::gazebo::System,
+        public ignition::gazebo::ISystemConfigure,
+        public ignition::gazebo::ISystemPreUpdate
   {
     /// \brief Constructor.
     public: Surface();
@@ -70,10 +64,10 @@ namespace systems
     public: ~Surface() override = default;
 
     // Documentation inherited.
-    public: void Configure(const Entity &_entity,
+    public: void Configure(const ignition::gazebo::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
-                           EntityComponentManager &_ecm,
-                           EventManager &_eventMgr) override;
+                           ignition::gazebo::EntityComponentManager &_ecm,
+                           ignition::gazebo::EventManager &_eventMgr) override;
 
     // Documentation inherited.
     public: void PreUpdate(
@@ -85,14 +79,12 @@ namespace systems
     /// \param[in] _h Height of the chord line.
     /// \return The area.
     /// \ref https://www.mathopenref.com/segmentareaht.html
-    private: double CircleSegment(double _r, double _h) const;
+    private: double CircleSegment(double _r,
+                                  double _h) const;
 
     /// \brief Private data pointer.
     private: std::unique_ptr<SurfacePrivate> dataPtr;
   };
-  }
-}
-}
 }
 
 #endif

@@ -1,0 +1,135 @@
+<%
+if !defined?(name) || name== nil || name.empty?
+  $model_name = 'wamv'
+else
+  $model_name = name
+end
+
+if !defined?(wavefieldSize) || wavefieldSize == nil || wavefieldSize.empty?
+  $wavefield_size = 1000.0
+else
+  $wavefield_size = wavefieldSize.to_f
+end
+  $wavefield_cell_count = $wavefield_size / 20.0
+
+  x_uu = 72.4 # Hydrodynamic quadratic coefficient
+  x_u = 51.3 # Hydrodynamic linear coefficient
+  max_velocity_knots = 15 # Maximum velocity in knots.
+  max_velocity_mps = max_velocity_knots * 0.5144 # convert knots to m/s
+  max_total_thrust = (x_u + x_uu * max_velocity_mps) * max_velocity_mps
+%>
+
+<?xml version="1.0"?>
+
+<sdf version='1.9'>
+<model name="<%= $model_name%>">
+  <static>false</static>
+  <self_collide>true</self_collide>
+
+  <!-- Base model-->
+  <include merge="true">
+    <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/wam-v</uri>
+  </include>
+
+  <plugin
+    filename="ignition-gazebo-thruster-system"
+    name="ignition::gazebo::systems::Thruster">
+    <joint_name>left_engine_propeller_joint</joint_name>
+    <thrust_coefficient>0.004422</thrust_coefficient>
+    <fluid_density>1000</fluid_density>
+    <propeller_diameter>0.2</propeller_diameter>
+    <velocity_control>true</velocity_control>
+    <max_thrust_cmd><%= max_total_thrust/2 %></max_thrust_cmd>
+  </plugin>
+
+  <plugin
+    filename="ignition-gazebo-joint-position-controller-system"
+    name="ignition::gazebo::systems::JointPositionController">
+    <joint_name>left_chassis_engine_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <topic><%= $model_name%>/left/thruster/joint/cmd_pos</topic>
+  </plugin>
+
+  <plugin
+    filename="ignition-gazebo-thruster-system"
+    name="ignition::gazebo::systems::Thruster">
+    <joint_name>right_engine_propeller_joint</joint_name>
+    <thrust_coefficient>0.004422</thrust_coefficient>
+    <fluid_density>1000</fluid_density>
+    <propeller_diameter>0.2</propeller_diameter>
+    <velocity_control>true</velocity_control>
+    <max_thrust_cmd><%= max_total_thrust/2 %></max_thrust_cmd>
+  </plugin>
+
+  <plugin
+    filename="ignition-gazebo-joint-position-controller-system"
+    name="ignition::gazebo::systems::JointPositionController">
+    <joint_name>right_chassis_engine_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <topic><%= $model_name%>/right/thruster/joint/cmd_pos</topic>
+  </plugin>
+
+  <plugin
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <vehicle_length>4.9</vehicle_length>
+    <vehicle_width>2.4</vehicle_width>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+
+    <!-- Waves -->
+    <wavefield>
+      <size><%= $wavefield_size%> <%= $wavefield_size%></size>
+      <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
+      <wave>
+        <model>PMS</model>
+        <period>5.0</period>
+        <number>3</number>
+        <scale>1.1</scale>
+        <gain>0.5</gain>
+        <direction>1 0</direction>
+        <angle>0.4</angle>
+        <tau>2.0</tau>
+        <amplitude>0.0</amplitude>
+        <steepness>0.0</steepness>
+      </wave>
+    </wavefield>
+  </plugin>
+
+  <plugin
+    filename="libSimpleHydrodynamics.so"
+    name="vrx::SimpleHydrodynamics">
+    <link_name>base_link</link_name>
+    <!-- Added mass -->
+    <xDotU>0.0</xDotU>
+    <yDotV>0.0</yDotV>
+    <nDotR>0.0</nDotR>
+    <!-- Linear and quadratic drag -->
+    <xU><%=x_u%></xU>
+    <xUU><%=x_uu%></xUU>
+    <yV>40.0</yV>
+    <yVV>0.0</yVV>
+    <zW>500.0</zW>
+    <kP>100.0</kP>
+    <mQ>100.0</mQ>
+    <nR>400.0</nR>
+    <nRR>0.0</nRR>
+  </plugin>
+
+  <!-- Publish robot state information -->
+  <plugin filename="libignition-gazebo-pose-publisher-system.so"
+    name="ignition::gazebo::systems::PosePublisher">
+    <publish_link_pose>true</publish_link_pose>
+    <publish_sensor_pose>true</publish_sensor_pose>
+    <publish_collision_pose>false</publish_collision_pose>
+    <publish_visual_pose>false</publish_visual_pose>
+    <publish_nested_model_pose>true</publish_nested_model_pose>
+    <publish_model_pose>false</publish_model_pose>
+    <use_pose_vector_msg>true</use_pose_vector_msg>
+    <static_publisher>true</static_publisher>
+    <static_update_frequency>1</static_update_frequency>
+  </plugin>
+
+</model>
+</sdf>

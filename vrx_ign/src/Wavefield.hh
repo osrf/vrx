@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef IGNITION_GAZEBO_WAVEFIELD_HH_
-#define IGNITION_GAZEBO_WAVEFIELD_HH_
+#ifndef VRX_WAVEFIELD_HH_
+#define VRX_WAVEFIELD_HH_
 
 #include <memory>
 #include <vector>
@@ -26,12 +26,8 @@
 #include <ignition/math/Vector3.hh>
 #include <sdf/sdf.hh>
 
-namespace ignition
+namespace vrx
 {
-namespace gazebo
-{
-// Inline bracket to help doxygen filtering.
-inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
   /// \brief Class to hold private data for Wavefield.
   class WavefieldPrivate;
 
@@ -102,7 +98,7 @@ inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
   ///     <steepness>0.0</steepness>
   ///   </wave>
   /// </wavefield>
-    class Wavefield
+  class Wavefield
   {
     /// \brief Constructor.
     public: Wavefield();
@@ -240,10 +236,9 @@ inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
     /// \param[in] _time        The time at which we want the depth.
     /// \param[in] _timeInit    The time at which we want the wavefield to start
     /// \return                 The depth 'h' at the point.
-    public: double ComputeDepthSimply(
-            const ignition::math::Vector3d &_point,
-            double _time,
-            double _timeInit = 0);
+    public: double ComputeDepthSimply(const ignition::math::Vector3d &_point,
+                                      double _time,
+                                      double _timeInit = 0);
 
     /// \brief Compute the depth at a point directly
     /// (no sampling or interpolation).
@@ -264,17 +259,14 @@ inline namespace IGNITION_GAZEBO_VERSION_NAMESPACE {
     /// \param[in] _time        The time at which we want the depth.
     /// \param[in] _timeInit    The time at which we want the wavefield to start
     /// \return                 The depth 'h' at the point.
-    public: double ComputeDepthDirectly(
-      const ignition::math::Vector3d &_point,
-      double _time,
-      double _timeInit = 0);
+    public: double ComputeDepthDirectly(const ignition::math::Vector3d &_point,
+                                        double _time,
+                                        double _timeInit = 0);
 
     /// \internal
     /// \brief Pointer to the class private data.
     private: std::unique_ptr<WavefieldPrivate> data;
   };
-}
-}
 }
 
 #endif

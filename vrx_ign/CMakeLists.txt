@@ -46,6 +46,7 @@ install(
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
+  SimpleHydrodynamics
   Surface
   WaveVisual
 )

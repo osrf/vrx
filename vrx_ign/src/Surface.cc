@@ -37,8 +37,9 @@
 using namespace ignition;
 using namespace gazebo;
 using namespace systems;
+using namespace vrx;
 
-class ignition::gazebo::systems::SurfacePrivate
+class vrx::SurfacePrivate
 {
   /// \brief The link entity
   public: ignition::gazebo::Link link;
@@ -276,10 +277,10 @@ double Surface::CircleSegment(double _r, double _h) const
     (_r - _h) * sqrt(2 * _r * _h - _h * _h);
 }
 
-IGNITION_ADD_PLUGIN(Surface,
+IGNITION_ADD_PLUGIN(vrx::Surface,
                     ignition::gazebo::System,
                     Surface::ISystemConfigure,
                     Surface::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(Surface,
-                          "ignition::gazebo::systems::Surface")
+IGNITION_ADD_PLUGIN_ALIAS(vrx::Surface,
+                          "vrx::Surface")
