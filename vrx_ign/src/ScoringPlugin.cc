@@ -56,10 +56,18 @@ void ScoringPlugin::Configure(const Entity &_entity,
 
     ignition::msgs::Time readyTimeMsg, runningTimeMsg;
     
-    readyTimeMsg.set_sec(this->readyTime.count());
+    auto ready_sec = std::chrono::duration_cast<std::chrono::seconds>(this->readyTime);
+    auto ready_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(this->readyTime - ready_sec);
+    readyTimeMsg.set_sec(ready_sec.count());
+    readyTimeMsg.set_nsec(ready_nsec.count());
     this->taskMsgReadyTime.set_allocated_time_value(&readyTimeMsg);
 
     runningTimeMsg.set_sec(this->runningTime.count());
+
+    auto running_sec = std::chrono::duration_cast<std::chrono::seconds>(this->runningTime);
+    auto running_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(this->runningTime - running_sec);
+    runningTimeMsg.set_sec(running_sec.count());
+    runningTimeMsg.set_nsec(running_nsec.count());
     this->taskMsgRunningTime.set_allocated_time_value(&runningTimeMsg);
     
     this->taskMsgParam = this->taskMsg.add_param()->mutable_params();
@@ -216,24 +224,22 @@ void ScoringPlugin::UpdateTaskMessage()
     (*(this->taskMsgParam))["state"] = this->taskMsgState;
 
     ignition::msgs::Time elapsedTimeMsg, remainingTimeMsg;
-    
-    elapsedTimeMsg.set_sec(this->elapsedTime.count());
+
+    auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(this->elapsedTime);
+    auto elapsed_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(this->elapsedTime - elapsed_sec);
+    elapsedTimeMsg.set_sec(elapsed_sec.count());
+    elapsedTimeMsg.set_nsec(elapsed_nsec.count());
     this->taskMsgElapsedTime.set_allocated_time_value(&elapsedTimeMsg);
 
-    remainingTimeMsg.set_sec(this->remainingTime.count());
+    auto remaining_sec = std::chrono::duration_cast<std::chrono::seconds>(this->remainingTime);
+    auto remaining_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(this->remainingTime - remaining_sec);
+    remainingTimeMsg.set_sec(remaining_sec.count());
+    remainingTimeMsg.set_nsec(remaining_nsec.count());
     this->taskMsgRemainingTime.set_allocated_time_value(&remainingTimeMsg);
     
     (*(this->taskMsgParam))["elapsed_time"] = this->taskMsgElapsedTime;
     (*(this->taskMsgParam))["remaining_time"] = this->taskMsgRemainingTime;
-    // this->taskMsgParam = this->taskMsg.add_param()->mutable_params();
 
-
-    // this->taskMsgParam["elapsed_time"] = builtin_interfaces::msg::Duration
-    //             (rclcpp::Duration(this->elapsedTime.sec,this->elapsedTime.nsec));
-    // this->taskMsgParam["remaining_time"] = builtin_interfaces::msg::Duration
-    //             (rclcpp::Duration(this->remainingTime.sec,this->remainingTime.nsec));
-    
-    // this->taskMsgParam["timed_out"] = this->timedOut;
     this->taskMsgTimedOut.set_bool_value(this->timedOut);
     (*(this->taskMsgParam))["timed_out"] = this->taskMsgTimedOut;
 
@@ -331,8 +337,12 @@ void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
         ignition::msgs::Entity collision1 = _contacts.contact(i).collision1();
         ignition::msgs::Entity collision2 = _contacts.contact(i).collision2();
 
-        currentTimeMsg.set_sec(this->simTime.count());
-
+        auto current_sec = std::chrono::duration_cast<std::chrono::seconds>(this->simTime);
+        auto current_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(this->simTime - current_sec);
+        currentTimeMsg.set_sec(current_sec.count());
+        currentTimeMsg.set_nsec(current_nsec.count());
+        h->set_allocated_stamp(&currentTimeMsg);
+        
         this->contactMsg.set_allocated_header(h); // rosNode->now(); //TODO: ignition::msgs::Time
         this->contactMsg.set_allocated_collision1(&collision1);
         this->contactMsg.set_allocated_collision2(&collision1);
