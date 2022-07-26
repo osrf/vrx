@@ -18,8 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  INCLUDE_DIRS
-    include
   CATKIN_DEPENDS
     gazebo_dev
     vrx_gazebo
@@ -29,22 +27,15 @@ catkin_package(
 )
 
 include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(gymkhana_scoring_plugin src/gymkhana_scoring_plugin.cc)
-target_link_libraries(gymkhana_scoring_plugin ${catkin_LIBRARIES})
 
 ## Install ##
 
 # Run xacro to generate world files
 xacro_add_files(
   worlds/marina.world.xacro
-  worlds/perception.world.xacro
-  worlds/station_keeping.world.xacro
-  worlds/wayfinding.world.xacro
-  worlds/gymkhana.world.xacro
   INSTALL DESTINATION worlds
 )
 
@@ -60,15 +51,3 @@ install(DIRECTORY launch/
 install(DIRECTORY config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
 
-# Install all the executable nodes
-catkin_install_python(
-  PROGRAMS
-    nodes/pinger_visualization.py
-    nodes/set_pinger_position.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-install(TARGETS gymkhana_scoring_plugin
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
