@@ -192,9 +192,10 @@ namespace asv
     public: double pm(double omega, double omega_p)
     {
       double alpha = 0.0081;
+      double beta = 0.74;
       double g = 9.81;
       return alpha*std::pow(g, 2.0)/std::pow(omega, 5.0)* \
-        std::exp(-(5.0/4.0)*std::pow(omega_p/omega, 4.0));
+        std::exp(-beta*std::pow(omega_p/omega, 4.0));
     }
 
     /// \brief Recalculate for Pierson-Moskowitz spectrum sampling model
