@@ -103,10 +103,6 @@ class PerceptionObject
 ///                      <name> Landmark name.
 ///                      <pose> Initial object pose.
 ///
-/// <loop_forever>: Optional parameter. If true, all objects will be spawned
-/// as a circular buffer. After spawning the last element of the collection,
-/// the first one will be inserted.
-///
 /// <frame>: Optional parameter. If present, the poses of the objects will be
 /// in the frame of this link/model. Otherwise the world frame is used.
 ///
@@ -130,7 +126,6 @@ class PerceptionObject
 ///   <running_state_duration>300</running_state_duration>
 ///
 ///   <!-- Parameters for PopulationPlugin -->
-///   <loop_forever>false</loop_forever>
 ///   <frame>wamv</frame>
 ///   <object_sequence>
 ///     <object>
@@ -202,10 +197,6 @@ class PerceptionScoringPlugin : public ScoringPlugin
 
   /// \brief The time specified in the object is relative to this time.
   public: gazebo::common::Time startTime;
-
-  /// \brief When true, "objects" will be repopulated when the object queue
-  /// is empty, creating an infinite supply of objects.
-  public: bool loopForever = false;
 
   /// \brief Link/model name for the object poses use as their frame of
   /// reference

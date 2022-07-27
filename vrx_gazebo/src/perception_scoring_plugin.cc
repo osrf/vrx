@@ -167,11 +167,6 @@ void PerceptionScoringPlugin::Load(gazebo::physics::WorldPtr _world,
   this->world = _world;
   this->sdf = _sdf;
 
-  if (_sdf->HasElement("loop_forever"))
-  {
-    sdf::ElementPtr loopElem = _sdf->GetElement("loop_forever");
-    this->loopForever = loopElem->Get<bool>();
-  }
 
   if (_sdf->HasElement("frame"))
   {
@@ -364,16 +359,7 @@ void PerceptionScoringPlugin::OnUpdate()
     this->SetScore(this->Score() / this->objects.size());
     ROS_INFO_NAMED("Perception run score: ", "%f", this->Score());
 
-    // if loop, restart
-    if (this->loopForever)
-    {
-      this->objectsDespawned = 0;
-      this->Restart();
-    }
-    else
-    {
-      this->Finish();
-    }
+    this->Finish();
   }
 }
 
