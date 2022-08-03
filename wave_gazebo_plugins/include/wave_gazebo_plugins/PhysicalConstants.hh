@@ -43,7 +43,7 @@ namespace asv
 
     /// \brief Density of water.
     ///
-    /// \return     998.6 [kg m-3].
+    /// \return     1000 [kg m-3].
     public: static double WaterDensity();
 
     /// \brief Kinematic viscosity of water at 18 dgree C.

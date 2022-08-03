@@ -105,7 +105,7 @@ std::string BuoyancyObject::Disp()
 
 /////////////////////////////////////////////////
 BuoyancyPlugin::BuoyancyPlugin()
-  : fluidDensity(997),
+  : fluidDensity(1000),
     fluidLevel(0.0),
     linearDrag(0.0),
     angularDrag(0.0),

@@ -88,7 +88,7 @@ void UsvDynamicsPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   this->waterLevel       = this->SdfParamDouble(_sdf, "waterLevel"  , 0.5);
-  this->waterDensity     = this->SdfParamDouble(_sdf, "waterDensity", 997.7735);
+  this->waterDensity     = this->SdfParamDouble(_sdf, "waterDensity", 1000);
   this->paramXdotU       = this->SdfParamDouble(_sdf, "xDotU"       , 5);
   this->paramYdotV       = this->SdfParamDouble(_sdf, "yDotV"       , 5);
   this->paramZdotW       = this->SdfParamDouble(_sdf, "zDotW"       , 0.1);
