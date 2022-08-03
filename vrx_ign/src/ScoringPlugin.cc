@@ -58,7 +58,7 @@ void ScoringPlugin::Configure(const Entity &_entity,
 
     taskMsgName.set_string_value(this->taskName);
 
-    ignition::msgs::Time readyTimeMsg
+    ignition::msgs::Time readyTimeMsg;
     ignition::msgs::Time runningTimeMsg;
     
     auto ready_sec = std::chrono::duration_cast<std::chrono::seconds>(this->readyTime);
