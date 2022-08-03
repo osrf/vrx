@@ -14,13 +14,15 @@
  * limitations under the License.
  *
  */
-#ifndef VRX_SURFACE_HH_
-#define VRX_SURFACE_HH_
+#ifndef VRX_WAMVSURFACE_HH_
+#define VRX_WAMVSURFACE_HH_
 
 #include <ignition/gazebo/System.hh>
 #include <ignition/math/Vector3.hh>
 #include <ignition/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
+
+#include "Surface.hh"
 
 namespace vrx
 {
@@ -28,7 +30,7 @@ namespace vrx
   /// a fluid. This system must be attached to a model and the system will apply
   /// buoyancy to a collection of points around a given link.
   ///
-  /// This system models the vehicle's buoyancy assuming a single hull with a
+  /// This system models the vehicle's buoyancy assuming two hulls with a
   /// cylindrical shape. It's possible to derive from this plugin and provide
   /// your own buoyancy function at each point. For this purpose you
   /// should override `BuoyancyAtPoint()` in the derived plugin.
@@ -97,64 +99,24 @@ namespace vrx
   ///     </wave>
   ///   </wavefield>
   /// </plugin>
-  class Surface
-      : public ignition::gazebo::System,
-        public ignition::gazebo::ISystemConfigure,
-        public ignition::gazebo::ISystemPreUpdate
+  class WamvSurface
+      : public vrx::Surface
   {
     /// \brief Constructor.
-    public: Surface();
+    public: WamvSurface();
 
     /// \brief Destructor.
-    public: ~Surface() override = default;
+    public: ~WamvSurface() override = default;
 
-    // Documentation inherited.
-    public: void Configure(const ignition::gazebo::Entity &_entity,
-                           const std::shared_ptr<const sdf::Element> &_sdf,
-                           ignition::gazebo::EntityComponentManager &_ecm,
-                           ignition::gazebo::EventManager &_eventMgr) override;
-
-    // Documentation inherited.
-    public: void PreUpdate(
-                const ignition::gazebo::UpdateInfo &_info,
-                ignition::gazebo::EntityComponentManager &_ecm) override;
-
-    /// \brief Get the gravity component.
-    /// \return Gravity vector.
-    public: ignition::math::Vector3d Gravity() const;
-
-    /// \brief Get the vehicle length.
-    /// \return Vechicle length in m.
-    public: double HullLength() const;
-
-    /// \brief Get the hull radius.
-    /// \return The hull radius in m.
-    public: double HullRadius() const;
-
-    /// \brief Get the fluid density.
-    /// \return The fluid density in kg/m^3.
-    public: double FluidDensity() const;
-
-    /// \brief Compute the buoyancy generated at a point in the vehicle.
+    /// \brief This method is called when there is a timestep in the simulator.
     /// \param[in] _info Simulator information about the current timestep.
-    /// \param[in] _point The point.
-    /// \param[in] _deltaZ Total Z location of the point relative to fluid
-    ///            surface.
-    /// \param[in] _ecm Ignition's ECM.
-    // public: virtual double BuoyancyAtPoint(
-    //                             const ignition::gazebo::UpdateInfo &_info,
-    //                             const ignition::math::Vector3d &_point,
-    //                             const uint16_t _pointsPerHull,
-    //                             double _deltaZ,
-    //                             ignition::gazebo::EntityComponentManager &_ecm);
-
-    /// \brief Convenience function for calculating the area of circle segment.
-    /// \param[in] _r Radius of circle.
-    /// \param[in] _h Height of the chord line.
-    /// \return The area.
-    /// \ref https://www.mathopenref.com/segmentareaht.html
-    public: double CircleSegment(double _r,
-                                 double _h) const;
+    ///                         will become the new registry.
+    /// \param[in] _ecm - Ignition's ECM.
+    public: virtual double BuoyancyAtPoint(
+                    const ignition::gazebo::UpdateInfo &_info,
+                    const ignition::math::Vector3d &_point,
+                    double _deltaZ,
+                    ignition::gazebo::EntityComponentManager &_ecm) override;
 
     /// \brief Private data pointer.
     IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
