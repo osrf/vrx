@@ -6,13 +6,15 @@
 using namespace ignition;
 using namespace gazebo;
 using namespace systems;
-void cb(const ignition::msgs::Contacts &_contacts){return;}
 
+
+//////////////////////////////////////////////////
 ScoringPlugin::ScoringPlugin()
     //: gzNode(new std::unique_ptr<ignition::transport::Node()>)
 {
 }
 
+//////////////////////////////////////////////////
 void ScoringPlugin::Configure(const Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
                            EntityComponentManager &_ecm,
@@ -38,8 +40,10 @@ void ScoringPlugin::Configure(const Entity &_entity,
     this->sc.SetHeadingOffset(gzSC->HeadingOffset());
 
     this->readyTime = std::chrono::duration<double>(this->initialStateDuration);
-    this->runningTime = this->readyTime +  std::chrono::duration<double>(this->readyStateDuration);
-    this->finishTime = this->runningTime + std::chrono::duration<double>(this->runningStateDuration);
+    this->runningTime = this->readyTime + 
+          std::chrono::duration<double>(this->readyStateDuration);
+    this->finishTime = this->runningTime + 
+          std::chrono::duration<double>(this->runningStateDuration);
 
     // Prepopulate the task msg.
     taskMsgName.set_type(ignition::msgs::Any_ValueType::Any_ValueType_STRING);
@@ -54,7 +58,8 @@ void ScoringPlugin::Configure(const Entity &_entity,
 
     taskMsgName.set_string_value(this->taskName);
 
-    ignition::msgs::Time readyTimeMsg, runningTimeMsg;
+    ignition::msgs::Time readyTimeMsg
+    ignition::msgs::Time runningTimeMsg;
     
     auto ready_sec = std::chrono::duration_cast<std::chrono::seconds>(this->readyTime);
     auto ready_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(this->readyTime - ready_sec);

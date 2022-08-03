@@ -235,7 +235,7 @@ class ScoringPlugin
         private: std::vector<std::string> collisionList;
 
         /// \brief Collisions timestamps.
-        private: std::vector<std::chrono::duration<double> > collisionTimestamps;
+        private: std::vector<std::chrono::duration<double>> collisionTimestamps;
 
         /// \brief Whether the current task has timed out or not.
         private: bool timedOut = false;
@@ -248,9 +248,16 @@ class ScoringPlugin
         
         /// \brief The next task message to be published.
         ignition::msgs::Param_V taskMsg;
-        ignition::msgs::Any taskMsgName, taskMsgState, 
-                taskMsgReadyTime, taskMsgRunningTime, taskMsgElapsedTime, taskMsgRemainingTime,
-                taskMsgTimedOut, taskMsgNumCollisions, taskMsgScore;
+        ignition::msgs::Any taskMsgName; 
+        ignition::msgs::Any taskMsgState; 
+                
+        ignition::msgs::Any taskMsgReadyTime; 
+        ignition::msgs::Any taskMsgRunningTime; 
+        ignition::msgs::Any taskMsgElapsedTime; 
+        ignition::msgs::Any taskMsgRemainingTime;
+        ignition::msgs::Any taskMsgTimedOut; 
+        ignition::msgs::Any taskMsgNumCollisions; 
+        ignition::msgs::Any taskMsgScore;
         
         google::protobuf::Map< std::string, ignition::msgs::Any>* taskMsgParam;
         
@@ -263,16 +270,17 @@ class ScoringPlugin
 
         /// \brief Publisher for the task state.
         //Replaced with ignition messages
-        protected: std::unique_ptr<ignition::transport::Node::Publisher> taskPub;
+        protected: std::unique_ptr
+                <ignition::transport::Node::Publisher> taskPub;
         // protected: rclcpp::Publisher<vrx_ros::msg::Task>::SharedPtr taskPub;
         // protected: ros::Publisher taskPub;
 
         /// \brief Publisher for the collision.
         //Replaced with ignition messages
-        private: std::unique_ptr<ignition::transport::Node::Publisher> contactPub;
+        private: std::unique_ptr
+                <ignition::transport::Node::Publisher> contactPub;
         // private: rclcpp::Publisher<vrx_ros::msg::Contact>::SharedPtr contactPub;
         // private: ros::Publisher contactPub;
-
 
         /// \brief Score in case of timeout - added for Navigation task
         private: double timeoutScore = -1;
