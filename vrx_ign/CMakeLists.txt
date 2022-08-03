@@ -22,8 +22,8 @@ set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 find_package(ignition-rendering6 REQUIRED)
 set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
 find_package(sdformat12 REQUIRED)
-find_package(ignition-physics4 REQUIRED)
-set(IGN_PHYSICS_VER ${ignition-physics4_VERSION_MAJOR})
+find_package(ignition-physics5 REQUIRED)
+set(IGN_PHYSICS_VER ${ignition-physics5_VERSION_MAJOR})
 
 find_package(std_msgs REQUIRED)
 #============================================================================
