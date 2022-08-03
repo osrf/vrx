@@ -117,14 +117,6 @@ def spawn(sim_mode, world_name, models, robot=None):
                 ]
             ))
 
-            # video target relay
-            nodes.append(Node(
-                package='vrx_ros',
-                executable='video_target_relay',
-                output='screen',
-                parameters=[{'model_name': model.model_name}]
-            ))
-
             group_action = GroupAction([
                 PushRosNamespace(model.model_name),
                 *nodes
