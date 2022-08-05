@@ -37,9 +37,18 @@
 using namespace ignition;
 using namespace gazebo;
 using namespace systems;
+using namespace vrx;
 
-class ignition::gazebo::systems::SurfacePrivate
+class vrx::SurfacePrivate
 {
+  /// \brief Convenience function for calculating the area of circle segment.
+  /// \param[in] _r Radius of circle.
+  /// \param[in] _h Height of the chord line.
+  /// \return The area.
+  /// \ref https://www.mathopenref.com/segmentareaht.html
+  public: double CircleSegment(double _r,
+                               double _h) const;
+
   /// \brief The link entity
   public: ignition::gazebo::Link link;
 
@@ -70,6 +79,13 @@ class ignition::gazebo::systems::SurfacePrivate
   /// \brief The wavefield.
   public: Wavefield wavefield;
 };
+
+//////////////////////////////////////////////////
+double SurfacePrivate::CircleSegment(double _r, double _h) const
+{
+  return _r * _r * acos((_r -_h) / _r ) -
+    (_r - _h) * sqrt(2 * _r * _h - _h * _h);
+}
 
 
 //////////////////////////////////////////////////
@@ -239,7 +255,7 @@ void Surface::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
 
       // Buoyancy force at grid point
       const float kBuoyForce =
-        this->CircleSegment(this->dataPtr->hullRadius, deltaZ) *
+        this->dataPtr->CircleSegment(this->dataPtr->hullRadius, deltaZ) *
           this->dataPtr->vehicleLength /
           (static_cast<float>(this->dataPtr->numSamples)) *
           -this->dataPtr->gravity.Z() * this->dataPtr->fluidDensity;
@@ -269,17 +285,10 @@ void Surface::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
   }
 }
 
-//////////////////////////////////////////////////
-double Surface::CircleSegment(double _r, double _h) const
-{
-  return _r * _r * acos((_r -_h) / _r ) -
-    (_r - _h) * sqrt(2 * _r * _h - _h * _h);
-}
-
-IGNITION_ADD_PLUGIN(Surface,
+IGNITION_ADD_PLUGIN(vrx::Surface,
                     ignition::gazebo::System,
                     Surface::ISystemConfigure,
                     Surface::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(Surface,
-                          "ignition::gazebo::systems::Surface")
+IGNITION_ADD_PLUGIN_ALIAS(vrx::Surface,
+                          "vrx::Surface")
