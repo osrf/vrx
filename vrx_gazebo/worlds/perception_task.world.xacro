@@ -36,7 +36,6 @@
       <ready_state_duration>10.0</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <!-- Parameters for PopulationPlugin -->
-      <loop_forever>true</loop_forever>
       <frame>wamv</frame>
       <!-- Pose of each object is expressed relative to the body frame
            of the object named in the frame field - i.e., relative to
