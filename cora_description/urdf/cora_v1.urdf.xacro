@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="cora">
+
+  <link name="base_link">
+  </link>
+
+  <joint name="dummy_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="dummy_link"/>
+  </joint>
+
+  <link name="dummy_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://cora_description/models/meshes/base_v1.dae"/>
+      </geometry>
+    </visual>
+
+    <collision name="collision">
+      <geometry>
+        <box size="12.21 3.58 3.53" />
+      </geometry>
+    </collision>
+
+    <!-- Numbers are from MeshLab -->
+    <inertial>
+      <origin xyz="0.458797 0.002028 0.234834" rpy="0 0 0" />
+      <mass value="42.935"/>
+      <inertia ixx="55.373356" ixy="0.245103" ixz="-21.590300"
+                               iyy="341.188965" iyz="0.053122"
+                                                izz="367.665375"/>
+    </inertial>
+  </link>
+
+</robot>

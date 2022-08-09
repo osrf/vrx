@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>vorc_gazebo</name>
+  <version>0.0.0</version>
+  <description>VORC competition in Gazebo</description>
+
+  <maintainer email="mabel@openrobotics.org">Mabel Zhang</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <author email="mabel@openrobotics.org">Mabel Zhang</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>gazebo_dev</depend>
+  <depend version_gte="2.5.17">gazebo_ros</depend>
+  <depend>vrx_gazebo</depend>
+  <depend>wamv_gazebo</depend>
+  <depend>wave_gazebo</depend>
+  <depend>xacro</depend>
+
+  <export>
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros gazebo_media_path="${prefix}"/>
+    <gazebo_ros plugin_path="${prefix}/../../lib"/>
+  </export>
+</package>

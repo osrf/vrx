@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="include_all_xacros">
+    <!-- World -->
+    <xacro:include filename="$(find vorc_gazebo)/worlds/marina.xacro" />
+    <xacro:include filename="$(find vorc_gazebo)/worlds/xacros/marina_minus_scene.xacro" />
+
+    <!-- Environment -->
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/scene.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/usv_wind_plugin.xacro" />
+    <xacro:include filename="$(find wave_gazebo)/world_models/ocean_waves/model.xacro"/>
+
+    <!-- Utility -->
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/insert_model.xacro" />
+
+    <!-- Competition Tasks -->
+    <xacro:include filename="$(find vorc_gazebo)/worlds/xacros/gymkhana.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/perception.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/stationkeeping.xacro" />
+    <xacro:include filename="$(find vrx_gazebo)/worlds/xacros/wayfinding.xacro" />
+  </xacro:macro>
+</world>

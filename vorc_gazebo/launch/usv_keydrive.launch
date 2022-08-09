@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find vrx_gazebo)/launch/usv_keydrive.launch">
+    <arg name="namespace" value="cora"/>
+  </include>
+</launch>

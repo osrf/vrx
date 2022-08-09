@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cora_description</name>
+  <version>0.0.0</version>
+  <description>
+    URDF model of CoRa (Common Raft), a hypothetical surface vehicle designed by
+    Rafi Abdullah with input from Cole Biesemeyer, for the Virtual Ocean Robot
+    Challenge (VORC).
+  </description>
+
+  <maintainer email="mabel@openrobotics.org">Mabel Zhang</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <author email="mabel@openrobotics.org">Mabel Zhang</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>wamv_gazebo</depend>
+  <depend>xacro</depend>
+
+</package>
