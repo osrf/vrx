@@ -60,6 +60,22 @@ install(
   TARGETS Surface
   DESTINATION lib)
 
+# Buoyancy
+add_library(Buoyancy SHARED
+  src/buoyancy_gazebo_plugin.cc
+  src/polyhedron_volume.cc
+  src/shape_volume.cc
+)
+target_link_libraries(Buoyancy PUBLIC
+  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-gazebo${IGN_GAZEBO_VER}::core
+  ignition-math${IGN_MATH_VER}
+  Waves
+)
+install(
+  TARGETS Buoyancy
+  DESTINATION lib)
+
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
   SimpleHydrodynamics

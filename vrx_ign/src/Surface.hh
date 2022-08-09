@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 #ifndef VRX_SURFACE_HH_
 #define VRX_SURFACE_HH_
 
