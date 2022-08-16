@@ -70,7 +70,7 @@ end
   </plugin>
 
   <!-- Left hull -->
-  <plugin
+  <!-- <plugin
     filename="libWamvSurface.so"
     name="vrx::WamvSurface">
     <link_name>base_link</link_name>
@@ -83,7 +83,6 @@ end
       <point>-1.225 1.2 0</point>
     </points>
 
-    <!-- Waves -->
     <wavefield>
       <size><%= $wavefield_size%> <%= $wavefield_size%></size>
       <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
@@ -100,10 +99,10 @@ end
         <steepness>0.0</steepness>
       </wave>
     </wavefield>
-  </plugin>
+  </plugin> -->
 
   <!-- Right hull -->
-  <plugin
+  <!-- <plugin
     filename="libWamvSurface.so"
     name="vrx::WamvSurface">
     <link_name>base_link</link_name>
@@ -116,7 +115,41 @@ end
       <point>-1.225 -1.2 0</point>
     </points>
 
-    <!-- Waves -->
+    <wavefield>
+      <size><%= $wavefield_size%> <%= $wavefield_size%></size>
+      <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
+      <wave>
+        <model>PMS</model>
+        <period>5.0</period>
+        <number>3</number>
+        <scale>1.1</scale>
+        <gain>0.5</gain>
+        <direction>1 0</direction>
+        <angle>0.4</angle>
+        <tau>2.0</tau>
+        <amplitude>0.0</amplitude>
+        <steepness>0.0</steepness>
+      </wave>
+    </wavefield>
+  </plugin> -->
+
+  <!-- Left hull -->
+  <plugin
+    filename="libBuoyancy.so"
+    name="vrx::Buoyancy">
+    <fluid_density>1000</fluid_density>
+    <fluid_level>0.0</fluid_level>
+    <linear_drag>20.0</linear_drag>
+    <angular_drag>2.0</angular_drag>
+    <buoyancy name="buoyancy">
+      <link_name>base_link</link_name>
+      <geometry>
+        <cylinder>
+          <length>8</length>
+          <radius>0.2</radius>
+        </cylinder>
+      </geometry>
+    </buoyancy>
     <wavefield>
       <size><%= $wavefield_size%> <%= $wavefield_size%></size>
       <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>

@@ -21,6 +21,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <ignition/math/Vector3.hh>
 #include "ignition/gazebo/Entity.hh"
 #include "ignition/gazebo/Link.hh"
 #include <ignition/gazebo/System.hh>
@@ -166,13 +167,16 @@ namespace vrx
   //   protected: std::string waveModelName;
 
     /// \brief Map of water height at each link from previous timestep
-    //protected: std::map<gazebo::physics::LinkPtr, double> linkHeights;
+    protected: std::map<int, double> linkHeights;
 
     /// \brief Map of water velocity at each link
-    //protected: std::map<gazebo::physics::LinkPtr, double> linkHeightDots;
+    protected: std::map<int, double> linkHeightDots;
 
-  //   /// \brief Previous update time
-  //   protected: double lastSimTime;
+    /// \brief Previous update time
+    protected: double lastSimTime{0};
+
+    /// \brief The world's gravity [m/s^2].
+    protected: math::Vector3d gravity;
 
   //   /// \brief The wave parameters.
   //   protected: std::shared_ptr<const asv::WaveParameters> waveParams;
