@@ -436,6 +436,11 @@
         </noise>
       </vertical>
     </plugin>
-
+    <plugin
+      filename="libScoringPlugin.so"
+      name="ScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>station_keeping</task_name>
+    </plugin>
   </world>
 </sdf>
