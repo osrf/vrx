@@ -50,20 +50,7 @@ void ScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
   this->contactPub = 
         this->node.Advertise<ignition::msgs::Contact>(this->contactDebugTopic);
 
-  std::string worldName = "sydney_regatta"; //hard code for testing
-    
-  std::string collisionTopic =
-        std::string("/gazebosim/") + worldName + std::string("/physics/contacts");
-  if (!gzNode->Subscribe(collisionTopic, &ScoringPlugin::OnCollisionMsg, this))
-    {
-      std::cerr << "Error subscribing to [" << collisionTopic << "]" 
-            << std::endl;
-      ignerr << "Error subscribing to [" << collisionTopic << "]" << std::endl;
-    }
 
-  this->serverControlPub = std::make_unique<ignition::transport::Node::Publisher>
-        (gzNode->Advertise<ignition::msgs::ServerControl>
-        ("/gazebosim/server/control")); */
 }
 
 //////////////////////////////////////////////////
