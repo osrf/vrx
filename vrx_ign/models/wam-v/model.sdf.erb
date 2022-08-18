@@ -133,7 +133,7 @@ end
     </wavefield>
   </plugin> -->
 
-  <!-- Left hull -->
+  <!-- Hulls -->
   <plugin
     filename="libBuoyancy.so"
     name="vrx::Buoyancy">
@@ -141,11 +141,62 @@ end
     <fluid_level>0.0</fluid_level>
     <linear_drag>20.0</linear_drag>
     <angular_drag>2.0</angular_drag>
-    <buoyancy name="buoyancy">
+    <buoyancy name="left_hull_front">
       <link_name>base_link</link_name>
+      <pose>1.85 1.03 0.3 0 1.38 0 </pose>
       <geometry>
         <cylinder>
-          <length>8</length>
+          <length>5</length>
+          <radius>0.17</radius>
+        </cylinder>
+      </geometry>
+    </buoyancy>
+    <buoyancy name="left_hull_mid">
+      <link_name>base_link</link_name>
+      <pose>0.6 1.03 0.2 0 1.57 0 </pose>
+      <geometry>
+        <cylinder>
+          <length>2</length>
+          <radius>0.2</radius>
+        </cylinder>
+      </geometry>
+    </buoyancy>
+    <buoyancy name="left_hull_rear">
+      <link_name>base_link</link_name>
+      <pose>-1.4 1.03 0.2 0 1.57 0 </pose>
+      <geometry>
+        <cylinder>
+          <length>2</length>
+          <radius>0.2</radius>
+        </cylinder>
+      </geometry>
+    </buoyancy>
+    <buoyancy name="right_hull_front">
+      <link_name>base_link</link_name>
+      <pose>1.85 -1.03 0.3 0 1.38 0 </pose>
+      <geometry>
+        <cylinder>
+          <length>5</length>
+          <radius>0.17</radius>
+        </cylinder>
+      </geometry>
+    </buoyancy>
+    <buoyancy name="right_hull_mid">
+      <link_name>base_link</link_name>
+      <pose>0.6 -1.03 0.2 0 1.57 0 </pose>
+      <geometry>
+        <cylinder>
+          <length>2</length>
+          <radius>0.2</radius>
+        </cylinder>
+      </geometry>
+    </buoyancy>
+    <buoyancy name="right_hull_rear">
+      <link_name>base_link</link_name>
+      <pose>-1.4 -1.03 0.2 0 1.57 0 </pose>
+      <geometry>
+        <cylinder>
+          <length>2</length>
           <radius>0.2</radius>
         </cylinder>
       </geometry>

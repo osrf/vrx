@@ -349,6 +349,18 @@
       <uri>coast_waves</uri>
     </include>
 
+    <!-- <include>
+      <name>red_buoy</name>
+      <pose>-528 170 0.1 0 0 0</pose>
+      <uri>mb_marker_buoy_red</uri>
+    </include> -->
+
+    <!-- <include>
+      <name>cylinder</name>
+      <pose>-528 170 0 0 1.57 0</pose>
+      <uri>cylinder</uri>
+    </include> -->
+
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>

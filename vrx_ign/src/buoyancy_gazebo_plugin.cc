@@ -168,8 +168,8 @@ void Buoyancy::Configure(const gazebo::Entity &_entity,
         buoyObj.Load(_entity, buoyancyElem, _ecm);
 
         // add link to linkMap if it is not in the map
-        if (this->linkMap.find(buoyObj.linkId) == this->linkMap.end())
-        {
+        // if (this->linkMap.find(buoyObj.linkId) == this->linkMap.end())
+        // {
           gazebo::Model model(_entity);
           gazebo::Link objLink = gazebo::Link(model.LinkByName(_ecm, buoyObj.linkName));
           if (!objLink.Valid(_ecm))
@@ -179,10 +179,15 @@ void Buoyancy::Configure(const gazebo::Entity &_entity,
             throw ParseException("link_name", "invalid link name");
           }
 
-          this->linkMap[buoyObj.linkId] = objLink;
+          objLink.EnableVelocityChecks(_ecm, true);
+          this->linkMap[buoyObj.linkId] = std::make_pair(objLink, buoyObj.pose);
+          buoyObj.link = objLink;
           this->linkHeights[buoyObj.linkId] = this->fluidLevel;
           this->linkHeightDots[buoyObj.linkId] = 0;
-        }
+
+          buoyObj.height = this->fluidLevel;
+          buoyObj.heightDots = 0;
+        //}
 
         // get mass
         auto inertial = _ecm.Component<gazebo::components::Inertial>(buoyObj.linkId);
@@ -226,30 +231,83 @@ void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
     this->lastSimTime = simTime;
 
     // get wave height for each link
-    for (const auto &linkEntry : this->linkMap)
+    for (auto &buoyancyObj : this->buoyancyObjects)
+    //for (const auto &linkEntry : this->linkMap)
     {
-      const auto &link = linkEntry.second;
-      const auto kPose = link.WorldPose(_ecm);
+      // const auto &link = linkEntry.second.first;
+      const auto &link = buoyancyObj.link;
+      // auto pose = (*link.WorldPose(_ecm)) * linkEntry.second.second;
+      auto pose = (*link.WorldPose(_ecm)) * buoyancyObj.pose;
+
+      // for (auto& buoyancyObj : this->buoyancyObjects)
+      // {
+      //   if (buoyancyObj.linkId == link.Entity())
+      //   {
+      //     pose = pose * buoyancyObj.pose;
+      //     ignerr << "Found " << buoyancyObj.pose << std::endl;
+      //   }
+      // }
+
+      // ignerr << "---" << std::endl;
 
       // Compute the wave displacement at the centre of the link frame.
       // Wave field height at the link, relative to the mean water level.
       double waveHeight = this->wavefield.ComputeDepthSimply(
-        (*kPose).Pos(), simTime);
+        pose.Pos(), simTime);
 
-      this->linkHeightDots[linkEntry.first] =
-        (waveHeight - this->linkHeights[linkEntry.first]) / dt;
-      this->linkHeights[linkEntry.first] = waveHeight;
+      // this->linkHeightDots[linkEntry.first] =
+      //   (waveHeight - this->linkHeights[linkEntry.first]) / dt;
+      // this->linkHeights[linkEntry.first] = waveHeight;
+
+      buoyancyObj.heightDots = (waveHeight - buoyancyObj.height) / dt;
+      buoyancyObj.height = waveHeight;
     }
   }
 
-  for (auto& buoyancyObj : this->buoyancyObjects)
+  static int counter = 0;
+
+  for (auto &buoyancyObj : this->buoyancyObjects)
   {
-    auto link = this->linkMap[buoyancyObj.linkId];
+    auto link = this->linkMap[buoyancyObj.linkId].first;
+    //auto link = buoyancyObj.link;
+    auto worldPoseComp = link.WorldPose(_ecm);
+    if (!worldPoseComp)
+      continue;
     ignition::math::Pose3d linkFrame = (*link.WorldPose(_ecm));
+
+    // begin caguero testing
+    // linkFrame = {-528, 170, 0.1, 0, 1.57, 0};
+    // end caguero testing
+
+    if (counter == 0)
+    {
+      ignerr << "link id: " << buoyancyObj.linkId << std::endl;
+      ignerr << "link entity: " << link.Entity() << std::endl;
+      ignerr << "linkFrame: " << linkFrame << std::endl;
+      ignerr << "buoyancyObj.pose:" << buoyancyObj.pose << std::endl;
+    }
+
     linkFrame = linkFrame * buoyancyObj.pose;
 
+    if (counter == 0)
+    {
+      ignerr << "linkFrame: " << linkFrame << std::endl;
+    }
+
+    // auto submergedVolume = buoyancyObj.shape->CalculateVolume(linkFrame,
+    //   this->linkHeights[buoyancyObj.linkId] + this->fluidLevel);
+
     auto submergedVolume = buoyancyObj.shape->CalculateVolume(linkFrame,
-      this->linkHeights[buoyancyObj.linkId] + this->fluidLevel);
+      buoyancyObj.height + this->fluidLevel);
+
+    // begin caguero testing
+    // submergedVolume.volume = 0.0955677;
+    // end caguero testing
+
+    if (counter == 0)
+    {
+      ignerr << "submergedVolume: " << submergedVolume.volume << std::endl;
+    }
 
     // GZ_ASSERT(submergedVolume.volume >= 0,
     //   "Non-positive volume found in volume properties!");
@@ -261,7 +319,16 @@ void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
       ignition::math::Vector3d buoyancy = -this->fluidDensity *
         submergedVolume.volume * this->gravity;
 
+      if (counter == 0)
+      {
+        ignerr << "buoyancy before: " << buoyancy<< std::endl;
+      }
+
       ignition::math::Vector3d linVel = (*link.WorldLinearVelocity(_ecm));
+
+      // begin caguero testing
+      // linVel = 0;
+      // end caguero testing
       auto worldAngularVel = link.WorldAngularVelocity(_ecm);
 
       if (!worldAngularVel)
@@ -278,10 +345,22 @@ void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
       float partialMass = buoyancyObj.mass * submergedVolume.volume
         / buoyancyObj.shape->volume;
 
+      // ignerr << "World link pose: " << *comPose << std::endl;
+      // ignerr << "mass: " << buoyancyObj.mass << std::endl;
+      // ignerr << "submergedVolume: " << submergedVolume.volume << std::endl;
+      // ignerr << "Full volume: " << buoyancyObj.shape->volume << std::endl;
+
       // drag (based on Exact Buoyancy for Polyhedra by Eric Catto)
       // linear drag
+      // ignition::math::Vector3d relVel =
+      //   ignition::math::Vector3d(0, 0, this->linkHeightDots[buoyancyObj.linkId]) - linVel;
       ignition::math::Vector3d relVel =
-        ignition::math::Vector3d(0, 0, this->linkHeightDots[buoyancyObj.linkId]) - linVel;
+        ignition::math::Vector3d(0, 0, buoyancyObj.heightDots) - linVel;
+
+      // begin caguero testing
+      // relVel = {0, 0, -0.023528};
+      // end caguero testing
+
       ignition::math::Vector3d dragForce = this->linearDrag * partialMass * relVel;
       buoyancy += dragForce;
       if (buoyancy.Z() < 0.0)
@@ -289,10 +368,16 @@ void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
         buoyancy.Z() = 0.0;
       }
 
-      ignerr << "Applying force [" << buoyancy << "] at point [" <<
-                submergedVolume.centroid << "]" << std::endl;
+      auto centroidLocal = comPose->Rot().Inverse() *
+        (submergedVolume.centroid - comPose->Pos());
+      // ignerr << "Local point: " << centroidLocal << std::endl;
+
+      // ignerr << "Linear velocity:" << linVel << std::endl;
+      // ignerr << "Applying force [" << buoyancy << "] at point [" <<
+      //           submergedVolume.centroid << "]" << std::endl;
       // apply force
       //link.AddWorldForce(_ecm, buoyancy, submergedVolume.centroid);
+      link.AddWorldForce(_ecm, buoyancy, centroidLocal);
 
       // drag torque
       double averageLength2 = ::pow(buoyancyObj.shape->averageLength, 2);
@@ -302,7 +387,30 @@ void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
       ignition::math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
         dragTorque);
 
-      //link.AddWorldWrench(_ecm, {0, 0, 0}, torqueWorld);
+      // ignerr << "Torque: " << torqueWorld << std::endl;
+
+      if (counter == 0)
+      {
+        ignerr << "fluidDensity: " <<  fluidDensity<< std::endl;
+        ignerr << "submergedVolume.volume: " << submergedVolume.volume << std::endl;
+        ignerr << "gravity: " << this->gravity << std::endl;
+        ignerr << "buoyancy after: " << buoyancy<< std::endl;
+        ignerr << "linVel: " << linVel << std::endl;
+        ignerr << "localAngularVel: " << localAngularVel << std::endl;
+        ignerr << "buoyancyObj.mass: " << buoyancyObj.mass << std::endl;
+        ignerr << "submergedVolume.volume: " << submergedVolume.volume << std::endl;
+        ignerr << "buoyancyObj.shape->volume: " << buoyancyObj.shape->volume << std::endl;
+        ignerr << "partialMass: " << partialMass << std::endl;
+        ignerr << "relVel: " << relVel << std::endl;
+        ignerr << "dragForce: " << dragForce << std::endl;
+        ignerr << "centroidGlobal: " << submergedVolume.centroid << std::endl;
+        ignerr << "centroidLocal: " << centroidLocal << std::endl;
+        ignerr << "averageLength2: " << averageLength2 << std::endl;
+        ignerr << "dragTorque: " << torqueWorld << std::endl;
+        ++counter;
+      }
+
+      link.AddWorldWrench(_ecm, {0, 0, 0}, torqueWorld);
     }
   }
 }

@@ -21,6 +21,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 #include "ignition/gazebo/Entity.hh"
 #include "ignition/gazebo/Link.hh"
@@ -71,10 +72,14 @@ namespace vrx
     public: ignition::math::Pose3d pose;
 
     /// \brief Object mass (from inertial elem)
-    public:double mass;
+    public: double mass;
 
     /// \brief Buoyancy object's shape properties
     public: ShapeVolumePtr shape;
+
+    public: double height;
+
+    public: double heightDots;
   };
 
   /// \brief This plugin simulates buoyancy of an object in fluid.
@@ -154,7 +159,7 @@ namespace vrx
     protected: std::vector<BuoyancyObject> buoyancyObjects;
 
     /// \brief Map of <link ID, link pointer>
-    protected: std::map<int, gazebo::Link> linkMap;
+    protected: std::map<int, std::pair<gazebo::Link, math::Pose3d>> linkMap;
 
   //   /// \brief Pointer to base model
   //   protected: physics::ModelPtr model;
