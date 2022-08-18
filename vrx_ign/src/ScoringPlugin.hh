@@ -101,8 +101,8 @@ class ScoringPlugin
 
         /// \brief Callback executed at every world update.
         public: void PostUpdate(
-                    const ignition::gazebo::UpdateInfo &_info,
-                    const ignition::gazebo::EntityComponentManager &_ecm) override;
+                const ignition::gazebo::UpdateInfo &_info,
+                const ignition::gazebo::EntityComponentManager &_ecm) override;
 
         /// \brief Update all time-related variables.
         std::chrono::duration<double> simTime;
@@ -117,20 +117,20 @@ class ScoringPlugin
         /// \brief Publish the task stats over a ROS topic.
         private: void PublishStats();
 
-        /// \brief Callback executed when the task state transition into "ready".
+        /// \brief Callback executed when the state transitions to "ready".
         private: virtual void OnReady();
 
-        /// \brief Callback executed when the task state transition into "running".
+        /// \brief Callback executed when the state transitions to "running".
         private: virtual void OnRunning();
 
-        /// \brief Callback executed when the task state transition into "finished".
+        /// \brief Callback executed when the state transitions to "finished".
         protected: virtual void OnFinished();
 
         /// \brief Callback executed when a collision is detected for the WAMV.
         private: virtual void OnCollision();
 
         /// \brief Callback function when collision occurs in the world.
-        /// \param[in] _contacts List of all collisions from last simulation iteration
+        /// \param[in] _contacts List of all collisions from last sim iteration
         private: void OnCollisionMsg(const ignition::msgs::Contacts &_contacts);
 
         /// \brief Parse all SDF parameters.
@@ -149,10 +149,12 @@ class ScoringPlugin
         //protected: World world;
 
           /// \brief Creator interface 
-        protected: std::unique_ptr<ignition::gazebo::SdfEntityCreator> creator{nullptr};
+        protected: 
+          std::unique_ptr<ignition::gazebo::SdfEntityCreator> creator{nullptr};
 
         /// \brief World entity
-        protected: ignition::gazebo::Entity worldEntity{ignition::gazebo::kNullEntity};
+        protected: 
+          ignition::gazebo::Entity worldEntity{ignition::gazebo::kNullEntity};
 
         /// \brief Event manager for pausing simulation 
         public: ignition::gazebo::EventManager *eventManager{nullptr};
@@ -238,7 +240,7 @@ class ScoringPlugin
         private: std::vector<std::string> collisionList;
 
         /// \brief Collisions timestamps.
-        private: std::vector<std::chrono::duration<double> > collisionTimestamps;
+        private: std::vector<std::chrono::duration<double>> collisionTimestamps;
 
         /// \brief Whether the current task has timed out or not.
         private: bool timedOut = false;
@@ -249,38 +251,21 @@ class ScoringPlugin
         /// \brief The task state.
         private: std::string taskState = "initial";
         
-        /// \brief The next task message to be published.
-        // ignition::msgs::Param_V taskMsg;
-        // ignition::msgs::Any taskMsgName, taskMsgState, 
-        //         taskMsgReadyTime, taskMsgRunningTime, taskMsgElapsedTime, taskMsgRemainingTime,
-        //         taskMsgTimedOut, taskMsgNumCollisions, taskMsgScore;
-        
-        // google::protobuf::Map< std::string, ignition::msgs::Any>* taskMsgParam;
-
         /// \brief Simplified task message (pending protobuf investigation)
         ignition::msgs::StringMsg taskMessage;
 
-        /// \brief ROS Contact Msg.
-        // private: vrx_ros::msg::Contact contactMsg; //Replaced with ignition messages
+        /// \brief Ignition Contact Msg.
+
         private: ignition::msgs::Contact contactMsg;
 
-        /// \brief The name of the joints to be dettached during ReleaseVehicle().
+        /// \brief The name of the joints to detach during ReleaseVehicle().
         private: std::vector<std::string> lockJointNames;
 
         /// \brief Publisher for the task state.
-        //Replaced with ignition messages
-       // protected: std::unique_ptr<ignition::transport::Node::Publisher> taskPub;
-       private: ignition::transport::Node::Publisher taskPub;
-        // protected: rclcpp::Publisher<vrx_ros::msg::Task>::SharedPtr taskPub;
-        // protected: ros::Publisher taskPub;
+        private: ignition::transport::Node::Publisher taskPub;
 
         /// \brief Publisher for the collision.
-        //Replaced with ignition messages
-        //private: std::unique_ptr<ignition::transport::Node::Publisher> contactPub;
         private: ignition::transport::Node::Publisher contactPub;
-        // private: rclcpp::Publisher<vrx_ros::msg::Contact>::SharedPtr contactPub;
-        // private: ros::Publisher contactPub;
-
 
         /// \brief Score in case of timeout - added for Navigation task
         private: double timeoutScore = -1;

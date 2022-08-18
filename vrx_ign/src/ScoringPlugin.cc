@@ -20,11 +20,13 @@ void ScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
                            ignition::gazebo::EventManager &_eventMgr)
 {
 
-    this->creator = std::make_unique<ignition::gazebo::SdfEntityCreator>(_ecm, _eventMgr);
-    this->worldEntity = _ecm.EntityByComponents(ignition::gazebo::components::World());
+    this->creator = 
+        std::make_unique<ignition::gazebo::SdfEntityCreator>(_ecm, _eventMgr);
+    this->worldEntity = 
+        _ecm.EntityByComponents(ignition::gazebo::components::World());
     this->eventManager = &_eventMgr;
     this->sdf = _sdf;
-    //this->forceReturn = true; // Turns off update function!  Remove before use.
+    //this->forceReturn = true; // Turns off update function! Remove before use.
     // SDF.
     if (!this->ParseSDFParameters())
     {
@@ -34,27 +36,32 @@ void ScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
     }
 
     this->readyTime = std::chrono::duration<double>(this->initialStateDuration);
-    this->runningTime = this->readyTime +  std::chrono::duration<double>(this->readyStateDuration);
-    this->finishTime = this->runningTime + std::chrono::duration<double>(this->runningStateDuration);
+    this->runningTime = this->readyTime +  
+        std::chrono::duration<double>(this->readyStateDuration);
+    this->finishTime = this->runningTime + 
+        std::chrono::duration<double>(this->runningStateDuration);
 
     // Prepopulate the task msg.
 
-    taskMessage.set_data(this->taskState);
+  taskMessage.set_data(this->taskState);
 
-    this->taskPub = this->node.Advertise<ignition::msgs::StringMsg>(this->taskInfoTopic);
-    this->contactPub = this->node.Advertise<ignition::msgs::Contact>(this->contactDebugTopic);
+  this->taskPub = 
+        this->node.Advertise<ignition::msgs::StringMsg>(this->taskInfoTopic);
+  this->contactPub = 
+        this->node.Advertise<ignition::msgs::Contact>(this->contactDebugTopic);
 
-    std::string worldName = "sydney_regatta"; //hard code for testing
+  std::string worldName = "sydney_regatta"; //hard code for testing
     
-    std::string collisionTopic =
+  std::string collisionTopic =
         std::string("/gazebosim/") + worldName + std::string("/physics/contacts");
-             if (!gzNode->Subscribe(collisionTopic, &ScoringPlugin::OnCollisionMsg, this))
+  if (!gzNode->Subscribe(collisionTopic, &ScoringPlugin::OnCollisionMsg, this))
     {
-        std::cerr << "Error subscribing to [" << collisionTopic << "]" << std::endl;
-        ignerr << "Error subscribing to [" << collisionTopic << "]" << std::endl;
+      std::cerr << "Error subscribing to [" << collisionTopic << "]" 
+            << std::endl;
+      ignerr << "Error subscribing to [" << collisionTopic << "]" << std::endl;
     }
 
-    this->serverControlPub = std::make_unique<ignition::transport::Node::Publisher>
+  this->serverControlPub = std::make_unique<ignition::transport::Node::Publisher>
         (gzNode->Advertise<ignition::msgs::ServerControl>
         ("/gazebosim/server/control")); */
 }
@@ -171,7 +178,8 @@ void ScoringPlugin::PublishStats()
   this->UpdateTaskMessage();
 
   // We publish stats at 1Hz.
-  if (this->currentTime - this->lastStatsSent >= std::chrono::duration<double>(1.0))
+  if (this->currentTime - this->lastStatsSent >= 
+      std::chrono::duration<double>(1.0))
   {
     this->taskPub.Publish(this->taskMessage);
     this->lastStatsSent = this->currentTime;
