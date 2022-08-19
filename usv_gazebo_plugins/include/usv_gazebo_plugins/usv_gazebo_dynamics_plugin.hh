@@ -40,7 +40,7 @@ namespace gazebo
   /// <boatArea>: Horizontal surface area [m^2]. Default value is 0.48.
   /// <boatLength>: Boat length [m]. Default value is 1.35.
   /// <boatWidth>: Boat width [m]. Default value is 1.
-  /// <waterDensity>: Water density [kg/m^3]. Default value is 997.7735.
+  /// <waterDensity>: Water density [kg/m^3]. Default value is 1000.
   /// <waterLevel>: Water height [m]. Default value is 0.5.
   /// <xDotU>: Added mass coeff, surge.
   /// <yDotV>: Added mass coeff, sway.
