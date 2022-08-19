@@ -18,105 +18,87 @@
 #ifndef VRX_BUOYANCY_HH_
 #define VRX_BUOYANCY_HH_
 
-#include <map>
-#include <string>
-#include <vector>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Vector3.hh>
-#include "ignition/gazebo/Entity.hh"
-#include "ignition/gazebo/Link.hh"
+#include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/System.hh>
-#include "ignition/gazebo/Util.hh"
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Vector3.hh>
+#include <ignition/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
-
-#include "shape_volume.hh"
-#include "Wavefield.hh"
-
-using namespace ignition;
 
 namespace vrx
 {
-  /// \brief A class for storing buoyancy object properties
-  class BuoyancyObject
-  {
-    /// \brief Default constructor
-    public: BuoyancyObject();
-
-    /// \brief Default move constructor
-    public: BuoyancyObject(BuoyancyObject&& obj) noexcept; // NOLINT
-
-    /// \brief No copy constructor
-    public: BuoyancyObject(BuoyancyObject& obj) = delete;
-
-    /// \brief Load buoyancy object from SDF
-    /// \param[in] _sdf The SDF Element tree containing the object parameters.
-    public: void Load(const gazebo::Entity &_entity,
-                      const std::shared_ptr<const sdf::Element> &_sdf,
-                      ignition::gazebo::EntityComponentManager &_ecm);
-
-    /// \brief Display string for buoyancy object
-    public: std::string Disp();
-
-    /// \brief The link entity.
-    public: gazebo::Link link;
-
-    /// \brief Associated link ID
-    public: int linkId;
-
-    /// \brief Associated link name
-    public: std::string linkName;
-
-    /// \brief Pose of buoyancy relative to link
-    public: ignition::math::Pose3d pose;
-
-    /// \brief Object mass (from inertial elem)
-    public: double mass;
-
-    /// \brief Buoyancy object's shape properties
-    public: ShapeVolumePtr shape;
-
-    public: double height;
-
-    public: double heightDots;
-  };
-
   /// \brief This plugin simulates buoyancy of an object in fluid.
-  ///   <wave_model>:    Name of the wave model object (optional)
+  ///
+  /// ## Optional system parameters
+  ///   <wavefield>: The wavefield parameters. See `Wavefield.hh`.
   ///
   ///   <fluid_density>: Sets the density of the fluid that surrounds the
-  ///                    buoyant object [kg/m^3].
-  ///                    This parameter is optional (default value 997 kg/m^3).
+  ///                    buoyant object [kg/m^3]. Default value is 1000 kg/m^3).
   ///
   ///   <fluid_level>:   The height of the fluid/air interface [m].
-  ///                    This parameter is optional (default value 0 m).
+  ///                    The default value is 0 m.
   ///
   ///   <linear_drag>:   Linear drag coefficent [N/(m/s)].
   ///                    Translational drag implement as linear function
-  ///                    of velocity.
-  ///                    This parameter is optional.
+  ///                    of velocity. The default value is 0.
   ///
   ///   <angular_drag>:  Angular drag coefficent [(Nm)/(rad/s)].
   ///                    Rotational drag implemented as linear function
-  ///                    of velocity.
-  ///                    This parameter is optional.
+  ///                    of velocity. The default value is 0.
   ///
-  ///   <buoyancy>:      Describes the volume properties
+  ///   <buoyancy>:      Describes the volume properties. It might contain the
+  ///                    following elements:
+  ///
+  ///                      <link_name>: Required element containing the name of
+  ///                                   the link used to apply forces.
+  ///                      <geometry>: Required element modeling the buoyancy
+  ///                                  of the object.
+  ///                      <pose>: Optional element containing the offset
+  ///                              from `link_name` where forces will be applied
+  ///
   ///                    For example:
   ///
   ///                    <buoyancy name="buoyancy1">
   ///                      <link_name>link</link_name>
   ///                      <geometry>
-  ///                        ...
+  ///                       <cylinder>
+  ///                         <length>5</length>
+  ///                         <radius>0.17</radius>
+  ///                       </cylinder>
   ///                      </geometry>
   ///                    </buoyancy>
   ///
-  ///     <link>:        Name of associated link element
-  ///
-  ///     <geometry>:    Geometry element specifying buoyancy object's
-  ///                    volume properties.
-  ///                    Supported shapes: box, sphere, cylinder
+  /// ## Example
+  /// <plugin name="vrx::Buoyancy" filename="libBuoyancy.so">
+  ///   <fluid_density>1000</fluid_density>
+  ///   <fluid_level>0.0</fluid_level>
+  ///   <linear_drag>25.0</linear_drag>
+  ///   <angular_drag>2.0</angular_drag>
+  ///   <buoyancy name="buoyancy_cylinder">
+  ///     <link_name>link</link_name>
+  ///     <pose>0 0 0 0 0 0</pose>
+  ///     <geometry>
+  ///       <cylinder>
+  ///         <length>4</length>
+  ///         <radius>0.2</radius>
+  ///       </cylinder>
+  ///     </geometry>
+  ///   </buoyancy>
+  ///   <wavefield>
+  ///     <size>1000 1000</size>
+  ///     <cell_count>50 50</cell_count>
+  ///     <wave>
+  ///       <model>PMS</model>
+  ///       <period>5.0</period>
+  ///       <number>3</number>
+  ///       <scale>1.1</scale>
+  ///       <gain>0.5</gain>
+  ///       <direction>1 0</direction>
+  ///       <angle>0.4</angle>
+  ///       <tau>2.0</tau>
+  ///       <amplitude>0.0</amplitude>
+  ///       <steepness>0.0</steepness>
+  ///     </wave>
+  ///   </wavefield>
+  /// </plugin>
   class Buoyancy
     : public ignition::gazebo::System,
       public ignition::gazebo::ISystemConfigure,
@@ -139,52 +121,8 @@ namespace vrx
                 const ignition::gazebo::UpdateInfo &_info,
                 ignition::gazebo::EntityComponentManager &_ecm) override;
 
-    /// \brief The wavefield.
-    protected: Wavefield wavefield;
-
-    /// \brief The density of the fluid in which the object is submerged in
-    /// kg/m^3. Defaults to 1000, the fluid density of water at 15 Celsius.
-    protected: double fluidDensity;
-
-    /// \brief The height of the fluid/air interface [m]. Defaults to 0.
-    protected: double fluidLevel = 0;
-
-    /// \brief Linear drag coefficient. Defaults to 0.
-    protected: double linearDrag;
-
-    /// \brief Angular drag coefficient. Defaults to 0.
-    protected: double angularDrag;
-
-    /// \brief List of buoyancy objects for model
-    protected: std::vector<BuoyancyObject> buoyancyObjects;
-
-    /// \brief Map of <link ID, link pointer>
-    protected: std::map<int, std::pair<gazebo::Link, math::Pose3d>> linkMap;
-
-  //   /// \brief Pointer to base model
-  //   protected: physics::ModelPtr model;
-
-  //   /// \brief Pointer to the Gazebo world
-  //   /// Retrieved when the model is loaded.
-  //   protected: physics::WorldPtr world;
-
-  //   /// \brief The name of the wave model
-  //   protected: std::string waveModelName;
-
-    /// \brief Map of water height at each link from previous timestep
-    protected: std::map<int, double> linkHeights;
-
-    /// \brief Map of water velocity at each link
-    protected: std::map<int, double> linkHeightDots;
-
-    /// \brief Previous update time
-    protected: double lastSimTime{0};
-
-    /// \brief The world's gravity [m/s^2].
-    protected: math::Vector3d gravity;
-
-  //   /// \brief The wave parameters.
-  //   protected: std::shared_ptr<const asv::WaveParameters> waveParams;
+    /// \brief Private data pointer.
+    IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };
 }
 
