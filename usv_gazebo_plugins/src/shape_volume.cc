@@ -90,10 +90,16 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
       throw ParseException("cylinder", "missing <radius> or <length> element");
     }
   }
+  else if (sdf->HasElement("mesh"))
+  {
+      auto meshElem = sdf->GetElement("mesh");
+      auto filename = meshElem->GetAttribute("filename")->GetAsString();
+      shape = dynamic_cast<ShapeVolume*>(new MeshVolume(filename));
+  }
   else
   {
     throw ParseException(
-        "geometry", "missing <box>, <cylinder> or <sphere> element");
+        "geometry", "missing <box>, <cylinder>, <sphere>, or <mesh> element");
   }
 
   return std::unique_ptr<ShapeVolume>(shape);
@@ -112,6 +118,8 @@ std::string ShapeVolume::Display()
       return "Cylinder";
     case ShapeType::Sphere:
       return "Sphere";
+    case ShapeType::Mesh:
+      return "Mesh";
   }
   return "None";
 }
@@ -226,4 +234,57 @@ Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
     output.centroid.Z() = pose.Pos().Z() + output.centroid.Z();
   }
   return output;
+}
+
+/////////////////////////////////////////////////
+MeshVolume::MeshVolume(std::string filename)
+    : polyhedron(Polyhedron::makeMesh(filename))
+{
+  type = ShapeType::Mesh;
+  volume = polyhedron.ComputeFullVolume().volume;
+
+  ignition::math::Vector3d min;
+  ignition::math::Vector3d max;
+
+  min.X(FLT_MAX);
+  min.Y(FLT_MAX);
+  min.Z(FLT_MAX);
+
+  max.X(-FLT_MAX);
+  max.Y(-FLT_MAX);
+  max.Z(-FLT_MAX);
+
+  for (const auto& vertex : polyhedron.GetVertices())
+  {
+    min.X(std::min(min.X(), vertex.X()));
+    min.Y(std::min(min.Y(), vertex.Y()));
+    min.Z(std::min(min.Z(), vertex.Z()));
+
+    max.X(std::max(max.X(), vertex.X()));
+    max.Y(std::max(max.Y(), vertex.Y()));
+    max.Z(std::max(max.Z(), vertex.Z()));
+  }
+
+  auto x = max.X() - min.X();
+  auto y = max.Y() - min.Y();
+  auto z = max.Z() - min.Z();
+
+  averageLength = (x + y + z) / 3;
+}
+
+/////////////////////////////////////////////////
+std::string MeshVolume::Display()
+{
+  std::stringstream ss;
+  ss << ShapeVolume::Display() << ":" << filename;
+  return ss.str();
+}
+
+/////////////////////////////////////////////////
+Volume MeshVolume::CalculateVolume(const ignition::math::Pose3d &pose,
+                                   double fluidLevel)
+{
+  Plane waterSurface;
+  waterSurface.offset = fluidLevel;
+  return this->polyhedron.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
 }

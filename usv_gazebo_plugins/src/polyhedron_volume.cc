@@ -17,6 +17,8 @@
 
 #include "usv_gazebo_plugins/polyhedron_volume.hh"
 
+#include <gazebo/common/MeshManager.hh>
+
 using namespace buoyancy;
 using Face = Polyhedron::Face;
 
@@ -122,6 +124,31 @@ Polyhedron Polyhedron::makeCylinder(double r, double l, int n)
   assert(cylinder.faces.size() == 4 * n);
 
   return cylinder;
+}
+
+Polyhedron Polyhedron::makeMesh(std::string filename)
+{
+    buoyancy::Polyhedron mesh;
+
+    // retrieve the subMesh from the mesh filename
+    auto subMesh =
+        gazebo::common::MeshManager::Instance()->Load(filename)->GetSubMesh(0);
+
+    // copy the submesh's vertices to the polyhedron mesh's "vertices" array
+    for (unsigned int v = 0; v < subMesh->GetVertexCount(); ++v)
+    {
+      mesh.vertices.emplace_back(subMesh->Vertex(v));
+    }
+
+    // copy the submesh's indices to the polyhedron mesh's "faces" array
+    for (unsigned int i = 0; i < subMesh->GetIndexCount(); i+=3)
+    {
+      mesh.faces.emplace_back(Face(subMesh->GetIndex(i),
+                                   subMesh->GetIndex(i+1),
+                                   subMesh->GetIndex(i+2)));
+    }
+
+    return mesh;
 }
 
 //////////////////////////////////////////////////////
@@ -286,4 +313,10 @@ Volume Polyhedron::SubmergedVolume(const ignition::math::Vector3d &x,
   output.centroid.Z() = ::fabs(output.centroid[2]) < EPSILON ?
       0 : output.centroid.Z();
   return output;
+}
+
+//////////////////////////////////////////////////////
+std::vector<ignition::math::Vector3d> Polyhedron::GetVertices()
+{
+    return vertices;
 }
