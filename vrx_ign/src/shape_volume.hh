@@ -15,7 +15,8 @@
  *
 */
 
-#pragma once
+#ifndef VRX_SHAPE_VOLUME_HH_
+#define VRX_SHAPE_VOLUME_HH_
 
 #include <cmath>
 #include <exception>
@@ -23,11 +24,12 @@
 #include <string>
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
+
 #include "polyhedron_volume.hh"
 
 namespace vrx
 {
-  /// \brief Type of geometry shape
+  /// \brief Type of geometry shape.
   enum class ShapeType
   {
     None,
@@ -36,114 +38,118 @@ namespace vrx
     Cylinder
   };
 
-  /// \brief Parent shape object for volume objects
+  /// \brief Parent shape object for volume objects.
   struct ShapeVolume
   {
-    /// \brief Default destructor
+    /// \brief Default destructor.
     virtual ~ShapeVolume() = default;
 
     /// \brief Factory method for shape. Parses a shape object from sdf data
-    /// \param sdf geometry SDF element
-    static std::unique_ptr<ShapeVolume> makeShape(const sdf::ElementPtr sdf);
+    /// \param[in] _sdf geometry SDF element
+    /// \return A pointer to a new ShapeVolume.
+    static std::unique_ptr<ShapeVolume> makeShape(const sdf::ElementPtr _sdf);
 
-    /// \brief Display string for shape object
-    virtual std::string Display();
+    /// \brief Display string for shape object.
+    /// \return A string representation of the ShapeVolume.
+    virtual std::string Display() const;
 
     /// \brief Calculates volume + centroid of submerged shape
     /// if the shape is out of water returns Volume{}
-    /// @param pose: world pose of volume
-    /// @param fluidLevel: height of fluid
-    /// @return volume object with volume + centroid (relative to world)
-    virtual Volume CalculateVolume(const ignition::math::Pose3d& pose,
-                                   double fluidLevel) = 0;
+    /// \param[in] _pose World pose of volume
+    /// \param[in] _fluidLevel Height of fluid. Default is 0.
+    /// \return Volume object with volume + centroid (relative to world).
+    virtual Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+                                   double _fluidLevel) const = 0;
 
-    /// \brief Type of shape
+    /// \brief Type of shape.
     ShapeType type;
 
-    /// \brief Full volume of object
+    /// \brief Full volume of object.
     double volume;
 
-    /// \brief Average length of object
-    /// estimate used for drag torque calculation
+    /// \brief Average length of object.
+    /// Estimate used for drag torque calculation.
     double averageLength;
   };
+
   typedef std::unique_ptr<ShapeVolume> ShapeVolumePtr;
 
-  /// \brief Box shape volume
+  /// \brief Box shape volume.
   struct BoxVolume : public ShapeVolume
   {
-    /// \brief Default constructor
-    /// @param x: length
-    /// @param y: width
-    /// @param z: height
-    explicit BoxVolume(double x, double y, double z);
-
-    /// \brief Display string for box shape
-    std::string Display() override;
+    /// \brief Default constructor.
+    /// \param[in] _x Length.
+    /// \param[in] _y Width.
+    /// \param[in] _z Height.
+    explicit BoxVolume(double _x,
+                       double _y,
+                       double _z);
 
     // Documentation inherited.
-    Volume CalculateVolume(const ignition::math::Pose3d& pose,
-                           double fluidLevel) override;
+    std::string Display() const override;
 
-    /// \brief Length
+    // Documentation inherited.
+    Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+                           double _fluidLevel) const override;
+
+    /// \brief Length.
     double x;
 
-    /// \brief Width
+    /// \brief Width.
     double y;
 
-    /// \brief Height
+    /// \brief Height.
     double z;
 
-    private:
-    /// \brief Polyhedron defining a box
-    Polyhedron polyhedron;
+    /// \brief Polyhedron defining a box.
+    private: Polyhedron polyhedron;
   };
 
-  /// \brief Cylinder shape volume
+  /// \brief Cylinder shape volume.
   struct CylinderVolume : public ShapeVolume
   {
     /// \brief Default constructor
-    /// @param r: radius
-    /// @param l: length
-    explicit CylinderVolume(double r, double l);
-
-    /// \brief Display string for cylinder shape
-    std::string Display() override;
+    /// \param[in] _r Radius.
+    /// \param[in] _l Length.
+    explicit CylinderVolume(double _r,
+                            double _l);
 
     // Documentation inherited.
-    Volume CalculateVolume(const ignition::math::Pose3d& pose,
-                           double fluidLevel) override;
+    std::string Display() const override;
 
-    /// \brief Radius of cylinder
+    // Documentation inherited.
+    Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+                           double _fluidLevel) const override;
+
+    /// \brief Radius of cylinder.
     double r;
 
-    /// \brief Height of cylinder
+    /// \brief Height of cylinder.
     double h;
 
-    private:
-    /// \brief Polyhedron defining a cylinder
-    Polyhedron polyhedron;
+    /// \brief Polyhedron defining a cylinder.
+    private: Polyhedron polyhedron;
   };
 
-  /// \brief Sphere shape volume
+  /// \brief Sphere shape volume.
   struct SphereVolume : public ShapeVolume
   {
-    /// \brief Default constructor
-    /// @param r: radius
-    explicit SphereVolume(double r);
-
-    /// \brief Display string for sphere shape
-    std::string Display() override;
+    /// \brief Default constructor.
+    /// \param[in] _r Radius.
+    explicit SphereVolume(double _r);
 
     // Documentation inherited.
-    Volume CalculateVolume(const ignition::math::Pose3d& pose,
-                           double fluidLevel) override;
+    std::string Display() const override;
 
-    /// \brief Radius of sphere
+    // Documentation inherited.
+    Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+                           double _fluidLevel) const override;
+
+    /// \brief Radius of sphere.
     double r;
   };
 
-  /// \brief Custom exception for parsing errors
+  /// \brief Custom exception for parsing errors.
   struct ParseException : public std::exception
   {
     ParseException(const char* shape, const char* message)
@@ -163,3 +169,5 @@ namespace vrx
     private: std::string output_;
   };
 }
+
+#endif

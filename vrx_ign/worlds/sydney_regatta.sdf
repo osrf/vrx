@@ -355,11 +355,11 @@
       <uri>mb_marker_buoy_red</uri>
     </include> -->
 
-    <!-- <include>
+    <include>
       <name>cylinder</name>
-      <pose>-528 170 0 0 1.57 0</pose>
+      <pose>-528 170 20 0 0 0</pose>
       <uri>cylinder</uri>
-    </include> -->
+    </include>
 
     <!-- The posts for securing the WAM-V -->
     <include>

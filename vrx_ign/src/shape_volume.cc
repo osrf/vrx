@@ -17,22 +17,22 @@
 
 #include "shape_volume.hh"
 
+using namespace ignition;
 using namespace vrx;
 
 /////////////////////////////////////////////////
-ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
+ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr _sdf)
 {
   double epsilon = 1e-20;
 
   ShapeVolume* shape = nullptr;
 
-  if (sdf->HasElement("box"))
+  if (_sdf->HasElement("box"))
   {
-    auto boxElem = sdf->GetElement("box");
+    auto boxElem = _sdf->GetElement("box");
     if (boxElem->HasElement("size"))
     {
-      ignition::math::Vector3d dim = boxElem->GetElement("size")
-          ->Get<ignition::math::Vector3d>();
+      math::Vector3d dim = boxElem->GetElement("size")->Get<math::Vector3d>();
       if (dim[0] > epsilon && dim[1] > epsilon && dim[2] > epsilon)
       {
         shape = dynamic_cast<ShapeVolume*>(
@@ -48,9 +48,9 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
       throw ParseException("box", "missing <size> element");
     }
   }
-  else if (sdf->HasElement("sphere"))
+  else if (_sdf->HasElement("sphere"))
   {
-    auto sphereElem = sdf->GetElement("sphere");
+    auto sphereElem = _sdf->GetElement("sphere");
     if (sphereElem->HasElement("radius"))
     {
       auto r = sphereElem->GetElement("radius")->Get<double>();
@@ -68,9 +68,9 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
       throw ParseException("sphere", "missing <radius> element");
     }
   }
-  else if (sdf->HasElement("cylinder"))
+  else if (_sdf->HasElement("cylinder"))
   {
-    auto cylinderElem = sdf->GetElement("cylinder");
+    auto cylinderElem = _sdf->GetElement("cylinder");
     if (cylinderElem->HasElement("radius") &&
         cylinderElem->HasElement("length"))
     {
@@ -100,9 +100,9 @@ ShapeVolumePtr ShapeVolume::makeShape(const sdf::ElementPtr sdf)
 }
 
 /////////////////////////////////////////////////
-std::string ShapeVolume::Display()
+std::string ShapeVolume::Display() const
 {
-  switch (type)
+  switch (this->type)
   {
     case ShapeType::None:
       return "None";
@@ -117,87 +117,90 @@ std::string ShapeVolume::Display()
 }
 
 //////////////////////////////////////////////////
-BoxVolume::BoxVolume(double x, double y, double z)
-    : x(x),
-      y(y),
-      z(z),
-      polyhedron(Polyhedron::makeCube(x, y, z))
+BoxVolume::BoxVolume(double _x, double _y, double _z)
+    : x(_x),
+      y(_y),
+      z(_z),
+      polyhedron(Polyhedron::makeCube(_x, _y, _z))
 {
-  type = ShapeType::Box;
-  volume = x * y * z;
-  averageLength = (x + y + z) / 3.0;
+  this->type = ShapeType::Box;
+  this->volume = _x * _y * _z;
+  this->averageLength = (_x + _y + _z) / 3.0;
 }
 
 //////////////////////////////////////////////////
-std::string BoxVolume::Display()
+std::string BoxVolume::Display() const
 {
   std::stringstream ss;
-  ss << ShapeVolume::Display() << ":" << x << "," << y << "," << z;
+  ss << ShapeVolume::Display() << ":"
+     << this->x << "," << this->y << "," << this->z;
   return ss.str();
 }
 
 //////////////////////////////////////////////////
-Volume BoxVolume::CalculateVolume(const ignition::math::Pose3d &pose,
-                                  double fluidLevel)
+Volume BoxVolume::CalculateVolume(const math::Pose3d &_pose,
+                                  double _fluidLevel) const
 {
   Plane waterSurface;
-  waterSurface.offset = fluidLevel;
-  return this->polyhedron.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
+  waterSurface.offset = _fluidLevel;
+  return this->polyhedron.SubmergedVolume(
+    _pose.Pos(), _pose.Rot(), waterSurface);
 }
 
 /////////////////////////////////////////////////
-CylinderVolume::CylinderVolume(double r, double h)
-    : r(r),
-      h(h),
-      polyhedron(Polyhedron::makeCylinder(r, h, 20))
+CylinderVolume::CylinderVolume(double _r, double _h)
+    : r(_r),
+      h(_h),
+      polyhedron(Polyhedron::makeCylinder(_r, _h, 20))
 {
-  type = ShapeType::Cylinder;
-  volume = M_PI * r * r * h;
-  averageLength = (2 * r + h) / 2.0;
+  this->type = ShapeType::Cylinder;
+  this->volume = M_PI * _r * _r * _h;
+  this->averageLength = (2 * _r + _h) / 2.0;
 }
 
 /////////////////////////////////////////////////
-std::string CylinderVolume::Display()
+std::string CylinderVolume::Display() const
 {
   std::stringstream ss;
-  ss << ShapeVolume::Display() << ":" << r << "," << h;
+  ss << ShapeVolume::Display() << ":" << this->r << "," << this->h;
   return ss.str();
 }
 
 /////////////////////////////////////////////////
-Volume CylinderVolume::CalculateVolume(const ignition::math::Pose3d &pose,
-                                       double fluidLevel)
+Volume CylinderVolume::CalculateVolume(const math::Pose3d &_pose,
+                                       double _fluidLevel) const
 {
   Plane waterSurface;
-  waterSurface.offset = fluidLevel;
-  return this->polyhedron.SubmergedVolume(pose.Pos(), pose.Rot(), waterSurface);
+  waterSurface.offset = _fluidLevel;
+  return this->polyhedron.SubmergedVolume(
+    _pose.Pos(), _pose.Rot(), waterSurface);
 }
 
 //////////////////////////////////////////////////
-SphereVolume::SphereVolume(double r)
-    : r(r)
+SphereVolume::SphereVolume(double _r)
+    : r(_r)
 {
-  type = ShapeType::Sphere;
-  volume = 4./3. * M_PI * r * r * r;
-  averageLength = 2 * r;
+  this->type = ShapeType::Sphere;
+  this->volume = 4./3. * M_PI * _r * _r * _r;
+  this->averageLength = 2 * _r;
 }
 
 //////////////////////////////////////////////////
-std::string SphereVolume::Display()
+std::string SphereVolume::Display() const
 {
   std::stringstream ss;
-  ss << ShapeVolume::Display() << ":" << r;
+  ss << ShapeVolume::Display() << ":" << this->r;
   return ss.str();
 }
 
 //////////////////////////////////////////////////
-Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
-                                     double fluidLevel)
+Volume SphereVolume::CalculateVolume(const math::Pose3d &_pose,
+                                     double _fluidLevel) const
 {
   Volume output{};
   // Location of bottom of object relative to the fluid surface - assumes
   // origin is at cog of the object.
-  double h = fluidLevel - (pose.Pos().Z() - r);
+  double h = _fluidLevel - (_pose.Pos().Z() - r);
 
   if (h <= 0)
     return output;
@@ -208,22 +211,22 @@ Volume SphereVolume::CalculateVolume(const ignition::math::Pose3d &pose,
 
   // volume = integral of (R^2 - z^2) dz * pi
   output.volume = (pow(r, 2) * (intLimitUpper - intLimitLower)
-      - (pow(intLimitUpper, 3)/3.0 - pow(intLimitLower, 3)/3.0)) * M_PI;
-  output.centroid.X() = pose.Pos().X();
-  output.centroid.Y() = pose.Pos().Y();
+      - (pow(intLimitUpper, 3) / 3.0 - pow(intLimitLower, 3) / 3.0)) * M_PI;
+  output.centroid.X() = _pose.Pos().X();
+  output.centroid.Y() = _pose.Pos().Y();
 
   if (output.volume > 0)
   {
     // centroid is always centered to object in X and Y plane
-    output.centroid.X() = pose.Pos().X();
-    output.centroid.Y() = pose.Pos().Y();
+    output.centroid.X() = _pose.Pos().X();
+    output.centroid.Y() = _pose.Pos().Y();
     // z_bar = (integral of (z(R)^2 - z^3) dz) * pi / volume
     output.centroid.Z() = (pow(r, 2) / 2.0 *
         (pow(intLimitUpper, 2) - pow(intLimitLower, 2)) -
         (pow(intLimitUpper, 4) - pow(intLimitLower, 4))/ 4.0)
             * M_PI / output.volume;
     // convert centroid.z to global frame
-    output.centroid.Z() = pose.Pos().Z() + output.centroid.Z();
+    output.centroid.Z() = _pose.Pos().Z() + output.centroid.Z();
   }
   return output;
 }
