@@ -7,6 +7,8 @@
 #include <ignition/gazebo/SdfEntityCreator.hh>
 #include "ScoringPlugin.hh"
 
+using namespace vrx;
+
 void cb(const ignition::msgs::Contacts &_contacts){return;}
 
 ScoringPlugin::ScoringPlugin()
@@ -14,6 +16,7 @@ ScoringPlugin::ScoringPlugin()
 {
 }
 
+//////////////////////////////////////////////////
 void ScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
                            ignition::gazebo::EntityComponentManager &_ecm,
@@ -350,6 +353,7 @@ bool ScoringPlugin::ParseJoints()
   return true;
 }
 
+//////////////////////////////////////////////////
 void ScoringPlugin::Exit()
 {
   bool exit = this->perPluginExitOnCompletion;
@@ -377,28 +381,32 @@ void ScoringPlugin::Exit()
   return;
 }
 
+//////////////////////////////////////////////////
 void ScoringPlugin::SetTimeoutScore(double _timeoutScore)
 {
   this->timeoutScore = _timeoutScore;
 }
 
+//////////////////////////////////////////////////
 double ScoringPlugin::GetTimeoutScore() const
 {
   return this->timeoutScore;
 }
 
+//////////////////////////////////////////////////
 double ScoringPlugin::GetRunningStateDuration() const
 {
   return this->runningStateDuration;
 }
 
+//////////////////////////////////////////////////
 unsigned int ScoringPlugin::GetNumCollisions() const
 {
   return this->numCollisions;
 }
 
 
-IGNITION_ADD_PLUGIN(ScoringPlugin,
+IGNITION_ADD_PLUGIN(vrx::ScoringPlugin,
                     ignition::gazebo::System,
-                    ScoringPlugin::ISystemConfigure,
-                    ScoringPlugin::ISystemPostUpdate)
+                    vrx::ScoringPlugin::ISystemConfigure,
+                    vrx::ScoringPlugin::ISystemPostUpdate)

@@ -38,7 +38,8 @@
 #include "ignition/gazebo/Util.hh"
 #include <ignition/transport/Node.hh>
 
-
+namespace vrx
+{
 class ScoringPlugin 
         : public ignition::gazebo::System,
           public ignition::gazebo::ISystemConfigure,
@@ -280,5 +281,5 @@ class ScoringPlugin
         private: bool forceReturn = false;
 
         };
-
+}
 #endif

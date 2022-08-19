@@ -438,7 +438,7 @@
     </plugin>
     <plugin
       filename="libScoringPlugin.so"
-      name="ScoringPlugin">
+      name="vrx::ScoringPlugin">
       <vehicle>wamv</vehicle>
       <task_name>station_keeping</task_name>
     </plugin>
