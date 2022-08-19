@@ -327,19 +327,16 @@ void UsvDynamicsPlugin::Update()
 
       // Compute the depth at the grid point.
       double simTime = kTimeNow.Double();
-      // double depth = WavefieldSampler::ComputeDepthDirectly(
-      //  *waveParams, X, simTime);
       double depth = 0.0;
       if (waveParams)
       {
+        // depth = WavefieldSampler::ComputeDepthDirectly(
+        // *waveParams, X, simTime);
         depth = WavefieldSampler::ComputeDepthSimply(*waveParams, X, simTime);
       }
 
-      // Vertical wave displacement.
-      double dz = depth + X.Z();
-
       // Total z location of boat grid point relative to water surface
-      double  deltaZ = (this->waterLevel + dz) - kDdz;
+      double  deltaZ = (this->waterLevel + depth) - kDdz;
       deltaZ = std::max(deltaZ, 0.0);  // enforce only upward buoy force
       deltaZ = std::min(deltaZ, this->paramHullRadius);
       // Buoyancy force at grid point
