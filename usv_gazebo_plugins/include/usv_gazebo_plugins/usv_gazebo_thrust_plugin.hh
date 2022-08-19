@@ -51,8 +51,11 @@ namespace gazebo
     /// \param[in] _msg The thrust angle message to process.
     public: void OnThrustAngle(const std_msgs::Float32::ConstPtr &_msg);
 
-    /// \brief Maximum abs val of incoming command.
+    /// \brief Maximum val of incoming command.
     public: double maxCmd;
+
+    /// \brief Minimum val of incoming command.
+    public: double minCmd;
 
     /// \brief Max forward force in Newtons.
     public: double maxForceFwd;
@@ -66,8 +69,12 @@ namespace gazebo
     /// \brief Link where thrust force is applied.
     public: physics::LinkPtr link;
 
-    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear).
+    /// \brief Thruster mapping (0=linear; 1=GLF, nonlinear; 2=linear interp).
     public: int mappingType;
+
+    /// \brief Lookup map of cmd values -> force values
+    ///        for use in mappingType=2,linear interp
+    public: std::map<double, double> cmdForceMap;
 
     /// \brief Topic name for incoming ROS thruster commands.
     public: std::string cmdTopic;
@@ -132,14 +139,21 @@ namespace gazebo
   ///   <enableAngle>: If true, thruster will have adjustable angle.
   ///                  If false, thruster will have constant angle.
   ///   Optional elements:
-  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear),
+  ///   <mappingType>: Thruster mapping (0=linear; 1=GLF, nonlinear;
+  ///                  2=linear interp),
   ///   default is 0
-  ///   <maxCmd>:Maximum (abs val) of thrust commands,
+  ///   <maxCmd>:Maximum of thrust commands,
   ///   defualt is 1.0
+  ///   <minCmd>:Minimum of thrust commands,
+  ///   defualt is -1.0
   ///   <maxForceFwd>: Maximum forward force [N].
   ///   default is 250.0 N
   ///   <maxForceRev>: Maximum reverse force [N].
   ///   default is -100.0 N
+  ///   <cmdValues>: values of thrust commands corresponding to thrust forces
+  ///   default is minCmd maxCmd
+  ///   <forceValues>: values of thrust forces corresponding to thrust commands
+  ///   default is maxForceRev maxForceFwd
   ///   <maxAngle>: Absolute value of maximum thruster angle [radians].
   ///   default is pi/2
   ///
@@ -159,6 +173,7 @@ namespace gazebo
   ///        <enableAngle>false</enableAngle>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
+  ///        <minCmd>-1.0</minCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
   ///        <maxAngle>1.57</maxAngle>
@@ -172,8 +187,49 @@ namespace gazebo
   ///        <enableAngle>false</enableAngle>
   ///        <mappingType>1</mappingType>
   ///        <maxCmd>1.0</maxCmd>
+  ///        <minCmd>-1.0</minCmd>
   ///        <maxForceFwd>250.0</maxForceFwd>
   ///        <maxForceRev>-100.0</maxForceRev>
+  ///        <maxAngle>1.57</maxAngle>
+  ///      </thruster>
+  ///    </plugin>
+  ///
+  /// Here is an equivalent example but using a mapping type of 2,linear interp:
+  ///
+  ///    <plugin name="example" filename="libusv_gazebo_thrust_plugin.so">
+  ///      <!-- General plugin parameters -->
+  ///      <cmdTimeout>1.0</cmdTimeout>
+  ///
+  ///      <thruster>
+  ///        <linkName>left_propeller_link</linkName>
+  ///        <propJointName>left_engine_propeller_joint</propJointName>
+  ///        <engineJointName>left_chasis_engine_joint</engineJointName>
+  ///        <cmdTopic>left_thrust_cmd</cmdTopic>
+  ///        <angleTopic>left_thrust_angle</angleTopic>
+  ///        <enableAngle>false</enableAngle>
+  ///        <mappingType>2</mappingType>
+  ///        <maxCmd>1.0</maxCmd>
+  ///        <minCmd>-1.0</minCmd>
+  ///        <maxForceFwd>250.0</maxForceFwd>
+  ///        <maxForceRev>-100.0</maxForceRev>
+  ///        <cmdValues>-1.0 0 1.0</cmdValues>
+  ///        <ForceValues>-100.0 0 250.0</cmdValues>
+  ///        <maxAngle>1.57</maxAngle>
+  ///      </thruster>
+  ///      <thruster>
+  ///        <linkName>right_propeller_link</linkName>
+  ///        <propJointName>right_engine_propeller_joint</propJointName>
+  ///        <engineJointName>right_chasis_engine_joint</engineJointName>
+  ///        <cmdTopic>right_thrust_cmd</cmdTopic>
+  ///        <angleTopic>right_thrust_angle</angleTopic>
+  ///        <enableAngle>false</enableAngle>
+  ///        <mappingType>2</mappingType>
+  ///        <maxCmd>1.0</maxCmd>
+  ///        <minCmd>-1.0</minCmd>
+  ///        <maxForceFwd>250.0</maxForceFwd>
+  ///        <maxForceRev>-100.0</maxForceRev>
+  ///        <cmdValues>-1.0 0 1.0</cmdValues>
+  ///        <ForceValues>-100.0 0 250.0</cmdValues>
   ///        <maxAngle>1.57</maxAngle>
   ///      </thruster>
   ///    </plugin>
@@ -203,11 +259,28 @@ namespace gazebo
                                    const std::string &_paramName,
                                    const double _defaultVal) const;
 
+    /// \brief Convenience function for getting SDF parameters.
+    /// \param[in] _sdfPtr Pointer to an SDF element to parse.
+    /// \param[in] _paramName The name of the vector element to parse.
+    /// \param[in] _defaultVal The default vector value returned if the element
+    /// does not exist.
+    /// \return The vector value parsed.
+    private: std::vector<double> SdfParamVector(
+                                sdf::ElementPtr _sdfPtr,
+                                const std::string &_paramName,
+                                const std::string _defaultValString) const;
+
+    /// \brief Conversion of a string to a double vector
+    /// \param[in] _input The string to convert to a vector of doubles.
+    /// \return The vector converted from the input string.
+    private: std::vector<double> StrToVector(std::string _input) const;
+
     /// \brief Takes ROS Drive commands and scales them by max thrust.
     /// \param[in] _cmd ROS drive command.
     /// \return Value scaled and saturated.
     private: double ScaleThrustCmd(const double _cmd,
                                    const double _max_cmd,
+                                   const double _min_cmd,
                                    const double _max_pos,
                                    const double _max_neg) const;
 
@@ -236,6 +309,14 @@ namespace gazebo
     private: double GlfThrustCmd(const double _cmd,
                                  const double _maxPos,
                                  const double _maxNeg) const;
+
+    /// \brief Uses linear interpolatoin between given thrust command
+    /// to thruster force mapping.
+    /// \param[in] _cmd Thrust command.
+    /// \param[in] _cmdForceMap Mapping b/t thrust command and thrust force.
+    /// \return Thrust force [N].
+    private: double LinearInterpThrustCmd(const double _cmd,
+                            const std::map<double, double> _cmdForceMap) const;
 
     /// \brief Rotate engine using engine joint PID
     /// \param[in] _i Index of thruster whose engine will be rotated
