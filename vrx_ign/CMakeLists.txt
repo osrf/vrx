@@ -46,34 +46,20 @@ install(
   TARGETS Waves
   DESTINATION lib)
 
-# Surface
-add_library(Surface SHARED
-  src/Surface.cc
-)
-target_link_libraries(Surface PUBLIC
-  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-  ignition-math${IGN_MATH_VER}
-  Waves
-)
-install(
-  TARGETS Surface
-  DESTINATION lib)
-
 # Buoyancy
-add_library(Buoyancy SHARED
-  src/buoyancy_gazebo_plugin.cc
-  src/polyhedron_volume.cc
-  src/shape_volume.cc
+add_library(SimpleBuoyancy SHARED
+  src/SimpleBuoyancy.cc
+  src/PolyhedronVolume.cc
+  src/ShapeVolume.cc
 )
-target_link_libraries(Buoyancy PUBLIC
+target_link_libraries(SimpleBuoyancy PUBLIC
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
   ignition-gazebo${IGN_GAZEBO_VER}::core
   ignition-math${IGN_MATH_VER}
   Waves
 )
 install(
-  TARGETS Buoyancy
+  TARGETS SimpleBuoyancy
   DESTINATION lib)
 
 # Plugins
@@ -90,8 +76,7 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
     Waves
-    Surface
-  )
+)
 endforeach()
 
 install(
@@ -110,6 +95,5 @@ install(DIRECTORY
   models
   launch
   DESTINATION share/${PROJECT_NAME})
-
 
 ament_package()

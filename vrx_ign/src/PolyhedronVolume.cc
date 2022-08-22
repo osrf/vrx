@@ -16,7 +16,7 @@
 */
 
 #include <cassert>
-#include "polyhedron_volume.hh"
+#include "PolyhedronVolume.hh"
 
 using namespace vrx;
 using Face = Polyhedron::Face;
@@ -40,7 +40,7 @@ Volume::Volume()
 }
 
 //////////////////////////////////////////////////////
-Volume& Volume::operator+=(const Volume &_rhs)
+Volume &Volume::operator+=(const Volume &_rhs)
 {
   this->volume += _rhs.volume;
   this->centroid += _rhs.centroid;

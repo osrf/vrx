@@ -15,7 +15,7 @@
  *
 */
 
-#include "shape_volume.hh"
+#include "ShapeVolume.hh"
 
 using namespace ignition;
 using namespace vrx;

@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef VRX_SHAPE_VOLUME_HH_
-#define VRX_SHAPE_VOLUME_HH_
+#ifndef VRX_SHAPEVOLUME_HH_
+#define VRX_SHAPEVOLUME_HH_
 
 #include <cmath>
 #include <exception>
@@ -25,7 +25,7 @@
 #include <ignition/math/Pose3.hh>
 #include <sdf/sdf.hh>
 
-#include "polyhedron_volume.hh"
+#include "PolyhedronVolume.hh"
 
 namespace vrx
 {
@@ -53,9 +53,9 @@ namespace vrx
     /// \return A string representation of the ShapeVolume.
     virtual std::string Display() const;
 
-    /// \brief Calculates volume + centroid of submerged shape
-    /// if the shape is out of water returns Volume{}
-    /// \param[in] _pose World pose of volume
+    /// \brief Calculates volume + centroid of submerged shape.
+    /// If the shape is out of water returns Volume{}.
+    /// \param[in] _pose World pose of volume.
     /// \param[in] _fluidLevel Height of fluid. Default is 0.
     /// \return Volume object with volume + centroid (relative to world).
     virtual Volume CalculateVolume(const ignition::math::Pose3d &_pose,

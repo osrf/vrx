@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef VRX_POLYHEDRON_VOLUME_HH_
-#define VRX_POLYHEDRON_VOLUME_HH_
+#ifndef VRX_POLYHEDRONVOLUME_HH_
+#define VRX_POLYHEDRONVOLUME_HH_
 
 #include <vector>
 #include <ignition/math/Vector3.hh>
@@ -66,7 +66,9 @@ namespace vrx
       /// \param[in] _i1 Index 1.
       /// \param[in] _i2 Index 2.
       /// \param[in] _i3 Index 3.
-      Face(int _i1, int _i2, int _i3);
+      Face(int _i1,
+           int _i2,
+           int _i3);
 
       /// \brief Index of vertex.
       public: int i1;

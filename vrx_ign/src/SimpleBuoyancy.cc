@@ -29,8 +29,8 @@
 #include <ignition/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
-#include "buoyancy_gazebo_plugin.hh"
-#include "shape_volume.hh"
+#include "SimpleBuoyancy.hh"
+#include "ShapeVolume.hh"
 #include "Wavefield.hh"
 
 using namespace ignition;
@@ -151,8 +151,8 @@ void BuoyancyObject::Load(const gazebo::Entity &_entity,
   }
 }
 
-/// \brief Private Buoyancy data class.
-class Buoyancy::Implementation
+/// \brief Private SimpleBuoyancy data class.
+class SimpleBuoyancy::Implementation
 {
   /// \brief The wavefield.
   public: Wavefield wavefield;
@@ -180,13 +180,13 @@ class Buoyancy::Implementation
 };
 
 //////////////////////////////////////////////////
-Buoyancy::Buoyancy()
+SimpleBuoyancy::SimpleBuoyancy()
   : System(), dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-void Buoyancy::Configure(const gazebo::Entity &_entity,
+void SimpleBuoyancy::Configure(const gazebo::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     gazebo::EntityComponentManager &_ecm,
     gazebo::EventManager &/*_eventMgr*/)
@@ -244,10 +244,10 @@ void Buoyancy::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
+void SimpleBuoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
     gazebo::EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("Buoyancy::PreUpdate");
+  IGN_PROFILE("SimpleBuoyancy::PreUpdate");
 
   // Elapsed time since the last update.
   double dt;
@@ -272,6 +272,8 @@ void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
 
     // Apply the offset.
     linkFrame = linkFrame * buoyancyObj.pose;
+
+    // std::cerr << simTime << " " << linkFrame.Pos() << std::endl;
 
     if (this->dataPtr->wavefield.Active())
     {
@@ -347,10 +349,10 @@ void Buoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
   }
 }
 
-IGNITION_ADD_PLUGIN(Buoyancy,
+IGNITION_ADD_PLUGIN(SimpleBuoyancy,
                     gazebo::System,
-                    Buoyancy::ISystemConfigure,
-                    Buoyancy::ISystemPreUpdate)
+                    SimpleBuoyancy::ISystemConfigure,
+                    SimpleBuoyancy::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(vrx::Buoyancy,
-                          "vrx::Buoyancy")
+IGNITION_ADD_PLUGIN_ALIAS(vrx::SimpleBuoyancy,
+                          "vrx::SimpleBuoyancy")

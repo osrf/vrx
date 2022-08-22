@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef VRX_BUOYANCY_HH_
-#define VRX_BUOYANCY_HH_
+#ifndef VRX_SimpleBuoyancy_HH_
+#define VRX_SimpleBuoyancy_HH_
 
 #include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/System.hh>
@@ -67,7 +67,7 @@ namespace vrx
   ///                    </buoyancy>
   ///
   /// ## Example
-  /// <plugin name="vrx::Buoyancy" filename="libBuoyancy.so">
+  /// <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
   ///   <fluid_density>1000</fluid_density>
   ///   <fluid_level>0.0</fluid_level>
   ///   <linear_drag>25.0</linear_drag>
@@ -99,16 +99,16 @@ namespace vrx
   ///     </wave>
   ///   </wavefield>
   /// </plugin>
-  class Buoyancy
+  class SimpleBuoyancy
     : public ignition::gazebo::System,
       public ignition::gazebo::ISystemConfigure,
       public ignition::gazebo::ISystemPreUpdate
   {
     /// \brief Constructor.
-    public: Buoyancy();
+    public: SimpleBuoyancy();
 
     /// \brief Destructor.
-    public: ~Buoyancy() override = default;
+    public: ~SimpleBuoyancy() override = default;
 
     // Documentation inherited.
     public: void Configure(const ignition::gazebo::Entity &_entity,
