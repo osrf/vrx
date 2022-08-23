@@ -340,7 +340,7 @@
       <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
       to go into the model file to change the altitude/height! -->
       <pose> 0 0 0.2 0 0 0 </pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/sydney_regatta</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
 
     <include>
@@ -351,8 +351,8 @@
 
     <include>
       <name>mb_marker_buoy_red</name>
-      <pose>-528 190 0 0 1.57 0</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
+      <pose>-528 191 0 0 1.57 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
         <fluid_density>1000</fluid_density>
@@ -388,44 +388,237 @@
       </plugin>
     </include>
 
+    <include>
+      <name>mb_marker_buoy_black</name>
+      <pose>-528 190 0 0 1.57 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
+
+      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 -0.3 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.325</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <size>1000 1000</size>
+          <cell_count>50 50></cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5.0</period>
+            <number>3</number>
+            <scale>1.1</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_marker_buoy_green</name>
+      <pose>-528 189 0 0 1.57 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
+
+      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 -0.3 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.325</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <size>1000 1000</size>
+          <cell_count>50 50></cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5.0</period>
+            <number>3</number>
+            <scale>1.1</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_marker_buoy_white</name>
+      <pose>-528 188 0 0 1.57 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
+
+      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 -0.3 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.325</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <size>1000 1000</size>
+          <cell_count>50 50></cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5.0</period>
+            <number>3</number>
+            <scale>1.1</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_round_buoy_orange</name>
+      <pose>-528 187 0 0 1.57 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
+
+      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <size>1000 1000</size>
+          <cell_count>50 50></cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5.0</period>
+            <number>3</number>
+            <scale>1.1</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_round_buoy_black</name>
+      <pose>-528 186 0 0 1.57 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+
+      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <size>1000 1000</size>
+          <cell_count>50 50></cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5.0</period>
+            <number>3</number>
+            <scale>1.1</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+    </include>
+
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>
       <pose>-535.916809 154.362869 0.675884 -0.17182 0.030464 -0.005286</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/post</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/post</uri>
     </include>
     <include>
       <name>post_1</name>
       <pose>-527.48999 153.854782 0.425844 -0.1365 0  0</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/post</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/post</uri>
     </include>
     <include>
       <name>post_2</name>
       <pose>-544.832825 156.671951 0.499025 -0.162625 0 0 </pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/post</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/post</uri>
     </include>
 
     <!-- Antenna for communication with the WAM-V -->
     <include>
       <pose>-531.063721 147.668579 1.59471 -0.068142 0 -0.1</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/antenna</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/antenna</uri>
     </include>
 
     <!-- ground station tents -->
     <include>
       <name>ground_station_0</name>
       <pose>-540.796448 146.493744 1.671421 -0.00834 0.01824 1.301726</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/ground_station</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/ground_station</uri>
     </include>
     <include>
       <name>ground_station_1</name>
       <pose>-537.622681 145.827896 1.681931 -0.00603 0.018667 1.301571</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/ground_station</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/ground_station</uri>
     </include>
     <include>
       <name>ground_station_2</name>
       <pose>-534.550537 144.910400 1.720474 -0.004994 0.020798 1.301492</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/ground_station</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/ground_station</uri>
     </include>
 
     <!-- The projectile for the ball shooter -->
