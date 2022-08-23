@@ -18,6 +18,7 @@
 #ifndef VRX_ScoringPlugin_HH_
 #define VRX_ScoringPlugin_HH_
 
+#include <memory>
 #include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/System.hh>
 #include <ignition/utils/ImplPtr.hh>
@@ -95,13 +96,15 @@ namespace vrx
   /// avoid showing the state messages.
   ///
   /// Here's an example:
-  /// <plugin name="scoring_plugin"
-  ///         filename="libscoring_plugin.so">
+  /// <plugin
+  ///   filename="libScoringPlugin.so"
+  ///   name="vrx::ScoringPlugin">
   ///   <vehicle>wamv</vehicle>
-  ///   <task_name>navigation_course</task_name>
+  ///   <task_name>my_task</task_name>
+  ///   <task_info_topic>/vrx/task/info</task_info_topic>
   ///   <initial_state_duration>10</initial_state_duration>
   ///   <ready_state_duration>10</ready_state_duration>
-  ///   <running_state_duration>30</running_state_duration>
+  ///   <running_state_duration>300</running_state_duration>
   ///   <release_joints>
   ///     <joint>
   ///       <name>wamv_external_pivot_joint</name>
@@ -132,6 +135,21 @@ namespace vrx
     public: void PreUpdate(
                 const ignition::gazebo::UpdateInfo &_info,
                 ignition::gazebo::EntityComponentManager &_ecm) override;
+
+    /// \brief Callback executed when the task state transition into "ready".
+    protected: virtual void OnReady();
+
+    /// \brief Callback executed when the task state transition into "running".
+    protected: virtual void OnRunning();
+
+    /// \brief Callback executed when the task state transition into "finished".
+    protected: virtual void OnFinished();
+
+    /// \brief Callback executed when a collision is detected in the vehicle.
+    protected: virtual void OnCollision();
+
+    /// \brief Update the state of the current task.
+    private: void UpdateTaskState();
 
     /// \brief Private data pointer.
     IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
