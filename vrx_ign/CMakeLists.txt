@@ -64,6 +64,7 @@ install(
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
+  ScoringPlugin
   SimpleHydrodynamics
   WaveVisual
 )
