@@ -2,6 +2,7 @@
 #include <ignition/physics/Joint.hh>
 #include <ignition/plugin/Register.hh>
 #include <ignition/gazebo/components/World.hh>
+#include <sdf/World.hh>
 #include <ignition/gazebo/EntityComponentManager.hh>
 #include <ignition/gazebo/Events.hh>
 #include <ignition/gazebo/SdfEntityCreator.hh>
@@ -22,15 +23,14 @@ void ScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
                            ignition::gazebo::EntityComponentManager &_ecm,
                            ignition::gazebo::EventManager &_eventMgr)
 {
-
     this->creator = 
         std::make_unique<ignition::gazebo::SdfEntityCreator>(_ecm, _eventMgr);
     this->worldEntity = 
         _ecm.EntityByComponents(ignition::gazebo::components::World());
+    ignition::gazebo::World world(this->worldEntity);
+    this->sc = world.SphericalCoordinates(_ecm).value();
     this->eventManager = &_eventMgr;
     this->sdf = _sdf;
-    //this->forceReturn = true; // Turns off update function! Remove before use.
-    // SDF.
     if (!this->ParseSDFParameters())
     {
         ignerr << "Scoring disabled" << std::endl;
@@ -43,17 +43,15 @@ void ScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
         std::chrono::duration<double>(this->readyStateDuration);
     this->finishTime = this->runningTime + 
         std::chrono::duration<double>(this->runningStateDuration);
+    this->lastStatsSent = std::chrono::duration<double>(0);
 
     // Prepopulate the task msg.
-
   taskMessage.set_data(this->taskState);
 
   this->taskPub = 
         this->node.Advertise<ignition::msgs::StringMsg>(this->taskInfoTopic);
   this->contactPub = 
         this->node.Advertise<ignition::msgs::Contact>(this->contactDebugTopic);
-
-
 }
 
 //////////////////////////////////////////////////
@@ -107,12 +105,6 @@ void ScoringPlugin::Finish()
 void ScoringPlugin::PostUpdate(const ignition::gazebo::UpdateInfo &_info,
                 const ignition::gazebo::EntityComponentManager &_ecm)
 {
-    // Placeholder for testing
-    if (this->forceReturn)
-    {
-      return;
-    }
-
     this->simTime = _info.simTime;
     this->UpdateTime(simTime);
     this->UpdateTaskState();
@@ -166,7 +158,6 @@ void ScoringPlugin::UpdateTaskMessage() //My simplified version
 void ScoringPlugin::PublishStats()
 {
   this->UpdateTaskMessage();
-
   // We publish stats at 1Hz.
   if (this->currentTime - this->lastStatsSent >= 
       std::chrono::duration<double>(1.0))
@@ -223,7 +214,6 @@ void ScoringPlugin::OnCollisionMsg(const ignition::msgs::Contacts &_contacts)
     // loop through collisions, if any include the wamv, increment collision
     // counter
   ignmsg << "Collision Message" << std::endl;
-
 }
 
 //////////////////////////////////////////////////

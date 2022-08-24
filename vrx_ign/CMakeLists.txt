@@ -47,12 +47,26 @@ install(
   TARGETS Waves
   DESTINATION lib)
 
+# Base scoring plugin
+add_library(ScoringPlugin SHARED
+  src/ScoringPlugin.cc
+)
+target_link_libraries(ScoringPlugin PUBLIC
+ignition-gazebo${IGN_GAZEBO_VER}::core
+ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
+ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+ignition-physics${IGN_PHYSICS_VER}::ignition-physics${IGN_PHYSICS_VER}
+Waves
+)
+install(
+  TARGETS ScoringPlugin
+  DESTINATION lib)
+
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
   SimpleHydrodynamics
   Surface
   WaveVisual
-  ScoringPlugin
 )
 
 foreach(PLUGIN ${VRX_IGN_PLUGINS})
@@ -63,6 +77,7 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-physics${IGN_PHYSICS_VER}::ignition-physics${IGN_PHYSICS_VER}
     Waves
+    ScoringPlugin
   )
 endforeach()
 
