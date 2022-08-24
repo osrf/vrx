@@ -15,10 +15,12 @@
  *
 */
 
-#ifndef VRX_ScoringPlugin_HH_
-#define VRX_ScoringPlugin_HH_
+#ifndef VRX_SCORINGPLUGIN_HH_
+#define VRX_SCORINGPLUGIN_HH_
 
+#include <chrono>
 #include <memory>
+#include <string>
 #include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/System.hh>
 #include <ignition/utils/ImplPtr.hh>
@@ -133,8 +135,48 @@ namespace vrx
 
     // Documentation inherited.
     public: void PreUpdate(
-                const ignition::gazebo::UpdateInfo &_info,
-                ignition::gazebo::EntityComponentManager &_ecm) override;
+                      const ignition::gazebo::UpdateInfo &_info,
+                      ignition::gazebo::EntityComponentManager &_ecm) override;
+
+    /// \brief Get the current score.
+    /// \return The current score.
+    protected: double Score() const;
+
+    /// \brief Set the score.
+    /// \param[in] _newScore The new score.
+    protected: void SetScore(double _newScore);
+
+    /// \brief Get the task name.
+    /// \return Task name.
+    protected: std::string TaskName() const;
+
+    /// \brief Get the task state.
+    /// \return Task state.
+    protected: std::string TaskState() const;
+
+    /// \brief Get running duration.
+    /// \return the The running state duration in seconds.
+    protected: double RunningStateDuration() const;
+
+    /// \brief Elapsed time in the running state.
+    /// \return The elapsed time in the running state.
+    protected: std::chrono::duration<double> ElapsedTime() const;
+
+    /// \brief Remaining time in the running state.
+    /// \return The remaining time in the running state.
+    protected: std::chrono::duration<double> RemainingTime() const;
+
+    /// \brief Set the score in case of timeout.
+    /// \brief[in] _timeoutScore The timeout score.
+    protected: void SetTimeoutScore(double _timeoutScore);
+
+    /// \brief Get the timeoutScore.
+    /// \return The timeout score.
+    protected: double TimeoutScore() const;
+
+    /// \brief Get the number of WAM-V collisions.
+    /// \return Number of collisions
+    protected: uint16_t NumCollisions() const;
 
     /// \brief Callback executed when the task state transition into "ready".
     protected: virtual void OnReady();

@@ -20,14 +20,10 @@
 #include <string>
 #include <vector>
 #include <ignition/common/Profiler.hh>
-#include <ignition/math/SphericalCoordinates.hh>
 #include <ignition/gazebo/Entity.hh>
-#include <ignition/gazebo/Link.hh>
 #include <ignition/gazebo/Model.hh>
-#include <ignition/gazebo/Util.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/transport/Node.hh>
 #include <ignition/plugin/Register.hh>
+#include <ignition/transport/Node.hh>
 #include <sdf/sdf.hh>
 
 #include "ScoringPlugin.hh"
@@ -69,9 +65,6 @@ class ScoringPlugin::Implementation
 
   /// \brief Silent mode enabled?
   public: bool silent = false;
-
-  /// \brief Spherical coordinates conversions.
-  public: math::SphericalCoordinates sc;
 
   /// \brief Transport node.
   public: transport::Node node;
@@ -140,7 +133,7 @@ class ScoringPlugin::Implementation
   public: bool perPluginExitOnCompletion = true;
 
   /// \brief Number of vehicle collisions.
-  public: unsigned int numCollisions = 0u;
+  public: uint16_t numCollisions = 0u;
 };
 
 //////////////////////////////////////////////////
@@ -424,6 +417,67 @@ void ScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
   this->dataPtr->UpdateTime(_info.simTime);
   this->UpdateTaskState();
   this->dataPtr->PublishStats();
+}
+
+//////////////////////////////////////////////////
+double ScoringPlugin::Score() const
+{
+  return this->dataPtr->score;
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::SetScore(double _newScore)
+{
+  if (this->TaskState() == "running")
+    this->dataPtr->score = _newScore;
+}
+
+//////////////////////////////////////////////////
+std::string ScoringPlugin::TaskName() const
+{
+  return this->dataPtr->taskName;
+}
+
+//////////////////////////////////////////////////
+std::string ScoringPlugin::TaskState() const
+{
+  return this->dataPtr->taskState;
+}
+
+//////////////////////////////////////////////////
+double ScoringPlugin::RunningStateDuration() const
+{
+  return this->dataPtr->runningStateDuration;
+}
+
+//////////////////////////////////////////////////
+std::chrono::duration<double> ScoringPlugin::ElapsedTime() const
+{
+  return this->dataPtr->elapsedTime;
+}
+
+//////////////////////////////////////////////////
+std::chrono::duration<double> ScoringPlugin::RemainingTime() const
+{
+  return this->dataPtr->remainingTime;
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::SetTimeoutScore(double _timeoutScore)
+{
+  this->dataPtr->timeoutScore = _timeoutScore;
+}
+
+//////////////////////////////////////////////////
+double ScoringPlugin::TimeoutScore() const
+{
+  return this->dataPtr->timeoutScore;
+}
+
+//////////////////////////////////////////////////
+uint16_t ScoringPlugin::NumCollisions() const
+{
+  return this->dataPtr->numCollisions;
 }
 
 //////////////////////////////////////////////////
