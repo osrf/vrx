@@ -15,20 +15,26 @@
  *
 */
 
-#ifndef VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
-#define VRX_GAZEBO_WAYFINDING_SCORING_PLUGIN_HH_
+#ifndef VRX_WAYFINDINGSCORINGPLUGIN_HH_
+#define VRX_WAYFINDINGSCORINGPLUGIN_HH_
 
-#include <ros/ros.h>
+#include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
-#include <gazebo/common/Events.hh>
-#include <gazebo/common/Timer.hh>
-#include <gazebo/physics/World.hh>
+#include <ignition/gazebo/Entity.hh>
+#include <ignition/gazebo/System.hh>
+#include <ignition/utils/ImplPtr.hh>
+#include <ignition/transport/Node.hh>
+// #include <gazebo/common/Events.hh>
+// #include <gazebo/common/Timer.hh>
+// #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
-#include "vrx_gazebo/scoring_plugin.hh"
-#include "vrx_gazebo/waypoint_markers.hh"
 
+#include "ScoringPlugin.hh"
+// #include "WaypointMarkers.hh"
+namespace vrx
+{
 /// \brief A plugin for computing the score of the wayfinding navigation task.
 /// This plugin derives from the generic ScoringPlugin class. Refer to that
 /// plugin for an explanation of the four states defined (Initial, Ready,
@@ -59,13 +65,23 @@ class WayfindingScoringPlugin : public ScoringPlugin
 {
   /// \brief Constructor.
   public: WayfindingScoringPlugin();
+ 
+  // Destructor
+  public: ~WayfindingScoringPlugin() override;
 
   // Documentation inherited.
-  public: void Load(gazebo::physics::WorldPtr _world,
-                    sdf::ElementPtr _sdf);
+    public: void Configure(const ignition::gazebo::Entity &_entity,
+                           const std::shared_ptr<const sdf::Element> &_sdf,
+                           ignition::gazebo::EntityComponentManager &_ecm,
+                           ignition::gazebo::EventManager &_eventMgr) override;
 
+    // Documentation inherited. 
   /// \brief Callback executed at every world update.
-  private: void Update();
+    // TODO: Needed?
+    public: void PreUpdate(
+                      const ignition::gazebo::UpdateInfo &_info,
+                      ignition::gazebo::EntityComponentManager &_ecm) override;
+
 
   // Documentation inherited.
   private: void OnReady() override;
@@ -74,57 +90,73 @@ class WayfindingScoringPlugin : public ScoringPlugin
   private: void OnRunning() override;
 
   /// \brief Publish the waypoints through which the vehicle must navigate.
-  private: void PublishWaypoints();
+  // TODO: 
+  // private: void PublishWaypoints();
 
   /// \brief Pointer to the update event connection.
-  private: gazebo::event::ConnectionPtr updateConnection;
+  // TODO
+  // private: gazebo::event::ConnectionPtr updateConnection;
 
   /// \brief Pointer to the sdf plugin element.
+  // TODO: Move to implementation, public?
   private: sdf::ElementPtr sdf;
 
   /// \brief Topic where the list of waypoints is published.
+  // OK
   private: std::string waypointsTopic = "/vrx/wayfinding/waypoints";
 
   /// \brief Topic where the current minimum pose error distance for each
   /// waypoint is published.
+  // OK
   private: std::string minErrorsTopic = "/vrx/wayfinding/min_errors";
 
   /// \brief Topic where the current average minimum error is published.
+  // OK
   private: std::string meanErrorTopic = "/vrx/wayfinding/mean_error";
 
   /// \brief ROS node handle.
-  private: std::unique_ptr<ros::NodeHandle> rosNode;
+  // TODO: see transport node?
+  // private: std::unique_ptr<ros::NodeHandle> rosNode;
 
   /// \brief Publisher for the goal.
-  private: ros::Publisher waypointsPub;
+  // TODO: check transport::Node:Publisher 
+  // private: ignition::transport::Node:Publisher waypointsPub;
 
   /// \brief Publisher for the combined 2D pose error.
-  private: ros::Publisher minErrorsPub;
+  // private: ignition::transport::Node:Publisher minErrorsPub;
 
   /// \brief Publisher for the current rms error.
-  private: ros::Publisher meanErrorPub;
+  // private: ignition::transport::Node:Publisher meanErrorPub;
 
   /// \brief Vector containing waypoints as 3D vectors of doubles representing
   /// X Y yaw, where X and Y are local (Gazebo) coordinates.
-  private: std::vector<ignition::math::Vector3d> localWaypoints;
+  // TODO: Is this the right type?
+  // TODO: Move to implementation, public?
+  // private: std::vector<ignition::math::Vector3d> localWaypoints;
 
   /// \brief Vector containing waypoints as 3D vectors of doubles representing
   /// Lattitude Longitude yaw, where lattitude and longitude are given in
   /// spherical (WGS84) coordinates.
-  private: std::vector<ignition::math::Vector3d> sphericalWaypoints;
+  // TODO: Is this the right type?
+  // TODO: Move to implementation, public?
+  // private: std::vector<ignition::math::Vector3d> sphericalWaypoints;
 
   /// \brief Vector containing current minimum 2D pose error achieved for each
   /// waypoint so far.
+  // TODO: Move to implementation, public?
   private: std::vector<double> minErrors;
 
   /// \brief Current average minimum error for all waypoints.
+  // TODO: Move to implementation, public?
   private: double meanError;
 
   /// \brief Timer used to calculate the elapsed time docked in the bay.
-  private: gazebo::common::Timer timer;
+  // private: gazebo::common::Timer timer;
 
   /// \brief Waypoint visualization markers.
-  private: WaypointMarkers waypointMarkers;
+  // TODO: get this working later
+  // private: WaypointMarkers waypointMarkers;
 };
 
+} // namespace
 #endif

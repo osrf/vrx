@@ -671,10 +671,10 @@
 
     <!-- The base scoring plugin -->
     <plugin
-      filename="libScoringPlugin.so"
-      name="vrx::ScoringPlugin">
+      filename="libWayfindingScoringPlugin.so"
+      name="vrx::WayfindingScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>testing_task</task_name>
+      <task_name>wayfinding</task_name>
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>

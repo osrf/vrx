@@ -62,11 +62,27 @@ install(
   TARGETS SimpleBuoyancy
   DESTINATION lib)
 
+add_library(ScoringPlugin SHARED 
+  src/ScoringPlugin.cc
+)
+
+target_link_libraries(ScoringPlugin PUBLIC
+    ignition-gazebo${IGN_GAZEBO_VER}::core
+    ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
+    ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+    ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
+    Waves
+)
+
+install(
+  TARGETS ScoringPlugin 
+  DESTINATION lib)
+
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
-  ScoringPlugin
   SimpleHydrodynamics
   WaveVisual
+  WayfindingScoringPlugin
 )
 
 foreach(PLUGIN ${VRX_IGN_PLUGINS})
@@ -77,6 +93,7 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
     Waves
+    ScoringPlugin
 )
 endforeach()
 
