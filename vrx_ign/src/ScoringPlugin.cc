@@ -22,6 +22,7 @@
 #include <ignition/common/Profiler.hh>
 #include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/Model.hh>
+#include <ignition/gazebo/SdfEntityCreator.hh>
 #include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/sdf.hh>
@@ -134,6 +135,11 @@ class ScoringPlugin::Implementation
 
   /// \brief Number of vehicle collisions.
   public: uint16_t numCollisions = 0u;
+
+  /// \brief Pointer to the ECM.
+  public: gazebo::EntityComponentManager *ecm = nullptr;
+
+  public: std::unique_ptr<gazebo::SdfEntityCreator> creator;
 };
 
 //////////////////////////////////////////////////
@@ -331,9 +337,12 @@ ScoringPlugin::ScoringPlugin()
 void ScoringPlugin::Configure(const gazebo::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     gazebo::EntityComponentManager &_ecm,
-    gazebo::EventManager &/*_eventMgr*/)
+    gazebo::EventManager &_eventMgr)
 {
   this->dataPtr->sdf = _sdf->Clone();
+  this->dataPtr->ecm = &_ecm;
+  this->dataPtr->creator =
+    std::make_unique<gazebo::SdfEntityCreator>(_ecm, _eventMgr);
 
   // SDF.
   if (!this->dataPtr->ParseSDFParameters())
@@ -475,6 +484,19 @@ double ScoringPlugin::TimeoutScore() const
 }
 
 //////////////////////////////////////////////////
+void ScoringPlugin::ReleaseVehicle()
+{
+  if (this->dataPtr->ecm)
+  {
+    // this->dataPtr->ecm->RequestRemoveEntity(167);
+    // this->dataPtr->ecm->RequestRemoveEntity(168);
+    //this->dataPtr->ecm->RequestRemoveEntity(162);
+    this->dataPtr->creator->RequestRemoveEntity(167);
+    this->dataPtr->creator->RequestRemoveEntity(168);
+  }
+}
+
+//////////////////////////////////////////////////
 uint16_t ScoringPlugin::NumCollisions() const
 {
   return this->dataPtr->numCollisions;
@@ -483,6 +505,7 @@ uint16_t ScoringPlugin::NumCollisions() const
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
+  this->ReleaseVehicle();
   if (!this->dataPtr->silent)
     igndbg << "ScoringPlugin::OnReady" << std::endl;
 }
@@ -490,6 +513,7 @@ void ScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
+  this->ReleaseVehicle();
   if (!this->dataPtr->silent)
     igndbg << "ScoringPlugin::OnRunning" << std::endl;
 }

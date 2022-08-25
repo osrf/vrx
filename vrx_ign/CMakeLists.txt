@@ -66,6 +66,7 @@ install(
 list(APPEND VRX_IGN_PLUGINS
   ScoringPlugin
   SimpleHydrodynamics
+  Surface
   WaveVisual
 )
 

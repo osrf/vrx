@@ -174,6 +174,9 @@ namespace vrx
     /// \return The timeout score.
     protected: double TimeoutScore() const;
 
+    /// \brief Tries to release the vehicle in case is locked.
+    protected: virtual void ReleaseVehicle();
+
     /// \brief Get the number of WAM-V collisions.
     /// \return Number of collisions
     protected: uint16_t NumCollisions() const;
