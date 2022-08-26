@@ -156,6 +156,9 @@ class WayfindingScoringPlugin : public ScoringPlugin
   /// \brief Waypoint visualization markers.
   // TODO: get this working later
   // private: WaypointMarkers waypointMarkers;
+
+    /// \brief Private data pointer.
+//    IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
 };
 
 } // namespace
