@@ -84,81 +84,17 @@ class WayfindingScoringPlugin : public ScoringPlugin
 
 
   // Documentation inherited.
-  private: void OnReady() override;
+  protected: void OnReady() override;
 
   // Documentation inherited.
-  private: void OnRunning() override;
-
-  /// \brief Publish the waypoints through which the vehicle must navigate.
-  // TODO: 
-  // private: void PublishWaypoints();
+  protected: void OnRunning() override;
 
   /// \brief Pointer to the update event connection.
-  // TODO
+  // TODO: probably delete this
   // private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief Pointer to the sdf plugin element.
-  // TODO: Move to implementation, public?
-  private: sdf::ElementPtr sdf;
-
-  /// \brief Topic where the list of waypoints is published.
-  // OK
-  private: std::string waypointsTopic = "/vrx/wayfinding/waypoints";
-
-  /// \brief Topic where the current minimum pose error distance for each
-  /// waypoint is published.
-  // OK
-  private: std::string minErrorsTopic = "/vrx/wayfinding/min_errors";
-
-  /// \brief Topic where the current average minimum error is published.
-  // OK
-  private: std::string meanErrorTopic = "/vrx/wayfinding/mean_error";
-
-  /// \brief ROS node handle.
-  // TODO: see transport node?
-  // private: std::unique_ptr<ros::NodeHandle> rosNode;
-
-  /// \brief Publisher for the goal.
-  // TODO: check transport::Node:Publisher 
-  // private: ignition::transport::Node:Publisher waypointsPub;
-
-  /// \brief Publisher for the combined 2D pose error.
-  // private: ignition::transport::Node:Publisher minErrorsPub;
-
-  /// \brief Publisher for the current rms error.
-  // private: ignition::transport::Node:Publisher meanErrorPub;
-
-  /// \brief Vector containing waypoints as 3D vectors of doubles representing
-  /// X Y yaw, where X and Y are local (Gazebo) coordinates.
-  // TODO: Is this the right type?
-  // TODO: Move to implementation, public?
-  // private: std::vector<ignition::math::Vector3d> localWaypoints;
-
-  /// \brief Vector containing waypoints as 3D vectors of doubles representing
-  /// Lattitude Longitude yaw, where lattitude and longitude are given in
-  /// spherical (WGS84) coordinates.
-  // TODO: Is this the right type?
-  // TODO: Move to implementation, public?
-  // private: std::vector<ignition::math::Vector3d> sphericalWaypoints;
-
-  /// \brief Vector containing current minimum 2D pose error achieved for each
-  /// waypoint so far.
-  // TODO: Move to implementation, public?
-  private: std::vector<double> minErrors;
-
-  /// \brief Current average minimum error for all waypoints.
-  // TODO: Move to implementation, public?
-  private: double meanError;
-
-  /// \brief Timer used to calculate the elapsed time docked in the bay.
-  // private: gazebo::common::Timer timer;
-
-  /// \brief Waypoint visualization markers.
-  // TODO: get this working later
-  // private: WaypointMarkers waypointMarkers;
-
-    /// \brief Private data pointer.
-//    IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
+  /// \brief Private data pointer.
+  IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
 };
 
 } // namespace

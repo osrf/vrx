@@ -43,11 +43,66 @@
 using namespace ignition;
 using namespace vrx;
 
+class WayfindingScoringPlugin::Implementation
+{
+  public: transport::Node node;
+
+  /// \brief Topic where the list of waypoints is published.
+  public: std::string waypointsTopic = "/vrx/wayfinding/waypoints";
+
+  /// \brief Topic where the current minimum pose error distance for each
+  /// waypoint is published.
+  public: std::string minErrorsTopic = "/vrx/wayfinding/min_errors";
+
+  /// \brief Topic where the current average minimum error is published.
+  public: std::string meanErrorTopic = "/vrx/wayfinding/mean_error";
+
+  /// \brief Publisher for the goal.
+  // TODO: check transport::Node:Publisher 
+  public: transport::Node::Publisher waypointsPub;
+
+  /// \brief Publisher for the combined 2D pose error.
+  public: transport::Node::Publisher minErrorsPub;
+
+  /// \brief Publisher for the current rms error.
+  public: transport::Node::Publisher meanErrorPub;
+
+  /// \brief Vector containing waypoints as 3D vectors of doubles representing
+  /// X Y yaw, where X and Y are local (Gazebo) coordinates.
+  // TODO: Is this the right type?
+  public: std::vector<math::Vector3d> localWaypoints;
+
+  /// \brief Vector containing waypoints as 3D vectors of doubles representing
+  /// Lattitude Longitude yaw, where lattitude and longitude are given in
+  /// spherical (WGS84) coordinates.
+  // TODO: Is this the right type?
+  public: std::vector<math::Vector3d> sphericalWaypoints;
+
+  /// \brief Vector containing current minimum 2D pose error achieved for each
+  /// waypoint so far.
+  public: std::vector<double> minErrors;
+
+  /// \brief Current average minimum error for all waypoints.
+  public: double meanError;
+
+  /// \brief Timer used to calculate the elapsed time docked in the bay.
+  public: std::chrono::duration<double> timer;
+
+  /// \brief Waypoint visualization markers.
+  // TODO: get this working later
+  // private: WaypointMarkers waypointMarkers;
+
+  /// \brief Publish the waypoints through which the vehicle must navigate.
+  // TODO: implement
+  // public: void PublishWaypoints();
+
+};
 /////////////////////////////////////////////////
 // WayfindingScoringPlugin::WayfindingScoringPlugin()
   // TODO: uncomment after fixing WaypointMarkers.hh 
 //  : waypointMarkers("waypoint_marker")
 WayfindingScoringPlugin::WayfindingScoringPlugin()
+    : ScoringPlugin(), dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
   ignerr << "Wayfinding scoring plugin loaded" << std::endl;
   // TODO: uncomment to test timer 
@@ -63,7 +118,7 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
                            gazebo::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
-  this->meanError = 0.0;
+  this->dataPtr->meanError = 0.0;
 
   ignerr << "Task [" << this->TaskName() << "]" << std::endl;
 
@@ -179,9 +234,9 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
 void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
                      gazebo::EntityComponentManager &_ecm)
 {
-  if (this->meanError == 0.0) {
+  if (this->dataPtr->meanError == 0.0) {
     ignerr << "Wayfinding scoring plugin preupdate" << std::endl;
-    this->meanError++;
+    this->dataPtr->meanError++;
   }
    // The vehicle might not be ready yet, let's try to get it.
 // if (!this->vehicleModel)
@@ -202,11 +257,7 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
 
    ignerr << "Wayfinding: Running state" << std::endl;
 
-
-  if (this->meanError == 0.0) {
-    ignerr << "Wayfinding scoring plugin preupdate" << std::endl;
-    this->meanError++;
-  }
+ 
 }
 
 
