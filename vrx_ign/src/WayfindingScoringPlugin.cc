@@ -57,11 +57,15 @@ WayfindingScoringPlugin::WayfindingScoringPlugin()
 WayfindingScoringPlugin::~WayfindingScoringPlugin()
 {
 }
-void WayfindingScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
+void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
-                           ignition::gazebo::EntityComponentManager &_ecm,
-                           ignition::gazebo::EventManager &_eventMgr)
+                           gazebo::EntityComponentManager &_ecm,
+                           gazebo::EventManager &_eventMgr)
 {
+  ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
+  this->meanError = 0.0;
+
+  ignerr << "Task [" << this->TaskName() << "]" << std::endl;
 
   ignerr << "Wayfinding scoring plugin configured" << std::endl;
 }
@@ -175,7 +179,34 @@ void WayfindingScoringPlugin::Configure(const ignition::gazebo::Entity &_entity,
 void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
                      gazebo::EntityComponentManager &_ecm)
 {
-  ignerr << "Wayfinding scoring plugin preupdate" << std::endl;
+  if (this->meanError == 0.0) {
+    ignerr << "Wayfinding scoring plugin preupdate" << std::endl;
+    this->meanError++;
+  }
+   // The vehicle might not be ready yet, let's try to get it.
+// if (!this->vehicleModel)
+// {
+//   #if GAZEBO_MAJOR_VERSION >= 8
+//     this->vehicleModel = this->world->ModelByName(this->vehicleName);
+//   #else
+//     this->vehicleModel = this->world->GetModel(this->vehicleName);
+//   #endif
+//   if (!this->vehicleModel)
+//     return;
+// }
+// ignerr << "Got the vehicle" << std::endl;
+ 
+   // Nothing to do if the task is not in "running" state.
+   if (this->ScoringPlugin::TaskState() != "running")
+     return;
+
+   ignerr << "Wayfinding: Running state" << std::endl;
+
+
+  if (this->meanError == 0.0) {
+    ignerr << "Wayfinding scoring plugin preupdate" << std::endl;
+    this->meanError++;
+  }
 }
 
 
