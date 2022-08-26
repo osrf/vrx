@@ -671,14 +671,15 @@
 
     <!-- The base scoring plugin -->
     <plugin
-      filename="libScoringPlugin.so"
-      name="vrx::ScoringPlugin">
+      filename="libStationkeepingScoringPlugin.so"
+      name="vrx::StationkeepingScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>testing_task</task_name>
+      <task_name>station_keeping</task_name>
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
+      <goal_pose>-33.722718 150.674031 0.0</goal_pose>
       <release_joints>
         <joint>
           <name>wamv_external_pivot_joint</name>
@@ -687,6 +688,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
+      <markers>true</markers>
     </plugin>
 
   </world>
