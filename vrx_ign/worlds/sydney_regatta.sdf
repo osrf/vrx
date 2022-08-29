@@ -675,6 +675,21 @@
       name="vrx::WayfindingScoringPlugin">
       <vehicle>wamv</vehicle>
       <task_name>wayfinding</task_name>
+      <waypoints>
+        <!-- Approx. starting point of wamv -->
+        <waypoint>
+          <pose>-33.7226766699 150.6740630167 1.21756121843</pose>
+        </waypoint>
+        <!-- A waypoint -->
+        <waypoint>
+          <pose>-33.7220832884 150.67379127877 1.0</pose>
+        </waypoint>
+        <!-- Another waypoint -->
+        <waypoint>
+          <pose>-33.7226013209 150.67504609858 1.0</pose>
+        </waypoint>
+      </waypoints>
+
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
