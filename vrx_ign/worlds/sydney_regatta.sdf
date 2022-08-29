@@ -688,7 +688,7 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <markers>true</markers>
+      <!-- <markers>true</markers> -->
     </plugin>
 
   </world>
