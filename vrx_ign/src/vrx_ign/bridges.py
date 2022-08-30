@@ -82,8 +82,8 @@ def fixed_wing_prop(model_name):
 
 def thrust(model_name, side):
     return Bridge(
-        ign_topic=f'/model/{model_name}/joint/{side}_engine_propeller_joint/cmd_thrust',
-        ros_topic=f'{side}/thrust/cmd_thrust',
+        ign_topic=f'{model_name}/thrusters/{side}/thrust',
+        ros_topic=f'thrusters/{side}/thrust',
         ign_type='ignition.msgs.Double',
         ros_type='std_msgs/msg/Float64',
         direction=BridgeDirection.ROS_TO_IGN)
@@ -97,8 +97,8 @@ def thrust_joint_pos(model_name, side):
     # right_joint_topic = '/model/' + model_name + '/joint/right_chasis_engine_joint/0/cmd_pos'
     # For now, use erb to generate unique topic names in model.sdf.erb
     return Bridge(
-        ign_topic=f'{model_name}/{side}/thruster/joint/cmd_pos',
-        ros_topic=f'{side}/thrust/joint/cmd_pos',
+        ign_topic=f'{model_name}/thrusters/{side}/pos',
+        ros_topic=f'thrusters/{side}/pos',
         ign_type='ignition.msgs.Double',
         ros_type='std_msgs/msg/Float64',
         direction=BridgeDirection.ROS_TO_IGN)

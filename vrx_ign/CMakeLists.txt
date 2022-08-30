@@ -104,9 +104,10 @@ ament_python_install_package(
 #============================================================================
 # Resources
 install(DIRECTORY
-  worlds
-  models
+  config
   launch
+  models
+  worlds
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
