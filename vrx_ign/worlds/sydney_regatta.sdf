@@ -339,16 +339,15 @@
     <include>
       <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
       to go into the model file to change the altitude/height! -->
-      <pose> 0 0 0.2 0 0 0 </pose>
+      <pose>0 0 0.2 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
-
-      <!-- <plugin filename="ignition-gazebo-detachable-joint-system" name="ignition::gazebo::systems::DetachableJoint">
-       <parent_link>link</parent_link>
-       <child_model>wamv</child_model>
-       <child_link>wamv_external2_link</child_link>
-       <topic>/wamv/detach</topic>
-    </plugin> -->
     </include>
+
+   <!--  <include>
+      <name>platform</name>
+      <pose>2000 2000 0 0 0 0</pose>
+      <uri>platform</uri>
+    </include> -->
 
     <include>
       <name>Coast Waves</name>

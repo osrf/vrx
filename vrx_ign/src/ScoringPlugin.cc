@@ -20,9 +20,12 @@
 #include <string>
 #include <vector>
 #include <ignition/common/Profiler.hh>
+#include <ignition/gazebo/components/Collision.hh>
 #include <ignition/gazebo/Entity.hh>
+#include <ignition/gazebo/Link.hh>
 #include <ignition/gazebo/Model.hh>
 #include <ignition/gazebo/SdfEntityCreator.hh>
+#include <ignition/gazebo/Util.hh>
 #include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/sdf.hh>
@@ -138,6 +141,8 @@ class ScoringPlugin::Implementation
 
   /// \brief Pointer to the ECM.
   public: gazebo::EntityComponentManager *ecm = nullptr;
+
+  public: gazebo::Entity entity;
 
   public: std::unique_ptr<gazebo::SdfEntityCreator> creator;
 };
@@ -423,6 +428,31 @@ void ScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
 {
   IGN_PROFILE("ScoringPlugin::PreUpdate");
 
+  // Collisions
+  // auto entities = gazebo::entitiesFromScopedName(this->dataPtr->vehicleName, _ecm);
+  // if (entities.size() > 0)
+  // {
+  //   this->dataPtr->entity = *entities.begin();
+  //   ignerr << "Entity: " << this->dataPtr->entity << std::endl;
+  //   gazebo::Model model(this->dataPtr->entity);
+  //   for (auto const linkId : model.Links(_ecm))
+  //   {
+  //     static int count = 0;
+  //     if (count == 0)
+  //     {
+  //       ++count;
+  //       ignerr << "Link:" << linkId << std::endl;
+  //     }
+  //     gazebo::Link link(linkId);
+  //     gazebo::enableComponent<gazebo::components::Collision>(_ecm, linkId, true);
+  //     auto collisions = link.Collisions(_ecm);
+  //     for (auto c : collisions)
+  //       ignerr << "Collision [" << c << "]" << std::endl;
+  //   }
+  // }
+  // if (this->dataPtr->link.CollisionCount(_ecm) > 0)
+  //   ignerr << "Collision!" << std::endl;
+
   this->dataPtr->UpdateTime(_info.simTime);
   this->UpdateTaskState();
   this->dataPtr->PublishStats();
@@ -505,7 +535,7 @@ uint16_t ScoringPlugin::NumCollisions() const
 //////////////////////////////////////////////////
 void ScoringPlugin::OnReady()
 {
-  this->ReleaseVehicle();
+  // this->ReleaseVehicle();
   if (!this->dataPtr->silent)
     igndbg << "ScoringPlugin::OnReady" << std::endl;
 }
@@ -513,7 +543,7 @@ void ScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
-  this->ReleaseVehicle();
+  // this->ReleaseVehicle();
   if (!this->dataPtr->silent)
     igndbg << "ScoringPlugin::OnRunning" << std::endl;
 }

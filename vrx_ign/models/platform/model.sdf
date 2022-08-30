@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+    <model name="platform">
+        <static>false</static>
+        <link name="base_link"/>
+        <link name="dummy_link"/>
+        <link name="dummy_base"/>
+
+        <joint name="world_joint" type="fixed">
+          <parent>world</parent>
+          <child>dummy_base</child>
+        </joint>
+
+        <joint name="dummy_riser_joint" type="prismatic">
+          <parent>dummy_base</parent>
+          <child>dummy_link</child>
+          <axis>
+            <limit>
+              <lower>-3</lower>
+              <upper>3</upper>
+            </limit>
+            <xyz>0 0 1</xyz>
+          </axis>
+        </joint>
+
+        <joint name="dummy_pivot_joint" type="universal">
+          <parent>dummy_link</parent>
+          <child>base_link</child>
+          <axis>
+            <xyz>1 0 0</xyz>
+          </axis>
+          <axis2>
+            <xyz>0 1 0</xyz>
+          </axis2>
+        </joint>
+
+        <plugin filename="ignition-gazebo-detachable-joint-system" name="ignition::gazebo::systems::DetachableJoint">
+          <parent_link>base_link</parent_link>
+          <child_model>wamv</child_model>
+          <child_link>dummy_link</child_link>
+          <topic>/platform/detach</topic>
+          <suppress_child_warning>true</suppress_child_warning>
+        </plugin>
+    </model>
+</sdf>

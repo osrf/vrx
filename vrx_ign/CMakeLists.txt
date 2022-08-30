@@ -93,6 +93,7 @@ ament_python_install_package(
 #============================================================================
 # Resources
 install(DIRECTORY
+  config
   worlds
   models
   launch

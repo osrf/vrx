@@ -42,6 +42,7 @@ UAVS = [
 
 USVS = [
     'usv',
+    'wam-v'
 ]
 
 ARMS = [

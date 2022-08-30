@@ -30,33 +30,47 @@ end
   <!-- Base model-->
   <include merge="true">
     <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/wam-v</uri>
+
+    <!-- Contact sensors -->
+    <experimental:params>
+      <sensor element_id="base_link" name='sensor_contacts' type='contact' action="add">
+        <contact>
+          <collision>top_base</collision>
+          <collision>left_float</collision>
+          <collision>left_mid_float</collision>
+          <collision>left_front_float</collision>
+          <collision>right_float</collision>
+          <collision>right_mid_float</collision>
+          <collision>right_front_float</collision>
+          <topic>/wamv/contacts</topic>
+        </contact>
+        <always_on>1</always_on>
+        <update_rate>5</update_rate>
+      </sensor>
+    </experimental:params>
   </include>
 
   <!-- === Decide if we lock the robot to the world === -->
   <% if defined?(locked) && locked==true %>
-  <link name="wamv_external_link"/>
-  <joint name="wamv_external_pivot_joint" type="universal">
-    <parent>wamv_external_link</parent>
+  <link name="dummy_link">
+    <inertial>
+      <mass>0.001</mass>
+      <inertia>
+        <ixx>0.00000004</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.00000004</iyy>
+        <iyz>0</iyz>
+        <izz>0.00000004</izz>
+      </inertia>
+    </inertial>
+  </link>
+  <joint name="dummy_joint" type="fixed">
+    <parent>dummy_link</parent>
     <child>base_link</child>
-    <axis>
-      <xyz>1 0 0</xyz>
-    </axis>
-    <axis2>
-      <xyz>0 1 0</xyz>
-    </axis2>
-  </joint>
-  <joint name="wamv_external_riser" type="prismatic">
-    <parent>world</parent>
-    <child>wamv_external_link</child>
-    <axis>
-      <limit>
-        <lower>-3</lower>
-        <upper>3</upper>
-      </limit>
-      <xyz>0 0 1</xyz>
-    </axis>
   </joint>
   <% end %>
+
 
   <plugin
     filename="ignition-gazebo-thruster-system"
@@ -67,6 +81,8 @@ end
     <propeller_diameter>0.2</propeller_diameter>
     <velocity_control>true</velocity_control>
     <max_thrust_cmd><%= max_total_thrust/2 %></max_thrust_cmd>
+    <namespace><%= $model_name%></namespace>
+    <topic>thrusters/left/thrust</topic>
   </plugin>
 
   <plugin
@@ -74,7 +90,7 @@ end
     name="ignition::gazebo::systems::JointPositionController">
     <joint_name>left_chassis_engine_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <topic><%= $model_name%>/left/thruster/joint/cmd_pos</topic>
+    <topic><%=$model_name%>/thrusters/left/pos</topic>
   </plugin>
 
   <plugin
@@ -86,6 +102,8 @@ end
     <propeller_diameter>0.2</propeller_diameter>
     <velocity_control>true</velocity_control>
     <max_thrust_cmd><%= max_total_thrust/2 %></max_thrust_cmd>
+    <namespace><%= $model_name%></namespace>
+    <topic>thrusters/right/thrust</topic>
   </plugin>
 
   <plugin
@@ -93,7 +111,7 @@ end
     name="ignition::gazebo::systems::JointPositionController">
     <joint_name>right_chassis_engine_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <topic><%= $model_name%>/right/thruster/joint/cmd_pos</topic>
+    <topic><%= $model_name%>/thrusters/right/pos</topic>
   </plugin>
 
   <plugin
@@ -101,8 +119,8 @@ end
     name="vrx::SimpleBuoyancy">
     <fluid_density>1000</fluid_density>
     <fluid_level>0.0</fluid_level>
-    <linear_drag>20.0</linear_drag>
-    <angular_drag>2.0</angular_drag>
+    <linear_drag>0.0</linear_drag>
+    <angular_drag>0.0</angular_drag>
     <!-- Left Hull -->
     <buoyancy name="left_hull_mid">
       <link_name>base_link</link_name>
@@ -182,6 +200,15 @@ end
     <nR>400.0</nR>
     <nRR>0.0</nRR>
   </plugin>
+
+  <!-- <sensor name='sensor_contact' type='contact'>
+    <contact>
+      <collision>collision_sphere</collision>
+      <topic>/wamv/contact</topic>
+    </contact>
+    <always_on>1</always_on>
+    <update_rate>10</update_rate>
+  </sensor> -->
 
   <!-- Publish robot state information -->
   <plugin filename="libignition-gazebo-pose-publisher-system.so"
