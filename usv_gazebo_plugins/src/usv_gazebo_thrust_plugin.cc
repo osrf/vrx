@@ -232,6 +232,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       }
 
       thruster.maxCmd = this->SdfParamDouble(thrusterSDF, "maxCmd", 1.0);
+      thruster.minCmd = this->SdfParamDouble(thrusterSDF, "minCmd", -1.0);
       thruster.maxForceFwd =
         this->SdfParamDouble(thrusterSDF, "maxForceFwd", 250.0);
       thruster.maxForceRev =
@@ -297,7 +298,7 @@ void UsvThrust::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
 //////////////////////////////////////////////////
 double UsvThrust::ScaleThrustCmd(const double _cmd, const double _maxCmd,
-  const double _maxPos, const double _maxNeg) const
+  const double _minCmd, const double _maxPos, const double _maxNeg) const
 {
   double val = 0.0;
   if (_cmd >= 0.0)
@@ -308,7 +309,8 @@ double UsvThrust::ScaleThrustCmd(const double _cmd, const double _maxCmd,
   else
   {
     double absMaxNeg = std::abs(_maxNeg);
-    val = _cmd / _maxCmd * absMaxNeg;
+    double absMinCmd = std::abs(_minCmd);
+    val = _cmd / absMinCmd * absMaxNeg;
     val = std::max(val, -1.0 * absMaxNeg);
   }
   return val;
@@ -372,6 +374,7 @@ void UsvThrust::Update()
           tforcev.X() = this->ScaleThrustCmd(this->thrusters[i].currCmd/
                                             this->thrusters[i].maxCmd,
                                             this->thrusters[i].maxCmd,
+                                            this->thrusters[i].minCmd,
                                             this->thrusters[i].maxForceFwd,
                                             this->thrusters[i].maxForceRev);
           break;
