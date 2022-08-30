@@ -39,15 +39,15 @@ public:
 
     /// \brief Topic where the task stats are published.
 public:
-    std::string goalTopic = "/vrx/station_keeping/goal";
+    std::string goalTopic = "/vrx/stationkeeping/goal";
 
     /// \brief Topic where 2D pose error is published
 public:
-    std::string poseErrorTopic = "/vrx/station_keeping/pose_error";
+    std::string poseErrorTopic = "/vrx/stationkeeping/pose_error";
 
     /// \brief Topic where mean pose error is published.
 public:
-    std::string meanErrorTopic = "/vrx/station_keeping/mean_pose_error";
+    std::string meanErrorTopic = "/vrx/stationkeeping/mean_pose_error";
 
     /// \brief Publisher for the goal.
 public:
@@ -228,9 +228,9 @@ void StationkeepingScoringPlugin::Configure(
     }
 
     // Print some debugging messages
-    ignmsg << "StationKeeping Goal, Spherical: Lat = " << this->dataPtr->goalLat
+    ignmsg << "Stationkeeping Goal, Spherical: Lat = " << this->dataPtr->goalLat
            << " Lon = " << this->dataPtr->goalLon << std::endl;
-    ignmsg << "StationKeeping Goal, Local: X = " << this->dataPtr->goalX
+    ignmsg << "Stationkeeping Goal, Local: X = " << this->dataPtr->goalX
            << " Y = " << this->dataPtr->goalY << " Yaw = " << this->dataPtr->goalYaw << std::endl;
 
     // Store goal pose in message for publishing
