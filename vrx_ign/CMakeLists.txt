@@ -62,6 +62,7 @@ install(
   TARGETS SimpleBuoyancy
   DESTINATION lib)
 
+
 # Base scoring plugin
 add_library(ScoringPlugin SHARED
   src/ScoringPlugin.cc
@@ -79,6 +80,7 @@ install(
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
+
   StationkeepingScoringPlugin
   SimpleHydrodynamics
   WaveVisual
