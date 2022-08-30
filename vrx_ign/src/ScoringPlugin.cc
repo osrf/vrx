@@ -475,6 +475,11 @@ double ScoringPlugin::TimeoutScore() const
 }
 
 //////////////////////////////////////////////////
+std::string ScoringPlugin::VehicleName() const
+{
+  return this->dataPtr->vehicleName;
+}
+//////////////////////////////////////////////////
 uint16_t ScoringPlugin::NumCollisions() const
 {
   return this->dataPtr->numCollisions;

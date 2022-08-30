@@ -27,6 +27,8 @@
 // #include <gazebo/physics/Model.hh>
 #include <ignition/msgs/param.pb.h>
 #include <ignition/gazebo/components/World.hh>
+#include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/components/Pose.hh>
 #include <ignition/gazebo/World.hh>
 #include <chrono>
 #include <string>
@@ -106,6 +108,8 @@ class WayfindingScoringPlugin::Implementation
   /// \brief Publish the waypoints through which the vehicle must navigate.
   // TODO: implement
   // public: void PublishWaypoints();
+  
+  public: gazebo::Entity vehicleEntity;
 
 };
 // TODO: change ignerr messages to more appropriate values
@@ -114,7 +118,7 @@ class WayfindingScoringPlugin::Implementation
   // TODO: uncomment after fixing WaypointMarkers.hh 
 //  : waypointMarkers("waypoint_marker")
 WayfindingScoringPlugin::WayfindingScoringPlugin()
-    : ScoringPlugin(), dataPtr(utils::MakeUniqueImpl<Implementation>())
+    : ScoringPlugin(), dataPtr(ignition::utils::MakeUniqueImpl<Implementation>())
 {
   ignerr << "Wayfinding scoring plugin loaded" << std::endl;
   // TODO: uncomment to test timer 
@@ -227,6 +231,20 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   }
   this->dataPtr->waypointsPub =
       this->dataPtr->node.Advertise<msgs::Pose_V>(this->dataPtr->waypointsTopic, opts);
+
+  if (_sdf->HasElement("min_errors_topic"))
+  {
+      this->dataPtr->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
+  }
+  this->dataPtr->minErrorsPub = this->dataPtr->node.Advertise<msgs::Float_V>(this->dataPtr->minErrorsTopic, opts);
+
+  if (_sdf->HasElement("mean_error_topic"))
+  {
+      this->dataPtr->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
+  }
+  this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
+      this->dataPtr->meanErrorTopic, opts);
+
 
   // Setup ROS node and publisher
   // this->rosNode.reset(new ros::NodeHandle());
@@ -371,35 +389,76 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
 {
   ScoringPlugin::PreUpdate(_info,_ecm);
 
-  if (this->dataPtr->meanError == 0.0) {
-    ignerr << "Wayfinding scoring plugin preupdate" << std::endl;
-    this->dataPtr->meanError++;
-  }
-
   // Start publishing the goal once in "ready" state
   if (this->ScoringPlugin::TaskState() == "ready")
         this->dataPtr->waypointsPub.Publish(this->dataPtr->waypointsMessage);
 
-   // The vehicle might not be ready yet, let's try to get it.
-// if (!this->vehicleModel)
-// {
-//   #if GAZEBO_MAJOR_VERSION >= 8
-//     this->vehicleModel = this->world->ModelByName(this->vehicleName);
-//   #else
-//     this->vehicleModel = this->world->GetModel(this->vehicleName);
-//   #endif
-//   if (!this->vehicleModel)
-//     return;
-// }
-// ignerr << "Got the vehicle" << std::endl;
- 
+  if (!this->dataPtr->vehicleEntity)
+  {
+      auto entity = _ecm.EntityByComponents(
+          gazebo::components::Name(ScoringPlugin::VehicleName()));
+      if (entity != gazebo::kNullEntity)
+          this->dataPtr->vehicleEntity = entity;
+      else
+          return;
+  }
+
    // Nothing to do if the task is not in "running" state.
-   if (this->ScoringPlugin::TaskState() != "running")
-     return;
+  if (this->ScoringPlugin::TaskState() != "running")
+    return;
 
-   //ignerr << "Wayfinding: Running state" << std::endl;
+  msgs::Float_V minErrorsMsg;
+  msgs::Float meanErrorMsg;
+  //ignerr << "Wayfinding: Running state" << std::endl;
+  auto vehiclePose = _ecm.Component<gazebo::components::Pose>(
+                             this->dataPtr->vehicleEntity)->Data();
+  double currentHeading = vehiclePose.Rot().Euler().Z();
+  double currentTotalError = 0;
 
- 
+  for (unsigned i = 0; i < this->dataPtr->localWaypoints.size(); ++i)
+  {
+    const math::Vector3d wp = this->dataPtr->localWaypoints[i];
+    double dx   =  wp.X() - vehiclePose.Pos().X();
+    double dy   =  wp.Y() - vehiclePose.Pos().Y();
+    double dist = sqrt(pow(dx, 2) + pow(dy, 2));
+    double k    = 0.75;
+    double dhdg = abs(wp.Z() - currentHeading);
+    double headError = M_PI - abs(dhdg - M_PI);
+
+    double poseError =  dist + (pow(k, dist) * headError);
+
+    // If this is the first time through, minError == poseError
+    if (i == this->dataPtr->minErrors.size())
+    {
+      this->dataPtr->minErrors.push_back(poseError);
+    }
+
+    // If poseError is smaller than the minimum, update the minimum
+    if (poseError < this->dataPtr->minErrors.at(i))
+    {
+      this->dataPtr->minErrors.at(i) = poseError;
+    }
+
+    // add current minimum to current total error
+    currentTotalError += this->dataPtr->minErrors.at(i);
+  }
+
+  this->dataPtr->meanError = currentTotalError / this->dataPtr->localWaypoints.size();
+
+  // set up messages
+  meanErrorMsg.set_data(this->dataPtr->meanError);
+  for (unsigned i = 0; i < this->dataPtr->minErrors.size(); ++i)
+  {
+    minErrorsMsg.add_data(this->dataPtr->minErrors.at(i));
+  }
+
+  // publish
+  this->dataPtr->minErrorsPub.Publish(minErrorsMsg);
+  this->dataPtr->meanErrorPub.Publish(meanErrorMsg);
+
+  // START
+  // TODO: Min errors not getting published
+  ScoringPlugin::SetScore(this->dataPtr->meanError); 
 }
 
 
