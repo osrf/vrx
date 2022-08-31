@@ -17,6 +17,7 @@ end
   max_velocity_knots = 15 # Maximum velocity in knots.
   max_velocity_mps = max_velocity_knots * 0.5144 # convert knots to m/s
   max_total_thrust = (x_u + x_uu * max_velocity_mps) * max_velocity_mps
+  locked = false
 %>
 
 <?xml version="1.0"?>
@@ -30,6 +31,73 @@ end
   <include merge="true">
     <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/wam-v</uri>
   </include>
+
+  <!-- === Decide if we lock the robot to the world === -->
+  <% if defined?(locked) && locked==true %>
+  <link name="dummy_base">
+    <inertial>
+      <mass>0.001</mass>
+      <inertia>
+        <ixx>0.00000004</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.00000004</iyy>
+        <iyz>0</iyz>
+        <izz>0.00000004</izz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="dummy_link">
+    <inertial>
+      <mass>0.001</mass>
+      <inertia>
+        <ixx>0.00000004</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.00000004</iyy>
+        <iyz>0</iyz>
+        <izz>0.00000004</izz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="dummy_riser_joint" type="prismatic">
+    <parent>dummy_base</parent>
+    <child>dummy_link</child>
+    <axis>
+      <limit>
+        <lower>-3</lower>
+        <upper>3</upper>
+      </limit>
+      <xyz>0 0 1</xyz>
+    </axis>
+  </joint>
+
+  <joint name="dummy_pivot_joint" type="universal">
+    <parent>dummy_link</parent>
+    <child>base_link</child>
+    <axis>
+      <xyz>1 0 0</xyz>
+    </axis>
+    <axis2>
+      <xyz>0 1 0</xyz>
+    </axis2>
+  </joint>
+
+  <plugin filename="ignition-gazebo-detachable-joint-system" name="ignition::gazebo::systems::DetachableJoint">
+    <parent_link>dummy_base</parent_link>
+    <child_model>platform</child_model>
+    <child_link>dummy_base</child_link>
+    <topic>/vrx/release</topic>
+    <suppress_child_warning>true</suppress_child_warning>
+  </plugin>
+
+  <!-- <joint name="dummy_joint" type="fixed">
+    <parent>dummy_link</parent>
+    <child>base_link</child>
+  </joint> -->
+  <% end %>
 
   <plugin
     filename="ignition-gazebo-thruster-system"
