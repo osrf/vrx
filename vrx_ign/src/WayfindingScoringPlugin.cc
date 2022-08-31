@@ -134,7 +134,7 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
                            gazebo::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
-  ignerr << "Task [" << this->TaskName() << "]" << std::endl;
+  ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->dataPtr->meanError = 0.0; // TODO: delete
   this->dataPtr->sdf = _sdf->Clone();
@@ -192,35 +192,6 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   
     waypointElem = waypointElem->GetNextElement("waypoint");
   }
-  // START: 
-  // TODO: should orientation be a quaternion? 
-  // TODO: set up publishers so you can see what's happening 
-
-  // old examples
-  // ignition::msgs::Set(this->dataPtr->goalMsg.mutable_position(), pose.Pos());
-  // ignition::msgs::Set(this->dataPtr->goalMsg.mutable_orientation(), pose.Rot());
-
-  // geographic_msgs::GeoPoseStamped wp_msg;
-  // geographic_msgs::GeoPath path_msg;
-
-  // path_msg.header.stamp = ros::Time::now();
-
-  // for (auto wp : this->sphericalWaypoints)
-  // {
-  //   wp_msg.pose.position.latitude  = wp.X();
-  //   wp_msg.pose.position.longitude = wp.Y();
-  //   wp_msg.pose.position.altitude  = 0.0;
-
-  //   const ignition::math::Quaternion<double> orientation(0.0, 0.0, wp.Z());
-
-  //   wp_msg.pose.orientation.x = orientation.X();
-  //   wp_msg.pose.orientation.y = orientation.Y();
-  //   wp_msg.pose.orientation.z = orientation.Z();
-  //   wp_msg.pose.orientation.w = orientation.W();
-
-  //   wp_msg.header.stamp = ros::Time::now();
-  //   path_msg.poses.push_back(wp_msg);
-  // }
 
   // Throttle messages to 1Hz
   transport::AdvertiseMessageOptions opts;
@@ -245,144 +216,31 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
       this->dataPtr->meanErrorTopic, opts);
 
-
-  // Setup ROS node and publisher
-  // this->rosNode.reset(new ros::NodeHandle());
-  // if (_sdf->HasElement("waypoints_topic"))
-  // {
-  //   this->waypointsTopic = _sdf->Get<std::string>("waypoints_topic");
-  // }
-  // this->waypointsPub =
-  //   this->rosNode->advertise<geographic_msgs::GeoPath>(
-  //     this->waypointsTopic, 10, true);
-
-  // if (_sdf->HasElement("min_errors_topic"))
-  // {
-  //   this->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
-  // }
-  // this->minErrorsPub =
-  //   this->rosNode->advertise<std_msgs::Float64MultiArray>(
-  //     this->minErrorsTopic, 100);
-
-  // if (_sdf->HasElement("mean_error_topic"))
-  // {
-  //   this->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
-  // }
-  // this->meanErrorPub =
-  //   this->rosNode->advertise<std_msgs::Float64>(
-  //     this->meanErrorTopic, 100);
-
-  // this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
-  //   std::bind(&WayfindingScoringPlugin::Update, this));
-  //  
-    ignerr << "Wayfinding scoring plugin configured" << std::endl;
-}
-
-/////////////////////////////////////////////////
-// TODO: Change to Configure
-// void WayfindingScoringPlugin::Load(gazebo::physics::WorldPtr _world,
-//     sdf::ElementPtr _sdf)
+// // TODO: Publish waypoint markers
+// if (_sdf->HasElement("markers"))
 // {
-//   ScoringPlugin::Load(_world, _sdf);
-//   this->sdf = _sdf;
-//   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
-// 
-//   // A waypoints element is required.
-//   if (!this->sdf->HasElement("waypoints"))
+//   this->waypointMarkers.Load(_sdf->GetElement("markers"));
+//   if (this->waypointMarkers.IsAvailable())
 //   {
-//     gzerr << "Unable to find <waypoints> element in SDF." << std::endl;
-//     return;
-//   }
-//   auto waypointsElem = this->sdf->GetElement("waypoints");
-// 
-//   // We need at least one waypoint
-//   if (!waypointsElem->HasElement("waypoint"))
-//   {
-//     gzerr << "Unable to find <waypoint> element in SDF." << std::endl;
-//     return;
-//   }
-//   auto waypointElem = waypointsElem->GetElement("waypoint");
-// 
-//   while (waypointElem)
-//   {
-//     ignition::math::Vector3d latlonyaw =
-//       waypointElem->Get<ignition::math::Vector3d>("pose");
-// 
-//     // Convert lat/lon to local
-//     //  snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
-//     ignition::math::Vector3d scVec(latlonyaw.X(), latlonyaw.Y(), 0.0);
-// 
-//     ignition::math::Vector3d cartVec =
-//       this->sc.LocalFromSphericalPosition(scVec);
-// 
-//     cartVec.Z() = latlonyaw.Z();
-// 
-//     // Set up relevant vectors
-//     this->sphericalWaypoints.push_back(latlonyaw);
-//     this->localWaypoints.push_back(cartVec);
-// 
-//     // Print some debugging messages
-//     gzmsg << "Waypoint, Spherical: Lat = " << latlonyaw.X()
-//           << " Lon = " << latlonyaw.Y() << std::endl;
-//     gzmsg << "Waypoint, Local: X = " << cartVec.X()
-//           << " Y = " << cartVec.Y() << " Yaw = " << cartVec.Z() << std::endl;
-// 
-//     waypointElem = waypointElem->GetNextElement("waypoint");
-//   }
-// 
-//   // Setup ROS node and publisher
-//   this->rosNode.reset(new ros::NodeHandle());
-//   if (_sdf->HasElement("waypoints_topic"))
-//   {
-//     this->waypointsTopic = _sdf->Get<std::string>("waypoints_topic");
-//   }
-//   this->waypointsPub =
-//     this->rosNode->advertise<geographic_msgs::GeoPath>(
-//       this->waypointsTopic, 10, true);
-// 
-//   if (_sdf->HasElement("min_errors_topic"))
-//   {
-//     this->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
-//   }
-//   this->minErrorsPub =
-//     this->rosNode->advertise<std_msgs::Float64MultiArray>(
-//       this->minErrorsTopic, 100);
-// 
-//   if (_sdf->HasElement("mean_error_topic"))
-//   {
-//     this->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
-//   }
-//   this->meanErrorPub =
-//     this->rosNode->advertise<std_msgs::Float64>(
-//       this->meanErrorTopic, 100);
-// 
-//   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
-//     std::bind(&WayfindingScoringPlugin::Update, this));
-// 
-//   // Publish waypoint markers
-//   if (_sdf->HasElement("markers"))
-//   {
-//     this->waypointMarkers.Load(_sdf->GetElement("markers"));
-//     if (this->waypointMarkers.IsAvailable())
+//     int markerId = 0;
+//     for (const auto waypoint : this->localWaypoints)
 //     {
-//       int markerId = 0;
-//       for (const auto waypoint : this->localWaypoints)
+//       if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
+//           waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
 //       {
-//         if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
-//             waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
-//         {
-//           gzerr << "Error creating visual marker" << std::endl;
-//         }
-//         markerId++;
+//         gzerr << "Error creating visual marker" << std::endl;
 //       }
+//       markerId++;
 //     }
-//     else
-//     {
-//       gzwarn << "Cannot display gazebo markers (Gazebo version < 8)"
-//              << std::endl;
-//     }
+//   }
+//   else
+//   {
+//     gzwarn << "Cannot display gazebo markers (Gazebo version < 8)"
+//            << std::endl;
 //   }
 // }
+
+}
 
 void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
                      gazebo::EntityComponentManager &_ecm)
@@ -463,7 +321,7 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
 
 
 //////////////////////////////////////////////////
-// TODO: Change to PreUpdate
+// TODO: Start here and compare to PreUpdate 
 // void WayfindingScoringPlugin::Update()
 // {
 //   // The vehicle might not be ready yet, let's try to get it.
