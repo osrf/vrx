@@ -354,7 +354,8 @@
       <pose>-528 190 0 0 1.57 0</pose>
       <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
-      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>

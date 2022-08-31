@@ -47,19 +47,19 @@ install(
   DESTINATION lib)
 
 # Buoyancy
-add_library(SimpleBuoyancy SHARED
-  src/SimpleBuoyancy.cc
+add_library(PolyhedraBuoyancyDrag SHARED
+  src/PolyhedraBuoyancyDrag.cc
   src/PolyhedronVolume.cc
   src/ShapeVolume.cc
 )
-target_link_libraries(SimpleBuoyancy PUBLIC
+target_link_libraries(PolyhedraBuoyancyDrag PUBLIC
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
   ignition-gazebo${IGN_GAZEBO_VER}::core
   ignition-math${IGN_MATH_VER}
   Waves
 )
 install(
-  TARGETS SimpleBuoyancy
+  TARGETS PolyhedraBuoyancyDrag
   DESTINATION lib)
 
 # Plugins

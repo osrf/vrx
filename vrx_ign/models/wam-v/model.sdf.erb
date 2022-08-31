@@ -70,12 +70,12 @@ end
   </plugin>
 
   <plugin
-    filename="libSimpleBuoyancy.so"
-    name="vrx::SimpleBuoyancy">
+    filename="libPolyhedraBuoyancyDrag.so"
+    name="vrx::PolyhedraBuoyancyDrag">
     <fluid_density>1000</fluid_density>
     <fluid_level>0.0</fluid_level>
-    <linear_drag>20.0</linear_drag>
-    <angular_drag>2.0</angular_drag>
+    <linear_drag>0.0</linear_drag>
+    <angular_drag>0.0</angular_drag>
     <!-- Left Hull -->
     <buoyancy name="left_hull_mid">
       <link_name>base_link</link_name>
