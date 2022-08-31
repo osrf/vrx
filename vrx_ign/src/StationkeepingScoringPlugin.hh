@@ -18,22 +18,8 @@
 #ifndef VRX_GAZEBO_STATIONKEEPING_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_STATIONKEEPING_SCORING_PLUGIN_HH_
 
-// old includes
-// #include <geographic_msgs/GeoPoseStamped.h>
-// #include <ros/ros.h>
-// #include <memory>
-// #include <string>
-// #include <gazebo/common/Events.hh>
-// #include <gazebo/common/Timer.hh>
-// #include <gazebo/physics/World.hh>
-// #include <sdf/sdf.hh>
-// #include "vrx_gazebo/scoring_plugin.hh"
-// #include "vrx_gazebo/waypoint_markers.hh"
-
-// new includes
 #include <ignition/transport.hh>
 #include "ScoringPlugin.hh"
-//#include "waypoint_markers.hh"
 
 /// \brief A plugin for computing the score of the station keeping task.
 /// This plugin derives from the generic ScoringPlugin class. Refer to that
@@ -55,8 +41,7 @@
 /// <goal_pose>: Optional parameter (vector type) specifying the latitude,
 /// longitude and yaw of the task goal. If not provided, all values default
 /// to 0.
-/// <markers>: Optional parameter to enable visualization markers. Check the
-/// WaypointMarkers class for SDF documentation.
+
 namespace vrx
 {
     class StationkeepingScoringPlugin : public ScoringPlugin

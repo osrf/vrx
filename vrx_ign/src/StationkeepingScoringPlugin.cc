@@ -19,14 +19,12 @@
 #include <ignition/gazebo/components/Pose.hh>
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/World.hh>
-#include "StationkeepingScoringPlugin.hh"
 #include <ignition/msgs/float.pb.h>
 #include <ignition/msgs/pose.pb.h>
-#include <ignition/msgs/quaternion.pb.h>
-#include <ignition/msgs/vector3d.pb.h>
 #include <ignition/msgs.hh>
 #include <ignition/plugin/Register.hh>
-#include <ignition/gazebo/Model.hh>
+
+#include "StationkeepingScoringPlugin.hh"
 
 using namespace vrx;
 
@@ -105,14 +103,6 @@ public:
 public:
     bool headErrorOn = true;
 
-    /// \brief Absolute time specifying the start of the docked time.
-public:
-    std::chrono::duration<double> dockTime;
-
-    /// \brief Timer used to calculate the elapsed time docked in the bay.
-public:
-    std::chrono::duration<double> timer;
-
     /// \brief Spherical coordinates conversions.
 public:
     ignition::math::SphericalCoordinates sc;
@@ -125,9 +115,11 @@ public:
 public:
     bool markers = false;
 
+    /// \brief Display goal marker (currently disabled)
 public:
     void AddMarker();
 
+    /// \brief Display or suppress state changes
 public:
     bool silent = false;
 };
@@ -150,7 +142,8 @@ void StationkeepingScoringPlugin::Implementation::AddMarker()
 
 /////////////////////////////////////////////////
 StationkeepingScoringPlugin::StationkeepingScoringPlugin()
-    : ScoringPlugin(), dataPtr(ignition::utils::MakeUniqueImpl<Implementation>())
+    : ScoringPlugin(), 
+    dataPtr(ignition::utils::MakeUniqueImpl<Implementation>())
 {
     ignmsg << "Stationkeeping scoring plugin loaded" << std::endl;
 }
@@ -172,7 +165,9 @@ void StationkeepingScoringPlugin::Configure(
     // Get lat, lon and yaw from SDF
     if (!_sdf->HasElement("goal_pose") && !_sdf->HasElement("goal_pose_cart"))
     {
-        ignerr << "Found neither <goal_pose> nor <goal_pose_cart> element in SDF." << std::endl;
+        ignerr << 
+            "Found neither <goal_pose> nor <goal_pose_cart> element in SDF."
+            << std::endl;
         ignerr << "Using default pose: 0 0 0" << std::endl;
     }
     else if (_sdf->HasElement("goal_pose"))
@@ -193,7 +188,8 @@ void StationkeepingScoringPlugin::Configure(
 
         // Convert lat/lon to local
         // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
-        ignition::math::Vector3d scVec(this->dataPtr->goalLat, this->dataPtr->goalLon, 0.0);
+        ignition::math::Vector3d scVec(this->dataPtr->goalLat, 
+            this->dataPtr->goalLon, 0.0);
         ignition::math::Vector3d cartVec =
             this->dataPtr->sc.LocalFromSphericalPosition(scVec);
 
@@ -213,10 +209,12 @@ void StationkeepingScoringPlugin::Configure(
 
         // Convert local to lat/lon
         // Snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
-        ignition::math::Vector3d cartVec(this->dataPtr->goalX, this->dataPtr->goalY, xyz.Z());
+        ignition::math::Vector3d cartVec(this->dataPtr->goalX, 
+            this->dataPtr->goalY, xyz.Z());
 
         auto in = ignition::math::SphericalCoordinates::CoordinateType::GLOBAL;
-        auto out = ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL;
+        auto out = 
+            ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL;
         auto scVec = this->dataPtr->sc.PositionTransform(cartVec, in, out);
         scVec.X(IGN_RTOD(scVec.X()));
         scVec.Y(IGN_RTOD(scVec.Y()));
@@ -231,13 +229,15 @@ void StationkeepingScoringPlugin::Configure(
     ignmsg << "Stationkeeping Goal, Spherical: Lat = " << this->dataPtr->goalLat
            << " Lon = " << this->dataPtr->goalLon << std::endl;
     ignmsg << "Stationkeeping Goal, Local: X = " << this->dataPtr->goalX
-           << " Y = " << this->dataPtr->goalY << " Yaw = " << this->dataPtr->goalYaw << std::endl;
+           << " Y = " << this->dataPtr->goalY << " Yaw = " 
+           << this->dataPtr->goalYaw << std::endl;
 
     // Store goal pose in message for publishing
-    ignition::math::Pose3d pose(this->dataPtr->goalLat, this->dataPtr->goalLon, 0,
-                                0, 0, this->dataPtr->goalYaw);
+    ignition::math::Pose3d pose(this->dataPtr->goalLat, this->dataPtr->goalLon, 
+                                0, 0, 0, this->dataPtr->goalYaw);
     ignition::msgs::Set(this->dataPtr->goalMsg.mutable_position(), pose.Pos());
-    ignition::msgs::Set(this->dataPtr->goalMsg.mutable_orientation(), pose.Rot());
+    ignition::msgs::Set(this->dataPtr->goalMsg.mutable_orientation(), 
+                        pose.Rot());
 
     // Throttle messages to 1Hz
     ignition::transport::AdvertiseMessageOptions opts;
@@ -247,28 +247,34 @@ void StationkeepingScoringPlugin::Configure(
         this->dataPtr->goalTopic = _sdf->Get<std::string>("goal_topic");
     }
     this->dataPtr->goalPub =
-        this->dataPtr->node.Advertise<ignition::msgs::Pose>(this->dataPtr->goalTopic, opts);
+        this->dataPtr->node.Advertise<ignition::msgs::Pose>(
+            this->dataPtr->goalTopic, opts);
 
     if (_sdf->HasElement("pose_error_topic"))
     {
-        this->dataPtr->poseErrorTopic = _sdf->Get<std::string>("pose_error_topic");
+        this->dataPtr->poseErrorTopic = 
+            _sdf->Get<std::string>("pose_error_topic");
     }
-    this->dataPtr->poseErrorPub = this->dataPtr->node.Advertise<ignition::msgs::Float>(this->dataPtr->poseErrorTopic, opts);
+    this->dataPtr->poseErrorPub = 
+        this->dataPtr->node.Advertise<ignition::msgs::Float>(
+            this->dataPtr->poseErrorTopic, opts);
 
     if (_sdf->HasElement("mean_error_topic"))
     {
-        this->dataPtr->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
+        this->dataPtr->meanErrorTopic = 
+            _sdf->Get<std::string>("mean_error_topic");
     }
-    this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<ignition::msgs::Float>(
-        this->dataPtr->meanErrorTopic, opts);
+    this->dataPtr->meanErrorPub = 
+        this->dataPtr->node.Advertise<ignition::msgs::Float>(
+            this->dataPtr->meanErrorTopic, opts);
 
     if (_sdf->HasElement("head_error_on"))
         this->dataPtr->headErrorOn = _sdf->Get<bool>("head_error_on");
 
-    if (_sdf->HasElement("markers"))
+/*     if (_sdf->HasElement("markers"))
     {
         this->dataPtr->markers = true;
-    }
+    } */
 }
 
 //////////////////////////////////////////////////
@@ -278,11 +284,11 @@ void StationkeepingScoringPlugin::PreUpdate(
 {
     ScoringPlugin::PreUpdate(_info, _ecm);
 
-    // Check to see if we need to publish the marker(s)
+/*     // Check to see if we need to publish the marker(s)
     if (this->dataPtr->markers)
     {
         this->dataPtr->AddMarker();
-    }
+    } */
 
     // Start publishing the goal once in "ready" state
     if (this->ScoringPlugin::TaskState() == "ready")
