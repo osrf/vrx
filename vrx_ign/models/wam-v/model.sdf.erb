@@ -32,8 +32,7 @@ end
     <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/wam-v</uri>
   </include>
 
-  <!-- === Decide if we lock the robot to the world === -->
-  <% if defined?(locked) && locked==true %>
+  <!-- Used to lock the WAM-V to the world -->
   <link name="dummy_base">
     <inertial>
       <mass>0.001</mass>
@@ -48,6 +47,7 @@ end
     </inertial>
   </link>
 
+  <!-- Used to lock the WAM-V to the world -->
   <link name="dummy_link">
     <inertial>
       <mass>0.001</mass>
@@ -62,6 +62,8 @@ end
     </inertial>
   </link>
 
+  <!-- === Decide if we lock the robot to the world === -->
+  <% if defined?(locked) && locked==true %>
   <joint name="dummy_riser_joint" type="prismatic">
     <parent>dummy_base</parent>
     <child>dummy_link</child>
