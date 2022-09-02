@@ -15,7 +15,7 @@
  *
 */
 
-#include <ignition/msgs/param.pb.h>
+#include <ignition/msgs/
 #include <ignition/gazebo/components/World.hh>
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/components/Pose.hh>
@@ -32,7 +32,6 @@
 #include <ignition/plugin/Register.hh>
 
 #include "WayfindingScoringPlugin.hh"
-// TODO: uncomment after fixing WaypointMarkers.hh 
 #include "WaypointMarkers.hh"
 using namespace ignition;
 using namespace vrx;
@@ -88,10 +87,6 @@ class WayfindingScoringPlugin::Implementation
   public: gazebo::Entity vehicleEntity;
 
 };
-/////////////////////////////////////////////////
-// WayfindingScoringPlugin::WayfindingScoringPlugin()
-  // TODO: uncomment after fixing WaypointMarkers.hh 
-//  : waypointMarkers("waypoint_marker")
 WayfindingScoringPlugin::WayfindingScoringPlugin()
     : ScoringPlugin(), 
       dataPtr(ignition::utils::MakeUniqueImpl<Implementation>()),
@@ -187,30 +182,20 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
       this->dataPtr->meanErrorTopic, opts);
 
-   // TODO: Publish waypoint markers
    if (_sdf->HasElement("markers"))
    {
      this->waypointMarkers.Configure(_entity, this->dataPtr->sdf->GetElement("markers"), _ecm, _eventMgr);
-//   if (this->waypointMarkers.IsAvailable())
-//   {
-       int markerId = 0;
-       for (const auto waypoint : this->dataPtr->localWaypoints)
+     int markerId = 0;
+     for (const auto waypoint : this->dataPtr->localWaypoints)
+     {
+       if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
+           waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
        {
-         if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
-             waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
-         {
-           ignerr << "Error creating visual marker" << std::endl;
-         }
-         markerId++;
+         ignerr << "Error creating visual marker" << std::endl;
        }
+       markerId++;
      }
-//   else
-//   {
-//     gzwarn << "Cannot display gazebo markers (Gazebo version < 8)"
-//            << std::endl;
-//   }
-// }
-
+   }
 }
 
 void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,

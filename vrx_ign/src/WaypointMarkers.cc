@@ -75,6 +75,7 @@ bool WaypointMarkers::DrawMarker(double _x, double _y, double _yaw,
 bool WaypointMarkers::DrawMarker(int _marker_id, double _x, double _y,
     double _yaw, std::string _text)
 {
+//TODO: Fix below. The markers are not showing up.
 // removing ifdefs
 // #if GAZEBO_MAJOR_VERSION >= 8
   ignition::msgs::Marker markerMsg;
