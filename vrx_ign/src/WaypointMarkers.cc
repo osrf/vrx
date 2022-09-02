@@ -112,19 +112,19 @@ bool WaypointMarkers::DrawMarker(int _marker_id, double _x, double _y,
     return false;
   }
   // draw text
-  if (!_text.empty())
-  {
-    markerMsg.set_type(ignition::msgs::Marker_Type_TEXT);
-    markerMsg.set_text(_text);
-    ignition::msgs::Set(markerMsg.mutable_scale(),
-                        ignition::math::Vector3d(1.0, 1.0, 1.0));
-    ignition::msgs::Set(markerMsg.mutable_pose(),
-                        ignition::math::Pose3d(_x, _y - 0.2,
-                            this->height + this->scaling.Z() + 0.8,
-                            0, 0, 0));
-    markerMsg.set_id((_marker_id + 1) * 10000);
-    result = node.Request("/marker", markerMsg);
-  }
+//  if (!_text.empty())
+//  {
+//    markerMsg.set_type(ignition::msgs::Marker_Type_TEXT);
+//    markerMsg.set_text(_text);
+//    ignition::msgs::Set(markerMsg.mutable_scale(),
+//                        ignition::math::Vector3d(1.0, 1.0, 1.0));
+//    ignition::msgs::Set(markerMsg.mutable_pose(),
+//                        ignition::math::Pose3d(_x, _y - 0.2,
+//                            this->height + this->scaling.Z() + 0.8,
+//                            0, 0, 0));
+//    markerMsg.set_id((_marker_id + 1) * 10000);
+//    result = node.Request("/marker", markerMsg);
+//  }
   return result;
 
 // removing ifdefs
