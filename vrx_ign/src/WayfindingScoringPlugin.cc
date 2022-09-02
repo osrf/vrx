@@ -15,7 +15,6 @@
  *
 */
 
-#include <ignition/msgs/
 #include <ignition/gazebo/components/World.hh>
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/components/Pose.hh>
