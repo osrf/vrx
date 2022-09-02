@@ -689,6 +689,10 @@
           <pose>-33.7226013209 150.67504609858 1.0</pose>
         </waypoint>
       </waypoints>
+      <markers>
+        <scaling>0.2 0.2 2.0 </scaling>
+        <height>0.5 </height>
+      </markers>
 
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>

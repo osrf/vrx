@@ -26,13 +26,10 @@
 #include <ignition/gazebo/System.hh>
 #include <ignition/utils/ImplPtr.hh>
 #include <ignition/transport/Node.hh>
-// #include <gazebo/common/Events.hh>
-// #include <gazebo/common/Timer.hh>
-// #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 
 #include "ScoringPlugin.hh"
-// #include "WaypointMarkers.hh"
+#include "WaypointMarkers.hh"
 namespace vrx
 {
 /// \brief A plugin for computing the score of the wayfinding navigation task.
@@ -70,17 +67,16 @@ class WayfindingScoringPlugin : public ScoringPlugin
   public: ~WayfindingScoringPlugin() override;
 
   // Documentation inherited.
-    public: void Configure(const ignition::gazebo::Entity &_entity,
-                           const std::shared_ptr<const sdf::Element> &_sdf,
-                           ignition::gazebo::EntityComponentManager &_ecm,
-                           ignition::gazebo::EventManager &_eventMgr) override;
+  public: void Configure(const ignition::gazebo::Entity &_entity,
+                         const std::shared_ptr<const sdf::Element> &_sdf,
+                         ignition::gazebo::EntityComponentManager &_ecm,
+                         ignition::gazebo::EventManager &_eventMgr) override;
 
-    // Documentation inherited. 
+  // Documentation inherited. 
   /// \brief Callback executed at every world update.
-    // TODO: Needed?
-    public: void PreUpdate(
-                      const ignition::gazebo::UpdateInfo &_info,
-                      ignition::gazebo::EntityComponentManager &_ecm) override;
+  public: void PreUpdate(
+                    const ignition::gazebo::UpdateInfo &_info,
+                    ignition::gazebo::EntityComponentManager &_ecm) override;
 
 
   // Documentation inherited.
@@ -89,9 +85,9 @@ class WayfindingScoringPlugin : public ScoringPlugin
   // Documentation inherited.
   protected: void OnRunning() override;
 
-  /// \brief Pointer to the update event connection.
-  // TODO: probably delete this
-  // private: gazebo::event::ConnectionPtr updateConnection;
+  /// \brief Waypoint visualization markers.
+  // TODO: Move to Implementation? 
+  private: WaypointMarkers waypointMarkers;
 
   /// \brief Private data pointer.
   IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)

@@ -78,6 +78,18 @@ install(
   TARGETS ScoringPlugin 
   DESTINATION lib)
 
+add_library(WaypointMarkers src/WaypointMarkers.cc)
+target_link_libraries(WaypointMarkers PUBLIC
+  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-gazebo${IGN_GAZEBO_VER}::core
+  ignition-math${IGN_MATH_VER}
+)
+
+install(
+  TARGETS WaypointMarkers
+  DESTINATION lib
+)
+
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
   SimpleHydrodynamics
@@ -94,6 +106,7 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
     Waves
     ScoringPlugin
+    WaypointMarkers
 )
 endforeach()
 

@@ -33,7 +33,7 @@
 
 #include "WayfindingScoringPlugin.hh"
 // TODO: uncomment after fixing WaypointMarkers.hh 
-// #include "WaypointMarkers.hh"
+#include "WaypointMarkers.hh"
 using namespace ignition;
 using namespace vrx;
 
@@ -85,10 +85,6 @@ class WayfindingScoringPlugin::Implementation
   /// \brief Spherical coordinate conversions. 
   public: math::SphericalCoordinates sc; 
 
-  /// \brief Waypoint visualization markers.
-  // TODO: get this working later
-  // private: WaypointMarkers waypointMarkers;
-
   public: gazebo::Entity vehicleEntity;
 
 };
@@ -97,7 +93,9 @@ class WayfindingScoringPlugin::Implementation
   // TODO: uncomment after fixing WaypointMarkers.hh 
 //  : waypointMarkers("waypoint_marker")
 WayfindingScoringPlugin::WayfindingScoringPlugin()
-    : ScoringPlugin(), dataPtr(ignition::utils::MakeUniqueImpl<Implementation>())
+    : ScoringPlugin(), 
+      dataPtr(ignition::utils::MakeUniqueImpl<Implementation>()),
+      waypointMarkers("waypoint_marker")
 {
   ignmsg << "Wayfinding scoring plugin loaded" << std::endl;
 }
@@ -189,23 +187,23 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
       this->dataPtr->meanErrorTopic, opts);
 
-// // TODO: Publish waypoint markers
-// if (_sdf->HasElement("markers"))
-// {
-//   this->waypointMarkers.Load(_sdf->GetElement("markers"));
+   // TODO: Publish waypoint markers
+   if (_sdf->HasElement("markers"))
+   {
+     this->waypointMarkers.Configure(_entity, this->dataPtr->sdf->GetElement("markers"), _ecm, _eventMgr);
 //   if (this->waypointMarkers.IsAvailable())
 //   {
-//     int markerId = 0;
-//     for (const auto waypoint : this->localWaypoints)
-//     {
-//       if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
-//           waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
-//       {
-//         gzerr << "Error creating visual marker" << std::endl;
-//       }
-//       markerId++;
-//     }
-//   }
+       int markerId = 0;
+       for (const auto waypoint : this->dataPtr->localWaypoints)
+       {
+         if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
+             waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
+         {
+           ignerr << "Error creating visual marker" << std::endl;
+         }
+         markerId++;
+       }
+     }
 //   else
 //   {
 //     gzwarn << "Cannot display gazebo markers (Gazebo version < 8)"
