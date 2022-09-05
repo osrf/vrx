@@ -80,7 +80,7 @@ install(
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
-
+  WildlifeScoringPlugin
   StationkeepingScoringPlugin
   SimpleHydrodynamics
   WaveVisual
