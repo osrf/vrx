@@ -679,6 +679,7 @@
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
       <release_joints>
         <joint>
           <name>wamv_external_pivot_joint</name>
