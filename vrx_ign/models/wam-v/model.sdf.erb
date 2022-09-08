@@ -69,55 +69,48 @@ end
     <topic><%= $model_name%>/right/thruster/joint/cmd_pos</topic>
   </plugin>
 
+  <!-- Left hull -->
   <plugin
-    filename="libPolyhedraBuoyancyDrag.so"
-    name="vrx::PolyhedraBuoyancyDrag">
-    <fluid_density>1000</fluid_density>
-    <fluid_level>0.0</fluid_level>
-    <linear_drag>0.0</linear_drag>
-    <angular_drag>0.0</angular_drag>
-    <!-- Left Hull -->
-    <buoyancy name="left_hull_mid">
-      <link_name>base_link</link_name>
-      <pose>0.6 1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
-    <buoyancy name="left_hull_rear">
-      <link_name>base_link</link_name>
-      <pose>-1.4 1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
-    <!-- Right Hull -->
-    <buoyancy name="right_hull_mid">
-      <link_name>base_link</link_name>
-      <pose>0.6 -1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
-    <buoyancy name="right_hull_rear">
-      <link_name>base_link</link_name>
-      <pose>-1.4 -1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <hull_length>4.9</hull_length>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+    <points>
+      <point>0.6 1.03 0</point>
+      <point>-1.4 1.03 0</point>
+    </points>
+    <wavefield>
+      <size><%= $wavefield_size%> <%= $wavefield_size%></size>
+      <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
+      <wave>
+        <model>PMS</model>
+        <period>5.0</period>
+        <number>3</number>
+        <scale>1.1</scale>
+        <gain>0.3</gain>
+        <direction>1 0</direction>
+        <angle>0.4</angle>
+        <tau>2.0</tau>
+        <amplitude>0.0</amplitude>
+        <steepness>0.0</steepness>
+      </wave>
+    </wavefield>
+  </plugin>
+
+  <!-- Right hull -->
+  <plugin
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <hull_length>4.9</hull_length>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+    <points>
+      <point>0.6 -1.03 0</point>
+      <point>-1.4 -1.03 0</point>
+    </points>
     <wavefield>
       <size><%= $wavefield_size%> <%= $wavefield_size%></size>
       <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
