@@ -20,6 +20,8 @@ find_package(ignition-plugin1 REQUIRED COMPONENTS loader register)
 set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
 find_package(ignition-rendering6 REQUIRED)
 set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
+find_package(ignition-utils1 REQUIRED)
+set(IGN_UTILS_VER ${ignition-utils1_VERSION_MAJOR})
 find_package(sdformat12 REQUIRED)
 
 find_package(std_msgs REQUIRED)
@@ -44,6 +46,22 @@ install(
   TARGETS Waves
   DESTINATION lib)
 
+# Buoyancy
+add_library(PolyhedraBuoyancyDrag SHARED
+  src/PolyhedraBuoyancyDrag.cc
+  src/PolyhedronVolume.cc
+  src/ShapeVolume.cc
+)
+target_link_libraries(PolyhedraBuoyancyDrag PUBLIC
+  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-gazebo${IGN_GAZEBO_VER}::core
+  ignition-math${IGN_MATH_VER}
+  Waves
+)
+install(
+  TARGETS PolyhedraBuoyancyDrag
+  DESTINATION lib)
+
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
   SimpleHydrodynamics
@@ -57,8 +75,9 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-gazebo${IGN_GAZEBO_VER}::core
     ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
+    ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
     Waves
-  )
+)
 endforeach()
 
 install(
@@ -77,6 +96,5 @@ install(DIRECTORY
   models
   launch
   DESTINATION share/${PROJECT_NAME})
-
 
 ament_package()

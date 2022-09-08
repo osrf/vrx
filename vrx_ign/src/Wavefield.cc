@@ -130,6 +130,10 @@ class vrx::WavefieldPrivate
   /// \brief The component wave dirctions (derived).
   public: std::vector<ignition::math::Vector2d> directions;
 
+  /// \brief True when waves are present.
+  public: bool active = false;
+
+
   /// \brief Recalculate for constant wavelength-amplitude ratio
   public: void RecalculateCwr()
   {
@@ -337,6 +341,14 @@ void Wavefield::Load(const std::shared_ptr<const sdf::Element> &_sdf)
     this->data->Recalculate();
   }
   this->DebugPrint();
+
+  this->data->active = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool Wavefield::Active() const
+{
+  return this->data->active;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

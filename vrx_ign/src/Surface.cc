@@ -17,9 +17,9 @@
 #include <ignition/msgs/wrench.pb.h>
 #include <chrono>
 #include <string>
+#include <unordered_map>
 #include <ignition/common/Profiler.hh>
 #include <ignition/common/Time.hh>
-#include <ignition/math/Pose3.hh>
 #include <ignition/math/Vector3.hh>
 #include <ignition/plugin/Register.hh>
 #include <sdf/sdf.hh>
@@ -35,37 +35,23 @@
 #include "Wavefield.hh"
 
 using namespace ignition;
-using namespace gazebo;
-using namespace systems;
 using namespace vrx;
 
-class vrx::SurfacePrivate
+/// \brief Private Surface data class.
+class vrx::Surface::Implementation
 {
-  /// \brief Convenience function for calculating the area of circle segment.
-  /// \param[in] _r Radius of circle.
-  /// \param[in] _h Height of the chord line.
-  /// \return The area.
-  /// \ref https://www.mathopenref.com/segmentareaht.html
-  public: double CircleSegment(double _r,
-                               double _h) const;
+  /// \brief Parse the points via SDF.
+  /// \param[in] _sdf Pointer to the SDF.
+  public: void ParsePoints(const std::shared_ptr<const sdf::Element> &_sdf);
 
-  /// \brief The link entity
-  public: ignition::gazebo::Link link;
-
-  /// \brief Model interface
-  public: Model model{kNullEntity};
+  /// \brief The link entity.
+  public: gazebo::Link link;
 
   /// \brief Vessel length [m].
-  public: double vehicleLength = 4.9;
-
-  /// \brief Vessel width [m].
-  public: double vehicleWidth = 2.4;
+  public: double hullLength = 4.9;
 
   /// \brief Demi-hull radius [m].
   public: double hullRadius = 0.213;
-
-  /// \brief Length discretization, i.e., "N"
-  public: int numSamples = 2;
 
   /// \brief Fluid height [m].
   public: double fluidLevel = 0;
@@ -74,34 +60,101 @@ class vrx::SurfacePrivate
   public: double fluidDensity = 997.7735;
 
   /// \brief The world's gravity [m/s^2].
-  public: ignition::math::Vector3d gravity;
+  public: math::Vector3d gravity;
+
+  /// \brief The points where the plugin applies forces. These points are
+  /// relative to the link paramter's origin. Note that we don't check that the
+  /// points are contained within the hull. You should pass reasonable points.
+  public: std::vector<math::Vector3d> points;
 
   /// \brief The wavefield.
   public: Wavefield wavefield;
 };
 
 //////////////////////////////////////////////////
-double SurfacePrivate::CircleSegment(double _r, double _h) const
+void Surface::Implementation::ParsePoints(
+  const std::shared_ptr<const sdf::Element> &_sdf)
+{
+  if (!_sdf->HasElement("points"))
+    return;
+
+  auto ptr = const_cast<sdf::Element *>(_sdf.get());
+  auto sdfPoints = ptr->GetElement("points");
+
+  // We need at least one point.
+  if (!sdfPoints->HasElement("point"))
+    ignerr << "Unable to find <points><point> element in SDF." << std::endl;
+
+  auto pointElem = sdfPoints->GetElement("point");
+
+  // Parse a new point.
+  while (pointElem)
+  {
+    ignition::math::Vector3d point;
+    pointElem->GetValue()->Get<math::Vector3d>(point);
+    this->points.push_back(point);
+
+    // Parse the next point.
+    pointElem = pointElem->GetNextElement("point");
+  }
+
+
+
+
+
+  // if (!_sdf->HasElement("hull"))
+  //  return;
+
+  // auto ptr = const_cast<sdf::Element *>(_sdf.get());
+
+
+  // auto sdfHull = ptr->GetElement("hull");
+  // while (sdfHull)
+  // {
+  //   // We need the hull's name.
+  //   if (!sdfHull->HasElement("name"))
+  //     ignerr << "Unable to find <hull><name> element in SDF." << std::endl;
+
+  //   std::string name = sdfHull->Get<std::string>("name");
+
+  //   // We need at least one point.
+  //   if (!sdfHull->HasElement("point"))
+  //     ignerr << "Unable to find <hull><point> element in SDF." << std::endl;
+
+  //   auto pointElem = sdfHull->GetElement("point");
+  //   while (pointElem)
+  //   {
+  //     ignition::math::Vector3d point;
+  //     pointElem->GetValue()->Get<math::Vector3d>(point);
+  //     this->hulls[name].push_back(point);
+
+  //     // Parse the next point.
+  //     pointElem = pointElem->GetNextElement("point");
+  //   }
+
+  //   sdfHull = sdfHull->GetNextElement("hull");
+  // }
+}
+
+//////////////////////////////////////////////////
+double Surface::CircleSegment(double _r, double _h) const
 {
   return _r * _r * acos((_r -_h) / _r ) -
     (_r - _h) * sqrt(2 * _r * _h - _h * _h);
 }
 
-
 //////////////////////////////////////////////////
 Surface::Surface()
-  : dataPtr(std::make_unique<SurfacePrivate>())
+  : System(), dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-void Surface::Configure(const Entity &_entity,
+void Surface::Configure(const gazebo::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
-    EntityComponentManager &_ecm,
-    EventManager &/*_eventMgr*/)
+    gazebo::EntityComponentManager &_ecm,
+    gazebo::EventManager &/*_eventMgr*/)
 {
-  this->dataPtr->model = Model(_entity);
-
   // Parse required elements.
   if (!_sdf->HasElement("link_name"))
   {
@@ -109,8 +162,9 @@ void Surface::Configure(const Entity &_entity,
     return;
   }
 
+  gazebo::Model model(_entity);
   std::string linkName = _sdf->Get<std::string>("link_name");
-  this->dataPtr->link = Link(this->dataPtr->model.LinkByName(_ecm, linkName));
+  this->dataPtr->link = gazebo::Link(model.LinkByName(_ecm, linkName));
   if (!this->dataPtr->link.Valid(_ecm))
   {
     ignerr << "Could not find link named [" << linkName
@@ -118,32 +172,18 @@ void Surface::Configure(const Entity &_entity,
     return;
   }
 
-  // Required parameters.
-  if (!_sdf->HasElement("vehicle_length"))
-  {
-    ignerr << "No <vehicle_length> specified" << std::endl;
-    return;
-  }
-  this->dataPtr->vehicleLength = _sdf->Get<double>("vehicle_length");
-
-  if (!_sdf->HasElement("vehicle_width"))
-  {
-    ignerr << "No <vehicle_width> specified" << std::endl;
-    return;
-  }
-  this->dataPtr->vehicleWidth = _sdf->Get<double>("vehicle_width");
-
-  if (!_sdf->HasElement("hull_radius"))
-  {
-    ignerr << "No <hull_radius> specified" << std::endl;
-    return;
-  }
-  this->dataPtr->hullRadius = _sdf->Get<double>("hull_radius");
-
   // Optional parameters.
-  if (_sdf->HasElement("num_samples"))
+  // Although some of these parameters are required in this plugin, a potential
+  // derived plugin might not need them. Make sure that the default values are
+  // reasonable.
+  if (_sdf->HasElement("hull_length"))
   {
-    this->dataPtr->numSamples = _sdf->Get<int>("num_samples");
+    this->dataPtr->hullLength = _sdf->Get<double>("hull_length");
+  }
+
+  if (_sdf->HasElement("hull_radius"))
+  {
+    this->dataPtr->hullRadius = _sdf->Get<double>("hull_radius");
   }
 
   if (_sdf->HasElement("fluid_level"))
@@ -155,6 +195,9 @@ void Surface::Configure(const Entity &_entity,
   {
     this->dataPtr->fluidDensity = _sdf->Get<double>("fluid_density");
   }
+
+  // Parse the optional <points> element.
+  this->dataPtr->ParsePoints(_sdf);
 
   // Get the gravity from the world.
   auto worldEntity = gazebo::worldEntity(_ecm);
@@ -170,123 +213,130 @@ void Surface::Configure(const Entity &_entity,
   // Wavefield
   this->dataPtr->wavefield.Load(_sdf);
 
-  // Create necessary components if not present.
-  enableComponent<components::Inertial>(_ecm, this->dataPtr->link.Entity());
-  enableComponent<components::WorldPose>(_ecm, this->dataPtr->link.Entity());
-
   igndbg << "Surface plugin successfully configured with the following "
          << "parameters:" << std::endl;
   igndbg << "  <link_name>: " << linkName << std::endl;
-  igndbg << "  <vehicle_length>: " << this->dataPtr->vehicleLength << std::endl;
-  igndbg << "  <vehicle_width>: " << this->dataPtr->vehicleWidth << std::endl;
+  igndbg << "  <vehicle_length>: " << this->dataPtr->hullLength << std::endl;
   igndbg << "  <hull_radius>: " << this->dataPtr->hullRadius << std::endl;
-  igndbg << "  <num_samples>: " << this->dataPtr->numSamples << std::endl;
   igndbg << "  <fluid_level>: " << this->dataPtr->fluidLevel << std::endl;
   igndbg << "  <fluid_density>: " << this->dataPtr->fluidDensity << std::endl;
+  igndbg << "  <points>:" << std::endl;
+  for (const auto &p : this->dataPtr->points)
+    igndbg << "    [" << p << "]" << std::endl;
 }
 
 //////////////////////////////////////////////////
-void Surface::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
-    ignition::gazebo::EntityComponentManager &_ecm)
+void Surface::PreUpdate(const gazebo::UpdateInfo &_info,
+    gazebo::EntityComponentManager &_ecm)
 {
   IGN_PROFILE("Surface::PreUpdate");
 
   if (_info.paused)
     return;
 
-  // Vehicle frame transform
+  // Vehicle frame transform.
   const auto kPose = this->dataPtr->link.WorldPose(_ecm);
-  // std::optional<ignition::math::Pose3d> kPose;
-  // *kPose = {-532, 162, -0.008054, 0, 0, 1};
   if (!kPose)
   {
     ignerr << "Unable to get world pose from link ["
            << this->dataPtr->link.Entity() << "]" << std::endl;
     return;
   }
-  const ignition::math::Vector3d kEuler = (*kPose).Rot().Euler();
-  ignition::math::Quaternion vq(kEuler.X(), kEuler.Y(), kEuler.Z());
+  const math::Vector3d kEuler = (*kPose).Rot().Euler();
+  math::Quaternion vq(kEuler.X(), kEuler.Y(), kEuler.Z());
 
-  // Loop over boat grid points
-  // Grid point location in boat frame - might be able to precalculate these?
-  ignition::math::Vector3d bpnt(0, 0, 0);
-  // Grid point location in world frame
-  ignition::math::Vector3d bpntW(0, 0, 0);
-  // For each hull
-  // Debug output:
-  // igndbg << "===" << std::endl;
-  for (int i = 0; i < 2; ++i)
+  for (auto const &bpnt : this->dataPtr->points)
   {
-    // Grid point in boat frame
-    bpnt.Set(bpnt.X(), (i * 2.0 - 1.0) * this->dataPtr->vehicleWidth / 2.0,
-      bpnt.Z());
+    // Transform from vessel to fluid/world frame.
+    const math::Vector3d kBpntW = vq * bpnt;
 
-    // For each length segment
-    for (int j = 1; j <= this->dataPtr->numSamples; ++j)
-    {
-      bpnt.Set(((j - 0.5) / (static_cast<float>(this->dataPtr->numSamples)) -
-        0.5) * this->dataPtr->vehicleLength, bpnt.Y(), bpnt.Z());
+    // Vertical location of boat grid point in world frame.
+    const float kDdz = (*kPose).Pos().Z() + kBpntW.Z();
 
-      // Transform from vessel to fluid/world frame.
-      bpntW = vq * bpnt;
+    // World location of grid point.
+    math::Vector3d point;
+    point.X() = (*kPose).Pos().X() + kBpntW.X();
+    point.Y() = (*kPose).Pos().Y() + kBpntW.Y();
 
-      // Vertical location of boat grid point in world frame.
-      const float kDdz = (*kPose).Pos().Z() + bpntW.Z();
+    // Compute the depth at the grid point.
+    double simTime = std::chrono::duration<double>(_info.simTime).count();
+    double depth = this->dataPtr->wavefield.ComputeDepthSimply(point, simTime);
 
-      // Find vertical displacement of wave field
-      // World location of grid point
-      ignition::math::Vector3d point;
-      point.X() = (*kPose).Pos().X() + bpntW.X();
-      point.Y() = (*kPose).Pos().Y() + bpntW.Y();
+    // Vertical wave displacement.
+    double dz = depth + point.Z();
 
-      // Compute the depth at the grid point.
-      double simTime = std::chrono::duration<double>(_info.simTime).count();
-      double depth =
-        this->dataPtr->wavefield.ComputeDepthSimply(point, simTime);
+    // Total z location of boat grid point relative to fluid surface.
+    double deltaZ = (this->dataPtr->fluidLevel + dz) - kDdz;
+    // Enforce only upward buoy force
+    deltaZ = std::max(deltaZ, 0.0);
+    deltaZ = std::min(deltaZ, this->dataPtr->hullRadius);
 
-      // Vertical wave displacement.
-      double dz = depth + point.Z();
-
-      // Total z location of boat grid point relative to fluid surface
-      double deltaZ = (this->dataPtr->fluidLevel + dz) - kDdz;
-      // enforce only upward buoy force
-      deltaZ = std::max(deltaZ, 0.0);
-      deltaZ = std::min(deltaZ, this->dataPtr->hullRadius);
-
-      // Buoyancy force at grid point
-      const float kBuoyForce =
-        this->dataPtr->CircleSegment(this->dataPtr->hullRadius, deltaZ) *
-          this->dataPtr->vehicleLength /
-          (static_cast<float>(this->dataPtr->numSamples)) *
+    const float kBuoyForce =
+      this->CircleSegment(this->dataPtr->hullRadius, deltaZ) *
+        this->dataPtr->hullLength / this->dataPtr->points.size() *
           -this->dataPtr->gravity.Z() * this->dataPtr->fluidDensity;
 
-      // Apply force at grid point
-      // Position is in the link frame and force is in world frame.
-      this->dataPtr->link.AddWorldForce(_ecm,
-        ignition::math::Vector3d(0, 0, kBuoyForce),
-        bpnt);
+    // Apply force at the point.
+    // Position is in the link frame and force is in world frame.
+    this->dataPtr->link.AddWorldForce(_ecm,
+      math::Vector3d(0, 0, kBuoyForce),
+      bpnt);
 
-      // Debug output:
-      // igndbg << bpnt.X() << "," << bpnt.Y() << "," << bpnt.Z() << std::endl;
-      // igndbg << "-" << std::endl;
-      // igndbg << bpntW.X() << "," << bpntW.Y() << "," << bpntW.Z() << std::endl;
-      // igndbg << "X: " << X << std::endl;
-      // igndbg << "depth: " << depth << std::endl;
-      // igndbg << "dz: " << dz << std::endl;
-      // igndbg << "kDdz: " << kDdz << std::endl;
-      // igndbg << "deltaZ: " << deltaZ << std::endl;
-      // igndbg << "hull radius: " << this->dataPtr->hullRadius << std::endl;
-      // igndbg << "vehicle length: " << this->dataPtr->vehicleLength << std::endl;
-      // igndbg << "num samples: " << this->dataPtr->numSamples << std::endl;
-      // igndbg << "gravity z: " << -this->dataPtr->gravity.Z() << std::endl;
-      // igndbg << "fluid density: " << this->dataPtr->fluidDensity << std::endl;
-      // igndbg << "Force: " << kBuoyForce << std::endl << std::endl;
-    }
+    // Debug output:
+    // igndbg << bpnt.X() << "," << bpnt.Y() << "," << bpnt.Z() << std::endl;
+    // igndbg << "-" << std::endl;
+    // igndbg << bpntW.X() << "," << bpntW.Y() << "," << bpntW.Z() << std::endl;
+    // igndbg << "X: " << X << std::endl;
+    // igndbg << "depth: " << depth << std::endl;
+    // igndbg << "dz: " << dz << std::endl;
+    // igndbg << "kDdz: " << kDdz << std::endl;
+    // igndbg << "deltaZ: " << deltaZ << std::endl;
+    // igndbg << "hull radius: " << this->dataPtr->hullRadius << std::endl;
+    // igndbg << "vehicle length: " << this->dataPtr->hullLength << std::endl;
+    // igndbg << "gravity z: " << -this->dataPtr->gravity.Z() << std::endl;
+    // igndbg << "fluid density: " << this->dataPtr->fluidDensity << std::endl;
+    // igndbg << "Force: " << kBuoyForce << std::endl << std::endl;
   }
 }
 
-IGNITION_ADD_PLUGIN(vrx::Surface,
-                    ignition::gazebo::System,
+//////////////////////////////////////////////////
+math::Vector3d Surface::Gravity() const
+{
+  return this->dataPtr->gravity;
+}
+
+//////////////////////////////////////////////////
+double Surface::HullLength() const
+{
+  return this->dataPtr->hullLength;
+}
+
+//////////////////////////////////////////////////
+double Surface::HullRadius() const
+{
+  return this->dataPtr->hullRadius;
+}
+
+//////////////////////////////////////////////////
+double Surface::FluidDensity() const
+{
+  return this->dataPtr->fluidDensity;
+}
+
+//////////////////////////////////////////////////
+// double Surface::BuoyancyAtPoint(const gazebo::UpdateInfo &/*_info*/,
+//     const math::Vector3d &/*_point*/, const uint16_t _pointsPerHull,
+//     double _deltaZ,
+//     gazebo::EntityComponentManager &/*_ecm*/)
+// {
+//   // Buoyancy force at this point.
+//   return this->CircleSegment(this->dataPtr->hullRadius, _deltaZ) *
+//     this->dataPtr->hullLength / _pointsPerHull *
+//     -this->dataPtr->gravity.Z() * this->dataPtr->fluidDensity;
+// }
+
+IGNITION_ADD_PLUGIN(Surface,
+                    gazebo::System,
                     Surface::ISystemConfigure,
                     Surface::ISystemPreUpdate)
 

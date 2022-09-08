@@ -111,6 +111,10 @@ namespace vrx
     /// \param[in] _sdf The SDF Element tree containing the wavefield parameters
     public: void Load(const std::shared_ptr<const sdf::Element> &_sdf);
 
+    /// \brief Is the wavefield loaded.
+    /// \return True when the wavefield has been loaded or false otherwise.
+    public: bool Active() const;
+
     /// \brief The number of wave components (3 max if visualisation required).
     public: size_t Number() const;
 

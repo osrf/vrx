@@ -69,16 +69,18 @@ end
     <topic><%= $model_name%>/right/thruster/joint/cmd_pos</topic>
   </plugin>
 
+  <!-- Left hull -->
   <plugin
     filename="libSurface.so"
     name="vrx::Surface">
     <link_name>base_link</link_name>
-    <vehicle_length>4.9</vehicle_length>
-    <vehicle_width>2.4</vehicle_width>
+    <hull_length>4.9</hull_length>
     <hull_radius>0.213</hull_radius>
     <fluid_level>0</fluid_level>
-
-    <!-- Waves -->
+    <points>
+      <point>0.6 1.03 0</point>
+      <point>-1.4 1.03 0</point>
+    </points>
     <wavefield>
       <size><%= $wavefield_size%> <%= $wavefield_size%></size>
       <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
@@ -87,7 +89,37 @@ end
         <period>5.0</period>
         <number>3</number>
         <scale>1.1</scale>
-        <gain>0.5</gain>
+        <gain>0.3</gain>
+        <direction>1 0</direction>
+        <angle>0.4</angle>
+        <tau>2.0</tau>
+        <amplitude>0.0</amplitude>
+        <steepness>0.0</steepness>
+      </wave>
+    </wavefield>
+  </plugin>
+
+  <!-- Right hull -->
+  <plugin
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <hull_length>4.9</hull_length>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+    <points>
+      <point>0.6 -1.03 0</point>
+      <point>-1.4 -1.03 0</point>
+    </points>
+    <wavefield>
+      <size><%= $wavefield_size%> <%= $wavefield_size%></size>
+      <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
+      <wave>
+        <model>PMS</model>
+        <period>5.0</period>
+        <number>3</number>
+        <scale>1.1</scale>
+        <gain>0.3</gain>
         <direction>1 0</direction>
         <angle>0.4</angle>
         <tau>2.0</tau>
