@@ -76,6 +76,21 @@ install(
   TARGETS ScoringPlugin
   DESTINATION lib)
 
+# Wayfinding scoring plugin
+add_library(WayfindingScoringPlugin SHARED
+  src/WayfindingScoringPlugin.cc
+  src/WaypointMarkers
+)
+target_link_libraries(WayfindingScoringPlugin PUBLIC
+  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-gazebo${IGN_GAZEBO_VER}::core
+  ignition-math${IGN_MATH_VER}
+  ScoringPlugin
+)
+install(
+  TARGETS WayfindingScoringPlugin
+  DESTINATION lib)
+
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
   StationkeepingScoringPlugin
