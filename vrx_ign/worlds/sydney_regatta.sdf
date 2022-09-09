@@ -340,7 +340,7 @@
       <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
       to go into the model file to change the altitude/height! -->
       <pose> 0 0 0.2 0 0 0 </pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/sydney_regatta</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
 
     <include>
@@ -352,7 +352,7 @@
     <include>
       <name>mb_marker_buoy_red</name>
       <pose>-528 190 0 0 1.57 0</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -393,40 +393,40 @@
     <include>
       <name>post_0</name>
       <pose>-535.916809 154.362869 0.675884 -0.17182 0.030464 -0.005286</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/post</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/post</uri>
     </include>
     <include>
       <name>post_1</name>
       <pose>-527.48999 153.854782 0.425844 -0.1365 0  0</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/post</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/post</uri>
     </include>
     <include>
       <name>post_2</name>
       <pose>-544.832825 156.671951 0.499025 -0.162625 0 0 </pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/post</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/post</uri>
     </include>
 
     <!-- Antenna for communication with the WAM-V -->
     <include>
       <pose>-531.063721 147.668579 1.59471 -0.068142 0 -0.1</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/antenna</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/antenna</uri>
     </include>
 
     <!-- ground station tents -->
     <include>
       <name>ground_station_0</name>
       <pose>-540.796448 146.493744 1.671421 -0.00834 0.01824 1.301726</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/ground_station</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/ground_station</uri>
     </include>
     <include>
       <name>ground_station_1</name>
       <pose>-537.622681 145.827896 1.681931 -0.00603 0.018667 1.301571</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/ground_station</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/ground_station</uri>
     </include>
     <include>
       <name>ground_station_2</name>
       <pose>-534.550537 144.910400 1.720474 -0.004994 0.020798 1.301492</pose>
-      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/ground_station</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/ground_station</uri>
     </include>
 
     <!-- The projectile for the ball shooter -->
@@ -475,6 +475,26 @@
          <stddev>0.03</stddev>
         </noise>
       </vertical>
+    </plugin>
+
+    <!-- The base scoring plugin -->
+    <plugin
+      filename="libScoringPlugin.so"
+      name="vrx::ScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>testing_task</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_joints>
+        <joint>
+          <name>wamv_external_pivot_joint</name>
+        </joint>
+        <joint>
+          <name>wamv_external_riser</name>
+        </joint>
+      </release_joints>
     </plugin>
 
   </world>

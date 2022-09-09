@@ -62,6 +62,19 @@ install(
   TARGETS PolyhedraBuoyancyDrag
   DESTINATION lib)
 
+# Scoring plugin
+add_library(ScoringPlugin SHARED
+  src/ScoringPlugin.cc
+)
+target_link_libraries(ScoringPlugin PUBLIC
+  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-gazebo${IGN_GAZEBO_VER}::core
+  ignition-math${IGN_MATH_VER}
+)
+install(
+  TARGETS ScoringPlugin
+  DESTINATION lib)
+
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
   SimpleHydrodynamics
