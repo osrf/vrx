@@ -32,9 +32,13 @@ import vrx_ign.bridges
 
 import os
 
-def launch(context, *args, **kwargs):
-
-    ign_args = LaunchConfiguration('ign_args').perform(context)
+def generate_launch_description():
+    ign_args = LaunchConfiguration('ign_args')
+    ign_args_launch = DeclareLaunchArgument(
+        'ign_args', 
+        default_value='',
+        description='Arguments to be passed to Ignition Gazebo'
+    )
 
     ign_gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
@@ -70,22 +74,38 @@ def launch(context, *args, **kwargs):
       vrx_ign.bridges.phase(),
       vrx_ign.bridges.stream_status(),
     ]
-    nodes = []
-    nodes.append(Node(
+
+    bridge_node = Node(
         package='ros_ign_bridge',
         executable='parameter_bridge',
         output='screen',
         arguments=[bridge.argument() for bridge in bridges],
         remappings=[bridge.remapping() for bridge in bridges],
-    ))
+    )
 
+    wamv_args = {'name': 'wamv',
+                 'world': 'sydney_regatta',
+                 'model': 'wam-v',
+                 'x': '-532',
+                 'y': '162',
+                 'z': '0',
+                 'R': '0',
+                 'P': '0',
+                 'Y': '1'
+                }
 
-    return [ign_gazebo, *nodes, monitor_sim_proc, sim_exit_event_handler]
+    spawn_wamv = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+        get_package_share_directory('vrx_ign'), 'launch'),
+        '/spawn.launch.py']),
+        launch_arguments = wamv_args.items())
 
-def generate_launch_description():
     return LaunchDescription([
-        DeclareLaunchArgument('ign_args', default_value='',
-            description='Arguments to be passed to Ignition Gazebo'),
-        OpaqueFunction(function = launch)
+        ign_args_launch,
+        ign_gazebo,
+        bridge_node,
+        spawn_wamv,
+        monitor_sim_proc,
+        sim_exit_event_handler
         ])
 

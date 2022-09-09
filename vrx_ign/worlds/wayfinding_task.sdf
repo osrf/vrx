@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="sydney_regatta">
+  <world name="wayfinding_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -677,17 +677,33 @@
 
     <!-- The base scoring plugin -->
     <plugin
-      filename="libStationkeepingScoringPlugin.so"
-      name="vrx::StationkeepingScoringPlugin">
+      filename="libWayfindingScoringPlugin.so"
+      name="vrx::WayfindingScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>station_keeping</task_name>
+      <task_name>wayfinding</task_name>
+      <waypoints>
+        <!-- Approx. starting point of wamv -->
+        <waypoint>
+          <pose>-33.7226766699 150.6740630167 1.21756121843</pose>
+        </waypoint>
+        <!-- A waypoint -->
+        <waypoint>
+          <pose>-33.7220832884 150.67379127877 1.0</pose>
+        </waypoint>
+        <!-- Another waypoint -->
+        <waypoint>
+          <pose>-33.7226013209 150.67504609858 1.0</pose>
+        </waypoint>
+      </waypoints>
+      <markers>
+        <scaling>0.2 0.2 2.0 </scaling>
+        <height>0.5 </height>
+      </markers>
+
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
-      <!-- <head_error_on>false</head_error_on> -->
-      <goal_pose>-33.722718 150.674031 0</goal_pose>
-      <!-- <goal_pose_cart>-532 162 1</goal_pose_cart> -->
       <release_joints>
         <joint>
           <name>wamv_external_pivot_joint</name>
@@ -696,7 +712,6 @@
           <name>wamv_external_riser</name>
         </joint>
       </release_joints>
-      <!-- <markers>true</markers> -->
     </plugin>
 
   </world>

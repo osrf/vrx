@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef VRX_SimpleBuoyancy_HH_
-#define VRX_SimpleBuoyancy_HH_
+#ifndef VRX_POLYHEDRABUOYANCYDRAG_HH_
+#define VRX_POLYHEDRABUOYANCYDRAG_HH_
 
 #include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/System.hh>
@@ -26,6 +26,11 @@
 namespace vrx
 {
   /// \brief This plugin simulates buoyancy of an object in fluid.
+  /// The code computes buoyancy and drag forces on rigid bodies.
+  /// The algorithm determines an exact buoyancy force for a polyhedron in a
+  /// water volume.
+  /// \ref Erin Catto. “Exact Buoyancy for Polyhedra”.
+  ///      In Game Programming Gems 6, Charles River Media, 2006, pp. 175–187.
   ///
   /// ## Optional system parameters
   ///   <wavefield>: The wavefield parameters. See `Wavefield.hh`.
@@ -67,7 +72,8 @@ namespace vrx
   ///                    </buoyancy>
   ///
   /// ## Example
-  /// <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+  /// <plugin name="vrx::PolyhedraBuoyancyDrag"
+  ///         filename="libPolyhedraBuoyancyDrag.so">
   ///   <fluid_density>1000</fluid_density>
   ///   <fluid_level>0.0</fluid_level>
   ///   <linear_drag>25.0</linear_drag>
@@ -99,16 +105,16 @@ namespace vrx
   ///     </wave>
   ///   </wavefield>
   /// </plugin>
-  class SimpleBuoyancy
+  class PolyhedraBuoyancyDrag
     : public ignition::gazebo::System,
       public ignition::gazebo::ISystemConfigure,
       public ignition::gazebo::ISystemPreUpdate
   {
     /// \brief Constructor.
-    public: SimpleBuoyancy();
+    public: PolyhedraBuoyancyDrag();
 
     /// \brief Destructor.
-    public: ~SimpleBuoyancy() override = default;
+    public: ~PolyhedraBuoyancyDrag() override = default;
 
     // Documentation inherited.
     public: void Configure(const ignition::gazebo::Entity &_entity,
