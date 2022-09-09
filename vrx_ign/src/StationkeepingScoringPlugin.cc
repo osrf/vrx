@@ -333,6 +333,7 @@ void StationkeepingScoringPlugin::OnFinished()
   ScoringPlugin::OnFinished();
 }
 
+//////////////////////////////////////////////////
 void StationkeepingScoringPlugin::OnCollision()
 {
   if (!this->dataPtr->silent)
