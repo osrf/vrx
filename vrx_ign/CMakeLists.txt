@@ -62,7 +62,8 @@ install(
   TARGETS PolyhedraBuoyancyDrag
   DESTINATION lib)
 
-# Scoring plugin
+
+# Base scoring plugin
 add_library(ScoringPlugin SHARED
   src/ScoringPlugin.cc
 )
@@ -77,6 +78,8 @@ install(
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
+
+  StationkeepingScoringPlugin
   SimpleHydrodynamics
   Surface
   WaveVisual
@@ -89,6 +92,7 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
+    ScoringPlugin
     Waves
 )
 endforeach()
