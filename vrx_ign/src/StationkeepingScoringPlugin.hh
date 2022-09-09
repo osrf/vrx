@@ -21,70 +21,60 @@
 #include <ignition/transport.hh>
 #include "ScoringPlugin.hh"
 
-/// \brief A plugin for computing the score of the station keeping task.
-/// This plugin derives from the generic ScoringPlugin class. Refer to that
-/// plugin for an explanation of the four states defined (Initial, Ready,
-/// Running and Finished) as well as other required SDF elements.
-///
-/// This plugin publishes a goal pose to a topic when it enters the Ready
-/// state.
-///
-/// In the running state it calculates a 2D pose error distance between the
-/// vehicle and the goal as well as a running mean error of all 2D pose errors
-/// calculated so far. The current 2D pose error is published to a topic for
-/// pose error, and the mean error is published to a task score topic. Mean
-/// error is also set as the score using the SetScore() method inherited from
-/// the parent. This causes it to also appear in the task information topic.
-///
-/// This plugin requires the following SDF parameters:
-///
-/// <goal_pose>: Optional parameter (vector type) specifying the latitude,
-/// longitude and yaw of the task goal. If not provided, all values default
-/// to 0.
-
 namespace vrx
 {
-    class StationkeepingScoringPlugin : public ScoringPlugin
-    {
-        /// \brief Constructor.
-    public:
-        StationkeepingScoringPlugin();
+  /// \brief A plugin for computing the score of the station keeping task.
+  /// This plugin derives from the generic ScoringPlugin class. Refer to that
+  /// plugin for an explanation of the four states defined (Initial, Ready,
+  /// Running and Finished) as well as other required SDF elements.
+  ///
+  /// This plugin publishes a goal pose to a topic when it enters the Ready
+  /// state.
+  ///
+  /// In the running state it calculates a 2D pose error distance between the
+  /// vehicle and the goal as well as a running mean error of all 2D pose errors
+  /// calculated so far. The current 2D pose error is published to a topic for
+  /// pose error, and the mean error is published to a task score topic. Mean
+  /// error is also set as the score using the SetScore() method inherited from
+  /// the parent. This causes it to also appear in the task information topic.
+  ///
+  /// This plugin requires the following SDF parameters:
+  ///
+  /// <goal_pose>: Optional parameter (vector type) specifying the latitude,
+  /// longitude and yaw of the task goal. If not provided, all values default
+  /// to 0.
+  class StationkeepingScoringPlugin : public ScoringPlugin
+  {
+    /// \brief Constructor.
+    public: StationkeepingScoringPlugin();
 
-        /// \brief Destructor.
-    public:
-        ~StationkeepingScoringPlugin() override = default;
+    /// \brief Destructor.
+    public: ~StationkeepingScoringPlugin() override = default;
 
-        // Documentation inherited.
-    public:
-        void Configure(const ignition::gazebo::Entity &_entity,
-                       const std::shared_ptr<const sdf::Element> &_sdf,
-                       ignition::gazebo::EntityComponentManager &_ecm,
-                       ignition::gazebo::EventManager &_eventMgr) override;
+    // Documentation inherited.
+    public: void Configure(const ignition::gazebo::Entity &_entity,
+                           const std::shared_ptr<const sdf::Element> &_sdf,
+                           ignition::gazebo::EntityComponentManager &_ecm,
+                           ignition::gazebo::EventManager &_eventMgr) override;
 
-        /// \brief Callback executed at every world update.
-    public:
-        void PreUpdate(
-            const ignition::gazebo::UpdateInfo &_info,
-            ignition::gazebo::EntityComponentManager &_ecm) override;
+    /// \brief Callback executed at every world update.
+    public: void PreUpdate(const ignition::gazebo::UpdateInfo &_info,
+                       ignition::gazebo::EntityComponentManager &_ecm) override;
 
-        // Documentation inherited.
-    protected:
-        void OnReady() override;
+    // Documentation inherited.
+    protected: void OnReady() override;
 
-        // Documentation inherited.
-    protected:
-        void OnRunning() override;
+    // Documentation inherited.
+    protected: void OnRunning() override;
 
-        // Documentation inherited.
-    protected:
-        void OnFinished() override;
+    // Documentation inherited.
+    protected: void OnFinished() override;
 
-        // Documentation
-    protected:
-        void OnCollision() override;
+    // Documentation
+    protected: void OnCollision() override;
 
-        /// \brief Private data pointer.
-        IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
-    };
+    /// \brief Private data pointer.
+    IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
+  };
 }
 #endif
