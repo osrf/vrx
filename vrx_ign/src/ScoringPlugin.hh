@@ -174,6 +174,10 @@ namespace vrx
     /// \return The timeout score.
     protected: double TimeoutScore() const;
 
+    /// \brief Get the vehicleName.
+    /// \return The vehicle name.
+    protected: std::string VehicleName() const;
+
     /// \brief Get the number of WAM-V collisions.
     /// \return Number of collisions
     protected: uint16_t NumCollisions() const;
@@ -195,6 +199,10 @@ namespace vrx
 
     /// \brief Update the state of the current task.
     private: void UpdateTaskState();
+
+    /// \brief Callback used to receive contacts information.
+    /// \param[in] _contacts The message containing contact information.
+    private: void OnContacts(const ignition::msgs::Contacts &_contacts);
 
     /// \brief Private data pointer.
     IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)

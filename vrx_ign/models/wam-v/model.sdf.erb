@@ -30,6 +30,24 @@ end
   <!-- Base model-->
   <include merge="true">
     <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/wam-v</uri>
+
+    <!-- Contact sensors -->
+    <experimental:params>
+      <sensor element_id="base_link" name='sensor_contacts' type='contact' action="add">
+        <contact>
+          <collision>top_base</collision>
+          <collision>left_float</collision>
+          <collision>left_mid_float</collision>
+          <collision>left_front_float</collision>
+          <collision>right_float</collision>
+          <collision>right_mid_float</collision>
+          <collision>right_front_float</collision>
+          <topic>/vrx/contacts</topic>
+        </contact>
+        <always_on>1</always_on>
+        <update_rate>5</update_rate>
+      </sensor>
+    </experimental:params>
   </include>
 
   <!-- Used to lock the WAM-V to the world -->
@@ -138,55 +156,48 @@ end
     <topic><%= $model_name%>/thrusters/right/pos</topic>
   </plugin>
 
+  <!-- Left hull -->
   <plugin
-    filename="libSimpleBuoyancy.so"
-    name="vrx::SimpleBuoyancy">
-    <fluid_density>1000</fluid_density>
-    <fluid_level>0.0</fluid_level>
-    <linear_drag>0.0</linear_drag>
-    <angular_drag>0.0</angular_drag>
-    <!-- Left Hull -->
-    <buoyancy name="left_hull_mid">
-      <link_name>base_link</link_name>
-      <pose>0.6 1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
-    <buoyancy name="left_hull_rear">
-      <link_name>base_link</link_name>
-      <pose>-1.4 1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
-    <!-- Right Hull -->
-    <buoyancy name="right_hull_mid">
-      <link_name>base_link</link_name>
-      <pose>0.6 -1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
-    <buoyancy name="right_hull_rear">
-      <link_name>base_link</link_name>
-      <pose>-1.4 -1.03 0.2 0 1.57 0</pose>
-      <geometry>
-        <cylinder>
-          <length>2</length>
-          <radius>0.2</radius>
-        </cylinder>
-      </geometry>
-    </buoyancy>
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <hull_length>4.9</hull_length>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+    <points>
+      <point>0.6 1.03 0</point>
+      <point>-1.4 1.03 0</point>
+    </points>
+    <wavefield>
+      <size><%= $wavefield_size%> <%= $wavefield_size%></size>
+      <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
+      <wave>
+        <model>PMS</model>
+        <period>5.0</period>
+        <number>3</number>
+        <scale>1.1</scale>
+        <gain>0.3</gain>
+        <direction>1 0</direction>
+        <angle>0.4</angle>
+        <tau>2.0</tau>
+        <amplitude>0.0</amplitude>
+        <steepness>0.0</steepness>
+      </wave>
+    </wavefield>
+  </plugin>
+
+  <!-- Right hull -->
+  <plugin
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <hull_length>4.9</hull_length>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+    <points>
+      <point>0.6 -1.03 0</point>
+      <point>-1.4 -1.03 0</point>
+    </points>
     <wavefield>
       <size><%= $wavefield_size%> <%= $wavefield_size%></size>
       <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>

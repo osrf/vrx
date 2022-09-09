@@ -29,7 +29,7 @@
 #include <ignition/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
-#include "SimpleBuoyancy.hh"
+#include "PolyhedraBuoyancyDrag.hh"
 #include "ShapeVolume.hh"
 #include "Wavefield.hh"
 
@@ -151,8 +151,8 @@ void BuoyancyObject::Load(const gazebo::Entity &_entity,
   }
 }
 
-/// \brief Private SimpleBuoyancy data class.
-class SimpleBuoyancy::Implementation
+/// \brief Private PolyhedraBuoyancyDrag data class.
+class PolyhedraBuoyancyDrag::Implementation
 {
   /// \brief The wavefield.
   public: Wavefield wavefield;
@@ -180,13 +180,13 @@ class SimpleBuoyancy::Implementation
 };
 
 //////////////////////////////////////////////////
-SimpleBuoyancy::SimpleBuoyancy()
+PolyhedraBuoyancyDrag::PolyhedraBuoyancyDrag()
   : System(), dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
-void SimpleBuoyancy::Configure(const gazebo::Entity &_entity,
+void PolyhedraBuoyancyDrag::Configure(const gazebo::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     gazebo::EntityComponentManager &_ecm,
     gazebo::EventManager &/*_eventMgr*/)
@@ -244,10 +244,10 @@ void SimpleBuoyancy::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void SimpleBuoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
+void PolyhedraBuoyancyDrag::PreUpdate(const gazebo::UpdateInfo &_info,
     gazebo::EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("SimpleBuoyancy::PreUpdate");
+  IGN_PROFILE("PolyhedraBuoyancyDrag::PreUpdate");
 
   // Elapsed time since the last update.
   double dt;
@@ -305,7 +305,6 @@ void SimpleBuoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
         continue;
       }
 
-      // Drag (based on Exact Buoyancy for Polyhedra by Eric Catto).
       // Linear drag.
       math::Vector3d relVel =
         math::Vector3d(0, 0, buoyancyObj.waterSpeed) - *linVel;
@@ -349,10 +348,10 @@ void SimpleBuoyancy::PreUpdate(const gazebo::UpdateInfo &_info,
   }
 }
 
-IGNITION_ADD_PLUGIN(SimpleBuoyancy,
+IGNITION_ADD_PLUGIN(PolyhedraBuoyancyDrag,
                     gazebo::System,
-                    SimpleBuoyancy::ISystemConfigure,
-                    SimpleBuoyancy::ISystemPreUpdate)
+                    PolyhedraBuoyancyDrag::ISystemConfigure,
+                    PolyhedraBuoyancyDrag::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(vrx::SimpleBuoyancy,
-                          "vrx::SimpleBuoyancy")
+IGNITION_ADD_PLUGIN_ALIAS(vrx::PolyhedraBuoyancyDrag,
+                          "vrx::PolyhedraBuoyancyDrag")
