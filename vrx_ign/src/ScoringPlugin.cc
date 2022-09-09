@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <ignition/msgs/param.pb.h>
 #include <chrono>
@@ -198,7 +198,7 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     if (value < 0)
     {
       ignerr << "<ready_state_duration> value should not be negative."
-            << std::endl;
+             << std::endl;
       return false;
     }
 
@@ -212,7 +212,7 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     if (value < 0)
     {
       ignerr << "<running_state_duration> value should not be negative."
-            << std::endl;
+             << std::endl;
       return false;
     }
     this->runningStateDuration = value;
@@ -326,7 +326,7 @@ void ScoringPlugin::Implementation::PublishStats()
 
   // We publish stats at 1Hz.
   if (this->currentTime - this->lastStatsSent >=
-        std::chrono::duration<double>(1.0))
+      std::chrono::duration<double>(1.0))
   {
     this->taskPub.Publish(this->taskMsg);
     this->lastStatsSent = this->currentTime;
@@ -411,7 +411,7 @@ void ScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->node.Subscribe("/vrx/contacts",
     &ScoringPlugin::OnContacts, this);
 
-  if (char* envDbg = std::getenv("VRX_DEBUG"))
+  if (char *envDbg = std::getenv("VRX_DEBUG"))
   {
     if (std::string(envDbg) == "false")
       this->dataPtr->debug = false;
@@ -487,6 +487,12 @@ void ScoringPlugin::SetTimeoutScore(double _timeoutScore)
 double ScoringPlugin::TimeoutScore() const
 {
   return this->dataPtr->timeoutScore;
+}
+
+//////////////////////////////////////////////////
+std::string ScoringPlugin::VehicleName() const
+{
+  return this->dataPtr->vehicleName;
 }
 
 //////////////////////////////////////////////////
