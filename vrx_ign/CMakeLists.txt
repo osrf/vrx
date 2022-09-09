@@ -78,7 +78,6 @@ install(
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
-
   StationkeepingScoringPlugin
   SimpleHydrodynamics
   Surface
@@ -109,9 +108,10 @@ ament_python_install_package(
 #============================================================================
 # Resources
 install(DIRECTORY
-  worlds
-  models
+  config
   launch
+  models
+  worlds
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()

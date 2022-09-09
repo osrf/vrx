@@ -37,15 +37,15 @@ class USVBridge : public rclcpp::Node
   {
     // cmd thrust pub
     this->leftCmdThrustPub = this->create_publisher<std_msgs::msg::Float64>(
-        "left/thrust/cmd_thrust", 10);
+        "/wamv/thrusters/left/thrust", 10);
     this->rightCmdThrustPub = this->create_publisher<std_msgs::msg::Float64>(
-        "right/thrust/cmd_thrust", 10);
+        "/wamv/thrusters/right/thrust", 10);
 
     // cmd pos pub
     this->leftCmdPosPub = this->create_publisher<std_msgs::msg::Float64>(
-        "left/thrust/joint/cmd_pos", 10);
+        "/wamv/thrusters/left/pos", 10);
     this->rightCmdPosPub = this->create_publisher<std_msgs::msg::Float64>(
-        "right/thrust/joint/cmd_pos", 10);
+        "/wamv/thrusters/right/pos", 10);
 
     // cmd thrust sub
     this->cmdThrustersSub =
