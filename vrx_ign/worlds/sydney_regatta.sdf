@@ -694,14 +694,6 @@
       <!-- <head_error_on>false</head_error_on> -->
       <goal_pose>-33.722718 150.674031 0</goal_pose>
       <!-- <goal_pose_cart>-532 162 1</goal_pose_cart> -->
-      <release_joints>
-        <joint>
-          <name>wamv_external_pivot_joint</name>
-        </joint>
-        <joint>
-          <name>wamv_external_riser</name>
-        </joint>
-      </release_joints>
       <!-- <markers>true</markers> -->
     </plugin>
 
