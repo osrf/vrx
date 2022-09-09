@@ -115,8 +115,8 @@ end
   <% end %>
 
   <plugin
-    filename="ignition-gazebo-thruster-system"
-    name="ignition::gazebo::systems::Thruster">
+    filename="gz-sim-thruster-system"
+    name="gz::sim::systems::Thruster">
     <joint_name>left_engine_propeller_joint</joint_name>
     <thrust_coefficient>0.004422</thrust_coefficient>
     <fluid_density>1000</fluid_density>
@@ -128,16 +128,16 @@ end
   </plugin>
 
   <plugin
-    filename="ignition-gazebo-joint-position-controller-system"
-    name="ignition::gazebo::systems::JointPositionController">
+    filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>left_chassis_engine_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
     <topic><%=$model_name%>/thrusters/left/pos</topic>
   </plugin>
 
   <plugin
-    filename="ignition-gazebo-thruster-system"
-    name="ignition::gazebo::systems::Thruster">
+    filename="gz-sim-thruster-system"
+    name="gz::sim::systems::Thruster">
     <joint_name>right_engine_propeller_joint</joint_name>
     <thrust_coefficient>0.004422</thrust_coefficient>
     <fluid_density>1000</fluid_density>
@@ -149,8 +149,8 @@ end
   </plugin>
 
   <plugin
-    filename="ignition-gazebo-joint-position-controller-system"
-    name="ignition::gazebo::systems::JointPositionController">
+    filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>right_chassis_engine_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
     <topic><%= $model_name%>/thrusters/right/pos</topic>
@@ -237,8 +237,8 @@ end
   </plugin>
 
   <!-- Publish robot state information -->
-  <plugin filename="libignition-gazebo-pose-publisher-system.so"
-    name="ignition::gazebo::systems::PosePublisher">
+  <plugin filename="libgz-sim-pose-publisher-system.so"
+    name="gz::sim::systems::PosePublisher">
     <publish_link_pose>true</publish_link_pose>
     <publish_sensor_pose>true</publish_sensor_pose>
     <publish_collision_pose>false</publish_collision_pose>

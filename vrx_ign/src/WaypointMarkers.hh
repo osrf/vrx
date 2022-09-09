@@ -20,8 +20,8 @@
 
 #include <memory>
 #include <string>
-#include <ignition/math/Vector3.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/transport/Node.hh>
 #include <sdf/sdf.hh>
 
 namespace vrx
@@ -85,7 +85,7 @@ namespace vrx
     private: std::string material;
 
     /// \brief Scaling factor for cylinder marker
-    private: ignition::math::Vector3d scaling;
+    private: gz::math::Vector3d scaling;
 
     /// \brief Height of marker above water
     private: double height;
@@ -94,7 +94,7 @@ namespace vrx
     private: int id = 0;
 
     /// \brief gazebo transport node
-    private: ignition::transport::Node node;
+    private: gz::transport::Node node;
   };
 }
 

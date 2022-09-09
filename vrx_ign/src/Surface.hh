@@ -18,9 +18,9 @@
 #ifndef VRX_SURFACE_HH_
 #define VRX_SURFACE_HH_
 
-#include <ignition/gazebo/System.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/utils/ImplPtr.hh>
+#include <gz/sim/System.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
 
 namespace vrx
@@ -56,8 +56,8 @@ namespace vrx
   ///
   /// ## Example
   /// <plugin
-  ///   filename="ignition-gazebo-surface-system"
-  ///   name="ignition::gazebo::systems::Surface">
+  ///   filename="gz-sim-surface-system"
+  ///   name="gz::sim::systems::Surface">
   ///   <link_name>base_link</link_name>
   ///   <vehicle_length>4.9</vehicle_length>
   ///   <vehicle_width>2.4</vehicle_width>
@@ -99,9 +99,9 @@ namespace vrx
   ///   </wavefield>
   /// </plugin>
   class Surface
-      : public ignition::gazebo::System,
-        public ignition::gazebo::ISystemConfigure,
-        public ignition::gazebo::ISystemPreUpdate
+      : public gz::sim::System,
+        public gz::sim::ISystemConfigure,
+        public gz::sim::ISystemPreUpdate
   {
     /// \brief Constructor.
     public: Surface();
@@ -110,19 +110,19 @@ namespace vrx
     public: ~Surface() override = default;
 
     // Documentation inherited.
-    public: void Configure(const ignition::gazebo::Entity &_entity,
+    public: void Configure(const gz::sim::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
-                           ignition::gazebo::EntityComponentManager &_ecm,
-                           ignition::gazebo::EventManager &_eventMgr) override;
+                           gz::sim::EntityComponentManager &_ecm,
+                           gz::sim::EventManager &_eventMgr) override;
 
     // Documentation inherited.
     public: void PreUpdate(
-                const ignition::gazebo::UpdateInfo &_info,
-                ignition::gazebo::EntityComponentManager &_ecm) override;
+                const gz::sim::UpdateInfo &_info,
+                gz::sim::EntityComponentManager &_ecm) override;
 
     /// \brief Get the gravity component.
     /// \return Gravity vector.
-    public: ignition::math::Vector3d Gravity() const;
+    public: gz::math::Vector3d Gravity() const;
 
     /// \brief Get the vehicle length.
     /// \return Vechicle length in m.
@@ -143,11 +143,11 @@ namespace vrx
     ///            surface.
     /// \param[in] _ecm Ignition's ECM.
     // public: virtual double BuoyancyAtPoint(
-    //                             const ignition::gazebo::UpdateInfo &_info,
-    //                             const ignition::math::Vector3d &_point,
+    //                             const gz::sim::UpdateInfo &_info,
+    //                             const gz::math::Vector3d &_point,
     //                             const uint16_t _pointsPerHull,
     //                             double _deltaZ,
-    //                             ignition::gazebo::EntityComponentManager &_ecm);
+    //                             gz::sim::EntityComponentManager &_ecm);
 
     /// \brief Convenience function for calculating the area of circle segment.
     /// \param[in] _r Radius of circle.
@@ -158,7 +158,7 @@ namespace vrx
                                  double _h) const;
 
     /// \brief Private data pointer.
-    IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
+    GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };
 }
 

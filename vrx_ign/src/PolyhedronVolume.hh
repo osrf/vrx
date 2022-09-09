@@ -19,8 +19,8 @@
 #define VRX_POLYHEDRONVOLUME_HH_
 
 #include <vector>
-#include <ignition/math/Vector3.hh>
-#include <ignition/math/Quaternion.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/math/Quaternion.hh>
 
 namespace vrx
 {
@@ -31,7 +31,7 @@ namespace vrx
     Plane();
 
     /// \brief Vector3 normal to plane.
-    ignition::math::Vector3d normal;
+    gz::math::Vector3d normal;
 
     /// \brief Offset w.r.t. normal.
     float offset;
@@ -49,7 +49,7 @@ namespace vrx
     double volume;
 
     /// \brief Vector3 representing volume centroid.
-    ignition::math::Vector3d centroid;
+    gz::math::Vector3d centroid;
   };
 
   /// \brief Submerged volume calculation using polyhedron
@@ -109,8 +109,8 @@ namespace vrx
     /// \param[in] _q Our orientation (quaternions).
     /// \param[in] _plane Water surface defined as a plane.
     /// \return Volume object with volume and centroid (relative to world).
-    public: Volume SubmergedVolume(const ignition::math::Vector3d &_x,
-                                   const ignition::math::Quaterniond &_q,
+    public: Volume SubmergedVolume(const gz::math::Vector3d &_x,
+                                   const gz::math::Quaterniond &_q,
                                    const Plane &_plane) const;
 
     /// \brief Computes volume and centroid of tetrahedron.
@@ -121,11 +121,11 @@ namespace vrx
     /// \param[in] _p Arbitrary point.
     /// \return Volume object with volume and centroid.
     private: static Volume tetrahedronVolume(
-                                      const ignition::math::Vector3d &_v1,
-                                      const ignition::math::Vector3d &_v2,
-                                      const ignition::math::Vector3d &_v3,
-                                      const ignition::math::Vector3d &_p =
-                                        ignition::math::Vector3d::Zero);
+                                      const gz::math::Vector3d &_v1,
+                                      const gz::math::Vector3d &_v2,
+                                      const gz::math::Vector3d &_v3,
+                                      const gz::math::Vector3d &_p =
+                                        gz::math::Vector3d::Zero);
 
     /// \brief Clips a partially submerged triangle.
     /// \param[in] _v1 Point on triangle.
@@ -135,17 +135,17 @@ namespace vrx
     /// \param[in] _d2 Distance of point v2 to the splitting plane.
     /// \param[in] _d3 Distance of point v3 to the splitting plane.
     /// \return Volume object for clipped tetrahedron.
-    private: static Volume clipTriangle(const ignition::math::Vector3d &_v1,
-                                        const ignition::math::Vector3d &_v2,
-                                        const ignition::math::Vector3d &_v3,
+    private: static Volume clipTriangle(const gz::math::Vector3d &_v1,
+                                        const gz::math::Vector3d &_v2,
+                                        const gz::math::Vector3d &_v3,
                                         double _d1,
                                         double _d2,
                                         double _d3,
-                                        const ignition::math::Vector3d &_p =
-                                          ignition::math::Vector3d::Zero);
+                                        const gz::math::Vector3d &_p =
+                                          gz::math::Vector3d::Zero);
 
     /// \brief Object vertices.
-    private: std::vector<ignition::math::Vector3d> vertices;
+    private: std::vector<gz::math::Vector3d> vertices;
 
     /// \brief Object faces.
     private: std::vector<Face> faces;

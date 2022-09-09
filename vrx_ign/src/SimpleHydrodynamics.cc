@@ -17,24 +17,24 @@
 
 #include <string>
 #include <Eigen/Eigen>
-#include <ignition/common/Profiler.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/plugin/Register.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
-#include "ignition/gazebo/Link.hh"
-#include "ignition/gazebo/Model.hh"
+#include "gz/sim/Link.hh"
+#include "gz/sim/Model.hh"
 
 #include "SimpleHydrodynamics.hh"
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 using namespace vrx;
 
 class vrx::SimpleHydrodynamicsPrivate
 {
   /// \brief The link entity.
-  public: ignition::gazebo::Link link;
+  public: gz::sim::Link link;
 
   /// \brief Model interface.
   public: Model model{kNullEntity};
@@ -186,10 +186,10 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
 
 //////////////////////////////////////////////////
 void SimpleHydrodynamics::PreUpdate(
-    const ignition::gazebo::UpdateInfo &_info,
-    ignition::gazebo::EntityComponentManager &_ecm)
+    const gz::sim::UpdateInfo &_info,
+    gz::sim::EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("SimpleHydrodynamics::PreUpdate");
+  GZ_PROFILE("SimpleHydrodynamics::PreUpdate");
 
   if (_info.paused)
     return;
@@ -275,19 +275,19 @@ void SimpleHydrodynamics::PreUpdate(
   const Eigen::VectorXd kForceSum = kAmassVec + kDvec;
 
   // Transform the force and torque to the world frame.
-  ignition::math::Vector3d forceWorld = (*comPose).Rot().RotateVector(
-    ignition::math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
-  ignition::math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
-    ignition::math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));
+  gz::math::Vector3d forceWorld = (*comPose).Rot().RotateVector(
+    gz::math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
+  gz::math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
+    gz::math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));
 
   // Apply the force and torque at COM.
   this->dataPtr->link.AddWorldWrench(_ecm, forceWorld, torqueWorld);
 }
 
-IGNITION_ADD_PLUGIN(vrx::SimpleHydrodynamics,
-                    ignition::gazebo::System,
+GZ_ADD_PLUGIN(vrx::SimpleHydrodynamics,
+                    gz::sim::System,
                     SimpleHydrodynamics::ISystemConfigure,
                     SimpleHydrodynamics::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(vrx::SimpleHydrodynamics,
+GZ_ADD_PLUGIN_ALIAS(vrx::SimpleHydrodynamics,
                           "vrx::SimpleHydrodynamics")

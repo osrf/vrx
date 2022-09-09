@@ -15,24 +15,24 @@
  *
  */
 
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/Pose.hh>
-#include <ignition/gazebo/components/World.hh>
-#include <ignition/gazebo/World.hh>
-#include <ignition/msgs/float.pb.h>
-#include <ignition/msgs/pose.pb.h>
-#include <ignition/plugin/Register.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/World.hh>
+#include <gz/msgs/float.pb.h>
+#include <gz/msgs/pose.pb.h>
+#include <gz/plugin/Register.hh>
 
 #include "StationkeepingScoringPlugin.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /// \brief Private ScoringPlugin data class.
 class StationkeepingScoringPlugin::Implementation
 {
   /// \brief Transport node.
-  public: transport::Node node;
+  public: transport::Node node{transport::NodeOptions()};
 
   /// \brief Topic where the task stats are published.
   public: std::string goalTopic = "/vrx/stationkeeping/goal";
@@ -89,7 +89,7 @@ class StationkeepingScoringPlugin::Implementation
   public: math::SphericalCoordinates sc;
 
   /// \brief Vehicle to score.
-  public: gazebo::Entity vehicleEntity;
+  public: sim::Entity vehicleEntity{sim::kNullEntity};
 
   /// \brief Waypoint visualization markers
   public: bool markers = false;
@@ -126,15 +126,15 @@ StationkeepingScoringPlugin::StationkeepingScoringPlugin()
 }
 
 /////////////////////////////////////////////////
-void StationkeepingScoringPlugin::Configure(const gazebo::Entity &_entity,
+void StationkeepingScoringPlugin::Configure(const sim::Entity &_entity,
   const std::shared_ptr<const sdf::Element> &_sdf,
-  gazebo::EntityComponentManager &_ecm, gazebo::EventManager &_eventMgr)
+  sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
   ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
   auto worldEntity =
-      _ecm.EntityByComponents(gazebo::components::World());
-  gazebo::World world(worldEntity);
+      _ecm.EntityByComponents(sim::components::World());
+  sim::World world(worldEntity);
   this->dataPtr->sc = world.SphericalCoordinates(_ecm).value();
 
   // Get lat, lon and yaw from SDF
@@ -185,8 +185,8 @@ void StationkeepingScoringPlugin::Configure(const gazebo::Entity &_entity,
     auto in = math::SphericalCoordinates::CoordinateType::GLOBAL;
     auto out = math::SphericalCoordinates::CoordinateType::SPHERICAL;
     auto scVec = this->dataPtr->sc.PositionTransform(cartVec, in, out);
-    scVec.X(IGN_RTOD(scVec.X()));
-    scVec.Y(IGN_RTOD(scVec.Y()));
+    scVec.X(GZ_RTOD(scVec.X()));
+    scVec.Y(GZ_RTOD(scVec.Y()));
 
     // Store spherical 2D location
     this->dataPtr->goalLat = scVec.X();
@@ -241,8 +241,8 @@ void StationkeepingScoringPlugin::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
-  gazebo::EntityComponentManager &_ecm)
+void StationkeepingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
+  sim::EntityComponentManager &_ecm)
 {
   ScoringPlugin::PreUpdate(_info, _ecm);
 
@@ -260,8 +260,8 @@ void StationkeepingScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
   if (!this->dataPtr->vehicleEntity)
   {
     auto entity = _ecm.EntityByComponents(
-      gazebo::components::Name(ScoringPlugin::VehicleName()));
-    if (entity != gazebo::kNullEntity)
+      sim::components::Name(ScoringPlugin::VehicleName()));
+    if (entity != sim::kNullEntity)
       this->dataPtr->vehicleEntity = entity;
     else
       return;
@@ -271,7 +271,7 @@ void StationkeepingScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
 
   msgs::Float poseErrorMsg;
   msgs::Float meanErrorMsg;
-  auto vehiclePose = _ecm.Component<gazebo::components::Pose>(
+  auto vehiclePose = _ecm.Component<sim::components::Pose>(
     this->dataPtr->vehicleEntity)->Data();
   double currentHeading = vehiclePose.Rot().Euler().Z();
   double dx = this->dataPtr->goalX - vehiclePose.Pos().X();
@@ -343,7 +343,7 @@ void StationkeepingScoringPlugin::OnCollision()
   ScoringPlugin::OnCollision();
 }
 
-IGNITION_ADD_PLUGIN(vrx::StationkeepingScoringPlugin,
-                    gazebo::System,
+GZ_ADD_PLUGIN(vrx::StationkeepingScoringPlugin,
+                    sim::System,
                     vrx::StationkeepingScoringPlugin::ISystemConfigure,
                     vrx::StationkeepingScoringPlugin::ISystemPreUpdate)

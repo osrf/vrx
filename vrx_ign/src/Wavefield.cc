@@ -20,14 +20,14 @@
 #include <string>
 
 #include <Eigen/Dense>
-#include <ignition/common/Console.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Vector2.hh>
-#include <ignition/math/Vector3.hh>
+#include <gz/common/Console.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/math/Vector2.hh>
+#include <gz/math/Vector3.hh>
 
 #include "Wavefield.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,10 +65,10 @@ class vrx::WavefieldPrivate
   }
 
   /// \brief The size of the wavefield.
-  public: ignition::math::Vector2d size;
+  public: gz::math::Vector2d size;
 
   /// \brief The number of grid cells in the wavefield.
-  public: ignition::math::Vector2d cellCount;
+  public: gz::math::Vector2d cellCount;
 
   /// \brief Name of wavefield model to use - must be "PMS" or "CWR"
   public: std::string model;
@@ -95,7 +95,7 @@ class vrx::WavefieldPrivate
   public: double phase;
 
   /// \brief The mean wave direction.
-  public: ignition::math::Vector2d direction;
+  public: gz::math::Vector2d direction;
 
   /// \brief The time constant for exponential increasing waves on startup
   public: double tau;
@@ -128,7 +128,7 @@ class vrx::WavefieldPrivate
   public: std::vector<double> wavenumbers;
 
   /// \brief The component wave dirctions (derived).
-  public: std::vector<ignition::math::Vector2d> directions;
+  public: std::vector<gz::math::Vector2d> directions;
 
   /// \brief True when waves are present.
   public: bool active = false;
@@ -163,7 +163,7 @@ class vrx::WavefieldPrivate
       const double omega = this->DeepWaterDispersionToOmega(k);
       const double phi = this->phase;
       double q = 0.0;
-      if (!ignition::math::equal(a, 0.0))
+      if (!gz::math::equal(a, 0.0))
       {
         q = std::min(1.0, this->steepness / (a * k * this->number));
       }
@@ -178,7 +178,7 @@ class vrx::WavefieldPrivate
       const double c = std::cos(n * this->angle);
       const double s = std::sin(n * this->angle);
 
-      const ignition::math::Vector2d d(
+      const gz::math::Vector2d d(
         c * this->direction.X() - s * this->direction.Y(),
         s * this->direction.X() + c * this->direction.Y());
       directions.push_back(d);
@@ -231,7 +231,7 @@ class vrx::WavefieldPrivate
       const double k = this->DeepWaterDispersionToWavenumber(omega);
       const double phi = this->phase;
       double q = 0.0;
-      if (!ignition::math::equal(a, 0.0))
+      if (!gz::math::equal(a, 0.0))
       {
         q = std::min(1.0, this->steepness / (a * k * this->number));
       }
@@ -246,7 +246,7 @@ class vrx::WavefieldPrivate
       const double c = std::cos(n * this->angle);
       const double s = std::sin(n * this->angle);
 
-      const ignition::math::Vector2d d(
+      const gz::math::Vector2d d(
         c * this->direction.X() - s * this->direction.Y(),
         s * this->direction.X() + c * this->direction.Y());
       directions.push_back(d);
@@ -312,9 +312,9 @@ void Wavefield::Load(const std::shared_ptr<const sdf::Element> &_sdf)
   auto ptr = const_cast<sdf::Element *>(_sdf.get());
   auto sdfWavefield = ptr->GetElement("wavefield");
 
-  this->data->size = sdfWavefield->Get<ignition::math::Vector2d>("size",
+  this->data->size = sdfWavefield->Get<gz::math::Vector2d>("size",
     this->data->size).first;
-  this->data->cellCount = sdfWavefield->Get<ignition::math::Vector2d>("cell_count",
+  this->data->cellCount = sdfWavefield->Get<gz::math::Vector2d>("cell_count",
     this->data->cellCount).first;
   if (sdfWavefield->HasElement("wave"))
   {
@@ -329,7 +329,7 @@ void Wavefield::Load(const std::shared_ptr<const sdf::Element> &_sdf)
       sdfWave->Get<double>("period", this->data->period).first;
     this->data->phase = sdfWave->Get<double>("phase", this->data->phase).first;
     this->data->direction =
-      sdfWave->Get<ignition::math::Vector2d>("direction",
+      sdfWave->Get<gz::math::Vector2d>("direction",
         this->data->direction).first;
     this->data->scale = sdfWave->Get<double>("scale", this->data->scale).first;
     this->data->angle = sdfWave->Get<double>("angle", this->data->angle).first;
@@ -424,7 +424,7 @@ float Wavefield::Gain() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-ignition::math::Vector2d Wavefield::Direction() const
+gz::math::Vector2d Wavefield::Direction() const
 {
   return this->data->direction;
 }
@@ -491,7 +491,7 @@ void Wavefield::SetGain(double _gain)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Wavefield::SetDirection(const ignition::math::Vector2d &_direction)
+void Wavefield::SetDirection(const gz::math::Vector2d &_direction)
 {
   this->data->direction = _direction;
   this->data->Recalculate();
@@ -528,7 +528,7 @@ const std::vector<double> &Wavefield::Wavenumber_V() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-const std::vector<ignition::math::Vector2d> &Wavefield::Direction_V() const
+const std::vector<gz::math::Vector2d> &Wavefield::Direction_V() const
 {
   return this->data->directions;
 }
@@ -568,7 +568,7 @@ void Wavefield::DebugPrint() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-double Wavefield::ComputeDepthSimply(const ignition::math::Vector3d &_point,
+double Wavefield::ComputeDepthSimply(const gz::math::Vector3d &_point,
   double _time, double _timeInit)
 {
   double h = 0.0;
@@ -590,7 +590,7 @@ double Wavefield::ComputeDepthSimply(const ignition::math::Vector3d &_point,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-double Wavefield::ComputeDepthDirectly(const ignition::math::Vector3d &_point,
+double Wavefield::ComputeDepthDirectly(const gz::math::Vector3d &_point,
   double _time, double _timeInit)
 {
   // Struture for passing wave parameters to lambdas
@@ -602,7 +602,7 @@ double Wavefield::ComputeDepthDirectly(const ignition::math::Vector3d &_point,
       const std::vector<double>& _omega,
       const std::vector<double>& _phi,
       const std::vector<double>& _q,
-      const std::vector<ignition::math::Vector2d>& _dir) :
+      const std::vector<gz::math::Vector2d>& _dir) :
       a(_a), k(_k), omega(_omega), phi(_phi), q(_q), dir(_dir) {}
 
     const std::vector<double>& a;
@@ -610,7 +610,7 @@ double Wavefield::ComputeDepthDirectly(const ignition::math::Vector3d &_point,
     const std::vector<double>& omega;
     const std::vector<double>& phi;
     const std::vector<double>& q;
-    const std::vector<ignition::math::Vector2d>& dir;
+    const std::vector<gz::math::Vector2d>& dir;
   };
 
   // Compute the target function and Jacobian. Also calculate pz,

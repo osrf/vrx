@@ -20,27 +20,27 @@
 #include <mutex>
 #include <string>
 
-#include <ignition/common/Profiler.hh>
-#include <ignition/plugin/Register.hh>
-#include <ignition/rendering/Material.hh>
-#include <ignition/rendering/RenderingIface.hh>
-#include <ignition/rendering/Scene.hh>
-#include <ignition/rendering/ShaderParams.hh>
-#include <ignition/rendering/Visual.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/plugin/Register.hh>
+#include <gz/rendering/Material.hh>
+#include <gz/rendering/RenderingIface.hh>
+#include <gz/rendering/Scene.hh>
+#include <gz/rendering/ShaderParams.hh>
+#include <gz/rendering/Visual.hh>
 
 #include <sdf/Element.hh>
 
-#include "ignition/gazebo/components/Name.hh"
-#include "ignition/gazebo/components/SourceFilePath.hh"
-#include "ignition/gazebo/rendering/Events.hh"
-#include "ignition/gazebo/rendering/RenderUtil.hh"
-#include "ignition/gazebo/Util.hh"
+#include "gz/sim/components/Name.hh"
+#include "gz/sim/components/SourceFilePath.hh"
+#include "gz/sim/rendering/Events.hh"
+#include "gz/sim/rendering/RenderUtil.hh"
+#include "gz/sim/Util.hh"
 
 #include "Wavefield.hh"
 #include "WaveVisual.hh"
 
-using namespace ignition;
-using namespace gazebo;
+using namespace gz;
+using namespace sim;
 using namespace vrx;
 
 class vrx::WaveVisualPrivate
@@ -55,7 +55,7 @@ class vrx::WaveVisualPrivate
   public: std::mutex mutex;
 
   /// \brief Connection to pre-render event callback
-  public: ignition::common::ConnectionPtr connection{nullptr};
+  public: gz::common::ConnectionPtr connection{nullptr};
 
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
@@ -126,7 +126,7 @@ void WaveVisual::Configure(const Entity &_entity,
                EntityComponentManager &_ecm,
                EventManager &_eventMgr)
 {
-  IGN_PROFILE("WaveVisual::Configure");
+  GZ_PROFILE("WaveVisual::Configure");
   // Ugly, but needed because the sdf::Element::GetElement is not a const
   // function and _sdf is a const shared pointer to a const sdf::Element.
   auto sdf = const_cast<sdf::Element *>(_sdf.get());
@@ -213,16 +213,16 @@ void WaveVisual::Configure(const Entity &_entity,
   // the callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
-      _eventMgr.Connect<ignition::gazebo::events::SceneUpdate>(
+      _eventMgr.Connect<gz::sim::events::SceneUpdate>(
       std::bind(&WaveVisualPrivate::OnUpdate, this->dataPtr.get()));
 }
 
 //////////////////////////////////////////////////
 void WaveVisual::PreUpdate(
-  const ignition::gazebo::UpdateInfo &_info,
-  ignition::gazebo::EntityComponentManager &)
+  const gz::sim::UpdateInfo &_info,
+  gz::sim::EntityComponentManager &)
 {
-  IGN_PROFILE("WaveVisual::PreUpdate");
+  GZ_PROFILE("WaveVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
 }
@@ -419,9 +419,9 @@ void WaveVisualPrivate::OnUpdate()
   }
 }
 
-IGNITION_ADD_PLUGIN(vrx::WaveVisual,
-                    ignition::gazebo::System,
+GZ_ADD_PLUGIN(vrx::WaveVisual,
+                    gz::sim::System,
                     WaveVisual::ISystemConfigure,
                     WaveVisual::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(WaveVisual, "vrx::WaveVisual")
+GZ_ADD_PLUGIN_ALIAS(WaveVisual, "vrx::WaveVisual")

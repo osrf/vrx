@@ -22,7 +22,7 @@
 #include <exception>
 #include <memory>
 #include <string>
-#include <ignition/math/Pose3.hh>
+#include <gz/math/Pose3.hh>
 #include <sdf/sdf.hh>
 
 #include "PolyhedronVolume.hh"
@@ -58,7 +58,7 @@ namespace vrx
     /// \param[in] _pose World pose of volume.
     /// \param[in] _fluidLevel Height of fluid. Default is 0.
     /// \return Volume object with volume + centroid (relative to world).
-    virtual Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+    virtual Volume CalculateVolume(const gz::math::Pose3d &_pose,
                                    double _fluidLevel) const = 0;
 
     /// \brief Type of shape.
@@ -89,7 +89,7 @@ namespace vrx
     std::string Display() const override;
 
     // Documentation inherited.
-    Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+    Volume CalculateVolume(const gz::math::Pose3d &_pose,
                            double _fluidLevel) const override;
 
     /// \brief Length.
@@ -118,7 +118,7 @@ namespace vrx
     std::string Display() const override;
 
     // Documentation inherited.
-    Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+    Volume CalculateVolume(const gz::math::Pose3d &_pose,
                            double _fluidLevel) const override;
 
     /// \brief Radius of cylinder.
@@ -142,7 +142,7 @@ namespace vrx
     std::string Display() const override;
 
     // Documentation inherited.
-    Volume CalculateVolume(const ignition::math::Pose3d &_pose,
+    Volume CalculateVolume(const gz::math::Pose3d &_pose,
                            double _fluidLevel) const override;
 
     /// \brief Radius of sphere.

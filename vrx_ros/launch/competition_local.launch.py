@@ -31,18 +31,18 @@ import vrx_ign.bridges
 import os
 
 def generate_launch_description():
-    ign_args = LaunchConfiguration('ign_args')
-    ign_args_launch = DeclareLaunchArgument(
-        'ign_args', 
+    gz_args = LaunchConfiguration('gz_args')
+    gz_args_launch = DeclareLaunchArgument(
+        'gz_args', 
         default_value='',
-        description='Arguments to be passed to Ignition Gazebo'
+        description='Arguments to be passed to Gazebo'
     )
 
-    ign_gazebo = IncludeLaunchDescription(
+    gz_gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-        get_package_share_directory('ros_ign_gazebo'), 'launch'),
-        '/ign_gazebo.launch.py']),
-        launch_arguments = {'ign_args': ign_args}.items())
+        get_package_share_directory('ros_gz_gazebo'), 'launch'),
+        '/gz_gazebo.launch.py']),
+        launch_arguments = {'gz_args': gz_args}.items())
 
     # Register handler for shutting down ros launch when ign gazebo process exits
     # monitor_sim.py will run until it can not find the ign gazebo process.
@@ -74,7 +74,7 @@ def generate_launch_description():
     ]
 
     bridge_node = Node(
-        package='ros_ign_bridge',
+        package='ros_gz_bridge',
         executable='parameter_bridge',
         output='screen',
         arguments=[bridge.argument() for bridge in bridges],
@@ -99,8 +99,8 @@ def generate_launch_description():
         launch_arguments = wamv_args.items())
 
     return LaunchDescription([
-        ign_args_launch,
-        ign_gazebo,
+        gz_args_launch,
+        gz_gazebo,
         bridge_node,
         spawn_wamv,
         monitor_sim_proc,

@@ -29,17 +29,17 @@ import os
 
 
 def simulation(world_name, headless=False):
-    ign_args = ['-v 4', '-r']
+    gz_args = ['-v 4', '-r']
     if headless:
-        ign_args.append('-s')
-    ign_args.append(f'{world_name}.sdf')
+        gz_args.append('-s')
+    gz_args.append(f'{world_name}.sdf')
 
-    ign_gazebo = IncludeLaunchDescription(
+    gz_gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('ros_ign_gazebo'), 'launch'),
-            '/ign_gazebo.launch.py']),
-        launch_arguments={'ign_args': ' '.join(ign_args)}.items())
-    return [ign_gazebo]
+            get_package_share_directory('ros_gz_gazebo'), 'launch'),
+            '/gz_gazebo.launch.py']),
+        launch_arguments={'gz_args': ' '.join(gz_args)}.items())
+    return [gz_gazebo]
 
 
 def competition_bridges():
@@ -52,7 +52,7 @@ def competition_bridges():
     ]
     nodes = []
     nodes.append(Node(
-        package='ros_ign_bridge',
+        package='ros_gz_bridge',
         executable='parameter_bridge',
         output='screen',
         arguments=[bridge.argument() for bridge in bridges],
@@ -72,13 +72,13 @@ def spawn(sim_mode, world_name, models, robot=None):
 
         # Script to insert model in running simulation
         if sim_mode == 'full' or sim_mode == 'sim':
-            ignition_spawn_entity = Node(
-                package='ros_ign_gazebo',
+            gz_spawn_entity = Node(
+                package='ros_gz_gazebo',
                 executable='create',
                 output='screen',
                 arguments=model.spawn_args()
             )
-            launch_processes.append(ignition_spawn_entity)
+            launch_processes.append(gz_spawn_entity)
 
         if sim_mode == 'full' or sim_mode == 'bridge':
             bridges, nodes, custom_launches = model.bridges(world_name)
@@ -100,7 +100,7 @@ def spawn(sim_mode, world_name, models, robot=None):
                 ))
 
             nodes.append(Node(
-                package='ros_ign_bridge',
+                package='ros_gz_bridge',
                 executable='parameter_bridge',
                 output='screen',
                 arguments=[bridge.argument() for bridge in bridges],
@@ -125,7 +125,7 @@ def spawn(sim_mode, world_name, models, robot=None):
             if sim_mode == 'full':
                 handler = RegisterEventHandler(
                     event_handler=OnProcessExit(
-                        target_action=ignition_spawn_entity,
+                        target_action=gz_spawn_entity,
                         on_exit=[group_action],
                     )
                 )

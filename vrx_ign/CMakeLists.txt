@@ -5,26 +5,28 @@ project(vrx_ign)
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
-find_package(ignition-gazebo6 REQUIRED)
-set(IGN_GAZEBO_VER ${ignition-gazebo6_VERSION_MAJOR})
+find_package(gz-sim7 REQUIRED)
+set(GZ_SIM_VER ${gz-sim7_VERSION_MAJOR})
 
-find_package(ignition-common4 REQUIRED COMPONENTS graphics)
-set(IGN_COMMON_VER ${ignition-common4_VERSION_MAJOR})
-find_package(ignition-fuel_tools7 REQUIRED)
-find_package(ignition-math6 REQUIRED)
-set(IGN_MATH_VER ${ignition-math6_VERSION_MAJOR})
-find_package(ignition-msgs8 REQUIRED)
-find_package(ignition-transport11 REQUIRED)
-set(IGN_TRANSPORT_VER ${ignition-transport11_VERSION_MAJOR})
-find_package(ignition-plugin1 REQUIRED COMPONENTS loader register)
-set(IGN_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
-find_package(ignition-rendering6 REQUIRED)
-set(IGN_RENDERING_VER ${ignition-rendering6_VERSION_MAJOR})
-find_package(ignition-utils1 REQUIRED)
-set(IGN_UTILS_VER ${ignition-utils1_VERSION_MAJOR})
-find_package(sdformat12 REQUIRED)
+find_package(gz-common5 REQUIRED COMPONENTS graphics)
+set(GZ_COMMON_VER ${gz-common5_VERSION_MAJOR})
+find_package(gz-fuel_tools8 REQUIRED)
+find_package(gz-math7 REQUIRED)
+set(GZ_MATH_VER ${gz-math7_VERSION_MAJOR})
+find_package(gz-msgs9 REQUIRED)
+find_package(gz-transport12 REQUIRED)
+set(GZ_TRANSPORT_VER ${gz-transport12_VERSION_MAJOR})
+find_package(gz-plugin2 REQUIRED COMPONENTS loader register)
+set(GZ_PLUGIN_VER ${gz-plugin2_VERSION_MAJOR})
+find_package(gz-rendering7 REQUIRED)
+set(GZ_RENDERING_VER ${gz-rendering7_VERSION_MAJOR})
+find_package(gz-utils2 REQUIRED)
+set(GZ_UTILS_VER ${gz-utils2_VERSION_MAJOR})
+find_package(sdformat13 REQUIRED)
 
 find_package(std_msgs REQUIRED)
+
+find_package(Eigen3 REQUIRED)
 
 #============================================================================
 # Hooks
@@ -38,9 +40,10 @@ add_library(Waves SHARED
   src/Wavefield.cc
 )
 target_link_libraries(Waves PUBLIC
-  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-  ignition-math${IGN_MATH_VER}
+  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+  gz-sim${GZ_SIM_VER}::core
+  gz-math${GZ_MATH_VER}
+  Eigen3::Eigen
 )
 install(
   TARGETS Waves
@@ -53,9 +56,9 @@ add_library(PolyhedraBuoyancyDrag SHARED
   src/ShapeVolume.cc
 )
 target_link_libraries(PolyhedraBuoyancyDrag PUBLIC
-  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-  ignition-math${IGN_MATH_VER}
+  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+  gz-sim${GZ_SIM_VER}::core
+  gz-math${GZ_MATH_VER}
   Waves
 )
 install(
@@ -68,9 +71,9 @@ add_library(ScoringPlugin SHARED
   src/ScoringPlugin.cc
 )
 target_link_libraries(ScoringPlugin PUBLIC
-  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-  ignition-math${IGN_MATH_VER}
+  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+  gz-sim${GZ_SIM_VER}::core
+  gz-math${GZ_MATH_VER}
 )
 install(
   TARGETS ScoringPlugin
@@ -82,9 +85,9 @@ add_library(WayfindingScoringPlugin SHARED
   src/WaypointMarkers
 )
 target_link_libraries(WayfindingScoringPlugin PUBLIC
-  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
-  ignition-gazebo${IGN_GAZEBO_VER}::core
-  ignition-math${IGN_MATH_VER}
+  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+  gz-sim${GZ_SIM_VER}::core
+  gz-math${GZ_MATH_VER}
   ScoringPlugin
 )
 install(
@@ -92,27 +95,28 @@ install(
   DESTINATION lib)
 
 # Plugins
-list(APPEND VRX_IGN_PLUGINS
+list(APPEND VRX_GZ_PLUGINS
   StationkeepingScoringPlugin
   SimpleHydrodynamics
   Surface
   WaveVisual
 )
 
-foreach(PLUGIN ${VRX_IGN_PLUGINS})
+foreach(PLUGIN ${VRX_GZ_PLUGINS})
   add_library(${PLUGIN} SHARED src/${PLUGIN}.cc)
   target_link_libraries(${PLUGIN} PUBLIC
-    ignition-gazebo${IGN_GAZEBO_VER}::core
-    ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
-    ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
-    ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
+    gz-sim${GZ_SIM_VER}::core
+    gz-plugin${GZ_PLUGIN_VER}::gz-plugin${GZ_PLUGIN_VER}
+    gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
+    gz-utils${GZ_UTILS_VER}::gz-utils${GZ_UTILS_VER}
     ScoringPlugin
     Waves
-)
+    Eigen3::Eigen
+  )
 endforeach()
 
 install(
-  TARGETS ${VRX_IGN_PLUGINS}
+  TARGETS ${VRX_GZ_PLUGINS}
   DESTINATION lib)
 
 ament_python_install_package(

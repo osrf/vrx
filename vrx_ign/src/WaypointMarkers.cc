@@ -15,12 +15,12 @@
  *
 */
 
-#include <ignition/msgs/marker.pb.h>
+#include <gz/msgs/marker.pb.h>
 #include <memory>
 #include <string>
 #include "WaypointMarkers.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /////////////////////////////////////////////////

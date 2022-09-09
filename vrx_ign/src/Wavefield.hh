@@ -21,9 +21,9 @@
 #include <memory>
 #include <vector>
 
-#include <ignition/gazebo/config.hh>
-#include <ignition/math/Vector2.hh>
-#include <ignition/math/Vector3.hh>
+#include <gz/sim/config.hh>
+#include <gz/math/Vector2.hh>
+#include <gz/math/Vector3.hh>
 #include <sdf/sdf.hh>
 
 namespace vrx
@@ -156,7 +156,7 @@ namespace vrx
 
     /// \brief A two component vector specifiying the direction
     /// of the mean wave.
-    public: ignition::math::Vector2d Direction() const;
+    public: gz::math::Vector2d Direction() const;
 
     /// \brief Set the number of wave components (3 max).
     ///
@@ -209,7 +209,7 @@ namespace vrx
     /// \brief Set the mean wave direction.
     ///
     /// \param[in] _direction The direction parameter, a two component vector.
-    public: void SetDirection(const ignition::math::Vector2d &_direction);
+    public: void SetDirection(const gz::math::Vector2d &_direction);
 
     /// \brief Access the component angular frequencies.
     public: const std::vector<double> &AngularFrequency_V() const;
@@ -227,7 +227,7 @@ namespace vrx
     public: const std::vector<double> &Wavenumber_V() const;
 
     /// \brief Access the component directions.
-    public: const std::vector<ignition::math::Vector2d> &Direction_V() const;
+    public: const std::vector<gz::math::Vector2d> &Direction_V() const;
 
     /// \brief Print a summary of the wave parameters to the gzmsg stream.
     public: void DebugPrint() const;
@@ -240,7 +240,7 @@ namespace vrx
     /// \param[in] _time        The time at which we want the depth.
     /// \param[in] _timeInit    The time at which we want the wavefield to start
     /// \return                 The depth 'h' at the point.
-    public: double ComputeDepthSimply(const ignition::math::Vector3d &_point,
+    public: double ComputeDepthSimply(const gz::math::Vector3d &_point,
                                       double _time,
                                       double _timeInit = 0);
 
@@ -263,7 +263,7 @@ namespace vrx
     /// \param[in] _time        The time at which we want the depth.
     /// \param[in] _timeInit    The time at which we want the wavefield to start
     /// \return                 The depth 'h' at the point.
-    public: double ComputeDepthDirectly(const ignition::math::Vector3d &_point,
+    public: double ComputeDepthDirectly(const gz::math::Vector3d &_point,
                                         double _time,
                                         double _timeInit = 0);
 

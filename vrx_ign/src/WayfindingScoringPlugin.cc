@@ -18,28 +18,28 @@
 #include <chrono>
 #include <string>
 #include <vector>
-#include <ignition/common/Profiler.hh>
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/Pose.hh>
-#include <ignition/gazebo/components/World.hh>
-#include <ignition/gazebo/Entity.hh>
-#include <ignition/gazebo/Model.hh>
-#include <ignition/gazebo/World.hh>
-#include <ignition/plugin/Register.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/Entity.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/World.hh>
+#include <gz/plugin/Register.hh>
+#include <gz/transport/Node.hh>
 #include <sdf/sdf.hh>
 
 #include "WayfindingScoringPlugin.hh"
 #include "WaypointMarkers.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /// \brief Private WayfindingScoringPlugin data class.
 class WayfindingScoringPlugin::Implementation
 {
   /// \brief A transport node.
-  public: transport::Node node;
+  public: transport::Node node{transport::NodeOptions()};
 
   /// \brief Topic where the list of waypoints is published.
   public: std::string waypointsTopic = "/vrx/wayfinding/waypoints";
@@ -86,7 +86,7 @@ class WayfindingScoringPlugin::Implementation
   public: math::SphericalCoordinates sc; 
 
   /// \brief Entity of the vehicle used.
-  public: gazebo::Entity vehicleEntity;
+  public: sim::Entity vehicleEntity{sim::kNullEntity};
 
   /// \brief Waypoint visualization markers.
   public: WaypointMarkers waypointMarkers{"waypoint_marker"};
@@ -106,17 +106,17 @@ WayfindingScoringPlugin::~WayfindingScoringPlugin()
 }
 
 //////////////////////////////////////////////////
-void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
+void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
   const std::shared_ptr<const sdf::Element> &_sdf,
-  gazebo::EntityComponentManager &_ecm, gazebo::EventManager &_eventMgr)
+  sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
   ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->dataPtr->sdf = _sdf->Clone();
 
-  auto worldEntity = _ecm.EntityByComponents(gazebo::components::World());
-  gazebo::World world(worldEntity);
+  auto worldEntity = _ecm.EntityByComponents(sim::components::World());
+  sim::World world(worldEntity);
 
   this->dataPtr->sc = world.SphericalCoordinates(_ecm).value();
 
@@ -210,8 +210,8 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
-  gazebo::EntityComponentManager &_ecm)
+void WayfindingScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
+  sim::EntityComponentManager &_ecm)
 {
   ScoringPlugin::PreUpdate(_info,_ecm);
 
@@ -230,15 +230,15 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
   if (!this->dataPtr->vehicleEntity)
   {
     auto entity = _ecm.EntityByComponents(
-      gazebo::components::Name(ScoringPlugin::VehicleName()));
-    if (entity != gazebo::kNullEntity)
+      sim::components::Name(ScoringPlugin::VehicleName()));
+    if (entity != sim::kNullEntity)
       this->dataPtr->vehicleEntity = entity;
     else
       return;
   }
 
   // calculate scores
-  auto vehiclePose = _ecm.Component<gazebo::components::Pose>(
+  auto vehiclePose = _ecm.Component<sim::components::Pose>(
     this->dataPtr->vehicleEntity)->Data();
 
   double currentHeading = vehiclePose.Rot().Euler().Z();
@@ -298,10 +298,10 @@ void WayfindingScoringPlugin::OnRunning()
   ignmsg << "WayfindingScoringPlugin::OnRunning" << std::endl;
 }
 
-IGNITION_ADD_PLUGIN(WayfindingScoringPlugin,
-                    gazebo::System,
+GZ_ADD_PLUGIN(WayfindingScoringPlugin,
+                    sim::System,
                     ScoringPlugin::ISystemConfigure,
                     ScoringPlugin::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(vrx::WayfindingScoringPlugin,
+GZ_ADD_PLUGIN_ALIAS(vrx::WayfindingScoringPlugin,
                           "vrx::WayfindingScoringPlugin")

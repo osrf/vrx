@@ -18,7 +18,7 @@
 #define VRX_SIMPLE_HYDRODYNAMICS_HH_
 
 #include <memory>
-#include <ignition/gazebo/System.hh>
+#include <gz/sim/System.hh>
 #include <sdf/sdf.hh>
 
 namespace vrx
@@ -68,7 +68,7 @@ namespace vrx
   /// # Example
   /// <plugin
   ///   filename="libSimpleHydrodynamics.so"
-  ///   name="ignition::gazebo::systems::SimpleHydrodynamics">
+  ///   name="gz::sim::systems::SimpleHydrodynamics">
   ///   <link_name>base_link</link_name>
   ///   <!-- Added mass -->
   ///   <xDotU>0.0</xDotU>
@@ -90,9 +90,9 @@ namespace vrx
   /// [1] Fossen, Thor I. _Guidance and Control of Ocean Vehicles_.
   ///    United Kingdom: Wiley, 1994.
   class SimpleHydrodynamics
-      : public ignition::gazebo::System,
-        public ignition::gazebo::ISystemConfigure,
-        public ignition::gazebo::ISystemPreUpdate
+      : public gz::sim::System,
+        public gz::sim::ISystemConfigure,
+        public gz::sim::ISystemPreUpdate
   {
     /// \brief Constructor.
     public: SimpleHydrodynamics();
@@ -101,15 +101,15 @@ namespace vrx
     public: ~SimpleHydrodynamics() override = default;
 
     // Documentation inherited.
-    public: void Configure(const ignition::gazebo::Entity &_entity,
+    public: void Configure(const gz::sim::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
-                           ignition::gazebo::EntityComponentManager &_ecm,
-                           ignition::gazebo::EventManager &_eventMgr) override;
+                           gz::sim::EntityComponentManager &_ecm,
+                           gz::sim::EventManager &_eventMgr) override;
 
     // Documentation inherited.
     public: void PreUpdate(
-                const ignition::gazebo::UpdateInfo &_info,
-                ignition::gazebo::EntityComponentManager &_ecm) override;
+                const gz::sim::UpdateInfo &_info,
+                gz::sim::EntityComponentManager &_ecm) override;
 
     /// \brief Private data pointer.
     private: std::unique_ptr<SimpleHydrodynamicsPrivate> dataPtr;

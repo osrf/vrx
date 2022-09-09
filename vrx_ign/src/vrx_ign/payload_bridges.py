@@ -45,77 +45,77 @@ def image(world_name, model_name, slot_idx, model_prefix=''):
     prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
     ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
     return Bridge(
-        ign_topic=f'{prefix}/camera/image',
+        gz_topic=f'{prefix}/camera/image',
         ros_topic=f'{ros_prefix}/image_raw',
-        ign_type='ignition.msgs.Image',
+        gz_type='gz.msgs.Image',
         ros_type='sensor_msgs/msg/Image',
-        direction=BridgeDirection.IGN_TO_ROS)
+        direction=BridgeDirection.GZ_TO_ROS)
 
 
 def depth_image(world_name, model_name, slot_idx, model_prefix=''):
     prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
     ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
     return Bridge(
-        ign_topic=f'{prefix}/camera/depth_image',
+        gz_topic=f'{prefix}/camera/depth_image',
         ros_topic=f'{ros_prefix}/depth',
-        ign_type='ignition.msgs.Image',
+        gz_type='gz.msgs.Image',
         ros_type='sensor_msgs/msg/Image',
-        direction=BridgeDirection.IGN_TO_ROS)
+        direction=BridgeDirection.GZ_TO_ROS)
 
 
 def camera_info(world_name, model_name, slot_idx, model_prefix=''):
     prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
     ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
     return Bridge(
-        ign_topic=f'{prefix}/camera/camera_info',
+        gz_topic=f'{prefix}/camera/camera_info',
         ros_topic=f'{ros_prefix}/camera_info',
-        ign_type='ignition.msgs.CameraInfo',
+        gz_type='gz.msgs.CameraInfo',
         ros_type='sensor_msgs/msg/CameraInfo',
-        direction=BridgeDirection.IGN_TO_ROS)
+        direction=BridgeDirection.GZ_TO_ROS)
 
 
 def lidar_scan(world_name, model_name, slot_idx, model_prefix=''):
     prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
     ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
     return Bridge(
-        ign_topic=f'{prefix}/lidar/scan',
+        gz_topic=f'{prefix}/lidar/scan',
         ros_topic=f'{ros_prefix}/scan',
-        ign_type='ignition.msgs.LaserScan',
+        gz_type='gz.msgs.LaserScan',
         ros_type='sensor_msgs/msg/LaserScan',
-        direction=BridgeDirection.IGN_TO_ROS)
+        direction=BridgeDirection.GZ_TO_ROS)
 
 
 def lidar_points(world_name, model_name, slot_idx, model_prefix=''):
     prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
     ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
     return Bridge(
-        ign_topic=f'{prefix}/lidar/scan/points',
+        gz_topic=f'{prefix}/lidar/scan/points',
         ros_topic=f'{ros_prefix}/points',
-        ign_type='ignition.msgs.PointCloudPacked',
+        gz_type='gz.msgs.PointCloudPacked',
         ros_type='sensor_msgs/msg/PointCloud2',
-        direction=BridgeDirection.IGN_TO_ROS)
+        direction=BridgeDirection.GZ_TO_ROS)
 
 
 def camera_points(world_name, model_name, slot_idx, model_prefix=''):
     prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
     ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
     return Bridge(
-        ign_topic=f'{prefix}/camera/points',
+        gz_topic=f'{prefix}/camera/points',
         ros_topic=f'{ros_prefix}/points',
-        ign_type='ignition.msgs.PointCloudPacked',
+        gz_type='gz.msgs.PointCloudPacked',
         ros_type='sensor_msgs/msg/PointCloud2',
-        direction=BridgeDirection.IGN_TO_ROS)
+        direction=BridgeDirection.GZ_TO_ROS)
 
 
 def rfranger(world_name, model_name, slot_idx, model_prefix=''):
     prefix = f'/world/{world_name}/model/{model_name}/model/sensor_{slot_idx}'
     ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
     return Bridge(
-        ign_topic=f'{prefix}/rfsensor',
+        gz_topic=f'{prefix}/rfsensor',
         ros_topic=f'{ros_prefix}/rfsensor',
-        ign_type='ignition.msgs.Param_V',
-        ros_type='ros_ign_interfaces/msg/ParamVec',
-        direction=BridgeDirection.IGN_TO_ROS)
+        gz_type='gz.msgs.Param_V',
+        ros_type='ros_gz_interfaces/msg/ParamVec',
+        direction=BridgeDirection.GZ_TO_ROS)
 
 
 def payload_bridges(world_name, model_name, payload, idx, model_prefix=''):

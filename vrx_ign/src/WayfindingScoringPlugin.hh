@@ -22,10 +22,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <ignition/gazebo/Entity.hh>
-#include <ignition/gazebo/System.hh>
-#include <ignition/transport/Node.hh>
-#include <ignition/utils/ImplPtr.hh>
+#include <gz/sim/Entity.hh>
+#include <gz/sim/System.hh>
+#include <gz/transport/Node.hh>
+#include <gz/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
 
 #include "ScoringPlugin.hh"
@@ -68,16 +68,16 @@ class WayfindingScoringPlugin : public ScoringPlugin
   public: ~WayfindingScoringPlugin() override;
 
   // Documentation inherited.
-  public: void Configure(const ignition::gazebo::Entity &_entity,
+  public: void Configure(const gz::sim::Entity &_entity,
                          const std::shared_ptr<const sdf::Element> &_sdf,
-                         ignition::gazebo::EntityComponentManager &_ecm,
-                         ignition::gazebo::EventManager &_eventMgr) override;
+                         gz::sim::EntityComponentManager &_ecm,
+                         gz::sim::EventManager &_eventMgr) override;
 
   // Documentation inherited. 
   /// \brief Callback executed at every world update.
   public: void PreUpdate(
-                    const ignition::gazebo::UpdateInfo &_info,
-                    ignition::gazebo::EntityComponentManager &_ecm) override;
+                    const gz::sim::UpdateInfo &_info,
+                    gz::sim::EntityComponentManager &_ecm) override;
 
   // Documentation inherited.
   protected: void OnReady() override;
@@ -86,7 +86,7 @@ class WayfindingScoringPlugin : public ScoringPlugin
   protected: void OnRunning() override;
 
   /// \brief Private data pointer.
-  IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
+  GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
 };
 
 } // namespace

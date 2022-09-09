@@ -15,21 +15,21 @@
  *
  */
 
-#include <ignition/msgs/param.pb.h>
+#include <gz/msgs/param.pb.h>
 #include <chrono>
 #include <string>
 #include <vector>
-#include <ignition/common/Profiler.hh>
-#include <ignition/gazebo/Entity.hh>
-#include <ignition/gazebo/Events.hh>
-#include <ignition/gazebo/Model.hh>
-#include <ignition/plugin/Register.hh>
-#include <ignition/transport/Node.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/sim/Entity.hh>
+#include <gz/sim/Events.hh>
+#include <gz/sim/Model.hh>
+#include <gz/plugin/Register.hh>
+#include <gz/transport/Node.hh>
 #include <sdf/sdf.hh>
 
 #include "ScoringPlugin.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /// \brief Private ScoringPlugin data class.
@@ -60,7 +60,7 @@ class ScoringPlugin::Implementation
   public: std::string vehicleName;
 
   /// \brief Vehicle to score.
-  public: gazebo::Model vehicleModel;
+  public: sim::Model vehicleModel{gz::sim::kNullEntity};
 
   /// \brief Silent mode enabled?
   public: bool silent = false;
@@ -326,9 +326,9 @@ void ScoringPlugin::Implementation::Exit()
   }
   else
   {
-    ignerr << "VRX_EXIT_ON_COMPLETION and <per_plugin_exit_on_completion> "
-           << "both not set, will not shutdown on ScoringPlugin::Exit()"
-           << std::endl;
+    gzerr << "VRX_EXIT_ON_COMPLETION and <per_plugin_exit_on_completion> "
+          << "both not set, will not shutdown on ScoringPlugin::Exit()"
+          << std::endl;
   }
   return;
 }
@@ -340,10 +340,10 @@ ScoringPlugin::ScoringPlugin()
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::Configure(const gazebo::Entity &_entity,
+void ScoringPlugin::Configure(const sim::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
-    gazebo::EntityComponentManager &_ecm,
-    gazebo::EventManager &_eventMgr)
+    sim::EntityComponentManager &_ecm,
+    sim::EventManager &_eventMgr)
 {
   this->dataPtr->sdf = _sdf->Clone();
   this->dataPtr->eventManager = &_eventMgr;
@@ -425,10 +425,10 @@ void ScoringPlugin::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
-    gazebo::EntityComponentManager &_ecm)
+void ScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
+    sim::EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("ScoringPlugin::PreUpdate");
+  GZ_PROFILE("ScoringPlugin::PreUpdate");
 
   this->dataPtr->UpdateTime(_info.simTime);
   this->UpdateTaskState();
@@ -539,7 +539,7 @@ void ScoringPlugin::OnCollision()
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::OnContacts(const ignition::msgs::Contacts &_contacts)
+void ScoringPlugin::OnContacts(const gz::msgs::Contacts &_contacts)
 {
   // If any collision includes the WAM-V, increment collision counter.
   for (unsigned int i = 0; i < _contacts.contact_size(); ++i)
@@ -587,10 +587,10 @@ void ScoringPlugin::ReleaseVehicle()
   this->dataPtr->releasePub.Publish(msg);
 }
 
-IGNITION_ADD_PLUGIN(ScoringPlugin,
-                    gazebo::System,
+GZ_ADD_PLUGIN(ScoringPlugin,
+                    sim::System,
                     ScoringPlugin::ISystemConfigure,
                     ScoringPlugin::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(vrx::ScoringPlugin,
+GZ_ADD_PLUGIN_ALIAS(vrx::ScoringPlugin,
                           "vrx::ScoringPlugin")

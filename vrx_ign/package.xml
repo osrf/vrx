@@ -2,7 +2,7 @@
 <package format="2">
   <name>vrx_ign</name>
   <version>0.0.0</version>
-  <description>VRX ignition resources</description>
+  <description>VRX gazebo resources</description>
 
   <maintainer email="caguero@openrobotics.org">Carlos Agüero</maintainer>
 
@@ -20,7 +20,7 @@
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
-  <exec_depend>ros_ign_gazebo</exec_depend>
+  <exec_depend>ros_gz_gazebo</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>xacro</exec_depend>
   <exec_depend>vrx_ros</exec_depend>

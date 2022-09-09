@@ -14,27 +14,26 @@
  * limitations under the License.
  *
  */
-#include <ignition/msgs/wrench.pb.h>
+#include <gz/msgs/wrench.pb.h>
 #include <chrono>
 #include <string>
 #include <unordered_map>
-#include <ignition/common/Profiler.hh>
-#include <ignition/common/Time.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/plugin/Register.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
-#include "ignition/gazebo/components/Inertial.hh"
-#include "ignition/gazebo/components/Pose.hh"
-#include "ignition/gazebo/Link.hh"
-#include "ignition/gazebo/Model.hh"
-#include "ignition/gazebo/Util.hh"
-#include "ignition/gazebo/World.hh"
+#include "gz/sim/components/Inertial.hh"
+#include "gz/sim/components/Pose.hh"
+#include "gz/sim/Link.hh"
+#include "gz/sim/Model.hh"
+#include "gz/sim/Util.hh"
+#include "gz/sim/World.hh"
 
 #include "Surface.hh"
 #include "Wavefield.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /// \brief Private Surface data class.
@@ -45,7 +44,7 @@ class vrx::Surface::Implementation
   public: void ParsePoints(const std::shared_ptr<const sdf::Element> &_sdf);
 
   /// \brief The link entity.
-  public: gazebo::Link link;
+  public: sim::Link link{sim::kNullEntity};
 
   /// \brief Vessel length [m].
   public: double hullLength = 4.9;
@@ -90,7 +89,7 @@ void Surface::Implementation::ParsePoints(
   // Parse a new point.
   while (pointElem)
   {
-    ignition::math::Vector3d point;
+    gz::math::Vector3d point;
     pointElem->GetValue()->Get<math::Vector3d>(point);
     this->points.push_back(point);
 
@@ -124,7 +123,7 @@ void Surface::Implementation::ParsePoints(
   //   auto pointElem = sdfHull->GetElement("point");
   //   while (pointElem)
   //   {
-  //     ignition::math::Vector3d point;
+  //     gz::math::Vector3d point;
   //     pointElem->GetValue()->Get<math::Vector3d>(point);
   //     this->hulls[name].push_back(point);
 
@@ -150,10 +149,10 @@ Surface::Surface()
 }
 
 //////////////////////////////////////////////////
-void Surface::Configure(const gazebo::Entity &_entity,
+void Surface::Configure(const sim::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
-    gazebo::EntityComponentManager &_ecm,
-    gazebo::EventManager &/*_eventMgr*/)
+    sim::EntityComponentManager &_ecm,
+    sim::EventManager &/*_eventMgr*/)
 {
   // Parse required elements.
   if (!_sdf->HasElement("link_name"))
@@ -162,9 +161,9 @@ void Surface::Configure(const gazebo::Entity &_entity,
     return;
   }
 
-  gazebo::Model model(_entity);
+  sim::Model model(_entity);
   std::string linkName = _sdf->Get<std::string>("link_name");
-  this->dataPtr->link = gazebo::Link(model.LinkByName(_ecm, linkName));
+  this->dataPtr->link = sim::Link(model.LinkByName(_ecm, linkName));
   if (!this->dataPtr->link.Valid(_ecm))
   {
     ignerr << "Could not find link named [" << linkName
@@ -200,8 +199,8 @@ void Surface::Configure(const gazebo::Entity &_entity,
   this->dataPtr->ParsePoints(_sdf);
 
   // Get the gravity from the world.
-  auto worldEntity = gazebo::worldEntity(_ecm);
-  auto world = gazebo::World(worldEntity);
+  auto worldEntity = sim::worldEntity(_ecm);
+  auto world = sim::World(worldEntity);
   auto gravityOpt = world.Gravity(_ecm);
   if (!gravityOpt)
   {
@@ -226,10 +225,10 @@ void Surface::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void Surface::PreUpdate(const gazebo::UpdateInfo &_info,
-    gazebo::EntityComponentManager &_ecm)
+void Surface::PreUpdate(const sim::UpdateInfo &_info,
+    sim::EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("Surface::PreUpdate");
+  GZ_PROFILE("Surface::PreUpdate");
 
   if (_info.paused)
     return;
@@ -324,10 +323,10 @@ double Surface::FluidDensity() const
 }
 
 //////////////////////////////////////////////////
-// double Surface::BuoyancyAtPoint(const gazebo::UpdateInfo &/*_info*/,
+// double Surface::BuoyancyAtPoint(const sim::UpdateInfo &/*_info*/,
 //     const math::Vector3d &/*_point*/, const uint16_t _pointsPerHull,
 //     double _deltaZ,
-//     gazebo::EntityComponentManager &/*_ecm*/)
+//     sim::EntityComponentManager &/*_ecm*/)
 // {
 //   // Buoyancy force at this point.
 //   return this->CircleSegment(this->dataPtr->hullRadius, _deltaZ) *
@@ -335,10 +334,10 @@ double Surface::FluidDensity() const
 //     -this->dataPtr->gravity.Z() * this->dataPtr->fluidDensity;
 // }
 
-IGNITION_ADD_PLUGIN(Surface,
-                    gazebo::System,
+GZ_ADD_PLUGIN(Surface,
+                    sim::System,
                     Surface::ISystemConfigure,
                     Surface::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(vrx::Surface,
+GZ_ADD_PLUGIN_ALIAS(vrx::Surface,
                           "vrx::Surface")

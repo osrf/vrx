@@ -15,7 +15,7 @@
  *
  */
 
-#include <ignition/math/Angle.hh>
+#include <gz/math/Angle.hh>
 
 #include <std_msgs/msg/int16_multi_array.hpp>
 #include <std_msgs/msg/float64.hpp>
@@ -98,7 +98,7 @@ class USVBridge : public rclcpp::Node
     // 90 deg in hw = -180 in sim
     double leftDeg = leftValue / 100.0;
     leftDeg += 90;
-    ignition::math::Angle leftAngle;
+    gz::math::Angle leftAngle;
     leftAngle.SetDegree(leftDeg);
 
     std_msgs::msg::Float64 leftPosMsg;
@@ -107,7 +107,7 @@ class USVBridge : public rclcpp::Node
 
     double rightDeg = rightValue / 100.0;
     rightDeg += 90;
-    ignition::math::Angle rightAngle;
+    gz::math::Angle rightAngle;
     rightAngle.SetDegree(rightDeg);
 
     std_msgs::msg::Float64 rightPosMsg;

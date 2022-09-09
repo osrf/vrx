@@ -16,8 +16,8 @@
   <depend>geometry_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rosgraph_msgs</depend>
-  <depend>ros_ign_bridge</depend>
-  <depend>ros_ign_interfaces</depend>
+  <depend>ros_gz_bridge</depend>
+  <depend>ros_gz_interfaces</depend>
   <depend>sensor_msgs</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>

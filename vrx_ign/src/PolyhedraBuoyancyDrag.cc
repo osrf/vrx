@@ -18,22 +18,22 @@
 #include <string>
 #include <ostream>
 #include <vector>
-#include <ignition/common/Profiler.hh>
-#include <ignition/gazebo/components/Inertial.hh>
-#include <ignition/gazebo/Entity.hh>
-#include <ignition/gazebo/Link.hh>
-#include <ignition/gazebo/Util.hh>
-#include <ignition/gazebo/World.hh>
-#include <ignition/math/Pose3.hh>
-#include <ignition/math/Vector3.hh>
-#include <ignition/plugin/Register.hh>
+#include <gz/common/Profiler.hh>
+#include <gz/sim/components/Inertial.hh>
+#include <gz/sim/Entity.hh>
+#include <gz/sim/Link.hh>
+#include <gz/sim/Util.hh>
+#include <gz/sim/World.hh>
+#include <gz/math/Pose3.hh>
+#include <gz/math/Vector3.hh>
+#include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
 #include "PolyhedraBuoyancyDrag.hh"
 #include "ShapeVolume.hh"
 #include "Wavefield.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /// \brief A class for storing buoyancy object properties.
@@ -52,9 +52,9 @@ class BuoyancyObject
   /// \param[in] _entity The model entity contining the buoyancy object.
   /// \param[in] _sdf The SDF Element tree containing the object parameters.
   /// \param[in] _ecm Gazebo's ECM.
-  public: void Load(const gazebo::Entity &_entity,
+  public: void Load(const sim::Entity &_entity,
                     const std::shared_ptr<const sdf::Element> &_sdf,
-                    gazebo::EntityComponentManager &_ecm);
+                    sim::EntityComponentManager &_ecm);
 
   /// \brief Stream extraction operator.
   /// \param[in] _out output stream.
@@ -75,10 +75,10 @@ class BuoyancyObject
   }
 
   /// \brief The link entity.
-  public: gazebo::Link link;
+  public: sim::Link link;
 
   /// \brief Associated link ID.
-  public: gazebo::Entity linkId = -1;
+  public: sim::Entity linkId = -1;
 
   /// \brief Associated link name.
   public: std::string linkName = "";
@@ -100,9 +100,9 @@ class BuoyancyObject
 };
 
 ///////////////////////////////////////////////////
-void BuoyancyObject::Load(const gazebo::Entity &_entity,
+void BuoyancyObject::Load(const sim::Entity &_entity,
   const std::shared_ptr<const sdf::Element> &_sdf,
-  gazebo::EntityComponentManager &_ecm)
+  sim::EntityComponentManager &_ecm)
 {
   // Parse required <link_name>.
   if (!_sdf->HasElement("link_name"))
@@ -112,8 +112,8 @@ void BuoyancyObject::Load(const gazebo::Entity &_entity,
   }
 
   this->linkName = _sdf->Get<std::string>("link_name");
-  gazebo::Model model(_entity);
-  this->link = gazebo::Link(model.LinkByName(_ecm, this->linkName));
+  sim::Model model(_entity);
+  this->link = sim::Link(model.LinkByName(_ecm, this->linkName));
   if (!this->link.Valid(_ecm))
   {
     ignerr << "Could not find link named [" << this->linkName
@@ -124,7 +124,7 @@ void BuoyancyObject::Load(const gazebo::Entity &_entity,
   this->linkId = this->link.Entity();
 
   // Get mass.
-  auto inertial = _ecm.Component<gazebo::components::Inertial>(this->linkId);
+  auto inertial = _ecm.Component<sim::components::Inertial>(this->linkId);
   if (!inertial)
   {
     ignerr << "Could not inertial element for [" << this->linkName
@@ -186,10 +186,10 @@ PolyhedraBuoyancyDrag::PolyhedraBuoyancyDrag()
 }
 
 //////////////////////////////////////////////////
-void PolyhedraBuoyancyDrag::Configure(const gazebo::Entity &_entity,
+void PolyhedraBuoyancyDrag::Configure(const sim::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
-    gazebo::EntityComponentManager &_ecm,
-    gazebo::EventManager &/*_eventMgr*/)
+    sim::EntityComponentManager &_ecm,
+    sim::EventManager &/*_eventMgr*/)
 {
   // Parse optional <wavefield>.
   this->dataPtr->wavefield.Load(_sdf);
@@ -213,7 +213,7 @@ void PolyhedraBuoyancyDrag::Configure(const gazebo::Entity &_entity,
   // Parse optional <buoyancy>.
   if (_sdf->HasElement("buoyancy"))
   {
-    gazebo::Model model(_entity);
+    sim::Model model(_entity);
     igndbg << "Found buoyancy element(s), looking at each element..."
            << std::endl;
     auto ptr = const_cast<sdf::Element *>(_sdf.get());
@@ -232,8 +232,8 @@ void PolyhedraBuoyancyDrag::Configure(const gazebo::Entity &_entity,
   }
 
   // Get the gravity from the world.
-  auto worldEntity = gazebo::worldEntity(_ecm);
-  auto world = gazebo::World(worldEntity);
+  auto worldEntity = sim::worldEntity(_ecm);
+  auto world = sim::World(worldEntity);
   auto gravityOpt = world.Gravity(_ecm);
   if (!gravityOpt)
   {
@@ -244,10 +244,10 @@ void PolyhedraBuoyancyDrag::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void PolyhedraBuoyancyDrag::PreUpdate(const gazebo::UpdateInfo &_info,
-    gazebo::EntityComponentManager &_ecm)
+void PolyhedraBuoyancyDrag::PreUpdate(const sim::UpdateInfo &_info,
+    sim::EntityComponentManager &_ecm)
 {
-  IGN_PROFILE("PolyhedraBuoyancyDrag::PreUpdate");
+  GZ_PROFILE("PolyhedraBuoyancyDrag::PreUpdate");
 
   // Elapsed time since the last update.
   double dt;
@@ -348,10 +348,10 @@ void PolyhedraBuoyancyDrag::PreUpdate(const gazebo::UpdateInfo &_info,
   }
 }
 
-IGNITION_ADD_PLUGIN(PolyhedraBuoyancyDrag,
-                    gazebo::System,
+GZ_ADD_PLUGIN(PolyhedraBuoyancyDrag,
+                    sim::System,
                     PolyhedraBuoyancyDrag::ISystemConfigure,
                     PolyhedraBuoyancyDrag::ISystemPreUpdate)
 
-IGNITION_ADD_PLUGIN_ALIAS(vrx::PolyhedraBuoyancyDrag,
+GZ_ADD_PLUGIN_ALIAS(vrx::PolyhedraBuoyancyDrag,
                           "vrx::PolyhedraBuoyancyDrag")

@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include "ignition/gazebo/System.hh"
+#include "gz/sim/System.hh"
 
 namespace vrx
 {
@@ -37,9 +37,9 @@ namespace vrx
   /// <wavefield>  Wavefield parameters - see Wavefield.hh
   ///
   class WaveVisual
-      : public ignition::gazebo::System,
-        public ignition::gazebo::ISystemConfigure,
-        public ignition::gazebo::ISystemPreUpdate
+      : public gz::sim::System,
+        public gz::sim::ISystemConfigure,
+        public gz::sim::ISystemPreUpdate
   {
     /// \brief Constructor
     public: WaveVisual();
@@ -48,15 +48,15 @@ namespace vrx
     public: ~WaveVisual() override;
 
     // Documentation inherited
-    public: void Configure(const ignition::gazebo::Entity &_entity,
+    public: void Configure(const gz::sim::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
-                           ignition::gazebo::EntityComponentManager &_ecm,
-                           ignition::gazebo::EventManager &_eventMgr) final;
+                           gz::sim::EntityComponentManager &_ecm,
+                           gz::sim::EventManager &_eventMgr) final;
 
     /// Documentation inherited
     public: void PreUpdate(
-                const ignition::gazebo::UpdateInfo &_info,
-                ignition::gazebo::EntityComponentManager &_ecm) override;
+                const gz::sim::UpdateInfo &_info,
+                gz::sim::EntityComponentManager &_ecm) override;
 
     /// \brief Private data pointer
     private: std::unique_ptr<WaveVisualPrivate> dataPtr;

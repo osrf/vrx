@@ -17,7 +17,7 @@
 
 #include "ShapeVolume.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /////////////////////////////////////////////////
