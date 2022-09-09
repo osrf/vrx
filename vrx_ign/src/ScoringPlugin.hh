@@ -174,6 +174,10 @@ namespace vrx
     /// \return The timeout score.
     protected: double TimeoutScore() const;
 
+    /// \brief Get the vehicleName.
+    /// \return The vehicle name.
+    protected: std::string VehicleName() const;
+
     /// \brief Get the number of WAM-V collisions.
     /// \return Number of collisions
     protected: uint16_t NumCollisions() const;
