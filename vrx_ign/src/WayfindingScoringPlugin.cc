@@ -107,9 +107,8 @@ WayfindingScoringPlugin::~WayfindingScoringPlugin()
 
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
-                           const std::shared_ptr<const sdf::Element> &_sdf,
-                           gazebo::EntityComponentManager &_ecm,
-                           gazebo::EventManager &_eventMgr)
+  const std::shared_ptr<const sdf::Element> &_sdf,
+  gazebo::EntityComponentManager &_ecm, gazebo::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
   ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
@@ -174,22 +173,22 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   // set up topics
   if (this->dataPtr->sdf->HasElement("waypoints_topic"))
   {
-    this->dataPtr->waypointsTopic = this->dataPtr->sdf->Get<std::string>("waypoints_topic");
+    this->dataPtr->waypointsTopic =
+      this->dataPtr->sdf->Get<std::string>("waypoints_topic");
   }
+
   this->dataPtr->waypointsPub = this->dataPtr->node.Advertise<msgs::Pose_V>(
     this->dataPtr->waypointsTopic, opts);
 
   if (_sdf->HasElement("min_errors_topic"))
-  {
     this->dataPtr->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
-  }
+
   this->dataPtr->minErrorsPub = this->dataPtr->node.Advertise<msgs::Float_V>(
     this->dataPtr->minErrorsTopic, opts);
 
   if (_sdf->HasElement("mean_error_topic"))
-  {
     this->dataPtr->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
-  }
+
   this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
     this->dataPtr->meanErrorTopic, opts);
 
@@ -259,15 +258,11 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
 
     // If this is the first time through, minError == poseError
     if (i == this->dataPtr->minErrors.size())
-    {
       this->dataPtr->minErrors.push_back(poseError);
-    }
 
     // If poseError is smaller than the minimum, update the minimum
     if (poseError < this->dataPtr->minErrors.at(i))
-    {
       this->dataPtr->minErrors.at(i) = poseError;
-    }
 
     // add current minimum to current total error
     currentTotalError += this->dataPtr->minErrors.at(i);
@@ -282,9 +277,7 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
 
   meanErrorMsg.set_data(this->dataPtr->meanError);
   for (unsigned i = 0; i < this->dataPtr->minErrors.size(); ++i)
-  {
     minErrorsMsg.add_data(this->dataPtr->minErrors.at(i));
-  }
 
   // publish
   this->dataPtr->minErrorsPub.Publish(minErrorsMsg);
