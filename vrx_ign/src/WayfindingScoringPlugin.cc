@@ -15,28 +15,30 @@
  *
 */
 
-#include <ignition/gazebo/components/World.hh>
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/Pose.hh>
-#include <ignition/gazebo/World.hh>
 #include <chrono>
 #include <string>
 #include <vector>
 #include <ignition/common/Profiler.hh>
+#include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/components/Pose.hh>
+#include <ignition/gazebo/components/World.hh>
 #include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/Model.hh>
+#include <ignition/gazebo/World.hh>
+#include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
 #include <sdf/sdf.hh>
 
-#include <ignition/plugin/Register.hh>
-
 #include "WayfindingScoringPlugin.hh"
 #include "WaypointMarkers.hh"
+
 using namespace ignition;
 using namespace vrx;
 
+/// \brief Private WayfindingScoringPlugin data class.
 class WayfindingScoringPlugin::Implementation
 {
+  /// \brief A transport node.
   public: transport::Node node;
 
   /// \brief Topic where the list of waypoints is published.
@@ -83,19 +85,27 @@ class WayfindingScoringPlugin::Implementation
   /// \brief Spherical coordinate conversions. 
   public: math::SphericalCoordinates sc; 
 
+  /// \brief Entity of the vehicle used.
   public: gazebo::Entity vehicleEntity;
 
+  /// \brief Waypoint visualization markers.
+  public: WaypointMarkers waypointMarkers{"waypoint_marker"};
 };
+
+//////////////////////////////////////////////////
 WayfindingScoringPlugin::WayfindingScoringPlugin()
-    : ScoringPlugin(), 
-      dataPtr(ignition::utils::MakeUniqueImpl<Implementation>()),
-      waypointMarkers("waypoint_marker")
+  : ScoringPlugin(),
+    dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
   ignmsg << "Wayfinding scoring plugin loaded" << std::endl;
 }
+
+//////////////////////////////////////////////////
 WayfindingScoringPlugin::~WayfindingScoringPlugin()
 {
 }
+
+//////////////////////////////////////////////////
 void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
                            gazebo::EntityComponentManager &_ecm,
@@ -150,9 +160,9 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   
     // Print some debugging messages
     ignmsg << "Waypoint, Spherical: Lat = " << latlonyaw.X()
-          << " Lon = " << latlonyaw.Y() << std::endl;
+           << " Lon = " << latlonyaw.Y() << std::endl;
     ignmsg << "Waypoint, Local: X = " << cartVec.X()
-          << " Y = " << cartVec.Y() << " Yaw = " << cartVec.Z() << std::endl;
+           << " Y = " << cartVec.Y() << " Yaw = " << cartVec.Z() << std::endl;
   
     waypointElem = waypointElem->GetNextElement("waypoint");
   }
@@ -160,52 +170,58 @@ void WayfindingScoringPlugin::Configure(const gazebo::Entity &_entity,
   // Throttle messages to 1Hz
   transport::AdvertiseMessageOptions opts;
   opts.SetMsgsPerSec(1u);
+
   // set up topics
   if (this->dataPtr->sdf->HasElement("waypoints_topic"))
   {
-      this->dataPtr->waypointsTopic = this->dataPtr->sdf->Get<std::string>("waypoints_topic");
+    this->dataPtr->waypointsTopic = this->dataPtr->sdf->Get<std::string>("waypoints_topic");
   }
-  this->dataPtr->waypointsPub =
-      this->dataPtr->node.Advertise<msgs::Pose_V>(this->dataPtr->waypointsTopic, opts);
+  this->dataPtr->waypointsPub = this->dataPtr->node.Advertise<msgs::Pose_V>(
+    this->dataPtr->waypointsTopic, opts);
 
   if (_sdf->HasElement("min_errors_topic"))
   {
-      this->dataPtr->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
+    this->dataPtr->minErrorsTopic = _sdf->Get<std::string>("min_errors_topic");
   }
-  this->dataPtr->minErrorsPub = this->dataPtr->node.Advertise<msgs::Float_V>(this->dataPtr->minErrorsTopic, opts);
+  this->dataPtr->minErrorsPub = this->dataPtr->node.Advertise<msgs::Float_V>(
+    this->dataPtr->minErrorsTopic, opts);
 
   if (_sdf->HasElement("mean_error_topic"))
   {
-      this->dataPtr->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
+    this->dataPtr->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
   }
   this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
-      this->dataPtr->meanErrorTopic, opts);
+    this->dataPtr->meanErrorTopic, opts);
 
-   if (_sdf->HasElement("markers"))
-   {
-     this->waypointMarkers.Configure(_entity, this->dataPtr->sdf->GetElement("markers"), _ecm, _eventMgr);
-     int markerId = 0;
-     for (const auto waypoint : this->dataPtr->localWaypoints)
-     {
-       if (!this->waypointMarkers.DrawMarker(markerId, waypoint.X(),
-           waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
-       {
-         ignerr << "Error creating visual marker" << std::endl;
-       }
-       markerId++;
-     }
-   }
+  if (_sdf->HasElement("markers"))
+  {
+    this->dataPtr->waypointMarkers.Load(
+      this->dataPtr->sdf->GetElement("markers"));
+    int markerId = 0;
+    for (const auto waypoint : this->dataPtr->localWaypoints)
+    {
+      if (!this->dataPtr->waypointMarkers.DrawMarker(markerId, waypoint.X(),
+            waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
+      {
+        ignerr << "Error creating visual marker" << std::endl;
+      }
+      markerId++;
+    }
+  }
 }
 
+//////////////////////////////////////////////////
 void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
-                     gazebo::EntityComponentManager &_ecm)
+  gazebo::EntityComponentManager &_ecm)
 {
   ScoringPlugin::PreUpdate(_info,_ecm);
 
   // Start publishing the goal once in "ready" state
   if (this->ScoringPlugin::TaskState() == "ready" || 
       this->ScoringPlugin::TaskState() == "running")
-        this->dataPtr->waypointsPub.Publish(this->dataPtr->waypointsMessage);
+  {
+    this->dataPtr->waypointsPub.Publish(this->dataPtr->waypointsMessage);
+  }
 
   // Nothing else to do if the task is not in "running" state.
   if (this->ScoringPlugin::TaskState() != "running")
@@ -214,17 +230,17 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
   // Get the vehicle if it's ready
   if (!this->dataPtr->vehicleEntity)
   {
-      auto entity = _ecm.EntityByComponents(
-          gazebo::components::Name(ScoringPlugin::VehicleName()));
-      if (entity != gazebo::kNullEntity)
-          this->dataPtr->vehicleEntity = entity;
-      else
-          return;
+    auto entity = _ecm.EntityByComponents(
+      gazebo::components::Name(ScoringPlugin::VehicleName()));
+    if (entity != gazebo::kNullEntity)
+      this->dataPtr->vehicleEntity = entity;
+    else
+      return;
   }
 
   // calculate scores
   auto vehiclePose = _ecm.Component<gazebo::components::Pose>(
-                             this->dataPtr->vehicleEntity)->Data();
+    this->dataPtr->vehicleEntity)->Data();
 
   double currentHeading = vehiclePose.Rot().Euler().Z();
 
@@ -233,13 +249,12 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
   for (unsigned i = 0; i < this->dataPtr->localWaypoints.size(); ++i)
   {
     const math::Vector3d wp = this->dataPtr->localWaypoints[i];
-    double dx   =  wp.X() - vehiclePose.Pos().X();
-    double dy   =  wp.Y() - vehiclePose.Pos().Y();
-    double dist = sqrt(pow(dx, 2) + pow(dy, 2));
-    double k    = 0.75;
-    double dhdg = abs(wp.Z() - currentHeading);
+    double dx        =  wp.X() - vehiclePose.Pos().X();
+    double dy        =  wp.Y() - vehiclePose.Pos().Y();
+    double dist      = sqrt(pow(dx, 2) + pow(dy, 2));
+    double k         = 0.75;
+    double dhdg      = abs(wp.Z() - currentHeading);
     double headError = M_PI - abs(dhdg - M_PI);
-
     double poseError =  dist + (pow(k, dist) * headError);
 
     // If this is the first time through, minError == poseError
@@ -258,7 +273,8 @@ void WayfindingScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
     currentTotalError += this->dataPtr->minErrors.at(i);
   }
 
-  this->dataPtr->meanError = currentTotalError / this->dataPtr->localWaypoints.size();
+  this->dataPtr->meanError =
+    currentTotalError / this->dataPtr->localWaypoints.size();
 
   // set up messages
   msgs::Float_V minErrorsMsg;
@@ -282,7 +298,6 @@ void WayfindingScoringPlugin::OnReady()
 {
   ignmsg << "WayfindingScoringPlugin::OnReady" << std::endl;
 }
-
 
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::OnRunning()

@@ -24,12 +24,13 @@
 #include <vector>
 #include <ignition/gazebo/Entity.hh>
 #include <ignition/gazebo/System.hh>
-#include <ignition/utils/ImplPtr.hh>
 #include <ignition/transport/Node.hh>
+#include <ignition/utils/ImplPtr.hh>
 #include <sdf/sdf.hh>
 
 #include "ScoringPlugin.hh"
 #include "WaypointMarkers.hh"
+
 namespace vrx
 {
 /// \brief A plugin for computing the score of the wayfinding navigation task.
@@ -78,16 +79,11 @@ class WayfindingScoringPlugin : public ScoringPlugin
                     const ignition::gazebo::UpdateInfo &_info,
                     ignition::gazebo::EntityComponentManager &_ecm) override;
 
-
   // Documentation inherited.
   protected: void OnReady() override;
 
   // Documentation inherited.
   protected: void OnRunning() override;
-
-  /// \brief Waypoint visualization markers.
-  // TODO: Move to Implementation? 
-  private: WaypointMarkers waypointMarkers;
 
   /// \brief Private data pointer.
   IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)

@@ -85,6 +85,7 @@ target_link_libraries(WayfindingScoringPlugin PUBLIC
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
   ignition-gazebo${IGN_GAZEBO_VER}::core
   ignition-math${IGN_MATH_VER}
+  ScoringPlugin
 )
 install(
   TARGETS WayfindingScoringPlugin
