@@ -54,6 +54,8 @@ namespace vrx
 
   /// \brief Submerged volume calculation using polyhedron
   /// based on: Exact Buoyancy for Polyhedra by Eric Catto.
+  /// \ref Erin Catto. “Exact Buoyancy for Polyhedra”.
+  ///      In Game Programming Gems 6, Charles River Media, 2006, pp. 175–187.
   class Polyhedron
   {
     /// \brief Store vertex index for a triangular face.

@@ -37,135 +37,103 @@ class ScoringPlugin::Implementation
   /// \brief Parse all SDF parameters.
   /// \return True when all parameters were successfully parsed or false
   /// otherwise.
-public:
-  bool ParseSDFParameters();
+  public: bool ParseSDFParameters();
 
   /// \brief Parse the joints section of the SDF block.
   /// \return True when all parameters were successfully parsed or false
   /// otherwise.
-public:
-  bool ParseJoints();
+  public: bool ParseJoints();
 
   /// \brief Update the task stats message.
-public:
-  void UpdateTaskMessage();
+  public: void UpdateTaskMessage();
 
   /// \brief Update all time-related variables.
   /// \param[in] _simTime Current simulation time.
-public:
-  void UpdateTime(const std::chrono::duration<double> _simTime);
+  public: void UpdateTime(const std::chrono::duration<double> _simTime);
 
   /// \brief Publish the task stats over a topic.
-public:
-  void PublishStats();
+  public: void PublishStats();
 
   /// \brief The name of the task.
-public:
-  std::string taskName = "undefined";
+  public: std::string taskName = "undefined";
 
   /// \brief The name of the vehicle to score.
-public:
-  std::string vehicleName;
+  public: std::string vehicleName;
 
   /// \brief Vehicle to score.
-public:
-  gazebo::Model vehicleModel;
+  public: gazebo::Model vehicleModel;
 
   /// \brief Silent mode enabled?
-public:
-  bool silent = false;
+  public: bool silent = false;
 
   /// \brief Transport node.
-public:
-  transport::Node node;
+  public: transport::Node node;
 
   /// \brief Transport node publisher for task information.
-public:
-  transport::Node::Publisher taskPub;
+  public: transport::Node::Publisher taskPub;
 
   /// \brief Topic where the task stats are published.
-public:
-  std::string taskInfoTopic = "/vrx/task/info";
+  public: std::string taskInfoTopic = "/vrx/task/info";
 
   /// \brief Bool flag for debug.
-public:
-  bool debug = true;
+  public: bool debug = true;
 
   /// \brief The score.
-public:
-  double score = 0.0;
+  public: double score = 0.0;
 
   /// \brief Pointer to the SDF plugin element.
-public:
-  sdf::ElementPtr sdf;
+  public: sdf::ElementPtr sdf;
 
   /// \brief Duration (seconds) of the initial state.
-public:
-  double initialStateDuration = 30.0;
+  public: double initialStateDuration = 30.0;
 
   /// \brief Duration (seconds) of the ready state.
-public:
-  double readyStateDuration = 60.0;
+  public: double readyStateDuration = 60.0;
 
   /// \brief Duration (seconds) of the running state (max task time).
-public:
-  double runningStateDuration = 300.0;
+  public: double runningStateDuration = 300.0;
 
   /// \brief Absolute time specifying the start of the ready state.
-public:
-  std::chrono::duration<double> readyTime;
+  public: std::chrono::duration<double> readyTime;
 
   /// \brief Absolute time specifying the start of the running state.
-public:
-  std::chrono::duration<double> runningTime;
+  public: std::chrono::duration<double> runningTime;
 
   /// \brief Absolute time specifying the start of the finish state.
-public:
-  std::chrono::duration<double> finishTime;
+  public: std::chrono::duration<double> finishTime;
 
   /// \brief Current time (simulation).
-public:
-  std::chrono::duration<double> currentTime;
+  public: std::chrono::duration<double> currentTime;
 
   // \brief Elapsed time since the start of the task (running state).
-public:
-  std::chrono::duration<double> elapsedTime;
+  public: std::chrono::duration<double> elapsedTime;
 
   /// \brief Remaining time since the start of the task (running state).
-public:
-  std::chrono::duration<double> remainingTime;
+  public: std::chrono::duration<double> remainingTime;
 
   /// \brief Whether the current task has timed out or not.
-public:
-  bool timedOut = false;
+  public: bool timedOut = false;
 
   /// \brief Time at which the last message was sent.
-public:
-  std::chrono::duration<double> lastStatsSent{0};
+  public: std::chrono::duration<double> lastStatsSent{0};
 
   /// \brief The task state.
-public:
-  std::string taskState = "initial";
+  public: std::string taskState = "initial";
 
   /// \brief The next task message to be published.
-public:
-  msgs::Param taskMsg;
+  public: msgs::Param taskMsg;
 
   /// \brief The name of the joints to be dettached during ReleaseVehicle().
-public:
-  std::vector<std::string> lockJointNames;
+  public: std::vector<std::string> lockJointNames;
 
   /// \brief Score in case of timeout - added for Navigation task
-public:
-  double timeoutScore = -1;
+  public: double timeoutScore = -1;
 
   /// \brief Whether to shut down after last gate is crossed.
-public:
-  bool perPluginExitOnCompletion = true;
+  public: bool perPluginExitOnCompletion = true;
 
   /// \brief Number of vehicle collisions.
-public:
-  uint16_t numCollisions = 0u;
+  public: uint16_t numCollisions = 0u;
 };
 
 //////////////////////////////////////////////////
@@ -195,7 +163,7 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
   if (this->sdf->HasElement("per_plugin_exit_on_completion"))
   {
     this->perPluginExitOnCompletion = this->sdf->Get<bool>(
-        "per_plugin_exit_on_completion");
+      "per_plugin_exit_on_completion");
   }
 
   // This is an optional element.
@@ -287,7 +255,7 @@ bool ScoringPlugin::Implementation::ParseJoints()
 
 //////////////////////////////////////////////////
 void ScoringPlugin::Implementation::UpdateTime(
-    const std::chrono::duration<double> _simTime)
+  const std::chrono::duration<double> _simTime)
 {
   this->currentTime = _simTime;
 
@@ -355,15 +323,15 @@ void ScoringPlugin::Implementation::PublishStats()
 
 //////////////////////////////////////////////////
 ScoringPlugin::ScoringPlugin()
-    : System(), dataPtr(utils::MakeUniqueImpl<Implementation>())
+  : System(), dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::Configure(const gazebo::Entity &_entity,
-                              const std::shared_ptr<const sdf::Element> &_sdf,
-                              gazebo::EntityComponentManager &_ecm,
-                              gazebo::EventManager & /*_eventMgr*/)
+    const std::shared_ptr<const sdf::Element> &_sdf,
+    gazebo::EntityComponentManager &_ecm,
+    gazebo::EventManager &/*_eventMgr*/)
 {
   this->dataPtr->sdf = _sdf->Clone();
 
@@ -375,11 +343,11 @@ void ScoringPlugin::Configure(const gazebo::Entity &_entity,
   }
 
   this->dataPtr->readyTime =
-      std::chrono::duration<double>(this->dataPtr->initialStateDuration);
+    std::chrono::duration<double>(this->dataPtr->initialStateDuration);
   this->dataPtr->runningTime = this->dataPtr->readyTime +
-                               std::chrono::duration<double>(this->dataPtr->readyStateDuration);
-  this->dataPtr->finishTime = this->dataPtr->runningTime +
-                              std::chrono::duration<double>(this->dataPtr->runningStateDuration);
+    std::chrono::duration<double>(this->dataPtr->readyStateDuration);
+  this->dataPtr->finishTime =this->dataPtr->runningTime +
+    std::chrono::duration<double>(this->dataPtr->runningStateDuration);
 
   // Prepopulate the task msg.
   auto *param = this->dataPtr->taskMsg.mutable_params();
@@ -426,7 +394,7 @@ void ScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->UpdateTaskMessage();
 
   this->dataPtr->taskPub = this->dataPtr->node.Advertise<msgs::Param>(
-      this->dataPtr->taskInfoTopic);
+    this->dataPtr->taskInfoTopic);
 
   if (char *envDbg = std::getenv("VRX_DEBUG"))
   {
@@ -442,7 +410,7 @@ void ScoringPlugin::Configure(const gazebo::Entity &_entity,
 
 //////////////////////////////////////////////////
 void ScoringPlugin::PreUpdate(const gazebo::UpdateInfo &_info,
-                              gazebo::EntityComponentManager &_ecm)
+    gazebo::EntityComponentManager &_ecm)
 {
   IGN_PROFILE("ScoringPlugin::PreUpdate");
 

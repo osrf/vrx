@@ -354,7 +354,8 @@
       <pose>-528 191 0 0 1.57 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
-      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
@@ -393,7 +394,8 @@
       <pose>-528 190 0 0 1.57 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
 
-      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
@@ -432,7 +434,8 @@
       <pose>-528 189 0 0 1.57 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
 
-      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
@@ -471,7 +474,8 @@
       <pose>-528 188 0 0 1.57 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
 
-      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
@@ -510,7 +514,8 @@
       <pose>-528 187 0 0 1.57 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
 
-      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
@@ -548,7 +553,8 @@
       <pose>-528 186 0 0 1.57 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
 
-      <plugin name="vrx::SimpleBuoyancy" filename="libSimpleBuoyancy.so">
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
