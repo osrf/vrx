@@ -18,7 +18,6 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.actions import EmitEvent
 from launch.actions import ExecuteProcess
-from launch.actions import IncludeLaunchDescription
 from launch.actions import RegisterEventHandler
 from launch.events import Shutdown
 from launch.event_handlers import OnProcessExit
