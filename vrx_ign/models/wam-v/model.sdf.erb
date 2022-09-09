@@ -29,6 +29,24 @@ end
   <!-- Base model-->
   <include merge="true">
     <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/wam-v</uri>
+
+    <!-- Contact sensors -->
+    <experimental:params>
+      <sensor element_id="base_link" name='sensor_contacts' type='contact' action="add">
+        <contact>
+          <collision>top_base</collision>
+          <collision>left_float</collision>
+          <collision>left_mid_float</collision>
+          <collision>left_front_float</collision>
+          <collision>right_float</collision>
+          <collision>right_mid_float</collision>
+          <collision>right_front_float</collision>
+          <topic>/vrx/contacts</topic>
+        </contact>
+        <always_on>1</always_on>
+        <update_rate>5</update_rate>
+      </sensor>
+    </experimental:params>
   </include>
 
   <plugin
