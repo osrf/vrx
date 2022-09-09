@@ -197,6 +197,10 @@ namespace vrx
     /// \brief Update the state of the current task.
     private: void UpdateTaskState();
 
+    /// \brief Callback used to receive contacts information.
+    /// \param[in] _contacts The message containing contact information.
+    private: void OnContacts(const ignition::msgs::Contacts &_contacts);
+
     /// \brief Private data pointer.
     IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <ignition/msgs/param.pb.h>
 #include <chrono>
@@ -111,6 +111,9 @@ class ScoringPlugin::Implementation
   /// \brief Remaining time since the start of the task (running state).
   public: std::chrono::duration<double> remainingTime;
 
+  /// \brief Last time we considered a vehicle collision.
+  public: std::chrono::duration<double> lastCollisionTime;
+
   /// \brief Whether the current task has timed out or not.
   public: bool timedOut = false;
 
@@ -131,6 +134,15 @@ class ScoringPlugin::Implementation
 
   /// \brief Whether to shut down after last gate is crossed.
   public: bool perPluginExitOnCompletion = true;
+
+  /// \brief Collision buffer.
+  public: double collisionBuffer = 3.0;
+
+  /// \brief Collision list.
+  public: std::vector<std::string> collisionList;
+
+  /// \brief Collisions timestamps.
+  public: std::vector<double> collisionTimestamps;
 
   /// \brief Number of vehicle collisions.
   public: uint16_t numCollisions = 0u;
@@ -186,7 +198,7 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     if (value < 0)
     {
       ignerr << "<ready_state_duration> value should not be negative."
-            << std::endl;
+             << std::endl;
       return false;
     }
 
@@ -200,7 +212,7 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     if (value < 0)
     {
       ignerr << "<running_state_duration> value should not be negative."
-            << std::endl;
+             << std::endl;
       return false;
     }
     this->runningStateDuration = value;
@@ -314,7 +326,7 @@ void ScoringPlugin::Implementation::PublishStats()
 
   // We publish stats at 1Hz.
   if (this->currentTime - this->lastStatsSent >=
-        std::chrono::duration<double>(1.0))
+      std::chrono::duration<double>(1.0))
   {
     this->taskPub.Publish(this->taskMsg);
     this->lastStatsSent = this->currentTime;
@@ -396,7 +408,10 @@ void ScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->taskPub = this->dataPtr->node.Advertise<msgs::Param>(
     this->dataPtr->taskInfoTopic);
 
-  if (char* envDbg = std::getenv("VRX_DEBUG"))
+  this->dataPtr->node.Subscribe("/vrx/contacts",
+    &ScoringPlugin::OnContacts, this);
+
+  if (char *envDbg = std::getenv("VRX_DEBUG"))
   {
     if (std::string(envDbg) == "false")
       this->dataPtr->debug = false;
@@ -479,6 +494,7 @@ std::string ScoringPlugin::VehicleName() const
 {
   return this->dataPtr->vehicleName;
 }
+
 //////////////////////////////////////////////////
 uint16_t ScoringPlugin::NumCollisions() const
 {
@@ -517,7 +533,47 @@ void ScoringPlugin::OnFinished()
 //////////////////////////////////////////////////
 void ScoringPlugin::OnCollision()
 {
-  ++this->dataPtr->numCollisions;
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::OnContacts(const ignition::msgs::Contacts &_contacts)
+{
+  // If any collision includes the WAM-V, increment collision counter.
+  for (unsigned int i = 0; i < _contacts.contact_size(); ++i)
+  {
+    std::string wamvCollisionStr1 = _contacts.contact(i).collision1().name();
+    std::string wamvCollisionStr2 = _contacts.contact(i).collision2().name();
+
+    bool isWamvHit =
+      wamvCollisionStr1.find("wamv::base_link::") != std::string::npos ||
+      wamvCollisionStr2.find("wamv::base_link::") != std::string::npos;
+
+    bool isHitBufferPassed =
+      (this->dataPtr->currentTime - this->dataPtr->lastCollisionTime).count() >
+      this->dataPtr->collisionBuffer;
+
+    if (isWamvHit && isHitBufferPassed)
+    {
+      ++this->dataPtr->numCollisions;
+      if (!this->dataPtr->silent)
+      {
+        igndbg << "[" << this->dataPtr->numCollisions
+               << "] New collision counted between ["
+               << _contacts.contact(i).collision1().name() << "] and ["
+               << _contacts.contact(i).collision2().name() << "]" << std::endl;
+      }
+
+      this->dataPtr->lastCollisionTime = this->dataPtr->currentTime;
+
+      this->dataPtr->collisionList.push_back(
+        _contacts.contact(i).collision1().name() +
+        std::string(" || ") + _contacts.contact(i).collision2().name());
+      this->dataPtr->collisionTimestamps.push_back(
+        this->dataPtr->currentTime.count());
+      this->OnCollision();
+      return;
+    }
+  }
 }
 
 IGNITION_ADD_PLUGIN(ScoringPlugin,

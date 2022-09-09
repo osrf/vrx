@@ -47,54 +47,55 @@ install(
   DESTINATION lib)
 
 # Buoyancy
-add_library(SimpleBuoyancy SHARED
-  src/SimpleBuoyancy.cc
+add_library(PolyhedraBuoyancyDrag SHARED
+  src/PolyhedraBuoyancyDrag.cc
   src/PolyhedronVolume.cc
   src/ShapeVolume.cc
 )
-target_link_libraries(SimpleBuoyancy PUBLIC
+target_link_libraries(PolyhedraBuoyancyDrag PUBLIC
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
   ignition-gazebo${IGN_GAZEBO_VER}::core
   ignition-math${IGN_MATH_VER}
   Waves
 )
 install(
-  TARGETS SimpleBuoyancy
+  TARGETS PolyhedraBuoyancyDrag
   DESTINATION lib)
 
-add_library(ScoringPlugin SHARED 
+
+# Base scoring plugin
+add_library(ScoringPlugin SHARED
   src/ScoringPlugin.cc
 )
-
 target_link_libraries(ScoringPlugin PUBLIC
-    ignition-gazebo${IGN_GAZEBO_VER}::core
-    ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
-    ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
-    ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
-    Waves
-)
-
-install(
-  TARGETS ScoringPlugin 
-  DESTINATION lib)
-
-add_library(WaypointMarkers src/WaypointMarkers.cc)
-target_link_libraries(WaypointMarkers PUBLIC
   ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
   ignition-gazebo${IGN_GAZEBO_VER}::core
   ignition-math${IGN_MATH_VER}
 )
-
 install(
-  TARGETS WaypointMarkers
-  DESTINATION lib
+  TARGETS ScoringPlugin
+  DESTINATION lib)
+
+# Wayfinding scoring plugin
+add_library(WayfindingScoringPlugin SHARED
+  src/WayfindingScoringPlugin.cc
+  src/WaypointMarkers
 )
+target_link_libraries(WayfindingScoringPlugin PUBLIC
+  ignition-common${IGN_COMMON_VER}::ignition-common${IGN_COMMON_VER}
+  ignition-gazebo${IGN_GAZEBO_VER}::core
+  ignition-math${IGN_MATH_VER}
+)
+install(
+  TARGETS WayfindingScoringPlugin
+  DESTINATION lib)
 
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
+  StationkeepingScoringPlugin
   SimpleHydrodynamics
+  Surface
   WaveVisual
-  WayfindingScoringPlugin
 )
 
 foreach(PLUGIN ${VRX_IGN_PLUGINS})
@@ -104,9 +105,8 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
-    Waves
     ScoringPlugin
-    WaypointMarkers
+    Waves
 )
 endforeach()
 
@@ -122,9 +122,10 @@ ament_python_install_package(
 #============================================================================
 # Resources
 install(DIRECTORY
-  worlds
-  models
+  config
   launch
+  models
+  worlds
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
