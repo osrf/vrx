@@ -92,6 +92,7 @@ foreach(PLUGIN ${VRX_IGN_PLUGINS})
     ignition-plugin${IGN_PLUGIN_VER}::ignition-plugin${IGN_PLUGIN_VER}
     ignition-rendering${IGN_RENDERING_VER}::ignition-rendering${IGN_RENDERING_VER}
     ignition-utils${IGN_UTILS_VER}::ignition-utils${IGN_UTILS_VER}
+    ScoringPlugin
     Waves
 )
 endforeach()
