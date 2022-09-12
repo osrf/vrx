@@ -16,7 +16,11 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import EmitEvent
 from launch.actions import ExecuteProcess
+from launch.actions import RegisterEventHandler
+from launch.events import Shutdown
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
@@ -39,6 +43,27 @@ def generate_launch_description():
         get_package_share_directory('ros_ign_gazebo'), 'launch'),
         '/ign_gazebo.launch.py']),
         launch_arguments = {'ign_args': ign_args}.items())
+
+    # Register handler for shutting down ros launch when ign gazebo process exits
+    # monitor_sim.py will run until it can not find the ign gazebo process.
+    # Once monitor_sim.py exits, a process exit event is triggered which causes the
+    # handler to emit a Shutdown event
+    p = os.path.join(get_package_share_directory('vrx_ros'), 'launch',
+                     'monitor_sim.py')
+    monitor_sim_proc = ExecuteProcess(
+        cmd=['python3', p],
+        name='monitor_sim',
+        output='screen',
+    )
+    sim_exit_event_handler = RegisterEventHandler(
+        OnProcessExit(
+            target_action=monitor_sim_proc,
+            on_exit=[
+                EmitEvent(event=Shutdown(reason='Simulation ended'))
+            ]
+        )
+    )
+
 
     bridges = [
       vrx_ign.bridges.score(),
@@ -78,4 +103,7 @@ def generate_launch_description():
         ign_gazebo,
         bridge_node,
         spawn_wamv,
+        monitor_sim_proc,
+        sim_exit_event_handler
         ])
+

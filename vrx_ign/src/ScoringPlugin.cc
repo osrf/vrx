@@ -21,6 +21,7 @@
 #include <vector>
 #include <ignition/common/Profiler.hh>
 #include <ignition/gazebo/Entity.hh>
+#include <ignition/gazebo/Events.hh>
 #include <ignition/gazebo/Model.hh>
 #include <ignition/plugin/Register.hh>
 #include <ignition/transport/Node.hh>
@@ -48,6 +49,9 @@ class ScoringPlugin::Implementation
 
   /// \brief Publish the task stats over a topic.
   public: void PublishStats();
+
+  /// \brief Shutdown Gazebo and ROS.
+  public: void Exit();
 
   /// \brief The name of the task.
   public: std::string taskName = "undefined";
@@ -144,6 +148,9 @@ class ScoringPlugin::Implementation
 
   /// \brief Number of vehicle collisions.
   public: uint16_t numCollisions = 0u;
+
+  /// \brief Event manager for exiting the simulation.
+  public: gazebo::EventManager *eventManager{nullptr};
 };
 
 //////////////////////////////////////////////////
@@ -301,6 +308,32 @@ void ScoringPlugin::Implementation::PublishStats()
 }
 
 //////////////////////////////////////////////////
+void ScoringPlugin::Implementation::Exit()
+{
+  bool exit = this->perPluginExitOnCompletion;
+
+  char* env = std::getenv("VRX_EXIT_ON_COMPLETION");
+  if (env != nullptr && std::string(env) == "true")
+  {
+    // Overwrite class variable if environment variable is specified
+    exit = true;
+  }
+
+  if (exit)
+  {
+    // shutdown gazebo
+    this->eventManager->Emit<gazebo::events::Stop>();
+  }
+  else
+  {
+    ignerr << "VRX_EXIT_ON_COMPLETION and <per_plugin_exit_on_completion> "
+           << "both not set, will not shutdown on ScoringPlugin::Exit()"
+           << std::endl;
+  }
+  return;
+}
+
+//////////////////////////////////////////////////
 ScoringPlugin::ScoringPlugin()
   : System(), dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
@@ -310,9 +343,10 @@ ScoringPlugin::ScoringPlugin()
 void ScoringPlugin::Configure(const gazebo::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     gazebo::EntityComponentManager &_ecm,
-    gazebo::EventManager &/*_eventMgr*/)
+    gazebo::EventManager &_eventMgr)
 {
   this->dataPtr->sdf = _sdf->Clone();
+  this->dataPtr->eventManager = &_eventMgr;
 
   // SDF.
   if (!this->dataPtr->ParseSDFParameters())
@@ -495,6 +529,8 @@ void ScoringPlugin::OnFinished()
   }
   this->dataPtr->UpdateTaskMessage();
   this->dataPtr->taskPub.Publish(this->dataPtr->taskMsg);
+
+  this->dataPtr->Exit();
 }
 
 //////////////////////////////////////////////////
