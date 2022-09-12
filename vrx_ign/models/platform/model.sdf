@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+    <model name="platform">
+        <static>false</static>
+        <link name="dummy_base"/>
+
+        <joint name="world_joint" type="fixed">
+          <parent>world</parent>
+          <child>dummy_base</child>
+        </joint>
+    </model>
+</sdf>

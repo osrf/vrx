@@ -39,11 +39,6 @@ class ScoringPlugin::Implementation
   /// otherwise.
   public: bool ParseSDFParameters();
 
-  /// \brief Parse the joints section of the SDF block.
-  /// \return True when all parameters were successfully parsed or false
-  /// otherwise.
-  public: bool ParseJoints();
-
   /// \brief Update the task stats message.
   public: void UpdateTaskMessage();
 
@@ -72,8 +67,14 @@ class ScoringPlugin::Implementation
   /// \brief Transport node publisher for task information.
   public: transport::Node::Publisher taskPub;
 
+  /// \brief Transport node publisher for releasing the vehicle.
+  public: transport::Node::Publisher releasePub;
+
   /// \brief Topic where the task stats are published.
   public: std::string taskInfoTopic = "/vrx/task/info";
+
+  /// \brief Topic name to release the vehicle if locked to the world.
+  public: std::string releaseTopic = "/vrx/release";
 
   /// \brief Bool flag for debug.
   public: bool debug = true;
@@ -125,9 +126,6 @@ class ScoringPlugin::Implementation
 
   /// \brief The next task message to be published.
   public: msgs::Param taskMsg;
-
-  /// \brief The name of the joints to be dettached during ReleaseVehicle().
-  public: std::vector<std::string> lockJointNames;
 
   /// \brief Score in case of timeout - added for Navigation task
   public: double timeoutScore = -1;
@@ -219,47 +217,15 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
   }
 
   // This is an optional element.
+  if (this->sdf->HasElement("release_topic"))
+  {
+    this->releaseTopic = this->sdf->Get<std::string>("release_topic");
+  }
+
+  // This is an optional element.
   if (this->sdf->HasElement("silent"))
   {
     this->silent = this->sdf->Get<bool>("silent");
-  }
-
-  return this->ParseJoints();
-}
-
-//////////////////////////////////////////////////
-bool ScoringPlugin::Implementation::ParseJoints()
-{
-  // Optional element.
-  if (this->sdf->HasElement("release_joints"))
-  {
-    auto releaseJointsElem = this->sdf->GetElement("release_joints");
-
-    // We need at least one joint.
-    if (!releaseJointsElem->HasElement("joint"))
-    {
-      ignerr << "Unable to find <joint> element in SDF." << std::endl;
-      return false;
-    }
-
-    auto jointElem = releaseJointsElem->GetElement("joint");
-
-    // Parse a new joint to be released.
-    while (jointElem)
-    {
-      // The joint's name.
-      if (!jointElem->HasElement("name"))
-      {
-        ignerr << "Unable to find <name> element in SDF." << std::endl;
-        return false;
-      }
-
-      const std::string jointName = jointElem->Get<std::string>("name");
-      this->lockJointNames.push_back(jointName);
-
-      // Parse the next joint.
-      jointElem = jointElem->GetNextElement("joint");
-    }
   }
 
   return true;
@@ -286,6 +252,7 @@ void ScoringPlugin::UpdateTaskState()
       this->dataPtr->currentTime >= this->dataPtr->readyTime)
   {
     this->dataPtr->taskState = "ready";
+    this->ReleaseVehicle();
     this->OnReady();
     return;
   }
@@ -408,8 +375,8 @@ void ScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->taskPub = this->dataPtr->node.Advertise<msgs::Param>(
     this->dataPtr->taskInfoTopic);
 
-  this->dataPtr->node.Subscribe("/vrx/contacts",
-    &ScoringPlugin::OnContacts, this);
+  this->dataPtr->releasePub = this->dataPtr->node.Advertise<msgs::Empty>(
+    this->dataPtr->releaseTopic);
 
   if (char *envDbg = std::getenv("VRX_DEBUG"))
   {
@@ -574,6 +541,14 @@ void ScoringPlugin::OnContacts(const ignition::msgs::Contacts &_contacts)
       return;
     }
   }
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::ReleaseVehicle()
+{
+  ignition::msgs::Empty msg;
+  msg.set_unused(true);
+  this->dataPtr->releasePub.Publish(msg);
 }
 
 IGNITION_ADD_PLUGIN(ScoringPlugin,

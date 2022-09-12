@@ -194,6 +194,9 @@ namespace vrx
     /// \brief Callback executed when a collision is detected in the vehicle.
     protected: virtual void OnCollision();
 
+    /// \brief Release the vehicle in case it's locked.
+    protected: virtual void ReleaseVehicle();
+
     /// \brief Update the state of the current task.
     private: void UpdateTaskState();
 
