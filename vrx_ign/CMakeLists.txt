@@ -94,6 +94,7 @@ install(
 # Plugins
 list(APPEND VRX_IGN_PLUGINS
   StationkeepingScoringPlugin
+  NavigationScoringPlugin
   SimpleHydrodynamics
   Surface
   WaveVisual
