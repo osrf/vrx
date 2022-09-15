@@ -15,6 +15,7 @@
  *
  */
 
+#include <gz/msgs/contacts.pb.h>
 #include <gz/msgs/param.pb.h>
 #include <chrono>
 #include <string>
@@ -150,7 +151,7 @@ class ScoringPlugin::Implementation
   public: uint16_t numCollisions = 0u;
 
   /// \brief Event manager for exiting the simulation.
-  public: gazebo::EventManager *eventManager{nullptr};
+  public: sim::EventManager *eventManager{nullptr};
 };
 
 //////////////////////////////////////////////////
@@ -322,7 +323,7 @@ void ScoringPlugin::Implementation::Exit()
   if (exit)
   {
     // shutdown gazebo
-    this->eventManager->Emit<gazebo::events::Stop>();
+    this->eventManager->Emit<sim::events::Stop>();
   }
   else
   {
@@ -582,7 +583,7 @@ void ScoringPlugin::OnContacts(const gz::msgs::Contacts &_contacts)
 //////////////////////////////////////////////////
 void ScoringPlugin::ReleaseVehicle()
 {
-  ignition::msgs::Empty msg;
+  msgs::Empty msg;
   msg.set_unused(true);
   this->dataPtr->releasePub.Publish(msg);
 }

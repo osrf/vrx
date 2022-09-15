@@ -38,10 +38,10 @@ def generate_launch_description():
         description='Arguments to be passed to Gazebo'
     )
 
-    gz_gazebo = IncludeLaunchDescription(
+    gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-        get_package_share_directory('ros_gz_gazebo'), 'launch'),
-        '/gz_gazebo.launch.py']),
+        get_package_share_directory('ros_gz_sim'), 'launch'),
+        '/gz_sim.launch.py']),
         launch_arguments = {'gz_args': gz_args}.items())
 
     # Register handler for shutting down ros launch when ign gazebo process exits
@@ -100,7 +100,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         gz_args_launch,
-        gz_gazebo,
+        gz_sim,
         bridge_node,
         spawn_wamv,
         monitor_sim_proc,

@@ -18,6 +18,7 @@
 #ifndef VRX_SCORINGPLUGIN_HH_
 #define VRX_SCORINGPLUGIN_HH_
 
+#include <gz/msgs/contacts.pb.h>
 #include <chrono>
 #include <memory>
 #include <string>

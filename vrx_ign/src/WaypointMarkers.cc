@@ -18,6 +18,7 @@
 #include <gz/msgs/marker.pb.h>
 #include <memory>
 #include <string>
+#include <gz/msgs/Utility.hh>
 #include "WaypointMarkers.hh"
 
 using namespace gz;

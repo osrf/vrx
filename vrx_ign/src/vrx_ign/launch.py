@@ -34,12 +34,12 @@ def simulation(world_name, headless=False):
         gz_args.append('-s')
     gz_args.append(f'{world_name}.sdf')
 
-    gz_gazebo = IncludeLaunchDescription(
+    gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('ros_gz_gazebo'), 'launch'),
-            '/gz_gazebo.launch.py']),
+            get_package_share_directory('ros_gz_sim'), 'launch'),
+            '/gz_sim.launch.py']),
         launch_arguments={'gz_args': ' '.join(gz_args)}.items())
-    return [gz_gazebo]
+    return [gz_sim]
 
 
 def competition_bridges():
@@ -73,7 +73,7 @@ def spawn(sim_mode, world_name, models, robot=None):
         # Script to insert model in running simulation
         if sim_mode == 'full' or sim_mode == 'sim':
             gz_spawn_entity = Node(
-                package='ros_gz_gazebo',
+                package='ros_gz_sim',
                 executable='create',
                 output='screen',
                 arguments=model.spawn_args()
