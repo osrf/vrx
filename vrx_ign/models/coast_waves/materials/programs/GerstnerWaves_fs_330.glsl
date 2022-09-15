@@ -46,7 +46,7 @@ void main()
   vec3 E = normalize(inPs.eyeVec);
   vec3 R = reflect(E, N);
 
-  // negate z for use with the skybox texture that comes with ign-rendering
+  // negate z for use with the skybox texture that comes with gz-rendering
   R = vec3(R.x, R.y, -R.z);
 
   // uncomment this line if using other textures that are Y up

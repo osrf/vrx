@@ -44,10 +44,10 @@ def generate_launch_description():
         '/gz_sim.launch.py']),
         launch_arguments = {'gz_args': gz_args}.items())
 
-    # Register handler for shutting down ros launch when ign gazebo process exits
-    # monitor_sim.py will run until it can not find the ign gazebo process.
-    # Once monitor_sim.py exits, a process exit event is triggered which causes the
-    # handler to emit a Shutdown event
+    # Register handler for shutting down ros launch when gazebo process exits
+    # monitor_sim.py will run until it can not find the gazebo process.
+    # Once monitor_sim.py exits, a process exit event is triggered which causes
+    # the handler to emit a Shutdown event
     p = os.path.join(get_package_share_directory('vrx_ros'), 'launch',
                      'monitor_sim.py')
     monitor_sim_proc = ExecuteProcess(
