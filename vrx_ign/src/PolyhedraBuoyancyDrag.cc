@@ -107,7 +107,7 @@ void BuoyancyObject::Load(const sim::Entity &_entity,
   // Parse required <link_name>.
   if (!_sdf->HasElement("link_name"))
   {
-    ignerr << "No <link_name> specified" << std::endl;
+    gzerr << "No <link_name> specified" << std::endl;
     return;
   }
 
@@ -116,8 +116,8 @@ void BuoyancyObject::Load(const sim::Entity &_entity,
   this->link = sim::Link(model.LinkByName(_ecm, this->linkName));
   if (!this->link.Valid(_ecm))
   {
-    ignerr << "Could not find link named [" << this->linkName
-           << "] in model" << std::endl;
+    gzerr << "Could not find link named [" << this->linkName
+          << "] in model" << std::endl;
     return;
   }
   this->link.EnableVelocityChecks(_ecm, true);
@@ -127,8 +127,8 @@ void BuoyancyObject::Load(const sim::Entity &_entity,
   auto inertial = _ecm.Component<sim::components::Inertial>(this->linkId);
   if (!inertial)
   {
-    ignerr << "Could not inertial element for [" << this->linkName
-           << "] in model" << std::endl;
+    gzerr << "Could not inertial element for [" << this->linkName
+          << "] in model" << std::endl;
     return;
   }
   this->mass = inertial->Data().MassMatrix().Mass();
@@ -136,7 +136,7 @@ void BuoyancyObject::Load(const sim::Entity &_entity,
   // Parse required <geometry>.
   if (!_sdf->HasElement("geometry"))
   {
-    ignerr << "No <geometry> specified" << std::endl;
+    gzerr << "No <geometry> specified" << std::endl;
     return;
   }
 
@@ -214,8 +214,8 @@ void PolyhedraBuoyancyDrag::Configure(const sim::Entity &_entity,
   if (_sdf->HasElement("buoyancy"))
   {
     sim::Model model(_entity);
-    igndbg << "Found buoyancy element(s), looking at each element..."
-           << std::endl;
+    gzdbg << "Found buoyancy element(s), looking at each element..."
+          << std::endl;
     auto ptr = const_cast<sdf::Element *>(_sdf.get());
     for (sdf::ElementPtr buoyancyElem = ptr->GetElement("buoyancy");
         buoyancyElem;
@@ -226,7 +226,7 @@ void PolyhedraBuoyancyDrag::Configure(const sim::Entity &_entity,
       buoyObj.height = this->dataPtr->fluidLevel;
 
       // Add buoyancy object to list and display stats.
-      igndbg << buoyObj << std::endl;
+      gzdbg << buoyObj << std::endl;
       this->dataPtr->buoyancyObjects.push_back(std::move(buoyObj));
     }
   }
@@ -237,7 +237,7 @@ void PolyhedraBuoyancyDrag::Configure(const sim::Entity &_entity,
   auto gravityOpt = world.Gravity(_ecm);
   if (!gravityOpt)
   {
-    ignerr << "Unable to get the gravity from the world" << std::endl;
+    gzerr << "Unable to get the gravity from the world" << std::endl;
     return;
   }
   this->dataPtr->gravity = *gravityOpt;
@@ -265,7 +265,7 @@ void PolyhedraBuoyancyDrag::PreUpdate(const sim::UpdateInfo &_info,
     auto worldPoseComp = buoyancyObj.link.WorldPose(_ecm);
     if (!worldPoseComp)
     {
-      ignerr << "No worldpose component found" << std::endl;
+      gzerr << "No worldpose component found" << std::endl;
       continue;
     }
     math::Pose3d linkFrame = *worldPoseComp;
@@ -301,7 +301,7 @@ void PolyhedraBuoyancyDrag::PreUpdate(const sim::UpdateInfo &_info,
       auto linVel = buoyancyObj.link.WorldLinearVelocity(_ecm);
       if (!linVel)
       {
-        ignerr << "No linear velocity component found" << std::endl;
+        gzerr << "No linear velocity component found" << std::endl;
         continue;
       }
 
@@ -329,7 +329,7 @@ void PolyhedraBuoyancyDrag::PreUpdate(const sim::UpdateInfo &_info,
       auto worldAngularVel = buoyancyObj.link.WorldAngularVelocity(_ecm);
       if (!worldAngularVel)
       {
-        ignerr << "No angular velocity component found" <<"\n";
+        gzerr << "No angular velocity component found" <<"\n";
         continue;
       }
 

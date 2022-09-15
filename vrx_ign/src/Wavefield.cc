@@ -258,21 +258,21 @@ class vrx::WavefieldPrivate
   {
     if (!this->model.compare("PMS"))
     {
-      ignmsg << "Using Pierson-Moskowitz spectrum sampling wavefield model "
+      gzmsg << "Using Pierson-Moskowitz spectrum sampling wavefield model "
             << std::endl;
       this->RecalculatePms();
     }
     else if (!this->model.compare("CWR"))
     {
-      ignmsg << "Using Constant wavelength-ampltude ratio wavefield model "
+      gzmsg << "Using Constant wavelength-ampltude ratio wavefield model "
             << std::endl;
       this->RecalculateCwr();
     }
     else
     {
-      ignwarn<< "Wavefield model specified as <" << this->model
-            << "> which is not one of the two supported wavefield models: "
-            << "PMS or CWR!!!" << std::endl;
+      gzwarn << "Wavefield model specified as <" << this->model
+             << "> which is not one of the two supported wavefield models: "
+             << "PMS or CWR!!!" << std::endl;
     }
   }
 
@@ -536,35 +536,35 @@ const std::vector<gz::math::Vector2d> &Wavefield::Direction_V() const
 ///////////////////////////////////////////////////////////////////////////////
 void Wavefield::DebugPrint() const
 {
-  ignmsg << "Input Parameters:" << std::endl;
-  ignmsg << "model:     " << this->data->model << std::endl;
-  ignmsg << "number:     " << this->data->number << std::endl;
-  ignmsg << "scale:      " << this->data->scale << std::endl;
-  ignmsg << "angle:      " << this->data->angle << std::endl;
-  ignmsg << "steepness:  " << this->data->steepness << std::endl;
-  ignmsg << "amplitude:  " << this->data->amplitude << std::endl;
-  ignmsg << "period:     " << this->data->period << std::endl;
-  ignmsg << "direction:  " << this->data->direction << std::endl;
-  ignmsg << "tau:  " << this->data->tau << std::endl;
-  ignmsg << "gain:  " << this->data->gain << std::endl;
-  ignmsg << "Derived Parameters:" << std::endl;
-  ignmsg << "amplitudes:  " << this->data->amplitudes << std::endl;
-  ignmsg << "wavenumbers: " << this->data->wavenumbers << std::endl;
-  ignmsg << "omegas:      " << this->data->angularFrequencies << std::endl;
-  ignmsg << "periods:     ";
+  gzmsg << "Input Parameters:" << std::endl;
+  gzmsg << "model:     " << this->data->model << std::endl;
+  gzmsg << "number:     " << this->data->number << std::endl;
+  gzmsg << "scale:      " << this->data->scale << std::endl;
+  gzmsg << "angle:      " << this->data->angle << std::endl;
+  gzmsg << "steepness:  " << this->data->steepness << std::endl;
+  gzmsg << "amplitude:  " << this->data->amplitude << std::endl;
+  gzmsg << "period:     " << this->data->period << std::endl;
+  gzmsg << "direction:  " << this->data->direction << std::endl;
+  gzmsg << "tau:  " << this->data->tau << std::endl;
+  gzmsg << "gain:  " << this->data->gain << std::endl;
+  gzmsg << "Derived Parameters:" << std::endl;
+  gzmsg << "amplitudes:  " << this->data->amplitudes << std::endl;
+  gzmsg << "wavenumbers: " << this->data->wavenumbers << std::endl;
+  gzmsg << "omegas:      " << this->data->angularFrequencies << std::endl;
+  gzmsg << "periods:     ";
   for (auto&& omega : this->data->angularFrequencies) // NOLINT
   {
-    ignmsg << 2.0 * M_PI / omega <<", ";
+    gzmsg << 2.0 * M_PI / omega <<", ";
   }
-  ignmsg << std::endl;
-  ignmsg << "phases:      " << this->data->phases << std::endl;
-  ignmsg << "steepnesses: " << this->data->steepnesses << std::endl;
-  ignmsg << "directions:  ";
+  gzmsg << std::endl;
+  gzmsg << "phases:      " << this->data->phases << std::endl;
+  gzmsg << "steepnesses: " << this->data->steepnesses << std::endl;
+  gzmsg << "directions:  ";
   for (auto&& d : this->data->directions) // NOLINT
   {
-    ignmsg << d << "; ";
+    gzmsg << d << "; ";
   }
-  ignmsg << std::endl;
+  gzmsg << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -82,7 +82,7 @@ void Surface::Implementation::ParsePoints(
 
   // We need at least one point.
   if (!sdfPoints->HasElement("point"))
-    ignerr << "Unable to find <points><point> element in SDF." << std::endl;
+    gzerr << "Unable to find <points><point> element in SDF." << std::endl;
 
   auto pointElem = sdfPoints->GetElement("point");
 
@@ -112,13 +112,13 @@ void Surface::Implementation::ParsePoints(
   // {
   //   // We need the hull's name.
   //   if (!sdfHull->HasElement("name"))
-  //     ignerr << "Unable to find <hull><name> element in SDF." << std::endl;
+  //     gzerr << "Unable to find <hull><name> element in SDF." << std::endl;
 
   //   std::string name = sdfHull->Get<std::string>("name");
 
   //   // We need at least one point.
   //   if (!sdfHull->HasElement("point"))
-  //     ignerr << "Unable to find <hull><point> element in SDF." << std::endl;
+  //     gzerr << "Unable to find <hull><point> element in SDF." << std::endl;
 
   //   auto pointElem = sdfHull->GetElement("point");
   //   while (pointElem)
@@ -157,7 +157,7 @@ void Surface::Configure(const sim::Entity &_entity,
   // Parse required elements.
   if (!_sdf->HasElement("link_name"))
   {
-    ignerr << "No <link_name> specified" << std::endl;
+    gzerr << "No <link_name> specified" << std::endl;
     return;
   }
 
@@ -166,7 +166,7 @@ void Surface::Configure(const sim::Entity &_entity,
   this->dataPtr->link = sim::Link(model.LinkByName(_ecm, linkName));
   if (!this->dataPtr->link.Valid(_ecm))
   {
-    ignerr << "Could not find link named [" << linkName
+    gzerr << "Could not find link named [" << linkName
            << "] in model" << std::endl;
     return;
   }
@@ -204,7 +204,7 @@ void Surface::Configure(const sim::Entity &_entity,
   auto gravityOpt = world.Gravity(_ecm);
   if (!gravityOpt)
   {
-    ignerr << "Unable to get the gravity from the world" << std::endl;
+    gzerr << "Unable to get the gravity from the world" << std::endl;
     return;
   }
   this->dataPtr->gravity = *gravityOpt;
@@ -212,16 +212,16 @@ void Surface::Configure(const sim::Entity &_entity,
   // Wavefield
   this->dataPtr->wavefield.Load(_sdf);
 
-  igndbg << "Surface plugin successfully configured with the following "
+  gzdbg << "Surface plugin successfully configured with the following "
          << "parameters:" << std::endl;
-  igndbg << "  <link_name>: " << linkName << std::endl;
-  igndbg << "  <vehicle_length>: " << this->dataPtr->hullLength << std::endl;
-  igndbg << "  <hull_radius>: " << this->dataPtr->hullRadius << std::endl;
-  igndbg << "  <fluid_level>: " << this->dataPtr->fluidLevel << std::endl;
-  igndbg << "  <fluid_density>: " << this->dataPtr->fluidDensity << std::endl;
-  igndbg << "  <points>:" << std::endl;
+  gzdbg << "  <link_name>: " << linkName << std::endl;
+  gzdbg << "  <vehicle_length>: " << this->dataPtr->hullLength << std::endl;
+  gzdbg << "  <hull_radius>: " << this->dataPtr->hullRadius << std::endl;
+  gzdbg << "  <fluid_level>: " << this->dataPtr->fluidLevel << std::endl;
+  gzdbg << "  <fluid_density>: " << this->dataPtr->fluidDensity << std::endl;
+  gzdbg << "  <points>:" << std::endl;
   for (const auto &p : this->dataPtr->points)
-    igndbg << "    [" << p << "]" << std::endl;
+    gzdbg << "    [" << p << "]" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -237,7 +237,7 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
   const auto kPose = this->dataPtr->link.WorldPose(_ecm);
   if (!kPose)
   {
-    ignerr << "Unable to get world pose from link ["
+    gzerr << "Unable to get world pose from link ["
            << this->dataPtr->link.Entity() << "]" << std::endl;
     return;
   }
@@ -282,19 +282,19 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
       bpnt);
 
     // Debug output:
-    // igndbg << bpnt.X() << "," << bpnt.Y() << "," << bpnt.Z() << std::endl;
-    // igndbg << "-" << std::endl;
-    // igndbg << bpntW.X() << "," << bpntW.Y() << "," << bpntW.Z() << std::endl;
-    // igndbg << "X: " << X << std::endl;
-    // igndbg << "depth: " << depth << std::endl;
-    // igndbg << "dz: " << dz << std::endl;
-    // igndbg << "kDdz: " << kDdz << std::endl;
-    // igndbg << "deltaZ: " << deltaZ << std::endl;
-    // igndbg << "hull radius: " << this->dataPtr->hullRadius << std::endl;
-    // igndbg << "vehicle length: " << this->dataPtr->hullLength << std::endl;
-    // igndbg << "gravity z: " << -this->dataPtr->gravity.Z() << std::endl;
-    // igndbg << "fluid density: " << this->dataPtr->fluidDensity << std::endl;
-    // igndbg << "Force: " << kBuoyForce << std::endl << std::endl;
+    // gzdbg << bpnt.X() << "," << bpnt.Y() << "," << bpnt.Z() << std::endl;
+    // gzdbg << "-" << std::endl;
+    // gzdbg << bpntW.X() << "," << bpntW.Y() << "," << bpntW.Z() << std::endl;
+    // gzdbg << "X: " << X << std::endl;
+    // gzdbg << "depth: " << depth << std::endl;
+    // gzdbg << "dz: " << dz << std::endl;
+    // gzdbg << "kDdz: " << kDdz << std::endl;
+    // gzdbg << "deltaZ: " << deltaZ << std::endl;
+    // gzdbg << "hull radius: " << this->dataPtr->hullRadius << std::endl;
+    // gzdbg << "vehicle length: " << this->dataPtr->hullLength << std::endl;
+    // gzdbg << "gravity z: " << -this->dataPtr->gravity.Z() << std::endl;
+    // gzdbg << "fluid density: " << this->dataPtr->fluidDensity << std::endl;
+    // gzdbg << "Force: " << kBuoyForce << std::endl << std::endl;
   }
 }
 

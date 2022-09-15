@@ -116,7 +116,7 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
   // Parse required elements.
   if (!_sdf->HasElement("link_name"))
   {
-    ignerr << "No <link_name> specified" << std::endl;
+    gzerr << "No <link_name> specified" << std::endl;
     return;
   }
 
@@ -124,7 +124,7 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
   this->dataPtr->link = Link(this->dataPtr->model.LinkByName(_ecm, linkName));
   if (!this->dataPtr->link.Valid(_ecm))
   {
-    ignerr << "Could not find link named [" << linkName
+    gzerr << "Could not find link named [" << linkName
            << "] in model" << std::endl;
     return;
   }
@@ -161,27 +161,27 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
   this->dataPtr->Ma(4, 4) = this->dataPtr->paramMdotQ;
   this->dataPtr->Ma(5, 5) = this->dataPtr->paramNdotR;
 
-  igndbg << "SimpleHydrodynamics plugin successfully configured with the "
-         << "following parameters:"                        << std::endl;
-  igndbg << "  <link_name>: " << linkName                  << std::endl;
-  igndbg << "  <xDotU>: "     << this->dataPtr->paramXdotU << std::endl;
-  igndbg << "  <yDotV>: "     << this->dataPtr->paramYdotV << std::endl;
-  igndbg << "  <zDotW>: "     << this->dataPtr->paramZdotW << std::endl;
-  igndbg << "  <kDotP>: "     << this->dataPtr->paramKdotP << std::endl;
-  igndbg << "  <mDotQ>: "     << this->dataPtr->paramMdotQ << std::endl;
-  igndbg << "  <nDotR>: "     << this->dataPtr->paramNdotR << std::endl;
-  igndbg << "  <xU>: "        << this->dataPtr->paramXu    << std::endl;
-  igndbg << "  <xUU>: "       << this->dataPtr->paramXuu   << std::endl;
-  igndbg << "  <yV>: "        << this->dataPtr->paramYv    << std::endl;
-  igndbg << "  <yVV>: "       << this->dataPtr->paramYvv   << std::endl;
-  igndbg << "  <zW>: "        << this->dataPtr->paramZw    << std::endl;
-  igndbg << "  <zWW>: "       << this->dataPtr->paramZww   << std::endl;
-  igndbg << "  <kP>: "        << this->dataPtr->paramKp    << std::endl;
-  igndbg << "  <kPP>: "       << this->dataPtr->paramKpp   << std::endl;
-  igndbg << "  <mQ>: "        << this->dataPtr->paramMq    << std::endl;
-  igndbg << "  <mQQ>: "       << this->dataPtr->paramMqq   << std::endl;
-  igndbg << "  <nR>: "        << this->dataPtr->paramNr    << std::endl;
-  igndbg << "  <nRR>: "       << this->dataPtr->paramNrr   << std::endl;
+  gzdbg << "SimpleHydrodynamics plugin successfully configured with the "
+        << "following parameters:"                        << std::endl;
+  gzdbg << "  <link_name>: " << linkName                  << std::endl;
+  gzdbg << "  <xDotU>: "     << this->dataPtr->paramXdotU << std::endl;
+  gzdbg << "  <yDotV>: "     << this->dataPtr->paramYdotV << std::endl;
+  gzdbg << "  <zDotW>: "     << this->dataPtr->paramZdotW << std::endl;
+  gzdbg << "  <kDotP>: "     << this->dataPtr->paramKdotP << std::endl;
+  gzdbg << "  <mDotQ>: "     << this->dataPtr->paramMdotQ << std::endl;
+  gzdbg << "  <nDotR>: "     << this->dataPtr->paramNdotR << std::endl;
+  gzdbg << "  <xU>: "        << this->dataPtr->paramXu    << std::endl;
+  gzdbg << "  <xUU>: "       << this->dataPtr->paramXuu   << std::endl;
+  gzdbg << "  <yV>: "        << this->dataPtr->paramYv    << std::endl;
+  gzdbg << "  <yVV>: "       << this->dataPtr->paramYvv   << std::endl;
+  gzdbg << "  <zW>: "        << this->dataPtr->paramZw    << std::endl;
+  gzdbg << "  <zWW>: "       << this->dataPtr->paramZww   << std::endl;
+  gzdbg << "  <kP>: "        << this->dataPtr->paramKp    << std::endl;
+  gzdbg << "  <kPP>: "       << this->dataPtr->paramKpp   << std::endl;
+  gzdbg << "  <mQ>: "        << this->dataPtr->paramMq    << std::endl;
+  gzdbg << "  <mQQ>: "       << this->dataPtr->paramMqq   << std::endl;
+  gzdbg << "  <nR>: "        << this->dataPtr->paramNr    << std::endl;
+  gzdbg << "  <nRR>: "       << this->dataPtr->paramNrr   << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -211,25 +211,25 @@ void SimpleHydrodynamics::PreUpdate(
   // Sanity check: Make sure that we can read the full state.
   if (!worldAngularVel)
   {
-    ignerr << "No angular velocity" <<"\n";
+    gzerr << "No angular velocity" <<"\n";
     return;
   }
 
   if (!worldLinearVel)
   {
-    ignerr << "No linear velocity" <<"\n";
+    gzerr << "No linear velocity" <<"\n";
     return;
   }
 
   if (!worldAngularAccel)
   {
-    ignerr << "No angular acceleration" <<"\n";
+    gzerr << "No angular acceleration" <<"\n";
     return;
   }
 
   if (!worldLinearAccel)
   {
-    ignerr << "No linear acceleration" <<"\n";
+    gzerr << "No linear acceleration" <<"\n";
     return;
   }
 

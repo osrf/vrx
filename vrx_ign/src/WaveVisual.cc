@@ -133,12 +133,12 @@ void WaveVisual::Configure(const Entity &_entity,
 
   if (!sdf->HasElement("wavefield"))
   {
-    ignerr << "<wavefield> parameter is missing " << std::endl;
+    gzerr << "<wavefield> parameter is missing " << std::endl;
     return;
   }
   if (!sdf->HasElement("shader"))
   {
-    ignerr << "<shader> parameter is missing " << std::endl;
+    gzerr << "<shader> parameter is missing " << std::endl;
     return;
   }
 
@@ -156,9 +156,9 @@ void WaveVisual::Configure(const Entity &_entity,
   if (!shaderElem->HasElement("vertex") ||
       !shaderElem->HasElement("fragment"))
   {
-    ignerr << "<shader> must have <vertex> and <fragment> sdf elements"
-           << std::endl;
-     return;
+    gzerr << "<shader> must have <vertex> and <fragment> sdf elements"
+          << std::endl;
+    return;
   }
   else
   {
@@ -254,7 +254,7 @@ void WaveVisualPrivate::OnUpdate()
       if (n && n->HasUserData("gazebo-entity"))
       {
         // RenderUti stores gazebo-entity user data as int
-        // \todo(anyone) Change this to uint64_t in Ignition H?
+        // \todo(anyone) Change this to uint64_t in Gazebo H?
         auto variant = n->UserData("gazebo-entity");
         const int *value = std::get_if<int>(&variant);
         if (value && *value == static_cast<int>(this->entity))

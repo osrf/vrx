@@ -160,7 +160,7 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
   // This is a required element.
   if (!this->sdf->HasElement("vehicle"))
   {
-    ignerr << "Unable to find <vehicle> element in SDF." << std::endl;
+    gzerr << "Unable to find <vehicle> element in SDF." << std::endl;
     return false;
   }
   this->vehicleName = this->sdf->Get<std::string>("vehicle");
@@ -168,7 +168,7 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
   // This is a required element.
   if (!this->sdf->HasElement("task_name"))
   {
-    ignerr << "Unable to find <task_name> element in SDF." << std::endl;
+    gzerr << "Unable to find <task_name> element in SDF." << std::endl;
     return false;
   }
   this->taskName = this->sdf->Get<std::string>("task_name");
@@ -190,8 +190,8 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     double value = this->sdf->Get<double>("initial_state_duration");
     if (value < 0)
     {
-      ignerr << "<initial_state_duration> value should not be negative."
-             << std::endl;
+      gzerr << "<initial_state_duration> value should not be negative."
+            << std::endl;
       return false;
     }
     this->initialStateDuration = value;
@@ -203,8 +203,8 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     double value = this->sdf->Get<double>("ready_state_duration");
     if (value < 0)
     {
-      ignerr << "<ready_state_duration> value should not be negative."
-             << std::endl;
+      gzerr << "<ready_state_duration> value should not be negative."
+            << std::endl;
       return false;
     }
 
@@ -217,8 +217,8 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     double value = this->sdf->Get<double>("running_state_duration");
     if (value < 0)
     {
-      ignerr << "<running_state_duration> value should not be negative."
-             << std::endl;
+      gzerr << "<running_state_duration> value should not be negative."
+            << std::endl;
       return false;
     }
     this->runningStateDuration = value;
@@ -352,7 +352,7 @@ void ScoringPlugin::Configure(const sim::Entity &_entity,
   // SDF.
   if (!this->dataPtr->ParseSDFParameters())
   {
-    ignerr << "Scoring disabled" << std::endl;
+    gzerr << "Scoring disabled" << std::endl;
     return;
   }
 
@@ -420,8 +420,8 @@ void ScoringPlugin::Configure(const sim::Entity &_entity,
   }
   else
   {
-    ignwarn << "VRX_DEBUG environment variable not set, defaulting to true"
-            << std::endl;
+    gzwarn << "VRX_DEBUG environment variable not set, defaulting to true"
+           << std::endl;
   }
 }
 
@@ -507,21 +507,21 @@ uint16_t ScoringPlugin::NumCollisions() const
 void ScoringPlugin::OnReady()
 {
   if (!this->dataPtr->silent)
-    igndbg << "ScoringPlugin::OnReady" << std::endl;
+    gzdbg << "ScoringPlugin::OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
   if (!this->dataPtr->silent)
-    igndbg << "ScoringPlugin::OnRunning" << std::endl;
+    gzdbg << "ScoringPlugin::OnRunning" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
   if (!this->dataPtr->silent)
-    igndbg << this->dataPtr->currentTime.count() << "  OnFinished" << std::endl;
+    gzdbg << this->dataPtr->currentTime.count() << "  OnFinished" << std::endl;
 
   // If a timeoutScore was specified, use it.
   if (this->dataPtr->timedOut && this->dataPtr->timeoutScore > 0.0)
@@ -561,10 +561,10 @@ void ScoringPlugin::OnContacts(const gz::msgs::Contacts &_contacts)
       ++this->dataPtr->numCollisions;
       if (!this->dataPtr->silent)
       {
-        igndbg << "[" << this->dataPtr->numCollisions
-               << "] New collision counted between ["
-               << _contacts.contact(i).collision1().name() << "] and ["
-               << _contacts.contact(i).collision2().name() << "]" << std::endl;
+        gzdbg << "[" << this->dataPtr->numCollisions
+              << "] New collision counted between ["
+              << _contacts.contact(i).collision1().name() << "] and ["
+              << _contacts.contact(i).collision2().name() << "]" << std::endl;
       }
 
       this->dataPtr->lastCollisionTime = this->dataPtr->currentTime;

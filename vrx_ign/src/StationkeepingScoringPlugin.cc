@@ -122,7 +122,7 @@ StationkeepingScoringPlugin::StationkeepingScoringPlugin()
   : ScoringPlugin(),
   dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
-  ignmsg << "Stationkeeping scoring plugin loaded" << std::endl;
+  gzmsg << "Stationkeeping scoring plugin loaded" << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -131,7 +131,7 @@ void StationkeepingScoringPlugin::Configure(const sim::Entity &_entity,
   sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
-  ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
   auto worldEntity =
       _ecm.EntityByComponents(sim::components::World());
   sim::World world(worldEntity);
@@ -140,17 +140,17 @@ void StationkeepingScoringPlugin::Configure(const sim::Entity &_entity,
   // Get lat, lon and yaw from SDF
   if (!_sdf->HasElement("goal_pose") && !_sdf->HasElement("goal_pose_cart"))
   {
-    ignerr << "Found neither <goal_pose> nor <goal_pose_cart> element in SDF."
+    gzerr << "Found neither <goal_pose> nor <goal_pose_cart> element in SDF."
            << std::endl;
-    ignerr << "Using default pose: 0 0 0" << std::endl;
+    gzerr << "Using default pose: 0 0 0" << std::endl;
   }
   else if (_sdf->HasElement("goal_pose"))
   {
     if (_sdf->HasElement("goal_pose_cart"))
     {
-      ignerr << "Both goal_pose and goal_pose_cart were specified."
+      gzerr << "Both goal_pose and goal_pose_cart were specified."
              << std::endl;
-      ignerr << "Ignoring goal_pose_cart." << std::endl;
+      gzerr << "Ignoring goal_pose_cart." << std::endl;
     }
 
     math::Vector3d latlonyaw = _sdf->Get<math::Vector3d>("goal_pose");
@@ -195,9 +195,9 @@ void StationkeepingScoringPlugin::Configure(const sim::Entity &_entity,
   }
 
   // Print some debugging messages
-  ignmsg << "Stationkeeping Goal, Spherical: Lat = " << this->dataPtr->goalLat
+  gzmsg << "Stationkeeping Goal, Spherical: Lat = " << this->dataPtr->goalLat
          << " Lon = " << this->dataPtr->goalLon << std::endl;
-  ignmsg << "Stationkeeping Goal, Local: X = " << this->dataPtr->goalX
+  gzmsg << "Stationkeeping Goal, Local: X = " << this->dataPtr->goalX
          << " Y = " << this->dataPtr->goalY << " Yaw = "
          << this->dataPtr->goalYaw << std::endl;
 
@@ -308,7 +308,7 @@ void StationkeepingScoringPlugin::OnReady()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
+    gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
   }
   ScoringPlugin::OnReady();
 }
@@ -318,7 +318,7 @@ void StationkeepingScoringPlugin::OnRunning()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
+    gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
   }
   ScoringPlugin::OnRunning();
 }
@@ -328,7 +328,7 @@ void StationkeepingScoringPlugin::OnFinished()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "StationkeepingScoringPlugin::OnFinished" << std::endl;
+    gzmsg << "StationkeepingScoringPlugin::OnFinished" << std::endl;
   }
   ScoringPlugin::OnFinished();
 }
@@ -338,7 +338,7 @@ void StationkeepingScoringPlugin::OnCollision()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "StationkeepingScoringPlugin::OnCollision" << std::endl;
+    gzmsg << "StationkeepingScoringPlugin::OnCollision" << std::endl;
   }
   ScoringPlugin::OnCollision();
 }

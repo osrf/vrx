@@ -64,7 +64,6 @@ def generate_launch_description():
         )
     )
 
-
     bridges = [
       vrx_ign.bridges.score(),
       vrx_ign.bridges.clock(),
@@ -106,4 +105,3 @@ def generate_launch_description():
         monitor_sim_proc,
         sim_exit_event_handler
         ])
-

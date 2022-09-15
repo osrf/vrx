@@ -97,7 +97,7 @@ WayfindingScoringPlugin::WayfindingScoringPlugin()
   : ScoringPlugin(),
     dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
-  ignmsg << "Wayfinding scoring plugin loaded" << std::endl;
+  gzmsg << "Wayfinding scoring plugin loaded" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -111,7 +111,7 @@ void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
   sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
-  ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->dataPtr->sdf = _sdf->Clone();
 
@@ -123,7 +123,7 @@ void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
   // A waypoints element is required.
   if (!this->dataPtr->sdf->HasElement("waypoints"))
   {
-    ignerr << "Unable to find <waypoints> element in SDF." << std::endl;
+    gzerr << "Unable to find <waypoints> element in SDF." << std::endl;
     return;
   }
   auto waypointsElem = this->dataPtr->sdf->GetElement("waypoints");
@@ -131,7 +131,7 @@ void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
   // We need at least one waypoint
   if (!waypointsElem->HasElement("waypoint"))
   {
-    ignerr << "Unable to find <waypoint> element in <waypoints>." << std::endl;
+    gzerr << "Unable to find <waypoint> element in <waypoints>." << std::endl;
     return;
   }
   auto waypointElem = waypointsElem->GetElement("waypoint");
@@ -158,9 +158,9 @@ void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
     this->dataPtr->localWaypoints.push_back(cartVec);
   
     // Print some debugging messages
-    ignmsg << "Waypoint, Spherical: Lat = " << latlonyaw.X()
+    gzmsg << "Waypoint, Spherical: Lat = " << latlonyaw.X()
            << " Lon = " << latlonyaw.Y() << std::endl;
-    ignmsg << "Waypoint, Local: X = " << cartVec.X()
+    gzmsg << "Waypoint, Local: X = " << cartVec.X()
            << " Y = " << cartVec.Y() << " Yaw = " << cartVec.Z() << std::endl;
   
     waypointElem = waypointElem->GetNextElement("waypoint");
@@ -202,7 +202,7 @@ void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
       if (!this->dataPtr->waypointMarkers.DrawMarker(markerId, waypoint.X(),
             waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
       {
-        ignerr << "Error creating visual marker" << std::endl;
+        gzerr << "Error creating visual marker" << std::endl;
       }
       markerId++;
     }
@@ -289,13 +289,13 @@ void WayfindingScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::OnReady()
 {
-  ignmsg << "WayfindingScoringPlugin::OnReady" << std::endl;
+  gzmsg << "WayfindingScoringPlugin::OnReady" << std::endl;
 }
 
 //////////////////////////////////////////////////
 void WayfindingScoringPlugin::OnRunning()
 {
-  ignmsg << "WayfindingScoringPlugin::OnRunning" << std::endl;
+  gzmsg << "WayfindingScoringPlugin::OnRunning" << std::endl;
 }
 
 GZ_ADD_PLUGIN(WayfindingScoringPlugin,
