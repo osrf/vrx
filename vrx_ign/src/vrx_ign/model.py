@@ -54,7 +54,7 @@ GRIPPERS = [
     'vrx_suction_gripper'
 ]
 
-WAVEFIELD_SIZE = {'simple_demo': 1000, 'coast': 6000}
+WAVEFIELD_SIZE = {'sydney_regatta': 1000,}
 
 
 class Model:
