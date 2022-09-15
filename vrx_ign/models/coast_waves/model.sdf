@@ -9,9 +9,7 @@
             <uri>meshes/waterlow.dae</uri>
           </mesh>
         </geometry>
-        <plugin
-            filename="libWaveVisual.so"
-            name="vrx::WaveVisual">
+        <plugin filename="libWaveVisual.so" name="vrx::WaveVisual">
           <shader>
             <vertex>materials/programs/GerstnerWaves_vs_330.glsl</vertex>
             <fragment>materials/programs/GerstnerWaves_fs_330.glsl</fragment>

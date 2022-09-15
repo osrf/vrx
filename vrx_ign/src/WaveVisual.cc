@@ -40,7 +40,6 @@
 #include "WaveVisual.hh"
 
 using namespace gz;
-using namespace sim;
 using namespace vrx;
 
 class vrx::WaveVisualPrivate
@@ -55,7 +54,7 @@ class vrx::WaveVisualPrivate
   public: std::mutex mutex;
 
   /// \brief Connection to pre-render event callback
-  public: gz::common::ConnectionPtr connection{nullptr};
+  public: common::ConnectionPtr connection{nullptr};
 
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
@@ -70,7 +69,7 @@ class vrx::WaveVisualPrivate
   public: rendering::ScenePtr scene;
 
   /// \brief Entity id of the visual
-  public: Entity entity = kNullEntity;
+  public: sim::Entity entity = sim::kNullEntity;
 
   /// \brief Current sim time
   public: std::chrono::steady_clock::duration currentSimTime;
@@ -121,10 +120,10 @@ WaveVisual::~WaveVisual()
 }
 
 /////////////////////////////////////////////////
-void WaveVisual::Configure(const Entity &_entity,
+void WaveVisual::Configure(const sim::Entity &_entity,
                const std::shared_ptr<const sdf::Element> &_sdf,
-               EntityComponentManager &_ecm,
-               EventManager &_eventMgr)
+               sim::EntityComponentManager &_ecm,
+               sim::EventManager &_eventMgr)
 {
   GZ_PROFILE("WaveVisual::Configure");
   // Ugly, but needed because the sdf::Element::GetElement is not a const
@@ -148,7 +147,7 @@ void WaveVisual::Configure(const Entity &_entity,
   {
     auto modelEntity = topLevelModel(_entity, _ecm);
     this->dataPtr->modelPath =
-        _ecm.ComponentData<components::SourceFilePath>(modelEntity).value();
+      _ecm.ComponentData<sim::components::SourceFilePath>(modelEntity).value();
   }
 
   // parse path to shaders
@@ -163,11 +162,11 @@ void WaveVisual::Configure(const Entity &_entity,
   else
   {
     sdf::ElementPtr vertexElem = shaderElem->GetElement("vertex");
-    this->dataPtr->vertexShaderUri = common::findFile(
-        asFullPath(vertexElem->Get<std::string>(), this->dataPtr->modelPath));
+    this->dataPtr->vertexShaderUri = common::findFile(sim::asFullPath(
+        vertexElem->Get<std::string>(), this->dataPtr->modelPath));
     sdf::ElementPtr fragmentElem = shaderElem->GetElement("fragment");
-    this->dataPtr->fragmentShaderUri = common::findFile(
-        asFullPath(fragmentElem->Get<std::string>(), this->dataPtr->modelPath));
+    this->dataPtr->fragmentShaderUri = common::findFile(sim::asFullPath(
+        fragmentElem->Get<std::string>(), this->dataPtr->modelPath));
   }
 
   // parse shader params
@@ -206,21 +205,21 @@ void WaveVisual::Configure(const Entity &_entity,
   }
 
   this->dataPtr->entity = _entity;
-  auto nameComp = _ecm.Component<components::Name>(_entity);
+  auto nameComp = _ecm.Component<sim::components::Name>(_entity);
   this->dataPtr->visualName = nameComp->Data();
 
   // connect to the SceneUpdate event
   // the callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
-      _eventMgr.Connect<gz::sim::events::SceneUpdate>(
+      _eventMgr.Connect<sim::events::SceneUpdate>(
       std::bind(&WaveVisualPrivate::OnUpdate, this->dataPtr.get()));
 }
 
 //////////////////////////////////////////////////
 void WaveVisual::PreUpdate(
-  const gz::sim::UpdateInfo &_info,
-  gz::sim::EntityComponentManager &)
+  const sim::UpdateInfo &_info,
+  sim::EntityComponentManager &)
 {
   GZ_PROFILE("WaveVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
@@ -396,13 +395,13 @@ void WaveVisualPrivate::OnUpdate()
     // \todo(anyone) find a more generic way of getting path to the textures
     // than using hard coded material paths
     std::string bumpMapPath = common::findFile(
-        asFullPath("materials/textures/wave_normals.dds",
+        sim::asFullPath("materials/textures/wave_normals.dds",
         this->modelPath));
     (*fsParams)["bumpMap"].SetTexture(bumpMapPath,
         rendering::ShaderParam::ParamType::PARAM_TEXTURE);
 
     std::string cubeMapPath = common::findFile(
-        asFullPath("materials/textures/skybox_lowres.dds", this->modelPath));
+      sim::asFullPath("materials/textures/skybox_lowres.dds", this->modelPath));
     (*fsParams)["cubeMap"].SetTexture(cubeMapPath,
         rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, 1u);
     this->paramsSet = true;
@@ -420,8 +419,8 @@ void WaveVisualPrivate::OnUpdate()
 }
 
 GZ_ADD_PLUGIN(vrx::WaveVisual,
-                    gz::sim::System,
-                    WaveVisual::ISystemConfigure,
-                    WaveVisual::ISystemPreUpdate)
+              sim::System,
+              WaveVisual::ISystemConfigure,
+              WaveVisual::ISystemPreUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(WaveVisual, "vrx::WaveVisual")

@@ -34,7 +34,7 @@ using namespace vrx;
 class vrx::SimpleHydrodynamicsPrivate
 {
   /// \brief The link entity.
-  public: gz::sim::Link link;
+  public: sim::Link link;
 
   /// \brief Model interface.
   public: Model model{kNullEntity};
@@ -186,8 +186,8 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
 
 //////////////////////////////////////////////////
 void SimpleHydrodynamics::PreUpdate(
-    const gz::sim::UpdateInfo &_info,
-    gz::sim::EntityComponentManager &_ecm)
+    const sim::UpdateInfo &_info,
+    sim::EntityComponentManager &_ecm)
 {
   GZ_PROFILE("SimpleHydrodynamics::PreUpdate");
 
@@ -275,19 +275,19 @@ void SimpleHydrodynamics::PreUpdate(
   const Eigen::VectorXd kForceSum = kAmassVec + kDvec;
 
   // Transform the force and torque to the world frame.
-  gz::math::Vector3d forceWorld = (*comPose).Rot().RotateVector(
-    gz::math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
-  gz::math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
-    gz::math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));
+  math::Vector3d forceWorld = (*comPose).Rot().RotateVector(
+    math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
+  math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
+    math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));
 
   // Apply the force and torque at COM.
   this->dataPtr->link.AddWorldWrench(_ecm, forceWorld, torqueWorld);
 }
 
 GZ_ADD_PLUGIN(vrx::SimpleHydrodynamics,
-                    gz::sim::System,
-                    SimpleHydrodynamics::ISystemConfigure,
-                    SimpleHydrodynamics::ISystemPreUpdate)
+              sim::System,
+              SimpleHydrodynamics::ISystemConfigure,
+              SimpleHydrodynamics::ISystemPreUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(vrx::SimpleHydrodynamics,
-                          "vrx::SimpleHydrodynamics")
+                    "vrx::SimpleHydrodynamics")

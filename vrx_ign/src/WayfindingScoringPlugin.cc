@@ -299,9 +299,9 @@ void WayfindingScoringPlugin::OnRunning()
 }
 
 GZ_ADD_PLUGIN(WayfindingScoringPlugin,
-                    sim::System,
-                    ScoringPlugin::ISystemConfigure,
-                    ScoringPlugin::ISystemPreUpdate)
+              sim::System,
+              ScoringPlugin::ISystemConfigure,
+              ScoringPlugin::ISystemPreUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(vrx::WayfindingScoringPlugin,
-                          "vrx::WayfindingScoringPlugin")
+                    "vrx::WayfindingScoringPlugin")

@@ -344,6 +344,6 @@ void StationkeepingScoringPlugin::OnCollision()
 }
 
 GZ_ADD_PLUGIN(vrx::StationkeepingScoringPlugin,
-                    sim::System,
-                    vrx::StationkeepingScoringPlugin::ISystemConfigure,
-                    vrx::StationkeepingScoringPlugin::ISystemPreUpdate)
+              sim::System,
+              vrx::StationkeepingScoringPlugin::ISystemConfigure,
+              vrx::StationkeepingScoringPlugin::ISystemPreUpdate)

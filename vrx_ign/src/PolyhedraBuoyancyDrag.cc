@@ -349,9 +349,9 @@ void PolyhedraBuoyancyDrag::PreUpdate(const sim::UpdateInfo &_info,
 }
 
 GZ_ADD_PLUGIN(PolyhedraBuoyancyDrag,
-                    sim::System,
-                    PolyhedraBuoyancyDrag::ISystemConfigure,
-                    PolyhedraBuoyancyDrag::ISystemPreUpdate)
+              sim::System,
+              PolyhedraBuoyancyDrag::ISystemConfigure,
+              PolyhedraBuoyancyDrag::ISystemPreUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(vrx::PolyhedraBuoyancyDrag,
-                          "vrx::PolyhedraBuoyancyDrag")
+                    "vrx::PolyhedraBuoyancyDrag")

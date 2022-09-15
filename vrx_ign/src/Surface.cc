@@ -89,7 +89,7 @@ void Surface::Implementation::ParsePoints(
   // Parse a new point.
   while (pointElem)
   {
-    gz::math::Vector3d point;
+    math::Vector3d point;
     pointElem->GetValue()->Get<math::Vector3d>(point);
     this->points.push_back(point);
 
@@ -123,7 +123,7 @@ void Surface::Implementation::ParsePoints(
   //   auto pointElem = sdfHull->GetElement("point");
   //   while (pointElem)
   //   {
-  //     gz::math::Vector3d point;
+  //     math::Vector3d point;
   //     pointElem->GetValue()->Get<math::Vector3d>(point);
   //     this->hulls[name].push_back(point);
 
@@ -335,9 +335,9 @@ double Surface::FluidDensity() const
 // }
 
 GZ_ADD_PLUGIN(Surface,
-                    sim::System,
-                    Surface::ISystemConfigure,
-                    Surface::ISystemPreUpdate)
+              sim::System,
+              Surface::ISystemConfigure,
+              Surface::ISystemPreUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(vrx::Surface,
-                          "vrx::Surface")
+                    "vrx::Surface")

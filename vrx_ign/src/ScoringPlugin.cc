@@ -589,9 +589,9 @@ void ScoringPlugin::ReleaseVehicle()
 }
 
 GZ_ADD_PLUGIN(ScoringPlugin,
-                    sim::System,
-                    ScoringPlugin::ISystemConfigure,
-                    ScoringPlugin::ISystemPreUpdate)
+              sim::System,
+              ScoringPlugin::ISystemConfigure,
+              ScoringPlugin::ISystemPreUpdate)
 
 GZ_ADD_PLUGIN_ALIAS(vrx::ScoringPlugin,
-                          "vrx::ScoringPlugin")
+                    "vrx::ScoringPlugin")
