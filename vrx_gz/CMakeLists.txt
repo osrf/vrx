@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 
-project(vrx_ign)
+project(vrx_gz)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
@@ -120,8 +120,8 @@ install(
   DESTINATION lib)
 
 ament_python_install_package(
-  vrx_ign
-  PACKAGE_DIR src/vrx_ign
+  vrx_gz
+  PACKAGE_DIR src/vrx_gz
 )
 
 #============================================================================

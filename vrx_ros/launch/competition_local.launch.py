@@ -26,7 +26,7 @@ from launch.substitutions import LaunchConfiguration
 
 from launch_ros.actions import Node
 
-import vrx_ign.bridges
+import vrx_gz.bridges
 
 import os
 
@@ -65,11 +65,11 @@ def generate_launch_description():
     )
 
     bridges = [
-      vrx_ign.bridges.score(),
-      vrx_ign.bridges.clock(),
-      vrx_ign.bridges.run_clock(),
-      vrx_ign.bridges.phase(),
-      vrx_ign.bridges.stream_status(),
+      vrx_gz.bridges.score(),
+      vrx_gz.bridges.clock(),
+      vrx_gz.bridges.run_clock(),
+      vrx_gz.bridges.phase(),
+      vrx_gz.bridges.stream_status(),
     ]
 
     bridge_node = Node(
@@ -93,7 +93,7 @@ def generate_launch_description():
 
     spawn_wamv = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-        get_package_share_directory('vrx_ign'), 'launch'),
+        get_package_share_directory('vrx_gz'), 'launch'),
         '/spawn.launch.py']),
         launch_arguments = wamv_args.items())
 

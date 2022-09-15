@@ -23,7 +23,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
 
-import vrx_ign.bridges
+import vrx_gz.bridges
 
 import os
 
@@ -44,11 +44,11 @@ def simulation(world_name, headless=False):
 
 def competition_bridges():
     bridges = [
-        vrx_ign.bridges.score(),
-        vrx_ign.bridges.clock(),
-        vrx_ign.bridges.run_clock(),
-        vrx_ign.bridges.phase(),
-        vrx_ign.bridges.stream_status(),
+        vrx_gz.bridges.score(),
+        vrx_gz.bridges.clock(),
+        vrx_gz.bridges.run_clock(),
+        vrx_gz.bridges.phase(),
+        vrx_gz.bridges.stream_status(),
     ]
     nodes = []
     nodes.append(Node(

@@ -1,4 +1,4 @@
-from vrx_ign.bridge import Bridge, BridgeDirection
+from vrx_gz.bridge import Bridge, BridgeDirection
 
 
 def camera_models():

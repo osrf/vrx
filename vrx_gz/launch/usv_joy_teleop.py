@@ -22,7 +22,7 @@ import launch_ros.actions
 def generate_launch_description():
 
     parameters_file = os.path.join(
-        get_package_share_directory('vrx_ign'),
+        get_package_share_directory('vrx_gz'),
         'config', 'wamv.yaml'
     )
 

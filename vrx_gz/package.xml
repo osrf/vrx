@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>vrx_ign</name>
+  <name>vrx_gz</name>
   <version>0.0.0</version>
   <description>VRX gazebo resources</description>
 

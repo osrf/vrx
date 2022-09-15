@@ -18,8 +18,8 @@ from launch.actions import DeclareLaunchArgument
 from launch.actions import OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 
-import vrx_ign.launch
-from vrx_ign.model import Model
+import vrx_gz.launch
+from vrx_gz.model import Model
 
 
 def launch(context, *args, **kwargs):
@@ -36,11 +36,11 @@ def launch(context, *args, **kwargs):
     with open(config_file, 'r') as stream:
         models = Model.FromConfig(stream)
 
-    launch_processes.extend(vrx_ign.launch.simulation(world_name, headless))
-    launch_processes.extend(vrx_ign.launch.spawn(sim_mode, world_name, models, robot))
+    launch_processes.extend(vrx_gz.launch.simulation(world_name, headless))
+    launch_processes.extend(vrx_gz.launch.spawn(sim_mode, world_name, models, robot))
 
     if (sim_mode == 'bridge' or sim_mode == 'full') and bridge_competition_topics:
-        launch_processes.extend(vrx_ign.launch.competition_bridges())
+        launch_processes.extend(vrx_gz.launch.competition_bridges())
 
     return launch_processes
 
@@ -56,9 +56,9 @@ def generate_launch_description():
             'sim_mode',
             default_value='full',
             description='Simulation mode: "full", "sim", "bridge".'
-                        'full: spawns robot and launch ros_ign bridges, '
+                        'full: spawns robot and launch ros_gz bridges, '
                         'sim: spawns robot only, '
-                        'bridge: launch ros_ign bridges only.'),
+                        'bridge: launch ros_gz bridges only.'),
         DeclareLaunchArgument(
             'bridge_competition_topics',
             default_value='True',

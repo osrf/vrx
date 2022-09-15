@@ -23,8 +23,8 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
-import vrx_ign.bridges
-import vrx_ign.payload_bridges
+import vrx_gz.bridges
+import vrx_gz.payload_bridges
 import pathlib
 import shutil
 
@@ -91,36 +91,36 @@ class Model:
         nodes = []
         bridges = [
             # IMU
-            vrx_ign.bridges.imu(world_name, self.model_name),
+            vrx_gz.bridges.imu(world_name, self.model_name),
             # pose
-            vrx_ign.bridges.pose(self.model_name),
+            vrx_gz.bridges.pose(self.model_name),
             # pose static
-            vrx_ign.bridges.pose_static(self.model_name),
+            vrx_gz.bridges.pose_static(self.model_name),
             # comms tx
-            vrx_ign.bridges.comms_tx(self.model_name),
+            vrx_gz.bridges.comms_tx(self.model_name),
             # comms rx
-            vrx_ign.bridges.comms_rx(self.model_name),
+            vrx_gz.bridges.comms_rx(self.model_name),
         ]
         if self.is_UAV():
             bridges.extend([
                 # Magnetometer
-                vrx_ign.bridges.magnetometer(world_name, self.model_name),
+                vrx_gz.bridges.magnetometer(world_name, self.model_name),
                 # Air Pressure
-                vrx_ign.bridges.air_pressure(world_name, self.model_name),
+                vrx_gz.bridges.air_pressure(world_name, self.model_name),
             ])
             if not self.is_fixed_wing_UAV():
                 bridges.extend([
                     # twist
-                    vrx_ign.bridges.cmd_vel(self.model_name)
+                    vrx_gz.bridges.cmd_vel(self.model_name)
                 ])
         elif self.is_USV():
             bridges.extend([
                 # thrust cmd
-                vrx_ign.bridges.thrust(self.model_name, 'left'),
-                vrx_ign.bridges.thrust(self.model_name, 'right'),
+                vrx_gz.bridges.thrust(self.model_name, 'left'),
+                vrx_gz.bridges.thrust(self.model_name, 'right'),
                 # thrust joint pos cmd
-                vrx_ign.bridges.thrust_joint_pos(self.model_name, 'left'),
-                vrx_ign.bridges.thrust_joint_pos(self.model_name, 'right'),
+                vrx_gz.bridges.thrust_joint_pos(self.model_name, 'left'),
+                vrx_gz.bridges.thrust_joint_pos(self.model_name, 'right'),
             ])
             nodes.append(Node(
                 package='vrx_ros',
@@ -130,7 +130,7 @@ class Model:
         if self.has_valid_arm():
             # arm joint states
             bridges.append(
-                vrx_ign.bridges.arm_joint_states(world_name, self.model_name)
+                vrx_gz.bridges.arm_joint_states(world_name, self.model_name)
             )
 
             if self.arm == 'vrx_oberon7_arm':
@@ -138,11 +138,11 @@ class Model:
                 arm_joints = ['azimuth', 'shoulder', 'elbow', 'roll', 'pitch', 'wrist']
                 for joint in arm_joints:
                     bridges.append(
-                        vrx_ign.bridges.arm_joint_pos(self.model_name, joint)
+                        vrx_gz.bridges.arm_joint_pos(self.model_name, joint)
                     )
 
                 bridges.append(
-                    vrx_ign.bridges.wrist_joint_force_torque(self.model_name),
+                    vrx_gz.bridges.wrist_joint_force_torque(self.model_name),
                 )
                 # default to oberon7 gripper if not specified.
                 if not self.gripper:
@@ -163,29 +163,29 @@ class Model:
             if self.gripper == 'vrx_oberon7_gripper':
                 # gripper_joint states
                 bridges.append(
-                    vrx_ign.bridges.gripper_joint_states(world_name, self.model_name,
+                    vrx_gz.bridges.gripper_joint_states(world_name, self.model_name,
                                                             isAttachedToArm)
                 )
                 gripper_joints = ['finger_left', 'finger_right']
                 for joint in gripper_joints:
                     bridges.append(
-                        vrx_ign.bridges.gripper_joint_pos(self.model_name, joint,
+                        vrx_gz.bridges.gripper_joint_pos(self.model_name, joint,
                                                              isAttachedToArm)
                     )
                     bridges.append(
-                        vrx_ign.bridges.gripper_joint_force_torque(
+                        vrx_gz.bridges.gripper_joint_force_torque(
                             self.model_name, joint, isAttachedToArm)
                     )
             elif self.gripper == 'vrx_suction_gripper':
                 bridges.append(
-                    vrx_ign.bridges.gripper_suction_control(self.model_name, isAttachedToArm)
+                    vrx_gz.bridges.gripper_suction_control(self.model_name, isAttachedToArm)
                 )
                 bridges.extend([
-                    vrx_ign.bridges.gripper_contact(self.model_name, isAttachedToArm, 'center'),
-                    vrx_ign.bridges.gripper_contact(self.model_name, isAttachedToArm, 'left'),
-                    vrx_ign.bridges.gripper_contact(self.model_name, isAttachedToArm, 'right'),
-                    vrx_ign.bridges.gripper_contact(self.model_name, isAttachedToArm, 'top'),
-                    vrx_ign.bridges.gripper_contact(self.model_name, isAttachedToArm, 'bottom')
+                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'center'),
+                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'left'),
+                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'right'),
+                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'top'),
+                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'bottom')
                 ])
 
         return [bridges, nodes, custom_launches]
@@ -228,10 +228,10 @@ class Model:
                     model_prefix = 'arm'
                     ros_slot_prefix = 'arm/' + ros_slot_prefix
                 bridges.extend(
-                    vrx_ign.payload_bridges.payload_bridges(
+                    vrx_gz.payload_bridges.payload_bridges(
                         world_name, self.model_name, p['sensor'], idx, model_prefix))
 
-                if p['sensor'] in vrx_ign.payload_bridges.camera_models():
+                if p['sensor'] in vrx_gz.payload_bridges.camera_models():
                     nodes.append(Node(
                         package='vrx_ros',
                         executable='optical_frame_publisher',
@@ -241,7 +241,7 @@ class Model:
                                     ('input/camera_info', f'{ros_slot_prefix}/camera_info'),
                                     ('output/camera_info',
                                      f'{ros_slot_prefix}/optical/camera_info')]))
-                elif p['sensor'] in vrx_ign.payload_bridges.rgbd_models():
+                elif p['sensor'] in vrx_gz.payload_bridges.rgbd_models():
                     nodes.append(Node(
                         package='vrx_ros',
                         executable='optical_frame_publisher',
@@ -324,10 +324,10 @@ class Model:
     def generate(self):
         # Generate SDF by executing ERB and populating templates
         template_file = os.path.join(
-            get_package_share_directory('vrx_ign'),
+            get_package_share_directory('vrx_gz'),
             'models', self.model_type, 'model.sdf.erb')
 
-        model_dir = os.path.join(get_package_share_directory('vrx_ign'), 'models')
+        model_dir = os.path.join(get_package_share_directory('vrx_gz'), 'models')
         model_tmp_dir = os.path.join(model_dir, 'tmp')
 
         command = ['erb']
@@ -358,7 +358,7 @@ class Model:
             if self.has_valid_arm() or self.is_custom_model(self.arm):
                 command.append(f'arm={self.arm}')
                 command.append(f'arm_slot={self.arm_slot}')
-                arm_package = 'vrx_ign'
+                arm_package = 'vrx_gz'
                 if self.is_custom_model(self.arm):
                     arm_package = self.arm
                 arm_model_file = os.path.join(

@@ -1,4 +1,4 @@
-from vrx_ign.bridge import Bridge, BridgeDirection
+from vrx_gz.bridge import Bridge, BridgeDirection
 
 
 def prefix(world_name, model_name, link_name):
@@ -91,7 +91,7 @@ def thrust(model_name, side):
 
 def thrust_joint_pos(model_name, side):
     # ROS naming policy indicates that first character of a name must be an alpha
-    # character. In the case below, the ign topic has the joint index 0 as the
+    # character. In the case below, the gz topic has the joint index 0 as the
     # first char so the following topics fail to be created on the ROS end
     # left_joint_topic = '/model/' + model_name + '/joint/left_chasis_engine_joint/0/cmd_pos'
     # right_joint_topic = '/model/' + model_name + '/joint/right_chasis_engine_joint/0/cmd_pos'
