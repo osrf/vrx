@@ -69,7 +69,11 @@ class NavigationScoringPlugin::Implementation
 
     /// \brief Recalculate the pose and width of the gate.
     // TODO: Implement
-    // public: void Update();
+    public: void Update();
+
+    // TODO: Implement
+    // TODO: Document 
+    public: bool LoadEntities(gazebo::EntityComponentManager &_ecm);
 
     /// \brief The left marker model name.
     public: std::string leftMarkerName;
@@ -122,6 +126,9 @@ class NavigationScoringPlugin::Implementation
   /// \brief Number of gates
   public: int numGates;
 
+  /// \brief True if all gate entities have been loaded
+  public: bool gatesLoaded = false;
+
   /// \brief Number of points deducted per collision.
   public: double obstaclePenalty = 10.0;
 
@@ -154,6 +161,33 @@ NavigationScoringPlugin::Implementation::Gate::Gate(
 //  this->Update();
 }
 
+bool NavigationScoringPlugin::Implementation::Gate::LoadEntities(
+    gazebo::EntityComponentManager &_ecm)
+{
+  leftMarkerEntity = _ecm.EntityByComponents(
+      gazebo::components::Name(leftMarkerName));
+
+  // Sanity check: Make sure that the model exists.
+  if (leftMarkerEntity == gazebo::kNullEntity)
+  {
+    ignerr << "Unable to find entity [" << leftMarkerName << "]" << std::endl;
+    return false;
+  }
+
+  rightMarkerEntity = _ecm.EntityByComponents(
+      gazebo::components::Name(rightMarkerName));
+
+  if (rightMarkerEntity == gazebo::kNullEntity)
+  {
+    ignerr << "Unable to find entity [" << rightMarkerName << "]" << std::endl;
+    return false;
+  }
+
+// TODO: Include this?
+// this->Update();
+
+  return true;
+}
 
 //////////////////////////////////////////////////
 bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
@@ -321,6 +355,20 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
   }
 
   // TODO: Load gates
+  if (!dataPtr->gatesLoaded)
+  {
+    ignmsg << "Loading " << dataPtr->numGates << " gates." << std::endl; 
+    dataPtr->gatesLoaded = true;
+    auto iter = std::begin(dataPtr->gates);
+    while (iter != std::end(dataPtr->gates))
+    {
+      Implementation::Gate &gate = *iter;
+
+      dataPtr->gatesLoaded = dataPtr->gatesLoaded && gate.LoadEntities(_ecm);
+      ++iter;
+    }
+
+  }
   // TODO: Update gates
 
   if (this->ScoringPlugin::TaskState() != "running")
