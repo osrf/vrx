@@ -69,7 +69,7 @@ class NavigationScoringPlugin::Implementation
 
     /// \brief Recalculate the pose and width of the gate.
     // TODO: Implement
-    public: void Update();
+    public: void Update(gazebo::EntityComponentManager &_ecm);
 
     // TODO: Implement
     // TODO: Document 
@@ -103,15 +103,6 @@ class NavigationScoringPlugin::Implementation
   /// \param[in] _sdf The current SDF element.
   /// \return True when the gates were successfully parsed or false othwerwise.
   public: bool ParseGates(sdf::ElementPtr _sdf);
-
-  /// \brief Register a new gate.
-  /// \param[in] _leftMarkerName The name of the left marker.
-  /// \param[in] _rightMarkerName The name of the right marker.
-  /// \return True when the gate has been registered or false otherwise.
-  // TODO: Implement
-  public: bool AddGate(gazebo::EntityComponentManager &_ecm,
-                        const std::string &_leftMarkerName,
-                        const std::string &_rightMarkerName);
 
   // TODO: Implement
   /// \brief Set the score to 0 and change to state to "finish".
@@ -157,8 +148,6 @@ NavigationScoringPlugin::Implementation::Gate::Gate(
   : leftMarkerName(_leftMarkerName),
     rightMarkerName(_rightMarkerName)
 {
-// TODO: Move to "load"
-//  this->Update();
 }
 
 bool NavigationScoringPlugin::Implementation::Gate::LoadEntities(
@@ -183,12 +172,45 @@ bool NavigationScoringPlugin::Implementation::Gate::LoadEntities(
     return false;
   }
 
-// TODO: Include this?
-// this->Update();
+  // update pose and width
+  this->Update(_ecm);
 
   return true;
 }
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::Implementation::Gate::Update(
+    gazebo::EntityComponentManager &_ecm)
+{
+  if (!leftMarkerEntity || !rightMarkerEntity)
+    return;
 
+  // The pose of the markers delimiting the gate.
+  auto leftMarkerPose = _ecm.Component<gazebo::components::Pose>(
+    leftMarkerEntity)->Data();
+  auto rightMarkerPose = _ecm.Component<gazebo::components::Pose>(
+    rightMarkerEntity)->Data();
+
+  // Unit vector from the left marker to the right one.
+  auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
+  v1.Normalize();
+
+  // Unit vector perpendicular to v1 in the direction we like to cross gates.
+  const auto v2 = math::Vector3d::UnitZ.Cross(v1);
+
+  // This is the center point of the gate.
+  const auto middle = (leftMarkerPose.Pos() + rightMarkerPose.Pos()) / 2.0;
+
+  // Yaw of the gate in world coordinates.
+  const auto yaw = atan2(v2.Y(), v2.X());
+
+  // The updated pose.
+  this->pose.Set(middle, ignition::math::Vector3d(0, 0, yaw));
+
+  // The updated width.
+  this->width = leftMarkerPose.Pos().Distance(rightMarkerPose.Pos());
+
+}
+ 
 //////////////////////////////////////////////////
 bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
 {
@@ -236,35 +258,6 @@ bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
 
   return true;
 }
-
-//////////////////////////////////////////////////
-bool NavigationScoringPlugin::Implementation::AddGate(
-    gazebo::EntityComponentManager &_ecm, const std::string &_leftMarkerName,
-    const std::string &_rightMarkerName)
-{
-  auto leftMarkerEntity = _ecm.EntityByComponents(
-      gazebo::components::Name(_leftMarkerName));
-
-  // Sanity check: Make sure that the model exists.
-  if (leftMarkerEntity == gazebo::kNullEntity)
-  {
-    ignerr << "Unable to find entity [" << _leftMarkerName << "]" << std::endl;
-    return false;
-  }
-
-  auto rightMarkerEntity = _ecm.EntityByComponents(
-      gazebo::components::Name(_rightMarkerName));
-
-  if (rightMarkerEntity == gazebo::kNullEntity)
-  {
-    ignerr << "Unable to find entity [" << _rightMarkerName << "]" << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
-
 
 /////////////////////////////////////////////////
 NavigationScoringPlugin::NavigationScoringPlugin()
