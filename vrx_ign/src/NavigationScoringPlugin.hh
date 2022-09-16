@@ -112,10 +112,13 @@ namespace vrx
     // Documentation inherited.
     protected: void OnFinished() override;
 
-    // Documentation
+    // Documentation inherited.
     protected: void OnCollision() override;
 
-    /// \brief Private data pointer.
+   /// \brief Set the score to 0 and change to state to "finish".
+   protected: void Fail();
+
+   /// \brief Private data pointer.
     IGN_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };
 }

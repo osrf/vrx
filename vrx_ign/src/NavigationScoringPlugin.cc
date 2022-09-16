@@ -104,10 +104,6 @@ class NavigationScoringPlugin::Implementation
   /// \return True when the gates were successfully parsed or false othwerwise.
   public: bool ParseGates(sdf::ElementPtr _sdf);
 
-  // TODO: Implement
-  /// \brief Set the score to 0 and change to state to "finish".
-  // private: void Fail();
-
   // TODO: Check Type 
   // private: gazebo::physics::ModelPtr course;
 
@@ -259,6 +255,8 @@ bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
   return true;
 }
 
+
+
 /////////////////////////////////////////////////
 NavigationScoringPlugin::NavigationScoringPlugin()
   : ScoringPlugin(),
@@ -347,7 +345,7 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
       return;
   }
 
-  // TODO: Load gates
+  // Try to get the gate entities 
   if (!dataPtr->gatesLoaded)
   {
     ignmsg << "Loading " << dataPtr->numGates << " gates." << std::endl; 
@@ -362,11 +360,76 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
     }
 
   }
-  // TODO: Update gates
 
   if (this->ScoringPlugin::TaskState() != "running")
     return;
 
+  // Current score
+  this->ScoringPlugin::SetScore(std::min(this->RunningStateDuration(),
+    std::chrono::duration<double>(this->ElapsedTime()).count() +
+    this->NumCollisions() * this->dataPtr->obstaclePenalty) / this->dataPtr->numGates);
+
+  auto vehiclePose = _ecm.Component<gazebo::components::Pose>(
+    this->dataPtr->vehicleEntity)->Data();
+
+  // Update the state of all gates.
+  auto iter = std::begin(this->dataPtr->gates);
+  while (iter != std::end(this->dataPtr->gates))
+  {
+    Implementation::Gate &gate = *iter;
+
+    // Update this gate (in case it moved).
+    gate.Update(_ecm);
+
+    // TODO: IsPoseInGate
+    // TODO: old code below
+    // Check if we have crossed this gate.
+    //auto currentState = gate.IsPoseInGate(robotPose);
+    //if (currentState == GateState::VEHICLE_AFTER &&
+    //    gate.state   == GateState::VEHICLE_BEFORE)
+    //{
+    //  currentState = GateState::CROSSED;
+    //  gzmsg << "New gate crossed!" << std::endl;
+
+    //  // We need to cross all gates in order.
+    //  if (iter != this->gates.begin())
+    //  {
+    //    gzmsg << "Gate crossed in the wrong order" << std::endl;
+    //    this->Fail();
+    //    return;
+    //  }
+
+    //  iter = this->gates.erase(iter);
+    //}
+    // Just checking: did we go backward through the gate?
+    // else if (currentState == GateState::VEHICLE_BEFORE &&
+    //          gate.state   == GateState::VEHICLE_AFTER)
+    // {
+    //   gate.state = GateState::INVALID;
+    //   gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
+    //         << std::endl;
+    //   this->Fail();
+    //   return;
+    //}
+    //else
+      ++iter;
+
+    //gate.state = currentState;
+  }
+
+  // Course completed!
+  if (this->dataPtr->gates.empty())
+  {
+    ignmsg << "Course completed!" << std::endl;
+    ScoringPlugin::Finish();
+  } 
+}
+
+//////////////////////////////////////////////////
+void NavigationScoringPlugin::Fail()
+{
+  ScoringPlugin::SetScore(ScoringPlugin::TimeoutScore());
+  ScoringPlugin::Finish();
 }
 
 //////////////////////////////////////////////////
