@@ -68,11 +68,9 @@ class NavigationScoringPlugin::Implementation
       const math::Pose3d &_robotWorldPose) const;
 
     /// \brief Recalculate the pose and width of the gate.
-    // TODO: Implement
     public: void Update(gazebo::EntityComponentManager &_ecm);
 
-    // TODO: Implement
-    // TODO: Document 
+    /// \brief Get right and left marker entities
     public: bool LoadEntities(gazebo::EntityComponentManager &_ecm);
 
     /// \brief The left marker model name.
@@ -104,8 +102,17 @@ class NavigationScoringPlugin::Implementation
   /// \return True when the gates were successfully parsed or false othwerwise.
   public: bool ParseGates(sdf::ElementPtr _sdf);
 
-  // TODO: Check Type 
-  // private: gazebo::physics::ModelPtr course;
+   /// \brief Name of the course used.
+  public: std::string courseName;
+
+   /// \brief Entity of the course used.
+  public: gazebo::Entity courseEntity;
+
+  /// \brief Pointer to the SDF plugin element.
+  public: sdf::ElementPtr sdf;
+
+   /// \brief Entity of the vehicle used.
+  public: gazebo::Entity vehicleEntity;
 
   /// \brief All the gates.
   public: std::vector<Gate> gates;
@@ -119,22 +126,9 @@ class NavigationScoringPlugin::Implementation
   /// \brief Number of points deducted per collision.
   public: double obstaclePenalty = 10.0;
 
-  /// \brief Pointer to the SDF plugin element.
-  public: sdf::ElementPtr sdf;
-
-   /// \brief Entity of the vehicle used.
-  public: gazebo::Entity vehicleEntity;
-
-   /// \brief Name of the course used.
-  public: std::string courseName;
-
-   /// \brief Entity of the course used.
-  public: gazebo::Entity courseEntity;
-
-  //TODO: needed?
+  //TODO: should this be set in ScoringPlugin?
   /// \brief Display or suppress state changes
   public: bool silent = false;
-  
 };
 
 /////////////////////////////////////////////////
@@ -206,11 +200,36 @@ void NavigationScoringPlugin::Implementation::Gate::Update(
   this->width = leftMarkerPose.Pos().Distance(rightMarkerPose.Pos());
 
 }
+
+
+/////////////////////////////////////////////////
+NavigationScoringPlugin::Implementation::GateState 
+    NavigationScoringPlugin::Implementation::Gate::IsPoseInGate(
+        const math::Pose3d &_robotWorldPose) const
+{
+  // Transform to gate frame.
+  const math::Vector3d robotLocalPosition =
+    this->pose.Rot().Inverse().RotateVector(_robotWorldPose.Pos() -
+    this->pose.Pos());
+
+  // Are we within the width?
+  if (fabs(robotLocalPosition.Y()) <= this->width / 2.0)
+  {
+    if (robotLocalPosition.X() >= 0.0)
+      return GateState::VEHICLE_AFTER;
+    else
+      return GateState::VEHICLE_BEFORE;
+  }
+  else
+    return GateState::VEHICLE_OUTSIDE;
+}
+
+
  
 //////////////////////////////////////////////////
 bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
 {
-// TODO: Ignition version?
+// TODO: Ignition version of this?
 //  GZ_ASSERT(_sdf, "NavigationScoringPlugin::ParseGates(): NULL _sdf pointer");
 
   // We need at least one gate.
@@ -381,40 +400,38 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
     // Update this gate (in case it moved).
     gate.Update(_ecm);
 
-    // TODO: IsPoseInGate
-    // TODO: old code below
     // Check if we have crossed this gate.
-    //auto currentState = gate.IsPoseInGate(robotPose);
-    //if (currentState == GateState::VEHICLE_AFTER &&
-    //    gate.state   == GateState::VEHICLE_BEFORE)
-    //{
-    //  currentState = GateState::CROSSED;
-    //  gzmsg << "New gate crossed!" << std::endl;
+    auto currentState = gate.IsPoseInGate(vehiclePose);
+    if (currentState == Implementation::GateState::VEHICLE_AFTER &&
+        gate.state   == Implementation::GateState::VEHICLE_BEFORE)
+    {
+      currentState = Implementation::GateState::CROSSED;
+      ignmsg << "New gate crossed!" << std::endl;
 
-    //  // We need to cross all gates in order.
-    //  if (iter != this->gates.begin())
-    //  {
-    //    gzmsg << "Gate crossed in the wrong order" << std::endl;
-    //    this->Fail();
-    //    return;
-    //  }
+      // We need to cross all gates in order.
+      if (iter != this->dataPtr->gates.begin())
+      {
+        ignmsg << "Gate crossed in the wrong order" << std::endl;
+        this->Fail();
+        return;
+      }
 
-    //  iter = this->gates.erase(iter);
-    //}
+      iter = this->dataPtr->gates.erase(iter);
+    }
     // Just checking: did we go backward through the gate?
-    // else if (currentState == GateState::VEHICLE_BEFORE &&
-    //          gate.state   == GateState::VEHICLE_AFTER)
-    // {
-    //   gate.state = GateState::INVALID;
-    //   gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
-    //         << std::endl;
-    //   this->Fail();
-    //   return;
-    //}
-    //else
+    else if (currentState == Implementation::GateState::VEHICLE_BEFORE &&
+              gate.state   == Implementation::GateState::VEHICLE_AFTER)
+     {
+       gate.state = Implementation::GateState::INVALID;
+       ignmsg << "Transited the gate in the wrong direction. Gate invalidated!"
+             << std::endl;
+       this->Fail();
+       return;
+    }
+    else
       ++iter;
 
-    //gate.state = currentState;
+    gate.state = currentState;
   }
 
   // Course completed!
