@@ -23,12 +23,20 @@
 // #include <gazebo/physics/Link.hh>
 // #include <ignition/math/Helpers.hh>
 // #include "vrx_gazebo/wildlife_scoring_plugin.hh"
-
+#include <ignition/plugin/Register.hh>
+#include <ignition/gazebo/components/World.hh>
+#include <ignition/gazebo/components/Pose.hh>
+#include <ignition/gazebo/World.hh>
+#include <ignition/gazebo/components/Name.hh>
+#include <ignition/gazebo/Link.hh>
+#include <ignition/msgs/pose_v.pb.h>
+#include <ignition/msgs.hh>
+#include <chrono>
 #include "WildlifeScoringPlugin.hh"
 
 using namespace vrx;
   /// \brief All buoy goals.
-  private: enum class BuoyGoal
+  enum class WildlifeScoringPlugin::BuoyGoal
   {
     /// \brief The goal is to stay out of the activation area.
     AVOID,
@@ -41,7 +49,7 @@ using namespace vrx;
   };
 
   /// \brief All buoy states.
-  private: enum class BuoyState
+  enum class WildlifeScoringPlugin::BuoyState
   {
     /// \brief Not "in" the gate and never engaged.
     NEVER_ENGAGED,
@@ -57,7 +65,7 @@ using namespace vrx;
   };
 
   /// \brief All gate states.
-  private: enum class GateState
+  enum class WildlifeScoringPlugin::GateState
   {
     /// \brief Not "in" the gate.
     VEHICLE_OUTSIDE,
@@ -73,13 +81,14 @@ using namespace vrx;
   };
 
   /// \brief A virtual gate to help detecting circumnavigation.
-  private: class VirtualGate
+ class WildlifeScoringPlugin::VirtualGate
   {
     /// \brief Constructor.
-    /// \param[in] _leftMakerLink The link of the buoy.
+    /// \param[in] _leftMarkerLink The link of the buoy.
     /// \param[in] _offset The offset from the buoy that delimitates the gate.
     /// \param[in] _width The width of the gate.
-    public: VirtualGate(const gazebo::physics::LinkPtr _leftMakerLink,
+    public: VirtualGate(ignition::gazebo::EntityComponentManager &_ecm,
+                        const ignition::gazebo::Link _leftMarkerLink,
                         const ignition::math::Vector3d &_offset,
                         double _width);
 
@@ -90,13 +99,13 @@ using namespace vrx;
       const ignition::math::Pose3d &_robotWorldPose) const;
 
     /// \brief Recalculate the pose of the gate.
-    public: void Update();
+    public: void Update(ignition::gazebo::EntityComponentManager &_ecm);
 
     /// \brief The left marker (buoy).
-    public: const gazebo::physics::LinkPtr leftMarkerLink;
+    public: const ignition::gazebo::Link leftMarkerLink;
 
-    /// \brief The offset of the right marker with respect to the left marker
-    /// in world coordinates.
+      /// \brief The offset of the right marker with respect to the left marker
+      /// in world coordinates.
     public: const ignition::math::Vector3d offset;
 
     /// \brief The width of the gate in meters.
@@ -112,29 +121,33 @@ using namespace vrx;
   };
 
   /// \brief A buoy that is part of the wildlife task.
-  private: class Buoy
+  class WildlifeScoringPlugin::Buoy
   {
     /// \brief Constructor.
     /// \param[in] _buoyLink The buoy's main link.
     /// \param[in] _buoyGoal The buoy's goal.
     /// \param[in] _engagementDistance The vehicle engages with the buoy when
     ///            the distance between them is lower or equal than this value.
-    public: Buoy(const gazebo::physics::LinkPtr _buoyLink,
+    public: Buoy(ignition::gazebo::EntityComponentManager &_ecm,
+                 const ignition::gazebo::Link _buoyLink,
                  const BuoyGoal _buoyGoal,
                  double _engagementDistance);
 
     /// \brief Update the status of this buoy.
-    public: void Update();
+    public: void Update(ignition::gazebo::EntityComponentManager &_ecm);
 
     /// \brief Set the vehicle model.
-    /// \param[in] _vehicleModel The vehicle model pointer.
-    public: void SetVehicleModel(gazebo::physics::ModelPtr _vehicleModel);
+    /// \param[in] _vehicleEntity The vehicle model pointer.
+    public: void SetVehicleEntity(ignition::gazebo::Entity _vehicleEntity);
 
     /// \brief The number of virtual gates;
     private: const unsigned int kNumVirtualGates = 8u;
 
+    /// \brief Link to the Entity Component Manager.
+    //private:  ignition::gazebo::EntityComponentManager &ecm;
+
     /// \brief The buoy's main link.
-    public: const gazebo::physics::LinkPtr link;
+    public: const ignition::gazebo::Link link;
 
     /// \brief The goal.
     public: const BuoyGoal goal;
@@ -157,29 +170,26 @@ using namespace vrx;
   };
 
 /////////////////////////////////////////////////
-WildlifeScoringPlugin::VirtualGate::VirtualGate(
-    const gazebo::physics::LinkPtr _leftMakerLink,
+WildlifeScoringPlugin::VirtualGate::VirtualGate(ignition::gazebo::EntityComponentManager &_ecm,
+    const ignition::gazebo::Link _leftMarkerLink,
     const ignition::math::Vector3d &_offset,
     double _width)
-  : leftMarkerLink(_leftMakerLink),
+  : leftMarkerLink(_leftMarkerLink),
     offset(_offset),
     width(_width)
 {
-  this->Update();
+  this->Update(_ecm);
 }
 
 /////////////////////////////////////////////////
-void WildlifeScoringPlugin::VirtualGate::Update()
+void WildlifeScoringPlugin::VirtualGate::Update(ignition::gazebo::EntityComponentManager &_ecm)
 {
-  if (!this->leftMarkerLink)
+  if (!this->leftMarkerLink.Valid(_ecm))
     return;
 
   // The pose of the markers delimiting the virtual gate.
-#if GAZEBO_MAJOR_VERSION >= 8
-  const auto leftMarkerPos = this->leftMarkerLink->WorldPose().Pos();
-#else
-  const auto leftMarkerPos = this->leftMarkerLink->GetWorldPose().Ign().Pos();
-#endif
+
+  const auto leftMarkerPos = (*this->leftMarkerLink.WorldPose(_ecm)).Pos();
   const auto rightMarkerPos = leftMarkerPos + this->offset;
 
   // Unit vector from the left marker to the right one.
@@ -223,7 +233,8 @@ WildlifeScoringPlugin::GateState
 
 /////////////////////////////////////////////////
 WildlifeScoringPlugin::Buoy::Buoy(
-    const gazebo::physics::LinkPtr _buoyLink,
+  ignition::gazebo::EntityComponentManager &_ecm,
+    const ignition::gazebo::Link _buoyLink,
     const BuoyGoal _buoyGoal,
     double _engagementDistance)
   : link(_buoyLink),
@@ -241,34 +252,25 @@ WildlifeScoringPlugin::Buoy::Buoy(
     ignition::math::Vector3d offset;
     offset.X(this->engagementDistance * cos(alpha));
     offset.Y(this->engagementDistance * sin(alpha));
-#if GAZEBO_MAJOR_VERSION >= 8
-    offset.Z(this->link->WorldPose().Pos().Z());
-#else
-    offset.Z(this->link->GetWorldPose().Ign().Pos().Z());
-#endif
+    offset.Z((*this->link.WorldPose(_ecm)).Pos().Z());
 
     this->virtualGates.push_back(
-      VirtualGate(_buoyLink, offset, _engagementDistance));
+      VirtualGate(_ecm, _buoyLink, offset, _engagementDistance));
   }
 
-  this->Update();
+  this->Update(_ecm);
 }
 
 /////////////////////////////////////////////////
-void WildlifeScoringPlugin::Buoy::Update()
+void WildlifeScoringPlugin::Buoy::Update(ignition::gazebo::EntityComponentManager &_ecm)
 {
   if (this->state == BuoyState::CIRCUMNAVIGATED || !this->vehicleEntity)
     return;
+    auto vehiclePose = _ecm.Component<ignition::gazebo::components::Pose>(
+                               this->vehicleEntity)
+                           ->Data();
+  const ignition::math::Pose3d buoyPose = *this->link.WorldPose(_ecm);
 
-
-#if GAZEBO_MAJOR_VERSION >= 8
-  const ignition::math::Pose3d vehiclePose = this->vehicleModel->WorldPose();
-  const ignition::math::Pose3d buoyPose = this->link->WorldPose();
-#else
-  const ignition::math::Pose3d vehiclePose =
-    this->vehicleModel->GetWorldPose().Ign();
-  const ignition::math::Pose3d buoyPose = this->link->GetWorldPose().Ign();
-#endif
   const double vehicleBuoyDistance = vehiclePose.Pos().Distance(buoyPose.Pos());
 
   if (this->state == BuoyState::NEVER_ENGAGED)
@@ -277,7 +279,8 @@ void WildlifeScoringPlugin::Buoy::Update()
     {
       // Transition to ENGAGED.
       this->state = BuoyState::ENGAGED;
-      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetScopedName()
+      igndbg << "[WildlifeScoringPlugin::Buoy] " 
+            << this->link.Name(_ecm).value_or("Link name error!")
             << " Transition from NEVER_ENGAGED" << " to ENGAGED" << std::endl;
       return;
     }
@@ -288,7 +291,8 @@ void WildlifeScoringPlugin::Buoy::Update()
     {
       // Transition to ENGAGED.
       this->state = BuoyState::ENGAGED;
-      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetScopedName()
+      igndbg << "[WildlifeScoringPlugin::Buoy] " 
+            << this->link.Name(_ecm).value_or("Link name error!")
             << " Transition from NOT_ENGAGED" << " to ENGAGED" << std::endl;
       return;
     }
@@ -299,7 +303,8 @@ void WildlifeScoringPlugin::Buoy::Update()
     {
       // Transition to NOT ENGAGED.
       this->state = BuoyState::NOT_ENGAGED;
-      gzdbg << "[WildlifeScoringPlugin::Buoy] " << this->link->GetScopedName()
+      igndbg << "[WildlifeScoringPlugin::Buoy] " 
+            << this->link.Name(_ecm).value_or("Link name error!")
             << " Transition from ENGAGED" << " to NOT_ENGAGED" << std::endl;
 
       // You need to start over.
@@ -313,8 +318,7 @@ void WildlifeScoringPlugin::Buoy::Update()
     // Check circumnavigation using the virtual gates.
     for (auto &virtualGate : this->virtualGates)
     {
-      virtualGate.Update();
-
+      virtualGate.Update(_ecm);
       // Check if we have crossed this gate.
       auto currentState = virtualGate.IsPoseInGate(vehiclePose);
       if (currentState == GateState::VEHICLE_AFTER &&
@@ -325,8 +329,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         if (this->goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE)
         {
           ++this->numVirtualGatesCrossed;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] "
-                << this->link->GetScopedName()
+          igndbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link.Name(_ecm).value_or("Link name error!")
                 << " Virtual gate crossed counterclockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "% completed)" << std::endl;
@@ -334,8 +338,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         else
         {
           this->numVirtualGatesCrossed = 0u;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] "
-                << this->link->GetScopedName()
+          igndbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link.Name(_ecm).value_or("Link name error!")
                 << " Virtual gate incorrectly crossed counterclockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "% completed)" << std::endl;
@@ -349,8 +353,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         if (this->goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE)
         {
           ++this->numVirtualGatesCrossed;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] "
-                << this->link->GetScopedName()
+          igndbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link.Name(_ecm).value_or("Link name error!")
                 << " Virtual gate crossed clockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "% completed)" << std::endl;
@@ -358,8 +362,8 @@ void WildlifeScoringPlugin::Buoy::Update()
         else
         {
           this->numVirtualGatesCrossed = 0u;
-          gzdbg << "[WildlifeScoringPlugin::Buoy] "
-                << this->link->GetScopedName()
+          igndbg << "[WildlifeScoringPlugin::Buoy] "
+                << this->link.Name(_ecm).value_or("Link name error!")
                 << " Virtual gate incorrectly crossed clockwise! ("
                 << 100 * this->numVirtualGatesCrossed / this->kNumVirtualGates
                 << "% completed)" << std::endl;
@@ -375,10 +379,10 @@ void WildlifeScoringPlugin::Buoy::Update()
 }
 
 /////////////////////////////////////////////////
-void WildlifeScoringPlugin::Buoy::SetVehicleModel(
-  gazebo::physics::ModelPtr _vehicleModel)
+void WildlifeScoringPlugin::Buoy::SetVehicleEntity(
+  ignition::gazebo::Entity _vehicleEntity)
 {
-  this->vehicleModel = _vehicleModel;
+  this->vehicleEntity = _vehicleEntity;
 }
 
 /// \brief Private WildlifeScoringPlugin data class.
@@ -387,22 +391,22 @@ class WildlifeScoringPlugin::Implementation
     /// \brief Parse the buoys from SDF.
   /// \param[in] _sdf The current SDF element.
   /// \return True when the buoys were successfully parsed or false otherwise.
-  private: bool ParseBuoys(sdf::ElementPtr _sdf);
+  public: bool ParseBuoys(const sdf::ElementPtr _sdf);
 
   /// \brief Register a new buoy.
   /// \param[in] _modelName The name of the buoy's model.
   /// \param[in] _linkName The name of the main buoy's link.
   /// \param[in] _goal The goal associated to this buoy.
   /// \return True when the buoy has been registered or false otherwise.
-  private: bool AddBuoy(const std::string &_modelName,
+  public: bool AddBuoy(const std::string &_modelName,
                         const std::string &_linkName,
                         const std::string &_goal);
     /// \brief Publish a new message with the animal locations.
-  private: void PublishAnimalLocations();
+  public: void PublishAnimalLocations();
 
   /// \brief Compute the total bonus achieved.
   /// \return The time bonus in seconds.
-  private: double TimeBonus() const;
+  public: double TimeBonus() const;
     /// \brief Transport node.
 public:
     ignition::transport::Node node;
@@ -420,25 +424,25 @@ public:
     ignition::gazebo::Entity vehicleEntity;
 
      /// \brief All the buoys.
-  private: std::vector<Buoy> buoys;
+  public: std::vector<Buoy> buoys;
 
   /// \brief The name of the topic where the animal locations are published.
-  private: std::string animalsTopic = "/vrx/wildlife_animals";
+  public: std::string animalsTopic = "/vrx/wildlife_animals";
 
   /// \brief Time bonus granted for each succcesfuly goal achieved.
-  private: double timeBonus = 30.0;
+  public: double timeBonus = 30.0;
 
   /// \brief When the vehicle is between the buoy and this distance, the vehicle
   /// engages with the buoy.
-  private: double engagementDistance = 10.0;
+  public: double engagementDistance = 10.0;
 
   /// \brief True when a vehicle collision is detected.
-  private: std::atomic<bool> collisionDetected{false};
+  public: std::atomic<bool> collisionDetected{false};
 };
 
 
 //////////////////////////////////////////////////
-bool WildlifeScoringPlugin::ParseBuoys(sdf::ElementPtr _sdf)
+bool WildlifeScoringPlugin::Implementation::ParseBuoys(sdf::ElementPtr _sdf)
 {
   // We need at least one buoy.
   if (!_sdf->HasElement("buoy"))
@@ -492,88 +496,83 @@ bool WildlifeScoringPlugin::ParseBuoys(sdf::ElementPtr _sdf)
 }
 
 //////////////////////////////////////////////////
-bool WildlifeScoringPlugin::AddBuoy(const std::string &_modelName,
+bool WildlifeScoringPlugin::Implementation::AddBuoy(const std::string &_modelName,
     const std::string &_linkName, const std::string &_goal)
 {
-    // // The vehicle might not be ready yet, let's try to get it.
-    // if (!this->dataPtr->vehicleEntity)
-    // {
-    //     auto entity = _ecm.EntityByComponents(
-    //         ignition::gazebo::components::Name(ScoringPlugin::VehicleName()));
-    //     if (entity != ignition::gazebo::kNullEntity)
-    //         this->dataPtr->vehicleEntity = entity;
-    //     else
-    //         return;
-    // }
 
-#if GAZEBO_MAJOR_VERSION >= 8
-  gazebo::physics::ModelPtr parentModel = this->world->ModelByName(_modelName);
-#else
-  gazebo::physics::ModelPtr parentModel = this->world->GetModel(_modelName);
-#endif
-  // Sanity check: Make sure that the model exists.
-  if (!parentModel)
-  {
-    gzerr << "Unable to find model [" << _modelName << "]" << std::endl;
-    return false;
-  }
 
-  gazebo::physics::LinkPtr link = parentModel->GetLink(_linkName);
-  // Sanity check: Make sure that the link exists.
-  if (!link)
-  {
-    ignerr << "Unable to find link [" << _linkName << "]" << std::endl;
-    return false;
-  }
+  // gazebo::physics::ModelPtr parentModel = this->world->ModelByName(_modelName);
 
-  BuoyGoal buoyGoal;
-  if (_goal == "avoid")
-    buoyGoal = BuoyGoal::AVOID;
-  else if (_goal == "circumnavigate_clockwise")
-    buoyGoal = BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE;
-  else if (_goal == "circumnavigate_counterclockwise")
-    buoyGoal = BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE;
-  else
-  {
-    ignerr << "Unknown <goal> value: [" << _goal << "]" << std::endl;
-    return false;
-  }
+  // // Sanity check: Make sure that the model exists.
+  // if (!parentModel)
+  // {
+  //   ignerr << "Unable to find model [" << _modelName << "]" << std::endl;
+  //   return false;
+  // }
 
-  // Save the new buoy.
-  dataPtr->buoys.push_back(Buoy(link, buoyGoal, dataPtr->engagementDistance));
+  // gazebo::physics::LinkPtr link = parentModel->GetLink(_linkName);
+  // // Sanity check: Make sure that the link exists.
+  // if (!link)
+  // {
+  //   ignerr << "Unable to find link [" << _linkName << "]" << std::endl;
+  //   return false;
+  // }
+
+  // BuoyGoal buoyGoal;
+  // if (_goal == "avoid")
+  //   buoyGoal = BuoyGoal::AVOID;
+  // else if (_goal == "circumnavigate_clockwise")
+  //   buoyGoal = BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE;
+  // else if (_goal == "circumnavigate_counterclockwise")
+  //   buoyGoal = BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE;
+  // else
+  // {
+  //   ignerr << "Unknown <goal> value: [" << _goal << "]" << std::endl;
+  //   return false;
+  // }
+
+  // // Save the new buoy.
+  // dataPtr->buoys.push_back(Buoy(ecm, link, buoyGoal, dataPtr->engagementDistance));
 
   return true;
 }
 
 //////////////////////////////////////////////////
-void WildlifeScoringPlugin::Update()
+void WildlifeScoringPlugin::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
+    ignition::gazebo::EntityComponentManager &_ecm)
 {
-  // The vehicle is not in the simulation yet.
-  if (!this->vehicleModel)
-    return;
-
+  ScoringPlugin::PreUpdate(_info, _ecm);
+if (!this->dataPtr->vehicleEntity)
+    {
+        auto entity = _ecm.EntityByComponents(
+            ignition::gazebo::components::Name(ScoringPlugin::VehicleName()));
+        if (entity != ignition::gazebo::kNullEntity)
+            this->dataPtr->vehicleEntity = entity;
+        else
+            return;
+    }
   // Skip if we're not in running mode.
   if (this->TaskState() != "running")
     return;
 
   // Current score.
   this->ScoringPlugin::SetScore(
-    std::min(this->GetRunningStateDuration(), this->ElapsedTime().Double()));
+    std::min(this->RunningStateDuration(), this->ElapsedTime().count()));
 
   // Update the state of all buoys.
   bool taskCompleted = true;
-  for (auto &buoy : this->buoys)
+  for (auto &buoy : this->dataPtr->buoys)
   {
     // Update the vehicle model if needed.
-    if (!buoy.vehicleModel)
-      buoy.SetVehicleModel(this->vehicleModel);
+    if (!buoy.vehicleEntity)
+      buoy.SetVehicleEntity(this->dataPtr->vehicleEntity);
 
     // If a collision is detected, invalidate the circumnavigations.
-    if (this->collisionDetected)
+    if (this->dataPtr->collisionDetected)
       buoy.numVirtualGatesCrossed = 0u;
 
     // Update the buoy state.
-    buoy.Update();
+    buoy.Update(_ecm);
 
     // We consider the task completed when all the circumnavigation goals have
     // been completed.
@@ -585,100 +584,98 @@ void WildlifeScoringPlugin::Update()
     }
   }
 
-  this->collisionDetected = false;
+  this->dataPtr->collisionDetected = false;
 
   // Publish the location of the buoys.
-  this->PublishAnimalLocations();
+  this->dataPtr->PublishAnimalLocations();
 
   if (taskCompleted)
   {
-    gzmsg << "Course completed!" << std::endl;
-    this->SetScore(std::max(0.0, this->Score() - this->TimeBonus()));
-    this->Finish();
+    ignmsg << "Course completed!" << std::endl;
+    this->SetScore(std::max(0.0, this->Score() - this->dataPtr->TimeBonus()));
+    this->OnFinished();
   }
 }
 
 //////////////////////////////////////////////////
-void WildlifeScoringPlugin::PublishAnimalLocations()
+void WildlifeScoringPlugin::Implementation::PublishAnimalLocations()
 {
-  geographic_msgs::GeoPath geoPathMsg;
-  geoPathMsg.header.stamp = ros::Time::now();
 
-  for (auto const &buoy : this->buoys)
-  {
-    // Conversion from Gazebo Cartesian coordinates to spherical.
-#if GAZEBO_MAJOR_VERSION >= 8
-    const ignition::math::Pose3d pose = buoy.link->WorldPose();
-#else
-    const ignition::math::Pose3d pose = buoy.link->GetWorldPose().Ign();
-#endif
 
-    auto in = ignition::math::SphericalCoordinates::CoordinateType::GLOBAL;
-    auto out = ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL;
-    auto latlon = this->sc.PositionTransform(pose.Pos(), in, out);
-    latlon.X(IGN_RTOD(latlon.X()));
-    latlon.Y(IGN_RTOD(latlon.Y()));
+  // geographic_msgs::GeoPath geoPathMsg;
+  // geoPathMsg.header.stamp = ros::Time::now();
 
-    const ignition::math::Quaternion<double> orientation = pose.Rot();
+  // for (auto const &buoy : this->buoys)
+  // {
+  //   // Conversion from Gazebo Cartesian coordinates to spherical.
 
-    // Fill the GeoPoseStamped message.
-    geographic_msgs::GeoPoseStamped geoPoseMsg;
-    geoPoseMsg.header.stamp = ros::Time::now();
+  //   const ignition::math::Pose3d pose = buoy.link->WorldPose();
+  //   auto in = ignition::math::SphericalCoordinates::CoordinateType::GLOBAL;
+  //   auto out = ignition::math::SphericalCoordinates::CoordinateType::SPHERICAL;
+  //   auto latlon = this->sc.PositionTransform(pose.Pos(), in, out);
+  //   latlon.X(IGN_RTOD(latlon.X()));
+  //   latlon.Y(IGN_RTOD(latlon.Y()));
 
-    // We set the buoy type based on its goal.
-    if (buoy.goal == BuoyGoal::AVOID)
-      geoPoseMsg.header.frame_id = "crocodile";
-    else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE)
-      geoPoseMsg.header.frame_id = "platypus";
-    else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE)
-      geoPoseMsg.header.frame_id = "turtle";
-    else
-      geoPoseMsg.header.frame_id = "unknown";
+  //   const ignition::math::Quaternion<double> orientation = pose.Rot();
 
-    geoPoseMsg.pose.position.latitude  = latlon.X();
-    geoPoseMsg.pose.position.longitude = latlon.Y();
-    geoPoseMsg.pose.position.altitude  = latlon.Z();
-    geoPoseMsg.pose.orientation.x = orientation.X();
-    geoPoseMsg.pose.orientation.y = orientation.Y();
-    geoPoseMsg.pose.orientation.z = orientation.Z();
-    geoPoseMsg.pose.orientation.w = orientation.W();
+  //   // Fill the GeoPoseStamped message.
+  //   geographic_msgs::GeoPoseStamped geoPoseMsg;
+  //   geoPoseMsg.header.stamp = ros::Time::now();
 
-    // Add the GeoPoseStamped message to the GeoPath message that we publish.
-    geoPathMsg.poses.push_back(geoPoseMsg);
-  }
-  this->animalsPub.publish(geoPathMsg);
+  //   // We set the buoy type based on its goal.
+  //   if (buoy.goal == BuoyGoal::AVOID)
+  //     geoPoseMsg.header.frame_id = "crocodile";
+  //   else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE)
+  //     geoPoseMsg.header.frame_id = "platypus";
+  //   else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE)
+  //     geoPoseMsg.header.frame_id = "turtle";
+  //   else
+  //     geoPoseMsg.header.frame_id = "unknown";
+
+  //   geoPoseMsg.pose.position.latitude  = latlon.X();
+  //   geoPoseMsg.pose.position.longitude = latlon.Y();
+  //   geoPoseMsg.pose.position.altitude  = latlon.Z();
+  //   geoPoseMsg.pose.orientation.x = orientation.X();
+  //   geoPoseMsg.pose.orientation.y = orientation.Y();
+  //   geoPoseMsg.pose.orientation.z = orientation.Z();
+  //   geoPoseMsg.pose.orientation.w = orientation.W();
+
+  //   // Add the GeoPoseStamped message to the GeoPath message that we publish.
+  //   geoPathMsg.poses.push_back(geoPoseMsg);
+  // }
+  // this->animalsPub.publish(geoPathMsg);
 }
 
 //////////////////////////////////////////////////
 void WildlifeScoringPlugin::OnCollision()
 {
-  gzdbg << "Collision detected, invalidating circumnavigations" << std::endl;
-  this->collisionDetected = true;
+  igndbg << "Collision detected, invalidating circumnavigations" << std::endl;
+  this->dataPtr->collisionDetected = true;
 }
 
 //////////////////////////////////////////////////
-double WildlifeScoringPlugin::TimeBonus() const
+double WildlifeScoringPlugin::Implementation::TimeBonus() const
 {
   // Check time bonuses.
   double totalBonus = 0;
-  for (auto const &buoy : this->buoys)
-  {
-    if (buoy.goal == BuoyGoal::AVOID &&
-        buoy.state == BuoyState::NEVER_ENGAGED)
-    {
-      totalBonus += this->timeBonus;
-    }
-    else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE &&
-             buoy.state == BuoyState::CIRCUMNAVIGATED)
-    {
-      totalBonus += this->timeBonus;
-    }
-    else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE &&
-             buoy.state == BuoyState::CIRCUMNAVIGATED)
-    {
-      totalBonus += this->timeBonus;
-    }
-  }
+  // for (auto const &buoy : this->buoys)
+  // {
+  //   if (buoy.goal == BuoyGoal::AVOID &&
+  //       buoy.state == BuoyState::NEVER_ENGAGED)
+  //   {
+  //     totalBonus += this->timeBonus;
+  //   }
+  //   else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE &&
+  //            buoy.state == BuoyState::CIRCUMNAVIGATED)
+  //   {
+  //     totalBonus += this->timeBonus;
+  //   }
+  //   else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE &&
+  //            buoy.state == BuoyState::CIRCUMNAVIGATED)
+  //   {
+  //     totalBonus += this->timeBonus;
+  //   }
+  // }
 
   return totalBonus;
 }
@@ -686,7 +683,8 @@ double WildlifeScoringPlugin::TimeBonus() const
 //////////////////////////////////////////////////
 void WildlifeScoringPlugin::OnFinished()
 {
-  dataPtr->SetTimeoutScore(std::max(0.0, dataPointer->Score() - dataPtr->TimeBonus()));
+  this->SetTimeoutScore(std::max(0.0, this->Score() - 
+      this->dataPtr->TimeBonus()));
   ScoringPlugin::OnFinished();
 }
 /////////////////////////////////////////////////
@@ -698,7 +696,7 @@ WildlifeScoringPlugin::WildlifeScoringPlugin()
 }
 
 /////////////////////////////////////////////////
-void StationkeepingScoringPlugin::Configure(
+void WildlifeScoringPlugin::Configure(
     const ignition::gazebo::Entity &_entity,
     const std::shared_ptr<const sdf::Element> &_sdf,
     ignition::gazebo::EntityComponentManager &_ecm,
@@ -715,31 +713,31 @@ void StationkeepingScoringPlugin::Configure(
     
     if (_sdf->HasElement("animals_topic"))
     {
-        dataPtr->animalsTopic = _sdf->Get<std::string>("animals_topic");
+        this->dataPtr->animalsTopic = _sdf->Get<std::string>("animals_topic");
     }
     // Publish animal buoy pose vector
-    dataPtr->goalPub =
-        dataPtr->node.Advertise<ignition::msgs::Pose_V>(
-            dataPtr->animalsTopic);
+    this->dataPtr->animalsPub =
+        this->dataPtr->node.Advertise<ignition::msgs::Pose_V>(
+            this->dataPtr->animalsTopic);
   // Parse the optional <engagement_distance> element.
   if (_sdf->HasElement("engagement_distance"))
-    dataPtr->engagementDistance = _sdf->Get<double>("engagement_distance");
+    this->dataPtr->engagementDistance = _sdf->Get<double>("engagement_distance");
 
   // Parse the optional <time_bonus> element.
   if (_sdf->HasElement("time_bonus"))
-    dataPtr->timeBonus = _sdf->Get<double>("time_bonus");
+    this->dataPtr->timeBonus = _sdf->Get<double>("time_bonus");
 
   // Parse the optional <buoys> element.
   // Note: Parse this element at the end because we use some of the previous
   // parameters.
   if (_sdf->HasElement("buoys"))
   {
-    auto const &buoysElem = _sdf->GetElement("buoys");
-    if (!this->ParseBuoys(buoysElem))
-    {
-      ignerr << "Score has been disabled" << std::endl;
-      return;
-    }
+    auto buoysElem = _sdf->GetElementImpl("buoys");
+    // if (!this->dataPtr->ParseBuoys(buoysElem))
+    // {
+    //   ignerr << "Score has been disabled" << std::endl;
+    //   return;
+    // }
   }
 
   ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
@@ -749,5 +747,5 @@ void StationkeepingScoringPlugin::Configure(
 // Register plugin with 
 IGNITION_ADD_PLUGIN(vrx::WildlifeScoringPlugin,
                     ignition::gazebo::System,
-                    vrx::StationkeepingScoringPlugin::ISystemConfigure,
-                    vrx::StationkeepingScoringPlugin::ISystemPreUpdate)
+                    vrx::WildlifeScoringPlugin::ISystemConfigure,
+                    vrx::WildlifeScoringPlugin::ISystemPreUpdate)

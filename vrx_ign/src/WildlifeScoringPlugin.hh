@@ -87,6 +87,16 @@ namespace vrx
 {
     class WildlifeScoringPlugin : public ScoringPlugin
     {
+    protected: class VirtualGate;
+
+    protected: class Buoy;
+
+    protected: enum class GateState;
+
+    protected: enum class BuoyState;
+
+    protected: enum class BuoyGoal;
+
         /// \brief Constructor.
     public:
         WildlifeScoringPlugin();
