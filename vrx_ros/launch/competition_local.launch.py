@@ -26,28 +26,28 @@ from launch.substitutions import LaunchConfiguration
 
 from launch_ros.actions import Node
 
-import vrx_ign.bridges
+import vrx_gz.bridges
 
 import os
 
 def generate_launch_description():
-    ign_args = LaunchConfiguration('ign_args')
-    ign_args_launch = DeclareLaunchArgument(
-        'ign_args', 
+    gz_args = LaunchConfiguration('gz_args')
+    gz_args_launch = DeclareLaunchArgument(
+        'gz_args', 
         default_value='',
-        description='Arguments to be passed to Ignition Gazebo'
+        description='Arguments to be passed to Gazebo'
     )
 
-    ign_gazebo = IncludeLaunchDescription(
+    gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-        get_package_share_directory('ros_ign_gazebo'), 'launch'),
-        '/ign_gazebo.launch.py']),
-        launch_arguments = {'ign_args': ign_args}.items())
+        get_package_share_directory('ros_gz_sim'), 'launch'),
+        '/gz_sim.launch.py']),
+        launch_arguments = {'gz_args': gz_args}.items())
 
-    # Register handler for shutting down ros launch when ign gazebo process exits
-    # monitor_sim.py will run until it can not find the ign gazebo process.
-    # Once monitor_sim.py exits, a process exit event is triggered which causes the
-    # handler to emit a Shutdown event
+    # Register handler for shutting down ros launch when gazebo process exits
+    # monitor_sim.py will run until it can not find the gazebo process.
+    # Once monitor_sim.py exits, a process exit event is triggered which causes
+    # the handler to emit a Shutdown event
     p = os.path.join(get_package_share_directory('vrx_ros'), 'launch',
                      'monitor_sim.py')
     monitor_sim_proc = ExecuteProcess(
@@ -64,17 +64,16 @@ def generate_launch_description():
         )
     )
 
-
     bridges = [
-      vrx_ign.bridges.score(),
-      vrx_ign.bridges.clock(),
-      vrx_ign.bridges.run_clock(),
-      vrx_ign.bridges.phase(),
-      vrx_ign.bridges.stream_status(),
+      vrx_gz.bridges.score(),
+      vrx_gz.bridges.clock(),
+      vrx_gz.bridges.run_clock(),
+      vrx_gz.bridges.phase(),
+      vrx_gz.bridges.stream_status(),
     ]
 
     bridge_node = Node(
-        package='ros_ign_bridge',
+        package='ros_gz_bridge',
         executable='parameter_bridge',
         output='screen',
         arguments=[bridge.argument() for bridge in bridges],
@@ -94,16 +93,15 @@ def generate_launch_description():
 
     spawn_wamv = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-        get_package_share_directory('vrx_ign'), 'launch'),
+        get_package_share_directory('vrx_gz'), 'launch'),
         '/spawn.launch.py']),
         launch_arguments = wamv_args.items())
 
     return LaunchDescription([
-        ign_args_launch,
-        ign_gazebo,
+        gz_args_launch,
+        gz_sim,
         bridge_node,
         spawn_wamv,
         monitor_sim_proc,
         sim_exit_event_handler
         ])
-
