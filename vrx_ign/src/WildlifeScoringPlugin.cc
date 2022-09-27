@@ -542,59 +542,59 @@ void WildlifeScoringPlugin::PreUpdate(const ignition::gazebo::UpdateInfo &_info,
     ignition::gazebo::EntityComponentManager &_ecm)
 {
   ScoringPlugin::PreUpdate(_info, _ecm);
-if (!this->dataPtr->vehicleEntity)
-    {
-        auto entity = _ecm.EntityByComponents(
-            ignition::gazebo::components::Name(ScoringPlugin::VehicleName()));
-        if (entity != ignition::gazebo::kNullEntity)
-            this->dataPtr->vehicleEntity = entity;
-        else
-            return;
-    }
-  // Skip if we're not in running mode.
-  if (this->TaskState() != "running")
-    return;
+// if (!this->dataPtr->vehicleEntity)
+//     {
+//         auto entity = _ecm.EntityByComponents(
+//             ignition::gazebo::components::Name(ScoringPlugin::VehicleName()));
+//         if (entity != ignition::gazebo::kNullEntity)
+//             this->dataPtr->vehicleEntity = entity;
+//         else
+//             return;
+//     }
+//   // Skip if we're not in running mode.
+//   if (this->TaskState() != "running")
+//     return;
 
-  // Current score.
-  this->ScoringPlugin::SetScore(
-    std::min(this->RunningStateDuration(), this->ElapsedTime().count()));
+//   // Current score.
+//   this->ScoringPlugin::SetScore(
+//     std::min(this->RunningStateDuration(), this->ElapsedTime().count()));
 
-  // Update the state of all buoys.
-  bool taskCompleted = true;
-  for (auto &buoy : this->dataPtr->buoys)
-  {
-    // Update the vehicle model if needed.
-    if (!buoy.vehicleEntity)
-      buoy.SetVehicleEntity(this->dataPtr->vehicleEntity);
+//   // Update the state of all buoys.
+//   bool taskCompleted = true;
+//   for (auto &buoy : this->dataPtr->buoys)
+//   {
+//     // Update the vehicle model if needed.
+//     if (!buoy.vehicleEntity)
+//       buoy.SetVehicleEntity(this->dataPtr->vehicleEntity);
 
-    // If a collision is detected, invalidate the circumnavigations.
-    if (this->dataPtr->collisionDetected)
-      buoy.numVirtualGatesCrossed = 0u;
+//     // If a collision is detected, invalidate the circumnavigations.
+//     if (this->dataPtr->collisionDetected)
+//       buoy.numVirtualGatesCrossed = 0u;
 
-    // Update the buoy state.
-    buoy.Update(_ecm);
+//     // Update the buoy state.
+//     buoy.Update(_ecm);
 
-    // We consider the task completed when all the circumnavigation goals have
-    // been completed.
-    if ((buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE ||
-         buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE) &&
-        buoy.state != BuoyState::CIRCUMNAVIGATED)
-    {
-      taskCompleted = false;
-    }
-  }
+//     // We consider the task completed when all the circumnavigation goals have
+//     // been completed.
+//     if ((buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE ||
+//          buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE) &&
+//         buoy.state != BuoyState::CIRCUMNAVIGATED)
+//     {
+//       taskCompleted = false;
+//     }
+//   }
 
-  this->dataPtr->collisionDetected = false;
+//   this->dataPtr->collisionDetected = false;
 
-  // Publish the location of the buoys.
-  this->dataPtr->PublishAnimalLocations();
+//   // Publish the location of the buoys.
+//   this->dataPtr->PublishAnimalLocations();
 
-  if (taskCompleted)
-  {
-    ignmsg << "Course completed!" << std::endl;
-    this->SetScore(std::max(0.0, this->Score() - this->dataPtr->TimeBonus()));
-    this->OnFinished();
-  }
+//   if (taskCompleted)
+//   {
+//     ignmsg << "Course completed!" << std::endl;
+//     this->SetScore(std::max(0.0, this->Score() - this->dataPtr->TimeBonus()));
+//     this->OnFinished();
+//   }
 }
 
 //////////////////////////////////////////////////
@@ -704,41 +704,41 @@ void WildlifeScoringPlugin::Configure(
 {
     ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
     ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
-    auto worldEntity =
-        _ecm.EntityByComponents(ignition::gazebo::components::World());
-    ignition::gazebo::World world(worldEntity);
-    this->dataPtr->sc = world.SphericalCoordinates(_ecm).value();
+  //   auto worldEntity =
+  //       _ecm.EntityByComponents(ignition::gazebo::components::World());
+  //   ignition::gazebo::World world(worldEntity);
+  //   this->dataPtr->sc = world.SphericalCoordinates(_ecm).value();
 
-  // Parse the optional <animals_topic> element.
+  // // Parse the optional <animals_topic> element.
     
-    if (_sdf->HasElement("animals_topic"))
-    {
-        this->dataPtr->animalsTopic = _sdf->Get<std::string>("animals_topic");
-    }
-    // Publish animal buoy pose vector
-    this->dataPtr->animalsPub =
-        this->dataPtr->node.Advertise<ignition::msgs::Pose_V>(
-            this->dataPtr->animalsTopic);
-  // Parse the optional <engagement_distance> element.
-  if (_sdf->HasElement("engagement_distance"))
-    this->dataPtr->engagementDistance = _sdf->Get<double>("engagement_distance");
+  //   if (_sdf->HasElement("animals_topic"))
+  //   {
+  //       this->dataPtr->animalsTopic = _sdf->Get<std::string>("animals_topic");
+  //   }
+  //   // Publish animal buoy pose vector
+  //   this->dataPtr->animalsPub =
+  //       this->dataPtr->node.Advertise<ignition::msgs::Pose_V>(
+  //           this->dataPtr->animalsTopic);
+  // // Parse the optional <engagement_distance> element.
+  // if (_sdf->HasElement("engagement_distance"))
+  //   this->dataPtr->engagementDistance = _sdf->Get<double>("engagement_distance");
 
-  // Parse the optional <time_bonus> element.
-  if (_sdf->HasElement("time_bonus"))
-    this->dataPtr->timeBonus = _sdf->Get<double>("time_bonus");
+  // // Parse the optional <time_bonus> element.
+  // if (_sdf->HasElement("time_bonus"))
+  //   this->dataPtr->timeBonus = _sdf->Get<double>("time_bonus");
 
-  // Parse the optional <buoys> element.
-  // Note: Parse this element at the end because we use some of the previous
-  // parameters.
-  if (_sdf->HasElement("buoys"))
-  {
-    auto buoysElem = _sdf->GetElementImpl("buoys");
-    // if (!this->dataPtr->ParseBuoys(buoysElem))
-    // {
-    //   ignerr << "Score has been disabled" << std::endl;
-    //   return;
-    // }
-  }
+  // // Parse the optional <buoys> element.
+  // // Note: Parse this element at the end because we use some of the previous
+  // // parameters.
+  // if (_sdf->HasElement("buoys"))
+  // {
+  //   auto buoysElem = _sdf->GetElementImpl("buoys");
+  //   // if (!this->dataPtr->ParseBuoys(buoysElem))
+  //   // {
+  //   //   ignerr << "Score has been disabled" << std::endl;
+  //   //   return;
+  //   // }
+  // }
 
   ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
 }

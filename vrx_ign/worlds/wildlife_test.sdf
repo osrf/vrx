@@ -620,8 +620,12 @@
       <pose>-534.550537 144.910400 1.720474 -0.004994 0.020798 1.301492</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/ground_station</uri>
     </include>
-
-    <!-- The projectile for the ball shooter -->
+ <!--    <include>
+      <name>crocodile_buoy</name>
+      <pose>-520 180 0 0 0 0</pose>
+      <uri>model://crocodile_buoy</uri>
+    </include>
+ -->    <!-- The projectile for the ball shooter -->
     <!-- <include>
       <name>blue_projectile</name>
       <pose>-545 60 0.03 0 0 0</pose>
@@ -670,7 +674,7 @@
     </plugin>
 
     <!-- The base scoring plugin -->
-   <plugin
+    <plugin
       filename="libWildlifeScoringPlugin.so"
       name="vrx::WildlifeScoringPlugin">
       <vehicle>wamv</vehicle>
@@ -690,7 +694,7 @@
       </release_joints>
       <buoys>
         <buoy>
-          <model_name>mb_round_buoy_black</model_name>
+          <model_name>crocodile_buoy</model_name>
           <link_name>link</link_name>
           <goal>avoid</goal>
         </buoy>
