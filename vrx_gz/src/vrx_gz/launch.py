@@ -44,10 +44,7 @@ def simulation(world_name, headless=False):
 
 def competition_bridges():
     bridges = [
-        vrx_gz.bridges.score(),
         vrx_gz.bridges.clock(),
-        vrx_gz.bridges.run_clock(),
-        vrx_gz.bridges.phase(),
     ]
     nodes = []
     nodes.append(Node(

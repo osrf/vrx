@@ -64,15 +64,15 @@ class Model:
         nodes = []
         bridges = [
             # IMU
-            vrx_gz.bridges.imu(world_name, self.model_name),
+            # vrx_gz.bridges.imu(world_name, self.model_name),
             # pose
             vrx_gz.bridges.pose(self.model_name),
             # pose static
             vrx_gz.bridges.pose_static(self.model_name),
             # comms tx
-            vrx_gz.bridges.comms_tx(self.model_name),
+            # vrx_gz.bridges.comms_tx(self.model_name),
             # comms rx
-            vrx_gz.bridges.comms_rx(self.model_name),
+            # vrx_gz.bridges.comms_rx(self.model_name),
         ]
         if self.is_UAV():
             bridges.extend([
