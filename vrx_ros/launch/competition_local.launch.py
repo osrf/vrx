@@ -69,7 +69,6 @@ def generate_launch_description():
       vrx_gz.bridges.clock(),
       vrx_gz.bridges.run_clock(),
       vrx_gz.bridges.phase(),
-      vrx_gz.bridges.stream_status(),
     ]
 
     bridge_node = Node(
