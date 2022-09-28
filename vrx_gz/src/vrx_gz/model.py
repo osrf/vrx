@@ -122,10 +122,6 @@ class Model:
                 vrx_gz.bridges.thrust_joint_pos(self.model_name, 'left'),
                 vrx_gz.bridges.thrust_joint_pos(self.model_name, 'right'),
             ])
-            nodes.append(Node(
-                package='vrx_ros',
-                executable='usv_bridge',
-            ))
 
         if self.has_valid_arm():
             # arm joint states
