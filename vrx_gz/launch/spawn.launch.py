@@ -66,33 +66,16 @@ def parse_from_cli(context, world_name):
         'slot7': {'sensor': slot7_payload, 'rpy': slot7_rpy},
     }
 
-    gripper = LaunchConfiguration('gripper').perform(context)
-
-    arm_slot0_payload = LaunchConfiguration('arm_payload_slot0').perform(context)
-    arm_slot0_rpy = LaunchConfiguration('arm_payload_slot0_rpy').perform(context)
-    arm_payloads = {
-        'slot0': {'sensor': arm_slot0_payload, 'rpy': arm_slot0_rpy},
-    }
-
     if model.is_UAV():
         # take flight time in minutes
         flight_time = LaunchConfiguration('flightTime').perform(context)
 
         model.set_flight_time(flight_time)
     elif model.is_USV():
-        arm = LaunchConfiguration('arm').perform(context)
-        arm_slot = LaunchConfiguration('arm_slot').perform(context)
 
         model.set_wavefield(world_name)
-        model.set_arm(arm)
-        model.set_arm_slot(arm_slot)
-    elif model_type == 'static_arm':
-        arm = LaunchConfiguration('arm').perform(context)
-        model.set_arm(arm)
 
-    model.set_gripper(gripper)
     model.set_payload(payloads)
-    model.set_arm_payload(arm_payloads)
     return model
 
 
@@ -169,18 +152,6 @@ def generate_launch_description():
             default_value='10',
             description='Battery flight time in minutes (only for UAVs)'),
         DeclareLaunchArgument(
-            'arm',
-            default_value='',
-            description='arm model to attach to usv'),
-        DeclareLaunchArgument(
-            'gripper',
-            default_value='',
-            description='gripper model to attach to arm or UAV'),
-        DeclareLaunchArgument(
-            'arm_slot',
-            default_value='0',
-            description='arm slot to attach to usv'),
-        DeclareLaunchArgument(
             'slot0',
             default_value='',
             description='Payload mounted to slot 0'),
@@ -244,14 +215,6 @@ def generate_launch_description():
             'slot7_rpy',
             default_value='0 0 0',
             description='Roll, Pitch, Yaw in degrees of payload mount'),
-        DeclareLaunchArgument(
-            'arm_payload_slot0',
-            default_value='',
-            description='Payload mounted to slot 0 on the arm'),
-        DeclareLaunchArgument(
-            'arm_payload_slot0_rpy',
-            default_value='0 0 0',
-            description='Roll, Pitch, Yaw in degrees of payload mount on the arm'),
         # launch setup
         OpaqueFunction(function=launch)
     ])

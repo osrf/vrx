@@ -48,7 +48,6 @@ def competition_bridges():
         vrx_gz.bridges.clock(),
         vrx_gz.bridges.run_clock(),
         vrx_gz.bridges.phase(),
-        vrx_gz.bridges.stream_status(),
     ]
     nodes = []
     nodes.append(Node(
@@ -91,14 +90,6 @@ def spawn(sim_mode, world_name, models, robot=None):
             bridges.extend(payload_bridges)
             nodes.extend(payload_nodes)
 
-            if model.is_fixed_wing_UAV():
-                nodes.append(Node(
-                    package='vrx_ros',
-                    executable='fixed_wing_bridge',
-                    output='screen',
-                    parameters=[{'model_name': model.model_name}],
-                ))
-
             nodes.append(Node(
                 package='ros_gz_bridge',
                 executable='parameter_bridge',
@@ -112,9 +103,6 @@ def spawn(sim_mode, world_name, models, robot=None):
                 package='vrx_ros',
                 executable='pose_tf_broadcaster',
                 output='screen',
-                parameters=[
-                    {'world_frame': world_name}
-                ]
             ))
 
             group_action = GroupAction([

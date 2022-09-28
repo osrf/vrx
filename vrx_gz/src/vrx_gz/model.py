@@ -30,12 +30,7 @@ import shutil
 
 import yaml
 
-FIXED_WING_UAVS = [
-    'vrx_fixed_wing',
-]
-
 UAVS = [
-    'vrx_fixed_wing',
     'vrx_hexrotor',
     'vrx_quadrotor'
 ]
@@ -43,15 +38,6 @@ UAVS = [
 USVS = [
     'usv',
     'wam-v',
-]
-
-ARMS = [
-    'vrx_oberon7_arm',
-]
-
-GRIPPERS = [
-    'vrx_oberon7_gripper',
-    'vrx_suction_gripper'
 ]
 
 WAVEFIELD_SIZE = {'sydney_regatta': 1000,}
@@ -66,25 +52,12 @@ class Model:
         self.battery_capacity = 0
         self.wavefield_size = 0
         self.payload = {}
-        self.arm_payload = {}
-        self.arm = ''
-        self.gripper = ''
-        self.arm_slot = '0'
 
     def is_UAV(self):
         return self.model_type in UAVS
 
-    def is_fixed_wing_UAV(self):
-        return self.model_type in FIXED_WING_UAVS
-
     def is_USV(self):
         return self.model_type in USVS
-
-    def has_valid_arm(self):
-        return self.arm in ARMS
-
-    def has_valid_gripper(self):
-        return self.gripper in GRIPPERS
 
     def bridges(self, world_name):
         custom_launches = []
@@ -108,11 +81,10 @@ class Model:
                 # Air Pressure
                 vrx_gz.bridges.air_pressure(world_name, self.model_name),
             ])
-            if not self.is_fixed_wing_UAV():
-                bridges.extend([
-                    # twist
-                    vrx_gz.bridges.cmd_vel(self.model_name)
-                ])
+            bridges.extend([
+                # twist
+                vrx_gz.bridges.cmd_vel(self.model_name)
+            ])
         elif self.is_USV():
             bridges.extend([
                 # thrust cmd
@@ -123,67 +95,6 @@ class Model:
                 vrx_gz.bridges.thrust_joint_pos(self.model_name, 'right'),
             ])
 
-        if self.has_valid_arm():
-            # arm joint states
-            bridges.append(
-                vrx_gz.bridges.arm_joint_states(world_name, self.model_name)
-            )
-
-            if self.arm == 'vrx_oberon7_arm':
-                # arm joint pos cmd
-                arm_joints = ['azimuth', 'shoulder', 'elbow', 'roll', 'pitch', 'wrist']
-                for joint in arm_joints:
-                    bridges.append(
-                        vrx_gz.bridges.arm_joint_pos(self.model_name, joint)
-                    )
-
-                bridges.append(
-                    vrx_gz.bridges.wrist_joint_force_torque(self.model_name),
-                )
-                # default to oberon7 gripper if not specified.
-                if not self.gripper:
-                    self.gripper = 'vrx_oberon7_gripper'
-        elif self.is_custom_model(self.arm):
-            custom_launch = self.custom_model_launch(world_name, self.model_name,
-                                                     self.arm)
-            if custom_launch is not None:
-                custom_launches.append(custom_launch)
-
-            # default to oberon7 gripper if not specified.
-            if not self.gripper:
-                self.gripper = 'vrx_oberon7_gripper'
-
-        if self.has_valid_gripper():
-            isAttachedToArm = self.is_USV()
-            # gripper joint pos cmd
-            if self.gripper == 'vrx_oberon7_gripper':
-                # gripper_joint states
-                bridges.append(
-                    vrx_gz.bridges.gripper_joint_states(world_name, self.model_name,
-                                                            isAttachedToArm)
-                )
-                gripper_joints = ['finger_left', 'finger_right']
-                for joint in gripper_joints:
-                    bridges.append(
-                        vrx_gz.bridges.gripper_joint_pos(self.model_name, joint,
-                                                             isAttachedToArm)
-                    )
-                    bridges.append(
-                        vrx_gz.bridges.gripper_joint_force_torque(
-                            self.model_name, joint, isAttachedToArm)
-                    )
-            elif self.gripper == 'vrx_suction_gripper':
-                bridges.append(
-                    vrx_gz.bridges.gripper_suction_control(self.model_name, isAttachedToArm)
-                )
-                bridges.extend([
-                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'center'),
-                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'left'),
-                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'right'),
-                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'top'),
-                    vrx_gz.bridges.gripper_contact(self.model_name, isAttachedToArm, 'bottom')
-                ])
-
         return [bridges, nodes, custom_launches]
 
     def payload_bridges(self, world_name, payloads=None):
@@ -192,15 +103,9 @@ class Model:
             payloads = self.payload
         bridges, nodes, payload_launches = self.payload_bridges_impl(world_name, payloads)
 
-        # payloads on arm
-        b_out, n_out, l_out = self.payload_bridges_impl(world_name, self.arm_payload, True)
-        bridges.extend(b_out)
-        nodes.extend(n_out)
-        payload_launches.extend(l_out)
-
         return [bridges, nodes, payload_launches]
 
-    def payload_bridges_impl(self, world_name, payloads, is_arm=False):
+    def payload_bridges_impl(self, world_name, payloads):
         bridges = []
         nodes = []
         payload_launches = []
@@ -220,9 +125,6 @@ class Model:
             else:
                 model_prefix = ''
                 ros_slot_prefix = f'slot{idx}'
-                if is_arm:
-                    model_prefix = 'arm'
-                    ros_slot_prefix = 'arm/' + ros_slot_prefix
                 bridges.extend(
                     vrx_gz.payload_bridges.payload_bridges(
                         world_name, self.model_name, p['sensor'], idx, model_prefix))
@@ -299,23 +201,11 @@ class Model:
         # UAV specific
         self.payload = payload
 
-    def set_arm_payload(self, arm_payload):
-        self.arm_payload = arm_payload
-
     def set_wavefield(self, world_name):
         if world_name not in WAVEFIELD_SIZE:
             print(f'Wavefield size not found for {world_name}')
         else:
             self.wavefield_size = WAVEFIELD_SIZE[world_name]
-
-    def set_arm(self, arm):
-        self.arm = arm
-
-    def set_arm_slot(self, arm_slot):
-        self.arm_slot = arm_slot
-
-    def set_gripper(self, gripper):
-        self.gripper = gripper
 
     def generate(self):
         # Generate SDF by executing ERB and populating templates
@@ -343,84 +233,9 @@ class Model:
             if self.battery_capacity == 0:
                 raise RuntimeError('Battery Capacity is zero, was flight_time set?')
             command.append(f'capacity={self.battery_capacity}')
-            if self.has_valid_gripper():
-                command.append(f'gripper={self.gripper}_{self.model_name}')
 
-        if self.model_type in USVS or self.model_type == 'static_arm':
+        if self.model_type in USVS:
             command.append(f'wavefieldSize={self.wavefield_size}')
-
-            # run erb for arm to attach the user specified gripper
-            # and also for arm and gripper to generate unique topic names
-            if self.has_valid_arm() or self.is_custom_model(self.arm):
-                command.append(f'arm={self.arm}')
-                command.append(f'arm_slot={self.arm_slot}')
-                arm_package = 'vrx_gz'
-                if self.is_custom_model(self.arm):
-                    arm_package = self.arm
-                arm_model_file = os.path.join(
-                    get_package_share_directory(arm_package), 'models',
-                    self.arm, 'model.sdf.erb')
-                arm_model_output_file = os.path.join(
-                    get_package_share_directory(arm_package), 'models',
-                    self.arm, 'model.sdf')
-                arm_command = ['erb']
-
-                if self.gripper:
-                    arm_command.append(f'gripper={self.gripper}_{self.model_name}')
-
-                # arm payloads
-                for (slot, payload) in self.arm_payload.items():
-                    if payload['sensor'] and payload['sensor'] != 'None':
-                        arm_command.append(f"arm_{slot}={payload['sensor']}")
-                    if 'rpy' in payload:
-                        if type(payload['rpy']) is str:
-                            r, p, y = payload['rpy'].split(' ')
-                        else:
-                            r, p, y = payload['rpy']
-                        arm_command.append(f'arm_{slot}_pos={r} {p} {y}')
-
-                arm_command.append(f'topic_prefix={self.model_name}')
-                arm_command.append(arm_model_file)
-                process = subprocess.Popen(arm_command, stdout=subprocess.PIPE)
-                stdout = process.communicate()[0]
-                str_output = codecs.getdecoder('unicode_escape')(stdout)[0]
-                with open(arm_model_output_file, 'w') as f:
-                    f.write(str_output)
-                # print(arm_command, str_output)
-
-        if self.has_valid_gripper():
-            gripper_model_file = os.path.join(model_dir, self.gripper, 'model.sdf.erb')
-            gripper_model_output_file = os.path.join(model_tmp_dir,
-                                                     self.gripper + "_" + self.model_name,
-                                                     'model.sdf')
-            gripper_command = ['erb']
-            topic_prefix = f'{self.model_name}'
-            if (self.is_USV()):
-                topic_prefix += '/arm'
-            gripper_command.append(f'topic_prefix={topic_prefix}')
-            gripper_command.append(gripper_model_file)
-
-            # create unique gripper model in mbzic_ign/models/tmp
-            # and symlink original model contents to new dir
-            output_dir = os.path.dirname(gripper_model_output_file)
-            if not os.path.exists(model_tmp_dir):
-                pathlib.Path(model_tmp_dir).mkdir(parents=True, exist_ok=True)
-            if os.path.exists(output_dir):
-                shutil.rmtree(output_dir)
-            pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
-            meshes_dir = os.path.join(model_dir, self.gripper, 'meshes')
-            if os.path.exists(meshes_dir):
-                os.symlink(meshes_dir, os.path.join(output_dir, 'meshes'))
-            model_config = os.path.join(model_dir, self.gripper, 'model.config')
-            os.symlink(model_config, os.path.join(output_dir, 'model.config'))
-
-            # Ru erb to generate new model.sdf file
-            process = subprocess.Popen(gripper_command, stdout=subprocess.PIPE)
-            stdout = process.communicate()[0]
-            str_output = codecs.getdecoder('unicode_escape')(stdout)[0]
-            with open(gripper_model_output_file, 'w') as f:
-                f.write(str_output)
-            # print(gripper_command, str_output)
 
         command.append(template_file)
         process = subprocess.Popen(command,
@@ -498,17 +313,5 @@ class Model:
 
         if 'payload' in config:
             model.set_payload(config['payload'])
-
-        if 'arm_payload' in config:
-            model.set_arm_payload(config['arm_payload'])
-
-        if 'arm' in config:
-            model.set_arm(config['arm'])
-
-        if 'arm_slot' in config:
-            model.set_arm_slot(config['arm_slot'])
-
-        if 'gripper' in config:
-            model.set_gripper(config['gripper'])
 
         return model

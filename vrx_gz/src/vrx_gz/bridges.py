@@ -61,25 +61,6 @@ def cmd_vel(model_name):
         ros_type='geometry_msgs/msg/Twist',
         direction=BridgeDirection.ROS_TO_GZ)
 
-
-def fixed_wing_flap(model_name, side):
-    return Bridge(
-        gz_topic=f'/model/{model_name}/joint/{side}_flap_joint/cmd_pos',
-        ros_topic=f'cmd/{side}_flap',
-        gz_type='gz.msgs.Double',
-        ros_type='std_msgs/msg/Float64',
-        direction=BridgeDirection.ROS_TO_GZ)
-
-
-def fixed_wing_prop(model_name):
-    return Bridge(
-        gz_topic=f'/model/{model_name}/joint/propeller_joint/cmd_vel',
-        ros_topic='cmd/motor_speed',
-        gz_type='gz.msgs.Double',
-        ros_type='std_msgs/msg/Float64',
-        direction=BridgeDirection.ROS_TO_GZ)
-
-
 def thrust(model_name, side):
     return Bridge(
         gz_topic=f'{model_name}/thrusters/{side}/thrust',
@@ -102,113 +83,6 @@ def thrust_joint_pos(model_name, side):
         gz_type='gz.msgs.Double',
         ros_type='std_msgs/msg/Float64',
         direction=BridgeDirection.ROS_TO_GZ)
-
-
-def arm_joint_states(world_name, model_name):
-    arm_prefix = f'/world/{world_name}/model/{model_name}/model/arm'
-    return Bridge(
-        gz_topic=f'{arm_prefix}/joint_state',
-        ros_topic='arm/joint_states',
-        gz_type='gz.msgs.Model',
-        ros_type='sensor_msgs/msg/JointState',
-        direction=BridgeDirection.GZ_TO_ROS)
-
-
-def gripper_joint_states(world_name, model_name, isAttachedToArm):
-    prefix = 'gripper'
-    if isAttachedToArm:
-        gripper_prefix = f'/world/{world_name}/model/{model_name}/model/arm/model/gripper'
-        prefix = 'arm/gripper'
-    else:
-        gripper_prefix = f'/world/{world_name}/model/{model_name}/model/gripper'
-    return Bridge(
-        gz_topic=f'{gripper_prefix}/joint_state',
-        ros_topic=f'{prefix}/joint_states',
-        gz_type='gz.msgs.Model',
-        ros_type='sensor_msgs/msg/JointState',
-        direction=BridgeDirection.GZ_TO_ROS)
-
-
-def arm_joint_pos(model_name, joint_name):
-    return Bridge(
-        gz_topic=f'/{model_name}/arm/{joint_name}',
-        ros_topic=f'arm/joint/{joint_name}/cmd_pos',
-        gz_type='gz.msgs.Double',
-        ros_type='std_msgs/msg/Float64',
-        direction=BridgeDirection.ROS_TO_GZ)
-
-
-def gripper_joint_pos(model_name, joint_name, isAttachedToArm):
-    prefix = 'gripper'
-    if isAttachedToArm:
-        prefix = 'arm/gripper'
-    return Bridge(
-        gz_topic=f'/{model_name}/{prefix}/{joint_name}',
-        ros_topic=f'{prefix}/joint/{joint_name}/cmd_pos',
-        gz_type='gz.msgs.Double',
-        ros_type='std_msgs/msg/Float64',
-        direction=BridgeDirection.ROS_TO_GZ)
-
-
-def wrist_joint_force_torque(model_name):
-    return Bridge(
-        gz_topic=f'/{model_name}/arm/wrist/forcetorque',
-        ros_topic='arm/wrist/joint/wrench',
-        gz_type='gz.msgs.Wrench',
-        ros_type='geometry_msgs/msg/Wrench',
-        direction=BridgeDirection.GZ_TO_ROS)
-
-
-def gripper_joint_force_torque(model_name, joint_name, isAttachedToArm):
-    prefix = 'gripper'
-    if isAttachedToArm:
-        prefix = 'arm/gripper'
-    return Bridge(
-        gz_topic=f'/{model_name}/{prefix}/{joint_name}/forcetorque',
-        ros_topic=f'{prefix}/joint/{joint_name}/wrench',
-        gz_type='gz.msgs.Wrench',
-        ros_type='geometry_msgs/msg/Wrench',
-        direction=BridgeDirection.GZ_TO_ROS)
-
-
-def gripper_suction_contacts(model_name, isAttachedToArm):
-    prefix = 'gripper'
-    if isAttachedToArm:
-        prefix = 'arm/gripper'
-    return Bridge(
-        gz_topic=f'/{model_name}/{prefix}/contact',
-        ros_topic='{prefix}/contact',
-        gz_type='gz.msgs.Contacts',
-        ros_type='ros_gz_interfaces/msg/Contacts',
-        direction=BridgeDirection.GZ_TO_ROS
-    )
-
-
-def gripper_contact(model_name, isAttachedToArm, direction):
-    prefix = 'gripper'
-    if isAttachedToArm:
-        prefix = 'arm/gripper'
-    return Bridge(
-        gz_topic=f'/{model_name}/{prefix}/contacts/{direction}',
-        ros_topic=f'{prefix}/contacts/{direction}',
-        gz_type='gz.msgs.Boolean',
-        ros_type='std_msgs/msg/Bool',
-        direction=BridgeDirection.GZ_TO_ROS
-    )
-
-
-def gripper_suction_control(model_name, isAttachedToArm):
-    prefix = 'gripper'
-    if isAttachedToArm:
-        prefix = 'arm/gripper'
-    return Bridge(
-        gz_topic=f'/{model_name}/{prefix}/suction_on',
-        ros_topic=f'{prefix}/suction_on',
-        gz_type='gz.msgs.Boolean',
-        ros_type='std_msgs/msg/Bool',
-        direction=BridgeDirection.ROS_TO_GZ
-    )
-
 
 def comms_tx(model_name):
     return Bridge(
@@ -259,15 +133,6 @@ def phase():
     return Bridge(
         gz_topic='/vrx/phase',
         ros_topic='/vrx/phase',
-        gz_type='gz.msgs.StringMsg',
-        ros_type='std_msgs/msg/String',
-        direction=BridgeDirection.GZ_TO_ROS)
-
-
-def stream_status():
-    return Bridge(
-        gz_topic='/vrx/target/stream/status',
-        ros_topic='/vrx/target/stream/status',
         gz_type='gz.msgs.StringMsg',
         ros_type='std_msgs/msg/String',
         direction=BridgeDirection.GZ_TO_ROS)
