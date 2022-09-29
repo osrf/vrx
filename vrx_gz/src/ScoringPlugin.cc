@@ -394,7 +394,7 @@ void ScoringPlugin::Configure(const sim::Entity &_entity,
   (*param)["remaining_time"] = remainingTimeValue;
 
   msgs::Any timedOutValue;
-  timedOutValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  timedOutValue.set_type(msgs::Any_ValueType::Any_ValueType_BOOLEAN);
   (*param)["timed_out"] = timedOutValue;
 
   msgs::Any numCollisionsValue;
