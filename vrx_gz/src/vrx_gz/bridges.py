@@ -110,6 +110,7 @@ def clock():
         ros_type='rosgraph_msgs/msg/Clock',
         direction=BridgeDirection.GZ_TO_ROS)
 
+
 def task_info():
     return Bridge(
         gz_topic=f'/vrx/task/info',
@@ -117,6 +118,7 @@ def task_info():
         gz_type='ignition.msgs.Param',
         ros_type='ros_gz_interfaces/msg/ParamVec',
         direction=BridgeDirection.GZ_TO_ROS)
+
 
 def contacts():
     return Bridge(
@@ -126,6 +128,7 @@ def contacts():
         ros_type='ros_gz_interfaces/msg/Contacts',
         direction=BridgeDirection.GZ_TO_ROS)
 
+
 def stationkeeping_goal():
     return Bridge(
         gz_topic=f'/vrx/stationkeeping/goal',
@@ -134,6 +137,7 @@ def stationkeeping_goal():
         ros_type='geometry_msgs/msg/PoseStamped',
         direction=BridgeDirection.GZ_TO_ROS)
 
+
 def stationkeeping_mean_pose_error():
     return Bridge(
         gz_topic=f'/vrx/stationkeeping/mean_pose_error',
@@ -141,6 +145,7 @@ def stationkeeping_mean_pose_error():
         gz_type='ignition.msgs.Float',
         ros_type='std_msgs/msg/Float32',
         direction=BridgeDirection.GZ_TO_ROS)
+
 
 def stationkeeping_pose_error():
     return Bridge(
