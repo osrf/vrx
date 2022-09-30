@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="station_keeping">
+  <world name="stationkeeping_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
