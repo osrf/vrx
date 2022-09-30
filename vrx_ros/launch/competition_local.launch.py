@@ -33,7 +33,7 @@ import os
 def generate_launch_description():
     gz_args = LaunchConfiguration('gz_args')
     gz_args_launch = DeclareLaunchArgument(
-        'gz_args', 
+        'gz_args',
         default_value='',
         description='Arguments to be passed to Gazebo'
     )
@@ -65,7 +65,12 @@ def generate_launch_description():
     )
 
     bridges = [
-      vrx_gz.bridges.clock(),
+        vrx_gz.bridges.clock(),
+        vrx_gz.bridges.contacts(),
+        vrx_gz.bridges.task_info(),
+        vrx_gz.bridges.stationkeeping_goal(),
+        vrx_gz.bridges.stationkeeping_mean_pose_error(),
+        vrx_gz.bridges.stationkeeping_pose_error(),
     ]
 
     bridge_node = Node(
