@@ -31,7 +31,7 @@ import vrx_gz.bridges
 import os
 
 STATIONKEEPING_WORLDS = [
-  'station_keeping'
+  'stationkeeping_task'
 ]
 
 WAYFINDING_WORLDS = [
