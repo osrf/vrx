@@ -31,7 +31,7 @@ import vrx_gz.bridges
 import os
 
 STATIONKEEPING_WORLDS = [
-  'sydney_regatta'
+  'station_keeping'
 ]
 
 WAYFINDING_WORLDS = [
