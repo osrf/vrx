@@ -208,8 +208,6 @@ void NavigationScoringPlugin::Implementation::Gate::Update(
 
 }
 /////////////////////////////////////////////////
-//TODO: debug below
-//TODO: remove super noisy messages 
 NavigationScoringPlugin::Implementation::GateState 
     NavigationScoringPlugin::Implementation::Gate::IsPoseInGate(
         const math::Pose3d &_robotWorldPose) const
