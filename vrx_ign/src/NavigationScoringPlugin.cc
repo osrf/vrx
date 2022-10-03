@@ -19,6 +19,7 @@
 #include <ignition/gazebo/components/Name.hh>
 #include <ignition/gazebo/components/Pose.hh>
 #include <ignition/gazebo/components/World.hh>
+#include <ignition/gazebo/components/ParentEntity.hh>
 #include <ignition/gazebo/World.hh>
 #include <ignition/msgs/float.pb.h>
 #include <ignition/msgs/pose.pb.h>
@@ -173,12 +174,18 @@ void NavigationScoringPlugin::Implementation::Gate::Update(
 {
   if (!leftMarkerEntity || !rightMarkerEntity)
     return;
+  
+  // get the course pose
+  auto courseEntity = _ecm.Component<gazebo::components::ParentEntity>(
+     leftMarkerEntity)->Data();
+  auto coursePose = _ecm.Component<gazebo::components::Pose>(
+     courseEntity)->Data();
 
-  // The pose of the markers delimiting the gate.
+  // The relative pose of the markers delimiting the gate.
   auto leftMarkerPose = _ecm.Component<gazebo::components::Pose>(
-    leftMarkerEntity)->Data();
+    leftMarkerEntity)->Data() + coursePose;
   auto rightMarkerPose = _ecm.Component<gazebo::components::Pose>(
-    rightMarkerEntity)->Data();
+    rightMarkerEntity)->Data()+ coursePose;
 
   // Unit vector from the left marker to the right one.
   auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
@@ -200,9 +207,9 @@ void NavigationScoringPlugin::Implementation::Gate::Update(
   this->width = leftMarkerPose.Pos().Distance(rightMarkerPose.Pos());
 
 }
-
-
 /////////////////////////////////////////////////
+//TODO: debug below
+//TODO: remove super noisy messages 
 NavigationScoringPlugin::Implementation::GateState 
     NavigationScoringPlugin::Implementation::Gate::IsPoseInGate(
         const math::Pose3d &_robotWorldPose) const
@@ -211,7 +218,6 @@ NavigationScoringPlugin::Implementation::GateState
   const math::Vector3d robotLocalPosition =
     this->pose.Rot().Inverse().RotateVector(_robotWorldPose.Pos() -
     this->pose.Pos());
-
   // Are we within the width?
   if (fabs(robotLocalPosition.Y()) <= this->width / 2.0)
   {
@@ -377,7 +383,8 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
       dataPtr->gatesLoaded = dataPtr->gatesLoaded && gate.LoadEntities(_ecm);
       ++iter;
     }
-
+    if (!dataPtr->gatesLoaded)
+      return;
   }
 
   if (this->ScoringPlugin::TaskState() != "running")
