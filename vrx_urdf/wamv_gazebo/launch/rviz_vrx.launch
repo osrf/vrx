@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- Example of launch rviz with a custom rviz config to have selected topics preloaded -->
+<launch>
+  <!-- Publishes static joint transforms (lidar, cameras, etc) to /tf -->
+  <node ns="wamv" pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub"/>
+
+  <!-- Publishes revolute joint static transforms (gps and imu) to /tf -->
+  <node ns="wamv" pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
+    <param name="gui" value="false" />
+  </node>
+
+  <arg name="rviz_config" default="$(find wamv_gazebo)/config/rviz_vrx.rviz" />
+  <node pkg="rviz" type="rviz"
+        name="wamv_visualization" args="-d $(arg rviz_config)" />
+</launch>

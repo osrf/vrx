@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="usv_dynamics_gazebo" params="wavefield_size:=1000">
+    <!--Gazebo Plugin for simulating WAM-V dynamics-->
+    <gazebo>
+      <!-- Left hull -->
+      <plugin
+        filename="libSurface.so"
+        name="vrx::Surface">
+        <link_name>${namespace}/base_link</link_name>
+        <hull_length>4.9</hull_length>
+        <hull_radius>0.213</hull_radius>
+        <fluid_level>0</fluid_level>
+        <points>
+          <point>0.6 1.03 0</point>
+          <point>-1.4 1.03 0</point>
+        </points>
+        <wavefield>
+          <size>${wavefield_size} ${wavefield_size}</size>
+          <cell_count>${wavefield_size / 20.0} ${wavefield_size / 20.0}</cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5.0</period>
+            <number>3</number>
+            <scale>1.1</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+
+      <!-- Right hull -->
+      <plugin
+        filename="libSurface.so"
+        name="vrx::Surface">
+        <link_name>${namespace}/base_link</link_name>
+        <hull_length>4.9</hull_length>
+        <hull_radius>0.213</hull_radius>
+        <fluid_level>0</fluid_level>
+        <points>
+          <point>0.6 -1.03 0</point>
+          <point>-1.4 -1.03 0</point>
+        </points>
+        <wavefield>
+          <size>${wavefield_size} ${wavefield_size}</size>
+          <cell_count>${wavefield_size / 20.0} ${wavefield_size / 20.0}</cell_count>
+          <wave>
+            <model>PMS</model>
+            <period>5.0</period>
+            <number>3</number>
+            <scale>1.1</scale>
+            <gain>0.3</gain>
+            <direction>1 0</direction>
+            <angle>0.4</angle>
+            <tau>2.0</tau>
+            <amplitude>0.0</amplitude>
+            <steepness>0.0</steepness>
+          </wave>
+        </wavefield>
+      </plugin>
+
+      <plugin
+        filename="libSimpleHydrodynamics.so"
+        name="vrx::SimpleHydrodynamics">
+        <link_name>${namespace}/base_link</link_name>
+        <!-- Added mass -->
+        <xDotU>0.0</xDotU>
+        <yDotV>0.0</yDotV>
+        <nDotR>0.0</nDotR>
+        <!-- Linear and quadratic drag -->
+        <xU>51.3</xU>
+        <xUU>72.4</xUU>
+        <yV>40.0</yV>
+        <yVV>0.0</yVV>
+        <zW>500.0</zW>
+        <kP>100.0</kP>
+        <mQ>100.0</mQ>
+        <nR>400.0</nR>
+        <nRR>0.0</nRR>
+      </plugin>
+
+    </gazebo>
+  </xacro:macro>
+</robot>

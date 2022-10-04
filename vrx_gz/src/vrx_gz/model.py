@@ -52,6 +52,7 @@ class Model:
         self.battery_capacity = 0
         self.wavefield_size = 0
         self.payload = {}
+        self.urdf = ''
 
     def is_UAV(self):
         return self.model_type in UAVS
@@ -207,14 +208,12 @@ class Model:
         else:
             self.wavefield_size = WAVEFIELD_SIZE[world_name]
 
-    def generate(self):
+
+    def erb_cmd(self):
         # Generate SDF by executing ERB and populating templates
         template_file = os.path.join(
             get_package_share_directory('vrx_gz'),
             'models', self.model_type, 'model.sdf.erb')
-
-        model_dir = os.path.join(get_package_share_directory('vrx_gz'), 'models')
-        model_tmp_dir = os.path.join(model_dir, 'tmp')
 
         command = ['erb']
         command.append(f'name={self.model_name}')
@@ -238,6 +237,39 @@ class Model:
             command.append(f'wavefieldSize={self.wavefield_size}')
 
         command.append(template_file)
+        return command
+
+
+    def xacro_cmd(self):
+        # run xacro to generate urdf file
+        xacro_command = ['xacro']
+        xacro_command.append(self.urdf)
+        xacro_command.append(f'namespace:={self.model_name}')
+        xacro_process = subprocess.Popen(xacro_command,
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE)
+        stdout = xacro_process.communicate()[0]
+        urdf_str = codecs.getdecoder('unicode_escape')(stdout)[0]
+        print(xacro_command)
+
+        # run gz sdf print to generate sdf file
+        model_dir = os.path.join(get_package_share_directory('vrx_gazebo'), 'models', self.model_name)
+        model_tmp_dir = os.path.join(model_dir, 'tmp')
+        model_output_file = os.path.join(model_tmp_dir, 'model.urdf')
+        if not os.path.exists(model_tmp_dir):
+            pathlib.Path(model_tmp_dir).mkdir(parents=True, exist_ok=True)
+        with open(model_output_file, 'w') as f:
+            f.write(urdf_str)
+        command = ['gz', 'sdf', '-p']
+        command.append(model_output_file)
+        return command
+
+    def generate(self):
+        command = None
+        if self.urdf != '':
+            command = self.xacro_cmd()
+        else:
+            command = self.erb_cmd()
         process = subprocess.Popen(command,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
@@ -252,6 +284,11 @@ class Model:
 
         stdout = process.communicate()[0]
         model_sdf = codecs.getdecoder('unicode_escape')(stdout)[0]
+
+        ######## todo remove me
+        with open('/tmp/wamv.sdf', 'w') as f:
+            f.write(model_sdf)
+
         print(command)
 
         return command, model_sdf
@@ -269,6 +306,9 @@ class Model:
                 '-R', str(self.position[3]),
                 '-P', str(self.position[4]),
                 '-Y', str(self.position[5])]
+
+    def set_urdf(self, urdf):
+        self.urdf = urdf
 
     @classmethod
     def FromConfig(cls, stream):

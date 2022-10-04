@@ -1,0 +1,1 @@
+ament_prepend_unique_value GZ_SIM_RESOURCE_PATH "$AMENT_CURRENT_PREFIX/share/wamv_description/models"
