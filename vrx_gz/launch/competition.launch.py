@@ -33,14 +33,19 @@ def launch(context, *args, **kwargs):
 
     launch_processes = []
 
-    with open(config_file, 'r') as stream:
-        models = Model.FromConfig(stream)
+    models = []
+    if config_file and config_file != '':
+        with open(config_file, 'r') as stream:
+            models = Model.FromConfig(stream)
+    else:
+      m = Model('wamv', 'wam-v', [-532, 162, 0, 0, 0, 1])
+      models.append(m)
 
     launch_processes.extend(vrx_gz.launch.simulation(world_name, headless))
     launch_processes.extend(vrx_gz.launch.spawn(sim_mode, world_name, models, robot))
 
     if (sim_mode == 'bridge' or sim_mode == 'full') and bridge_competition_topics:
-        launch_processes.extend(vrx_gz.launch.competition_bridges())
+        launch_processes.extend(vrx_gz.launch.competition_bridges(world_name))
 
     return launch_processes
 
@@ -50,7 +55,7 @@ def generate_launch_description():
         # Launch Arguments
         DeclareLaunchArgument(
             'world',
-            default_value='simple_demo',
+            default_value='sydney_regatta',
             description='Name of world'),
         DeclareLaunchArgument(
             'sim_mode',
@@ -65,6 +70,7 @@ def generate_launch_description():
             description='True to bridge competition topics, False to disable bridge.'),
         DeclareLaunchArgument(
             'config_file',
+            default_value='',
             description='YAML configuration file to spawn'),
         DeclareLaunchArgument(
             'robot',

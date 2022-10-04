@@ -20,6 +20,9 @@ from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
+from launch.actions import ExecuteProcess, EmitEvent
+from launch.events import Shutdown
+
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
 
@@ -27,6 +30,13 @@ import vrx_gz.bridges
 
 import os
 
+STATIONKEEPING_WORLDS = [
+  'stationkeeping_task'
+]
+
+WAYFINDING_WORLDS = [
+  'wayfinding_task'
+]
 
 def simulation(world_name, headless=False):
     gz_args = ['-v 4', '-r']
@@ -39,18 +49,52 @@ def simulation(world_name, headless=False):
             get_package_share_directory('ros_gz_sim'), 'launch'),
             '/gz_sim.launch.py']),
         launch_arguments={'gz_args': ' '.join(gz_args)}.items())
-    return [gz_sim]
+
+    # Register handler for shutting down ros launch when ign gazebo process exits
+    # monitor_sim.py will run until it can not find the ign gazebo process.
+    # Once monitor_sim.py exits, a process exit event is triggered which causes the
+    # handler to emit a Shutdown event
+    p = os.path.join(get_package_share_directory('vrx_ros'), 'launch',
+                     'monitor_sim.py')
+    monitor_sim_proc = ExecuteProcess(
+        cmd=['python3', p],
+        name='monitor_sim',
+        output='screen',
+    )
+    sim_exit_event_handler = RegisterEventHandler(
+        OnProcessExit(
+            target_action=monitor_sim_proc,
+            on_exit=[
+                EmitEvent(event=Shutdown(reason='Simulation ended'))
+            ]
+        )
+    )
+
+    return [gz_sim, monitor_sim_proc, sim_exit_event_handler]
 
 
-def competition_bridges():
+def competition_bridges(world_name):
     bridges = [
         vrx_gz.bridges.clock(),
         vrx_gz.bridges.contacts(),
         vrx_gz.bridges.task_info(),
-        vrx_gz.bridges.stationkeeping_goal(),
-        vrx_gz.bridges.stationkeeping_mean_pose_error(),
-        vrx_gz.bridges.stationkeeping_pose_error(),
     ]
+
+    task_bridges = []
+    if world_name in STATIONKEEPING_WORLDS:
+        task_bridges = [
+            vrx_gz.bridges.stationkeeping_goal(),
+            vrx_gz.bridges.stationkeeping_mean_pose_error(),
+            vrx_gz.bridges.stationkeeping_pose_error(),
+        ]
+    elif world_name in WAYFINDING_WORLDS:
+        task_bridges = [
+            vrx_gz.bridges.wayfinding_waypoints(),
+            vrx_gz.bridges.wayfinding_mean_error(),
+            vrx_gz.bridges.wayfinding_min_errors(),
+        ]
+    bridges.extend(task_bridges)
+
     nodes = []
     nodes.append(Node(
         package='ros_gz_bridge',
