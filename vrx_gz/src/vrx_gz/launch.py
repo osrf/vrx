@@ -27,6 +27,9 @@ import vrx_gz.bridges
 
 import os
 
+PERCEPTION_WORLDS = [
+  'perception_task'
+]
 
 def simulation(world_name, headless=False):
     gz_args = ['-v 4', '-r']
@@ -45,6 +48,11 @@ def simulation(world_name, headless=False):
 def competition_bridges():
     bridges = [
         vrx_gz.bridges.clock(),
+        vrx_gz.bridges.contacts(),
+        vrx_gz.bridges.task_info(),
+        vrx_gz.bridges.stationkeeping_goal(),
+        vrx_gz.bridges.stationkeeping_mean_pose_error(),
+        vrx_gz.bridges.stationkeeping_pose_error(),
     ]
     nodes = []
     nodes.append(Node(

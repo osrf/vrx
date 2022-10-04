@@ -42,45 +42,51 @@ namespace vrx
   ///                      <name> Landmark name.
   ///                      <pose> Initial object pose.
   ///
-  /// <loop_forever>: Optional parameter. If true, all objects will be spawned
-  /// as a circular buffer. After spawning the last element of the collection,
-  /// the first one will be inserted.
-  ///
   /// <frame>: Optional parameter. If present, the poses of the objects will be
-  /// in the frame of this link/model. Otherwise the world frame is used.
+  /// in the frame of this model. Otherwise the world frame is used.
   ///
-  /// <landmark_topic>: Optional parameter.  Specify the topic to which the
+  /// <landmark_topic>: Optional parameter. Specify the topic to which the
   ///   plugin subscribes for receiving identification and localization msgs.
-  ///   Default is "/vrx/perception/landmark"
+  ///   Default is "/vrx/perception/landmark".
   ///
   /// <duration>: Optional parameter. Specify the time an object sticks around.
   ///   Defaults to 5.
   ///
   /// Here's an example of a valid SDF:
   ///
-  /// <plugin filename="libperception_scoring_plugin.so"
-  ///         name="perception_scoring_plugin">
+  /// <plugin
+  ///   filename="libPerceptionScoringPlugin.so"
+  ///   name="vrx::PerceptionScoringPlugin">
+  ///   <!-- Parameters for ScoringPlugin base class -->
   ///   <vehicle>wamv</vehicle>
   ///   <task_name>perception</task_name>
-  ///   <initial_state_duration>1</initial_state_duration>
-  ///   <ready_state_duration>1</ready_state_duration>
-  ///   <running_state_duration>300</running_state_duration>
-  ///
+  ///   <initial_state_duration>10.0</initial_state_duration>
+  ///   <ready_state_duration>10.0</ready_state_duration>
+  ///   <running_state_duration>30</running_state_duration>
   ///   <!-- Parameters for PopulationPlugin -->
-  ///   <loop_forever>false</loop_forever>
+  ///   <loop_forever>true</loop_forever>
   ///   <frame>wamv</frame>
+  ///   <!-- Pose of each object is expressed relative to the body frame
+  ///        of the object named in the frame field - i.e., relative to
+  ///        the wam-v-->
   ///   <object_sequence>
   ///     <object>
-  ///       <time>10.0</time>
-  ///       <type>surmark950410</type>
+  ///       <time>5</time>
+  ///       <type>mb_marker_buoy_red</type>
   ///       <name>red_0</name>
-  ///       <pose>6 0 1 0 0 0</pose>
+  ///       <pose>8 0 1 0 0 0</pose>
   ///     </object>
   ///     <object>
-  ///       <time>10.0</time>
-  ///       <type>surmark950400</type>
+  ///       <time>5</time>
+  ///       <type>mb_marker_buoy_green</type>
   ///       <name>green_0</name>
-  ///       <pose>6 6 1 0 0 0</pose>
+  ///       <pose>8 2 1 0 0 0</pose>
+  ///     </object>
+  ///     <object>
+  ///       <time>15.0</time>
+  ///       <type>mb_marker_buoy_black</type>
+  ///       <name>black_0</name>
+  ///       <pose>8 -2 1 0 0 0</pose>
   ///     </object>
   ///   </object_sequence>
   /// </plugin>
@@ -98,7 +104,7 @@ namespace vrx
                            gz::sim::EntityComponentManager &_ecm,
                            gz::sim::EventManager &_eventMgr) override;
 
-    /// \brief Callback executed at every world update.
+    // Documentation inherited.
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
                            gz::sim::EntityComponentManager &_ecm) override;
 

@@ -15,17 +15,20 @@
  *
 */
 
+#include <gz/msgs/pose.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
-
 #include <gz/common/Profiler.hh>
 #include <gz/math/Matrix4.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/math/Quaternion.hh>
+#include <gz/math/SphericalCoordinates.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/World.hh>
 #include <gz/sim/Entity.hh>
-#include <gz/sim/Link.hh>
 #include <gz/sim/Model.hh>
+#include <gz/sim/Util.hh>
 #include <gz/sim/World.hh>
 #include <gz/plugin/Register.hh>
 #include <gz/transport/Node.hh>
@@ -42,8 +45,8 @@ class PerceptionObject
   /// \brief Simulation time in which the object should be spawned.
   public: double time;
 
-  /// \brief amount of time in which the object should be spawned.
-  public: double duration;
+  /// \brief Amount of time in which the object should be spawned.
+  public: double duration = 5;
 
   /// \brief Object type.
   public: std::string type;
@@ -55,8 +58,12 @@ class PerceptionObject
   /// specified frame.
   public: math::Pose3d trialPose;
 
-  /// \brief Pose in which the object should be placed in global frame.
+  /// \brief Pose in which the object should be placed when it's no active
+  /// in global frame.
   public: math::Pose3d origPose;
+
+  /// \brief The model entity.
+  public: sim::Entity entity = sim::kNullEntity;
 
   /// \brief Model entity that this object is representing.
   public: std::unique_ptr<sim::Model> model;
@@ -65,76 +72,82 @@ class PerceptionObject
   public: bool active = false;
 
   /// \brief Error associated with the guess of a model.
-  public: double error = -1.0;
+  public: double error = 10.0;
 
-  /// \brief Pointer to the ECM.
-  public: sim::EntityComponentManager *ecm;
+  /// \brief The Entity Component Manager.
+  public: sim::EntityComponentManager &ecm;
 
   /// \brief constructor of perception object.
-  /// \param ToDo.
+  /// \param[in] _time Simulation time in which the object should be spawned.
+  /// \param[in] _duration Amount of time in which the object should be spawned.
+  /// \param[in] _type Object type.
+  /// \param[in] _name Object name.
+  /// \param[in] _trialPose Pose in which the object should be placed relative
+  ///                       to the specified frame.
+  /// \param[in out _ecm] The Entity Component Manager.
   public: PerceptionObject(const double _time,
                            const double _duration,
                            const std::string &_type,
                            const std::string &_name,
                            const math::Pose3d &_trialPose,
-                           const sim::Entity _entity);
+                           sim::EntityComponentManager &_ecm);
 
-  /// \brief set the error of this boject if this object is active
-  /// and this is the lowest seen error.
-  /// \param[in] _error TODO.
+  /// \brief Set the error of this object if this object is active and this is
+  /// the lowest seen error.
+  /// \param[in] _error New error.
   public: void SetError(const double _error);
 
-  /// \brief move the object to where it is supposed to be relative to the frame
-  /// \brief of the robot and make it active
-  /// \param[in] _frame TODO.
-  public: void StartTrial(const sim::Link _frame);
+  /// \brief Move the object to where it is supposed to be relative to the frame
+  /// of the robot and make it active
+  /// \param[in] _frame The entity to be used as reference frame.
+  public: void StartTrial(const sim::Entity _frame);
 
-  /// \brief move the object back to its original location and make inactive.
+  /// \brief Move the object back to its original location and make inactive.
   public: void EndTrial();
 
-  /// \return a string summarizing this object.
-  public: std::string Str();
+  /// \brief Stream extraction operator.
+  /// \param[in] _out output stream.
+  /// \param[in] _obj PerceptionObject to output.
+  /// \return The stream.
+  public: friend std::ostream &operator<<(std::ostream &_out,
+                                          const PerceptionObject &_obj)
+  {
+    _out << "\tName: "       << _obj.name << std::endl
+         << "\tType: "       << _obj.type << std::endl
+         << "\tTime: "       << _obj.time << std::endl
+         << "\tDuration: "   << _obj.duration << std::endl
+         << "\tOrig pose: "  << _obj.origPose << std::endl
+         << "\tTrial pose: " << _obj.trialPose << std::endl
+         << "\tEntity: "     << _obj.entity << std::endl
+         << "\tActive: "     << std::boolalpha << _obj.active
+                             << std::noboolalpha << std::endl
+         << "\tError: "      << _obj.error << std::endl;
+
+    return _out;
+  }
 };
 
 /////////////////////////////////////////////////
 PerceptionObject::PerceptionObject(const double _time, const double _duration,
   const std::string &_type, const std::string &_name,
-  const math::Pose3d &_trialPose, const sim::Entity _world)
+  const math::Pose3d &_trialPose, sim::EntityComponentManager &_ecm)
+  : time(_time),
+    duration(_duration),
+    type(_type),
+    name(_name),
+    trialPose(_trialPose),
+    ecm(_ecm)
 {
-  this->time = _time;
-  this->duration = _duration;
-  this->type = _type;
-  this->name = _name;
-  this->trialPose = _trialPose;
-  // #if GAZEBO_MAJOR_VERSION >= 8
-  //   this->modelPtr = _world->EntityByName(this->name);
-  // #else
-  //   this->modelPtr = _world->GetEntity(this->name);
-  // #endif
-  // if (modelPtr)
-  // {
-  //   #if GAZEBO_MAJOR_VERSION >= 8
-  //     this->origPose = this->modelPtr->WorldPose();
-  //   #else
-  //     this->origPose = this->modelPtr->GetWorldPose().Ign();
-  //   #endif
-  // }
-}
+  auto entities = sim::entitiesFromScopedName(_name, _ecm);
+  if (entities.empty())
+  {
+    gzerr << "Unable to find entity [" << _name << "]" << std::endl;
+    return;
+  }
 
-/////////////////////////////////////////////////
-std::string PerceptionObject::Str()
-{
-  std::string rtn = "\nname: ";
-  rtn += this->name;
-  rtn += "\ntype: ";
-  rtn += this->type;
-  rtn += "\ntime: ";
-  rtn += std::to_string(this->time);
-  rtn +=  "\nduration: ";
-  rtn += std::to_string(this->duration);
-  rtn +=  "\nerror: ";
-  rtn += std::to_string(this->error);
-  return rtn;
+  this->entity = *entities.begin();
+  this->model.reset(new sim::Model(this->entity));
+  this->origPose = _ecm.Component<sim::components::Pose>(this->entity)->Data();
 }
 
 /////////////////////////////////////////////////
@@ -145,72 +158,58 @@ void PerceptionObject::SetError(const double _error)
 }
 
 /////////////////////////////////////////////////
-void PerceptionObject::StartTrial(const sim::Link _frame)
+void PerceptionObject::StartTrial(const sim::Entity _frame)
 {
   // Set object pose relative to the specified frame (e.g., the wam-v).
-  // Pitch and roll are set to zero as a hack to deal with
-  // transients associated with spawning buoys with significant attitude.
+  auto frameWorldPose =
+    this->ecm.Component<sim::components::Pose>(_frame)->Data();
+
   math::Pose3d framePose(
-    _frame.WorldPose(*this->ecm)->Pos(),
-    math::Quaterniond(0.0, 0.0, _frame.WorldPose(*this->ecm)->Rot().Yaw()));
+    frameWorldPose.Pos(),
+    math::Quaterniond(0.0, 0.0, frameWorldPose.Rot().Yaw()));
   math::Matrix4d transMat(framePose);
-  math::Matrix4d pose_local(this->trialPose);
+  math::Matrix4d poseLocal(this->trialPose);
 
-  // this->model->SetWorldPose((transMat * pose_local).Pose());
-  this->model->SetWorldPoseCmd(*ecm, (transMat * pose_local).Pose());
-  // this->modelPtr->SetWorldTwist(ign_math_vector3d_zero, ign_math_vector3d_zero);
-
+  this->model->SetWorldPoseCmd(this->ecm, (transMat * poseLocal).Pose());
   this->active = true;
 
-  gzmsg << "PerceptionScoringPlugin: spawning " << this->name << std::endl;
+  gzdbg << "PerceptionScoringPlugin: spawning " << this->name << std::endl;
 }
 
 /////////////////////////////////////////////////
 void PerceptionObject::EndTrial()
 {
-  this->model->SetWorldPoseCmd(*ecm, this->origPose);
-  // this->modelPtr->SetWorldTwist(ign_math_vector3d_zero,
-  //   ign_math_vector3d_zero);
+  this->model->SetWorldPoseCmd(this->ecm, this->origPose);
   this->active = false;
 
-  gzmsg << "PerceptionScoringPlugin: despawning " << this->name << std::endl;
+  gzdbg << "PerceptionScoringPlugin: despawning " << this->name << std::endl;
 }
 
 /// \brief Private PerceptionScoringPlugin data class.
 class PerceptionScoringPlugin::Implementation
 {
   /// \brief Parse all SDF parameters.
-  /// \return True when all parameters were successfully parsed or false
-  /// otherwise.
-  public: bool ParseSDFParameters();
+  /// \param[in] _ecm The Entity Component Manager.
+  /// \return True when all params were successfully parsed or false otherwise.
+  public: bool ParseSDFParameters(sim::EntityComponentManager &_ecm);
 
-  /// \brief Restart the object population list.
-  public: void Restart();
-
-  /// \brief
+  /// \brief Register a new perception attempt request.
   /// \param[in] _msg The message containing a perception attempt.
   public: void OnAttempt(const msgs::Pose &_msg);
 
-  /// \brief TODO.
-  public: int attemptBal = 0;
+  /// \brief Process all pending perception requests.
+  /// \param[in] _ecm The Entity Component Manager.
+  public: void ProcessAttempts(sim::EntityComponentManager &_ecm);
 
-  /// \brief ROS namespace.
-  public: std::string ns;
+  /// \brief Number of perception attempts (equal to the total number of objects
+  /// spawned.
+  public: uint16_t attemptBal = 0u;
 
-  /// \brief ROS topic where the object id/pose is received.
+  /// \brief Topic where the object id/pose is received.
   public: std::string objectTopic;
-
-  /// \brief ROS Node handle.
-  //public: ros::NodeHandle nh;
 
   /// \brief Transport node.
   public: transport::Node node;
-
-  /// \brief ROS subscriber
-  // public: ros::Subscriber objectSub;
-
-  /// \brief World pointer.
-  // public: gazebo::physics::WorldPtr world;
 
   /// \brief SDF pointer.
   public: sdf::ElementPtr sdf;
@@ -218,48 +217,39 @@ class PerceptionScoringPlugin::Implementation
   /// \brief Collection of objects to be spawned.
   public: std::vector<PerceptionObject> objects;
 
-  /// \brief Connection event.
-  // public: gazebo::event::ConnectionPtr connection;
+  /// \brief Name of the object used as the frame of reference.
+  public: std::string frameName = "";
 
-  /// \brief The time specified in the object is relative to this time.
-  public: double startTime;
+  /// \brief Entity of the object used as the frame of reference.
+  public: sim::Entity frame = sim::kNullEntity;
 
-  /// \brief When true, "objects" will be repopulated when the object queue
-  /// is empty, creating an infinite supply of objects.
-  public: bool loopForever = false;
+  /// \brief count of how many objects have been despawned
+  public: uint16_t objectsDespawned = 0u;
 
-  /// \brief Link/model name for the object poses use as their frame of
-  // reference.
-  public: std::string frameName = std::string();
+  /// World pointer.
+  public: std::unique_ptr<sim::World> world;
 
-  /// \brief Link/model that the object poses use as their frame of reference.
-  public: std::unique_ptr<sim::Link> frame;
+  /// Used to parse the SDF during the first plugin iteration.
+  public: bool firstIteration = true;
 
-  /// \brief Last time (sim time) that the plugin was updated.
-  public: double lastUpdateTime;
+  /// Current vector of perception requests to be processed.
+  public: std::vector<msgs::Pose> requests;
 
-  /// \ brief count of how many objects have been despawned
-  public: int objectsDespawned = 0;
+  /// \brief Mutex to protect the requests.
+  public: std::mutex mutex;
 };
 
 //////////////////////////////////////////////////
-bool PerceptionScoringPlugin::Implementation::ParseSDFParameters()
+bool PerceptionScoringPlugin::Implementation::ParseSDFParameters(
+  sim::EntityComponentManager &_ecm)
 {
-  if (this->sdf->HasElement("loop_forever"))
-  {
-    sdf::ElementPtr loopElem = this->sdf->GetElement("loop_forever");
-    this->loopForever = loopElem->Get<bool>();
-  }
-
-  if (this->sdf->HasElement("frame"))
-  {
-    this->frameName = this->sdf->Get<std::string>("frame");
-  }
+  auto worldEntity = _ecm.EntityByComponents(sim::components::World());
+  this->world.reset(new sim::World(worldEntity));
 
   if (!this->sdf->HasElement("object_sequence"))
   {
-    gzerr << "PerceptionScoringPlugin: Unable to find <object_sequence> "
-      "element\n";
+    gzerr << "PerceptionScoringPlugin: Unable to find <object_sequence> element"
+          << std::endl;
     return false;
   }
 
@@ -267,9 +257,7 @@ bool PerceptionScoringPlugin::Implementation::ParseSDFParameters()
 
   sdf::ElementPtr objectElem = nullptr;
   if (sequence->HasElement("object"))
-  {
     objectElem = sequence->GetElement("object");
-  }
 
   while (objectElem)
   {
@@ -321,22 +309,18 @@ bool PerceptionScoringPlugin::Implementation::ParseSDFParameters()
     math::Pose3d pose = poseElement->Get<math::Pose3d>();
 
     // Add the object to the collection.
-    // PerceptionObject obj(time, duration, type, name, pose, _world);
-
-    // TODO: caguero
-    //PerceptionObject obj(time, duration, type, name, pose, 0);
-    //this->objects.push_back(obj);
+    PerceptionObject obj(time, duration, type, name, pose, _ecm);
+    gzdbg << "New object: " << std::endl << obj << std::endl;
+    this->objects.push_back(std::move(obj));
 
     objectElem = objectElem->GetNextElement("object");
   }
 
-  // this->lastUpdateTime = this->world->SimTime();
+  // Optional: <frame>.
+  if (this->sdf->HasElement("frame"))
+    this->frameName = this->sdf->Get<std::string>("frame");
 
-  // Optional: ROS namespace.
-  // if (_sdf->HasElement("robot_namespace"))
-  //   this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
-
-  // Optional: ROS topic.
+  // Optional: <landmark_topic>.
   this->objectTopic = "/vrx/perception/landmark";
   if (this->sdf->HasElement("landmark_topic"))
   {
@@ -347,18 +331,61 @@ bool PerceptionScoringPlugin::Implementation::ParseSDFParameters()
   return true;
 }
 
-/////////////////////////////////////////////////
-void PerceptionScoringPlugin::Implementation::Restart()
+//////////////////////////////////////////////////
+void PerceptionScoringPlugin::Implementation::OnAttempt(const msgs::Pose &_msg)
 {
-  for (auto &obj : this->objects)
-  {
-    // reset all objects' errors
-    obj.error = 10.0;
-    // Bump all objs time to start again.
-    // obj.time += this->world->SimTime().Double();
-  }
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->requests.push_back(_msg);
+}
 
-  gzmsg << "Object population restarted" << std::endl;
+//////////////////////////////////////////////////
+void PerceptionScoringPlugin::Implementation::ProcessAttempts(
+  sim::EntityComponentManager &_ecm)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  for (auto &_msg : this->requests)
+  {
+    // Only accept an attempt if there are any in the attempt balance.
+    if (this->attemptBal == 0)
+    {
+      gzwarn << "PerceptionScoring: Attempt Balance is 0, no attempts currently"
+             << " allowed. Ignoring." << std::endl;
+
+      this->requests.clear();
+      return;
+    }
+
+    // Burn one attempt.
+    --this->attemptBal;
+    gzdbg << "PerceptionScoring: New Attempt Balance: " << this->attemptBal
+          << std::endl;
+
+    for (auto &obj : this->objects)
+    {
+      // If attempt correct type.
+      if (obj.type == _msg.name())
+      {
+        // Convert geo pose to Gazebo pose.
+        math::Vector3d scVec(_msg.position().x(), _msg.position().y(), 0);
+        math::Vector3d cartVec = this->world->SphericalCoordinates(
+          _ecm)->LocalFromSphericalPosition(scVec);
+
+        // Get current pose of the current object.
+        math::Pose3d truePose =
+          _ecm.Component<sim::components::Pose>(obj.entity)->Data();
+
+        auto trueSpherical = this->world->SphericalCoordinates(
+          _ecm)->SphericalFromLocalPosition(truePose.Pos());
+
+        // 2D Error.
+        double error = sqrt(pow(cartVec.X() - truePose.Pos().X(), 2) +
+                            pow(cartVec.Y() - truePose.Pos().Y(), 2));
+        obj.SetError(error);
+      }
+    }
+  }
+  this->requests.clear();
 }
 
 //////////////////////////////////////////////////
@@ -366,7 +393,6 @@ PerceptionScoringPlugin::PerceptionScoringPlugin()
   : ScoringPlugin(),
     dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
-  gzmsg << "Perception scoring plugin loaded" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -375,32 +401,94 @@ void PerceptionScoringPlugin::Configure(const sim::Entity &_entity,
   sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
-
   this->dataPtr->sdf = _sdf->Clone();
-
-  // SDF.
-  if (!this->dataPtr->ParseSDFParameters())
-  {
-    gzerr << "Perception scoring disabled" << std::endl;
-    return;
-  }
 }
 
 //////////////////////////////////////////////////
 void PerceptionScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
   sim::EntityComponentManager &_ecm)
 {
+  ScoringPlugin::PreUpdate(_info, _ecm);
 
+  // SDF.
+  if (this->dataPtr->firstIteration)
+  {
+    this->dataPtr->firstIteration = false;
+    if (!this->dataPtr->ParseSDFParameters(_ecm))
+    {
+      gzerr << "Perception scoring disabled" << std::endl;
+      return;
+    }
+  }
+
+  // Read the frame if we haven't done it yet.
+  if (this->dataPtr->frame == sim::kNullEntity &&
+      !this->dataPtr->frameName.empty())
+  {
+    // Get reference frame.
+    auto entities = sim::entitiesFromScopedName(this->dataPtr->frameName, _ecm);
+    if (entities.empty())
+      return;
+
+    this->dataPtr->frame = *entities.begin();
+  }
+
+  // Check all objects.
+  for (auto &obj : this->dataPtr->objects)
+  {
+    // Time to spawn an object.
+    if (this->ElapsedTime().count() > obj.time &&
+        this->ElapsedTime().count() < obj.time + obj.duration && !obj.active)
+    {
+      // Increment the atempt balance for this new obj
+      ++this->dataPtr->attemptBal;
+      obj.StartTrial(this->dataPtr->frame);
+      gzdbg << "PerceptionScoring: New Attempt Balance: "
+            << this->dataPtr->attemptBal << std::endl;
+    }
+
+    // Time to despawn and object
+    if (this->ElapsedTime().count() > obj.time + obj.duration && obj.active)
+    {
+      // Prevent negative attemp balance.
+      if (this->dataPtr->attemptBal > 0)
+        --this->dataPtr->attemptBal;
+      // Increment objects despawned.
+      ++this->dataPtr->objectsDespawned;
+      obj.EndTrial();
+
+      // Add the score for this object.
+      this->SetScore(this->Score() + obj.error);
+
+      gzdbg << "PerceptionScoring: New Attempt Balance: "
+            << this->dataPtr->attemptBal << std::endl;
+    }
+  }
+
+  // If we have finished.
+  if (this->dataPtr->objectsDespawned == this->dataPtr->objects.size() &&
+      this->TaskState() != "finished")
+  {
+    // Publish string summarizing the objects
+    for (auto &obj : this->dataPtr->objects)
+      gzdbg << "PerceptionScoring: " << std::endl << obj << std::endl;
+
+    // Run score is the mean error per object.
+    this->SetScore(this->Score() / this->dataPtr->objects.size());
+    gzdbg << "Perception run score: " << this->Score() << std::endl;
+
+    this->Exit();
+  }
+
+  // If we have requests, let's process them.
+  this->dataPtr->ProcessAttempts(_ecm);
 }
 
 //////////////////////////////////////////////////
 void PerceptionScoringPlugin::OnRunning()
 {
-  gzmsg << "PerceptionScoringPlugin::OnRunning" << std::endl;
-
-  // Quit if ros plugin was not loaded
-  // this->objectSub = this->nh.subscribe(this->objectTopic, 1,
-  //   &PerceptionScoringPlugin::OnAttempt, this);
+  this->dataPtr->node.Subscribe(this->dataPtr->objectTopic,
+    &PerceptionScoringPlugin::Implementation::OnAttempt, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////

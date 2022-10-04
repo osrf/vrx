@@ -183,6 +183,9 @@ namespace vrx
     /// \return Number of collisions
     protected: uint16_t NumCollisions() const;
 
+    /// \brief Exit simulation.
+    protected: void Exit();
+
     /// \brief Callback executed when the task state transition into "ready".
     protected: virtual void OnReady();
 
