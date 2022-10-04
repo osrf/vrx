@@ -164,6 +164,7 @@
             <stddev>0.007</stddev>
           </noise>
         </camera>
+        <!--
         <plugin name="camera_plugin_${name}" filename="libgazebo_ros_camera.so">
           <alwaysOn>true</alwaysOn>
           <updateRate>0.0</updateRate>
@@ -178,12 +179,15 @@
           <distortionT1>0.0</distortionT1>
           <distortionT2>0.0</distortionT2>
         </plugin>
+        -->
       </sensor>
     </gazebo>
 
     <!-- Set color of post -->
+    <!--
     <gazebo reference="${namespace}/${name}_post_link">
       <material>Gazebo/Black</material>
     </gazebo>
+    -->
   </xacro:macro>
 </robot>

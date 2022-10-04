@@ -33,24 +33,24 @@
       <parent link="${namespace}/base_link" />
       <child link="${namespace}/${name}_link" />
     </joint>
+
+
+    <gazebo reference="${namespace}/${name}_link">
+      <sensor name="navsat" type="navsat">
+        <always_on>1</always_on>
+        <update_rate>15</update_rate>
+        <topic>${namespace}/${sensor_namespace}gps/gps/fix</topic>
+      </sensor>
+    </gazebo>
+<!--
     <gazebo>
       <plugin name="gps_plugin_${name}" filename="libhector_gazebo_ros_gps.so">
         <updateRate>${update_rate}</updateRate>
         <alwaysOn>true</alwaysOn>
         <bodyName>${namespace}/${name}_link</bodyName>
-        <!-- Manually prepend namespace to tf frame. -->
         <frameId>${namespace}/${name}_link</frameId>
         <topicName>${namespace}/${sensor_namespace}gps/gps/fix</topicName>
-        <!-- Note that the hector_gazebo_ros_gps plugin uses NWU coordinates
-             for reporting velocities.  This may cause problems if localization
-             requires velocity in ENU.
-             See Issue #64 in VRX project for details
-             https://bitbucket.org/osrf/vrx/issues/64 -->
         <velocityTopicName>${namespace}/${sensor_namespace}gps/gps/fix_velocity</velocityTopicName>
-        <!-- Tell the plugin to use the spherical_coordiantes parameters
-	     from SDF.
-	     https://github.com/tu-darmstadt-ros-pkg/hector_gazebo/blob/melodic-devel/hector_gazebo_plugins/src/gazebo_ros_gps.cpp#L101
-	-->
 	<useWorldSphericalCoordinates>true</useWorldSphericalCoordinates>
 
         <offset>0.0 0.0 0.0</offset>
@@ -61,6 +61,18 @@
         <velocityGaussianNoise>0.0 0.0 0.0</velocityGaussianNoise>
       </plugin>
     </gazebo>
+-->
+        <!-- Note that the hector_gazebo_ros_gps plugin uses NWU coordinates
+             for reporting velocities.  This may cause problems if localization
+             requires velocity in ENU.
+             See Issue #64 in VRX project for details
+             https://bitbucket.org/osrf/vrx/issues/64 -->
+
+        <!-- Tell the plugin to use the spherical_coordiantes parameters
+	     from SDF.
+	     https://github.com/tu-darmstadt-ros-pkg/hector_gazebo/blob/melodic-devel/hector_gazebo_plugins/src/gazebo_ros_gps.cpp#L101
+	-->
+
   </xacro:macro>
 </robot>
 
