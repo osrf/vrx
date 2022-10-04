@@ -363,8 +363,17 @@ void PerceptionScoringPlugin::Implementation::ProcessAttempts(
 
     for (auto &obj : this->objects)
     {
+      std::string typeReported;
+      // In the ROS side, the object type is reported in the "frame_id" field
+      // of the header.
+      for (auto i = 0u; i < _msg.header().data_size(); ++i)
+      {
+        if (_msg.header().data(i).key() == "frame_id")
+          typeReported = _msg.header().data(i).value(0);
+      }
+
       // If attempt correct type.
-      if (obj.type == _msg.name())
+      if (obj.type == typeReported)
       {
         // Convert geo pose to Gazebo pose.
         math::Vector3d scVec(_msg.position().x(), _msg.position().y(), 0);
