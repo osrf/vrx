@@ -155,6 +155,33 @@ def stationkeeping_pose_error():
         ros_type='std_msgs/msg/Float32',
         direction=BridgeDirection.GZ_TO_ROS)
 
+
+def wayfinding_waypoints():
+    return Bridge(
+        gz_topic=f'/vrx/wayfinding/waypoints',
+        ros_topic=f'/vrx/wayfinding/waypoints',
+        gz_type='ignition.msgs.Pose_V',
+        ros_type='geometry_msgs/msg/PoseArray',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+
+def wayfinding_mean_error():
+    return Bridge(
+        gz_topic=f'/vrx/wayfinding/mean_error',
+        ros_topic=f'/vrx/wayfinding/mean_error',
+        gz_type='ignition.msgs.Float',
+        ros_type='std_msgs/msg/Float32',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+
+def wayfinding_min_errors():
+    return Bridge(
+        gz_topic=f'/vrx/wayfinding/min_errors',
+        ros_topic=f'/vrx/wayfinding/min_errors',
+        gz_type='ignition.msgs.Float_V',
+        ros_type='ros_gz_interfaces/msg/Float32Array',
+        direction=BridgeDirection.GZ_TO_ROS)
+
 def perception_reports():
     return Bridge(
         gz_topic=f'"/vrx/perception/landmark"',
