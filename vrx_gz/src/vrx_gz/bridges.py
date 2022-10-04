@@ -184,8 +184,8 @@ def wayfinding_min_errors():
 
 def perception_reports():
     return Bridge(
-        gz_topic=f'"/vrx/perception/landmark"',
-        ros_topic=f'"/vrx/perception/landmark"',
+        gz_topic=f'/vrx/perception/landmark',
+        ros_topic=f'/vrx/perception/landmark',
         gz_type='ignition.msgs.Pose',
-        ros_type='geometry_msgs/msg/Pose',
+        ros_type='geometry_msgs/msg/PoseStamped',
         direction=BridgeDirection.ROS_TO_GZ)
