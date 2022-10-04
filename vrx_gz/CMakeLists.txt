@@ -97,8 +97,8 @@ install(
 # Plugins
 list(APPEND VRX_GZ_PLUGINS
   PerceptionScoringPlugin
-  StationkeepingScoringPlugin
   SimpleHydrodynamics
+  StationkeepingScoringPlugin
   Surface
   WaveVisual
 )

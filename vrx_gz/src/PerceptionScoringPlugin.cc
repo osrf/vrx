@@ -408,6 +408,9 @@ void PerceptionScoringPlugin::Configure(const sim::Entity &_entity,
 void PerceptionScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
   sim::EntityComponentManager &_ecm)
 {
+  if (_info.paused)
+    return;
+
   ScoringPlugin::PreUpdate(_info, _ecm);
 
   // SDF.
