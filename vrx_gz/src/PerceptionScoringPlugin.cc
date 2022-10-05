@@ -84,7 +84,7 @@ class PerceptionObject
   /// \param[in] _name Object name.
   /// \param[in] _trialPose Pose in which the object should be placed relative
   ///                       to the specified frame.
-  /// \param[in out _ecm] The Entity Component Manager.
+  /// \param[in out] _ecm The Entity Component Manager.
   public: PerceptionObject(const double _time,
                            const double _duration,
                            const std::string &_type,
@@ -226,13 +226,13 @@ class PerceptionScoringPlugin::Implementation
   /// \brief count of how many objects have been despawned
   public: uint16_t objectsDespawned = 0u;
 
-  /// World pointer.
+  /// \brief World pointer.
   public: std::unique_ptr<sim::World> world;
 
-  /// Used to parse the SDF during the first plugin iteration.
+  /// \brief Used to parse the SDF during the first plugin iteration.
   public: bool firstIteration = true;
 
-  /// Current vector of perception requests to be processed.
+  /// \brief Current vector of perception requests to be processed.
   public: std::vector<msgs::Pose> requests;
 
   /// \brief Mutex to protect the requests.
