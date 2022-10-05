@@ -41,6 +41,8 @@ namespace vrx
   ///                      <type> Model.
   ///                      <name> Landmark name.
   ///                      <pose> Initial object pose.
+  ///                      <duration>: Optional parameter. Specify the time an
+  ///                                  object sticks around. Defaults to 5.
   ///
   /// <frame>: Optional parameter. If present, the poses of the objects will be
   /// in the frame of this model. Otherwise the world frame is used.
@@ -48,9 +50,6 @@ namespace vrx
   /// <landmark_topic>: Optional parameter. Specify the topic to which the
   ///   plugin subscribes for receiving identification and localization msgs.
   ///   Default is "/vrx/perception/landmark".
-  ///
-  /// <duration>: Optional parameter. Specify the time an object sticks around.
-  ///   Defaults to 5.
   ///
   /// Here's an example of a valid SDF:
   ///
@@ -63,8 +62,7 @@ namespace vrx
   ///   <initial_state_duration>10.0</initial_state_duration>
   ///   <ready_state_duration>10.0</ready_state_duration>
   ///   <running_state_duration>30</running_state_duration>
-  ///   <!-- Parameters for PopulationPlugin -->
-  ///   <loop_forever>true</loop_forever>
+  ///   <!-- Parameters for PerceptionScoringPlugin -->
   ///   <frame>wamv</frame>
   ///   <!-- Pose of each object is expressed relative to the body frame
   ///        of the object named in the frame field - i.e., relative to

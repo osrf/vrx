@@ -362,7 +362,10 @@ void PerceptionScoringPlugin::Implementation::ProcessAttempts(
     for (auto i = 0u; i < _msg.header().data_size(); ++i)
     {
       if (_msg.header().data(i).key() == "frame_id")
+      {
         typeReported = _msg.header().data(i).value(0);
+        break;
+      }
     }
 
     // Burn one attempt.
@@ -383,9 +386,6 @@ void PerceptionScoringPlugin::Implementation::ProcessAttempts(
         // Get current pose of the current object.
         math::Pose3d truePose =
           _ecm.Component<sim::components::Pose>(obj.entity)->Data();
-
-        auto trueSpherical = this->world->SphericalCoordinates(
-          _ecm)->SphericalFromLocalPosition(truePose.Pos());
 
         // 2D Error.
         double error = sqrt(pow(cartVec.X() - truePose.Pos().X(), 2) +
