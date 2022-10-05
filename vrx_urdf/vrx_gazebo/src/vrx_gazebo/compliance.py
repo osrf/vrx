@@ -13,7 +13,7 @@ class ComponentCompliance:
     def __init__(self, components_dir):
         self.components_dir = components_dir
 
-        self.config_dirpath = os.path.join(
+        self.config_dir = os.path.join(
             get_package_share_directory('vrx_gazebo'), 'config', 'wamv_config')
 
         # open component_compliance/bounding_boxes.yaml and all the boxes defined
@@ -34,13 +34,13 @@ class ComponentCompliance:
         # check if the component is allowed
         params = params.copy()
         if component_type not in self.default_parameters:
-            rclpy.get_logger().error('%s is not defined anywhere under %s' %
+            rclpy.logging.get_logger("complicance").error('%s is not defined anywhere under %s' %
                          (component_type, self.config_dir))
         assert component_type in self.default_parameters,\
             '%s is not defined anywhere under %s' % (component_type, self.config_dir)
         for i in params:
             if i not in self.numeric[component_type]['allowed_params']:
-                rclpy.get_logger().error('%s parameter specification of %s not permitted' %
+                rclpy.logging.get_logger("complicance").error('%s parameter specification of %s not permitted' %
                              (i, component_type))
 
         # add the default params to params if not specified
@@ -54,15 +54,15 @@ class ComponentCompliance:
             for box in self.boxes:
                 if box.fit(xyz):
                     return True
-            rclpy.get_logger().error('%s %s is out of bounds' %
+            rclpy.logging.get_logger("complicance").error('%s %s is out of bounds' %
                          (component_type, params['name']))
-            rclpy.get_logger().error('%s %s is at xyz=(%s, %s, %s), %s' %
+            rclpy.logging.get_logger("complicance").error('%s %s is at xyz=(%s, %s, %s), %s' %
                          (component_type, params['name'],
                           xyz[0], xyz[1], xyz[2],
                           'must fit in at least one of the following boxes ' +
                           'with remaining space:'))
             for box in self.boxes:
-                rclpy.get_logger().error('  %s' % str(box))
+                rclpy.logging.get_logger("complicance").error('  %s' % str(box))
             return False
         else:
             return True
@@ -70,8 +70,8 @@ class ComponentCompliance:
     def number_compliance(self, component_type, n):
         # ie: are n wamv_cameras allowed?
         if n > self.numeric[component_type]['num']:
-            rclpy.get_logger().error('Too many %s requested' % component_type)
-            rclpy.get_logger().error('  maximum of %s %s allowed' %
+            rclpy.logging.get_logger("complicance").error('Too many %s requested' % component_type)
+            rclpy.logging.get_logger("complicance").error('  maximum of %s %s allowed' %
                          (self.numeric[component_type]['num'], component_type))
             return False
         return True
@@ -84,7 +84,7 @@ class ThrusterCompliance:
     def __init__(self, thrusters_dir):
         self.thrusters_dir = thrusters_dir
 
-        self.config_dirpath = os.path.join(
+        self.config_dir = os.path.join(
             get_package_share_directory('vrx_gazebo'), 'config', 'wamv_config')
 
         # open thruster_compliance/bounding_boxes.yaml and the boxes defined
@@ -105,14 +105,14 @@ class ThrusterCompliance:
 
         params = params.copy()
         if thruster_type not in self.default_parameters:
-            rclpy.get_logger().error('%s is not defined anywhere under %s' %
+            rclpy.logging.get_logger("complicance").error('%s is not defined anywhere under %s' %
                          (thruster_type, self.config_dir))
         assert thruster_type in self.default_parameters,\
             '%s is not defined anywhere under %s' % \
             (thruster_type, self.config_dir)
         for i in params:
             if i not in self.numeric[thruster_type]['allowed_params']:
-                rclpy.get_logger().error('%s parameter specification of not permitted' %
+                rclpy.logging.get_logger("complicance").error('%s parameter specification of not permitted' %
                              (i, thruster_type))
                 assert False
 
@@ -128,21 +128,21 @@ class ThrusterCompliance:
         for box in self.boxes:
             if box.fit(xyz):
                 return True
-        rclpy.get_logger().error('%s %s is out of bounds' %
+        rclpy.logging.get_logger("complicance").error('%s %s is out of bounds' %
                      (thruster_type, params['prefix']))
-        rclpy.get_logger().error('%s %s is at xyz=(%s, %s, %s), %s' %
+        rclpy.logging.get_logger("complicance").error('%s %s is at xyz=(%s, %s, %s), %s' %
                      (thruster_type, params['prefix'],
                       xyz[0], xyz[1], xyz[2],
                       'it must fit in at least one of the following boxes ' +
                       'with remaining space:'))
         for box in self.boxes:
-            rclpy.get_logger().error('  %s' % str(box))
+            rclpy.logging.get_logger("complicance").error('  %s' % str(box))
         return False
 
     def number_compliance(self, thruster_type, n):
         if n > self.numeric[thruster_type]['num']:
-            rclpy.get_logger().error('Too many %s requested' % thruster_type)
-            rclpy.get_logger().error('  maximum of %s %s allowed' %
+            rclpy.logging.get_logger("complicance").error('Too many %s requested' % thruster_type)
+            rclpy.logging.get_logger("complicance").error('  maximum of %s %s allowed' %
                          (self.numeric[thruster_type]['num'], thruster_type))
             return False
         return True

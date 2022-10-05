@@ -25,10 +25,7 @@ from launch_ros.actions import Node
 
 
 def launch(context, *args, **kwargs):
-    # wamv_locked = LaunchConfiguration(
-    #     'wamv_locked').perform(context).lower() == 'true'
     wamv_locked = LaunchConfiguration('wamv_locked').perform(context)
-
     component_yaml = LaunchConfiguration('component_yaml').perform(context)
     thruster_yaml = LaunchConfiguration('thruster_yaml').perform(context)
     wamv_target = LaunchConfiguration('wamv_target').perform(context)
@@ -36,7 +33,6 @@ def launch(context, *args, **kwargs):
     if not component_yaml:
         component_yaml = os.path.join(get_package_share_directory('vrx_gazebo'),
                                       'config', 'wamv_config', 'example_component_config.yaml')
-
     if not thruster_yaml:
         thruster_yaml = os.path.join(get_package_share_directory('vrx_gazebo'),
                                       'config', 'wamv_config', 'example_thruster_config.yaml')
@@ -48,15 +44,16 @@ def launch(context, *args, **kwargs):
     wamv_gazebo = os.path.join(get_package_share_directory('wamv_gazebo'),
                                  'urdf', 'wamv_gazebo.urdf.xacro')
 
-
     node = Node(package='vrx_gazebo',
                 executable='generate_wamv.py',
-                parameters=[('wamv_locked', wamv_locked),
-                            ('component_yaml', component_yaml),
-                            ('thruster_yaml', thruster_yaml),
-                            ('components_dir', components_dir),
-                            ('thrusters_dir', thrusters_dir),
-                            ('wamv_gazebo', wamv_gazebo)])
+                output='screen',
+                parameters=[{'wamv_locked': wamv_locked},
+                            {'component_yaml': component_yaml},
+                            {'thruster_yaml': thruster_yaml},
+                            {'wamv_target': wamv_target},
+                            {'components_dir': components_dir},
+                            {'thrusters_dir': thrusters_dir},
+                            {'wamv_gazebo': wamv_gazebo}])
 
     return [node]
 
@@ -78,6 +75,6 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'wamv_target',
             default_value='',
-            description='WAM-V target'),
+            description='WAM-V target output URDF file'),
         OpaqueFunction(function=launch),
     ])

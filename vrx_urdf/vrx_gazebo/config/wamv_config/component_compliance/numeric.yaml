@@ -1,0 +1,68 @@
+wamv_camera: 
+    num: 3
+    allowed_params:
+        name
+        x
+        y
+        z
+        R
+        P
+        Y
+        post_Y
+        visualize
+
+wamv_gps:
+    num: 1
+    allowed_params:
+        name
+        x
+        y
+        z
+        R
+        P
+        Y
+
+wamv_imu:
+    num: 1
+    allowed_params:
+        name
+        x
+        y
+        z
+        R
+        P
+        Y
+
+lidar:
+    num: 2
+    allowed_params:
+        name
+        type    
+        x
+        y
+        z
+        R
+        P
+        Y
+        post_Y
+
+wamv_ball_shooter:
+    num: 1
+    allowed_params:
+        name
+        x
+        y
+        z
+        pitch
+        yaw
+
+wamv_pinger:
+    num: 1
+    allowed_params:
+        name
+        position
+
+wamv_p3d:
+    num: 0
+    allowed_params:
+        name

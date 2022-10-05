@@ -14,6 +14,11 @@ install(DIRECTORY models/
 install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch)
 
+# config
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config)
+
+
 # scripts
 install(PROGRAMS scripts/generate_wamv.py
   DESTINATION lib/${PROJECT_NAME})
