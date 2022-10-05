@@ -65,7 +65,7 @@
 
       <plugin
         filename="libSimpleHydrodynamics.so"
-        name="vrx::SimpleHydrodynamics_${name}">
+        name="vrx::SimpleHydrodynamics">
         <link_name>${namespace}/base_link</link_name>
         <!-- Added mass -->
         <xDotU>0.0</xDotU>
