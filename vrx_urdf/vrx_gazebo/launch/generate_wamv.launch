@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<!-- Generate wamv given custom configurations. Used by vrx-docker for
+     competition evaluation -->
+
+<launch>
+  <arg name="namespace" value="wamv_config"/>
+
+  <group ns="$(arg namespace)">
+	  
+    <arg name="wamv_locked" default="false"/>
+    <param name="wamv_locked" value="$(arg wamv_locked)"/>
+
+    <arg name="component_yaml" default="$(find vrx_gazebo)/config/wamv_config/example_component_config.yaml"/>
+    <param name="component_yaml" value="$(arg component_yaml)"/>
+
+    <arg name="thruster_yaml" default="$(find vrx_gazebo)/config/wamv_config/example_thruster_config.yaml"/>
+    <param name="thruster_yaml" value="$(arg thruster_yaml)"/>
+
+    <arg name="wamv_target"/>
+    <param name="wamv_target" value="$(arg wamv_target)"/>
+
+    <param name="wamv_gazebo" value="$(find wamv_gazebo)/urdf/wamv_gazebo.urdf.xacro"/>
+
+    <param name="components_dir" value="$(find wamv_gazebo)/urdf/components"/>
+    
+    <param name="thrusters_dir" value="$(find wamv_description)/urdf/thrusters"/>
+
+    <node name="wamv_generator" pkg="vrx_gazebo" type="generate_wamv.py" output="screen" required="true"/>
+  </group>
+</launch>
