@@ -143,27 +143,6 @@
       <xacro:wamv_p3d name="p3d_wamv"/>
     </xacro:if>
 
-    <!-- Contact sensors -->
-<!--    <gazebo>
-      <experimental:params>
-        <sensor element_id="${namespace}/base_link" name='sensor_contacts' type='contact' action="add">
-          <contact>
-            <collision>top_base</collision>
-            <collision>left_float</collision>
-            <collision>left_mid_float</collision>
-            <collision>left_front_float</collision>
-            <collision>right_float</collision>
-            <collision>right_mid_float</collision>
-            <collision>right_front_float</collision>
-            <topic>/vrx/contacts</topic>
-          </contact>
-          <always_on>1</always_on>
-          <update_rate>5</update_rate>
-        </sensor>
-      </experimental:params>
-    </gazebo>
--->
-
     <!-- Add pinger -->
     <xacro:if value="$(arg pinger_enabled)">
       <xacro:wamv_pinger name="pinger" position="1.0 0 -1.0" />

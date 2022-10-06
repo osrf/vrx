@@ -181,3 +181,11 @@ def wayfinding_min_errors():
         gz_type='ignition.msgs.Float_V',
         ros_type='ros_gz_interfaces/msg/Float32Array',
         direction=BridgeDirection.GZ_TO_ROS)
+
+def perception_reports():
+    return Bridge(
+        gz_topic=f'/vrx/perception/landmark',
+        ros_topic=f'/vrx/perception/landmark',
+        gz_type='ignition.msgs.Pose',
+        ros_type='geometry_msgs/msg/PoseStamped',
+        direction=BridgeDirection.ROS_TO_GZ)

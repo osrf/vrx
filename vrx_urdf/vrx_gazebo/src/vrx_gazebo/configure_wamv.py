@@ -140,7 +140,6 @@ def main(args=None):
 
     create_urdf_command = ("ros2 run xacro xacro -o " + wamv_target +
                            " '" + wamv_gazebo + "'")
-    print(f'{create_urdf_command}')
 
     if wamv_locked:
         create_urdf_command += (" locked:=" +
