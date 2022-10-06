@@ -111,7 +111,7 @@ class ScoringPlugin::Implementation
   /// \brief Current time (simulation).
   public: std::chrono::duration<double> currentTime;
 
-  // \brief Elapsed time since the start of the task (running state).
+  /// \brief Elapsed time since the start of the task (running state).
   public: std::chrono::duration<double> elapsedTime;
 
   /// \brief Remaining time since the start of the task (running state).
@@ -501,6 +501,12 @@ std::string ScoringPlugin::VehicleName() const
 uint16_t ScoringPlugin::NumCollisions() const
 {
   return this->dataPtr->numCollisions;
+}
+
+//////////////////////////////////////////////////
+void ScoringPlugin::Exit()
+{
+  return this->dataPtr->Exit();
 }
 
 //////////////////////////////////////////////////

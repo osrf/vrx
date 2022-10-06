@@ -30,6 +30,10 @@ import vrx_gz.bridges
 
 import os
 
+PERCEPTION_WORLDS = [
+  'perception_task'
+]
+
 STATIONKEEPING_WORLDS = [
   'stationkeeping_task'
 ]
@@ -81,7 +85,11 @@ def competition_bridges(world_name):
     ]
 
     task_bridges = []
-    if world_name in STATIONKEEPING_WORLDS:
+    if world_name in PERCEPTION_WORLDS:
+        task_bridges = [
+            vrx_gz.bridges.perception_reports(),
+        ]
+    elif world_name in STATIONKEEPING_WORLDS:
         task_bridges = [
             vrx_gz.bridges.stationkeeping_goal(),
             vrx_gz.bridges.stationkeeping_mean_pose_error(),
