@@ -51,17 +51,11 @@ def create_thruster_xacro(node):
                                    num_test=thruster_num_test,
                                    param_test=thruster_param_test)
 
-     gz_boiler_plate_top = ('  <gazebo>\n'
-                            '    <plugin name="wamv_gazebo_thrust" '
-                            'filename="libusv_gazebo_thrust_plugin.so">\n'
-                            '      <cmdTimeout>1.0</cmdTimeout>\n'
-                            '      <robotNamespace>${namespace}</robotNamespace>\n'
-                            '      <xacro:include filename="$(find wamv_gazebo)'
+     gz_boiler_plate_top = ('      <xacro:include filename="$(find wamv_gazebo)'
                             '/urdf/thruster_layouts/'
                             'wamv_gazebo_thruster_config.xacro" />\n')
-     gz_boiler_plate_bot = ('    </plugin>\n'
-                            '  </gazebo>\n'
-                            '</robot>')
+     gz_boiler_plate_bot = ('</robot>')
+
 
      # Append gazebo thruster config to thruster xacro
      add_gazebo_thruster_config(yaml_file=thruster_yaml,
