@@ -17,9 +17,6 @@
       </collision>
       <inertial>
         <mass value="0.1"/>
-        <!--
-        <inertia ixx="0.000083" ixy="0.0" ixz="0.0" iyy="0.000083" iyz="0.0" izz="0.0125"/>
-        -->
         <inertia ixx="0.00000542" ixy="0.0" ixz="0.0" iyy="0.00002104" iyz="0.0" izz="0.00002604"/>
       </inertial>
     </link>
@@ -108,33 +105,5 @@
       </sensor>
     </gazebo>
 
-<!--
-    <gazebo>
-      <plugin name="imu_plugin_${name}" filename="libhector_gazebo_ros_imu.so">
-        <updateRate>${update_rate}</updateRate>
-        <bodyName>${namespace}/${name}_link</bodyName>
-        <topicName>${namespace}/${sensor_namespace}imu/imu/data</topicName>
-        <serviceName>${namespace}/${sensor_namespace}imu_service</serviceName>
-        <frameId>${namespace}/${name}_link</frameId>
-        <alwaysOn>true</alwaysOn>
-
-        <accelOffset>0.0 0.0 0.0</accelOffset>
-        <accelDrift>0.0 0.0 0.0</accelDrift>
-        <accelDriftFrequency>0.00027 0.00027 0.000027</accelDriftFrequency>
-        <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
-
-        <rateOffset>0.0 0.0 0.0</rateOffset>
-        <rateDrift>0.0 0.0 0.0</rateDrift>
-        <rateDriftFrequency>0.00027 0.00027 0.000027</rateDriftFrequency>
-        <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
-
-        <yawOffset>0.0</yawOffset>
-        <yawDrift>0.0</yawDrift>
-        <yawDriftFrequency>0.00027</yawDriftFrequency>
-        <yawGaussianNoise>0.0</yawGaussianNoise>
-
-      </plugin>
-    </gazebo>
--->
   </xacro:macro>
 </robot>

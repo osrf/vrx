@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v">
   <!-- Required arg for melodic and kinetic... -->
-  <xacro:arg name="namespace" default="wamv"/>  
-  <xacro:property name="namespace" value="$(arg namespace)" scope="global" /> 
+  <xacro:arg name="namespace" default="wamv"/>
+  <xacro:property name="namespace" value="$(arg namespace)" scope="global" />
   <!-- Macro for creating the main collisions as simple shapes. -->
   <xacro:macro name="main_collisions" params="prefix reflect:=1">
     <!-- Main float -->
@@ -97,7 +97,7 @@
   <link name="${namespace}/base_link">
   </link>
 
-  <joint name="${namespace}/dummy_joint" type = "fixed">
+  <joint name="${namespace}/dummy_joint" type="fixed">
     <parent link="${namespace}/base_link"/>
     <child link="${namespace}/dummy_link"/>
   </joint>
@@ -130,5 +130,24 @@
       <inertia ixx="120.0" ixy="0.0" ixz="0.0" iyy="393" iyz="0.0" izz="446.0"/>
     </inertial>
   </link>
+
+  <gazebo reference="${namespace}/base_link">
+    <sensor type="contact" name="contact_sensor">
+      <contact>
+        <!-- collisions are renamed during urdf -> sdf fixed joint lumping -->
+        <collision>${namespace}/base_link_fixed_joint_lump__top_base_collision_41</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__left_float_collision_17</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__left_mid_float_collision_18</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__left_front_float_collision_19</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__right_float_collision_29</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__right_mid_float_collision_30</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__right_front_float_collision_31</collision>
+        <topic>/vrx/contacts</topic>
+      </contact>
+      <always_on>1</always_on>
+      <update_rate>5</update_rate>
+    </sensor>
+  </gazebo>
+
 
 </robot>

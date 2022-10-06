@@ -73,9 +73,10 @@
   <xacro:if value="$(arg locked)">
     <gazebo>
       <link name="wamv_external_link"/>
+      <link name="wamv_external_link_base"/>
       <joint name="wamv_external_pivot_joint" type="universal">
-        <parent>wamv::wamv/base_link</parent>
-        <child>wamv_external_link</child>
+        <parent>wamv_external_link</parent>
+        <child>wamv/base_link</child>
         <axis>
           <xyz>1 0 0</xyz>
         </axis>
@@ -84,7 +85,7 @@
         </axis2>
       </joint>
       <joint name="wamv_external_riser" type="prismatic">
-        <parent>world</parent>
+        <parent>wamv_external_link_base</parent>
         <child>wamv_external_link</child>
         <axis>
           <limit>
@@ -94,6 +95,13 @@
           <xyz>0 0 1</xyz>
         </axis>
       </joint>
+      <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+        <parent_link>wamv_external_link_base</parent_link>
+        <child_model>platform</child_model>
+        <child_link>dummy_base</child_link>
+        <topic>/vrx/release</topic>
+        <suppress_child_warning>true</suppress_child_warning>
+      </plugin>
     </gazebo>
   </xacro:if>
 
@@ -107,33 +115,54 @@
     <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
     <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
   </xacro:if>
-  
+
   <!-- Otherwise, add sensors based on enable variables -->
   <xacro:unless value="$(arg yaml_component_generation)">
     <!-- Add a front camera -->
     <xacro:if value="$(arg camera_enabled)">
       <xacro:wamv_camera name="front_camera" y="0.3" x="0.75" P="${radians(15)}" />
     </xacro:if>
-    
+
     <!-- Add simulated GPS -->
     <xacro:if value="$(arg gps_enabled)">
       <xacro:wamv_gps name="gps_wamv" x="-0.85" />
     </xacro:if>
-    
+
     <!-- Add Simulated IMU -->
     <xacro:if value="$(arg imu_enabled)">
       <xacro:wamv_imu name="imu_wamv" y="-0.2" />
     </xacro:if>
-    
+
     <!-- Add 3D LIDAR -->
     <xacro:if value="$(arg lidar_enabled)">
       <xacro:lidar name="lidar_wamv" y="-0.3" type="16_beam"/>
     </xacro:if>
-    
+
     <!-- Add P3D ground truth -->
     <xacro:if value="$(arg ground_truth_enabled)">
       <xacro:wamv_p3d name="p3d_wamv"/>
     </xacro:if>
+
+    <!-- Contact sensors -->
+<!--    <gazebo>
+      <experimental:params>
+        <sensor element_id="${namespace}/base_link" name='sensor_contacts' type='contact' action="add">
+          <contact>
+            <collision>top_base</collision>
+            <collision>left_float</collision>
+            <collision>left_mid_float</collision>
+            <collision>left_front_float</collision>
+            <collision>right_float</collision>
+            <collision>right_mid_float</collision>
+            <collision>right_front_float</collision>
+            <topic>/vrx/contacts</topic>
+          </contact>
+          <always_on>1</always_on>
+          <update_rate>5</update_rate>
+        </sensor>
+      </experimental:params>
+    </gazebo>
+-->
 
     <!-- Add pinger -->
     <xacro:if value="$(arg pinger_enabled)">
@@ -144,37 +173,38 @@
     <xacro:if value="$(arg ball_shooter_enabled)">
       <xacro:wamv_ball_shooter name="ball_shooter" x="0.54" y="0.30" z="1.296" pitch="-1.04"/>
     </xacro:if>
-    
+
     <!-- ==== VRX sensor configuration ==== -->
     <xacro:if value="$(arg vrx_sensors_enabled)">
-    
+
       <!-- Add CPU Cases -->
       <xacro:include filename="$(find wamv_description)/urdf/cpu_cases.xacro" />
       <xacro:cpu_cases position="-0.15 0 1.53" orientation="0 0 0"/>
-    
+
       <!-- Add a stereo camera pair -->
       <xacro:wamv_camera name="front_left_camera" y="0.1" x="0.75" P="${radians(15)}" />
       <xacro:wamv_camera name="front_right_camera" y="-0.1" x="0.75" P="${radians(15)}" />
-    
+
       <!-- Add a camera facing right -->
       <xacro:wamv_camera name="middle_right_camera" y="-0.45" P="${radians(15)}" Y="${radians(-90)}" post_Y="${radians(-90)}" />
-    
+
       <!-- Add simulated GPS -->
       <xacro:wamv_gps name="gps_wamv" x="-0.85" />
-    
+
       <!-- Add Simulated IMU -->
       <xacro:wamv_imu name="imu_wamv" y="-0.2" />
-    
+
       <!-- Add 3D LIDAR -->
       <xacro:lidar name="lidar_wamv" type="16_beam"/>
 
       <!-- Add pinger -->
       <xacro:wamv_pinger name="pinger" position="1.0 0 -1.0" />
-      
+
       <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
       <xacro:wamv_ball_shooter name="ball_shooter" x="0.54" y="0.30" z="1.296" pitch="-1.04"/>
 
     </xacro:if>
+
   </xacro:unless>
 
 </robot>

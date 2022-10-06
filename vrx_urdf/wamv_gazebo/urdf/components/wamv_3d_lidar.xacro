@@ -171,21 +171,8 @@
             <stddev>${noise_stddev}</stddev>
           </noise>
         </ray>
-        <!--
-        <plugin name="${name}_plugin" filename="libgazebo_ros_velodyne_gpu_laser.so">
-          <topicName>${namespace}/${sensor_namespace}lidars/${name}/points</topicName>
-          <frameName>${namespace}/${name}_link</frameName>
-          <min_intensity>0</min_intensity>
-        </plugin>
-        -->
       </sensor>
     </gazebo>
 
-    <!-- Set color of post -->
-<!--
-    <gazebo reference="${namespace}/${name}_post_link">
-      <material>Gazebo/Black</material>
-    </gazebo>
--->
   </xacro:macro>
 </robot>

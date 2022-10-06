@@ -36,6 +36,7 @@
     <parent link="${namespace}/base_link"/>
     <child link="${namespace}/cpu_cases_link"/>
   </joint>
+
 </xacro:macro>
 </robot>
 

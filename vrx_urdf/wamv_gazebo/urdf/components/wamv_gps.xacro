@@ -42,37 +42,6 @@
         <topic>${namespace}/${sensor_namespace}gps/gps/fix</topic>
       </sensor>
     </gazebo>
-<!--
-    <gazebo>
-      <plugin name="gps_plugin_${name}" filename="libhector_gazebo_ros_gps.so">
-        <updateRate>${update_rate}</updateRate>
-        <alwaysOn>true</alwaysOn>
-        <bodyName>${namespace}/${name}_link</bodyName>
-        <frameId>${namespace}/${name}_link</frameId>
-        <topicName>${namespace}/${sensor_namespace}gps/gps/fix</topicName>
-        <velocityTopicName>${namespace}/${sensor_namespace}gps/gps/fix_velocity</velocityTopicName>
-	<useWorldSphericalCoordinates>true</useWorldSphericalCoordinates>
-
-        <offset>0.0 0.0 0.0</offset>
-        <drift>0.0 0.0 0.0</drift>
-        <gaussianNoise>0 0 0</gaussianNoise>
-        <velocityOffset>0.0 0.0 0.0</velocityOffset>
-        <velocityDrift>0.0 0.0 0.0</velocityDrift>
-        <velocityGaussianNoise>0.0 0.0 0.0</velocityGaussianNoise>
-      </plugin>
-    </gazebo>
--->
-        <!-- Note that the hector_gazebo_ros_gps plugin uses NWU coordinates
-             for reporting velocities.  This may cause problems if localization
-             requires velocity in ENU.
-             See Issue #64 in VRX project for details
-             https://bitbucket.org/osrf/vrx/issues/64 -->
-
-        <!-- Tell the plugin to use the spherical_coordiantes parameters
-	     from SDF.
-	     https://github.com/tu-darmstadt-ros-pkg/hector_gazebo/blob/melodic-devel/hector_gazebo_plugins/src/gazebo_ros_gps.cpp#L101
-	-->
-
   </xacro:macro>
 </robot>
 

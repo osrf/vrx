@@ -136,7 +136,6 @@
       <child link="${namespace}/${name}_link_optical" />
     </joint>
 
-
     <!-- Gazebo camera setup -->
     <gazebo reference="${namespace}/${name}_link">
       <sensor type="camera" name="${name}_sensor">
@@ -164,30 +163,7 @@
             <stddev>0.007</stddev>
           </noise>
         </camera>
-        <!--
-        <plugin name="camera_plugin_${name}" filename="libgazebo_ros_camera.so">
-          <alwaysOn>true</alwaysOn>
-          <updateRate>0.0</updateRate>
-          <cameraName>${namespace}/${sensor_namespace}${camera_namespace}${name}</cameraName>
-          <imageTopicName>image_raw</imageTopicName>
-          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>${namespace}/${name}_link_optical</frameName>
-          <hackBaseline>0.07</hackBaseline>
-          <distortionK1>0.0</distortionK1>
-          <distortionK2>0.0</distortionK2>
-          <distortionK3>0.0</distortionK3>
-          <distortionT1>0.0</distortionT1>
-          <distortionT2>0.0</distortionT2>
-        </plugin>
-        -->
-      </sensor>
+        </sensor>
     </gazebo>
-
-    <!-- Set color of post -->
-    <!--
-    <gazebo reference="${namespace}/${name}_post_link">
-      <material>Gazebo/Black</material>
-    </gazebo>
-    -->
   </xacro:macro>
 </robot>

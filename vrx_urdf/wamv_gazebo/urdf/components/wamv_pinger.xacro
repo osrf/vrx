@@ -20,6 +20,7 @@
       <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}"/>
     </joint>
+
 <!--
     <gazebo>
       <plugin name="pinger_plugin" filename="libusv_gazebo_acoustic_pinger_plugin.so">

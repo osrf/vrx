@@ -16,6 +16,7 @@
       <parent link="${namespace}/base_link" />
       <child link="${namespace}/${name}_link" />
     </joint>
+
     <gazebo reference="${namespace}/${name}_link">
       <sensor type="gpu_ray" name="multibeam_sensor_${name}">
         <update_rate>10</update_rate>
@@ -37,12 +38,6 @@
             <resolution>0.02</resolution>
           </range>
         </ray>
-<!--
-        <plugin name="multibeam_simulator" filename="libgazebo_ros_gpu_laser.so">
-          <topicName>${namespace}/${sensor_namespace}lidars/${name}/scan</topicName>
-          <frameName>${namespace}/${name}_link</frameName>
-        </plugin>
--->
       </sensor>
     </gazebo>
   </xacro:macro>
