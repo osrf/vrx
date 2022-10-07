@@ -20,8 +20,6 @@ class ComponentCompliance:
         self.boxes = find_boxes(os.path.join(self.config_dir,
             'component_compliance', 'bounding_boxes.yaml'))
         # look at all components in components directory and get the default params
-        # self.declare_parameter('components_dir')
-        # self.components_dir = rclpy.get_parameter('components_dir') + '/'
         self.default_parameters = get_macros(self.components_dir)
 
         self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
@@ -34,13 +32,13 @@ class ComponentCompliance:
         # check if the component is allowed
         params = params.copy()
         if component_type not in self.default_parameters:
-            rclpy.logging.get_logger("complicance").error('%s is not defined anywhere under %s' %
+            rclpy.logging.get_logger("compliance").error('%s is not defined anywhere under %s' %
                          (component_type, self.config_dir))
         assert component_type in self.default_parameters,\
             '%s is not defined anywhere under %s' % (component_type, self.config_dir)
         for i in params:
             if i not in self.numeric[component_type]['allowed_params']:
-                rclpy.logging.get_logger("complicance").error('%s parameter specification of %s not permitted' %
+                rclpy.logging.get_logger("compliance").error('%s parameter specification of %s not permitted' %
                              (i, component_type))
 
         # add the default params to params if not specified
@@ -54,15 +52,15 @@ class ComponentCompliance:
             for box in self.boxes:
                 if box.fit(xyz):
                     return True
-            rclpy.logging.get_logger("complicance").error('%s %s is out of bounds' %
+            rclpy.logging.get_logger("compliance").error('%s %s is out of bounds' %
                          (component_type, params['name']))
-            rclpy.logging.get_logger("complicance").error('%s %s is at xyz=(%s, %s, %s), %s' %
+            rclpy.logging.get_logger("compliance").error('%s %s is at xyz=(%s, %s, %s), %s' %
                          (component_type, params['name'],
                           xyz[0], xyz[1], xyz[2],
                           'must fit in at least one of the following boxes ' +
                           'with remaining space:'))
             for box in self.boxes:
-                rclpy.logging.get_logger("complicance").error('  %s' % str(box))
+                rclpy.logging.get_logger("compliance").error('  %s' % str(box))
             return False
         else:
             return True
@@ -70,8 +68,8 @@ class ComponentCompliance:
     def number_compliance(self, component_type, n):
         # ie: are n wamv_cameras allowed?
         if n > self.numeric[component_type]['num']:
-            rclpy.logging.get_logger("complicance").error('Too many %s requested' % component_type)
-            rclpy.logging.get_logger("complicance").error('  maximum of %s %s allowed' %
+            rclpy.logging.get_logger("compliance").error('Too many %s requested' % component_type)
+            rclpy.logging.get_logger("compliance").error('  maximum of %s %s allowed' %
                          (self.numeric[component_type]['num'], component_type))
             return False
         return True
@@ -91,8 +89,6 @@ class ThrusterCompliance:
         self.boxes = find_boxes(os.path.join(self.config_dir,
             'thruster_compliance', 'bounding_boxes.yaml'))
         # look at all thrusters in thrusters directory and get the default params
-        # self.declare_parameter('thrusters_dir')
-        # self.thrusters_dir = rclpy.get_parameter('thrusters_dir') + '/'
         self.default_parameters = get_macros(self.thrusters_dir)
         self.numeric = yaml.safe_load(open(os.path.join(self.config_dir,
             'thruster_compliance', 'numeric.yaml')))
@@ -105,14 +101,14 @@ class ThrusterCompliance:
 
         params = params.copy()
         if thruster_type not in self.default_parameters:
-            rclpy.logging.get_logger("complicance").error('%s is not defined anywhere under %s' %
+            rclpy.logging.get_logger("compliance").error('%s is not defined anywhere under %s' %
                          (thruster_type, self.config_dir))
         assert thruster_type in self.default_parameters,\
             '%s is not defined anywhere under %s' % \
             (thruster_type, self.config_dir)
         for i in params:
             if i not in self.numeric[thruster_type]['allowed_params']:
-                rclpy.logging.get_logger("complicance").error('%s parameter specification of not permitted' %
+                rclpy.logging.get_logger("compliance").error('%s parameter specification of not permitted' %
                              (i, thruster_type))
                 assert False
 
@@ -128,21 +124,21 @@ class ThrusterCompliance:
         for box in self.boxes:
             if box.fit(xyz):
                 return True
-        rclpy.logging.get_logger("complicance").error('%s %s is out of bounds' %
+        rclpy.logging.get_logger("compliance").error('%s %s is out of bounds' %
                      (thruster_type, params['prefix']))
-        rclpy.logging.get_logger("complicance").error('%s %s is at xyz=(%s, %s, %s), %s' %
+        rclpy.logging.get_logger("compliance").error('%s %s is at xyz=(%s, %s, %s), %s' %
                      (thruster_type, params['prefix'],
                       xyz[0], xyz[1], xyz[2],
                       'it must fit in at least one of the following boxes ' +
                       'with remaining space:'))
         for box in self.boxes:
-            rclpy.logging.get_logger("complicance").error('  %s' % str(box))
+            rclpy.logging.get_logger("compliance").error('  %s' % str(box))
         return False
 
     def number_compliance(self, thruster_type, n):
         if n > self.numeric[thruster_type]['num']:
-            rclpy.logging.get_logger("complicance").error('Too many %s requested' % thruster_type)
-            rclpy.logging.get_logger("complicance").error('  maximum of %s %s allowed' %
+            rclpy.logging.get_logger("compliance").error('Too many %s requested' % thruster_type)
+            rclpy.logging.get_logger("compliance").error('  maximum of %s %s allowed' %
                          (self.numeric[thruster_type]['num'], thruster_type))
             return False
         return True
