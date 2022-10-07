@@ -13,20 +13,20 @@
   <xacro:arg name="pinger_enabled" default="false" />
   <xacro:arg name="ball_shooter_enabled" default="false" />
   <xacro:arg name="thruster_namespace" default="thrusters/"/>
-  <xacro:arg name="camera_namespace" default="cameras/"/>  
+  <xacro:arg name="camera_namespace" default="cameras/"/>
   <xacro:arg name="sensor_namespace" default="sensors/"/>
   <xacro:arg name="pinger_namespace" default="pingers/"/>
   <xacro:arg name="shooter_namespace" default="shooters/"/>
-  <!-- Note: this is only used for some sensors that do not correctly use the 
+  <!-- Note: this is only used for some sensors that do not correctly use the
   robotNamespace parameter -->
-  <xacro:arg name="namespace" default="wamv"/>    
+  <xacro:arg name="namespace" default="wamv"/>
   <xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global" />
   <xacro:property name="camera_namespace" value="$(arg camera_namespace)" scope="global" />
   <xacro:property name="sensor_namespace" value="$(arg sensor_namespace)" scope="global" />
   <xacro:property name="pinger_namespace" value="$(arg pinger_namespace)" scope="global" />
   <xacro:property name="shooter_namespace" value="$(arg shooter_namespace)" scope="global" />
-  <xacro:property name="namespace" value="$(arg namespace)" scope="global" />      
-  
+  <xacro:property name="namespace" value="$(arg namespace)" scope="global" />
+
   <!-- Sensor yaml file -->
   <xacro:arg name="yaml_component_generation" default="false"/>
   <xacro:arg name="component_xacro_file" default = ""/>
@@ -37,7 +37,7 @@
 
   <!-- === The WAM-V platform === -->
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro"/>
-  
+
   <!-- === Batteries === -->
   <xacro:include filename="$(find wamv_description)/urdf/battery.xacro"/>
   <xacro:battery prefix="left" position="0 1 0.45" orientation="0 0 0"/>
@@ -48,7 +48,7 @@
   <xacro:if value="$(arg yaml_thruster_generation)">
     <xacro:wamv_gazebo thruster_layout="$(arg thruster_xacro_file)"/>
   </xacro:if>
-  
+
   <!-- Otherwise, add thrusters based on thruster_config variable -->
   <xacro:unless value="$(arg yaml_thruster_generation)">
     <xacro:property name="thruster_conf" value="$(arg thruster_config)"/>
@@ -104,6 +104,23 @@
       </plugin>
     </gazebo>
   </xacro:if>
+
+  <!-- === TF === -->
+  <!-- Publish robot state information -->
+  <gazebo>
+    <plugin filename="libgz-sim-pose-publisher-system.so"
+      name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <publish_sensor_pose>true</publish_sensor_pose>
+      <publish_collision_pose>false</publish_collision_pose>
+      <publish_visual_pose>false</publish_visual_pose>
+      <publish_nested_model_pose>true</publish_nested_model_pose>
+      <publish_model_pose>false</publish_model_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <static_publisher>true</static_publisher>
+      <static_update_frequency>1</static_update_frequency>
+    </plugin>
+  </gazebo>
 
   <!-- === Sensors === -->
   <!-- Use sensor yaml file if given -->

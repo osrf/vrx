@@ -25,7 +25,7 @@
                                             x:=0.7 y:=0 z:=1.8
                                             R:=0 P:=0 Y:=0
                                             post_Y:=0 post_z_from:=1.2965
-                                            update_rate:=10 vertical_lasers:=16 samples:=1875 resolution:=0.1
+                                            update_rate:=10 vertical_lasers:=16 samples:=1875 resolution:=1
                                             min_angle:=${-pi} max_angle:=${pi}
                                             min_vertical_angle:=${-pi/12} max_vertical_angle:=${pi/12}
                                             max_range:=130 noise_stddev:=0.01">
