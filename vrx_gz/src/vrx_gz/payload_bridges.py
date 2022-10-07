@@ -115,6 +115,15 @@ def contacts():
         direction=BridgeDirection.GZ_TO_ROS)
 
 
+def odometry(model_name):
+    return Bridge(
+        gz_topic=f'/model/{model_name}/odometry',
+        ros_topic=f'/{model_name}/odom',
+        gz_type='ignition.msgs.Odometry',
+        ros_type='nav_msgs/msg/Odometry',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+
 def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type):
     bridges = []
     if sensor_type == sdf.Sensortype.CAMERA:
@@ -145,5 +154,9 @@ def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type)
             camera_info(world_name, model_name, link_name, sensor_name),
             depth_image(world_name, model_name, link_name, sensor_name),
             camera_points(world_name, model_name, link_name, sensor_name),
+        ]
+    elif 'OdometryPublisher' in sensor_name:
+        bridges = [
+            odometry(model_name),
         ]
     return bridges

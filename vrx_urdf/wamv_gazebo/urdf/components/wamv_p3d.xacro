@@ -4,7 +4,7 @@
     <gazebo>
       <plugin
         filename="gz-sim-odometry-publisher-system"
-        name="gz::sim::systems::OdometryPublisher_${name}">
+        name="gz::sim::systems::OdometryPublisher">
         <dimensions>3</dimensions>
         <odom_publish_frequency>10.0</odom_publish_frequency>
         <odom_frame>map</odom_frame>
