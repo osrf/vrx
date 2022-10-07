@@ -276,11 +276,10 @@ class Model:
 
         self.payload = self.payload_from_sdf(model_sdf)
 
-        ######## todo remove me
-        with open('/tmp/wamv.sdf', 'w') as f:
-            f.write(model_sdf)
-
-        print(command)
+        # for debugging generated sdf file
+        # with open('/tmp/wamv.sdf', 'w') as f:
+        #     f.write(model_sdf)
+        # print(command)
 
         return command, model_sdf
 

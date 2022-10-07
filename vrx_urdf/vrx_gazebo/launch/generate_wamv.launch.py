@@ -35,7 +35,7 @@ def launch(context, *args, **kwargs):
                                       'config', 'wamv_config', 'example_component_config.yaml')
     if not thruster_yaml:
         thruster_yaml = os.path.join(get_package_share_directory('vrx_gazebo'),
-                                      'config', 'wamv_config', 'example_thruster_config.yaml')
+                                     'config', 'wamv_config', 'example_thruster_config.yaml')
 
     components_dir = os.path.join(get_package_share_directory('wamv_gazebo'),
                                   'urdf', 'components')
