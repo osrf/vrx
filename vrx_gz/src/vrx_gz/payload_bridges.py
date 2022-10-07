@@ -1,144 +1,149 @@
 from vrx_gz.bridge import Bridge, BridgeDirection
 
-
-def camera_models():
-    models = ['vrx_vga_camera',
-              'vrx_hd_camera']
-    return models
+import sdformat13 as sdf
 
 
-def rgbd_models():
-    models = ['vrx_rgbd_camera']
-    return models
+def gz_prefix(world_name, model_name, link_name, sensor_name):
+    return f'/world/{world_name}/model/{model_name}/link/{link_name}/sensor/{sensor_name}'
 
 
-def lidar_models():
-    models = ['vrx_planar_lidar',
-              'vrx_3d_lidar',
-              ]
-    return models
+def ros_prefix(sensor_name):
+    return f'{sensor_name}'
 
 
-def rfranger_models():
-    models = ['vrx_rf_range',
-              'vrx_rf_long_range']
-    return models
-
-
-def slot_prefix(world_name, model_name, slot_idx, model_prefix=''):
-    s = f'/world/{world_name}/model/{model_name}/model/'
-    if model_prefix != '':
-        s += f'{model_prefix}/model/'
-    s += f'sensor_{slot_idx}/link/sensor_link/sensor'
-    return s
-
-
-def ros_slot_prefix(slot_idx, model_prefix=''):
-    s = ''
-    if model_prefix != '':
-        s = f'{model_prefix}/'
-    s += f'slot{slot_idx}'
-    return s
-
-
-def image(world_name, model_name, slot_idx, model_prefix=''):
-    prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
-    ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
+def image(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name)
     return Bridge(
-        gz_topic=f'{prefix}/camera/image',
-        ros_topic=f'{ros_prefix}/image_raw',
-        gz_type='gz.msgs.Image',
+        gz_topic=f'{gz_sensor_prefix}/image',
+        ros_topic=f'{ros_sensor_prefix}/image_raw',
+        gz_type='ignition.msgs.Image',
         ros_type='sensor_msgs/msg/Image',
         direction=BridgeDirection.GZ_TO_ROS)
 
 
-def depth_image(world_name, model_name, slot_idx, model_prefix=''):
-    prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
-    ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
+def depth_image(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name)
     return Bridge(
-        gz_topic=f'{prefix}/camera/depth_image',
-        ros_topic=f'{ros_prefix}/depth',
-        gz_type='gz.msgs.Image',
+        gz_topic=f'{gz_sensor_prefix}/depth_image',
+        ros_topic=f'{ros_sensor_prefix}/depth',
+        gz_type='ignition.msgs.Image',
         ros_type='sensor_msgs/msg/Image',
         direction=BridgeDirection.GZ_TO_ROS)
 
 
-def camera_info(world_name, model_name, slot_idx, model_prefix=''):
-    prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
-    ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
+def camera_info(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name)
     return Bridge(
-        gz_topic=f'{prefix}/camera/camera_info',
-        ros_topic=f'{ros_prefix}/camera_info',
-        gz_type='gz.msgs.CameraInfo',
+        gz_topic=f'{gz_sensor_prefix}/camera_info',
+        ros_topic=f'{ros_sensor_prefix}/camera_info',
+        gz_type='ignition.msgs.CameraInfo',
         ros_type='sensor_msgs/msg/CameraInfo',
         direction=BridgeDirection.GZ_TO_ROS)
 
 
-def lidar_scan(world_name, model_name, slot_idx, model_prefix=''):
-    prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
-    ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
+def lidar_scan(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name)
     return Bridge(
-        gz_topic=f'{prefix}/lidar/scan',
-        ros_topic=f'{ros_prefix}/scan',
-        gz_type='gz.msgs.LaserScan',
+        gz_topic=f'{gz_sensor_prefix}/scan',
+        ros_topic=f'{ros_sensor_prefix}/scan',
+        gz_type='ignition.msgs.LaserScan',
         ros_type='sensor_msgs/msg/LaserScan',
         direction=BridgeDirection.GZ_TO_ROS)
 
 
-def lidar_points(world_name, model_name, slot_idx, model_prefix=''):
-    prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
-    ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
+def lidar_points(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name)
     return Bridge(
-        gz_topic=f'{prefix}/lidar/scan/points',
-        ros_topic=f'{ros_prefix}/points',
-        gz_type='gz.msgs.PointCloudPacked',
+        gz_topic=f'{gz_sensor_prefix}/scan/points',
+        ros_topic=f'{ros_sensor_prefix}/points',
+        gz_type='ignition.msgs.PointCloudPacked',
         ros_type='sensor_msgs/msg/PointCloud2',
         direction=BridgeDirection.GZ_TO_ROS)
 
 
-def camera_points(world_name, model_name, slot_idx, model_prefix=''):
-    prefix = slot_prefix(world_name, model_name, slot_idx, model_prefix)
-    ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
+def camera_points(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name)
     return Bridge(
-        gz_topic=f'{prefix}/camera/points',
-        ros_topic=f'{ros_prefix}/points',
-        gz_type='gz.msgs.PointCloudPacked',
+        gz_topic=f'{gz_sensor_prefix}/points',
+        ros_topic=f'{ros_sensor_prefix}/points',
+        gz_type='ignition.msgs.PointCloudPacked',
         ros_type='sensor_msgs/msg/PointCloud2',
         direction=BridgeDirection.GZ_TO_ROS)
 
 
-def rfranger(world_name, model_name, slot_idx, model_prefix=''):
-    prefix = f'/world/{world_name}/model/{model_name}/model/sensor_{slot_idx}'
-    ros_prefix = ros_slot_prefix(slot_idx, model_prefix)
+def rfranger(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name)
     return Bridge(
-        gz_topic=f'{prefix}/rfsensor',
-        ros_topic=f'{ros_prefix}/rfsensor',
-        gz_type='gz.msgs.Param_V',
+        gz_topic=f'{gz_sensor_prefix}/rfsensor',
+        ros_topic=f'{ros_sensor_prefix}/rfsensor',
+        gz_type='ignition.msgs.Param_V',
         ros_type='ros_gz_interfaces/msg/ParamVec',
         direction=BridgeDirection.GZ_TO_ROS)
 
+def imu(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    return Bridge(
+        gz_topic=f'{gz_sensor_prefix}/imu',
+        ros_topic='imu/data',
+        gz_type='ignition.msgs.IMU',
+        ros_type='sensor_msgs/msg/Imu',
+        direction=BridgeDirection.GZ_TO_ROS)
 
-def payload_bridges(world_name, model_name, payload, idx, model_prefix=''):
+def navsat(world_name, model_name, link_name, sensor_name):
+    gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    return Bridge(
+        gz_topic=f'{gz_sensor_prefix}/navsat',
+        ros_topic='gps/fix',
+        gz_type='ignition.msgs.NavSat',
+        ros_type='sensor_msgs/msg/NavSatFix',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+
+def contacts():
+    return Bridge(
+        gz_topic=f'/vrx/contacts',
+        ros_topic=f'/vrx/contacts',
+        gz_type='ignition.msgs.Contacts',
+        ros_type='ros_gz_interfaces/msg/Contacts',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+
+def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type):
     bridges = []
-    if payload in camera_models():
+    if sensor_type == sdf.Sensortype.CAMERA:
         bridges = [
-            image(world_name, model_name, idx, model_prefix),
-            camera_info(world_name, model_name, idx, model_prefix)
+            image(world_name, model_name, link_name, sensor_name),
+            camera_info(world_name, model_name, link_name, sensor_name)
         ]
-    elif payload in lidar_models():
+    elif sensor_type == sdf.Sensortype.IMU:
         bridges = [
-            lidar_scan(world_name, model_name, idx, model_prefix),
-            lidar_points(world_name, model_name, idx, model_prefix)
+            imu(world_name, model_name, link_name, sensor_name)
         ]
-    elif payload in rgbd_models():
+    elif sensor_type == sdf.Sensortype.CONTACT:
         bridges = [
-            image(world_name, model_name, idx, model_prefix),
-            camera_info(world_name, model_name, idx, model_prefix),
-            depth_image(world_name, model_name, idx, model_prefix),
-            camera_points(world_name, model_name, idx, model_prefix),
+            contacts(),
         ]
-    elif payload in rfranger_models():
+    elif sensor_type == sdf.Sensortype.NAVSAT:
         bridges = [
-            rfranger(world_name, model_name, idx, model_prefix),
+            navsat(world_name, model_name, link_name, sensor_name),
+        ]
+    elif sensor_type == sdf.Sensortype.GPU_LIDAR:
+        bridges = [
+            lidar_scan(world_name, model_name, link_name, sensor_name),
+            lidar_points(world_name, model_name, link_name, sensor_name)
+        ]
+    elif sensor_type == sdf.Sensortype.RGBD_CAMERA:
+        bridges = [
+            image(world_name, model_name, link_name, sensor_name),
+            camera_info(world_name, model_name, link_name, sensor_name),
+            depth_image(world_name, model_name, link_name, sensor_name),
+            camera_points(world_name, model_name, link_name, sensor_name),
         ]
     return bridges

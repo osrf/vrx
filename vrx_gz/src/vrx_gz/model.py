@@ -16,6 +16,8 @@ import codecs
 import os
 import subprocess
 
+import sdformat13 as sdf
+
 from ament_index_python.packages import get_package_share_directory
 from ament_index_python.packages import PackageNotFoundError
 
@@ -64,8 +66,6 @@ class Model:
         custom_launches = []
         nodes = []
         bridges = [
-            # IMU
-            # vrx_gz.bridges.imu(world_name, self.model_name),
             # pose
             vrx_gz.bridges.pose(self.model_name),
             # pose static
@@ -110,52 +110,41 @@ class Model:
         bridges = []
         nodes = []
         payload_launches = []
-        for (idx, k) in enumerate(sorted(payloads.keys())):
-            p = payloads[k]
-            if not p['sensor'] or p['sensor'] == 'None' or p['sensor'] == '':
-                continue
+        for sensor_name, value in payloads.items():
+            link_name = value[0]
+            sensor_type = value[1]
 
-            # check if it is a custom payload
-            if self.is_custom_model(p['sensor']):
-                payload_launch = self.custom_payload_launch(world_name, self.model_name,
-                                                            p['sensor'], idx)
-                if payload_launch is not None:
-                    payload_launches.append(payload_launch)
+            bridges.extend(
+                vrx_gz.payload_bridges.payload_bridges(
+                    world_name, self.model_name, link_name, sensor_name, sensor_type))
 
-            # if not custom payload, add our own bridges and nodes
-            else:
-                model_prefix = ''
-                ros_slot_prefix = f'slot{idx}'
-                bridges.extend(
-                    vrx_gz.payload_bridges.payload_bridges(
-                        world_name, self.model_name, p['sensor'], idx, model_prefix))
+            if sensor_type == sdf.Sensortype.CAMERA:
+                nodes.append(Node(
+                    package='vrx_ros',
+                    executable='optical_frame_publisher',
+                    arguments=['1'],
+                    remappings=[('input/image', f'{sensor_name}/image_raw'),
+                                ('output/image', f'{sensor_name}/optical/image_raw'),
+                                ('input/camera_info', f'{sensor_name}/camera_info'),
+                                ('output/camera_info',
+                                 f'{sensor_name}/optical/camera_info')]))
+            elif sensor_type == sdf.Sensortype.RGBD_CAMERA:
+                nodes.append(Node(
+                    package='vrx_ros',
+                    executable='optical_frame_publisher',
+                    arguments=['1'],
+                    remappings=[('input/image', f'{sensor_name}/image_raw'),
+                                ('output/image', f'{sensor_name}/optical/image_raw'),
+                                ('input/camera_info', f'{sensor_name}/camera_info'),
+                                ('output/camera_info',
+                                 f'{sensor_name}/optical/camera_info')]))
+                nodes.append(Node(
+                    package='vrx_ros',
+                    executable='optical_frame_publisher',
+                    arguments=['1'],
+                    remappings=[('input/image', f'{sensor_name}/depth'),
+                                ('output/image', f'{sensor_name}/optical/depth')]))
 
-                if p['sensor'] in vrx_gz.payload_bridges.camera_models():
-                    nodes.append(Node(
-                        package='vrx_ros',
-                        executable='optical_frame_publisher',
-                        arguments=['1'],
-                        remappings=[('input/image', f'{ros_slot_prefix}/image_raw'),
-                                    ('output/image', f'{ros_slot_prefix}/optical/image_raw'),
-                                    ('input/camera_info', f'{ros_slot_prefix}/camera_info'),
-                                    ('output/camera_info',
-                                     f'{ros_slot_prefix}/optical/camera_info')]))
-                elif p['sensor'] in vrx_gz.payload_bridges.rgbd_models():
-                    nodes.append(Node(
-                        package='vrx_ros',
-                        executable='optical_frame_publisher',
-                        arguments=['1'],
-                        remappings=[('input/image', f'{ros_slot_prefix}/image_raw'),
-                                    ('output/image', f'{ros_slot_prefix}/optical/image_raw'),
-                                    ('input/camera_info', f'{ros_slot_prefix}/camera_info'),
-                                    ('output/camera_info',
-                                     f'{ros_slot_prefix}/optical/camera_info')]))
-                    nodes.append(Node(
-                        package='vrx_ros',
-                        executable='optical_frame_publisher',
-                        arguments=['1'],
-                        remappings=[('input/image', f'{ros_slot_prefix}/depth'),
-                                    ('output/image', f'{ros_slot_prefix}/optical/depth')]))
         return [bridges, nodes, payload_launches]
 
     def is_custom_model(self, model):
@@ -285,6 +274,8 @@ class Model:
         stdout = process.communicate()[0]
         model_sdf = codecs.getdecoder('unicode_escape')(stdout)[0]
 
+        self.payload = self.payload_from_sdf(model_sdf)
+
         ######## todo remove me
         with open('/tmp/wamv.sdf', 'w') as f:
             f.write(model_sdf)
@@ -292,6 +283,22 @@ class Model:
         print(command)
 
         return command, model_sdf
+
+    def payload_from_sdf(self, model_sdf):
+        payload = {}
+        root = sdf.Root()
+        root.load_sdf_string(model_sdf)
+        model = root.model()
+        for link_index in range(model.link_count()):
+            link = model.link_by_index(link_index)
+            for sensor_index in range(link.sensor_count()):
+                sensor = link.sensor_by_index(sensor_index)
+                payload[sensor.name()] = [link.name(), sensor.type()]
+        plugins = model.plugins()
+        for plugin in plugins:
+            payload[plugin.name()] = ['', plugin.filename()]
+        return payload
+
 
     def spawn_args(self, model_sdf=None):
         if not model_sdf:

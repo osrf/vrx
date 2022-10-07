@@ -39,7 +39,7 @@
       <sensor name="navsat" type="navsat">
         <always_on>1</always_on>
         <update_rate>15</update_rate>
-        <topic>${namespace}/${sensor_namespace}gps/gps/fix</topic>
+        <!--<topic>${namespace}/${sensor_namespace}gps/gps/fix</topic>-->
       </sensor>
     </gazebo>
   </xacro:macro>
