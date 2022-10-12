@@ -119,31 +119,33 @@ class Model:
                     world_name, self.model_name, link_name, sensor_name, sensor_type))
 
             if sensor_type == sdf.Sensortype.CAMERA:
+                ros_sensor_prefix = f'sensors/cameras/{sensor_name}'
                 nodes.append(Node(
                     package='vrx_ros',
                     executable='optical_frame_publisher',
                     arguments=['1'],
-                    remappings=[('input/image', f'{sensor_name}/image_raw'),
-                                ('output/image', f'{sensor_name}/optical/image_raw'),
-                                ('input/camera_info', f'{sensor_name}/camera_info'),
+                    remappings=[('input/image', f'{ros_sensor_prefix}/image_raw'),
+                                ('output/image', f'{ros_sensor_prefix}/optical/image_raw'),
+                                ('input/camera_info', f'{ros_sensor_prefix}/camera_info'),
                                 ('output/camera_info',
-                                 f'{sensor_name}/optical/camera_info')]))
+                                 f'{ros_sensor_prefix}/optical/camera_info')]))
             elif sensor_type == sdf.Sensortype.RGBD_CAMERA:
+                ros_sensor_prefix = f'sensors/cameras/{sensor_name}'
                 nodes.append(Node(
                     package='vrx_ros',
                     executable='optical_frame_publisher',
                     arguments=['1'],
-                    remappings=[('input/image', f'{sensor_name}/image_raw'),
-                                ('output/image', f'{sensor_name}/optical/image_raw'),
-                                ('input/camera_info', f'{sensor_name}/camera_info'),
+                    remappings=[('input/image', f'{ros_sensor_prefix}/image_raw'),
+                                ('output/image', f'{ros_sensor_prefix}/optical/image_raw'),
+                                ('input/camera_info', f'{ros_sensor_prefix}/camera_info'),
                                 ('output/camera_info',
-                                 f'{sensor_name}/optical/camera_info')]))
+                                 f'{ros_sensor_prefix}/optical/camera_info')]))
                 nodes.append(Node(
                     package='vrx_ros',
                     executable='optical_frame_publisher',
                     arguments=['1'],
-                    remappings=[('input/image', f'{sensor_name}/depth'),
-                                ('output/image', f'{sensor_name}/optical/depth')]))
+                    remappings=[('input/image', f'{ros_sensor_prefix}/depth'),
+                                ('output/image', f'{ros_sensor_prefix}/optical/depth')]))
 
         return [bridges, nodes, payload_launches]
 
