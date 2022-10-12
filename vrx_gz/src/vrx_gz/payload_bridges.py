@@ -7,13 +7,13 @@ def gz_prefix(world_name, model_name, link_name, sensor_name):
     return f'/world/{world_name}/model/{model_name}/link/{link_name}/sensor/{sensor_name}'
 
 
-def ros_prefix(sensor_name):
-    return f'{sensor_name}'
+def ros_prefix(sensor_name, sensor_type):
+    return f'sensors/{sensor_type}/{sensor_name}'
 
 
 def image(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
-    ros_sensor_prefix = ros_prefix(sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name, 'cameras')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/image',
         ros_topic=f'{ros_sensor_prefix}/image_raw',
@@ -24,7 +24,7 @@ def image(world_name, model_name, link_name, sensor_name):
 
 def depth_image(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
-    ros_sensor_prefix = ros_prefix(sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name, 'cameras')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/depth_image',
         ros_topic=f'{ros_sensor_prefix}/depth',
@@ -35,7 +35,7 @@ def depth_image(world_name, model_name, link_name, sensor_name):
 
 def camera_info(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
-    ros_sensor_prefix = ros_prefix(sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name, 'cameras')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/camera_info',
         ros_topic=f'{ros_sensor_prefix}/camera_info',
@@ -46,7 +46,7 @@ def camera_info(world_name, model_name, link_name, sensor_name):
 
 def lidar_scan(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
-    ros_sensor_prefix = ros_prefix(sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name, 'lidars')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/scan',
         ros_topic=f'{ros_sensor_prefix}/scan',
@@ -57,7 +57,7 @@ def lidar_scan(world_name, model_name, link_name, sensor_name):
 
 def lidar_points(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
-    ros_sensor_prefix = ros_prefix(sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name, 'lidars')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/scan/points',
         ros_topic=f'{ros_sensor_prefix}/points',
@@ -68,7 +68,7 @@ def lidar_points(world_name, model_name, link_name, sensor_name):
 
 def camera_points(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
-    ros_sensor_prefix = ros_prefix(sensor_name)
+    ros_sensor_prefix = ros_prefix(sensor_name, 'cameras')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/points',
         ros_topic=f'{ros_sensor_prefix}/points',
@@ -89,18 +89,20 @@ def rfranger(world_name, model_name, link_name, sensor_name):
 
 def imu(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix('', 'imu')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/imu',
-        ros_topic='imu/data',
+        ros_topic=f'{ros_sensor_prefix}imu/data',
         gz_type='ignition.msgs.IMU',
         ros_type='sensor_msgs/msg/Imu',
         direction=BridgeDirection.GZ_TO_ROS)
 
 def navsat(world_name, model_name, link_name, sensor_name):
     gz_sensor_prefix = gz_prefix(world_name, model_name, link_name, sensor_name)
+    ros_sensor_prefix = ros_prefix('', 'gps')
     return Bridge(
         gz_topic=f'{gz_sensor_prefix}/navsat',
-        ros_topic='gps/fix',
+        ros_topic=f'{ros_sensor_prefix}gps/fix',
         gz_type='ignition.msgs.NavSat',
         ros_type='sensor_msgs/msg/NavSatFix',
         direction=BridgeDirection.GZ_TO_ROS)
@@ -116,9 +118,10 @@ def contacts():
 
 
 def odometry(model_name):
+    ros_sensor_prefix = ros_prefix('', 'position')
     return Bridge(
         gz_topic=f'/model/{model_name}/odometry',
-        ros_topic=f'/{model_name}/odom',
+        ros_topic=f'{ros_sensor_prefix}ground_truth_odometry',
         gz_type='ignition.msgs.Odometry',
         ros_type='nav_msgs/msg/Odometry',
         direction=BridgeDirection.GZ_TO_ROS)
