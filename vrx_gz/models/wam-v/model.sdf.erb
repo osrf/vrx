@@ -1,0 +1,254 @@
+<%
+if !defined?(name) || name== nil || name.empty?
+  $model_name = 'wamv'
+else
+  $model_name = name
+end
+
+if !defined?(wavefieldSize) || wavefieldSize == nil || wavefieldSize.empty?
+  $wavefield_size = 1000.0
+else
+  $wavefield_size = wavefieldSize.to_f
+end
+  $wavefield_cell_count = $wavefield_size / 20.0
+
+  x_uu = 72.4 # Hydrodynamic quadratic coefficient
+  x_u = 51.3 # Hydrodynamic linear coefficient
+  max_velocity_knots = 15 # Maximum velocity in knots.
+  max_velocity_mps = max_velocity_knots * 0.5144 # convert knots to m/s
+  max_total_thrust = (x_u + x_uu * max_velocity_mps) * max_velocity_mps
+  locked = false
+%>
+
+<?xml version="1.0"?>
+
+<sdf version='1.9'>
+<model name="<%= $model_name%>">
+  <static>false</static>
+  <self_collide>true</self_collide>
+
+  <!-- Base model-->
+  <include merge="true">
+    <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/wam-v</uri>
+
+    <!-- Contact sensors -->
+    <experimental:params>
+      <sensor element_id="base_link" name='sensor_contacts' type='contact' action="add">
+        <contact>
+          <collision>top_base</collision>
+          <collision>left_float</collision>
+          <collision>left_mid_float</collision>
+          <collision>left_front_float</collision>
+          <collision>right_float</collision>
+          <collision>right_mid_float</collision>
+          <collision>right_front_float</collision>
+          <topic>/vrx/contacts</topic>
+        </contact>
+        <always_on>1</always_on>
+        <update_rate>5</update_rate>
+      </sensor>
+    </experimental:params>
+  </include>
+
+  <!-- Used to lock the WAM-V to the world -->
+  <link name="dummy_base">
+    <inertial>
+      <mass>0.001</mass>
+      <inertia>
+        <ixx>0.00000004</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.00000004</iyy>
+        <iyz>0</iyz>
+        <izz>0.00000004</izz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <!-- Used to lock the WAM-V to the world -->
+  <link name="dummy_link">
+    <inertial>
+      <mass>0.001</mass>
+      <inertia>
+        <ixx>0.00000004</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.00000004</iyy>
+        <iyz>0</iyz>
+        <izz>0.00000004</izz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <!-- === Decide if we lock the robot to the world === -->
+  <% if defined?(locked) && locked==true %>
+  <joint name="dummy_riser_joint" type="prismatic">
+    <parent>dummy_base</parent>
+    <child>dummy_link</child>
+    <axis>
+      <limit>
+        <lower>-3</lower>
+        <upper>3</upper>
+      </limit>
+      <xyz>0 0 1</xyz>
+    </axis>
+  </joint>
+
+  <joint name="dummy_pivot_joint" type="universal">
+    <parent>dummy_link</parent>
+    <child>base_link</child>
+    <axis>
+      <xyz>1 0 0</xyz>
+    </axis>
+    <axis2>
+      <xyz>0 1 0</xyz>
+    </axis2>
+  </joint>
+
+  <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+    <parent_link>dummy_base</parent_link>
+    <child_model>platform</child_model>
+    <child_link>dummy_base</child_link>
+    <topic>/vrx/release</topic>
+    <suppress_child_warning>true</suppress_child_warning>
+  </plugin>
+  <% end %>
+
+  <plugin
+    filename="gz-sim-thruster-system"
+    name="gz::sim::systems::Thruster">
+    <joint_name>left_engine_propeller_joint</joint_name>
+    <thrust_coefficient>0.004422</thrust_coefficient>
+    <fluid_density>1000</fluid_density>
+    <propeller_diameter>0.2</propeller_diameter>
+    <velocity_control>true</velocity_control>
+    <max_thrust_cmd><%= max_total_thrust/2 %></max_thrust_cmd>
+    <namespace><%= $model_name%></namespace>
+    <topic>thrusters/left/thrust</topic>
+  </plugin>
+
+  <plugin
+    filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
+    <joint_name>left_chassis_engine_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <topic><%=$model_name%>/thrusters/left/pos</topic>
+  </plugin>
+
+  <plugin
+    filename="gz-sim-thruster-system"
+    name="gz::sim::systems::Thruster">
+    <joint_name>right_engine_propeller_joint</joint_name>
+    <thrust_coefficient>0.004422</thrust_coefficient>
+    <fluid_density>1000</fluid_density>
+    <propeller_diameter>0.2</propeller_diameter>
+    <velocity_control>true</velocity_control>
+    <max_thrust_cmd><%= max_total_thrust/2 %></max_thrust_cmd>
+    <namespace><%= $model_name%></namespace>
+    <topic>thrusters/right/thrust</topic>
+  </plugin>
+
+  <plugin
+    filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
+    <joint_name>right_chassis_engine_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <topic><%= $model_name%>/thrusters/right/pos</topic>
+  </plugin>
+
+  <!-- Left hull -->
+  <plugin
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <hull_length>4.9</hull_length>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+    <points>
+      <point>0.6 1.03 0</point>
+      <point>-1.4 1.03 0</point>
+    </points>
+    <wavefield>
+      <size><%= $wavefield_size%> <%= $wavefield_size%></size>
+      <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
+      <wave>
+        <model>PMS</model>
+        <period>5.0</period>
+        <number>3</number>
+        <scale>1.1</scale>
+        <gain>0.3</gain>
+        <direction>1 0</direction>
+        <angle>0.4</angle>
+        <tau>2.0</tau>
+        <amplitude>0.0</amplitude>
+        <steepness>0.0</steepness>
+      </wave>
+    </wavefield>
+  </plugin>
+
+  <!-- Right hull -->
+  <plugin
+    filename="libSurface.so"
+    name="vrx::Surface">
+    <link_name>base_link</link_name>
+    <hull_length>4.9</hull_length>
+    <hull_radius>0.213</hull_radius>
+    <fluid_level>0</fluid_level>
+    <points>
+      <point>0.6 -1.03 0</point>
+      <point>-1.4 -1.03 0</point>
+    </points>
+    <wavefield>
+      <size><%= $wavefield_size%> <%= $wavefield_size%></size>
+      <cell_count><%= $wavefield_cell_count%> <%=$wavefield_cell_count%></cell_count>
+      <wave>
+        <model>PMS</model>
+        <period>5.0</period>
+        <number>3</number>
+        <scale>1.1</scale>
+        <gain>0.3</gain>
+        <direction>1 0</direction>
+        <angle>0.4</angle>
+        <tau>2.0</tau>
+        <amplitude>0.0</amplitude>
+        <steepness>0.0</steepness>
+      </wave>
+    </wavefield>
+  </plugin>
+
+  <plugin
+    filename="libSimpleHydrodynamics.so"
+    name="vrx::SimpleHydrodynamics">
+    <link_name>base_link</link_name>
+    <!-- Added mass -->
+    <xDotU>0.0</xDotU>
+    <yDotV>0.0</yDotV>
+    <nDotR>0.0</nDotR>
+    <!-- Linear and quadratic drag -->
+    <xU><%=x_u%></xU>
+    <xUU><%=x_uu%></xUU>
+    <yV>40.0</yV>
+    <yVV>0.0</yVV>
+    <zW>500.0</zW>
+    <kP>100.0</kP>
+    <mQ>100.0</mQ>
+    <nR>400.0</nR>
+    <nRR>0.0</nRR>
+  </plugin>
+
+  <!-- Publish robot state information -->
+  <plugin filename="libgz-sim-pose-publisher-system.so"
+    name="gz::sim::systems::PosePublisher">
+    <publish_link_pose>true</publish_link_pose>
+    <publish_sensor_pose>true</publish_sensor_pose>
+    <publish_collision_pose>false</publish_collision_pose>
+    <publish_visual_pose>false</publish_visual_pose>
+    <publish_nested_model_pose>true</publish_nested_model_pose>
+    <publish_model_pose>false</publish_model_pose>
+    <use_pose_vector_msg>true</use_pose_vector_msg>
+    <static_publisher>true</static_publisher>
+    <static_update_frequency>1</static_update_frequency>
+  </plugin>
+
+</model>
+</sdf>

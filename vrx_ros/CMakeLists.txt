@@ -5,14 +5,11 @@ project(vrx_ros)
 find_package(ament_cmake REQUIRED)
 
 find_package(geometry_msgs REQUIRED)
-find_package(ignition-math6 REQUIRED)
-set(IGN_MATH_VER ${ignition-math6_VERSION_MAJOR})
-find_package(ignition-msgs8 REQUIRED)
-find_package(ignition-transport11 REQUIRED)
-set(IGN_TRANSPORT_VER ${ignition-transport11_VERSION_MAJOR})
-find_package(mavros_msgs REQUIRED)
+find_package(gz-msgs9 REQUIRED)
+find_package(gz-transport12 REQUIRED)
+set(GZ_TRANSPORT_VER ${gz-transport12_VERSION_MAJOR})
 find_package(rclcpp REQUIRED)
-find_package(ros_ign_interfaces REQUIRED)
+find_package(ros_gz_interfaces REQUIRED)
 find_package(rosgraph_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -37,21 +34,10 @@ ament_target_dependencies(pose_tf_broadcaster
   tf2_msgs
 )
 
-add_executable(usv_bridge src/usv_bridge.cc)
-ament_target_dependencies(usv_bridge
-  PUBLIC
-  rclcpp
-  std_msgs
-)
-target_link_libraries(usv_bridge PUBLIC
-  ignition-math${IGN_MATH_VER}::ignition-math${IGN_MATH_VER}
-)
-
 # Resources
 install(TARGETS
   optical_frame_publisher
   pose_tf_broadcaster
-  usv_bridge
   DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY
   launch
