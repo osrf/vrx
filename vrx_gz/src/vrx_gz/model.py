@@ -276,7 +276,9 @@ class Model:
         stdout = process.communicate()[0]
         model_sdf = codecs.getdecoder('unicode_escape')(stdout)[0]
 
-        self.payload = self.payload_from_sdf(model_sdf)
+        # parse sdf for payloads if model is urdf
+        if self.urdf != '':
+            self.payload = self.payload_from_sdf(model_sdf)
 
         # for debugging generated sdf file
         # with open('/tmp/wamv.sdf', 'w') as f:
