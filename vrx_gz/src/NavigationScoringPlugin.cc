@@ -16,18 +16,18 @@
  */
 
 #include <vector>
-#include <ignition/gazebo/components/Name.hh>
-#include <ignition/gazebo/components/Pose.hh>
-#include <ignition/gazebo/components/World.hh>
-#include <ignition/gazebo/components/ParentEntity.hh>
-#include <ignition/gazebo/World.hh>
-#include <ignition/msgs/float.pb.h>
-#include <ignition/msgs/pose.pb.h>
-#include <ignition/plugin/Register.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/components/ParentEntity.hh>
+#include <gz/sim/World.hh>
+#include <gz/msgs/float.pb.h>
+#include <gz/msgs/pose.pb.h>
+#include <gz/plugin/Register.hh>
 
 #include "NavigationScoringPlugin.hh"
 
-using namespace ignition;
+using namespace gz;
 using namespace vrx;
 
 /// \brief Private ScoringPlugin data class.
@@ -69,10 +69,10 @@ class NavigationScoringPlugin::Implementation
       const math::Pose3d &_robotWorldPose) const;
 
     /// \brief Recalculate the pose and width of the gate.
-    public: void Update(gazebo::EntityComponentManager &_ecm);
+    public: void Update(sim::EntityComponentManager &_ecm);
 
     /// \brief Get right and left marker entities
-    public: bool LoadEntities(gazebo::EntityComponentManager &_ecm);
+    public: bool LoadEntities(sim::EntityComponentManager &_ecm);
 
     /// \brief The left marker model name.
     public: std::string leftMarkerName;
@@ -81,10 +81,10 @@ class NavigationScoringPlugin::Implementation
     public: std::string rightMarkerName;
 
     /// \brief The left marker entity.
-    public: gazebo::Entity leftMarkerEntity;
+    public: sim::Entity leftMarkerEntity;
 
     /// \brief The right marker entity.
-    public: gazebo::Entity rightMarkerEntity;
+    public: sim::Entity rightMarkerEntity;
 
     /// \brief The center of the gate in the world frame. Note that the roll and
     /// pitch are ignored. Only yaw is relevant and it points into the direction
@@ -107,13 +107,13 @@ class NavigationScoringPlugin::Implementation
   public: std::string courseName;
 
    /// \brief Entity of the course used.
-  public: gazebo::Entity courseEntity;
+  public: sim::Entity courseEntity;
 
   /// \brief Pointer to the SDF plugin element.
   public: sdf::ElementPtr sdf;
 
    /// \brief Entity of the vehicle used.
-  public: gazebo::Entity vehicleEntity;
+  public: sim::Entity vehicleEntity;
 
   /// \brief All the gates.
   public: std::vector<Gate> gates;
@@ -142,22 +142,22 @@ NavigationScoringPlugin::Implementation::Gate::Gate(
 }
 
 bool NavigationScoringPlugin::Implementation::Gate::LoadEntities(
-    gazebo::EntityComponentManager &_ecm)
+    sim::EntityComponentManager &_ecm)
 {
   leftMarkerEntity = _ecm.EntityByComponents(
-      gazebo::components::Name(leftMarkerName));
+      sim::components::Name(leftMarkerName));
 
   // Sanity check: Make sure that the model exists.
-  if (leftMarkerEntity == gazebo::kNullEntity)
+  if (leftMarkerEntity == sim::kNullEntity)
   {
     ignerr << "Unable to find entity [" << leftMarkerName << "]" << std::endl;
     return false;
   }
 
   rightMarkerEntity = _ecm.EntityByComponents(
-      gazebo::components::Name(rightMarkerName));
+      sim::components::Name(rightMarkerName));
 
-  if (rightMarkerEntity == gazebo::kNullEntity)
+  if (rightMarkerEntity == sim::kNullEntity)
   {
     ignerr << "Unable to find entity [" << rightMarkerName << "]" << std::endl;
     return false;
@@ -170,21 +170,21 @@ bool NavigationScoringPlugin::Implementation::Gate::LoadEntities(
 }
 //////////////////////////////////////////////////
 void NavigationScoringPlugin::Implementation::Gate::Update(
-    gazebo::EntityComponentManager &_ecm)
+    sim::EntityComponentManager &_ecm)
 {
   if (!leftMarkerEntity || !rightMarkerEntity)
     return;
   
   // get the course pose
-  auto courseEntity = _ecm.Component<gazebo::components::ParentEntity>(
+  auto courseEntity = _ecm.Component<sim::components::ParentEntity>(
      leftMarkerEntity)->Data();
-  auto coursePose = _ecm.Component<gazebo::components::Pose>(
+  auto coursePose = _ecm.Component<sim::components::Pose>(
      courseEntity)->Data();
 
   // The relative pose of the markers delimiting the gate.
-  auto leftMarkerPose = _ecm.Component<gazebo::components::Pose>(
+  auto leftMarkerPose = _ecm.Component<sim::components::Pose>(
     leftMarkerEntity)->Data() + coursePose;
-  auto rightMarkerPose = _ecm.Component<gazebo::components::Pose>(
+  auto rightMarkerPose = _ecm.Component<sim::components::Pose>(
     rightMarkerEntity)->Data()+ coursePose;
 
   // Unit vector from the left marker to the right one.
@@ -201,7 +201,7 @@ void NavigationScoringPlugin::Implementation::Gate::Update(
   const auto yaw = atan2(v2.Y(), v2.X());
 
   // The updated pose.
-  this->pose.Set(middle, ignition::math::Vector3d(0, 0, yaw));
+  this->pose.Set(middle, gz::math::Vector3d(0, 0, yaw));
 
   // The updated width.
   this->width = leftMarkerPose.Pos().Distance(rightMarkerPose.Pos());
@@ -289,9 +289,9 @@ NavigationScoringPlugin::NavigationScoringPlugin()
 }
 
 /////////////////////////////////////////////////
-void NavigationScoringPlugin::Configure(const gazebo::Entity &_entity,
+void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   const std::shared_ptr<const sdf::Element> &_sdf,
-  gazebo::EntityComponentManager &_ecm, gazebo::EventManager &_eventMgr)
+  sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
   ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
@@ -299,8 +299,8 @@ void NavigationScoringPlugin::Configure(const gazebo::Entity &_entity,
   this->dataPtr->sdf = _sdf->Clone();
 
   auto worldEntity =
-      _ecm.EntityByComponents(gazebo::components::World());
-  gazebo::World world(worldEntity);
+      _ecm.EntityByComponents(sim::components::World());
+  sim::World world(worldEntity);
 
   // course_name is a required element.
   if (!_sdf->HasElement("course_name"))
@@ -342,8 +342,8 @@ void NavigationScoringPlugin::Configure(const gazebo::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
-  gazebo::EntityComponentManager &_ecm)
+void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
+  sim::EntityComponentManager &_ecm)
 {
   ScoringPlugin::PreUpdate(_info, _ecm);
 
@@ -351,8 +351,8 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
   if (!this->dataPtr->vehicleEntity)
   {
     auto entity = _ecm.EntityByComponents(
-      gazebo::components::Name(ScoringPlugin::VehicleName()));
-    if (entity != gazebo::kNullEntity)
+      sim::components::Name(ScoringPlugin::VehicleName()));
+    if (entity != sim::kNullEntity)
       this->dataPtr->vehicleEntity = entity;
     else
       return;
@@ -361,8 +361,8 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
   if (!this->dataPtr->courseEntity)
   {
     auto entity = _ecm.EntityByComponents(
-      gazebo::components::Name(this->dataPtr->courseName));
-    if (entity != gazebo::kNullEntity)
+      sim::components::Name(this->dataPtr->courseName));
+    if (entity != sim::kNullEntity)
       this->dataPtr->courseEntity = entity;
     else
       return;
@@ -393,7 +393,7 @@ void NavigationScoringPlugin::PreUpdate( const gazebo::UpdateInfo &_info,
     std::chrono::duration<double>(this->ElapsedTime()).count() +
     this->NumCollisions() * this->dataPtr->obstaclePenalty) / this->dataPtr->numGates);
 
-  auto vehiclePose = _ecm.Component<gazebo::components::Pose>(
+  auto vehiclePose = _ecm.Component<sim::components::Pose>(
     this->dataPtr->vehicleEntity)->Data();
 
   // Update the state of all gates.
@@ -494,7 +494,7 @@ void NavigationScoringPlugin::OnCollision()
   ScoringPlugin::OnCollision();
 }
 
-IGNITION_ADD_PLUGIN(vrx::NavigationScoringPlugin,
-                    gazebo::System,
+GZ_ADD_PLUGIN(vrx::NavigationScoringPlugin,
+                    sim::System,
                     vrx::NavigationScoringPlugin::ISystemConfigure,
                     vrx::NavigationScoringPlugin::ISystemPreUpdate)
