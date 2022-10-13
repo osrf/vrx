@@ -196,7 +196,10 @@ void BallShooterPlugin::Configure(const sim::Entity &_entity,
 
   // Parse <num_shots> if available.
   if (sdf->HasElement("num_shots"))
-    this->dataPtr->remainingShots = sdf->GetElement("num_shots")->Get<unsigned int>();
+  {
+    this->dataPtr->remainingShots =
+        sdf->GetElement("num_shots")->Get<unsigned int>();
+  }
 
   // Parse <shot_force> if available.
   if (sdf->HasElement("shot_force"))
