@@ -201,6 +201,9 @@ class Model:
 
 
     def erb_cmd(self):
+        # this function is currently not called.
+        # xacro_cmd is used instead
+
         # Generate SDF by executing ERB and populating templates
         template_file = os.path.join(
             get_package_share_directory('vrx_gz'),
@@ -236,6 +239,9 @@ class Model:
         xacro_command = ['xacro']
         xacro_command.append(self.urdf)
         xacro_command.append(f'namespace:={self.model_name}')
+        xacro_command.append(f'locked:=true')
+        xacro_command.append(f'vrx_sensors_enabled:=true')
+        xacro_command.append(f'thruster_config:=H')
         xacro_process = subprocess.Popen(xacro_command,
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE)
@@ -257,16 +263,15 @@ class Model:
 
     def generate(self):
         command = None
-        if self.urdf != '':
-            command = self.xacro_cmd()
-        else:
-            command = self.erb_cmd()
+        if not self.urdf:
+            self.urdf = os.path.join(get_package_share_directory('wamv_gazebo'),
+                                     'urdf', 'wamv_gazebo.urdf.xacro')
+        command = self.xacro_cmd()
         process = subprocess.Popen(command,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
 
-        # evaluate error output to see if there were undefined variables
-        # for the ERB process
+        # evaluate error output for the xacro process
         stderr = process.communicate()[1]
         err_output = codecs.getdecoder('unicode_escape')(stderr)[0]
         for line in err_output.splitlines():
