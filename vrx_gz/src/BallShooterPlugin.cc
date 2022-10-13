@@ -23,15 +23,14 @@
 
 #include <gz/sim/Link.hh>
 #include <gz/sim/Model.hh>
+#include <gz/sim/components/AngularVelocityCmd.hh>
+#include <gz/sim/components/LinearVelocityCmd.hh>
 #include <gz/sim/components/Link.hh>
 #include <gz/sim/components/Model.hh>
 #include <gz/sim/components/Name.hh>
 #include <gz/sim/components/ParentEntity.hh>
 #include <gz/sim/components/Pose.hh>
 #include <gz/sim/components/PoseCmd.hh>
-
-#include <gz/sim/components/AngularVelocityCmd.hh>
-#include <gz/sim/components/LinearVelocityCmd.hh>
 
 #include <gz/transport/Node.hh>
 
