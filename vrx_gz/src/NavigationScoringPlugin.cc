@@ -412,6 +412,7 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     {
       currentState = Implementation::GateState::CROSSED;
       ignmsg << "New gate crossed!" << std::endl;
+      std::cout << std::flush;
 
       // We need to cross all gates in order.
       if (iter != this->dataPtr->gates.begin())
@@ -460,6 +461,7 @@ void NavigationScoringPlugin::OnReady()
   if (!this->dataPtr->silent)
   {
     ignmsg << "NavigationScoringPlugin::OnReady" << std::endl;
+    std::cout << std::flush;
   }
   ScoringPlugin::OnReady();
 }
@@ -470,6 +472,7 @@ void NavigationScoringPlugin::OnRunning()
   if (!this->dataPtr->silent)
   {
     ignmsg << "NavigationScoringPlugin::OnRunning" << std::endl;
+    std::cout << std::flush;
   }
   ScoringPlugin::OnRunning();
 }
@@ -490,6 +493,7 @@ void NavigationScoringPlugin::OnCollision()
   if (!this->dataPtr->silent)
   {
     ignmsg << "NavigationScoringPlugin::OnCollision" << std::endl;
+    std::cout << std::flush;
   }
   ScoringPlugin::OnCollision();
 }
