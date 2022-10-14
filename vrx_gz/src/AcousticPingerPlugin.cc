@@ -61,14 +61,13 @@ class AcousticPingerPlugin::Implementation
   /// \brief Vector storing the position of the pinger.
   public: math::Vector3d position = math::Vector3d::Zero;
 
-  // Variables that contain parameters of sensor simulation.
   /// \brief String holding the frame id of the sensor.
   public: std::string frameId = "pinger";
 
-  /// \brief ToDo.
+  /// \brief The topic used to read the range bearing measurements.
   public: std::string topic = "/pinger/range_bearing";
 
-  /// \brief ToDo.
+  /// \brief The topic to set the position of the pinger.
   public: std::string setPositionTopicName = "/pinger/set_pinger_position";
 
   /// \brief Sensor update rate.
@@ -82,7 +81,7 @@ class AcousticPingerPlugin::Implementation
 
   /// \brief Variable used to track time of last update. This is used to
   /// produce data at the correct rate.
-  public: std::chrono::duration<double> lastUpdateTime{0};;
+  public: std::chrono::duration<double> lastUpdateTime{0};
 
   // From Brian Bingham's rangebearing_gazebo_plugin.
   /// \brief rangeNoise - Gazebo noise object for range.
@@ -199,7 +198,7 @@ void AcousticPingerPlugin::Configure(const sim::Entity &_entity,
   this->dataPtr->sdf = _sdf->Clone();
   if (!this->dataPtr->ParseSDFParameters(_ecm))
   {
-    gzerr << "Perception scoring disabled" << std::endl;
+    gzerr << "AcousticPingerPlugin disabled" << std::endl;
     return;
   }
 
