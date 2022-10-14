@@ -91,6 +91,14 @@ def acoustic_pinger(model_name):
         ros_type='ros_gz_interfaces/msg/ParamVec',
         direction=BridgeDirection.GZ_TO_ROS)
 
+def set_acoustic_pinger(model_name):
+    return Bridge(
+        gz_topic=f'{model_name}/pingers/pinger/set_pinger_position',
+        ros_topic=f'pingers/pinger/set_pinger_position',
+        gz_type='ignition.msgs.Vector3d',
+        ros_type='geometry_msgs/Vector3',
+        direction=BridgeDirection.ROS_TO_GZ)
+
 def comms_tx(model_name):
     return Bridge(
         gz_topic='/broker/msgs',

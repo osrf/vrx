@@ -199,7 +199,6 @@ void AcousticPingerPlugin::Implementation::PingerPositionCallback(
 AcousticPingerPlugin::AcousticPingerPlugin()
   : dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
-  gzerr << "AcousticPingerPlugin loaded" << std::endl;
 }
 
 //////////////////////////////////////////////////
