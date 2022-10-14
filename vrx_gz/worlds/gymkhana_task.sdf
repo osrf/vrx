@@ -304,6 +304,10 @@
       filename="gz-sim-contact-system"
       name="gz::sim::systems::Contact">
     </plugin>
+    <plugin
+      filename="gz-sim-navsat-system"
+      name="gz::sim::systems::NavSat">
+    </plugin>
     <scene>
       <sky></sky>
       <grid>false</grid>
