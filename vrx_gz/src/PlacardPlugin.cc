@@ -119,8 +119,8 @@ class PlacardPlugin::Implementation
   /// Pointer to the scene node.
   public: rendering::ScenePtr scene;
 
-  /// \brief Next time where the plugin should be updated.
-  public: std::chrono::steady_clock::duration nextUpdateTime;
+  /// \brief True to change symbol shape and color in rendering thread
+  public: bool symbolDirty = false;
 
   /// \brief Locks state and pattern member variables.
   public: std::mutex mutex;
@@ -203,13 +203,16 @@ void PlacardPlugin::Implementation::InitializeAllPatterns()
 }
 
 //////////////////////////////////////////////////
-void PlacardPlugin::Implementation::ChangeSymbolTo(const gz::msgs::StringMsg_V &_msg)
+void PlacardPlugin::Implementation::ChangeSymbolTo(
+    const gz::msgs::StringMsg_V &_msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
   if (_msg.data_size() >= 2)
   {
     this->shape = _msg.data(0);
     this->color = _msg.data(1);
+
+    this->symbolDirty = true;
   }
   else
   {
@@ -337,7 +340,6 @@ void PlacardPlugin::Implementation::Update()
       nodes.pop_front();
       if (n && n->HasUserData("gazebo-entity"))
       {
-        // \todo(anyone) Change this to uint64_t in Ignition H?
         auto variant = n->UserData("gazebo-entity");
         const uint64_t *value = std::get_if<uint64_t>(&variant);
         if (value && *value == static_cast<uint64_t>(this->entity))
@@ -393,13 +395,11 @@ void PlacardPlugin::Implementation::Update()
     }
   }
 
-  // Only update the plugin at 1Hz.
-  if (this->scene->Time() < this->nextUpdateTime)
-    return;
-
-  this->nextUpdateTime = this->nextUpdateTime +  std::chrono::seconds(1);
-
   std::lock_guard<std::mutex> lock(this->mutex);
+
+  // Only update the plugin if new symbol cmd is received
+  if (!this->symbolDirty)
+    return;
 
   // Update the visuals.
   for (auto visual : this->visuals)
@@ -428,6 +428,8 @@ void PlacardPlugin::Implementation::Update()
     mat->SetAmbient(gazeboColor);
     mat->SetDiffuse(gazeboColor);
   }
+
+  this->symbolDirty = false;
 }
 
 //////////////////////////////////////////////////
@@ -439,6 +441,7 @@ void PlacardPlugin::Implementation::ChangeSymbol(const gz::msgs::Empty &_msg)
     this->shape = this->allPatterns[this->allPatternsIdx].at(1);
     this->allPatternsIdx =
       (this->allPatternsIdx + 1) % this->allPatterns.size();
+    this->symbolDirty = true;
   }
 
   gzmsg << "New symbol is " << this->color << " " << this->shape << std::endl;
