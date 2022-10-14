@@ -46,6 +46,10 @@ WAYFINDING_WORLDS = [
   'wayfinding_task'
 ]
 
+WILDLIFE_WORLDS = [
+  'wildlife_task'
+]
+
 def simulation(world_name, headless=False):
     gz_args = ['-v 4', '-r']
     if headless:
@@ -104,6 +108,9 @@ def competition_bridges(world_name):
             vrx_gz.bridges.wayfinding_waypoints(),
             vrx_gz.bridges.wayfinding_mean_error(),
             vrx_gz.bridges.wayfinding_min_errors(),
+        ]
+    elif world_name in WILDLIFE_WORLDS:
+        task_bridges = [
         ]
     bridges.extend(task_bridges)
 
