@@ -68,8 +68,7 @@ class AcousticPingerPlugin::Implementation
   public: sim::Entity entity = sim::kNullEntity;
 
   /// \brief Vector storing the position of the pinger.
-  // public: math::Vector3d position = math::Vector3d::Zero;
-  public: math::Vector3d position = {-528, 191, -2};
+  public: math::Vector3d position = math::Vector3d::Zero;
 
   // Variables that contain parameters of sensor simulation.
   /// \brief String holding the frame id of the sensor.

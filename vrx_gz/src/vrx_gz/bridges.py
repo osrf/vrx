@@ -96,7 +96,7 @@ def set_acoustic_pinger(model_name):
         gz_topic=f'{model_name}/pingers/pinger/set_pinger_position',
         ros_topic=f'pingers/pinger/set_pinger_position',
         gz_type='ignition.msgs.Vector3d',
-        ros_type='geometry_msgs/Vector3',
+        ros_type='geometry_msgs/msg/Vector3',
         direction=BridgeDirection.ROS_TO_GZ)
 
 def comms_tx(model_name):

@@ -254,7 +254,10 @@ end
   <plugin
     filename="libAcousticPingerPlugin.so"
     name="vrx::AcousticPingerPlugin">
+    <position>-528 191 -2</position>
     <topic><%= $model_name%>/pingers/pinger/range_bearing</topic>
+    <set_position_topic><%= $model_name%>/pingers/pinger/set_pinger_position
+    </set_position_topic>
     <frame_id><%= $model_name%>/pinger</frame_id>
     <range_noise>
       <noise>
