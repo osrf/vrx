@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="placard">
+    <pose>0 0 1 0 0 0</pose>
+    <!-- The white placard -->
+    <link name="link">
+      <collision name="collision_1">
+        <pose>-0.9234 0.0 1.164 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.153199 0.500 0.672</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_2">
+        <pose>-0.596803 0.0 1.41357 -3.14159 -1.5708 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.17285 0.5 0.5</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_3">
+        <pose>0.326598 0.0 1.35111 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>1.3468 0.500 0.29777</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_4">
+        <pose>0.070527 0.0 1.07723 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.834664 0.500 0.25</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_6">
+        <pose>0.326598 0.0 0.890117 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>1.3468 0.500 0.124233</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_5">
+        <pose>0.868936 0.0 1.07723 1.5708 0.0 1.5708</pose>
+        <geometry>
+          <box>
+            <size>0.500 0.25 0.262128</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="collision_7">
+        <pose>0.0 0.0 -0.336 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>2.000 0.500 2.328</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>meshes/placard_2022.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
