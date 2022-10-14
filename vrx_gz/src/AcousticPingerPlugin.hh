@@ -26,27 +26,29 @@
 
 namespace vrx
 {
-  /// \brief Implements a simulated range and bearing pinger localisation system
+  /// \brief Implements a range and bearing pinger system.  This assumes that
+  /// the ppinger localisation has a mechanism for estimating the range and
+  /// bearing of the pinger. Pinger estimates are published using messages.
   ///
-  /// Implements a range and bearing pinger system.  This assumes that the pinger
-  /// localisation has a mechanism for estimating the range and bearing
-  /// of the pinger.  Pinger estimates are published using a custom message to the
-  /// ROS system along with a standard header.  This should allow the tf library
-  /// to transform the sensor reading between frames.
+  /// Bearings are reported in the vehicle frame and coordinate system:
+  /// the x-axis is towards the vehicle’s nose, the y-axis is towards the port
+  /// side, and the z-axis points upwards. Following the right-hand rule,
+  /// bearing angles are measured counter-clockwise beginning from the x-axis.
+  /// See https://github.com/osrf/vrx/wiki/frame_conventions#acoustic-pinger .
   ///
   /// Accepts the following SDF parameters:
-  /// <robotNamespace> - Set the namespace of the robot. Used to setup the ROS
-  ///   nodehandle.
-  /// <frameId> - Tf frame of the sensor message. Used as part of the sensor
-  ///   message publication.
-  /// <topicName> - Name of the topic that the sensor message will be published on
-  /// <setPositionTopicName> - Name of the topic that is used to set the position
-  ///   of the simulated pinger sensor.
-  /// <position> - Position of the simulated pinger. Defaults to origin.
-  /// <updateRate> - Rate of simulated sensor messages.
-  /// <rangeNoise> - Noise model for the range to the simulated pinger.
-  /// <bearingNoise> - Noise model for the bearing to the simulated pinger.
-  /// <elevationNoise> - Noise model for the elevation to the simulated pinger.
+  /// <frame_id> Tf frame of the sensor message. Used as part of the sensor
+  ///            message publication.
+  /// <topic> Name of the topic that the sensor message will be published on.
+  ///         Defaults to "/pinger/range_bearing".
+  /// <set_position_topic> Name of the topic that is used to set the position
+  ///                      of the simulated pinger sensor.
+  ///                      Defaults to "/pinger/set_pinger_position".
+  /// <position> Position of the simulated pinger. Defaults to origin.
+  /// <update_rate> Rate of simulated sensor messages. Defaults to 1Hz.
+  /// <range_noise> Noise model for the range to the simulated pinger.
+  /// <bearing_noise> Noise model for the bearing to the simulated pinger.
+  /// <elevation_noise> Noise model for the elevation to the simulated pinger.
   class AcousticPingerPlugin
     : public gz::sim::System,
       public gz::sim::ISystemConfigure,
