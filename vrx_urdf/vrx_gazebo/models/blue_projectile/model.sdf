@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="blue_projectile">
+    <link name="link">
+      <inertial>
+        <mass>0.04</mass>
+        <!-- Mark only - based on cylinder -->
+        <inertia>
+          <ixx>0.00002166</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>00002166</iyy>
+          <iyz>0</iyz>
+          <izz>00002166</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <sphere>
+            <radius>0.0285</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+	        <sphere>
+            <radius>0.0285</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <ambient>0.3176 0.6118 0.8353</ambient>
+          <diffuse>0.3176 0.6118 0.8353</diffuse>
+          <specular>0.3176 0.6118 0.8353</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

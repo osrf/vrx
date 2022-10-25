@@ -61,9 +61,9 @@
       <parent link="${namespace}/${name}_base_link"/>
       <child link="${namespace}/${name}_launcher_link"/>
     </joint>
-<!--
+
     <gazebo>
-      <plugin name="ball_shooter_plugin" filename="libball_shooter_plugin.so">
+      <plugin name="vrx::BallShooterPlugin" filename="libBallShooterPlugin.so">
         <projectile>
           <model_name>blue_projectile</model_name>
           <link_name>link</link_name>
@@ -75,6 +75,5 @@
         <topic>${namespace}/${shooter_namespace}${name}/fire</topic>
       </plugin>
     </gazebo>
--->
   </xacro:macro>
 </robot>
