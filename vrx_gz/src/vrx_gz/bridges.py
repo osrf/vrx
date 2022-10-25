@@ -34,7 +34,6 @@ def air_pressure(world_name, model_name, link_name='base_link'):
         ros_type='sensor_msgs/msg/FluidPressure',
         direction=BridgeDirection.GZ_TO_ROS)
 
-
 def pose(model_name):
     return Bridge(
         gz_topic=f'/model/{model_name}/pose',
@@ -82,6 +81,22 @@ def thrust_joint_pos(model_name, side):
         ros_topic=f'thrusters/{side}/pos',
         gz_type='ignition.msgs.Double',
         ros_type='std_msgs/msg/Float64',
+        direction=BridgeDirection.ROS_TO_GZ)
+
+def acoustic_pinger(model_name):
+    return Bridge(
+        gz_topic=f'{model_name}/pingers/pinger/range_bearing',
+        ros_topic=f'pingers/pinger/range_bearing',
+        gz_type='ignition.msgs.Param',
+        ros_type='ros_gz_interfaces/msg/ParamVec',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+def set_acoustic_pinger(model_name):
+    return Bridge(
+        gz_topic=f'{model_name}/pingers/pinger/set_pinger_position',
+        ros_topic=f'pingers/pinger/set_pinger_position',
+        gz_type='ignition.msgs.Vector3d',
+        ros_type='geometry_msgs/msg/Vector3',
         direction=BridgeDirection.ROS_TO_GZ)
 
 def comms_tx(model_name):

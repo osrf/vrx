@@ -93,6 +93,9 @@ class Model:
                 # thrust joint pos cmd
                 vrx_gz.bridges.thrust_joint_pos(self.model_name, 'left'),
                 vrx_gz.bridges.thrust_joint_pos(self.model_name, 'right'),
+                # Acoustic pinger
+                vrx_gz.bridges.acoustic_pinger(self.model_name),
+                vrx_gz.bridges.set_acoustic_pinger(self.model_name),
             ])
 
         return [bridges, nodes, custom_launches]
