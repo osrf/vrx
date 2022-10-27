@@ -68,7 +68,7 @@ class LightBuoyPlugin::Implementation
   public: uint8_t IndexFromColor(const std::string &_color);
 
   /// \brief Initialize all color/symbol sequences.
-  // public: void InitializeAllPatterns();
+  public: void InitializeAllPatterns();
 
   /// \brief Parse all SDF parameters.
   /// \param[in] _sdf SDF elements.
@@ -77,18 +77,42 @@ class LightBuoyPlugin::Implementation
   /// \brief Display the next color in the sequence, or start over if at the end
   public: void Update();
 
+  /// \brief ToDo.
+  public: void ChangePattern(const msgs::Empty &_msg);
+
+  /// \brief ToDo.
+  public: void ChangePatternTo(const gz::msgs::StringMsg_V &_msg);
+
   /// \brief List of the color options (red, green, blue, yellow and no color)
   /// with their string name for logging.
   public: static std::map<std::string, gz::msgs::Color> kColors;
 
   /// \brief All color sequences.
-  // public: std::vector<Pattern_t> allPatterns;
+  public: std::vector<Pattern_t> allPatterns;
+
+  /// \brief The index pointing to one of the potential color sequences.
+  public: size_t allPatternsIdx = 0u;
 
   /// \brief Collection of visual names.
   public: std::vector<std::string> visualNames;
 
   /// \brief Pointer to the visual elements to modify.
   public: std::vector<gz::rendering::VisualPtr> visuals;
+
+  /// \brief Whether shuffle is enabled via a topic or not.
+  public: bool shuffleEnabled = false;
+
+  /// \brief Topic namespace.
+  public: std::string ns;
+
+  /// \brief topic.
+  public: std::string shuffleTopic;
+
+  /// \brief gazebo topic.
+  public: std::string gzColorsTopic;
+
+  /// \brief gazebo Node
+  public: gz::transport::Node gzNode;
 
   /// Pointer to the scene node.
   public: rendering::ScenePtr scene;
@@ -155,27 +179,27 @@ uint8_t LightBuoyPlugin::Implementation::IndexFromColor(
 }
 
 //////////////////////////////////////////////////
-// void LightBuoyPlugin::Implementation::InitializeAllPatterns()
-// {
-//   for (uint8_t i = 0u; i < this->kColors.size() - 1; ++i)
-//   {
-//     for (uint8_t j = 0u; j < this->kColors.size() - 1; ++j)
-//     {
-//       if (j == i)
-//         continue;
+void LightBuoyPlugin::Implementation::InitializeAllPatterns()
+{
+  auto colors = {"red", "green", "blue", "yellow"};
+  for (std::string i : colors)
+  {
+    for (std::string j : colors)
+    {
+      if (j == i)
+        continue;
 
-//       for (uint8_t k = 0u; k < this->kColors.size() - 1; ++k)
-//       {
-//         if (k == j)
-//           continue;
+      for (std::string k : colors)
+      {
+        if (k == j)
+          continue;
 
-//         // The last two colors are always OFF.
-//         this->allPatterns.push_back({i, j, k,
-//           this->IndexFromColor("off"), this->IndexFromColor("off")});
-//       }
-//     }
-//   }
-// }
+        // The last two colors are always OFF.
+        this->allPatterns.push_back({i, j, k, "off", "off"});
+      }
+    }
+  }
+}
 
 /////////////////////////////////////////////////
 bool LightBuoyPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
@@ -231,31 +255,31 @@ bool LightBuoyPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
     visualElem = visualElem->GetNextElement();
   }
 
-  // // Optional: Is shuffle enabled?
-  // if (_sdf->HasElement("shuffle"))
-  // {
-  //   this->shuffleEnabled = _sdf->GetElement("shuffle")->Get<bool>();
+  // Optional: Is shuffle enabled?
+  if (_sdf->HasElement("shuffle"))
+  {
+    this->shuffleEnabled = _sdf->GetElement("shuffle")->Get<bool>();
 
-  //   // Required if shuffle enabled: ROS topic.
-  //   if (!_sdf->HasElement("ros_shuffle_topic"))
-  //   {
-  //     ROS_ERROR("<ros_shuffle_topic> missing");
-  //   }
-  //   this->rosShuffleTopic = _sdf->GetElement
-  //     ("ros_shuffle_topic")->Get<std::string>();
-  // }
+    // Required if shuffle enabled: ROS topic.
+    if (!_sdf->HasElement("shuffle_topic"))
+    {
+      gzerr << "<shuffle_topic> missing" << std::endl;
+      return false;
+    }
+    this->shuffleTopic = _sdf->GetElement("shuffle_topic")->Get<std::string>();
+  }
 
-  // // optional gzColorsTopic
-  // if (!_sdf->HasElement("gz_colors_topic"))
-  // {
-  //   this->gzColorsTopic = "/vrx/light_buoy/new_pattern";
-  // }
-  // else
-  // {
-  //   this->gzColorsTopic = _sdf->GetElement
-  //     ("gz_colors_topic")->Get<std::string>();
-  // }
-  // // Optional: ROS namespace.
+  // optional gzColorsTopic
+  if (!_sdf->HasElement("gz_colors_topic"))
+  {
+    this->gzColorsTopic = "/vrx/light_buoy/new_pattern";
+  }
+  else
+  {
+    this->gzColorsTopic =
+      _sdf->GetElement("gz_colors_topic")->Get<std::string>();
+  }
+  // Optional: ROS namespace.
   // if (_sdf->HasElement("robot_namespace"))
   //   this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
 
@@ -376,6 +400,47 @@ void LightBuoyPlugin::Implementation::Update()
   ++this->state;
 }
 
+//////////////////////////////////////////////////
+void LightBuoyPlugin::Implementation::ChangePattern(const msgs::Empty &_msg)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  // this->pattern = this->allPatterns[this->allPatternsIdx];
+  this->allPatternsIdx = (this->allPatternsIdx + 1) % this->allPatterns.size();
+  this->state = 0;
+
+  // Generate string representing pattern, eg: "RGB"
+  std::string colorSeq = "";
+  for (size_t i = 0u; i < 3u; ++i)
+    colorSeq += this->pattern[i];
+
+  // Log the new pattern.
+  gzmsg << "LightBuoyPlugin: Pattern is " << colorSeq << std::endl;
+}
+
+//////////////////////////////////////////////////
+void LightBuoyPlugin::Implementation::ChangePatternTo(
+  const gz::msgs::StringMsg_V &_msg)
+{
+  if (_msg.data_size() < 3)
+  {
+    gzerr << "3 string values, [color_1, color_2, color_3], are required "
+          << "for setting the light sequence." << std::endl;
+    return;
+  }
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  this->pattern[0] = _msg.data(0);
+  this->pattern[1] = _msg.data(1);
+  this->pattern[2] = _msg.data(2);
+  this->pattern[3] = "off";
+  this->pattern[4] = "off";
+
+  // If we get a new pattern, reinitialize the sequence.
+  this->state = 0;
+}
+
 /////////////////////////////////////////////////
 LightBuoyPlugin::LightBuoyPlugin()
   : dataPtr(utils::MakeUniqueImpl<Implementation>())
@@ -399,12 +464,24 @@ void LightBuoyPlugin::Configure(const sim::Entity &_entity,
     return;
   }
 
+  if (this->dataPtr->shuffleEnabled)
+  {
+    std::string topic =
+      this->dataPtr->ns.empty() ? "" : this->dataPtr->ns + "/";
+    topic += this->dataPtr->shuffleTopic;
+    this->dataPtr->gzNode.Subscribe(topic,
+      &LightBuoyPlugin::Implementation::ChangePattern, this->dataPtr.get());
+  }
+
   // Connect to the SceneUpdate event.
   // The callback is executed in the rendering thread so do all
   // rendering operations in that thread.
   this->dataPtr->connection =
     _eventMgr.Connect<sim::events::SceneUpdate>(
     std::bind(&LightBuoyPlugin::Implementation::Update, this->dataPtr.get()));
+
+  this->dataPtr->gzNode.Subscribe(this->dataPtr->gzColorsTopic,
+    &LightBuoyPlugin::Implementation::ChangePatternTo, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////
