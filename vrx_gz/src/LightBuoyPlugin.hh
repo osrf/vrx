@@ -25,38 +25,26 @@
 
 namespace vrx
 {
-  /// \brief Plugin for changing the color of some visual elements using
-  //  messages.
+  /// \brief Plugin for setting the color sequence of the light buoy.
   /// This plugin accepts the following SDF parameters:
   ///
-  /// <color_1>: The first color of the sequence (RED, GREEN, BLUE, YELLOW).
-  /// <color_2>: The second color of the sequence (RED, GREEN, BLUE, YELLOW).
-  /// <color_3>: The third color of the sequence (RED, GREEN, BLUE, YELLOW).
-  /// <shuffle>: True if the topic for shuffling the sequence is enabled.
-  /// <robot_namespace>: The ROS namespace for this node. If not present,
-  ///                   the model name without any "::"" will be used.
-  ///                   E.g.: The plugin under a visual named
-  ///                   "model1::my_submodel::link::visual" will use "model1"
-  ///                   as namespace unless a value is specified.
-  /// <ros_shuffle_topic>: The ROS topic used to request color changes.
-  /// <gz_colors_topic>: The gazebo topic used to request specific color
-  ///                    changes. Defaults to /vrx/light_buoy/new_pattern
+  /// <color_1>: The first color of the sequence (red, green, blue, yellow).
+  /// <color_2>: The second color of the sequence (red, green, blue, yellow).
+  /// <color_3>: The third color of the sequence (red, green, blue, yellow).
   /// <visuals>: The collection of visuals that change in color. It accepts N
   ///            elements of <visual> elements.
   ///
+  /// The plugin should be inside a <visual> element.
   /// Here's an example:
-  ///   <plugin name="light_buoy_plugin" filename="liblight_buoy_plugin.so">
-  ///     <color_1>RED</color_1>
-  ///     <color_2>GREEN</color_2>
-  ///     <color_3>BLUE</color_3>
+  ///   <plugin name="vrx::LightBuoyPlugin" filename="libLightBuoyPlugin.so">
+  ///     <color_1>red</color_1>
+  ///     <color_2>green</color_2>
+  ///     <color_3>blue</color_3>
   ///     <visuals>
   ///       <visual>robotx_light_buoy::base_link::panel_1</visual>
   ///       <visual>robotx_light_buoy::base_link::panel_2</visual>
   ///       <visual>robotx_light_buoy::base_link::panel_3</visual>
   ///     </visuals>
-  ///     <shuffle>true</shuffle>
-  ///     <robot_namespace>vrx</robot_namespace>
-  ///     <ros_shuffle_topic>light_buoy/shuffle</ros_shuffle_topic>
   ///   </plugin>
   class LightBuoyPlugin
     : public gz::sim::System,
