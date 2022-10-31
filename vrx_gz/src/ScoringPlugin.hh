@@ -175,6 +175,10 @@ namespace vrx
     /// \return The timeout score.
     protected: double TimeoutScore() const;
 
+    /// \brief Finish the current task.
+    /// This will set the "finished" flag in the task message to true.
+    protected: void Finish();
+
     /// \brief Get the vehicleName.
     /// \return The vehicle name.
     protected: std::string VehicleName() const;

@@ -100,6 +100,7 @@ install(
 list(APPEND VRX_GZ_PLUGINS
   AcousticPingerPlugin
   PerceptionScoringPlugin
+  NavigationScoringPlugin
   SimpleHydrodynamics
   StationkeepingScoringPlugin
   Surface
