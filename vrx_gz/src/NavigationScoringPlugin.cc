@@ -15,25 +15,25 @@
  *
  */
 
-#include <vector>
-#include <gz/sim/components/Name.hh>
-#include <gz/sim/components/Pose.hh>
-#include <gz/sim/components/World.hh>
-#include <gz/sim/components/ParentEntity.hh>
-#include <gz/sim/World.hh>
 #include <gz/msgs/float.pb.h>
 #include <gz/msgs/pose.pb.h>
+#include <string>
+#include <vector>
+#include <gz/math/Pose3.hh>
 #include <gz/plugin/Register.hh>
-
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/ParentEntity.hh>
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/World.hh>
+#include <gz/sim/World.hh>
 #include "NavigationScoringPlugin.hh"
 
 using namespace gz;
 using namespace vrx;
 
-/// \brief Private ScoringPlugin data class.
+/// \brief Private NavigationScoringPlugin data class.
 class NavigationScoringPlugin::Implementation
 {
-
   /// \brief All gate states.
   public: enum class GateState
   {
@@ -59,19 +59,20 @@ class NavigationScoringPlugin::Implementation
     /// \brief Constructor.
     /// \param[in] _leftMarkerName The left marker's model name.
     /// \param[in] _rightMarkerName The right marker's model name.
-    public: Gate(const std::string _leftMarkerName,
-                 const std::string _rightMarkerName);
+    public: Gate(const std::string &_leftMarkerName,
+                 const std::string &_rightMarkerName);
 
     /// \brief Where is the given robot pose with respect to the gate?
     /// \param _robotWorldPose Pose of the robot, in the world frame.
     /// \return The gate state given the current robot pose.
-    public: GateState IsPoseInGate(
-      const math::Pose3d &_robotWorldPose) const;
+    public: GateState IsPoseInGate(const math::Pose3d &_robotWorldPose) const;
 
     /// \brief Recalculate the pose and width of the gate.
+    /// \param[in] _ecm The ECM.
     public: void Update(sim::EntityComponentManager &_ecm);
 
     /// \brief Get right and left marker entities
+    /// \param[in] _ecm The ECM.
     public: bool LoadEntities(sim::EntityComponentManager &_ecm);
 
     /// \brief The left marker model name.
@@ -134,32 +135,35 @@ class NavigationScoringPlugin::Implementation
 
 /////////////////////////////////////////////////
 NavigationScoringPlugin::Implementation::Gate::Gate(
-    const std::string _leftMarkerName,
-    const std::string _rightMarkerName)
+    const std::string &_leftMarkerName,
+    const std::string &_rightMarkerName)
   : leftMarkerName(_leftMarkerName),
     rightMarkerName(_rightMarkerName)
 {
 }
 
+/////////////////////////////////////////////////
 bool NavigationScoringPlugin::Implementation::Gate::LoadEntities(
     sim::EntityComponentManager &_ecm)
 {
-  leftMarkerEntity = _ecm.EntityByComponents(
-      sim::components::Name(leftMarkerName));
+  this->leftMarkerEntity = _ecm.EntityByComponents(
+    sim::components::Name(this->leftMarkerName));
 
   // Sanity check: Make sure that the model exists.
-  if (leftMarkerEntity == sim::kNullEntity)
+  if (this->leftMarkerEntity == sim::kNullEntity)
   {
-    ignerr << "Unable to find entity [" << leftMarkerName << "]" << std::endl;
+    gzerr << "Unable to find entity [" << this->leftMarkerName << "]"
+          << std::endl;
     return false;
   }
 
-  rightMarkerEntity = _ecm.EntityByComponents(
-      sim::components::Name(rightMarkerName));
+  this->rightMarkerEntity = _ecm.EntityByComponents(
+    sim::components::Name(this->rightMarkerName));
 
-  if (rightMarkerEntity == sim::kNullEntity)
+  if (this->rightMarkerEntity == sim::kNullEntity)
   {
-    ignerr << "Unable to find entity [" << rightMarkerName << "]" << std::endl;
+    gzerr << "Unable to find entity [" << this->rightMarkerName << "]"
+          << std::endl;
     return false;
   }
 
@@ -172,20 +176,20 @@ bool NavigationScoringPlugin::Implementation::Gate::LoadEntities(
 void NavigationScoringPlugin::Implementation::Gate::Update(
     sim::EntityComponentManager &_ecm)
 {
-  if (!leftMarkerEntity || !rightMarkerEntity)
+  if (!this->leftMarkerEntity || !this->rightMarkerEntity)
     return;
   
   // get the course pose
   auto courseEntity = _ecm.Component<sim::components::ParentEntity>(
-     leftMarkerEntity)->Data();
+    this->leftMarkerEntity)->Data();
   auto coursePose = _ecm.Component<sim::components::Pose>(
-     courseEntity)->Data();
+    courseEntity)->Data();
 
   // The relative pose of the markers delimiting the gate.
   auto leftMarkerPose =  coursePose * _ecm.Component<sim::components::Pose>(
-    leftMarkerEntity)->Data();
+    this->leftMarkerEntity)->Data();
   auto rightMarkerPose = coursePose * _ecm.Component<sim::components::Pose>(
-    rightMarkerEntity)->Data();
+    this->rightMarkerEntity)->Data();
 
   // Unit vector from the left marker to the right one.
   auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
@@ -207,6 +211,7 @@ void NavigationScoringPlugin::Implementation::Gate::Update(
   this->width = leftMarkerPose.Pos().Distance(rightMarkerPose.Pos());
 
 }
+
 /////////////////////////////////////////////////
 NavigationScoringPlugin::Implementation::GateState 
     NavigationScoringPlugin::Implementation::Gate::IsPoseInGate(
@@ -216,6 +221,7 @@ NavigationScoringPlugin::Implementation::GateState
   const math::Vector3d robotLocalPosition =
     this->pose.Rot().Inverse().RotateVector(_robotWorldPose.Pos() -
     this->pose.Pos());
+
   // Are we within the width?
   if (fabs(robotLocalPosition.Y()) <= this->width / 2.0)
   {
@@ -228,18 +234,13 @@ NavigationScoringPlugin::Implementation::GateState
     return GateState::VEHICLE_OUTSIDE;
 }
 
-
- 
 //////////////////////////////////////////////////
 bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
 {
-// TODO: Ignition version of this?
-//  GZ_ASSERT(_sdf, "NavigationScoringPlugin::ParseGates(): NULL _sdf pointer");
-
   // We need at least one gate.
   if (!_sdf->HasElement("gate"))
   {
-    ignerr << "Unable to find <gate> element in SDF." << std::endl;
+    gzerr << "Unable to find <gate> element in SDF." << std::endl;
     return false;
   }
 
@@ -251,7 +252,7 @@ bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
     // The left marker's name.
     if (!gateElem->HasElement("left_marker"))
     {
-      ignerr << "Unable to find <left_marker> element in SDF." << std::endl;
+      gzerr << "Unable to find <left_marker> element in SDF." << std::endl;
       return false;
     }
 
@@ -261,7 +262,7 @@ bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
     // The right marker's name.
     if (!gateElem->HasElement("right_marker"))
     {
-      ignerr << "Unable to find <right_marker> element in SDF." << std::endl;
+      gzerr << "Unable to find <right_marker> element in SDF." << std::endl;
       return false;
     }
 
@@ -278,14 +279,12 @@ bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
   return true;
 }
 
-
-
 /////////////////////////////////////////////////
 NavigationScoringPlugin::NavigationScoringPlugin()
   : ScoringPlugin(),
   dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
-  ignmsg << "Navigation scoring plugin loaded" << std::endl;
+  gzmsg << "Navigation scoring plugin loaded" << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -294,18 +293,17 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
-  ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 
   this->dataPtr->sdf = _sdf->Clone();
 
-  auto worldEntity =
-      _ecm.EntityByComponents(sim::components::World());
+  auto worldEntity = _ecm.EntityByComponents(sim::components::World());
   sim::World world(worldEntity);
 
   // course_name is a required element.
   if (!_sdf->HasElement("course_name"))
   {
-    ignerr << "Unable to find <course_name> element in SDF." << std::endl;
+    gzerr << "Unable to find <course_name> element in SDF." << std::endl;
     return;
   }
     this->dataPtr->courseName = _sdf->Get<std::string>("course_name");
@@ -317,7 +315,7 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
-    ignerr << "Unable to find <gates> element in SDF." << std::endl;
+    gzerr << "Unable to find <gates> element in SDF." << std::endl;
     return;
   }
 
@@ -325,7 +323,7 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   auto const &gatesElem = this->dataPtr->sdf->GetElement("gates");
   if (!this->dataPtr->ParseGates(gatesElem))
   {
-    ignerr << "Score has been disabled" << std::endl;
+    gzerr << "Score has been disabled" << std::endl;
     return;
   }
 
@@ -334,11 +332,10 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
 
   // Set default score in case of timeout.
   double timeoutScore = 200;
-  ignmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
+  gzmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
   this->ScoringPlugin::SetTimeoutScore(timeoutScore);
 
-  ignmsg << "Task [" << this->TaskName() << "]" << std::endl;
-
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -352,36 +349,38 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   {
     auto entity = _ecm.EntityByComponents(
       sim::components::Name(ScoringPlugin::VehicleName()));
-    if (entity != sim::kNullEntity)
-      this->dataPtr->vehicleEntity = entity;
-    else
+    if (entity == sim::kNullEntity)
       return;
+
+    this->dataPtr->vehicleEntity = entity;
   }
+
   // The course might not be ready yet, let's try to get it.
   if (!this->dataPtr->courseEntity)
   {
     auto entity = _ecm.EntityByComponents(
       sim::components::Name(this->dataPtr->courseName));
-    if (entity != sim::kNullEntity)
-      this->dataPtr->courseEntity = entity;
-    else
+    if (entity == sim::kNullEntity)
       return;
+
+    this->dataPtr->courseEntity = entity;
   }
 
   // Try to get the gate entities 
-  if (!dataPtr->gatesLoaded)
+  if (!this->dataPtr->gatesLoaded)
   {
-    ignmsg << "Loading " << dataPtr->numGates << " gates." << std::endl; 
-    dataPtr->gatesLoaded = true;
-    auto iter = std::begin(dataPtr->gates);
-    while (iter != std::end(dataPtr->gates))
+    gzmsg << "Loading " << this->dataPtr->numGates << " gates." << std::endl;
+    this->dataPtr->gatesLoaded = true;
+    auto iter = std::begin(this->dataPtr->gates);
+    while (iter != std::end(this->dataPtr->gates))
     {
       Implementation::Gate &gate = *iter;
 
-      dataPtr->gatesLoaded = dataPtr->gatesLoaded && gate.LoadEntities(_ecm);
+      this->dataPtr->gatesLoaded =
+        this->dataPtr->gatesLoaded && gate.LoadEntities(_ecm);
       ++iter;
     }
-    if (!dataPtr->gatesLoaded)
+    if (!this->dataPtr->gatesLoaded)
       return;
   }
 
@@ -391,7 +390,8 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   // Current score
   this->ScoringPlugin::SetScore(std::min(this->RunningStateDuration(),
     std::chrono::duration<double>(this->ElapsedTime()).count() +
-    this->NumCollisions() * this->dataPtr->obstaclePenalty) / this->dataPtr->numGates);
+    this->NumCollisions() * this->dataPtr->obstaclePenalty) /
+      this->dataPtr->numGates);
 
   auto vehiclePose = _ecm.Component<sim::components::Pose>(
     this->dataPtr->vehicleEntity)->Data();
@@ -411,13 +411,13 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
         gate.state   == Implementation::GateState::VEHICLE_BEFORE)
     {
       currentState = Implementation::GateState::CROSSED;
-      ignmsg << "New gate crossed!" << std::endl;
+      gzmsg << "New gate crossed!" << std::endl;
       std::cout << std::flush;
 
       // We need to cross all gates in order.
       if (iter != this->dataPtr->gates.begin())
       {
-        ignmsg << "Gate crossed in the wrong order" << std::endl;
+        gzmsg << "Gate crossed in the wrong order" << std::endl;
         this->Fail();
         return;
       }
@@ -427,9 +427,9 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     // Just checking: did we go backward through the gate?
     else if (currentState == Implementation::GateState::VEHICLE_BEFORE &&
               gate.state   == Implementation::GateState::VEHICLE_AFTER)
-     {
+    {
        gate.state = Implementation::GateState::INVALID;
-       ignmsg << "Transited the gate in the wrong direction. Gate invalidated!"
+       gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
              << std::endl;
        this->Fail();
        return;
@@ -443,7 +443,7 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   // Course completed!
   if (this->dataPtr->gates.empty())
   {
-    ignmsg << "Course completed!" << std::endl;
+    gzmsg << "Course completed!" << std::endl;
     ScoringPlugin::Finish();
   } 
 }
@@ -460,7 +460,7 @@ void NavigationScoringPlugin::OnReady()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "NavigationScoringPlugin::OnReady" << std::endl;
+    gzmsg << "NavigationScoringPlugin::OnReady" << std::endl;
     std::cout << std::flush;
   }
   ScoringPlugin::OnReady();
@@ -471,7 +471,7 @@ void NavigationScoringPlugin::OnRunning()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "NavigationScoringPlugin::OnRunning" << std::endl;
+    gzmsg << "NavigationScoringPlugin::OnRunning" << std::endl;
     std::cout << std::flush;
   }
   ScoringPlugin::OnRunning();
@@ -482,7 +482,7 @@ void NavigationScoringPlugin::OnFinished()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "NavigationScoringPlugin::OnFinished" << std::endl;
+    gzmsg << "NavigationScoringPlugin::OnFinished" << std::endl;
   }
   ScoringPlugin::OnFinished();
 }
@@ -492,7 +492,7 @@ void NavigationScoringPlugin::OnCollision()
 {
   if (!this->dataPtr->silent)
   {
-    ignmsg << "NavigationScoringPlugin::OnCollision" << std::endl;
+    gzmsg << "NavigationScoringPlugin::OnCollision" << std::endl;
     std::cout << std::flush;
   }
   ScoringPlugin::OnCollision();

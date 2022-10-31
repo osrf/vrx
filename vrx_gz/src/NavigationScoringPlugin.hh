@@ -28,63 +28,60 @@ namespace vrx
   /// plugin for an explanation of the four states defined (Initial, Ready,
   /// Running and Finished) as well as other required SDF elements.
   ///
-
-
-/// This plugin requires the following SDF parameters:
-///
-/// <obstacle_penalty>: Specifies how many points are deducted per collision.
-/// <gates>: Specifies the collection of gates delimiting the course.
-///
-///   Each gate accepts the following elements:
-///
-///   <gate>: A gate is delimited by two markers (left and right).
-///   The vessel should pass through the gate with the markers on the defined
-///   right and left sides. E.g.:
-///
-///      <left_marker>: The name of the marker that should stay on the left
-///      side of the vessel.
-///      <right_marker> The name of the marker that should stay on the right
-///      side of the vessel.
-///
-/// Here's an example:
-/// <plugin name="navigation_scoring_plugin"
-///         filename="libnavigation_scoring_plugin.so">
-///   <vehicle>wamv</vehicle>
-///   <task_name>navigation_scoring_plugin</task_name>
-///   <course_name>vrx_navigation_course</course_name>
-///   <obstacle_penalty>10</obstable_penalty>
-///   <gates>
-///     <gate>
-///       <left_marker>red_bound_0</left_marker>
-///       <right_marker>green_bound_0</right_marker>
-///     </gate>
-///     <gate>
-///       <left_marker>red_bound_1</left_marker>
-///       <right_marker>green_bound_1</right_marker>
-///     </gate>
-///     <gate>
-///       <left_marker>red_bound_2</left_marker>
-///       <right_marker>green_bound_2</right_marker>
-///     </gate>
-///     <gate>
-///       <left_marker>red_bound_3</left_marker>
-///       <right_marker>green_bound_3</right_marker>
-///     </gate>
-///     <gate>
-///       <left_marker>red_bound_4</left_marker>
-///       <right_marker>green_bound_4</right_marker>
-///     </gate>
-///     <gate>
-///       <left_marker>red_bound_5</left_marker>
-///       <right_marker>green_bound_5</right_marker>
-///     </gate>
-///     <gate>
-///       <left_marker>red_bound_6</left_marker>
-///       <right_marker>green_bound_6</right_marker>
-///     </gate>
-///   </gates>
-/// </plugin>
-
+  /// This plugin requires the following SDF parameters:
+  ///
+  /// <obstacle_penalty>: Specifies how many points are deducted per collision.
+  /// <gates>: Specifies the collection of gates delimiting the course.
+  ///
+  ///   Each gate accepts the following elements:
+  ///
+  ///   <gate>: A gate is delimited by two markers (left and right).
+  ///   The vessel should pass through the gate with the markers on the defined
+  ///   right and left sides. E.g.:
+  ///
+  ///      <left_marker>: The name of the marker that should stay on the left
+  ///      side of the vessel.
+  ///      <right_marker> The name of the marker that should stay on the right
+  ///      side of the vessel.
+  ///
+  /// Here's an example:
+  /// <plugin name="vrx::NavigationScoringPlugin"
+  ///         filename="libnavigationScoringPlugin.so">
+  ///   <vehicle>wamv</vehicle>
+  ///   <task_name>navigation_scoring_plugin</task_name>
+  ///   <course_name>vrx_navigation_course</course_name>
+  ///   <obstacle_penalty>10</obstable_penalty>
+  ///   <gates>
+  ///     <gate>
+  ///       <left_marker>red_bound_0</left_marker>
+  ///       <right_marker>green_bound_0</right_marker>
+  ///     </gate>
+  ///     <gate>
+  ///       <left_marker>red_bound_1</left_marker>
+  ///       <right_marker>green_bound_1</right_marker>
+  ///     </gate>
+  ///     <gate>
+  ///       <left_marker>red_bound_2</left_marker>
+  ///       <right_marker>green_bound_2</right_marker>
+  ///     </gate>
+  ///     <gate>
+  ///       <left_marker>red_bound_3</left_marker>
+  ///       <right_marker>green_bound_3</right_marker>
+  ///     </gate>
+  ///     <gate>
+  ///       <left_marker>red_bound_4</left_marker>
+  ///       <right_marker>green_bound_4</right_marker>
+  ///     </gate>
+  ///     <gate>
+  ///       <left_marker>red_bound_5</left_marker>
+  ///       <right_marker>green_bound_5</right_marker>
+  ///     </gate>
+  ///     <gate>
+  ///       <left_marker>red_bound_6</left_marker>
+  ///       <right_marker>green_bound_6</right_marker>
+  ///     </gate>
+  ///   </gates>
+  /// </plugin>
   class NavigationScoringPlugin : public ScoringPlugin
   {
     /// \brief Constructor.
@@ -101,7 +98,7 @@ namespace vrx
 
     /// \brief Callback executed at every world update.
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
-                       gz::sim::EntityComponentManager &_ecm) override;
+                           gz::sim::EntityComponentManager &_ecm) override;
 
     // Documentation inherited.
     protected: void OnReady() override;
@@ -115,10 +112,10 @@ namespace vrx
     // Documentation inherited.
     protected: void OnCollision() override;
 
-   /// \brief Set the score to 0 and change to state to "finish".
-   protected: void Fail();
+    /// \brief Set the score to 0 and change to state to "finish".
+    protected: void Fail();
 
-   /// \brief Private data pointer.
+    /// \brief Private data pointer.
     GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };
 }
