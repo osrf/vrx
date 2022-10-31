@@ -182,10 +182,10 @@ void NavigationScoringPlugin::Implementation::Gate::Update(
      courseEntity)->Data();
 
   // The relative pose of the markers delimiting the gate.
-  auto leftMarkerPose = _ecm.Component<sim::components::Pose>(
-    leftMarkerEntity)->Data() + coursePose;
-  auto rightMarkerPose = _ecm.Component<sim::components::Pose>(
-    rightMarkerEntity)->Data()+ coursePose;
+  auto leftMarkerPose =  coursePose * _ecm.Component<sim::components::Pose>(
+    leftMarkerEntity)->Data();
+  auto rightMarkerPose = coursePose * _ecm.Component<sim::components::Pose>(
+    rightMarkerEntity)->Data();
 
   // Unit vector from the left marker to the right one.
   auto v1 = leftMarkerPose.Pos() - rightMarkerPose.Pos();
