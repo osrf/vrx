@@ -245,7 +245,7 @@ void LightBuoyPlugin::Implementation::Update()
       {
         auto delim = name.rfind("/");
         auto shortName = name.substr(delim + 1);
-        node  = linkVisual->ChildByName(name);
+        node  = linkVisual->ChildByName(shortName);
       }
 
       if (node)
