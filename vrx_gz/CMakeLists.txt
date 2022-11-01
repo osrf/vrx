@@ -20,6 +20,8 @@ find_package(gz-plugin2 REQUIRED COMPONENTS loader register)
 set(GZ_PLUGIN_VER ${gz-plugin2_VERSION_MAJOR})
 find_package(gz-rendering7 REQUIRED)
 set(GZ_RENDERING_VER ${gz-rendering7_VERSION_MAJOR})
+find_package(gz-sensors7 REQUIRED)
+set(GZ_SENSORS_VER ${gz-sensors7_VERSION_MAJOR})
 find_package(gz-utils2 REQUIRED)
 set(GZ_UTILS_VER ${gz-utils2_VERSION_MAJOR})
 find_package(sdformat13 REQUIRED)
@@ -96,6 +98,10 @@ install(
 
 # Plugins
 list(APPEND VRX_GZ_PLUGINS
+  AcousticPingerPlugin
+  BallShooterPlugin
+  LightBuoyPlugin
+  NavigationScoringPlugin
   PerceptionScoringPlugin
   PlacardPlugin
   SimpleHydrodynamics
@@ -110,6 +116,7 @@ foreach(PLUGIN ${VRX_GZ_PLUGINS})
     gz-sim${GZ_SIM_VER}::core
     gz-plugin${GZ_PLUGIN_VER}::gz-plugin${GZ_PLUGIN_VER}
     gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
+    gz-sensors${GZ_SENSORS_VER}::gz-sensors${GZ_SENSORS_VER}
     gz-utils${GZ_UTILS_VER}::gz-utils${GZ_UTILS_VER}
     ScoringPlugin
     Waves

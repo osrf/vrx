@@ -250,5 +250,37 @@ end
     <static_update_frequency>1</static_update_frequency>
   </plugin>
 
+  <!-- The acoustic pinger scoring plugin -->
+  <plugin
+    filename="libAcousticPingerPlugin.so"
+    name="vrx::AcousticPingerPlugin">
+    <position>-528 191 -2</position>
+    <topic><%= $model_name%>/pingers/pinger/range_bearing</topic>
+    <set_position_topic><%= $model_name%>/pingers/pinger/set_pinger_position
+    </set_position_topic>
+    <frame_id><%= $model_name%>/pinger</frame_id>
+    <range_noise>
+      <noise>
+        <type>gaussian</type>
+        <mean>0.0</mean>
+        <stddev>3.0</stddev>
+      </noise>
+    </range_noise>
+    <bearing_noise>
+      <noise>
+        <type>gaussian</type>
+        <mean>0.0</mean>
+        <stddev>0.01</stddev>
+      </noise>
+    </bearing_noise>
+    <elevation_noise>
+      <noise>
+        <type>gaussian</type>
+        <mean>0.0</mean>
+        <stddev>0.01</stddev>
+      </noise>
+    </elevation_noise>
+  </plugin>
+
 </model>
 </sdf>

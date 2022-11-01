@@ -30,6 +30,10 @@ import vrx_gz.bridges
 
 import os
 
+GYMKHANA_WORLDS = [
+  'gymkhana_task'
+]
+
 PERCEPTION_WORLDS = [
   'perception_task'
 ]

@@ -126,6 +126,14 @@ def odometry(model_name):
         ros_type='nav_msgs/msg/Odometry',
         direction=BridgeDirection.GZ_TO_ROS)
 
+def ball_shooter(model_name):
+    return Bridge(
+        gz_topic=f'/{model_name}/shooters/ball_shooter/fire',
+        ros_topic=f'shooters/ball_shooter/fire',
+        gz_type='ignition.msgs.Empty',
+        ros_type='std_msgs/msg/Empty',
+        direction=BridgeDirection.ROS_TO_GZ)
+
 
 def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type):
     bridges = []
@@ -162,4 +170,9 @@ def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type)
         bridges = [
             odometry(model_name),
         ]
+    elif 'BallShooter' in sensor_name:
+        bridges = [
+            ball_shooter(model_name),
+        ]
+
     return bridges
