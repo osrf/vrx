@@ -492,6 +492,17 @@ double ScoringPlugin::TimeoutScore() const
 }
 
 //////////////////////////////////////////////////
+void ScoringPlugin::Finish()
+{
+  if (this->dataPtr->taskState == "finished")
+    return;
+
+  this->dataPtr->taskState = "finished";
+  this->OnFinished();
+}
+
+
+//////////////////////////////////////////////////
 std::string ScoringPlugin::VehicleName() const
 {
   return this->dataPtr->vehicleName;

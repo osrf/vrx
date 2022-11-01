@@ -249,6 +249,9 @@ void PolyhedraBuoyancyDrag::PreUpdate(const sim::UpdateInfo &_info,
 {
   GZ_PROFILE("PolyhedraBuoyancyDrag::PreUpdate");
 
+  if (_info.paused)
+    return;
+
   // Elapsed time since the last update.
   double dt;
   double simTime;

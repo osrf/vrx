@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="stationkeeping_task">
+  <world name="sydney_regatta">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -12,11 +12,11 @@
 
       <!-- 3D scene -->
       <plugin filename="MinimalScene" name="3D View">
-        <gz-gui>
+        <ignition-gui>
           <title>3D View</title>
           <property type="bool" key="showTitleBar">false</property>
           <property type="string" key="state">docked</property>
-        </gz-gui>
+        </ignition-gui>
 
         <engine>ogre2</engine>
         <scene>scene</scene>
@@ -31,51 +31,51 @@
 
       <!-- Plugins that add functionality to the scene -->
       <plugin filename="EntityContextMenuPlugin" name="Entity context menu">
-        <gz-gui>
+        <ignition-gui>
           <property key="state" type="string">floating</property>
           <property key="width" type="double">5</property>
           <property key="height" type="double">5</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
       <plugin filename="GzSceneManager" name="Scene Manager">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="width" type="double">5</property>
           <property key="height" type="double">5</property>
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
       <plugin filename="InteractiveViewControl" name="Interactive view control">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="width" type="double">5</property>
           <property key="height" type="double">5</property>
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
       <plugin filename="CameraTracking" name="Camera Tracking">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="width" type="double">5</property>
           <property key="height" type="double">5</property>
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
       <plugin filename="MarkerManager" name="Marker manager">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="width" type="double">5</property>
           <property key="height" type="double">5</property>
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
       <plugin filename="SelectEntities" name="Select Entities">
-        <gz-gui>
+        <ignition-gui>
           <anchors target="Select entities">
             <line own="right" target="right"/>
             <line own="top" target="top"/>
@@ -85,20 +85,20 @@
           <property key="height" type="double">5</property>
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
       <plugin filename="VisualizationCapabilities" name="Visualization Capabilities">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="width" type="double">5</property>
           <property key="height" type="double">5</property>
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
 
       <plugin filename="Spawn" name="Spawn Entities">
-        <gz-gui>
+        <ignition-gui>
           <anchors target="Select entities">
             <line own="right" target="right"/>
             <line own="top" target="top"/>
@@ -108,12 +108,12 @@
           <property key="height" type="double">5</property>
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
 
       <!-- World control -->
       <plugin filename="WorldControl" name="World control">
-        <gz-gui>
+        <ignition-gui>
           <title>World control</title>
           <property type="bool" key="showTitleBar">false</property>
           <property type="bool" key="resizable">false</property>
@@ -126,7 +126,7 @@
             <line own="left" target="left"/>
             <line own="bottom" target="bottom"/>
           </anchors>
-        </gz-gui>
+        </ignition-gui>
 
         <play_pause>true</play_pause>
         <step>true</step>
@@ -137,7 +137,7 @@
 
       <!-- World statistics -->
       <plugin filename="WorldStats" name="World stats">
-        <gz-gui>
+        <ignition-gui>
           <title>World stats</title>
           <property type="bool" key="showTitleBar">false</property>
           <property type="bool" key="resizable">false</property>
@@ -150,7 +150,7 @@
             <line own="right" target="right"/>
             <line own="bottom" target="bottom"/>
           </anchors>
-        </gz-gui>
+        </ignition-gui>
 
         <sim_time>true</sim_time>
         <real_time>true</real_time>
@@ -160,7 +160,7 @@
 
       <!-- Insert simple shapes -->
       <plugin filename="Shapes" name="Shapes">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="x" type="double">0</property>
           <property key="y" type="double">0</property>
@@ -169,12 +169,12 @@
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
           <property key="cardBackground" type="string">#666666</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
 
       <!-- Insert lights -->
       <plugin filename="Lights" name="Lights">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="x" type="double">250</property>
           <property key="y" type="double">0</property>
@@ -183,12 +183,12 @@
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
           <property key="cardBackground" type="string">#666666</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
 
       <!-- Translate / rotate -->
       <plugin filename="TransformControl" name="Transform control">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="x" type="double">0</property>
           <property key="y" type="double">50</property>
@@ -197,7 +197,7 @@
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
           <property key="cardBackground" type="string">#777777</property>
-        </gz-gui>
+        </ignition-gui>
 
         <!-- disable legacy features used to connect this plugin to GzScene3D -->
         <legacy>false</legacy>
@@ -205,7 +205,7 @@
 
       <!-- Screenshot -->
       <plugin filename="Screenshot" name="Screenshot">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="x" type="double">250</property>
           <property key="y" type="double">50</property>
@@ -214,12 +214,12 @@
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
           <property key="cardBackground" type="string">#777777</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
 
       <!-- Video recorder -->
       <plugin filename="VideoRecorder" name="VideoRecorder">
-        <gz-gui>
+        <ignition-gui>
           <property key="resizable" type="bool">false</property>
           <property key="x" type="double">300</property>
           <property key="y" type="double">50</property>
@@ -228,7 +228,7 @@
           <property key="state" type="string">floating</property>
           <property key="showTitleBar" type="bool">false</property>
           <property key="cardBackground" type="string">#777777</property>
-        </gz-gui>
+        </ignition-gui>
 
         <record_video>
           <use_sim_time>true</use_sim_time>
@@ -242,23 +242,23 @@
 
       <!-- Inspector -->
       <plugin filename="ComponentInspector" name="Component inspector">
-        <gz-gui>
+        <ignition-gui>
           <property type="string" key="state">docked_collapsed</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
 
       <!-- Entity tree -->
       <plugin filename="EntityTree" name="Entity tree">
-        <gz-gui>
+        <ignition-gui>
           <property type="string" key="state">docked_collapsed</property>
-        </gz-gui>
+        </ignition-gui>
       </plugin>
 
       <!-- View angle -->
       <plugin filename="ViewAngle" name="View angle">
-        <gz-gui>
+        <ignition-gui>
           <property type="string" key="state">docked_collapsed</property>
-        </gz-gui>
+        </ignition-gui>
 
         <!-- disable legacy features used to connect this plugin to GzScene3D -->
         <legacy>false</legacy>
@@ -267,48 +267,43 @@
     </gui>
 
     <plugin
-      filename="gz-sim-physics-system"
-      name="gz::sim::systems::Physics">
+      filename="ignition-gazebo-physics-system"
+      name="ignition::gazebo::systems::Physics">
     </plugin>
     <plugin
-      filename="gz-sim-user-commands-system"
-      name="gz::sim::systems::UserCommands">
+      filename="ignition-gazebo-user-commands-system"
+      name="ignition::gazebo::systems::UserCommands">
     </plugin>
     <plugin
-      filename="gz-sim-sensors-system"
-      name="gz::sim::systems::Sensors">
+      filename="ignition-gazebo-sensors-system"
+      name="ignition::gazebo::systems::Sensors">
       <render_engine>ogre2</render_engine>
       <disable_on_drained_battery>true</disable_on_drained_battery>
     </plugin>
     <plugin
-      filename="gz-sim-imu-system"
-      name="gz::sim::systems::Imu">
+      filename="ignition-gazebo-imu-system"
+      name="ignition::gazebo::systems::Imu">
     </plugin>
     <plugin
-      filename="gz-sim-magnetometer-system"
-      name="gz::sim::systems::Magnetometer">
+      filename="ignition-gazebo-magnetometer-system"
+      name="ignition::gazebo::systems::Magnetometer">
     </plugin>
     <plugin
-      filename="gz-sim-forcetorque-system"
-      name="gz::sim::systems::ForceTorque">
+      filename="ignition-gazebo-forcetorque-system"
+      name="ignition::gazebo::systems::ForceTorque">
     </plugin>
     <plugin
-      filename="gz-sim-particle-emitter2-system"
-      name="gz::sim::systems::ParticleEmitter2">
+      filename="ignition-gazebo-particle-emitter2-system"
+      name="ignition::gazebo::systems::ParticleEmitter2">
     </plugin>
     <plugin
-      filename="gz-sim-scene-broadcaster-system"
-      name="gz::sim::systems::SceneBroadcaster">
+      filename="ignition-gazebo-scene-broadcaster-system"
+      name="ignition::gazebo::systems::SceneBroadcaster">
     </plugin>
     <plugin
-      filename="gz-sim-contact-system"
-      name="gz::sim::systems::Contact">
+      filename="ignition-gazebo-contact-system"
+      name="ignition::gazebo::systems::Contact">
     </plugin>
-    <plugin
-      filename="gz-sim-navsat-system"
-      name="gz::sim::systems::NavSat">
-    </plugin>
-
     <scene>
       <sky></sky>
       <grid>false</grid>
@@ -359,242 +354,10 @@
       <uri>platform</uri>
     </include>
 
+    <!-- The VRX short navigation course -->
     <include>
-      <name>mb_marker_buoy_red</name>
-      <pose>-528 191 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_marker_buoy_black</name>
-      <pose>-528 190 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_marker_buoy_green</name>
-      <pose>-528 189 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_marker_buoy_white</name>
-      <pose>-528 188 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_round_buoy_orange</name>
-      <pose>-528 187 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_round_buoy_black</name>
-      <pose>-528 186 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
+      <uri>model://short_navigation_course_0</uri>
+      <pose>-524 186 0 0 0 -1.44</pose>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -638,43 +401,11 @@
     </include>
 
     <!-- The projectile for the ball shooter -->
-    <include>
+    <!-- <include>
       <name>blue_projectile</name>
       <pose>-545 60 0.03 0 0 0</pose>
       <uri>blue_projectile</uri>
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.02 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.0285</radius>
-            </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
-    </include>
+    </include> -->
 
     <wind>
       <linear_velocity>0 0 0</linear_velocity>
@@ -682,8 +413,8 @@
 
     <!-- Load the plugin for the wind -->
     <plugin
-      filename="gz-sim-wind-effects-system"
-      name="gz::sim::systems::WindEffects">
+      filename="ignition-gazebo-wind-effects-system"
+      name="ignition::gazebo::systems::WindEffects">
       <force_approximation_scaling_factor>0.002</force_approximation_scaling_factor>
       <horizontal>
         <magnitude>
@@ -717,21 +448,33 @@
       </vertical>
     </plugin>
 
-    <!-- The station keeping scoring plugin -->
+    <!-- The base scoring plugin -->
     <plugin
-      filename="libStationkeepingScoringPlugin.so"
-      name="vrx::StationkeepingScoringPlugin">
+      filename="libNavigationScoringPlugin.so"
+      name="vrx::NavigationScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>station_keeping</task_name>
+      <task_name>navigation</task_name>
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>
-      <!-- <head_error_on>false</head_error_on> -->
-      <goal_pose>-33.722718 150.674031 0</goal_pose>
-      <!-- <goal_pose_cart>-532 162 1</goal_pose_cart> -->
-      <!-- <markers>true</markers> -->
+      <course_name>short_navigation_course_0</course_name>
+      <obstacle_penalty>10.0</obstacle_penalty>
+      <gates>
+        <gate>
+          <left_marker>red_bound_0</left_marker>
+          <right_marker>green_bound_0</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_1</left_marker>
+          <right_marker>green_bound_1</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_2</left_marker>
+          <right_marker>green_bound_2</right_marker>
+        </gate>
+      </gates>
     </plugin>
 
   </world>
