@@ -46,16 +46,16 @@ using namespace vrx;
 /// \brief Private PlacardPlugin data class.
 class PlacardPlugin::Implementation
 {
-  /// \brief Creates a gz::msgs::Color message from 4 doubles.
+  /// \brief Creates a msgs::Color message from 4 doubles.
   /// \param[in] _r Red.
   /// \param[in] _g Green.
   /// \param[in] _b Blue.
   /// \param[in] _a Alpha.
   /// \return The Color message.
-  public: static gz::msgs::Color CreateColor(const double _r,
-                                             const double _g,
-                                             const double _b,
-                                             const double _a);
+  public: static msgs::Color CreateColor(const double _r,
+                                         const double _g,
+                                         const double _b,
+                                         const double _a);
 
   /// \brief Initialize all color/symbol sequences.
   public: void InitializeAllPatterns();
@@ -69,15 +69,15 @@ class PlacardPlugin::Implementation
 
   /// \brief ROS callback for changing a symbol and its color.
   /// \param[in] _msg Not used.
-  public: void ChangeSymbol(const gz::msgs::Empty &_msg);
+  public: void ChangeSymbol(const msgs::Empty &_msg);
 
   /// \brief Gazebo callback for changing light to a specific color pattern.
   /// \param[in] _msg New symbol.
-  public: void ChangeSymbolTo(const gz::msgs::StringMsg_V &_msg);
+  public: void ChangeSymbolTo(const msgs::StringMsg_V &_msg);
 
   /// \brief List of the color options (red, green, blue, and no color)
   /// with their string name for logging.
-  public: static std::map<std::string, gz::msgs::Color> kColors;
+  public: static std::map<std::string, msgs::Color> kColors;
 
   /// \brief List of the shape options (circle, cross, triangle)
   /// with their string name for logging.
@@ -99,7 +99,7 @@ class PlacardPlugin::Implementation
   public: std::vector<std::string> visualNames;
 
   /// \brief Pointer to the visual elements to modify.
-  public: std::vector<gz::rendering::VisualPtr> visuals;
+  public: std::vector<rendering::VisualPtr> visuals;
 
   /// \brief Whether shuffle is enabled via a ROS topic or not.
   public: bool shuffleEnabled = true;
@@ -111,7 +111,7 @@ class PlacardPlugin::Implementation
   public: std::string shuffleTopic;
 
   /// \brief gazebo Node
-  public: gz::transport::Node gzNode;
+  public: transport::Node gzNode;
 
   /// \brief gazebo symbol sub topic
   public: std::string symbolSubTopic;
@@ -126,14 +126,14 @@ class PlacardPlugin::Implementation
   public: std::mutex mutex;
 
   /// \brief Connection to pre-render event callback
-  public: gz::common::ConnectionPtr connection{nullptr};
+  public: common::ConnectionPtr connection{nullptr};
 
   /// \brief Vsual entity this plugin is attached to
-  public: gz::sim::Entity entity = gz::sim::kNullEntity;
+  public: sim::Entity entity = sim::kNullEntity;
 };
 
 // Static initialization.
-std::map<std::string, gz::msgs::Color> PlacardPlugin::Implementation::kColors =
+std::map<std::string, msgs::Color> PlacardPlugin::Implementation::kColors =
   {
     {"red",    CreateColor(1.0, 0.0, 0.0, 1.0)},
     {"green",  CreateColor(0.0, 1.0, 0.0, 1.0)},
@@ -168,25 +168,25 @@ void PlacardPlugin::Configure(const sim::Entity &_entity,
     std::string topic = this->dataPtr->ns.empty() ? "" : this->dataPtr->ns + "/";
     topic += this->dataPtr->shuffleTopic;
     this->dataPtr->gzNode.Subscribe(topic,
-        &PlacardPlugin::Implementation::ChangeSymbol, this->dataPtr.get());
+      &PlacardPlugin::Implementation::ChangeSymbol, this->dataPtr.get());
   }
 
   // connect to the SceneUpdate event
   // the callback is executed in the rendering thread so do all
   // rendering operations in that thread
   this->dataPtr->connection =
-      _eventMgr.Connect<gz::sim::events::SceneUpdate>(
+    _eventMgr.Connect<sim::events::SceneUpdate>(
       std::bind(&PlacardPlugin::Implementation::Update, this->dataPtr.get()));
 
   this->dataPtr->gzNode.Subscribe(this->dataPtr->symbolSubTopic,
-      &PlacardPlugin::Implementation::ChangeSymbolTo, this->dataPtr.get());
+    &PlacardPlugin::Implementation::ChangeSymbolTo, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////
-gz::msgs::Color PlacardPlugin::Implementation::CreateColor(const double _r,
+msgs::Color PlacardPlugin::Implementation::CreateColor(const double _r,
   const double _g, const double _b, const double _a)
 {
-  static gz::msgs::Color color;
+  static msgs::Color color;
   color.set_r(_r);
   color.set_g(_g);
   color.set_b(_b);
@@ -204,28 +204,26 @@ void PlacardPlugin::Implementation::InitializeAllPatterns()
 
 //////////////////////////////////////////////////
 void PlacardPlugin::Implementation::ChangeSymbolTo(
-    const gz::msgs::StringMsg_V &_msg)
+    const msgs::StringMsg_V &_msg)
 {
-  std::lock_guard<std::mutex> lock(this->mutex);
-  if (_msg.data_size() >= 2)
-  {
-    this->shape = _msg.data(0);
-    this->color = _msg.data(1);
-
-    this->symbolDirty = true;
-  }
-  else
+  if (_msg.data_size() < 2)
   {
     gzerr << "2 string values, [shape, color], are required "
           << "for changing symbol." << std::endl;
+    return;
   }
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->shape = _msg.data(0);
+  this->color = _msg.data(1);
+  this->symbolDirty = true;
 }
 
 //////////////////////////////////////////////////
 bool PlacardPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
 {
   // We initialize it with a random shape and color.
-  gz::msgs::Empty emptyMsg;
+  msgs::Empty emptyMsg;
   this->ChangeSymbol(emptyMsg);
 
   // Parse the shape.
@@ -291,29 +289,30 @@ bool PlacardPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
     this->shuffleEnabled = _sdf->GetElement("shuffle")->Get<bool>();
 
     // Required if shuffle enabled: ROS topic.
-    if (!_sdf->HasElement("ros_shuffle_topic"))
+    if (!_sdf->HasElement("shuffle_topic"))
     {
-      gzerr << "<ros_shuffle_topic> missing" << std::endl;
+      gzerr << "<shuffle_topic> missing" << std::endl;
+      return false;
     }
-    this->shuffleTopic = _sdf->GetElement
-      ("ros_shuffle_topic")->Get<std::string>();
+    this->shuffleTopic = _sdf->GetElement("shuffle_topic")->Get<std::string>();
   }
 
   // Required: namespace.
   if (!_sdf->HasElement("robot_namespace"))
   {
     gzerr << "<robot_namespace> missing" << std::endl;
+    return false;
   }
   this->ns = _sdf->GetElement("robot_namespace")->Get<std::string>();
-  if (!_sdf->HasElement("gz_symbol_topic"))
+  if (!_sdf->HasElement("symbol_topic"))
   {
     this->symbolSubTopic = "/" + this->ns + "/symbol";
   }
   else
   {
-    this->symbolSubTopic = _sdf->GetElement
-      ("gz_symbol_topic")->Get<std::string>();
+    this->symbolSubTopic = _sdf->GetElement("symbol_topic")->Get<std::string>();
   }
+
   return true;
 }
 
@@ -360,7 +359,7 @@ void PlacardPlugin::Implementation::Update()
     }
 
     rendering::VisualPtr linkVisual =
-          std::dynamic_pointer_cast<rendering::Visual>(visual->Parent());
+      std::dynamic_pointer_cast<rendering::Visual>(visual->Parent());
 
     if (!linkVisual)
     {
@@ -379,7 +378,7 @@ void PlacardPlugin::Implementation::Update()
       {
         auto delim = name.rfind("/");
         auto shortName = name.substr(delim + 1);
-        node  = linkVisual->ChildByName(name);
+        node  = linkVisual->ChildByName(shortName);
       }
 
       if (node)
@@ -404,7 +403,7 @@ void PlacardPlugin::Implementation::Update()
   // Update the visuals.
   for (auto visual : this->visuals)
   {
-    gz::msgs::Color color;
+    msgs::Color color;
     color.set_a(0.0);
     auto name = visual->Name();
     auto delim = name.rfind("/");
@@ -413,7 +412,7 @@ void PlacardPlugin::Implementation::Update()
     {
       color = this->kColors[this->color];
     }
-    gz::math::Color gazeboColor(color.r(), color.g(), color.b(), color.a());
+    math::Color gazeboColor(color.r(), color.g(), color.b(), color.a());
 
     auto mat = visual->Material();
     if (!mat)
@@ -433,7 +432,7 @@ void PlacardPlugin::Implementation::Update()
 }
 
 //////////////////////////////////////////////////
-void PlacardPlugin::Implementation::ChangeSymbol(const gz::msgs::Empty &_msg)
+void PlacardPlugin::Implementation::ChangeSymbol(const msgs::Empty &_msg)
 {
   {
     std::lock_guard<std::mutex> lock(this->mutex);

@@ -37,16 +37,15 @@ namespace vrx
 ///   <color> "red", "green", "blue" or "yellow". If ommited, the color will be
 ///           randomly selected.
 ///   <shuffle>: True if the topic for shuffling the sequence is enabled.
-///   <robot_namespace> ROS namespace of Node, can be used to have multiple
-///                     plugins.
-///   <ros_shuffle_topic>: The ROS topic used to request color changes.
-///   <gz_symbol_topic>: The gazebo topic subscribed to set symbol changes
-///                      defaults to /<robot_namespace>/symbol
+///   <robot_namespace> Topic namespace.
+///   <shuffle_topic>: The topic used to request color changes.
+///   <symbol_topic>: The gazebo topic subscribed to set symbol changes
+///                   defaults to /<robot_namespace>/symbol
 ///   <visuals>: The set of visual symbols. It contains at least one visual:
 ///              <visual>: A visual displaying a shape.
 ///
 /// Here's an example:
-///   <plugin name="placard1plugin" filename="libplacard_plugin.so">
+///   <plugin name="vrx::PlacardPlugin" filename="libPlacardPlugin.so">
 ///     <shape>triangle</shape>
 ///     <color>red</color>
 ///     <visuals>
@@ -57,7 +56,7 @@ namespace vrx
 ///     </visuals>
 ///     <shuffle>true</shuffle>
 ///     <robot_namespace>vrx</robot_namespace>
-///     <topic>dock/placard/shuffle</topic>
+///     <shuffle_topic>dock/placard/shuffle</shuffle_topic>
 ///   </plugin>
 class PlacardPlugin
     : public gz::sim::System,

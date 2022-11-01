@@ -40,7 +40,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2022_placard1</robot_namespace>
-            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
+            <shuffle_topic>shuffle</shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
@@ -189,7 +189,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2022_placard2</robot_namespace>
-            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
+            <shuffle_topic>shuffle</shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
@@ -338,7 +338,7 @@
             </visuals>
             <shuffle>true</shuffle>
             <robot_namespace>vrx/dock_2022_placard3</robot_namespace>
-            <ros_shuffle_topic>shuffle</ros_shuffle_topic>
+            <shuffle_topic>shuffle</shuffle_topic>
           </plugin>
         </visual>
         <visual name="visual_h_cross">
