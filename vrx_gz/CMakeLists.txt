@@ -103,6 +103,7 @@ list(APPEND VRX_GZ_PLUGINS
   LightBuoyPlugin
   NavigationScoringPlugin
   PerceptionScoringPlugin
+  PlacardPlugin
   SimpleHydrodynamics
   StationkeepingScoringPlugin
   Surface
