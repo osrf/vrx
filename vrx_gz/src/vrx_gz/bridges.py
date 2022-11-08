@@ -5,16 +5,6 @@ def prefix(world_name, model_name, link_name):
     return f'/world/{world_name}/model/{model_name}/link/{link_name}/sensor'
 
 
-def imu(world_name, model_name, link_name='base_link'):
-    sensor_prefix = prefix(world_name, model_name, link_name)
-    return Bridge(
-        gz_topic=f'{sensor_prefix}/imu_sensor/imu',
-        ros_topic='imu/data',
-        gz_type='ignition.msgs.IMU',
-        ros_type='sensor_msgs/msg/Imu',
-        direction=BridgeDirection.GZ_TO_ROS)
-
-
 def magnetometer(world_name, model_name, link_name='base_link'):
     sensor_prefix = prefix(world_name, model_name, link_name)
     return Bridge(
@@ -132,15 +122,6 @@ def task_info():
         ros_topic=f'/vrx/task/info',
         gz_type='ignition.msgs.Param',
         ros_type='ros_gz_interfaces/msg/ParamVec',
-        direction=BridgeDirection.GZ_TO_ROS)
-
-
-def contacts():
-    return Bridge(
-        gz_topic=f'/vrx/contacts',
-        ros_topic=f'/vrx/contacts',
-        gz_type='ignition.msgs.Contacts',
-        ros_type='ros_gz_interfaces/msg/Contacts',
         direction=BridgeDirection.GZ_TO_ROS)
 
 

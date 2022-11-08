@@ -16,6 +16,8 @@ import codecs
 import os
 import subprocess
 
+import sdformat13 as sdf
+
 from ament_index_python.packages import get_package_share_directory
 from ament_index_python.packages import PackageNotFoundError
 
@@ -52,6 +54,7 @@ class Model:
         self.battery_capacity = 0
         self.wavefield_size = 0
         self.payload = {}
+        self.urdf = ''
 
     def is_UAV(self):
         return self.model_type in UAVS
@@ -63,8 +66,6 @@ class Model:
         custom_launches = []
         nodes = []
         bridges = [
-            # IMU
-            # vrx_gz.bridges.imu(world_name, self.model_name),
             # pose
             vrx_gz.bridges.pose(self.model_name),
             # pose static
@@ -112,52 +113,43 @@ class Model:
         bridges = []
         nodes = []
         payload_launches = []
-        for (idx, k) in enumerate(sorted(payloads.keys())):
-            p = payloads[k]
-            if not p['sensor'] or p['sensor'] == 'None' or p['sensor'] == '':
-                continue
+        for sensor_name, value in payloads.items():
+            link_name = value[0]
+            sensor_type = value[1]
 
-            # check if it is a custom payload
-            if self.is_custom_model(p['sensor']):
-                payload_launch = self.custom_payload_launch(world_name, self.model_name,
-                                                            p['sensor'], idx)
-                if payload_launch is not None:
-                    payload_launches.append(payload_launch)
+            bridges.extend(
+                vrx_gz.payload_bridges.payload_bridges(
+                    world_name, self.model_name, link_name, sensor_name, sensor_type))
 
-            # if not custom payload, add our own bridges and nodes
-            else:
-                model_prefix = ''
-                ros_slot_prefix = f'slot{idx}'
-                bridges.extend(
-                    vrx_gz.payload_bridges.payload_bridges(
-                        world_name, self.model_name, p['sensor'], idx, model_prefix))
+            if sensor_type == sdf.Sensortype.CAMERA:
+                ros_sensor_prefix = f'sensors/cameras/{sensor_name}'
+                nodes.append(Node(
+                    package='vrx_ros',
+                    executable='optical_frame_publisher',
+                    arguments=['1'],
+                    remappings=[('input/image', f'{ros_sensor_prefix}/image_raw'),
+                                ('output/image', f'{ros_sensor_prefix}/optical/image_raw'),
+                                ('input/camera_info', f'{ros_sensor_prefix}/camera_info'),
+                                ('output/camera_info',
+                                 f'{ros_sensor_prefix}/optical/camera_info')]))
+            elif sensor_type == sdf.Sensortype.RGBD_CAMERA:
+                ros_sensor_prefix = f'sensors/cameras/{sensor_name}'
+                nodes.append(Node(
+                    package='vrx_ros',
+                    executable='optical_frame_publisher',
+                    arguments=['1'],
+                    remappings=[('input/image', f'{ros_sensor_prefix}/image_raw'),
+                                ('output/image', f'{ros_sensor_prefix}/optical/image_raw'),
+                                ('input/camera_info', f'{ros_sensor_prefix}/camera_info'),
+                                ('output/camera_info',
+                                 f'{ros_sensor_prefix}/optical/camera_info')]))
+                nodes.append(Node(
+                    package='vrx_ros',
+                    executable='optical_frame_publisher',
+                    arguments=['1'],
+                    remappings=[('input/image', f'{ros_sensor_prefix}/depth'),
+                                ('output/image', f'{ros_sensor_prefix}/optical/depth')]))
 
-                if p['sensor'] in vrx_gz.payload_bridges.camera_models():
-                    nodes.append(Node(
-                        package='vrx_ros',
-                        executable='optical_frame_publisher',
-                        arguments=['1'],
-                        remappings=[('input/image', f'{ros_slot_prefix}/image_raw'),
-                                    ('output/image', f'{ros_slot_prefix}/optical/image_raw'),
-                                    ('input/camera_info', f'{ros_slot_prefix}/camera_info'),
-                                    ('output/camera_info',
-                                     f'{ros_slot_prefix}/optical/camera_info')]))
-                elif p['sensor'] in vrx_gz.payload_bridges.rgbd_models():
-                    nodes.append(Node(
-                        package='vrx_ros',
-                        executable='optical_frame_publisher',
-                        arguments=['1'],
-                        remappings=[('input/image', f'{ros_slot_prefix}/image_raw'),
-                                    ('output/image', f'{ros_slot_prefix}/optical/image_raw'),
-                                    ('input/camera_info', f'{ros_slot_prefix}/camera_info'),
-                                    ('output/camera_info',
-                                     f'{ros_slot_prefix}/optical/camera_info')]))
-                    nodes.append(Node(
-                        package='vrx_ros',
-                        executable='optical_frame_publisher',
-                        arguments=['1'],
-                        remappings=[('input/image', f'{ros_slot_prefix}/depth'),
-                                    ('output/image', f'{ros_slot_prefix}/optical/depth')]))
         return [bridges, nodes, payload_launches]
 
     def is_custom_model(self, model):
@@ -210,14 +202,15 @@ class Model:
         else:
             self.wavefield_size = WAVEFIELD_SIZE[world_name]
 
-    def generate(self):
+
+    def erb_cmd(self):
+        # this function is currently not called.
+        # xacro_cmd is used instead
+
         # Generate SDF by executing ERB and populating templates
         template_file = os.path.join(
             get_package_share_directory('vrx_gz'),
             'models', self.model_type, 'model.sdf.erb')
-
-        model_dir = os.path.join(get_package_share_directory('vrx_gz'), 'models')
-        model_tmp_dir = os.path.join(model_dir, 'tmp')
 
         command = ['erb']
         command.append(f'name={self.model_name}')
@@ -241,12 +234,47 @@ class Model:
             command.append(f'wavefieldSize={self.wavefield_size}')
 
         command.append(template_file)
+        return command
+
+
+    def xacro_cmd(self):
+        # run xacro to generate urdf file
+        xacro_command = ['xacro']
+        xacro_command.append(self.urdf)
+        xacro_command.append(f'namespace:={self.model_name}')
+        xacro_command.append(f'locked:=true')
+        xacro_command.append(f'vrx_sensors_enabled:=true')
+        xacro_command.append(f'thruster_config:=H')
+        xacro_process = subprocess.Popen(xacro_command,
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE)
+        stdout = xacro_process.communicate()[0]
+        urdf_str = codecs.getdecoder('unicode_escape')(stdout)[0]
+        print(xacro_command)
+
+        # run gz sdf print to generate sdf file
+        model_dir = os.path.join(get_package_share_directory('vrx_gazebo'), 'models', self.model_name)
+        model_tmp_dir = os.path.join(model_dir, 'tmp')
+        model_output_file = os.path.join(model_tmp_dir, 'model.urdf')
+        if not os.path.exists(model_tmp_dir):
+            pathlib.Path(model_tmp_dir).mkdir(parents=True, exist_ok=True)
+        with open(model_output_file, 'w') as f:
+            f.write(urdf_str)
+        command = ['gz', 'sdf', '-p']
+        command.append(model_output_file)
+        return command
+
+    def generate(self):
+        command = None
+        if not self.urdf:
+            self.urdf = os.path.join(get_package_share_directory('wamv_gazebo'),
+                                     'urdf', 'wamv_gazebo.urdf.xacro')
+        command = self.xacro_cmd()
         process = subprocess.Popen(command,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
 
-        # evaluate error output to see if there were undefined variables
-        # for the ERB process
+        # evaluate error output for the xacro process
         stderr = process.communicate()[1]
         err_output = codecs.getdecoder('unicode_escape')(stderr)[0]
         for line in err_output.splitlines():
@@ -255,9 +283,33 @@ class Model:
 
         stdout = process.communicate()[0]
         model_sdf = codecs.getdecoder('unicode_escape')(stdout)[0]
-        print(command)
+
+        # parse sdf for payloads if model is urdf
+        if self.urdf != '':
+            self.payload = self.payload_from_sdf(model_sdf)
+
+        # for debugging generated sdf file
+        # with open('/tmp/wamv.sdf', 'w') as f:
+        #     f.write(model_sdf)
+        # print(command)
 
         return command, model_sdf
+
+    def payload_from_sdf(self, model_sdf):
+        payload = {}
+        root = sdf.Root()
+        root.load_sdf_string(model_sdf)
+        model = root.model()
+        for link_index in range(model.link_count()):
+            link = model.link_by_index(link_index)
+            for sensor_index in range(link.sensor_count()):
+                sensor = link.sensor_by_index(sensor_index)
+                payload[sensor.name()] = [link.name(), sensor.type()]
+        plugins = model.plugins()
+        for plugin in plugins:
+            payload[plugin.name()] = ['', plugin.filename()]
+        return payload
+
 
     def spawn_args(self, model_sdf=None):
         if not model_sdf:
@@ -272,6 +324,9 @@ class Model:
                 '-R', str(self.position[3]),
                 '-P', str(self.position[4]),
                 '-Y', str(self.position[5])]
+
+    def set_urdf(self, urdf):
+        self.urdf = urdf
 
     @classmethod
     def FromConfig(cls, stream):
