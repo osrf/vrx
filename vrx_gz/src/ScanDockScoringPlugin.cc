@@ -20,16 +20,8 @@
 #include <string>
 #include <vector>
 #include <gz/common/Profiler.hh>
-#include <gz/math/Matrix4.hh>
-#include <gz/math/Pose3.hh>
-#include <gz/math/Quaternion.hh>
-#include <gz/math/SphericalCoordinates.hh>
-#include <gz/sim/components/Pose.hh>
-#include <gz/sim/components/World.hh>
 #include <gz/sim/Entity.hh>
-#include <gz/sim/Model.hh>
 #include <gz/sim/Util.hh>
-#include <gz/sim/World.hh>
 #include <gz/plugin/Register.hh>
 #include <gz/transport/Node.hh>
 #include <sdf/sdf.hh>
@@ -59,13 +51,14 @@ class ColorSequenceChecker
   /// \return True when the submission was received or false otherwise.
   public: bool SubmissionReceived() const;
 
-  /// \brief Wheter a team submitted the color sequence and is correct or not.
+  /// \brief Whether a team submitted the color sequence and is correct or not.
   /// \return True when the team submitted the color sequence and it is correct
   /// or false otherwise.
   public: bool Correct() const;
 
   /// \brief Callback executed when a new color submission is received.
-  /// \param[in] _sequence Contains the submission.
+  /// \param[in] _sequence Contains the submission. The size of the vector
+  /// should be three.
   private: void OnColorSequence(const msgs::StringMsg_V &_sequence);
 
   /// \brief The expected color sequence.
@@ -74,7 +67,7 @@ class ColorSequenceChecker
   /// \brief Topic where the color sequence should be sent.
   private: std::string colorSequenceTopic;
 
-  /// \brief ROS Node handle.
+  /// \brief The transport node.
   private: transport::Node node;
 
   /// \brief Whether the color sequence has been received or not.
@@ -300,11 +293,6 @@ void ScanDockScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
       this->dataPtr->colorSubmissionProcessed = true;
     }
   }
-}
-
-//////////////////////////////////////////////////
-void ScanDockScoringPlugin::OnReady()
-{
 }
 
 //////////////////////////////////////////////////
