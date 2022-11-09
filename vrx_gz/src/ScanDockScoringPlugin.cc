@@ -123,6 +123,7 @@ void ColorSequenceChecker::OnColorSequence(const msgs::StringMsg_V &_sequence)
 {
   gzmsg << "ColorSequenceChecker: Color sequence submission received:"
         << _sequence.DebugString() << std::endl;
+  std::cout << std::flush;
 
   // Sanity check: Only one submission is allowed.
   if (this->colorSequenceReceived)
@@ -142,9 +143,9 @@ void ColorSequenceChecker::OnColorSequence(const msgs::StringMsg_V &_sequence)
 
   this->colorSequenceReceived = true;
 
-  std::string color1 = _sequence.data(1);
-  std::string color2 = _sequence.data(2);
-  std::string color3 = _sequence.data(3);
+  std::string color1 = _sequence.data(0);
+  std::string color2 = _sequence.data(1);
+  std::string color3 = _sequence.data(2);
 
   std::transform(color1.begin(), color1.end(), color1.begin(), ::tolower);
   std::transform(color2.begin(), color2.end(), color2.begin(), ::tolower);
@@ -165,6 +166,7 @@ void ColorSequenceChecker::OnColorSequence(const msgs::StringMsg_V &_sequence)
     gzmsg << "ColorSequenceChecker: Received color sequence is not correct. "
           << "No additional points." << std::endl;
   }
+  std::cout << std::flush;
 }
 
 /// \brief Private ScanDockScoringPlugin data class.

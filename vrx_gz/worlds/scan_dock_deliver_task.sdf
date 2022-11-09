@@ -506,7 +506,7 @@
       <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>
       <color_1>red</color_1>
       <color_2>green</color_2>
-      <color_3>yellow</color_3>
+      <color_3>blue</color_3>
     </plugin>
 
   </world>
