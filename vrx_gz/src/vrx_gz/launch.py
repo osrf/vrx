@@ -92,7 +92,6 @@ def simulation(world_name, headless=False):
 def competition_bridges(world_name):
     bridges = [
         vrx_gz.bridges.clock(),
-        vrx_gz.bridges.contacts(),
         vrx_gz.bridges.task_info(),
     ]
 
