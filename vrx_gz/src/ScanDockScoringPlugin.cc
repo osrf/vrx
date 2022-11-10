@@ -15,6 +15,8 @@
  *
 */
 
+#include <gz/msgs/boolean.pb.h>
+#include <gz/msgs/stringmsg.pb.h>
 #include <gz/msgs/stringmsg_v.pb.h>
 #include <memory>
 #include <string>
@@ -162,6 +164,245 @@ void ColorSequenceChecker::OnColorSequence(const msgs::StringMsg_V &_sequence)
   std::cout << std::flush;
 }
 
+/// \brief A class to monitor if the vehicle docked in a given bay.
+class DockChecker
+{
+  /// \brief Constructor.
+  /// \param[in] _name The name of the checker (only used for debugging).
+  /// \param[in] _internalActivationTopic The gazebo topic used to receive
+  /// notifications about the internal activation zone.
+  /// \param[in] _externalActivationTopic The gazebo topic used to receive
+  /// notifications about the external activation zone.
+  /// from the "contain" plugin.
+  /// \param[in] _minDockTime Minimum amount of seconds to stay docked to be
+  /// considered a fully successfull dock.
+  /// \param[in] _dockAllowed Whether is allowed to dock in this bay or not.
+  /// \param[in] _announceSymbol Optional symbol to announce via msgs.
+  /// \param[in] _symbolTopic Optional topic to announce the symbol.
+  public: DockChecker(const std::string &_name,
+                      const std::string &_internalActivationTopic,
+                      const std::string &_exteriorActivationTopic,
+                      const std::chrono::duration<double> _minDockTime,
+                      const bool _dockAllowed,
+                      const std::string &_announceSymbol,
+                      const std::string &_symbolTopic);
+
+  /// \brief The name of this checker.
+  public: std::string name;
+
+  /// \brief Whether the robot has been successfully docked in this bay or not.
+  /// \return True when the robot has been docked or false otherwise.
+  public: bool AnytimeDocked() const;
+
+  /// \brief Whether the robot is currently at the entrance of the bay.
+  /// \return True when the robot is at the entrance or false othwerwise.
+  public: bool AtEntrance() const;
+
+  /// \brief Whether it is allowed to dock in this bay or not.
+  public: bool Allowed() const;
+
+  /// \brief Announce the symbol of the bay.
+  public: void AnnounceSymbol();
+
+  /// \brief Update function that needs to be executed periodically.
+  /// \param[in] _info Update information.
+  public: void Update(const sim::UpdateInfo &_info);
+
+  /// \brief Callback triggered when the vehicle enters or exits the activation
+  /// zone.
+  /// \param[in] _msg The current state (0: exiting, 1: entering).
+  private: void OnInternalActivationEvent(const msgs::Boolean &_msg);
+
+  /// \brief Callback triggered when the vehicle enters or exits the activation
+  /// zone.
+  /// \param[in] _msg The current state (0: exiting, 1: entering).
+  private: void OnExternalActivationEvent(const msgs::Boolean &_msg);
+
+  /// \brief The gazebo topic used to receive notifications
+  /// from the internal activation zone.
+  private: std::string internalActivationTopic;
+
+  /// \brief The gazebo topic used to receive notifications
+  /// from the external activation zone.
+  private: std::string externalActivationTopic;
+
+  /// \brief Minimum amount of seconds to stay docked to be
+  /// considered a fully successfull dock.
+  private: std::chrono::duration<double> minDockTime;
+
+  /// \brief Current simulation time.
+  private: std::chrono::duration<double> simTime;
+
+  /// \brief Whether is allowed to dock in this bay or not.
+  private: bool dockAllowed;
+
+  /// \brief Timer used to calculate the elapsed time docked in the bay.
+  private: std::chrono::duration<double> timer;
+
+  /// \brief Ignition Transport node used for communication.
+  private: transport::Node ignNode;
+
+  /// \brief Whether the vehicle has successfully docked or not.
+  private: bool anytimeDocked = false;
+
+  /// \brief Whether the vehicle is at the entrance of the bay or not.
+  private: bool atEntrance = false;
+
+  /// \brief Color and shape of symbol to announce. E.g.: red_cross, blue_circle
+  private: msgs::StringMsg announceSymbol;
+
+  /// \brief Publisher for the symbol.
+  private: transport::Node::Publisher symbolPub;
+
+  /// \brief Topic where the target symbol will be published.
+  private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
+
+  /// \brief The transport node.
+  private: transport::Node node;
+
+  /// \brief Publish the placard symbols.
+  private: transport::Node::Publisher dockPlacardPub;
+};
+
+/////////////////////////////////////////////////
+DockChecker::DockChecker(const std::string &_name,
+  const std::string &_internalActivationTopic,
+  const std::string &_externalActivationTopic,
+  const std::chrono::duration<double> _minDockTime, const bool _dockAllowed,
+  const std::string &_announceSymbol, const std::string &_symbolTopic)
+  : name(_name),
+    internalActivationTopic(_internalActivationTopic),
+    externalActivationTopic(_externalActivationTopic),
+    minDockTime(_minDockTime),
+    dockAllowed(_dockAllowed),
+    symbolTopic(_symbolTopic)
+{
+  this->timer =
+    std::chrono::duration<double>(std::numeric_limits<double>::max());
+
+  this->announceSymbol.set_data(_announceSymbol);
+
+  // Subscriber to receive ContainPlugin updates.
+  this->node.Subscribe(this->internalActivationTopic,
+    &DockChecker::OnInternalActivationEvent, this);
+  this->node.Subscribe(this->externalActivationTopic,
+    &DockChecker::OnExternalActivationEvent, this);
+}
+
+/////////////////////////////////////////////////
+bool DockChecker::AnytimeDocked() const
+{
+  return this->anytimeDocked;
+}
+
+/////////////////////////////////////////////////
+bool DockChecker::AtEntrance() const
+{
+  return this->atEntrance;
+}
+
+/////////////////////////////////////////////////
+bool DockChecker::Allowed() const
+{
+  return this->dockAllowed;
+}
+
+/////////////////////////////////////////////////
+void DockChecker::AnnounceSymbol()
+{
+  // Override the docks own sdf parameters
+  this->dockPlacardPub = this->node.Advertise<msgs::StringMsg_V>(
+    this->symbolTopic);
+
+  msgs::StringMsg_V symbol;
+  // Add the shape.
+  symbol.add_data(this->announceSymbol.data().substr(
+    this->announceSymbol.data().find("_") + 1));
+  // Add the color.
+  symbol.add_data(this->announceSymbol.data().substr(
+    0, this->announceSymbol.data().find("_")));
+
+  this->dockPlacardPub.Publish(symbol);
+
+  if (this->dockAllowed)
+  {
+    this->symbolPub = this->node.Advertise<msgs::StringMsg>(this->symbolTopic);
+    this->symbolPub.Publish(this->announceSymbol);
+  }
+}
+
+/////////////////////////////////////////////////
+void DockChecker::Update(const sim::UpdateInfo &_info)
+{
+  this->simTime = _info.simTime;
+
+  if (this->anytimeDocked)
+    return;
+
+  auto elapsed = _info.simTime - this->timer;
+  this->anytimeDocked = elapsed >= this->minDockTime;
+
+  if (this->anytimeDocked)
+  {
+    gzmsg  << "Successfully stayed in dock for " << this->minDockTime.count()
+           << " seconds, transitioning to <docked> state" << std::endl;
+  }
+}
+
+/////////////////////////////////////////////////
+void DockChecker::OnInternalActivationEvent(const msgs::Boolean &_msg)
+{
+  // Currently docked.
+  if (_msg.data() == 1)
+  {
+    this->timer = this->simTime;
+    gzmsg << "Entering internal dock activation zone, transitioning to "
+          << "<docking> state in [" << this->name << "]." << std::endl;
+  }
+
+  // Currently undocked.
+  if (_msg.data() == 0)
+  {
+    this->timer =
+      std::chrono::duration<double>(std::numeric_limits<double>::max());
+    if (this->AnytimeDocked())
+    {
+      gzmsg << "Leaving internal dock activation zone in [" << this->name
+            << "] after required time - transitioning to <exited> state."
+            << std::endl;
+    }
+    else
+    {
+      gzmsg << "Leaving internal dock activation zone in [" << this->name
+            << "] early - transitioning back to <undocked> state."
+            << std::endl;
+    }
+  }
+
+  gzdbg << "[" << this->name << "] OnInternalActivationEvent(): "
+        << _msg.data() << std::endl;
+}
+
+/////////////////////////////////////////////////
+void DockChecker::OnExternalActivationEvent(const msgs::Boolean &_msg)
+{
+  this->atEntrance = _msg.data() == 1;
+
+  if (this->atEntrance)
+  {
+    gzmsg << "Entering external dock activation zone in [" << this->name
+          << "]" << std::endl;
+  }
+  else
+  {
+    gzmsg << "Leaving external dock activation zone in [" << this->name
+          << "]" << std::endl;
+  }
+
+  gzdbg << "[" << this->name << "] OnExternalActivationEvent(): "
+        << _msg.data() << std::endl;
+}
+
 /// \brief Private ScanDockScoringPlugin data class.
 class ScanDockScoringPlugin::Implementation
 {
@@ -174,6 +415,9 @@ class ScanDockScoringPlugin::Implementation
   /// the color sequence from the light buoy.
   public: std::unique_ptr<ColorSequenceChecker> colorChecker;
 
+  /// \brief Monitor all the available bays to decide when the vehicle docks.
+  public: std::vector<std::unique_ptr<DockChecker>> dockCheckers;
+
   /// \brief To check colors or not.
   public: bool enableColorChecker = true;
 
@@ -183,11 +427,19 @@ class ScanDockScoringPlugin::Implementation
   /// \brief Points granted when the color sequence is correct.
   public: double colorBonusPoints = 10.0;
 
+  /// \brief Points granted when the vehicle successfully
+  /// dock-and-undock in any bay
+  public: double dockBonusPoints = 10.0;
+
+  /// \brief Points granted when the vehicle successfully
+  /// dock-and-undock in the specified bay.
+  public: double correctDockBonusPoints = 10.0;
+
   /// \brief Expected color sequence.
   public: std::vector<std::string> expectedSequence;
 
   /// \brief A mutex.
-  private: std::mutex mutex;
+  public: std::mutex mutex;
 };
 
 //////////////////////////////////////////////////
@@ -237,6 +489,107 @@ bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
   {
     this->colorChecker.reset(
       new ColorSequenceChecker(this->expectedSequence, colorSequenceTopic));
+  }
+
+  // Required: Parse the bays.
+  if (!_sdf->HasElement("bays"))
+  {
+    gzerr << "<bays> missing" << std::endl;
+    return false;
+  }
+
+  auto baysElem = _sdf->GetElement("bays");
+  if (!baysElem->HasElement("bay"))
+  {
+    gzerr << "<bay> missing" << std::endl;
+    return false;
+  }
+
+  auto bayElem = baysElem->GetElement("bay");
+  while (bayElem)
+  {
+    // Required: bay name.
+    if (!bayElem->GetElement("name"))
+    {
+      gzerr << "<bays::bay::name> missing" << std::endl;
+      return false;
+    }
+    std::string bayName = bayElem->Get<std::string>("name");
+
+    // Required: internal_activation topic.
+    if (!bayElem->GetElement("internal_activation_topic"))
+    {
+      gzerr << "<bays::bay::internal_activation_topic> missing" << std::endl;
+      return false;
+    }
+    std::string internalActivationTopic =
+      bayElem->Get<std::string>("internal_activation_topic");
+
+    // Required: external_activation topic.
+    if (!bayElem->GetElement("external_activation_topic"))
+    {
+      gzerr << "<bays::bay::external_activation_topic> missing" << std::endl;
+      return false;
+    }
+    std::string externalActivationTopic =
+      bayElem->Get<std::string>("external_activation_topic");
+
+    // Required: gazebo symbol topic.
+    if (!bayElem->GetElement("symbol_topic"))
+    {
+      gzerr << "<bays::bay::symbol_topic> missing" << std::endl;
+      return false;
+    }
+    std::string symbolTopic = bayElem->Get<std::string>("symbol_topic");
+
+    // Required: minimum time to be considered "docked".
+    if (!bayElem->GetElement("min_dock_time"))
+    {
+      gzerr << "<bays::bay::min_dock_time> missing" << std::endl;
+      return false;
+    }
+    double minDockTime = bayElem->Get<double>("min_dock_time");
+
+    // Required: dock allowed.
+    if (!bayElem->GetElement("dock_allowed"))
+    {
+      gzerr << "<bays::bay::dock_allowed> missing" << std::endl;
+      return false;
+    }
+    bool dockAllowed = bayElem->Get<bool>("dock_allowed");
+
+    std::string announceSymbol = "";
+    if (!bayElem->HasElement("symbol"))
+    {
+      gzerr << "<bays::bay::symbol> not found" << std::endl;
+    }
+    announceSymbol = bayElem->GetElement("symbol")->Get<std::string>();
+
+    // Create a new dock checker.
+    std::unique_ptr<DockChecker> dockChecker(
+      new DockChecker(bayName, internalActivationTopic,
+        externalActivationTopic, std::chrono::duration<double>(minDockTime),
+        dockAllowed, announceSymbol, symbolTopic));
+
+    // Add the dock checker.
+    this->dockCheckers.push_back(std::move(dockChecker));
+
+    // Process the next checker.
+    bayElem = bayElem->GetNextElement();
+  }
+
+  // Optional: the points granted when the vehicle docks in any bay.
+  if (_sdf->HasElement("dock_bonus_points"))
+  {
+    this->dockBonusPoints =
+      _sdf->GetElement("dock_bonus_points")->Get<double>();
+  }
+
+  // Optional: the points granted when the vehicle docks in the expected bay.
+  if (_sdf->HasElement("correct_dock_bonus_points"))
+  {
+    this->correctDockBonusPoints =
+      _sdf->GetElement("correct_dock_bonus_points")->Get<double>();
   }
 
   return true;
@@ -293,6 +646,60 @@ void ScanDockScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
       this->dataPtr->colorSubmissionProcessed = true;
     }
   }
+
+  // Verify the dock checkers.
+  for (auto &dockChecker : this->dataPtr->dockCheckers)
+  {
+    // We always need to update the checkers.
+    dockChecker->Update(_info);
+
+    // Nothing to do if nobody ever docked or we're still inside the bay.
+    if (!dockChecker->AnytimeDocked() || !dockChecker->AtEntrance())
+      continue;
+
+    // Points granted for docking!
+    this->SetScore(this->Score() + this->dataPtr->dockBonusPoints);
+    if (this->TaskState() == "running")
+    {
+      gzmsg  << "Successfully docked in [" << dockChecker->name << "]"
+             << ". Awarding " << this->dataPtr->dockBonusPoints << " points."
+             << std::endl;
+    }
+
+    // Is this the right bay?
+    if (dockChecker->Allowed())
+    {
+      this->SetScore(this->Score() + this->dataPtr->correctDockBonusPoints);
+      if (this->TaskState() == "running")
+      {
+        gzmsg << "Docked in correct dock [" << dockChecker->name << "]"
+              << ". Awarding " << this->dataPtr->correctDockBonusPoints
+              << " more points." << std::endl;
+      }
+    }
+    else
+    {
+      if (this->TaskState() == "running")
+      {
+        gzmsg  << "Docked in incorrect dock [" << dockChecker->name << "]"
+               << ". No additional points." << std::endl;
+      }
+    }
+
+    // Time to finish the task as the vehicle docked.
+    // Note that we only allow to dock one time. This is to prevent teams
+    // docking in all possible bays.
+    this->Exit();
+    break;
+  }
+}
+
+//////////////////////////////////////////////////
+void ScanDockScoringPlugin::OnReady()
+{
+  // Announce the symbol if needed.
+  for (auto &dockChecker : this->dataPtr->dockCheckers)
+    dockChecker->AnnounceSymbol();
 }
 
 //////////////////////////////////////////////////
@@ -300,6 +707,10 @@ void ScanDockScoringPlugin::OnRunning()
 {
   if (this->dataPtr->enableColorChecker)
     this->dataPtr->colorChecker->Enable();
+
+  // Announce the symbol if needed.
+  for (auto &dockChecker : this->dataPtr->dockCheckers)
+    dockChecker->AnnounceSymbol();
 }
 
 GZ_ADD_PLUGIN(ScanDockScoringPlugin,

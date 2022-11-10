@@ -78,6 +78,9 @@ namespace vrx
                            gz::sim::EntityComponentManager &_ecm) override;
 
     // Documentation inherited.
+    private: void OnReady() override;
+
+    // Documentation inherited.
     private: void OnRunning() override;
 
     /// \brief Private data pointer.
