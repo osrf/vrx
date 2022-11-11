@@ -602,7 +602,7 @@
         <ref>wamv</ref>
         <geometry>
           <box>
-            <size>2 2 2</size>
+            <size>4 2 2</size>
           </box>
         </geometry>
       </performer>
