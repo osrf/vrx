@@ -66,6 +66,9 @@ class GymkhanaScoringPlugin::Implementation
   /// \brief Pointer to the SDF plugin element.
   public: sdf::ElementPtr sdf;
 
+  /// \brief Display or suppress state changes
+  public: bool silent = false;
+
 };
 
 /////////////////////////////////////////////////
@@ -208,6 +211,17 @@ void GymkhanaScoringPlugin::PreUpdate(const gz::sim::UpdateInfo &_info,
   {
     this->ScoringPlugin::SetScore(200);
   }
+}
+
+//////////////////////////////////////////////////
+void GymkhanaScoringPlugin::OnRunning()
+{
+  if (!this->dataPtr->silent)
+  {
+    gzmsg << "GymkhanaScoringPlugin::OnRunning" << std::endl;
+    std::cout << std::flush;
+  }
+  ScoringPlugin::OnRunning();
 }
 
 

@@ -55,9 +55,6 @@ namespace vrx
     // Documentation inherited.
     protected: void OnFinished() override;
  
-    // Documentation inherited.
-    private: void ReleaseVehicle() override;
-  
     /// \brief Private data pointer.
     GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };

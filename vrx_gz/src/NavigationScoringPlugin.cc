@@ -128,7 +128,6 @@ class NavigationScoringPlugin::Implementation
   /// \brief Number of points deducted per collision.
   public: double obstaclePenalty = 10.0;
 
-  //TODO: should this be set in ScoringPlugin?
   /// \brief Display or suppress state changes
   public: bool silent = false;
 };
