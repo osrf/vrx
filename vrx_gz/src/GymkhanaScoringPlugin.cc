@@ -34,9 +34,6 @@ using namespace vrx;
 /// \brief Private GymkhanaScoringPlugin data class.
 class GymkhanaScoringPlugin::Implementation
 {
-  /// \brief Callback for channel navigation portion's scoring plugin
-  public: void ChannelCallback(const msgs::Param &_msg);
-
   /// \brief Callback for black box station-keeping portion's scoring plugin
   public: void BlackboxCallback(const msgs::Param &_msg);
 
@@ -72,21 +69,21 @@ class GymkhanaScoringPlugin::Implementation
 };
 
 /////////////////////////////////////////////////
-void GymkhanaScoringPlugin::Implementation::ChannelCallback(
+void GymkhanaScoringPlugin::ChannelCallback(
   const msgs::Param &_msg)
 {
   if (_msg.IsInitialized()) // TODO: Check
   {
     
     // Determine whether channel has been crossed before timeout
-    if (!this->channelCrossed)
+    if (!this->dataPtr->channelCrossed)
     {
       if (_msg.params().at("state").string_value() == "finished")
       {
         if (_msg.params().at("score").double_value() == 200)
-          this->ScoringPlugin::Finish();
+          ScoringPlugin::Finish();
         else
-          this->channelCrossed = true;
+          this->dataPtr->channelCrossed = true;
       }
     }
   }
@@ -161,8 +158,8 @@ void GymkhanaScoringPlugin::Configure(const sim::Entity &_entity,
     setPositionTopicName, opts);
 
   this->dataPtr->node.Subscribe("/vrx/gymkhana_channel/task/info",
-    &GymkhanaScoringPlugin::Implementation::ChannelCallback, 
-    this->dataPtr.get());
+    &GymkhanaScoringPlugin::ChannelCallback, 
+    this);
 
   this->dataPtr->node.Subscribe("/vrx/gymkhana_blackbox/task/info",
     &GymkhanaScoringPlugin::Implementation::BlackboxCallback, 
@@ -219,7 +216,7 @@ void GymkhanaScoringPlugin::PreUpdate(const gz::sim::UpdateInfo &_info,
 void GymkhanaScoringPlugin::OnFinished()
 {
   // TODO: fix obstacle penalty (Navigation Plugin Implementation)
-  double penalty = this->NumCollisions() * this->obstaclePenalty;
+  double penalty = this->NumCollisions() * this->dataPtr->obstaclePenalty;
   this->SetTimeoutScore(this->Score() + penalty);
 
   ScoringPlugin::OnFinished();

@@ -18,6 +18,7 @@
 #ifndef VRX_GAZEBO_GYMKHANA_SCORING_PLUGIN_HH_
 #define VRX_GAZEBO_GYMKHANA_SCORING_PLUGIN_HH_
 
+#include <gz/msgs/param.pb.h>
 #include <gz/sim/Entity.hh>
 #include <gz/sim/System.hh>
 #include <gz/utils/ImplPtr.hh>
@@ -45,6 +46,9 @@ namespace vrx
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
                            gz::sim::EntityComponentManager &_ecm) override;
   
+    /// \brief Callback for channel navigation portion's scoring plugin
+    public: void ChannelCallback(const gz::msgs::Param &_msg);
+
     // Documentation inherited.
     private: void OnRunning() override;
  
