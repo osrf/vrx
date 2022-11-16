@@ -364,6 +364,13 @@
       <pose>-524 186 0 0 0 -1.44</pose>
     </include>
 
+    <!-- The obstacle course -->
+    <include>
+      <name>buoys</name>
+      <uri>model://obstacle_course</uri>
+      <pose>-477 275 0 0 0 2.54</pose>
+    </include>
+
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>
