@@ -115,67 +115,6 @@
         <child>link_symbols</child>
       </joint>
 
-      <!-- Uncomment to see the activation areas -->
-      <!-- For visualizing ContainPlugin volume
-           Make sure that the size and location are consistent with plugin -->
-      <!-- <link name="bay_visualization">
-        <visual name="bay_box">
-          <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
-          <material>
-            <ambient>0 1 0</ambient>
-            <diffuse>0 1 0</diffuse>
-            <specular>0 1 0 1</specular>
-          </material>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.0</transparency>
-        </visual>
-        <visual name="bay_box_exterior">
-          <pose frame="placard::link">0 -9.5 -1.5 0 0 0</pose>
-          <material>
-            <ambient>1 0 0</ambient>
-            <diffuse>1 0 0</diffuse>
-            <specular>1 0 0 1</specular>
-          </material>
-          <geometry>
-            <box>
-              <size>5.5 1.5 2</size>
-            </box>
-          </geometry>
-        </visual>
-      </link>
-      <joint name="placard_to_bay" type="fixed">
-        <child>placard::link</child>
-        <parent>bay_visualization</parent>
-      </joint> -->
-
-      <!-- <plugin
-        filename="gz-sim-performer-detector-system"
-        name="gz::sim::systems::PerformerDetector">
-        <topic>/vrx/dock_2022/bay_1/contains</topic>
-        <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>1.5 4 2</size>
-          </box>
-        </geometry>
-      </plugin>
-
-      <plugin
-        filename="gz-sim-performer-detector-system"
-        name="gz::sim::systems::PerformerDetector">
-        <topic>/vrx/dock_2022/bay_1_external/contains</topic>
-        <pose frame="placard::link">0 -9.5 -1.5 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>5.5 1.5 2</size>
-          </box>
-        </geometry>
-      </plugin> -->
-
     </model>
 
 
@@ -283,67 +222,6 @@
         <parent>placard::link</parent>    
         <child>link_symbols</child>
       </joint>
-
-      <!-- Uncomment to see the activation areas -->
-      <!-- For visualizing ContainPlugin volume
-           Make sure that the size and location are consistent with plugin -->
-      <!-- <link name="bay_visualization">
-        <visual name="bay_box">
-          <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
-          <material>
-            <ambient>0 1 0</ambient>
-            <diffuse>0 1 0</diffuse>
-            <specular>0 1 0 1</specular>
-          </material>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.0</transparency>
-        </visual>
-        <visual name="bay_box_exterior">
-          <pose frame="placard::link">0 -9.5 -1.5 0 0 0</pose>
-          <material>
-            <ambient>1 0 0</ambient>
-            <diffuse>1 0 0</diffuse>
-            <specular>1 0 0 1</specular>
-          </material>
-          <geometry>
-            <box>
-              <size>5.5 1.5 2</size>
-            </box>
-          </geometry>
-        </visual>
-      </link>
-      <joint name="placard_to_bay" type="fixed">
-        <child>placard::link</child>
-        <parent>bay_visualization</parent>
-      </joint> -->
-
-     <!--  <plugin
-        filename="gz-sim-performer-detector-system"
-        name="gz::sim::systems::PerformerDetector">
-        <topic>/vrx/dock_2022/bay_2/contains</topic>
-        <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>1.5 4 2</size>
-          </box>
-        </geometry>
-      </plugin> -->
-
-      <!-- <plugin
-        filename="gz-sim-performer-detector-system"
-        name="gz::sim::systems::PerformerDetector">
-        <topic>/vrx/dock_2022/bay_2_external/contains</topic>
-        <pose frame="placard::link">0 -9.5 -1.5 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>5.5 1.5 2</size>
-          </box>
-        </geometry>
-      </plugin> -->
 
     </model>
 
@@ -453,70 +331,11 @@
         <child>link_symbols</child>
       </joint>
 
-      <!-- Uncomment to see the activation areas -->
-      <!-- For visualizing ContainPlugin volume
-           Make sure that the size and location are consistent with plugin -->
-      <!-- <link name="bay_visualization">
-        <visual name="bay_box">
-          <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
-          <material>
-            <ambient>0 1 0</ambient>
-            <diffuse>0 1 0</diffuse>
-            <specular>0 1 0 1</specular>
-          </material>
-          <geometry>
-            <box>
-              <size>1.5 4 2</size>
-            </box>
-          </geometry>
-          <transparency>0.0</transparency>
-        </visual>
-        <visual name="bay_box_exterior">
-          <pose frame="placard::link">0 -9.5 -1.5 0 0 0</pose>
-          <material>
-            <ambient>1 0 0</ambient>
-            <diffuse>1 0 0</diffuse>
-            <specular>1 0 0 1</specular>
-          </material>
-          <geometry>
-            <box>
-              <size>5.5 1.5 2</size>
-            </box>
-          </geometry>
-        </visual>
-      </link>
-      <joint name="placard_to_bay" type="fixed">
-        <child>placard::link</child>
-        <parent>bay_visualization</parent>
-      </joint> -->
-
-      <!-- <plugin
-        filename="gz-sim-performer-detector-system"
-        name="gz::sim::systems::PerformerDetector">
-        <topic>/vrx/dock_2022/bay_3/contains</topic>
-        <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>1.5 4 2</size>
-          </box>
-        </geometry>
-      </plugin>
-
-      <plugin
-        filename="gz-sim-performer-detector-system"
-        name="gz::sim::systems::PerformerDetector">
-        <topic>/vrx/dock_2022/bay_3_external/contains</topic>
-        <pose frame="placard::link">0 -9.5 -1.5 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>5.5 1.5 2</size>
-          </box>
-        </geometry>
-      </plugin> -->
-
     </model>
 
-    <link name="bay1_visualization">
+    <!-- Uncomment to see the activation areas of the PerformerDectorPlugins
+         Make sure that the size and location are consistent with plugin -->
+    <!-- <link name="bay1_visualization">
       <visual name="bay1_box">
         <pose>1.5 3 0.25 0 0 1.5707963267948966</pose>
         <material>
@@ -603,8 +422,7 @@
           </box>
         </geometry>
       </visual>
-
-    </link>
+    </link> -->
 
     <plugin
       filename="gz-sim-performer-detector-system"
