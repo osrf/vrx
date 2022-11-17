@@ -99,10 +99,12 @@ install(
 # Plugins
 list(APPEND VRX_GZ_PLUGINS
   AcousticPingerPlugin
+  BallShooterPlugin
   LightBuoyPlugin
-  PerceptionScoringPlugin
   NavigationScoringPlugin
   GymkhanaScoringPlugin
+  PerceptionScoringPlugin
+  PlacardPlugin
   SimpleHydrodynamics
   StationkeepingScoringPlugin
   Surface

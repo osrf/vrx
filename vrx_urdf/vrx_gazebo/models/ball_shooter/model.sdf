@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="ball_shooter">
+    <link name="base_link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.02 0 0.05 0 0 0</pose>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.00083</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00052083</iyy>
+          <iyz>0</iyz>
+          <izz>0.00052083</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual_base">
+        <geometry>
+          <mesh>
+            <uri>model://ball_shooter/meshes/ball_shooter_base.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="launcher_link">
+      <pose>-0.0204 0 0.107877 0 0.5 0</pose>
+      <inertial>
+        <pose>0 0 0.0 0 -1.8326 0</pose>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.001779166666666667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.001779166666666667</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual_launcher">
+        <geometry>
+          <mesh>
+            <uri>model://ball_shooter/meshes/ball_shooter_launcher.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name='launcher_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>launcher_link</child>
+      <pose>-0.0204 0 0.107877 0 0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+      </axis>
+    </joint>
+  </model>
+</sdf>

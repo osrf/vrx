@@ -50,6 +50,9 @@ WILDLIFE_WORLDS = [
   'wildlife_task'
 ]
 
+SCAN_DOCK_DELIVER_WORLDS = [
+  'scan_dock_deliver_task'
+]
 def simulation(world_name, headless=False):
     gz_args = ['-v 4', '-r']
     if headless:
@@ -88,7 +91,6 @@ def simulation(world_name, headless=False):
 def competition_bridges(world_name):
     bridges = [
         vrx_gz.bridges.clock(),
-        vrx_gz.bridges.contacts(),
         vrx_gz.bridges.task_info(),
     ]
 
@@ -110,6 +112,9 @@ def competition_bridges(world_name):
             vrx_gz.bridges.wayfinding_min_errors(),
         ]
     elif world_name in WILDLIFE_WORLDS:
+        task_bridges = [
+        ]
+    elif world_name in SCAN_DOCK_DELIVER_WORLDS:
         task_bridges = [
         ]
     bridges.extend(task_bridges)
