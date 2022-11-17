@@ -532,19 +532,6 @@
     <include>
       <uri>dock_2022</uri>
       <pose>-480 190 0 0 0 1.0</pose>
-
-      <!-- Triggers a message when the vehicle enters and exits the bay #1 -->
-      <!-- <plugin
-        filename="gz-sim-performer-detector-system"
-        name="gz::sim::systems::PerformerDetector">
-        <topic>/vrx/dock_2022/bay_1/contains</topic>
-        <pose></pose>
-        <geometry>
-          <box>
-            <size>1.5 4 2</size>
-          </box>
-        </geometry>
-      </plugin> -->
     </include>
 
     <!-- The scan, dock, deliver scoring plugin -->
@@ -573,7 +560,7 @@
           <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>True</dock_allowed>
+          <dock_allowed>False</dock_allowed>
           <symbol>red_rectangle</symbol>
         </bay>
         <bay>
@@ -582,7 +569,7 @@
           <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <dock_allowed>False</dock_allowed>
+          <dock_allowed>True</dock_allowed>
           <symbol>blue_triangle</symbol>
         </bay>
         <bay>
@@ -595,17 +582,6 @@
           <symbol>yellow_circle</symbol>
         </bay>
       </bays>
-    </plugin>
-
-    <plugin name="gz::sim" filename="dummy">
-      <performer name="perf_wamv">
-        <ref>wamv</ref>
-        <geometry>
-          <box>
-            <size>4 2 2</size>
-          </box>
-        </geometry>
-      </performer>
     </plugin>
 
   </world>

@@ -2,12 +2,27 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="wam-v-cpu_cases">
 <xacro:macro name="cpu_cases" params="position:='0 0 0' orientation:='0 0 0'">
   <link name="${namespace}/cpu_cases_link">
-    <visual name="cpu_cases_visual">
+    <!-- <visual name="cpu_cases_visual">
       <origin xyz="0.073 0 -1.53" rpy="0 0 0"/>
       <geometry>
         <mesh filename="package://vrx_gazebo/models/cpu_cases/mesh/cpu_cases.dae"/>
       </geometry>
-    </visual>
+      <gazebo>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>package://vrx_gazebo/models/cpu_cases/mesh/cpu_cases_Albedo.png</albedo_map>
+              <normal_map>package://vrx_gazebo/models/cpu_cases/mesh/cpu_cases_Normal.png</normal_map>
+              <roughness_map>package://vrx_gazebo/models/cpu_cases/mesh/cpu_cases_Roughness.png</roughness_map>
+              <metalness_map>package://vrx_gazebo/models/cpu_cases/mesh/cpu_cases_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material>
+      </gazebo>
+    </visual> -->
+
     <collision name="cpu_case_1_collision">
       <origin xyz="0.185 0 0" rpy="0 0 0"/>
       <geometry>
@@ -36,6 +51,29 @@
     <parent link="${namespace}/base_link"/>
     <child link="${namespace}/cpu_cases_link"/>
   </joint>
+
+  <gazebo reference="${namespace}/cpu_cases_link">
+    <visual name="cpu_cases_visual">
+      <pose>0.073 0 -1.53 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/cpu_cases/mesh/cpu_cases.dae</uri>
+        </mesh>
+      </geometry>
+      <material>
+        <diffuse>1.0 1.0 1.0</diffuse>
+        <specular>1.0 1.0 1.0</specular>
+        <pbr>
+          <metal>
+            <albedo_map>https://fuel.gazebosim.org/1.0/openrobotics/models/cpu_cases/mesh/cpu_cases_Albedo.png</albedo_map>
+            <normal_map>https://fuel.gazebosim.org/1.0/openrobotics/models/cpu_cases/mesh/cpu_cases_Normal.png</normal_map>
+            <roughness_map>https://fuel.gazebosim.org/1.0/openrobotics/models/cpu_cases/mesh/cpu_cases_Roughness.png</roughness_map>
+            <metalness_map>https://fuel.gazebosim.org/1.0/openrobotics/models/cpu_cases/mesh/cpu_cases_Metalness.png</metalness_map>
+          </metal>
+        </pbr>
+      </material>
+    </visual>
+  </gazebo>
 
 </xacro:macro>
 </robot>

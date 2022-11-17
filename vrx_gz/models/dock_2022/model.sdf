@@ -118,7 +118,7 @@
       <!-- Uncomment to see the activation areas -->
       <!-- For visualizing ContainPlugin volume
            Make sure that the size and location are consistent with plugin -->
-      <link name="bay_visualization">
+      <!-- <link name="bay_visualization">
         <visual name="bay_box">
           <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
           <material>
@@ -150,9 +150,9 @@
       <joint name="placard_to_bay" type="fixed">
         <child>placard::link</child>
         <parent>bay_visualization</parent>
-      </joint>
+      </joint> -->
 
-      <plugin
+      <!-- <plugin
         filename="gz-sim-performer-detector-system"
         name="gz::sim::systems::PerformerDetector">
         <topic>/vrx/dock_2022/bay_1/contains</topic>
@@ -174,7 +174,7 @@
             <size>5.5 1.5 2</size>
           </box>
         </geometry>
-      </plugin>
+      </plugin> -->
 
     </model>
 
@@ -287,7 +287,7 @@
       <!-- Uncomment to see the activation areas -->
       <!-- For visualizing ContainPlugin volume
            Make sure that the size and location are consistent with plugin -->
-      <link name="bay_visualization">
+      <!-- <link name="bay_visualization">
         <visual name="bay_box">
           <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
           <material>
@@ -319,9 +319,9 @@
       <joint name="placard_to_bay" type="fixed">
         <child>placard::link</child>
         <parent>bay_visualization</parent>
-      </joint>
+      </joint> -->
 
-      <plugin
+     <!--  <plugin
         filename="gz-sim-performer-detector-system"
         name="gz::sim::systems::PerformerDetector">
         <topic>/vrx/dock_2022/bay_2/contains</topic>
@@ -331,9 +331,9 @@
             <size>1.5 4 2</size>
           </box>
         </geometry>
-      </plugin>
+      </plugin> -->
 
-      <plugin
+      <!-- <plugin
         filename="gz-sim-performer-detector-system"
         name="gz::sim::systems::PerformerDetector">
         <topic>/vrx/dock_2022/bay_2_external/contains</topic>
@@ -343,7 +343,7 @@
             <size>5.5 1.5 2</size>
           </box>
         </geometry>
-      </plugin>
+      </plugin> -->
 
     </model>
 
@@ -456,7 +456,7 @@
       <!-- Uncomment to see the activation areas -->
       <!-- For visualizing ContainPlugin volume
            Make sure that the size and location are consistent with plugin -->
-      <link name="bay_visualization">
+      <!-- <link name="bay_visualization">
         <visual name="bay_box">
           <pose frame="placard::link">0 -4.5 -1.5 0 0 0</pose>
           <material>
@@ -488,9 +488,9 @@
       <joint name="placard_to_bay" type="fixed">
         <child>placard::link</child>
         <parent>bay_visualization</parent>
-      </joint>
+      </joint> -->
 
-      <plugin
+      <!-- <plugin
         filename="gz-sim-performer-detector-system"
         name="gz::sim::systems::PerformerDetector">
         <topic>/vrx/dock_2022/bay_3/contains</topic>
@@ -512,10 +512,171 @@
             <size>5.5 1.5 2</size>
           </box>
         </geometry>
-      </plugin>
+      </plugin> -->
 
     </model>
-    
+
+    <link name="bay1_visualization">
+      <visual name="bay1_box">
+        <pose>1.5 3 0.25 0 0 1.5707963267948966</pose>
+        <material>
+          <ambient>0 1 0</ambient>
+          <diffuse>0 1 0</diffuse>
+          <specular>0 1 0 1</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>1.5 4 2</size>
+          </box>
+        </geometry>
+        <transparency>0.0</transparency>
+      </visual>
+
+      <visual name="bay2_box">
+        <pose>1.5 9 0.25 0 0 1.5707963267948966</pose>
+        <material>
+          <ambient>0 1 0</ambient>
+          <diffuse>0 1 0</diffuse>
+          <specular>0 1 0 1</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>1.5 4 2</size>
+          </box>
+        </geometry>
+        <transparency>0.0</transparency>
+      </visual>
+
+      <visual name="bay3_box">
+        <pose>1.5 15 0.25 0 0 1.5707963267948966</pose>
+        <material>
+          <ambient>0 1 0</ambient>
+          <diffuse>0 1 0</diffuse>
+          <specular>0 1 0 1</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>1.5 4 2</size>
+          </box>
+        </geometry>
+        <transparency>0.0</transparency>
+      </visual>
+
+      <visual name="bay1_box_exterior">
+        <pose>-3.5 3 0.25 0 0 1.5707963267948966</pose>
+        <material>
+          <ambient>1 0 0</ambient>
+          <diffuse>1 0 0</diffuse>
+          <specular>1 0 0 1</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>5.5 1.5 2</size>
+          </box>
+        </geometry>
+      </visual>
+
+      <visual name="bay2_box_exterior">
+        <pose>-3.5 9 0.25 0 0 1.5707963267948966</pose>
+        <material>
+          <ambient>1 0 0</ambient>
+          <diffuse>1 0 0</diffuse>
+          <specular>1 0 0 1</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>5.5 1.5 2</size>
+          </box>
+        </geometry>
+      </visual>
+
+      <visual name="bay3_box_exterior">
+        <pose>-3.5 15 0.25 0 0 1.5707963267948966</pose>
+        <material>
+          <ambient>1 0 0</ambient>
+          <diffuse>1 0 0</diffuse>
+          <specular>1 0 0 1</specular>
+        </material>
+        <geometry>
+          <box>
+            <size>5.5 1.5 2</size>
+          </box>
+        </geometry>
+      </visual>
+
+    </link>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022/bay_1/contain</topic>
+      <pose>1.5 3 0.25 0 0 1.5707963267948966</pose>
+      <geometry>
+        <box>
+          <size>1.5 4 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022/bay_2/contain</topic>
+      <pose>1.5 9 0.25 0 0 1.5707963267948966</pose>
+      <geometry>
+        <box>
+          <size>1.5 4 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022/bay_3/contain</topic>
+      <pose>1.5 15 0.25 0 0 1.5707963267948966</pose>
+      <geometry>
+        <box>
+          <size>1.5 4 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022/bay_1_external/contain</topic>
+      <pose>-3.5 3 0.25 0 0 1.5707963267948966</pose>
+      <geometry>
+        <box>
+          <size>5.5 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022/bay_2_external/contain</topic>
+      <pose>-3.5 9 0.25 0 0 1.5707963267948966</pose>
+      <geometry>
+        <box>
+          <size>5.5 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022/bay_3_external/contain</topic>
+      <pose>-3.5 15 0.25 0 0 1.5707963267948966</pose>
+      <geometry>
+        <box>
+          <size>5.5 1.5 2</size>
+        </box>
+      </geometry>
+    </plugin>
     
   </model>
 </sdf>

@@ -16,12 +16,15 @@
 */
 
 #include <gz/msgs/boolean.pb.h>
+#include <gz/msgs/pose.pb.h>
 #include <gz/msgs/stringmsg.pb.h>
 #include <gz/msgs/stringmsg_v.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
 #include <gz/common/Profiler.hh>
+#include <gz/sim/components/Name.hh>
+#include <gz/sim/components/World.hh>
 #include <gz/sim/Entity.hh>
 #include <gz/sim/Util.hh>
 #include <gz/plugin/Register.hh>
@@ -177,7 +180,8 @@ class DockChecker
   /// \param[in] _minDockTime Minimum amount of seconds to stay docked to be
   /// considered a fully successfull dock.
   /// \param[in] _dockAllowed Whether is allowed to dock in this bay or not.
-  /// \param[in] _announceSymbol Optional symbol to announce via msgs.
+  /// \param[in] _announceSymbol Symbol to announce via msgs.
+  /// E.g.: red_cross, blue_circle
   /// \param[in] _symbolTopic Optional topic to announce the symbol.
   public: DockChecker(const std::string &_name,
                       const std::string &_internalActivationTopic,
@@ -211,23 +215,23 @@ class DockChecker
   /// \brief Callback triggered when the vehicle enters or exits the activation
   /// zone.
   /// \param[in] _msg The current state (0: exiting, 1: entering).
-  private: void OnInternalActivationEvent(const msgs::Boolean &_msg);
+  private: void OnInternalActivationEvent(const msgs::Pose &_msg);
 
   /// \brief Callback triggered when the vehicle enters or exits the activation
   /// zone.
   /// \param[in] _msg The current state (0: exiting, 1: entering).
-  private: void OnExternalActivationEvent(const msgs::Boolean &_msg);
+  private: void OnExternalActivationEvent(const msgs::Pose &_msg);
 
-  /// \brief The gazebo topic used to receive notifications
-  /// from the internal activation zone.
+  /// \brief The topic used to receive notifications from the internal
+  /// activation zone.
   private: std::string internalActivationTopic;
 
-  /// \brief The gazebo topic used to receive notifications
-  /// from the external activation zone.
+  /// \brief The topic used to receive notifications from the external
+  /// activation zone.
   private: std::string externalActivationTopic;
 
-  /// \brief Minimum amount of seconds to stay docked to be
-  /// considered a fully successfull dock.
+  /// \brief Minimum amount of seconds to stay docked to be considered a fully
+  /// successfull dock.
   private: std::chrono::duration<double> minDockTime;
 
   /// \brief Current simulation time.
@@ -239,20 +243,14 @@ class DockChecker
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: std::chrono::duration<double> timer;
 
-  /// \brief Ignition Transport node used for communication.
-  private: transport::Node ignNode;
-
   /// \brief Whether the vehicle has successfully docked or not.
   private: bool anytimeDocked = false;
 
   /// \brief Whether the vehicle is at the entrance of the bay or not.
   private: bool atEntrance = false;
 
-  /// \brief Color and shape of symbol to announce. E.g.: red_cross, blue_circle
-  private: msgs::StringMsg announceSymbol;
-
-  /// \brief Publisher for the symbol.
-  private: transport::Node::Publisher symbolPub;
+  /// \brief Shape and color of symbol to announce. E.g.: ["red", "cross"]
+  private: msgs::StringMsg_V symbol;
 
   /// \brief Topic where the target symbol will be published.
   private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
@@ -277,16 +275,33 @@ DockChecker::DockChecker(const std::string &_name,
     dockAllowed(_dockAllowed),
     symbolTopic(_symbolTopic)
 {
+  // Override the docks own sdf parameters
+  this->dockPlacardPub = this->node.Advertise<msgs::StringMsg_V>(
+    this->symbolTopic);
+
+  // Add the shape.
+  this->symbol.add_data(_announceSymbol.substr(_announceSymbol.find("_") + 1));
+  // Add the color.
+  this->symbol.add_data(_announceSymbol.substr(0, _announceSymbol.find("_")));
+
   this->timer =
     std::chrono::duration<double>(std::numeric_limits<double>::max());
 
-  this->announceSymbol.set_data(_announceSymbol);
-
   // Subscriber to receive ContainPlugin updates.
-  this->node.Subscribe(this->internalActivationTopic,
-    &DockChecker::OnInternalActivationEvent, this);
-  this->node.Subscribe(this->externalActivationTopic,
-    &DockChecker::OnExternalActivationEvent, this);
+  if (!this->node.Subscribe(this->internalActivationTopic,
+    &DockChecker::OnInternalActivationEvent, this))
+  {
+    gzerr << "Error subscribing to topic [" << this->internalActivationTopic
+           << "]" << std::endl;
+    return;
+  }
+  if (!this->node.Subscribe(this->externalActivationTopic,
+    &DockChecker::OnExternalActivationEvent, this))
+  {
+    gzerr << "Error subscribing to topic [" << this->externalActivationTopic
+           << "]" << std::endl;
+    return;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -310,25 +325,7 @@ bool DockChecker::Allowed() const
 /////////////////////////////////////////////////
 void DockChecker::AnnounceSymbol()
 {
-  // Override the docks own sdf parameters
-  this->dockPlacardPub = this->node.Advertise<msgs::StringMsg_V>(
-    this->symbolTopic);
-
-  msgs::StringMsg_V symbol;
-  // Add the shape.
-  symbol.add_data(this->announceSymbol.data().substr(
-    this->announceSymbol.data().find("_") + 1));
-  // Add the color.
-  symbol.add_data(this->announceSymbol.data().substr(
-    0, this->announceSymbol.data().find("_")));
-
-  this->dockPlacardPub.Publish(symbol);
-
-  if (this->dockAllowed)
-  {
-    this->symbolPub = this->node.Advertise<msgs::StringMsg>(this->symbolTopic);
-    this->symbolPub.Publish(this->announceSymbol);
-  }
+  this->dockPlacardPub.Publish(this->symbol);
 }
 
 /////////////////////////////////////////////////
@@ -350,10 +347,21 @@ void DockChecker::Update(const sim::UpdateInfo &_info)
 }
 
 /////////////////////////////////////////////////
-void DockChecker::OnInternalActivationEvent(const msgs::Boolean &_msg)
+void DockChecker::OnInternalActivationEvent(const msgs::Pose &_msg)
 {
+  // Get the state from the header.
+  std::string state;
+  for (const auto &data : _msg.header().data())
+  {
+    if (data.key() == "state" && !data.value().empty())
+    {
+      state = data.value(0);
+      break;
+    }
+  }
+
   // Currently docked.
-  if (_msg.data() == 1)
+  if (state == "1")
   {
     this->timer = this->simTime;
     gzmsg << "Entering internal dock activation zone, transitioning to "
@@ -361,7 +369,7 @@ void DockChecker::OnInternalActivationEvent(const msgs::Boolean &_msg)
   }
 
   // Currently undocked.
-  if (_msg.data() == 0)
+  if (state == "0")
   {
     this->timer =
       std::chrono::duration<double>(std::numeric_limits<double>::max());
@@ -380,13 +388,25 @@ void DockChecker::OnInternalActivationEvent(const msgs::Boolean &_msg)
   }
 
   gzdbg << "[" << this->name << "] OnInternalActivationEvent(): "
-        << _msg.data() << std::endl;
+        << state << std::endl;
+  std::cout << std::flush;
 }
 
 /////////////////////////////////////////////////
-void DockChecker::OnExternalActivationEvent(const msgs::Boolean &_msg)
+void DockChecker::OnExternalActivationEvent(const msgs::Pose &_msg)
 {
-  this->atEntrance = _msg.data() == 1;
+  // Get the state from the header.
+  std::string state;
+  for (const auto &data : _msg.header().data())
+  {
+    if (data.key() == "state" && !data.value().empty())
+    {
+      state = data.value(0);
+      break;
+    }
+  }
+
+  this->atEntrance = state == "1";
 
   if (this->atEntrance)
   {
@@ -400,12 +420,16 @@ void DockChecker::OnExternalActivationEvent(const msgs::Boolean &_msg)
   }
 
   gzdbg << "[" << this->name << "] OnExternalActivationEvent(): "
-        << _msg.data() << std::endl;
+        << state << std::endl;
+  std::cout << std::flush;
 }
 
 /// \brief Private ScanDockScoringPlugin data class.
 class ScanDockScoringPlugin::Implementation
 {
+  /// \brief World entity.
+  public: std::string worldName;
+
   /// \brief Parse all SDF parameters.
   /// \param[in] _sdf SDF elements.
   /// \return True when all params were successfully parsed or false otherwise.
@@ -437,6 +461,9 @@ class ScanDockScoringPlugin::Implementation
 
   /// \brief Expected color sequence.
   public: std::vector<std::string> expectedSequence;
+
+  /// \brief A transport node.
+  public: transport::Node node;
 
   /// \brief A mutex.
   public: std::mutex mutex;
@@ -609,6 +636,10 @@ void ScanDockScoringPlugin::Configure(const sim::Entity &_entity,
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
 
+  sim::Entity worldEntity = _ecm.EntityByComponents(sim::components::World());
+  this->dataPtr->worldName =
+    _ecm.Component<sim::components::Name>(worldEntity)->Data();
+
   auto sdf = _sdf->Clone();
   if (!this->dataPtr->ParseSDF(sdf))
   {
@@ -705,6 +736,20 @@ void ScanDockScoringPlugin::OnReady()
 //////////////////////////////////////////////////
 void ScanDockScoringPlugin::OnRunning()
 {
+  std::function<void(const msgs::Boolean &_res, const bool)> f =
+        [](const msgs::Boolean &_res, const bool)
+      {
+      };
+
+  std::string performerTopic =
+    "/world/" + this->dataPtr->worldName + "/level/set_performer";
+  msgs::StringMsg performer;
+  performer.set_data(this->VehicleName());
+
+  // Register the vehicle as a performer.
+  this->dataPtr->node.Request<msgs::StringMsg, msgs::Boolean>(
+    performerTopic, performer, f);
+
   if (this->dataPtr->enableColorChecker)
     this->dataPtr->colorChecker->Enable();
 

@@ -42,6 +42,27 @@ namespace vrx
   /// <color_3>: Expected 3rd color of the sequence (RED, GREEN, BLUE, YELLOW).
   /// <color_bonus_points>: Points granted when the color sequence is correct.
   /// Default value is 10.
+  /// <bays>: Contains at least one of the following blocks:
+  ///   <bay>: A bay represents a potential place where a vehicle can dock.
+  ///   It has the following required elements:
+  ///     <name>: The name of the bay. This is used for debugging only.
+  ///     <internal_activation_topic>: The topic used to receive
+  ///     notifications from the internal activation zone.
+  ///     <external_activation_topic>: The topic used to receive
+  ///     notifications from the external activation zone.
+  ///     <min_dock_time>: Minimum amount of seconds to stay docked to be
+  ///     considered a fully successfull dock.
+  ///     <dockAllowed>: Whether is allowed to dock in this bay or not.
+  ///     <symbol>: Required string with format <COLOR>_<SHAPE>, where
+  ///     color can be "red", "green", "blue", "yellow" and shape can be
+  ///     "triangle", "circle", "cross", "rectangle". If this parameter is
+  ///     present, a message will be sent in OnReady().
+  ///     The vehicle should dock in the bay matching this color and shape.
+  ///     <symbol_topic> Topic to publish the symbol announcement.
+  /// <dock_bonus_points>: Points granted when the vehicle successfully
+  /// dock-and-undock in any bay. Default value is 10.
+  /// <correct_dock_bonus_points>: Points granted when the vehicle successfully
+  /// dock-and-undock in the specified bay. Default value is 10.
   /// Here's an example:
   /// <plugin name="vrx::ScanDockScoringPlugin"
   ///               filename="libScanDockScoringPlugin.so">
@@ -58,6 +79,38 @@ namespace vrx
   ///   <color_1>red</color_1>
   ///   <color_2>green</color_2>
   ///   <color_3>blue</color_3>
+  ///   <!-- Dock checkers -->
+  ///   <dock_bonus_points>15</dock_bonus_points>
+  ///   <correct_dock_bonus_points>5</correct_dock_bonus_points>
+  ///   <bays>
+  ///     <bay>
+  ///       <name>bay1</name>
+  ///       <internal_activation_topic>/vrx/dock_2022/bay_1/contain</internal_activation_topic>
+  ///       <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
+  ///       <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
+  ///       <min_dock_time>10.0</min_dock_time>
+  ///       <dock_allowed>False</dock_allowed>
+  ///       <symbol>red_rectangle</symbol>
+  ///     </bay>
+  ///     <bay>
+  ///       <name>bay2</name>
+  ///       <internal_activation_topic>/vrx/dock_2022/bay_2/contain</internal_activation_topic>
+  ///       <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
+  ///       <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
+  ///       <min_dock_time>10.0</min_dock_time>
+  ///       <dock_allowed>True</dock_allowed>
+  ///       <symbol>blue_triangle</symbol>
+  ///     </bay>
+  ///     <bay>
+  ///       <name>bay3</name>
+  ///       <internal_activation_topic>/vrx/dock_2022/bay_3/contain</internal_activation_topic>
+  ///       <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
+  ///       <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
+  ///       <min_dock_time>10.0</min_dock_time>
+  ///       <dock_allowed>False</dock_allowed>
+  ///       <symbol>yellow_circle</symbol>
+  ///     </bay>
+  ///   </bays>
   /// </plugin>
   class ScanDockScoringPlugin : public ScoringPlugin
   {
