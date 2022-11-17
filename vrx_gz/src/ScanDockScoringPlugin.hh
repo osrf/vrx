@@ -42,6 +42,7 @@ namespace vrx
   /// <color_3>: Expected 3rd color of the sequence (RED, GREEN, BLUE, YELLOW).
   /// <color_bonus_points>: Points granted when the color sequence is correct.
   /// Default value is 10.
+  ///
   /// <bays>: Contains at least one of the following blocks:
   ///   <bay>: A bay represents a potential place where a vehicle can dock.
   ///   It has the following required elements:
@@ -63,6 +64,13 @@ namespace vrx
   /// dock-and-undock in any bay. Default value is 10.
   /// <correct_dock_bonus_points>: Points granted when the vehicle successfully
   /// dock-and-undock in the specified bay. Default value is 10.
+  ///
+  /// <targets>: Contains at least one of the following blocks:
+  ///   <target>: A shooting target. It has the following elements:
+  ///     <topic>: The name of the topic where the PerformerDectorPlugin
+  ///              publishes information for this target.
+  ///     <bonus_points>: The points awarded for hitting this target.
+  ///
   /// Here's an example:
   /// <plugin name="vrx::ScanDockScoringPlugin"
   ///               filename="libScanDockScoringPlugin.so">
@@ -111,6 +119,38 @@ namespace vrx
   ///       <symbol>yellow_circle</symbol>
   ///     </bay>
   ///   </bays>
+  ///   <!-- Shooting targets -->
+  ///   <targets>
+  ///     <!-- Placard #1 -->
+  ///     <target>
+  ///       <topic>vrx/dock_2022_placard1_big_hole/contain</topic>
+  ///       <bonus_points>5</bonus_points>
+  ///     </target>
+  ///     <target>
+  ///       <topic>vrx/dock_2022_placard1_small_hole/contain</topic>
+  ///       <bonus_points>10</bonus_points>
+  ///     </target>
+
+  ///     <!-- Placard #2 -->
+  ///     <target>
+  ///       <topic>vrx/dock_2022_placard2_big_hole/contain</topic>
+  ///       <bonus_points>5</bonus_points>
+  ///     </target>
+  ///     <target>
+  ///       <topic>vrx/dock_2022_placard2_small_hole/contain</topic>
+  ///       <bonus_points>10</bonus_points>
+  ///     </target>
+
+  ///     <!-- Placard #3 -->
+  ///     <target>
+  ///       <topic>vrx/dock_2022_placard3_big_hole/contain</topic>
+  ///       <bonus_points>5</bonus_points>
+  ///     </target>
+  ///     <target>
+  ///       <topic>vrx/dock_2022_placard3_small_hole/contain</topic>
+  ///       <bonus_points>10</bonus_points>
+  ///     </target>
+  ///   </targets>
   /// </plugin>
   class ScanDockScoringPlugin : public ScoringPlugin
   {

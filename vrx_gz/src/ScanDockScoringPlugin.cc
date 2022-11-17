@@ -467,6 +467,9 @@ class ScanDockScoringPlugin::Implementation
 
   /// \brief A mutex.
   public: std::mutex mutex;
+
+  /// \brief The shooting bonus.
+  public: double shootingBonus = 0.0;
 };
 
 //////////////////////////////////////////////////
@@ -619,6 +622,52 @@ bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
       _sdf->GetElement("correct_dock_bonus_points")->Get<double>();
   }
 
+  // Optional: the shooting targets.
+  if (_sdf->HasElement("targets"))
+  {
+    // We require at least one <target> element.
+    auto targetsElem = _sdf->GetElement("targets");
+    if (!targetsElem->HasElement("target"))
+    {
+      gzerr << "<targets><target> not found" << std::endl;
+      return false;
+    }
+
+    auto targetElem = targetsElem->GetElement("target");
+    while (targetElem)
+    {
+      if (!targetElem->HasElement("topic"))
+      {
+        gzerr << "<targets><target><topic> not found" << std::endl;
+        return false;
+      }
+      std::string topic = targetElem->Get<std::string>("topic");
+
+      if (!targetElem->HasElement("bonus_points"))
+      {
+        gzerr << "<targets><target><bonus_points> not found" << std::endl;
+        return false;
+      }
+      double bonusPoints = targetElem->Get<double>("bonus_points");
+
+      std::function<void(const msgs::Pose&)> subCb =
+        [this, bonusPoints](const msgs::Pose &_msg)
+      {
+        // The projectile hit the target!
+       // if (_msg.data())
+       // {
+          std::lock_guard<std::mutex> lock(this->mutex);
+          this->shootingBonus = bonusPoints;
+        //}
+      };
+
+      this->node.Subscribe(topic, subCb);
+
+      // Process the next target.
+      targetElem = targetElem->GetNextElement();
+    }
+  }
+
   return true;
 }
 
@@ -722,6 +771,16 @@ void ScanDockScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
     // docking in all possible bays.
     this->Exit();
     break;
+  }
+
+  // Check the shooting targets.
+  {
+    std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
+    if (this->dataPtr->shootingBonus > 0)
+    {
+      this->SetScore(this->Score() + this->dataPtr->shootingBonus);
+      this->dataPtr->shootingBonus = 0;
+    }
   }
 }
 

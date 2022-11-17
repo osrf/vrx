@@ -424,6 +424,92 @@
       </visual>
     </link> -->
 
+    <!-- Uncomment to see the activation areas of the projectile targets -->
+    <!-- <visual name="visual_activation_big_box_1">
+          <pose>0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.5 0.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0</ambient>
+            <diffuse>0 1 0</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+
+        <visual name="visual_activation_small_box_1">
+          <pose>-0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.25 0.5 0.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0</ambient>
+            <diffuse>0 1 0</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual> -->
+
+        <!-- <visual name="visual_activation_big_box_2">
+          <pose>0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.5 0.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0</ambient>
+            <diffuse>0 1 0</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+
+        <visual name="visual_activation_small_box_2">
+          <pose>-0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.25 0.5 0.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0</ambient>
+            <diffuse>0 1 0</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual> -->
+
+        <!-- <visual name="visual_activation_big_box_3">
+          <pose>0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.5 0.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0</ambient>
+            <diffuse>0 1 0</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+
+        <visual name="visual_activation_small_box_3">
+          <pose>-0.6 -0.27 1.33 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.25 0.5 0.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0</ambient>
+            <diffuse>0 1 0</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual> -->
+
+    <!-- Plugins to detect if vehicle is in the different dock regions -->
     <plugin
       filename="gz-sim-performer-detector-system"
       name="gz::sim::systems::PerformerDetector">
@@ -495,6 +581,79 @@
         </box>
       </geometry>
     </plugin>
+
+    <!-- Plugins to detect if the projectile entered the hole -->
+    <!-- <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022_placard1_big_hole</topic>
+      <pose>0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.5 0.5 0.5</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>vrx/dock_2022_placard1_small_hole</topic>
+      <pose>-0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.25 0.5 0.25</size>
+        </box>
+      </geometry>
+    </plugin> -->
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022_placard2_big_hole</topic>
+      <pose>0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.5 0.5 0.5</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>vrx/dock_2022_placard2_small_hole</topic>
+      <pose>-0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.25 0.5 0.25</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <!-- <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>/vrx/dock_2022_placard3_big_hole</topic>
+      <pose>0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.5 0.5 0.5</size>
+        </box>
+      </geometry>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-performer-detector-system"
+      name="gz::sim::systems::PerformerDetector">
+      <topic>vrx/dock_2022_placard3_small_hole</topic>
+      <pose>-0.6 -0.27 1.33 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.25 0.5 0.25</size>
+        </box>
+      </geometry>
+    </plugin> -->
     
   </model>
 </sdf>
