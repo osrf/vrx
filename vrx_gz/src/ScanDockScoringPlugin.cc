@@ -183,13 +183,15 @@ class DockChecker
   /// \param[in] _announceSymbol Symbol to announce via msgs.
   /// E.g.: red_cross, blue_circle
   /// \param[in] _symbolTopic Optional topic to announce the symbol.
+  /// \param[in] _vehicleName Name of the vehicle.
   public: DockChecker(const std::string &_name,
                       const std::string &_internalActivationTopic,
                       const std::string &_exteriorActivationTopic,
                       const std::chrono::duration<double> _minDockTime,
                       const bool _dockAllowed,
                       const std::string &_announceSymbol,
-                      const std::string &_symbolTopic);
+                      const std::string &_symbolTopic,
+                      const std::string &_vehicleName);
 
   /// \brief The name of this checker.
   public: std::string name;
@@ -255,6 +257,9 @@ class DockChecker
   /// \brief Topic where the target symbol will be published.
   private: std::string symbolTopic = "/vrx/scan_dock/placard_symbol";
 
+  /// \brief Vehicle name.
+  private: std::string vehicleName;
+
   /// \brief The transport node.
   private: transport::Node node;
 
@@ -267,13 +272,15 @@ DockChecker::DockChecker(const std::string &_name,
   const std::string &_internalActivationTopic,
   const std::string &_externalActivationTopic,
   const std::chrono::duration<double> _minDockTime, const bool _dockAllowed,
-  const std::string &_announceSymbol, const std::string &_symbolTopic)
+  const std::string &_announceSymbol, const std::string &_symbolTopic,
+  const std::string &_vehicleName)
   : name(_name),
     internalActivationTopic(_internalActivationTopic),
     externalActivationTopic(_externalActivationTopic),
     minDockTime(_minDockTime),
     dockAllowed(_dockAllowed),
-    symbolTopic(_symbolTopic)
+    symbolTopic(_symbolTopic),
+    vehicleName(_vehicleName)
 {
   // Override the docks own sdf parameters
   this->dockPlacardPub = this->node.Advertise<msgs::StringMsg_V>(
@@ -349,6 +356,11 @@ void DockChecker::Update(const sim::UpdateInfo &_info)
 /////////////////////////////////////////////////
 void DockChecker::OnInternalActivationEvent(const msgs::Pose &_msg)
 {
+  // Sanity check: We're only interested in a performer that matches our
+  // vehicle name.
+  if (_msg.name() != this->vehicleName)
+    return;
+
   // Get the state from the header.
   std::string state;
   for (const auto &data : _msg.header().data())
@@ -395,6 +407,11 @@ void DockChecker::OnInternalActivationEvent(const msgs::Pose &_msg)
 /////////////////////////////////////////////////
 void DockChecker::OnExternalActivationEvent(const msgs::Pose &_msg)
 {
+  // Sanity check: We're only interested in a performer that matches our
+  // vehicle name.
+  if (_msg.name() != this->vehicleName)
+    return;
+
   // Get the state from the header.
   std::string state;
   for (const auto &data : _msg.header().data())
@@ -432,8 +449,10 @@ class ScanDockScoringPlugin::Implementation
 
   /// \brief Parse all SDF parameters.
   /// \param[in] _sdf SDF elements.
+  /// \param[in] _vehicleName Name of the vehicle.
   /// \return True when all params were successfully parsed or false otherwise.
-  public: bool ParseSDF(sdf::ElementPtr _sdf);
+  public: bool ParseSDF(sdf::ElementPtr _sdf,
+                        const std::string _vehicleName);
 
   /// \brief In charge of receiving the team submission and compare it with
   /// the color sequence from the light buoy.
@@ -473,7 +492,8 @@ class ScanDockScoringPlugin::Implementation
 };
 
 //////////////////////////////////////////////////
-bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
+bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf,
+  const std::string _vehicleName)
 {
   // Enable color checker - default is true
   this->enableColorChecker = true;
@@ -599,7 +619,7 @@ bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
     std::unique_ptr<DockChecker> dockChecker(
       new DockChecker(bayName, internalActivationTopic,
         externalActivationTopic, std::chrono::duration<double>(minDockTime),
-        dockAllowed, announceSymbol, symbolTopic));
+        dockAllowed, announceSymbol, symbolTopic, _vehicleName));
 
     // Add the dock checker.
     this->dockCheckers.push_back(std::move(dockChecker));
@@ -653,12 +673,25 @@ bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf)
       std::function<void(const msgs::Pose&)> subCb =
         [this, bonusPoints](const msgs::Pose &_msg)
       {
+        // Get the state from the header.
+        std::string state;
+        for (const auto &data : _msg.header().data())
+        {
+          if (data.key() == "state" && !data.value().empty())
+          {
+            state = data.value(0);
+            break;
+          }
+        }
         // The projectile hit the target!
-       // if (_msg.data())
-       // {
+        if (state == "1")
+        {
           std::lock_guard<std::mutex> lock(this->mutex);
           this->shootingBonus = bonusPoints;
-        //}
+
+          gzmsg << "Target hit!" << std::endl;
+          std::cout << std::flush;
+        }
       };
 
       this->node.Subscribe(topic, subCb);
@@ -690,7 +723,7 @@ void ScanDockScoringPlugin::Configure(const sim::Entity &_entity,
     _ecm.Component<sim::components::Name>(worldEntity)->Data();
 
   auto sdf = _sdf->Clone();
-  if (!this->dataPtr->ParseSDF(sdf))
+  if (!this->dataPtr->ParseSDF(sdf, this->VehicleName()))
   {
     gzerr << "Error parsing SDF, plugin disabled." << std::endl;
     return;
