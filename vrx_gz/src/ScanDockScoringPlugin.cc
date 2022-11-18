@@ -126,7 +126,7 @@ void ColorSequenceChecker::OnColorSequence(const msgs::StringMsg_V &_sequence)
   }
 
   // Sanity check: We should receive three colors.
-  if (_sequence.data_size() < 3u)
+  if (_sequence.data_size() != 3u)
   {
     gzerr << "Received a color sequence with " << _sequence.data_size()
           << " values but expecting three instead. Submission ignored."
