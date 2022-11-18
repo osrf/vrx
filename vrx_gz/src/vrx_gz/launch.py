@@ -53,6 +53,7 @@ WILDLIFE_WORLDS = [
 SCAN_DOCK_DELIVER_WORLDS = [
   'scan_dock_deliver_task'
 ]
+
 def simulation(world_name, headless=False):
     gz_args = ['-v 4', '-r']
     if headless:
@@ -116,6 +117,7 @@ def competition_bridges(world_name):
         ]
     elif world_name in SCAN_DOCK_DELIVER_WORLDS:
         task_bridges = [
+            vrx_gz.bridges.color_sequence_reports(),
         ]
     bridges.extend(task_bridges)
 

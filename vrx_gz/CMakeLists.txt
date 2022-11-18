@@ -104,6 +104,7 @@ list(APPEND VRX_GZ_PLUGINS
   NavigationScoringPlugin
   PerceptionScoringPlugin
   PlacardPlugin
+  ScanDockScoringPlugin
   SimpleHydrodynamics
   StationkeepingScoringPlugin
   Surface
