@@ -60,9 +60,9 @@ namespace vrx
   ///     The vehicle should dock in the bay matching this color and shape.
   ///     <symbol_topic> Topic to publish the symbol announcement.
   /// <dock_bonus_points>: Points granted when the vehicle successfully
-  /// dock-and-undock in any bay. Default value is 10.
+  /// docks and undocks in any bay. Default value is 10.
   /// <correct_dock_bonus_points>: Points granted when the vehicle successfully
-  /// dock-and-undock in the specified bay. Default value is 10.
+  /// docks and undocks in the specified bay. Default value is 10.
   /// Here's an example:
   /// <plugin name="vrx::ScanDockScoringPlugin"
   ///               filename="libScanDockScoringPlugin.so">
