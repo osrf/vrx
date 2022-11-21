@@ -24,6 +24,7 @@
 #include <gz/sim/Entity.hh>
 #include <gz/sim/Events.hh>
 #include <gz/sim/Model.hh>
+#include <gz/sim/Util.hh>
 #include <gz/plugin/Register.hh>
 #include <gz/transport/Node.hh>
 #include <sdf/sdf.hh>
@@ -61,7 +62,7 @@ class ScoringPlugin::Implementation
   public: std::string vehicleName;
 
   /// \brief Vehicle to score.
-  public: sim::Model vehicleModel{gz::sim::kNullEntity};
+  public: sim::Entity vehicleModel{gz::sim::kNullEntity};
 
   /// \brief Silent mode enabled?
   public: bool silent = false;
@@ -431,6 +432,13 @@ void ScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
 {
   GZ_PROFILE("ScoringPlugin::PreUpdate");
 
+  if (this->dataPtr->vehicleModel == sim::kNullEntity)
+  {
+    auto entity = sim::entitiesFromScopedName(this->dataPtr->vehicleName, _ecm);
+    if (!entity.empty())
+      this->dataPtr->vehicleModel = *entity.begin();
+  }
+
   this->dataPtr->UpdateTime(_info.simTime);
   this->UpdateTaskState();
   this->dataPtr->PublishStats();
@@ -501,11 +509,16 @@ void ScoringPlugin::Finish()
   this->OnFinished();
 }
 
-
 //////////////////////////////////////////////////
 std::string ScoringPlugin::VehicleName() const
 {
   return this->dataPtr->vehicleName;
+}
+
+//////////////////////////////////////////////////
+gz::sim::Entity ScoringPlugin::VehicleEntity() const
+{
+  return this->dataPtr->vehicleModel;
 }
 
 //////////////////////////////////////////////////
