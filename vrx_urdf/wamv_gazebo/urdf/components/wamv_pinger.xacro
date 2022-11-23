@@ -21,35 +21,37 @@
       <child link="${namespace}/${name}"/>
     </joint>
 
-<!--
     <gazebo>
-      <plugin name="pinger_plugin" filename="libusv_gazebo_acoustic_pinger_plugin.so">
-        <frameId>${frameId}</frameId>
-        <topicName>${namespace}/${sensor_namespace}${pinger_namespace}${name}/range_bearing</topicName>
-        <setPositionTopicName>${namespace}/${sensor_namespace}${pinger_namespace}${name}/set_pinger_position</setPositionTopicName>
-        <rangeNoise>
+      <plugin
+        filename="libAcousticPingerPlugin.so"
+        name="vrx::AcousticPingerPlugin">
+        <position>${position}</position>
+        <topic>${namespace}/${pinger_namespace}${name}/range_bearing</topic>
+        <set_position_topic>${namespace}/${pinger_namespace}${name}/set_pinger_position
+        </set_position_topic>
+        <frame_id>${namespace}/${name}</frame_id>
+        <range_noise>
           <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
             <stddev>3.0</stddev>
           </noise>
-        </rangeNoise>
-        <bearingNoise>
+        </range_noise>
+        <bearing_noise>
           <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
             <stddev>0.01</stddev>
           </noise>
-        </bearingNoise>
-        <elevationNoise>
+        </bearing_noise>
+        <elevation_noise>
           <noise>
             <type>gaussian</type>
             <mean>0.0</mean>
             <stddev>0.01</stddev>
           </noise>
-        </elevationNoise>
+        </elevation_noise>
       </plugin>
     </gazebo>
--->
   </xacro:macro>
 </robot>
