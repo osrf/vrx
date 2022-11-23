@@ -487,6 +487,18 @@
       </plugin>
     </include>
 
+    <!-- Needed to detect the projectile in the placard detectors -->
+    <plugin name="gz::sim" filename="dummy">
+      <performer name="perf_blue_projectile">
+        <ref>blue_projectile</ref>
+        <geometry>
+          <box>
+            <size>0.057 0.057 0.057</size>
+          </box>
+        </geometry>
+      </performer>
+    </plugin>
+
     <wind>
       <linear_velocity>0 0 0</linear_velocity>
     </wind>
@@ -582,6 +594,36 @@
           <symbol>yellow_circle</symbol>
         </bay>
       </bays>
+      <!-- Shooting targets -->
+      <targets>
+        <!-- Placard #1 -->
+        <target>
+          <topic>/vrx/dock_2022_placard1_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard1_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #2 -->
+        <target>
+          <topic>/vrx/dock_2022_placard2_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard2_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #3 -->
+        <target>
+          <topic>/vrx/dock_2022_placard3_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard3_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+      </targets>
     </plugin>
 
   </world>
