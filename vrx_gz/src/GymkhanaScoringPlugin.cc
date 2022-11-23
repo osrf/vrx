@@ -174,6 +174,9 @@ void GymkhanaScoringPlugin::Configure(const sim::Entity &_entity,
 void GymkhanaScoringPlugin::PreUpdate(const gz::sim::UpdateInfo &_info,
   gz::sim::EntityComponentManager &_ecm)
 {
+  // don't update when paused
+  if (_info.paused)
+    return;
 
   ScoringPlugin::PreUpdate(_info, _ecm);
 
