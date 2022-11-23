@@ -179,7 +179,7 @@ class DockChecker
   /// from the "contain" plugin.
   /// \param[in] _minDockTime Minimum amount of seconds to stay docked to be
   /// considered a fully successfull dock.
-  /// \param[in] _dockAllowed Whether is allowed to dock in this bay or not.
+  /// \param[in] _correctDock Whether this is the correct bay to dock in.
   /// \param[in] _announceSymbol Symbol to announce via msgs.
   /// E.g.: red_cross, blue_circle
   /// \param[in] _symbolTopic Optional topic to announce the symbol.
@@ -188,7 +188,7 @@ class DockChecker
                       const std::string &_internalActivationTopic,
                       const std::string &_exteriorActivationTopic,
                       const std::chrono::duration<double> _minDockTime,
-                      const bool _dockAllowed,
+                      const bool _correctDock,
                       const std::string &_announceSymbol,
                       const std::string &_symbolTopic,
                       const std::string &_vehicleName);
@@ -204,8 +204,8 @@ class DockChecker
   /// \return True when the robot is at the entrance or false othwerwise.
   public: bool AtEntrance() const;
 
-  /// \brief Whether it is allowed to dock in this bay or not.
-  public: bool Allowed() const;
+  /// \brief Whether this is the correct bay to dock in.
+  public: bool Correct() const;
 
   /// \brief Announce the symbol of the bay.
   public: void AnnounceSymbol();
@@ -239,8 +239,8 @@ class DockChecker
   /// \brief Current simulation time.
   private: std::chrono::duration<double> simTime;
 
-  /// \brief Whether is allowed to dock in this bay or not.
-  private: bool dockAllowed;
+  /// \brief Whether this is the correct bay to dock in.
+  private: bool correctDock;
 
   /// \brief Timer used to calculate the elapsed time docked in the bay.
   private: std::chrono::duration<double> timer;
@@ -271,14 +271,14 @@ class DockChecker
 DockChecker::DockChecker(const std::string &_name,
   const std::string &_internalActivationTopic,
   const std::string &_externalActivationTopic,
-  const std::chrono::duration<double> _minDockTime, const bool _dockAllowed,
+  const std::chrono::duration<double> _minDockTime, const bool _correctDock,
   const std::string &_announceSymbol, const std::string &_symbolTopic,
   const std::string &_vehicleName)
   : name(_name),
     internalActivationTopic(_internalActivationTopic),
     externalActivationTopic(_externalActivationTopic),
     minDockTime(_minDockTime),
-    dockAllowed(_dockAllowed),
+    correctDock(_correctDock),
     symbolTopic(_symbolTopic),
     vehicleName(_vehicleName)
 {
@@ -324,9 +324,9 @@ bool DockChecker::AtEntrance() const
 }
 
 /////////////////////////////////////////////////
-bool DockChecker::Allowed() const
+bool DockChecker::Correct() const
 {
-  return this->dockAllowed;
+  return this->correctDock;
 }
 
 /////////////////////////////////////////////////
@@ -600,13 +600,13 @@ bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf,
     }
     double minDockTime = bayElem->Get<double>("min_dock_time");
 
-    // Required: dock allowed.
-    if (!bayElem->GetElement("dock_allowed"))
+    // Required: correct dock .
+    if (!bayElem->GetElement("correct_dock"))
     {
-      gzerr << "<bays::bay::dock_allowed> missing" << std::endl;
+      gzerr << "<bays::bay::correct_dock> missing" << std::endl;
       return false;
     }
-    bool dockAllowed = bayElem->Get<bool>("dock_allowed");
+    bool correctDock = bayElem->Get<bool>("correct_dock");
 
     std::string announceSymbol = "";
     if (!bayElem->HasElement("symbol"))
@@ -619,7 +619,7 @@ bool ScanDockScoringPlugin::Implementation::ParseSDF(sdf::ElementPtr _sdf,
     std::unique_ptr<DockChecker> dockChecker(
       new DockChecker(bayName, internalActivationTopic,
         externalActivationTopic, std::chrono::duration<double>(minDockTime),
-        dockAllowed, announceSymbol, symbolTopic, _vehicleName));
+        correctDock, announceSymbol, symbolTopic, _vehicleName));
 
     // Add the dock checker.
     this->dockCheckers.push_back(std::move(dockChecker));
@@ -780,7 +780,7 @@ void ScanDockScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
     }
 
     // Is this the right bay?
-    if (dockChecker->Allowed())
+    if (dockChecker->Correct())
     {
       this->SetScore(this->Score() + this->dataPtr->correctDockBonusPoints);
       if (this->TaskState() == "running")
