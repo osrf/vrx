@@ -633,8 +633,10 @@
     </plugin>
 
     <!-- The scoring plugin -->
-    <plugin name="vrx::WildlifeScoringPlugin"
-            filename="libWildlifeScoringPlugin.so">
+    <plugin
+      filename="libWildlifeScoringPlugin.so"
+      name="vrx::WildlifeScoringPlugin">
+
       <!-- Common parameters -->
       <vehicle>wamv</vehicle>
       <task_name>wildlife</task_name>
@@ -646,15 +648,15 @@
       <!-- wildlife specific parameters -->
       <buoys>
         <buoy>
-          <name>crocodile_buoy::link</name>
+          <name>crocodile::link</name>
           <goal>avoid</goal>
         </buoy>
         <buoy>
-          <name>platypus_buoy::link</name>
+          <name>platypus::link</name>
           <goal>circumnavigate_clockwise</goal>
         </buoy>
         <buoy>
-          <name>turtle_buoy::link</name>
+          <name>turtle::link</name>
           <goal>circumnavigate_counterclockwise</goal>
         </buoy>
       </buoys>
