@@ -50,34 +50,37 @@ namespace vrx
   ///               Defaults to 30 secs.
   ///
   /// Here's an example:
-  // <plugin name="vrx::WildlifeScoringPlugin"
-  //         filename="libWildlifeScoringPlugin.so">
-  //   <!-- Common parameters -->
-  //   <vehicle>wamv</vehicle>
-  //   <task_name>wildlife</task_name>
-  //   <initial_state_duration>10</initial_state_duration>
-  //   <ready_state_duration>10</ready_state_duration>
-  //   <running_state_duration>300</running_state_duration>
-  //   <collision_buffer>10</collision_buffer>
-  //   <!-- wildlife specific parameters -->
-  //   <buoys>
-  //     <buoy>
-  //       <name>crocodile_buoy::link</name>
-  //       <goal>avoid</goal>
-  //     </buoy>
-  //     <buoy>
-  //       <name>platypus_buoy::link</name>
-  //       <goal>circumnavigate_clockwise</goal>
-  //     </buoy>
-  //     <buoy>
-  //       <name>turtle_buoy::link</name>
-  //       <goal>circumnavigate_counterclockwise</goal>
-  //     </buoy>
-  //   </buoys>
-  //   <engagement_distance>10.0</engagement_distance>
-  //   <time_bonus>30.0</time_bonus>
-  //   <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
-  // </plugin>
+  /// <plugin
+  ///   filename="libWildlifeScoringPlugin.so"
+  ///   name="vrx::WildlifeScoringPlugin">
+  ///
+  ///   <!-- Common parameters -->
+  ///   <vehicle>wamv</vehicle>
+  ///   <task_name>wildlife</task_name>
+  ///   <initial_state_duration>10</initial_state_duration>
+  ///   <ready_state_duration>10</ready_state_duration>
+  ///   <running_state_duration>300</running_state_duration>
+  ///   <collision_buffer>10</collision_buffer>
+  ///
+  ///   <!-- wildlife specific parameters -->
+  ///   <buoys>
+  ///     <buoy>
+  ///       <name>crocodile::link</name>
+  ///       <goal>avoid</goal>
+  ///     </buoy>
+  ///     <buoy>
+  ///       <name>platypus::link</name>
+  ///       <goal>circumnavigate_clockwise</goal>
+  ///     </buoy>
+  ///     <buoy>
+  ///       <name>turtle::link</name>
+  ///       <goal>circumnavigate_counterclockwise</goal>
+  ///     </buoy>
+  ///   </buoys>
+  ///   <engagement_distance>10.0</engagement_distance>
+  ///   <time_bonus>30.0</time_bonus>
+  ///   <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
+  /// <plugin>
   class WildlifeScoringPlugin : public ScoringPlugin
   {
     /// \brief Constructor.

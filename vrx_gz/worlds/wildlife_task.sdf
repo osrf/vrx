@@ -632,7 +632,7 @@
       </vertical>
     </plugin>
 
-    <!-- The scoring plugin -->
+    <!-- The wildlife scoring plugin -->
     <plugin
       filename="libWildlifeScoringPlugin.so"
       name="vrx::WildlifeScoringPlugin">
