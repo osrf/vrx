@@ -536,6 +536,7 @@
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>
       <!-- <markers>true</markers> -->
+      <silent>true</silent>
     </plugin>
 
   </world>
