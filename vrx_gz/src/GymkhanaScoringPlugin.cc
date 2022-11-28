@@ -35,6 +35,7 @@ using namespace vrx;
 class GymkhanaScoringPlugin::Implementation
 {
   /// \brief Callback for black box station-keeping portion's scoring plugin
+  /// \param[in] _msg Task message as defined in ScoringPlugin::Implementation
   public: void BlackboxCallback(const msgs::Param &_msg);
 
   /// \brief Set the pinger location.
