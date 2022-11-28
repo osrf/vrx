@@ -44,7 +44,7 @@ class GymkhanaScoringPlugin::Implementation
   /// \brief Transport node
   public: transport::Node node;
 
-  /// \brief ROS publisher to set the pinger position.
+  /// \brief publisher to set the pinger position.
   public: transport::Node::Publisher setPingerPub;
 
   /// \brief Whether buoy channel portion has been completed
@@ -69,7 +69,6 @@ class GymkhanaScoringPlugin::Implementation
 
   /// \brief Display or suppress state changes
   public: bool silent = false;
-
 };
 
 /////////////////////////////////////////////////
@@ -135,8 +134,10 @@ void GymkhanaScoringPlugin::Configure(const sim::Entity &_entity,
 
   // Optional <obstacle_penalty> element.
   if (_sdf->HasElement("obstacle_penalty"))
+  {
     this->dataPtr->obstaclePenalty = 
       this->dataPtr->sdf->Get<double>("obstacle_penalty");
+  }
 
   // Throttle messages to 1Hz
   transport::AdvertiseMessageOptions opts;
@@ -171,7 +172,6 @@ void GymkhanaScoringPlugin::Configure(const sim::Entity &_entity,
 }
 
 /////////////////////////////////////////////////
-//TODO
 void GymkhanaScoringPlugin::PreUpdate(const gz::sim::UpdateInfo &_info,
   gz::sim::EntityComponentManager &_ecm)
 {
