@@ -75,19 +75,15 @@ class GymkhanaScoringPlugin::Implementation
 void GymkhanaScoringPlugin::ChannelCallback(
   const msgs::Param &_msg)
 {
-  if (_msg.IsInitialized()) // TODO: Check
+  // Determine whether channel has been crossed before timeout
+  if (!this->dataPtr->channelCrossed)
   {
-    
-    // Determine whether channel has been crossed before timeout
-    if (!this->dataPtr->channelCrossed)
+    if (_msg.params().at("state").string_value() == "finished")
     {
-      if (_msg.params().at("state").string_value() == "finished")
-      {
-        if (_msg.params().at("score").double_value() == 200)
-          ScoringPlugin::Finish();
-        else
-          this->dataPtr->channelCrossed = true;
-      }
+      if (_msg.params().at("score").double_value() == 200)
+        ScoringPlugin::Finish();
+      else
+        this->dataPtr->channelCrossed = true;
     }
   }
 }
@@ -96,10 +92,7 @@ void GymkhanaScoringPlugin::ChannelCallback(
 void GymkhanaScoringPlugin::Implementation::BlackboxCallback(
   const msgs::Param &_msg)
 {
-  if (_msg.IsInitialized()) //TODO: Check
-  {
-    this->blackboxScore = _msg.params().at("score").double_value();
-  }
+  this->blackboxScore = _msg.params().at("score").double_value();
 }
 
 /////////////////////////////////////////////////
