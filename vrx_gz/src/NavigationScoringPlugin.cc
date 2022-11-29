@@ -128,7 +128,6 @@ class NavigationScoringPlugin::Implementation
   /// \brief Number of points deducted per collision.
   public: double obstaclePenalty = 10.0;
 
-  //TODO: should this be set in ScoringPlugin?
   /// \brief Display or suppress state changes
   public: bool silent = false;
 };
@@ -342,8 +341,11 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
 void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   sim::EntityComponentManager &_ecm)
 {
-  ScoringPlugin::PreUpdate(_info, _ecm);
+  // don't update when paused
+  if (_info.paused)
+    return;
 
+  ScoringPlugin::PreUpdate(_info, _ecm);
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->dataPtr->vehicleEntity)
   {

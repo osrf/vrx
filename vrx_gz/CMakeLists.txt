@@ -102,6 +102,7 @@ list(APPEND VRX_GZ_PLUGINS
   BallShooterPlugin
   LightBuoyPlugin
   NavigationScoringPlugin
+  GymkhanaScoringPlugin
   PerceptionScoringPlugin
   PlacardPlugin
   ScanDockScoringPlugin

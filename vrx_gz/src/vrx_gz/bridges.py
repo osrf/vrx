@@ -172,6 +172,32 @@ def perception_reports():
         ros_type='geometry_msgs/msg/PoseStamped',
         direction=BridgeDirection.ROS_TO_GZ)
 
+def gymkhana_blackbox_goal():
+    return Bridge(
+        gz_topic=f'/vrx/gymkhana_blackbox/goal',
+        ros_topic=f'/vrx/gymkhana_blackbox/goal',
+        gz_type='ignition.msgs.Pose',
+        ros_type='geometry_msgs/msg/PoseStamped',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+
+def gymkhana_blackbox_mean_pose_error():
+    return Bridge(
+        gz_topic=f'/vrx/gymkhana_blackbox/mean_pose_error',
+        ros_topic=f'/vrx/gymkhana_blackbox/mean_pose_error',
+        gz_type='ignition.msgs.Float',
+        ros_type='std_msgs/msg/Float32',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+
+def gymkhana_blackbox_pose_error():
+    return Bridge(
+        gz_topic=f'/vrx/gymkhana_blackbox/pose_error',
+        ros_topic=f'/vrx/gymkhana_blackbox/pose_error',
+        gz_type='ignition.msgs.Float',
+        ros_type='std_msgs/msg/Float32',
+        direction=BridgeDirection.GZ_TO_ROS)
+
 def color_sequence_reports():
     return Bridge(
         gz_topic=f'/vrx/scan_dock_deliver/color_sequence',

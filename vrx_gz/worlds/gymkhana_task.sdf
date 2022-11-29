@@ -358,6 +358,19 @@
       <uri>platform</uri>
     </include>
 
+    <!-- The VRX short navigation course -->
+    <include>
+      <uri>model://short_navigation_course_0</uri>
+      <pose>-524 186 0 0 0 -1.44</pose>
+    </include>
+
+    <!-- The obstacle course -->
+    <include>
+      <name>buoys</name>
+      <uri>model://obstacle_course</uri>
+      <pose>-477 275 0 0 0 2.54</pose>
+    </include>
+
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>
@@ -405,46 +418,6 @@
       <uri>blue_projectile</uri>
     </include> -->
 
-    <include>
-      <name>mb_marker_buoy_red</name>
-      <pose>-528 191 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
-    </include>
-
     <wind>
       <linear_velocity>0 0 0</linear_velocity>
     </wind>
@@ -486,21 +459,84 @@
       </vertical>
     </plugin>
 
+    <!-- Top-level scoring plugin -->
+    <plugin
+      filename="libGymkhanaScoringPlugin.so"
+      name="vrx::GymkhanaScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>gymkhana</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/debug/contact</contact_debug_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <!-- Per-plugin flag, different from env var VRX_EXIT_ON_COMPLETION.
+           Respect top-level plugin finished status. -->
+      <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
+      <obstacle_penalty>1</obstacle_penalty>
+      <set_position_topic_name>/wamv/pingers/pinger/set_pinger_position</set_position_topic_name>
+      <pinger_position>-483 295.5 0</pinger_position>
+    </plugin>
+
+    <!-- Scoring Plugin for the buoy channel portion -->
+    <plugin
+      filename="libNavigationScoringPlugin.so"
+      name="vrx::NavigationScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>gymkhana_channel</task_name>
+      <task_info_topic>/vrx/gymkhana_channel/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/gymkhana_channel/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <collision_buffer>10</collision_buffer>
+      <release_topic>/vrx/release</release_topic>
+
+      <course_name>short_navigation_course_0</course_name>
+      <obstacle_penalty>10.0</obstacle_penalty>
+      <gates>
+        <gate>
+          <left_marker>red_bound_0</left_marker>
+          <right_marker>green_bound_0</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_1</left_marker>
+          <right_marker>green_bound_1</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_2</left_marker>
+          <right_marker>green_bound_2</right_marker>
+        </gate>
+      </gates>
+      <silent>true</silent>
+    </plugin>
+
     <!-- The station keeping scoring plugin -->
     <plugin
       filename="libStationkeepingScoringPlugin.so"
       name="vrx::StationkeepingScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>station_keeping</task_name>
-      <task_info_topic>/vrx/task/info</task_info_topic>
+      <task_name>gymkhana_blackbox</task_name>
+      <mean_error_topic>/vrx/gymkhana_blackbox/mean_pose_error</mean_error_topic>
+      <pose_error_topic>/vrx/gymkhana_blackbox/pose_error</pose_error_topic>
+      <goal_topic>/vrx/gymkhana_blackbox/goal</goal_topic>
+      <task_info_topic>/vrx/gymkhana_blackbox/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/gymkhana_blackbox/debug/contact</contact_debug_topic>
+      <!-- Keep Gazebo running after this sub-task is completed -->
+      <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
+      <!-- Disable heading error -->
+      <head_error_on>false</head_error_on>
+      <!-- <goal_pose>-33.722718 150.674031 0</goal_pose> -->
+      <goal_pose_cart>-483 295.5 0</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>
-      <!-- <head_error_on>false</head_error_on> -->
-      <goal_pose>-33.722718 150.674031 0</goal_pose>
-      <!-- <goal_pose_cart>-532 162 1</goal_pose_cart> -->
       <!-- <markers>true</markers> -->
+      <silent>true</silent>
     </plugin>
 
   </world>

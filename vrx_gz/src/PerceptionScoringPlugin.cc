@@ -417,6 +417,7 @@ void PerceptionScoringPlugin::Configure(const sim::Entity &_entity,
 void PerceptionScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
   sim::EntityComponentManager &_ecm)
 {
+  // don't update when paused
   if (_info.paused)
     return;
 

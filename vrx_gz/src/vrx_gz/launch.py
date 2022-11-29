@@ -112,6 +112,12 @@ def competition_bridges(world_name):
             vrx_gz.bridges.wayfinding_mean_error(),
             vrx_gz.bridges.wayfinding_min_errors(),
         ]
+    elif world_name in GYMKHANA_WORLDS:
+        task_bridges = [
+            vrx_gz.bridges.gymkhana_blackbox_goal(),
+            vrx_gz.bridges.gymkhana_blackbox_mean_pose_error(),
+            vrx_gz.bridges.gymkhana_blackbox_pose_error(),
+        ]
     elif world_name in WILDLIFE_WORLDS:
         task_bridges = [
         ]

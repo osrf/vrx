@@ -130,6 +130,14 @@ class ScoringPlugin::Implementation
   public: std::string taskState = "initial";
 
   /// \brief The next task message to be published.
+  /// This is a generic message holding name-value pairs.
+  /// The following name-value pairs are defined: 
+  /// state: string containing the current taskState
+  /// elapsed_time: double representing current elapsed time
+  /// remaining_time: double representing current remaining time
+  /// timed_out: boolean indicating whether the task has timed out
+  /// num_collisions: integer representing the number of recorded collisions
+  /// score: double representing the current task score
   public: msgs::Param taskMsg;
 
   /// \brief Score in case of timeout - added for Navigation task

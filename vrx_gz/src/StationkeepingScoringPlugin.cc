@@ -244,6 +244,10 @@ void StationkeepingScoringPlugin::Configure(const sim::Entity &_entity,
 void StationkeepingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   sim::EntityComponentManager &_ecm)
 {
+  // don't update when paused
+  if (_info.paused)
+    return;
+
   ScoringPlugin::PreUpdate(_info, _ecm);
 
   // Check to see if we need to publish the marker(s)
