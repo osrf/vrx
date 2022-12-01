@@ -141,9 +141,6 @@ VirtualGate::VirtualGate(const sim::Entity _leftMarkerEntity,
 /////////////////////////////////////////////////
 void VirtualGate::Update()
 {
-  if (this->leftMarkerEntity == sim::kNullEntity)
-    return;
-
   // The pose of the markers delimiting the virtual gate.
   auto comp =
     this->ecm.Component<sim::components::WorldPose>(this->leftMarkerEntity);
@@ -271,7 +268,6 @@ Buoy::Buoy(const std::string &_entityName,
     offset.X(this->engagementDistance * cos(alpha));
     offset.Y(this->engagementDistance * sin(alpha));
 
-    sim::enableComponent<sim::components::WorldPose>(_ecm, this->entity, true);
     auto comp = this->ecm.Component<sim::components::WorldPose>(this->entity);
     if (!comp)
     {
@@ -615,7 +611,7 @@ void WildlifeScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
   if (taskCompleted)
   {
     gzmsg << "Course completed!" << std::endl;
-    this->SetScore(std::max(0.0, this->Score() - this->dataPtr->TimeBonus()));
+    this->SetScore(this->Score() - this->dataPtr->TimeBonus());
     this->Exit();
   }
 }
@@ -770,12 +766,8 @@ double WildlifeScoringPlugin::Implementation::TimeBonus() const
     {
       totalBonus += this->timeBonus;
     }
-    else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE &&
-             buoy.state == BuoyState::CIRCUMNAVIGATED)
-    {
-      totalBonus += this->timeBonus;
-    }
-    else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE &&
+    else if ((buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE         ||
+              buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE) &&
              buoy.state == BuoyState::CIRCUMNAVIGATED)
     {
       totalBonus += this->timeBonus;
@@ -795,8 +787,7 @@ void WildlifeScoringPlugin::OnCollision()
 //////////////////////////////////////////////////
 void WildlifeScoringPlugin::OnFinished()
 {
-  this->SetTimeoutScore(
-    std::max(0.0, this->Score() - this->dataPtr->TimeBonus()));
+  this->SetTimeoutScore(this->Score() - this->dataPtr->TimeBonus());
   ScoringPlugin::OnFinished();
 }
 
