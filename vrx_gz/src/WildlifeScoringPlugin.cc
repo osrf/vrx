@@ -102,7 +102,6 @@ class VirtualGate
   public: GateState IsPoseInGate(const math::Pose3d &_robotWorldPose) const;
 
   /// \brief Recalculate the pose of the gate.
-  /// \param[in] _ecm The Entity Component Manager.
   public: void Update();
 
   /// \brief The left marker (buoy) entity.
@@ -437,7 +436,7 @@ void Buoy::SetVehicleModel(sim::Entity _vehicleModel)
   this->vehicleModel = _vehicleModel;
 }
 
-/// \brief Private PerceptionScoringPlugin data class.
+/// \brief Private WildlifeScoringPlugin data class.
 class WildlifeScoringPlugin::Implementation
 {
   /// \brief Parse the buoys from SDF.
@@ -475,7 +474,7 @@ class WildlifeScoringPlugin::Implementation
   /// \brief The name of the topic where the animal locations are published.
   public: std::string animalsTopic = "/vrx/wildlife_animals";
 
-  /// \brief Time bonus granted for each succcesfuly goal achieved.
+  /// \brief Time bonus granted for each goal achieved.
   public: double timeBonus = 30.0;
 
   /// \brief When the vehicle is between the buoy and this distance, the vehicle
