@@ -132,8 +132,9 @@ void StationkeepingScoringPlugin::Configure(const sim::Entity &_entity,
 {
   ScoringPlugin::Configure(_entity, _sdf, _ecm, _eventMgr);
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
-  auto worldEntity =
-      _ecm.EntityByComponents(sim::components::World());
+
+  // Initialize spherical coordinates instance.
+  auto worldEntity = _ecm.EntityByComponents(sim::components::World());
   sim::World world(worldEntity);
   this->dataPtr->sc = world.SphericalCoordinates(_ecm).value();
 

@@ -110,6 +110,7 @@ list(APPEND VRX_GZ_PLUGINS
   StationkeepingScoringPlugin
   Surface
   WaveVisual
+  WildlifeScoringPlugin
 )
 
 foreach(PLUGIN ${VRX_GZ_PLUGINS})

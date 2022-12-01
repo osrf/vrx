@@ -135,9 +135,8 @@ namespace vrx
                            gz::sim::EventManager &_eventMgr) override;
 
     // Documentation inherited.
-    public: void PreUpdate(
-                      const gz::sim::UpdateInfo &_info,
-                      gz::sim::EntityComponentManager &_ecm) override;
+    public: void PreUpdate(const gz::sim::UpdateInfo &_info,
+                           gz::sim::EntityComponentManager &_ecm) override;
 
     /// \brief Get the current score.
     /// \return The current score.
@@ -182,6 +181,10 @@ namespace vrx
     /// \brief Get the vehicleName.
     /// \return The vehicle name.
     protected: std::string VehicleName() const;
+
+    /// \brief Get the vehicle entity.
+    /// \return The vehicle entity.
+    protected: gz::sim::Entity VehicleEntity() const;
 
     /// \brief Get the number of WAM-V collisions.
     /// \return Number of collisions
