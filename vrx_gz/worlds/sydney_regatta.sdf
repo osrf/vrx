@@ -355,11 +355,6 @@
     </include>
 
     <include>
-      <name>platform</name>
-      <uri>platform</uri>
-    </include>
-
-    <include>
       <name>mb_marker_buoy_red</name>
       <pose>-528 191 0 0 1.57 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
