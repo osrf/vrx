@@ -314,6 +314,7 @@ void StationkeepingScoringPlugin::OnReady()
   if (!this->dataPtr->silent)
   {
     gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
+    std::cout << std::flush;
   }
   ScoringPlugin::OnReady();
 }
@@ -324,6 +325,7 @@ void StationkeepingScoringPlugin::OnRunning()
   if (!this->dataPtr->silent)
   {
     gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
+    std::cout << std::flush;
   }
   ScoringPlugin::OnRunning();
 }
@@ -334,6 +336,7 @@ void StationkeepingScoringPlugin::OnFinished()
   if (!this->dataPtr->silent)
   {
     gzmsg << "StationkeepingScoringPlugin::OnFinished" << std::endl;
+    std::cout << std::flush;
   }
   ScoringPlugin::OnFinished();
 }
@@ -344,6 +347,7 @@ void StationkeepingScoringPlugin::OnCollision()
   if (!this->dataPtr->silent)
   {
     gzmsg << "StationkeepingScoringPlugin::OnCollision" << std::endl;
+    std::cout << std::flush;
   }
   ScoringPlugin::OnCollision();
 }
