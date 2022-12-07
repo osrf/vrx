@@ -739,6 +739,9 @@ void ScanDockScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
 
   ScoringPlugin::PreUpdate(_info, _ecm);
 
+  if (this->TaskState() == "finished")
+    return;
+
   if (this->dataPtr->enableColorChecker)
   {
     // Verify the color checker.
@@ -802,7 +805,7 @@ void ScanDockScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
     // Time to finish the task as the vehicle docked.
     // Note that we only allow to dock one time. This is to prevent teams
     // docking in all possible bays.
-    this->Exit();
+    this->RequestExit();
     break;
   }
 

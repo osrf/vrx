@@ -109,6 +109,9 @@ class ScoringPlugin::Implementation
   /// \brief Absolute time specifying the start of the finish state.
   public: std::chrono::duration<double> finishTime;
 
+  /// \brief Absolute time specifying the time to exit the simulation.
+  public: std::chrono::duration<double> exitTime;
+
   /// \brief Current time (simulation).
   public: std::chrono::duration<double> currentTime;
 
@@ -146,6 +149,12 @@ class ScoringPlugin::Implementation
 
   /// \brief Whether to shut down after last gate is crossed.
   public: bool perPluginExitOnCompletion = true;
+
+  /// \brief Number of seconds to delay the exit of the simulation when the
+  /// state transitions to "finished". This parameter will be ignored if
+  /// <per_plugin_exit_on_completion> or the VRX_EXIT_ON_COMPLETION environment
+  /// variable are set to not exit after task completion.
+  public: double exitDelay = 2.0;
 
   /// \brief Collision buffer.
   public: double collisionBuffer = 3.0;
@@ -192,6 +201,10 @@ bool ScoringPlugin::Implementation::ParseSDFParameters()
     this->perPluginExitOnCompletion = this->sdf->Get<bool>(
       "per_plugin_exit_on_completion");
   }
+
+  // This is an optional element.
+  if (this->sdf->HasElement("exit_delay"))
+    this->exitDelay = this->sdf->Get<double>("exit_delay");
 
   // This is an optional element.
   if (this->sdf->HasElement("initial_state_duration"))
@@ -288,6 +301,13 @@ void ScoringPlugin::UpdateTaskState()
     this->OnFinished();
     return;
   }
+
+  if (this->dataPtr->taskState == "finished" &&
+      this->dataPtr->currentTime >= this->dataPtr->exitTime)
+  {
+    this->dataPtr->Exit();
+    return;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -369,8 +389,10 @@ void ScoringPlugin::Configure(const sim::Entity &_entity,
     std::chrono::duration<double>(this->dataPtr->initialStateDuration);
   this->dataPtr->runningTime = this->dataPtr->readyTime +
     std::chrono::duration<double>(this->dataPtr->readyStateDuration);
-  this->dataPtr->finishTime =this->dataPtr->runningTime +
+  this->dataPtr->finishTime = this->dataPtr->runningTime +
     std::chrono::duration<double>(this->dataPtr->runningStateDuration);
+  this->dataPtr->exitTime = this->dataPtr->finishTime +
+    std::chrono::duration<double>(this->dataPtr->exitDelay);
 
   // Prepopulate the task msg.
   auto *param = this->dataPtr->taskMsg.mutable_params();
@@ -539,9 +561,12 @@ uint16_t ScoringPlugin::NumCollisions() const
 }
 
 //////////////////////////////////////////////////
-void ScoringPlugin::Exit()
+void ScoringPlugin::RequestExit()
 {
-  return this->dataPtr->Exit();
+  this->dataPtr->taskState = "finished";
+  this->dataPtr->remainingTime = std::chrono::duration<double>(0);
+  this->dataPtr->exitTime = this->dataPtr->currentTime +
+    std::chrono::duration<double>(this->dataPtr->exitDelay);
 }
 
 //////////////////////////////////////////////////
@@ -571,8 +596,6 @@ void ScoringPlugin::OnFinished()
   }
   this->dataPtr->UpdateTaskMessage();
   this->dataPtr->taskPub.Publish(this->dataPtr->taskMsg);
-
-  this->dataPtr->Exit();
 }
 
 //////////////////////////////////////////////////

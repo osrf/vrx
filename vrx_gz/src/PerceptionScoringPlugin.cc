@@ -423,6 +423,9 @@ void PerceptionScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
 
   ScoringPlugin::PreUpdate(_info, _ecm);
 
+  if (this->TaskState() == "finished")
+    return;
+
   // SDF.
   if (this->dataPtr->firstIteration)
   {
@@ -490,7 +493,7 @@ void PerceptionScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
     this->SetScore(this->Score() / this->dataPtr->objects.size());
     gzdbg << "Perception run score: " << this->Score() << std::endl;
 
-    this->Exit();
+    this->RequestExit();
   }
 
   // If we have requests, let's process them.
