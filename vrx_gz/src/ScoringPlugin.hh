@@ -190,7 +190,8 @@ namespace vrx
     /// \return Number of collisions
     protected: uint16_t NumCollisions() const;
 
-    /// \brief Exit simulation.
+    /// \brief Request the simulation exit. Note that the termination will be
+    /// delayed <exit_delay> seconds.
     protected: void RequestExit();
 
     /// \brief Callback executed when the task state transition into "ready".
