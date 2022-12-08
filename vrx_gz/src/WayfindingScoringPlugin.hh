@@ -79,12 +79,6 @@ class WayfindingScoringPlugin : public ScoringPlugin
                     const gz::sim::UpdateInfo &_info,
                     gz::sim::EntityComponentManager &_ecm) override;
 
-  // Documentation inherited.
-  protected: void OnReady() override;
-
-  // Documentation inherited.
-  protected: void OnRunning() override;
-
   /// \brief Private data pointer.
   GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
 };
