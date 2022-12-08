@@ -457,49 +457,6 @@ void NavigationScoringPlugin::Fail()
   ScoringPlugin::Finish();
 }
 
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::OnReady()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "NavigationScoringPlugin::OnReady" << std::endl;
-    std::cout << std::flush;
-  }
-  ScoringPlugin::OnReady();
-}
-
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::OnRunning()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "NavigationScoringPlugin::OnRunning" << std::endl;
-    std::cout << std::flush;
-  }
-  ScoringPlugin::OnRunning();
-}
-
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::OnFinished()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "NavigationScoringPlugin::OnFinished" << std::endl;
-  }
-  ScoringPlugin::OnFinished();
-}
-
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::OnCollision()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "NavigationScoringPlugin::OnCollision" << std::endl;
-    std::cout << std::flush;
-  }
-  ScoringPlugin::OnCollision();
-}
-
 GZ_ADD_PLUGIN(vrx::NavigationScoringPlugin,
                     sim::System,
                     vrx::NavigationScoringPlugin::ISystemConfigure,
