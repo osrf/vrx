@@ -616,6 +616,7 @@ void ScoringPlugin::OnContacts(const gz::msgs::Contacts &_contacts)
               << "] New collision counted between ["
               << _contacts.contact(i).collision1().name() << "] and ["
               << _contacts.contact(i).collision2().name() << "]" << std::endl;
+        std::cout << std::flush;
       }
 
       this->dataPtr->lastCollisionTime = this->dataPtr->currentTime;
