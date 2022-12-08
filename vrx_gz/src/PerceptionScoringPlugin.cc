@@ -502,6 +502,7 @@ void PerceptionScoringPlugin::OnRunning()
 {
   this->dataPtr->node.Subscribe(this->dataPtr->objectTopic,
     &PerceptionScoringPlugin::Implementation::OnAttempt, this->dataPtr.get());
+  ScoringPlugin::OnRunning();
 }
 
 //////////////////////////////////////////////////

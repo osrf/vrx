@@ -823,6 +823,7 @@ void ScanDockScoringPlugin::OnReady()
   // Announce the symbol if needed.
   for (auto &dockChecker : this->dataPtr->dockCheckers)
     dockChecker->AnnounceSymbol();
+  ScoringPlugin::OnReady();
 }
 
 //////////////////////////////////////////////////
@@ -848,6 +849,8 @@ void ScanDockScoringPlugin::OnRunning()
   // Announce the symbol if needed.
   for (auto &dockChecker : this->dataPtr->dockCheckers)
     dockChecker->AnnounceSymbol();
+
+  ScoringPlugin::OnRunning();
 }
 
 GZ_ADD_PLUGIN(ScanDockScoringPlugin,
