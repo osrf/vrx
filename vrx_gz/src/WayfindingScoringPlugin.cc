@@ -290,18 +290,6 @@ void WayfindingScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
   ScoringPlugin::SetScore(this->dataPtr->meanError); 
 }
 
-//////////////////////////////////////////////////
-void WayfindingScoringPlugin::OnReady()
-{
-  gzmsg << "WayfindingScoringPlugin::OnReady" << std::endl;
-}
-
-//////////////////////////////////////////////////
-void WayfindingScoringPlugin::OnRunning()
-{
-  gzmsg << "WayfindingScoringPlugin::OnRunning" << std::endl;
-}
-
 GZ_ADD_PLUGIN(WayfindingScoringPlugin,
               sim::System,
               ScoringPlugin::ISystemConfigure,

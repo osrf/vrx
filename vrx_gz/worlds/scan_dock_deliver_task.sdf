@@ -555,7 +555,7 @@
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
+      <running_state_duration>60</running_state_duration>
       <release_topic>/vrx/release</release_topic>
       <!-- Color sequence -->
       <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>

@@ -87,9 +87,6 @@ namespace vrx
     public: void ChannelCallback(const gz::msgs::Param &_msg);
 
     // Documentation inherited.
-    private: void OnRunning() override;
- 
-    // Documentation inherited.
     protected: void OnFinished() override;
  
     /// \brief Private data pointer.

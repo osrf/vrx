@@ -61,18 +61,6 @@ namespace vrx
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
                        gz::sim::EntityComponentManager &_ecm) override;
 
-    // Documentation inherited.
-    protected: void OnReady() override;
-
-    // Documentation inherited.
-    protected: void OnRunning() override;
-
-    // Documentation inherited.
-    protected: void OnFinished() override;
-
-    // Documentation
-    protected: void OnCollision() override;
-
     /// \brief Private data pointer.
     GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };

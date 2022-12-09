@@ -457,7 +457,7 @@
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
+      <running_state_duration>60</running_state_duration>
       <release_topic>/vrx/release</release_topic>
       <course_name>short_navigation_course_0</course_name>
       <obstacle_penalty>10.0</obstacle_penalty>

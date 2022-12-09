@@ -100,18 +100,6 @@ namespace vrx
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
                            gz::sim::EntityComponentManager &_ecm) override;
 
-    // Documentation inherited.
-    protected: void OnReady() override;
-
-    // Documentation inherited.
-    protected: void OnRunning() override;
-
-    // Documentation inherited.
-    protected: void OnFinished() override;
-
-    // Documentation inherited.
-    protected: void OnCollision() override;
-
     /// \brief Set the score to 0 and change to state to "finish".
     protected: void Fail();
 

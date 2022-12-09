@@ -211,19 +211,6 @@ void GymkhanaScoringPlugin::PreUpdate(const gz::sim::UpdateInfo &_info,
 }
 
 //////////////////////////////////////////////////
-void GymkhanaScoringPlugin::OnRunning()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "GymkhanaScoringPlugin::OnRunning" << std::endl;
-    std::cout << std::flush;
-  }
-  ScoringPlugin::OnRunning();
-}
-
-
-
-//////////////////////////////////////////////////
 void GymkhanaScoringPlugin::OnFinished()
 {
   // TODO: fix obstacle penalty (Navigation Plugin Implementation)
