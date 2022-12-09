@@ -309,44 +309,6 @@ void StationkeepingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
 }
 
 //////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnReady()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "StationkeepingScoringPlugin::OnReady" << std::endl;
-  }
-  ScoringPlugin::OnReady();
-}
-
-//////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnRunning()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "StationkeepingScoringPlugin::OnRunning" << std::endl;
-  }
-  ScoringPlugin::OnRunning();
-}
-
-//////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnFinished()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "StationkeepingScoringPlugin::OnFinished" << std::endl;
-  }
-  ScoringPlugin::OnFinished();
-}
-
-//////////////////////////////////////////////////
-void StationkeepingScoringPlugin::OnCollision()
-{
-  if (!this->dataPtr->silent)
-  {
-    gzmsg << "StationkeepingScoringPlugin::OnCollision" << std::endl;
-  }
-  ScoringPlugin::OnCollision();
-}
 
 GZ_ADD_PLUGIN(vrx::StationkeepingScoringPlugin,
               sim::System,

@@ -548,21 +548,31 @@ void ScoringPlugin::Exit()
 void ScoringPlugin::OnReady()
 {
   if (!this->dataPtr->silent)
-    gzdbg << "ScoringPlugin::OnReady" << std::endl;
+  {
+    gzmsg << "ScoringPlugin::OnReady" << std::endl;
+    std::cout << std::flush;
+  }
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnRunning()
 {
   if (!this->dataPtr->silent)
-    gzdbg << "ScoringPlugin::OnRunning" << std::endl;
+  {
+    gzmsg << "ScoringPlugin::OnRunning" << std::endl;
+    std::cout << std::flush;
+  }
 }
 
 //////////////////////////////////////////////////
 void ScoringPlugin::OnFinished()
 {
   if (!this->dataPtr->silent)
-    gzdbg << this->dataPtr->currentTime.count() << "  OnFinished" << std::endl;
+  {
+    gzmsg << "ScoringPlugin::OnFinished at time=" 
+          << this->dataPtr->currentTime.count()  << std::endl;
+    std::cout << std::flush;
+  }
 
   // If a timeoutScore was specified, use it.
   if (this->dataPtr->timedOut && this->dataPtr->timeoutScore > 0.0)
@@ -606,6 +616,7 @@ void ScoringPlugin::OnContacts(const gz::msgs::Contacts &_contacts)
               << "] New collision counted between ["
               << _contacts.contact(i).collision1().name() << "] and ["
               << _contacts.contact(i).collision2().name() << "]" << std::endl;
+        std::cout << std::flush;
       }
 
       this->dataPtr->lastCollisionTime = this->dataPtr->currentTime;
