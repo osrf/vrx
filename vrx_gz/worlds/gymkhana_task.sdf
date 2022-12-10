@@ -361,7 +361,7 @@
     <!-- The VRX short navigation course -->
     <include>
       <uri>model://short_navigation_course_0</uri>
-      <pose>-524 186 0 0 0 -1.44</pose>
+      <pose>-524 198 0 0 0 -1.44</pose>
     </include>
 
     <!-- The obstacle course -->
