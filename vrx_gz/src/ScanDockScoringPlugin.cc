@@ -805,7 +805,7 @@ void ScanDockScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
     // Time to finish the task as the vehicle docked.
     // Note that we only allow to dock one time. This is to prevent teams
     // docking in all possible bays.
-    this->RequestExit();
+    this->Finish();
     break;
   }
 

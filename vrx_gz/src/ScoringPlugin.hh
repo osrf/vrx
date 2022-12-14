@@ -174,7 +174,8 @@ namespace vrx
     /// \return The timeout score.
     protected: double TimeoutScore() const;
 
-    /// \brief Finish the current task.
+    /// \brief Finish the current task. Note that the simulation termination
+    /// (if happening) will be delayed <exit_delay> seconds.
     /// This will set the "finished" flag in the task message to true.
     protected: void Finish();
 
@@ -189,10 +190,6 @@ namespace vrx
     /// \brief Get the number of WAM-V collisions.
     /// \return Number of collisions
     protected: uint16_t NumCollisions() const;
-
-    /// \brief Request the simulation exit. Note that the termination will be
-    /// delayed <exit_delay> seconds.
-    protected: void RequestExit();
 
     /// \brief Callback executed when the task state transition into "ready".
     protected: virtual void OnReady();

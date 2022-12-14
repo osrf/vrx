@@ -612,7 +612,7 @@ void WildlifeScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
   {
     gzmsg << "Course completed!" << std::endl;
     this->SetScore(this->Score() - this->dataPtr->TimeBonus());
-    this->RequestExit();
+    this->Finish();
   }
 }
 

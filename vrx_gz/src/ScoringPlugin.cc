@@ -539,6 +539,8 @@ void ScoringPlugin::Finish()
     return;
 
   this->dataPtr->taskState = "finished";
+  this->dataPtr->exitTime = this->dataPtr->currentTime +
+    std::chrono::duration<double>(this->dataPtr->exitDelay);
   this->OnFinished();
 }
 
@@ -558,15 +560,6 @@ gz::sim::Entity ScoringPlugin::VehicleEntity() const
 uint16_t ScoringPlugin::NumCollisions() const
 {
   return this->dataPtr->numCollisions;
-}
-
-//////////////////////////////////////////////////
-void ScoringPlugin::RequestExit()
-{
-  this->dataPtr->taskState = "finished";
-  this->dataPtr->remainingTime = std::chrono::duration<double>(0);
-  this->dataPtr->exitTime = this->dataPtr->currentTime +
-    std::chrono::duration<double>(this->dataPtr->exitDelay);
 }
 
 //////////////////////////////////////////////////
