@@ -9,7 +9,7 @@
 
     <!-- Monocular Camera -->
     <link name="${namespace}/${name}_link">
-      <visual name="${name}_visual">
+      <visual>
         <origin xyz="-0.033 0 0" rpy="0 0 ${pi/2}"/>
         <geometry>
           <mesh filename="package://vrx_gazebo/models/mono_camera/mesh/mono_camera.dae"/>
@@ -138,6 +138,21 @@
 
     <!-- Gazebo camera setup -->
     <gazebo reference="${namespace}/${name}_link">
+      <visual>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://vrx_gazebo/models/mono_camera/mesh/mono_camera_Albedo.png</albedo_map>
+              <normal_map>model://vrx_gazebo/models/mono_camera/mesh/mono_camera_Normal.png</normal_map>
+              <roughness_map>model://vrx_gazebo/models/mono_camera/mesh/mono_camera_Roughness.png</roughness_map>
+              <metalness_map>model://vrx_gazebo/models/mono_camera/mesh/mono_camera_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
       <sensor type="camera" name="${name}_sensor">
         <update_rate>30.0</update_rate>
 	<xacro:if value="${visualize}">
