@@ -342,8 +342,6 @@
     </light>
 
     <include>
-      <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
-      to go into the model file to change the altitude/height! -->
       <pose> 0 0 0.2 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
