@@ -37,7 +37,7 @@
 
     <!-- 3d lidar sensor -->
     <link name="${namespace}/${name}_link">
-      <visual name="${name}_visual">
+      <visual>
         <origin xyz="0 0 -0.035" rpy="0 0 0"/>
         <geometry>
           <mesh filename="package://vrx_gazebo/models/3d_lidar/mesh/3d_lidar.dae"/>
@@ -144,6 +144,21 @@
     </joint>
 
     <gazebo reference="${namespace}/${name}_link">
+      <visual>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://vrx_gazebo/models/3d_lidar/mesh/3d_Lidar_Albedo.png</albedo_map>
+              <normal_map>model://vrx_gazebo/models/3d_lidar/mesh/3d_Lidar_Normal.png</normal_map>
+              <roughness_map>model://vrx_gazebo/models/3d_lidar/mesh/3d_Lidar_Roughness.png</roughness_map>
+              <metalness_map>model://vrx_gazebo/models/3d_lidar/mesh/3d_Lidar_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
       <sensor type="gpu_ray" name="${name}_sensor">
         <update_rate>${update_rate}</update_rate>
         <ray>
