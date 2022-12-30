@@ -257,9 +257,12 @@ void StationkeepingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   //   this->dataPtr->AddMarker();
   // }
 
+  if (this->TaskState() == "finished")
+    return;
+
   // Start publishing the goal once in "ready" state
-  if (this->ScoringPlugin::TaskState() == "ready")
-      this->dataPtr->goalPub.Publish(this->dataPtr->goalMsg);
+  if (this->TaskState() == "ready")
+    this->dataPtr->goalPub.Publish(this->dataPtr->goalMsg);
 
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->dataPtr->vehicleEntity)
