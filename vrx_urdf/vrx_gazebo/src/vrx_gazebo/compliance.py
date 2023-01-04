@@ -4,6 +4,7 @@ from ament_index_python.packages import get_package_share_directory
 
 import numpy as np
 import os
+import rclpy
 import yaml
 
 from vrx_gazebo.utils import get_macros
