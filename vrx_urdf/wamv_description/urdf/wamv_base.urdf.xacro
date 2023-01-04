@@ -131,6 +131,10 @@
     </inertial>
   </link>
 
+  <gazebo>
+    <enable_wind>true</enable_wind>
+  </gazebo>
+
   <gazebo reference="${namespace}/base_link">
     <sensor type="contact" name="contact_sensor">
       <contact>

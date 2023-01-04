@@ -28,7 +28,7 @@
             <cell_count>300 300</cell_count>
             <wave>
               <model>PMS</model>
-              <period>5</period>
+              <period>5.0</period>
               <number>3</number>
               <scale>1.1</scale>
               <gain>0.3</gain>
