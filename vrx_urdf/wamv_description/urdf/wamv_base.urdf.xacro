@@ -131,7 +131,7 @@
         <pbr>
           <metal>
             <albedo_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Albedo.png</albedo_map>
-            <!-- <normal_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Normal.png</normal_map> -->
+            <normal_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Normal.png</normal_map>
             <roughness_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Roughness.png</roughness_map>
             <metalness_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Metalness.png</metalness_map>
           </metal>
