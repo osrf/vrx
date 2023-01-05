@@ -15,7 +15,7 @@ We're happy to announce with release 2.0 VRX has transitioned from Gazebo Classi
 ## The VRX Competition
 The VRX environment is also the "virtual venue" for the [VRX Competition](https://github.com/osrf/vrx/wiki). Please see our Wiki for tutorials and links to registration and documentation relevant to the virtual competition. 
 
-![VRX](images/sydney_regatta.png)
+![VRX](images/sydney_regatta_gzsim.png)
 ![Ubuntu CI](https://github.com/osrf/vrx/workflows/Ubuntu%20CI/badge.svg)
 
 ## Getting Started
@@ -51,6 +51,6 @@ We continue to receive important improvements from the community.  We have done 
 
 ## Contacts
 
- * Carlos Aguero <caguero@openrobotics.org>
+ * Carlos Agüero <caguero@openrobotics.org>
  * Michael McCarrin <mrmccarr@nps.edu>
  * Brian Bingham <bbingham@nps.edu>
