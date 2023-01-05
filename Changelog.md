@@ -32,7 +32,7 @@
     * [Pull Request 542](https://github.com/osrf/vrx/pull/542) 
     * [Pull Request 547](https://github.com/osrf/vrx/pull/547) 
 
-1. Add physics based rendering to select components
+1. Add physically based rendering to select components
     * [Pull Request 555](https://github.com/osrf/vrx/pull/555) 
     * [Pull Request 560](https://github.com/osrf/vrx/pull/560) 
     * [Pull Request 561](https://github.com/osrf/vrx/pull/561) 
