@@ -94,16 +94,8 @@
     </collision>
   </xacro:macro>
 
-  <link name="${namespace}/base_link">
-  </link>
-
-  <joint name="${namespace}/dummy_joint" type="fixed">
-    <parent link="${namespace}/base_link"/>
-    <child link="${namespace}/dummy_link"/>
-  </joint>
-
   <!-- Basic model of the 16' WAM-V USV -->
-  <link name="${namespace}/dummy_link">
+  <link name="${namespace}/base_link">
     <visual>
       <geometry>
         <mesh filename="package://wamv_description/models/WAM-V-Base/mesh/WAM-V-Base.dae"/>
@@ -136,6 +128,21 @@
   </gazebo>
 
   <gazebo reference="${namespace}/base_link">
+    <visual>
+      <material>
+        <diffuse>1.0 1.0 1.0</diffuse>
+        <specular>1.0 1.0 1.0</specular>
+        <pbr>
+          <metal>
+            <albedo_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Albedo.png</albedo_map>
+            <normal_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Normal.png</normal_map>
+            <roughness_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Roughness.png</roughness_map>
+            <metalness_map>model://wamv_description/models/WAM-V-Base/mesh/WAM-V_Metalness.png</metalness_map>
+          </metal>
+        </pbr>
+      </material>
+    </visual>
+
     <sensor type="contact" name="contact_sensor">
       <contact>
         <!-- collisions are renamed during urdf -> sdf fixed joint lumping -->
