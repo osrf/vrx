@@ -15,7 +15,7 @@ We're happy to announce with release 2.0 VRX has transitioned from Gazebo Classi
 ## The VRX Competition
 The VRX environment is also the "virtual venue" for the [VRX Competition](https://github.com/osrf/vrx/wiki). Please see our Wiki for tutorials and links to registration and documentation relevant to the virtual competition. 
 
-![VRX](images/sydney_regatta.png)
+![VRX](images/sydney_regatta_gzsim.png)
 ![Ubuntu CI](https://github.com/osrf/vrx/workflows/Ubuntu%20CI/badge.svg)
 
 ## Getting Started
