@@ -19,8 +19,16 @@
           </mesh>
         </geometry>
         <material>
-          <diffuse>0.14 0.14 0.14</diffuse>
-          <specular>0.5 0.5 0.5</specular>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+              <normal_map>file://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+              <roughness_map>file://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+              <metalness_map>file://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
         </material>
       </visual>
     </link>
