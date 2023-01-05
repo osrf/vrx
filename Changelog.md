@@ -40,6 +40,7 @@
     * [Pull Request 568](https://github.com/osrf/vrx/pull/568) 
     * [Pull Request 569](https://github.com/osrf/vrx/pull/569) 
     * [Pull Request 570](https://github.com/osrf/vrx/pull/570) 
+    * [Pull Request 572](https://github.com/osrf/vrx/pull/572) 
 
 1. Bug fixes and cleanup
     * [Pull Request 519](https://github.com/osrf/vrx/pull/519) 
