@@ -1,3 +1,58 @@
+## VRX 2
+
+### VRX 2.0.0
+1. Port VRX Core Functionality to Gazebo Sim
+    * [Pull Request 474](https://github.com/osrf/vrx/pull/474) 
+    * [Pull Request 482](https://github.com/osrf/vrx/pull/482) 
+    * [Pull Request 490](https://github.com/osrf/vrx/pull/490) 
+    * [Pull Request 500](https://github.com/osrf/vrx/pull/500) 
+    * [Pull Request 503](https://github.com/osrf/vrx/pull/503) 
+    * [Pull Request 512](https://github.com/osrf/vrx/pull/512) 
+    * [Pull Request 520](https://github.com/osrf/vrx/pull/520) 
+    * [Pull Request 526](https://github.com/osrf/vrx/pull/526) 
+    * [Pull Request 531](https://github.com/osrf/vrx/pull/531) 
+    * [Pull Request 535](https://github.com/osrf/vrx/pull/535) 
+    * [Pull Request 543](https://github.com/osrf/vrx/pull/543) 
+
+1. Port VRX 2022 Tasks to Gazebo Sim 
+    * [Pull Request 501](https://github.com/osrf/vrx/pull/501) 
+    * [Pull Request 502](https://github.com/osrf/vrx/pull/502) 
+    * [Pull Request 504](https://github.com/osrf/vrx/pull/504) 
+    * [Pull Request 505](https://github.com/osrf/vrx/pull/505) 
+    * [Pull Request 506](https://github.com/osrf/vrx/pull/506) 
+    * [Pull Request 508](https://github.com/osrf/vrx/pull/508) 
+    * [Pull Request 513](https://github.com/osrf/vrx/pull/513) 
+    * [Pull Request 522](https://github.com/osrf/vrx/pull/522) 
+    * [Pull Request 523](https://github.com/osrf/vrx/pull/523) 
+    * [Pull Request 525](https://github.com/osrf/vrx/pull/525) 
+    * [Pull Request 527](https://github.com/osrf/vrx/pull/527) 
+    * [Pull Request 537](https://github.com/osrf/vrx/pull/537) 
+    * [Pull Request 540](https://github.com/osrf/vrx/pull/540) 
+    * [Pull Request 541](https://github.com/osrf/vrx/pull/541) 
+    * [Pull Request 542](https://github.com/osrf/vrx/pull/542) 
+    * [Pull Request 547](https://github.com/osrf/vrx/pull/547) 
+
+1. Add physics based rendering to select components
+    * [Pull Request 555](https://github.com/osrf/vrx/pull/555) 
+    * [Pull Request 560](https://github.com/osrf/vrx/pull/560) 
+    * [Pull Request 561](https://github.com/osrf/vrx/pull/561) 
+    * [Pull Request 567](https://github.com/osrf/vrx/pull/567) 
+    * [Pull Request 568](https://github.com/osrf/vrx/pull/568) 
+    * [Pull Request 569](https://github.com/osrf/vrx/pull/569) 
+    * [Pull Request 570](https://github.com/osrf/vrx/pull/570) 
+
+1. Bug fixes and cleanup
+    * [Pull Request 519](https://github.com/osrf/vrx/pull/519) 
+    * [Pull Request 530](https://github.com/osrf/vrx/pull/530) 
+    * [Pull Request 549](https://github.com/osrf/vrx/pull/549) 
+    * [Pull Request 550](https://github.com/osrf/vrx/pull/550) 
+    * [Pull Request 553](https://github.com/osrf/vrx/pull/553) 
+    * [Pull Request 554](https://github.com/osrf/vrx/pull/554) 
+    * [Pull Request 557](https://github.com/osrf/vrx/pull/557) 
+    * [Pull Request 558](https://github.com/osrf/vrx/pull/558) 
+    * [Pull Request 565](https://github.com/osrf/vrx/pull/565) 
+    * [Pull Request 566](https://github.com/osrf/vrx/pull/566) 
+
 ## VRX 1
 
 ### VRX 1.6.1
