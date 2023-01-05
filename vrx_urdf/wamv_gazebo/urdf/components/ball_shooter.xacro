@@ -3,7 +3,7 @@
   <xacro:macro name="wamv_ball_shooter" params="name:='ball_shooter' frameId:='wamv/ball_shooter' x:=0.55 y:=0.35 z:=1.4 pitch:='0' yaw:='0'">
 
     <link name="${namespace}/${name}_base_link">
-      <visual name="${name}_base_visual">
+      <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <mesh filename="package://vrx_gazebo/models/ball_shooter/meshes/ball_shooter_base.dae"/>
@@ -17,7 +17,7 @@
     </link>
 
     <link name="${namespace}/${name}_launcher_link">
-      <visual name="${name}_launcher_visual">
+      <visual>
         <!-- The cylinder has a -15deg pitch. We compensate for that here.
              That way, if the user passes a 0 deg rotation the cylinder will
              be parallel to the ground -->
@@ -61,6 +61,40 @@
       <parent link="${namespace}/${name}_base_link"/>
       <child link="${namespace}/${name}_launcher_link"/>
     </joint>
+
+    <gazebo reference="${namespace}/${name}_base_link">
+      <visual>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Albedo.png</albedo_map>
+              <normal_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Normal.png</normal_map>
+              <roughness_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Roughness.png</roughness_map>
+              <metalness_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </gazebo>
+
+    <gazebo reference="${namespace}/${name}_launcher_link">
+      <visual>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Albedo.png</albedo_map>
+              <normal_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Normal.png</normal_map>
+              <roughness_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Roughness.png</roughness_map>
+              <metalness_map>model://vrx_gazebo/models/ball_shooter/materials/Textures/Launcher_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </gazebo>
 
     <gazebo>
       <plugin name="vrx::BallShooterPlugin" filename="libBallShooterPlugin.so">
