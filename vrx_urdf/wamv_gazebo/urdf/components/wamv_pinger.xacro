@@ -4,19 +4,13 @@
     <link name="${namespace}/${name}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
       </visual>
-      <collision name="${name}_collision">
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <box size="0.1 0.1 0.1" />
-        </geometry>
-      </collision>
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.00000542" ixy="0.0" ixz="0.0" iyy="0.00002104" iyz="0.0" izz="0.00002604"/>
+      </inertial>
     </link>
     <joint name="${namespace}/${name}_pinger_joint" type="fixed">
-      <origin xyz="${position}" rpy="${orientation}"/>
       <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}"/>
     </joint>
