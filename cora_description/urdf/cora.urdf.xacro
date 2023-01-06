@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="cora">
+
+  <link name="cora/base_link">
+  </link>
+
+  <joint name="cora/dummy_joint" type="fixed">
+    <parent link="cora/base_link"/>
+    <child link="cora/dummy_link"/>
+    <!-- Adjust the visual/collision to match water height -->
+    <origin xyz="0 0 1" rpy="0 0 0"/>
+  </joint>
+
+  <link name="cora/dummy_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://cora_description/models/meshes/base.dae"/>
+      </geometry>
+      <material name="base_material">
+        <diffuse>1.0 1.0 1.0</diffuse>
+        <specular>1.0 1.0 1.0</specular>
+        <pbr>
+          <metal>
+            <albedo_map>package://cora_description/models/materials/textures/Boat_Albedo.png</albedo_map>
+            <metalness_map>package://cora_description/models/materials/textures/Boat_Metalness.png</metalness_map>
+            <roughness_map>package://cora_description/models/materials/textures/Boat_Roughness.png</roughness_map>
+          </metal>
+        </pbr>
+        <!-- fallback to script if no PBR support-->
+        <script>
+          <uri>package://cora_description/models/materials/scripts/</uri>
+          <uri>package://cora_description/models/materials/textures/</uri>
+          <name>UrbanTile/Boat_Diffuse</name>
+        </script>
+      </material>
+    </visual>
+
+    <collision name="collision">
+      <geometry>
+        <box size="12.21 3.58 2.84" />
+      </geometry>
+    </collision>
+
+    <!-- Mass is calculated based on an estimate of draft, the effective length and the cross-section of
+a circle segment. The value for the draft is consistent specifications of similar vessels.  Moments of inertia are based on an effective cylindrical model-->
+    <inertial>
+       <mass value="33000.0"/>
+       <inertia ixx="20700.0" ixy="0.0" ixz="0.0" iyy="420000.0" iyz="0.0" izz="420000.0"/>
+    </inertial>
+  </link>
+
+</robot>

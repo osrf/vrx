@@ -294,7 +294,7 @@ void BuoyancyPlugin::OnUpdate()
       float partialMass = buoyancyObj.mass * submergedVolume.volume
           / buoyancyObj.shape->volume;
 
-      // drag (based on Exact Buoyancy for Polyhedra by Eric Catto)
+      // drag (based on Exact Buoyancy for Polyhedra by Erin Catto)
       // linear drag
       ignition::math::Vector3d relVel =
           ignition::math::Vector3d(0, 0, this->linkHeightDots[link]) - linVel;

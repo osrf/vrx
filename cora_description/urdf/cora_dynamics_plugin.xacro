@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="usv_dynamics_gazebo" params="name">
+    <!--Gazebo Plugin for simulating Cora dynamics-->
+    <gazebo>
+      <plugin name="usv_dynamics_${name}" filename="libusv_gazebo_dynamics_plugin.so">
+        <bodyName>cora/base_link</bodyName>
+        <!-- Must be same as the ocean model!-->
+        <waterLevel>0</waterLevel>
+        <waterDensity>1024.0</waterDensity>
+        <!-- Added mass -->
+        <xDotU>0</xDotU>
+        <yDotV>26000</yDotV>
+        <zDotW>31000</zDotW>
+        <kDotP>0.0</kDotP>
+        <mDotQ>0.0</mDotQ>
+        <nDotR>0.0</nDotR>
+        <!-- Linear and quadratic drag -->
+        <xU>120.0</xU>
+        <xUU>240.0</xUU>
+        <yV>240.0</yV>
+        <yVV>2600</yVV>
+        <zW>50000.0</zW>
+        <zWW>0.0</zWW>
+        <kP>50000.0</kP>
+        <kPP>5000.0</kPP>
+        <mQ>500000.0</mQ>
+        <mQQ>5000.0</mQQ>
+        <nR>400000.0</nR>
+        <nRR>0.0</nRR>
+        <!-- General dimensions -->
+        <!--<boatArea>2.2</boatArea>-->
+        <hullRadius>3.0</hullRadius>
+        <boatWidth>3.3</boatWidth>
+        <boatLength>12.2</boatLength>
+        <!-- Length discretization, AKA, "N" -->
+        <length_n>2</length_n>
+        <!-- Wave model -->
+        <wave_model>ocean_waves</wave_model>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>
