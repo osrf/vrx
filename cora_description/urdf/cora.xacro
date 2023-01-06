@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="cora">
+
+  <xacro:arg name="locked" default="false" />
+
+  <!-- Include macros for dynamics plugins -->
+  <xacro:include filename="$(find cora_description)/urdf/macros.xacro" />
+
+  <!-- Attach hydrodynamics plugin -->
+  <xacro:usv_dynamics_gazebo name="cora_dynamics_plugin" />
+
+  <!-- Robot mesh -->
+  <xacro:include filename="$(find cora_description)/urdf/cora.urdf.xacro" />
+
+  <!-- Note: this is only used for some sensors that do not correctly use the
+  robotNamespace parameter -->
+  <xacro:arg name="namespace" default="cora"/>
+  <xacro:property name="namespace" value="$(arg namespace)" scope="global" />
+
+  <!-- Thrusters -->
+  <xacro:arg name="thruster_namespace" default="thrusters/"/>
+  <xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global" />
+  <xacro:include filename="$(find cora_description)/urdf/thrusters.xacro" />
+
+  <!-- Decide if we lock the robot to the world -->
+  <xacro:if value="$(arg locked)">
+    <gazebo>
+      <link name="cora_external_link"/>
+      <joint name="cora_external_pivot_joint" type="universal">
+        <parent>cora::cora/base_link</parent>
+        <child>cora_external_link</child>
+        <axis>
+          <xyz>1 0 0</xyz>
+        </axis>
+        <axis2>
+          <xyz>0 1 0</xyz>
+        </axis2>
+      </joint>
+      <joint name="cora_external_riser" type="prismatic">
+        <parent>world</parent>
+        <child>cora_external_link</child>
+        <axis>
+          <limit>
+            <lower>-3</lower>
+            <upper>3</upper>
+          </limit>
+          <xyz>0 0 1</xyz>
+        </axis>
+      </joint>
+    </gazebo>
+  </xacro:if>
+
+  <!-- Sensors -->
+  <xacro:arg name="camera_namespace" default="cameras/"/>
+  <xacro:arg name="sensor_namespace" default="sensors/"/>
+  <xacro:arg name="pinger_namespace" default="pingers/"/>
+  <xacro:property name="camera_namespace" value="$(arg camera_namespace)" scope="global" />
+  <xacro:property name="sensor_namespace" value="$(arg sensor_namespace)" scope="global" />
+  <xacro:property name="pinger_namespace" value="$(arg pinger_namespace)" scope="global" />
+  
+  <xacro:wamv_camera name="front_left_camera"  x="-0.61" y="0.2"  z="4.7" 
+  post_z_from="4.6" P="${radians(15)}" />
+  <xacro:wamv_camera name="front_right_camera" x="-0.61" y="-0.2" z="4.7" 
+  post_z_from="4.6" P="${radians(15)}" />
+  <xacro:lidar name="front_lidar" type="16_beam" x="-0.595" z="5" 
+  P="${radians(8)}" post_z_from="4.6"/>
+  <xacro:wamv_gps name="gps" x="-1.0" z="4.6" 
+  	update_rate="20" />
+  <xacro:wamv_imu name="imu" y="-0.2" z="1.0" update_rate="100" />
+  <xacro:wamv_pinger name="pinger" frameId="cora/pinger" />
+
+</robot>

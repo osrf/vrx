@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<!-- Macro to insert the marina into the world -->
+<world xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="marina_minus_scene">
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>44.09525149</latitude_deg>
+      <longitude_deg>9.823435727</longitude_deg>
+      <elevation>0.0</elevation>
+      <!-- For legacy gazebo reasons, need to rotate -->
+      <!--<heading_deg>180</heading_deg>-->
+    </spherical_coordinates>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>27.826445 -347.787354 5.134725 0 0.028 -2.279183</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+    <!-- Note - the pose tag doesn't seem to work for heightmaps, so you need
+    to go into the model file to change the altitutde/height!-->
+    <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://marina</uri>
+    </include>
+
+  </xacro:macro>
+
+</world>
