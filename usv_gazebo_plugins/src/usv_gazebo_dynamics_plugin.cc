@@ -256,6 +256,7 @@ void UsvDynamicsPlugin::Update()
   Cmat(1, 5) = this->paramXdotU * kVelLinearBody.X();
   Cmat(5, 0) = this->paramYdotV * kVelLinearBody.Y();
   Cmat(5, 1) = this->paramXdotU * kVelLinearBody.X();
+  const Eigen::VectorXd kCmat = Cmat * state;
 
   // Drag
   Dmat(0, 0) = this->paramXu + this->paramXuu * std::abs(kVelLinearBody.X());
@@ -277,7 +278,7 @@ void UsvDynamicsPlugin::Update()
   tf2::Transform xformV = tf2::Transform(vq);
 
   // Sum all forces - in body frame
-  const Eigen::VectorXd kForceSum = kAmassVec + kDvec;
+  const Eigen::VectorXd kForceSum = kAmassVec + kCmat + kDvec;
 
   // Forces in fixed frame
   ROS_DEBUG_STREAM_THROTTLE(1.0, "forceSum :\n" << kForceSum);
