@@ -43,7 +43,10 @@ STATIONKEEPING_WORLDS = [
 ]
 
 WAYFINDING_WORLDS = [
-  'wayfinding_task'
+  'wayfinding_task',
+  'practice_2022_wayfinding0_task',
+  'practice_2022_wayfinding1_task',
+  'practice_2022_wayfinding2_task',
 ]
 
 WILDLIFE_WORLDS = [
