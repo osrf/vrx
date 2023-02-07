@@ -39,7 +39,10 @@ PERCEPTION_WORLDS = [
 ]
 
 STATIONKEEPING_WORLDS = [
-  'stationkeeping_task'
+  'stationkeeping_task',
+  'practice_2022_stationkeeping0_task',
+  'practice_2022_stationkeeping1_task',
+  'practice_2022_stationkeeping2_task',
 ]
 
 WAYFINDING_WORLDS = [
