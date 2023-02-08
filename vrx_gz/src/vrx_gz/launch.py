@@ -43,11 +43,14 @@ STATIONKEEPING_WORLDS = [
 ]
 
 WAYFINDING_WORLDS = [
-  'wayfinding_task'
+  'wayfinding_task',
 ]
 
 WILDLIFE_WORLDS = [
-  'wildlife_task'
+  'wildlife_task',
+  'practice_2022_wildlife0_task',
+  'practice_2022_wildlife1_task',
+  'practice_2022_wildlife2_task'
 ]
 
 SCAN_DOCK_DELIVER_WORLDS = [
