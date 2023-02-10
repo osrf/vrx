@@ -359,14 +359,14 @@
     <!-- The VRX short navigation course -->
     <include>
       <uri>model://short_navigation_course_0</uri>
-      <pose>-524 198 0 0 0 -1.44</pose>
+      <pose>-524 186 0 0 0 -1.44</pose>
     </include>
 
     <!-- The obstacle course -->
     <include>
       <name>buoys</name>
       <uri>model://obstacle_course0</uri>
-      <pose>-477 275 0 0 0 2.54</pose>
+      <pose>-477 275 0 0 0 -2.54</pose>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -466,7 +466,7 @@
       <per_plugin_exit_on_completion>true</per_plugin_exit_on_completion>
       <obstacle_penalty>1</obstacle_penalty>
       <set_position_topic_name>/wamv/pingers/pinger/set_pinger_position</set_position_topic_name>
-      <pinger_position>-483 295.5 0</pinger_position>
+      <pinger_position>-503 302.5 0</pinger_position>
     </plugin>
 
     <!-- Scoring Plugin for the buoy channel portion -->
@@ -520,13 +520,11 @@
       <per_plugin_exit_on_completion>false</per_plugin_exit_on_completion>
       <!-- Disable heading error -->
       <head_error_on>false</head_error_on>
-      <!-- <goal_pose>-33.722718 150.674031 0</goal_pose> -->
-      <goal_pose_cart>-483 295.5 0</goal_pose_cart>
+      <goal_pose_cart>-503 302.5 0</goal_pose_cart>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>
-      <!-- <markers>true</markers> -->
       <silent>true</silent>
     </plugin>
 
