@@ -19,7 +19,7 @@
       <visual name="base">
         <geometry>
            <mesh>
-            <uri>file://robotx_light_buoy/mesh/robotx_light_buoy.dae</uri>
+            <uri>file://robotx_light_buoy_rgb/mesh/robotx_light_buoy.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -27,10 +27,10 @@
           <specular>1.0 1.0 1.0</specular>
           <pbr>
             <metal>
-              <albedo_map>file://robotx_light_buoy/mesh/LightTower_Albedo.png</albedo_map>
-              <normal_map>file://robotx_light_buoy/mesh/LightTower_Normal.png</normal_map>
-              <roughness_map>file://robotx_light_buoy/mesh/LightTower_Roughness.png</roughness_map>
-              <metalness_map>file://robotx_light_buoy/mesh/LightTower_Metalness.png</metalness_map>
+              <albedo_map>file://robotx_light_buoy_rgb/mesh/LightTower_Albedo.png</albedo_map>
+              <normal_map>file://robotx_light_buoy_rgb/mesh/LightTower_Normal.png</normal_map>
+              <roughness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Roughness.png</roughness_map>
+              <metalness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Metalness.png</metalness_map>
             </metal>
           </pbr>
         </material>
