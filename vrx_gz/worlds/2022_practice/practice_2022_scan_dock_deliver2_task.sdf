@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="scan_dock_deliver_task">
+  <world name="practice_2022_scan_dock_deliver2_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -358,9 +358,9 @@
     </include>
 
     <include>
-      <name>robotx_light_buoy_rgb</name>
-      <pose>-528 186 0.32 0 0 0</pose>
-      <uri>robotx_light_buoy_rgb</uri>
+      <name>robotx_light_buoy_yrg</name>
+      <pose>-510 175 0.32 0 0 0</pose>
+      <uri>robotx_light_buoy_yrg</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -541,7 +541,7 @@
 
     <include>
       <uri>dock_2022</uri>
-      <pose>-480 190 0 0 0 1.0</pose>
+      <pose>-540 210 0 0 0 3.14</pose>
     </include>
 
     <!-- The scan, dock, deliver scoring plugin -->
@@ -557,9 +557,9 @@
       <release_topic>/vrx/release</release_topic>
       <!-- Color sequence -->
       <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>
-      <color_1>red</color_1>
-      <color_2>green</color_2>
-      <color_3>blue</color_3>
+      <color_1>yellow</color_1>
+      <color_2>red</color_2>
+      <color_3>green</color_3>
       <!-- Dock checkers -->
       <dock_bonus_points>15</dock_bonus_points>
       <correct_dock_bonus_points>5</correct_dock_bonus_points>
@@ -570,8 +570,8 @@
           <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <correct_dock>False</correct_dock>
-          <symbol>red_rectangle</symbol>
+          <correct_dock>True</correct_dock>
+          <symbol>yellow_triangle</symbol>
         </bay>
         <bay>
           <name>bay2</name>
@@ -579,8 +579,8 @@
           <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <correct_dock>True</correct_dock>
-          <symbol>blue_triangle</symbol>
+          <correct_dock>False</correct_dock>
+          <symbol>blue_cross</symbol>
         </bay>
         <bay>
           <name>bay3</name>
@@ -589,7 +589,7 @@
           <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
           <correct_dock>False</correct_dock>
-          <symbol>yellow_circle</symbol>
+          <symbol>green_rectangle</symbol>
         </bay>
       </bays>
       <!-- Shooting targets -->

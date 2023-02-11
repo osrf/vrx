@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="scan_dock_deliver_task">
+  <world name="practice_2022_scan_dock_deliver0_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -358,9 +358,9 @@
     </include>
 
     <include>
-      <name>robotx_light_buoy_rgb</name>
-      <pose>-528 186 0.32 0 0 0</pose>
-      <uri>robotx_light_buoy_rgb</uri>
+      <name>robotx_light_buoy_rgy</name>
+      <pose>-532 175 0.32 0 0 0</pose>
+      <uri>robotx_light_buoy_rgy</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -559,7 +559,7 @@
       <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>
       <color_1>red</color_1>
       <color_2>green</color_2>
-      <color_3>blue</color_3>
+      <color_3>yellow</color_3>
       <!-- Dock checkers -->
       <dock_bonus_points>15</dock_bonus_points>
       <correct_dock_bonus_points>5</correct_dock_bonus_points>
@@ -570,7 +570,7 @@
           <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <correct_dock>False</correct_dock>
+          <correct_dock>True</correct_dock>
           <symbol>red_rectangle</symbol>
         </bay>
         <bay>
@@ -579,7 +579,7 @@
           <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
           <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
           <min_dock_time>10.0</min_dock_time>
-          <correct_dock>True</correct_dock>
+          <correct_dock>False</correct_dock>
           <symbol>blue_triangle</symbol>
         </bay>
         <bay>

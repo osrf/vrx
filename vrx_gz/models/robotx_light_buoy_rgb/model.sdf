@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
-  <model name="robotx_light_buoy">
+  <model name="robotx_light_buoy_rgb">
     <pose>0 0 -0.0762 0 0 0</pose>
     <link name="base_link">
       <inertial>
@@ -53,9 +53,9 @@
           <color_2>green</color_2>
           <color_3>blue</color_3>
           <visuals>
-            <visual>robotx_light_buoy::base_link::panel_1</visual>
-            <visual>robotx_light_buoy::base_link::panel_2</visual>
-            <visual>robotx_light_buoy::base_link::panel_3</visual>
+            <visual>robotx_light_buoy_rgb::base_link::panel_1</visual>
+            <visual>robotx_light_buoy_rgb::base_link::panel_2</visual>
+            <visual>robotx_light_buoy_rgb::base_link::panel_3</visual>
           </visuals>
         </plugin>
       </visual>

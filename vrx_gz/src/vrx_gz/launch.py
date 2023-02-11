@@ -51,7 +51,10 @@ WILDLIFE_WORLDS = [
 ]
 
 SCAN_DOCK_DELIVER_WORLDS = [
-  'scan_dock_deliver_task'
+  'scan_dock_deliver_task',
+  'practice_2022_scan_dock_deliver0_task',
+  'practice_2022_scan_dock_deliver1_task',
+  'practice_2022_scan_dock_deliver2_task'
 ]
 
 def simulation(world_name, headless=False):
