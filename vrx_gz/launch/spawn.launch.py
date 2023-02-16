@@ -35,7 +35,12 @@ def parse_from_cli(context, world_name):
     y_rot = LaunchConfiguration('Y').perform(context)
     position = [x_pos, y_pos, z_pos, r_rot, p_rot, y_rot]
 
+    robot_urdf = LaunchConfiguration('urdf').perform(context)
+
     model = Model(robot_name, model_type, position)
+
+    if robot_urdf and robot_urdf != '':
+        model.set_urdf(robot_urdf)
 
     slot0_payload = LaunchConfiguration('slot0').perform(context)
     slot1_payload = LaunchConfiguration('slot1').perform(context)
@@ -215,6 +220,10 @@ def generate_launch_description():
             'slot7_rpy',
             default_value='0 0 0',
             description='Roll, Pitch, Yaw in degrees of payload mount'),
+        DeclareLaunchArgument(
+            'urdf',
+            default_value='',
+            description='URDF file of the wam-v model. '),
         # launch setup
         OpaqueFunction(function=launch)
     ])
