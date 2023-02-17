@@ -134,6 +134,27 @@ def ball_shooter(model_name):
         ros_type='std_msgs/msg/Empty',
         direction=BridgeDirection.ROS_TO_GZ)
 
+def thrust(model_name, side):
+    return Bridge(
+        gz_topic=f'{model_name}/thrusters/{side}/thrust',
+        ros_topic=f'thrusters/{side}/thrust',
+        gz_type='ignition.msgs.Double',
+        ros_type='std_msgs/msg/Float64',
+        direction=BridgeDirection.ROS_TO_GZ)
+
+def thrust_joint_pos(model_name, side):
+    # ROS naming policy indicates that first character of a name must be an alpha
+    # character. In the case below, the gz topic has the joint index 0 as the
+    # first char so the following topics fail to be created on the ROS end
+    # left_joint_topic = '/model/' + model_name + '/joint/left_chasis_engine_joint/0/cmd_pos'
+    # right_joint_topic = '/model/' + model_name + '/joint/right_chasis_engine_joint/0/cmd_pos'
+    # For now, use erb to generate unique topic names in model.sdf.erb
+    return Bridge(
+        gz_topic=f'{model_name}/thrusters/{side}/pos',
+        ros_topic=f'thrusters/{side}/pos',
+        gz_type='ignition.msgs.Double',
+        ros_type='std_msgs/msg/Float64',
+        direction=BridgeDirection.ROS_TO_GZ)
 
 def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type):
     bridges = []
@@ -173,6 +194,14 @@ def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type)
     elif 'BallShooter' in sensor_name:
         bridges = [
             ball_shooter(model_name),
+        ]
+    elif 'thruster_thrust_' in sensor_name:
+        bridges = [
+            thrust(model_name, sensor_type),
+        ]
+    elif 'thruster_rotate_' in sensor_name:
+        bridges = [
+            thrust_joint_pos(model_name, sensor_type),
         ]
 
     return bridges
