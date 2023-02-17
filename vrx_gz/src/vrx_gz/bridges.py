@@ -46,28 +46,6 @@ def cmd_vel(model_name):
         ros_type='geometry_msgs/msg/Twist',
         direction=BridgeDirection.ROS_TO_GZ)
 
-def thrust(model_name, side):
-    return Bridge(
-        gz_topic=f'{model_name}/thrusters/{side}/thrust',
-        ros_topic=f'thrusters/{side}/thrust',
-        gz_type='ignition.msgs.Double',
-        ros_type='std_msgs/msg/Float64',
-        direction=BridgeDirection.ROS_TO_GZ)
-
-def thrust_joint_pos(model_name, side):
-    # ROS naming policy indicates that first character of a name must be an alpha
-    # character. In the case below, the gz topic has the joint index 0 as the
-    # first char so the following topics fail to be created on the ROS end
-    # left_joint_topic = '/model/' + model_name + '/joint/left_chasis_engine_joint/0/cmd_pos'
-    # right_joint_topic = '/model/' + model_name + '/joint/right_chasis_engine_joint/0/cmd_pos'
-    # For now, use erb to generate unique topic names in model.sdf.erb
-    return Bridge(
-        gz_topic=f'{model_name}/thrusters/{side}/pos',
-        ros_topic=f'thrusters/{side}/pos',
-        gz_type='ignition.msgs.Double',
-        ros_type='std_msgs/msg/Float64',
-        direction=BridgeDirection.ROS_TO_GZ)
-
 def acoustic_pinger(model_name):
     return Bridge(
         gz_topic=f'{model_name}/pingers/pinger/range_bearing',
@@ -180,7 +158,6 @@ def gymkhana_blackbox_goal():
         ros_type='geometry_msgs/msg/PoseStamped',
         direction=BridgeDirection.GZ_TO_ROS)
 
-
 def gymkhana_blackbox_mean_pose_error():
     return Bridge(
         gz_topic=f'/vrx/gymkhana_blackbox/mean_pose_error',
@@ -188,7 +165,6 @@ def gymkhana_blackbox_mean_pose_error():
         gz_type='ignition.msgs.Float',
         ros_type='std_msgs/msg/Float32',
         direction=BridgeDirection.GZ_TO_ROS)
-
 
 def gymkhana_blackbox_pose_error():
     return Bridge(
