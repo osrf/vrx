@@ -28,8 +28,8 @@ from launch_ros.actions import Node
 import vrx_gz.bridges
 import vrx_gz.payload_bridges
 import pathlib
+import re
 import shutil
-
 import yaml
 
 UAVS = [
@@ -88,12 +88,6 @@ class Model:
             ])
         elif self.is_USV():
             bridges.extend([
-                # thrust cmd
-                vrx_gz.bridges.thrust(self.model_name, 'left'),
-                vrx_gz.bridges.thrust(self.model_name, 'right'),
-                # thrust joint pos cmd
-                vrx_gz.bridges.thrust_joint_pos(self.model_name, 'left'),
-                vrx_gz.bridges.thrust_joint_pos(self.model_name, 'right'),
                 # Acoustic pinger
                 vrx_gz.bridges.acoustic_pinger(self.model_name),
                 vrx_gz.bridges.set_acoustic_pinger(self.model_name),
@@ -295,6 +289,11 @@ class Model:
 
         return command, model_sdf
 
+    def name_from_plugin(self, plugin_sdf):
+        result = re.search(r"/*<name>(.*)<\/name>", plugin_sdf)
+        if (result):
+            return result.group(1)
+
     def payload_from_sdf(self, model_sdf):
         payload = {}
         root = sdf.Root()
@@ -307,7 +306,12 @@ class Model:
                 payload[sensor.name()] = [link.name(), sensor.type()]
         plugins = model.plugins()
         for plugin in plugins:
-            payload[plugin.name()] = ['', plugin.filename()]
+            if plugin.name() == 'gz::sim::systems::Thruster':
+                name = self.name_from_plugin(plugin.__str__())
+                payload['thruster_thrust_' + name] = [link.name(), name]
+            elif plugin.name() == 'gz::sim::systems::JointPositionController':
+                name = self.name_from_plugin(plugin.__str__())
+                payload['thruster_rotate_' + name] = [link.name(), name]
         return payload
 
 

@@ -38,7 +38,10 @@ GYMKHANA_WORLDS = [
 ]
 
 PERCEPTION_WORLDS = [
-  'perception_task'
+  'perception_task',
+  'practice_2022_perception0_task',
+  'practice_2022_perception1_task',
+  'practice_2022_perception2_task'
 ]
 
 STATIONKEEPING_WORLDS = [
