@@ -736,8 +736,8 @@
         </waypoint>
       </waypoints>
       <markers>
-        <scaling>0.2 0.2 2.0 </scaling>
-        <height>0.5 </height>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
       </markers>
 
       <task_info_topic>/vrx/task/info</task_info_topic>

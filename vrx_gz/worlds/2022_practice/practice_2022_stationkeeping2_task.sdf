@@ -490,6 +490,10 @@
       <release_topic>/vrx/release</release_topic>
       <!-- <head_error_on>false</head_error_on> -->
       <goal_pose>-33.7226643 150.673947 -1.0</goal_pose>
+      <markers>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
+      </markers>
     </plugin>
 
   </world>
