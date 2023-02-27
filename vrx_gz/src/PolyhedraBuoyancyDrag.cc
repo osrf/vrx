@@ -156,7 +156,8 @@ void BuoyancyObject::Load(const sim::Entity &_entity,
 /// \brief Private PolyhedraBuoyancyDrag data class.
 class PolyhedraBuoyancyDrag::Implementation
 {
-  /// \brief ToDo.
+  /// \brief Callback for receiving wave field updates.
+  /// \param[in] _msg The message containing all the wave field parameters.
   public: void OnWavefield(const gz::msgs::Param &_msg);
 
   /// \brief The wavefield.

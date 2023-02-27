@@ -79,10 +79,10 @@ class vrx::WavefieldPrivate
   /// \brief Recalculate all derived quantities from inputs.
   public: void Recalculate();
 
-  /// \brief
+  /// \brief Helper function.
   public: double DeepWaterDispersionToOmega(double _wavenumber) const;
 
-  /// \brief
+  /// \brief Helper function.
   public: double DeepWaterDispersionToWavenumber(double _omega) const;
 
   /// \brief Pierson-Moskowitz wave spectrum.

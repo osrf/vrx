@@ -74,6 +74,9 @@ namespace vrx
   ///
   /// ## SDF parameters in primary mode:
   ///
+  /// * `<topic>` (string, default: "/wavefield/parameters")
+  ///    The topic for publishing wave field updates.
+  ///
   /// * `<size>` (Vector2D, default: (1000 1000))
   ///   A two component vector for the size of the wave field in each direction.
   ///
@@ -120,6 +123,7 @@ namespace vrx
   /// ## SDF parameters in secondary mode:
   ///
   /// * `<topic>` (string, default: "/wavefield/parameters")
+  ///    The topic for receiving wave field updates.
   ///
   /// ## Example (primary mode)
   /// <wavefield>

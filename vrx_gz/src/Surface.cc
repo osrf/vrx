@@ -42,7 +42,8 @@ class vrx::Surface::Implementation
   /// \param[in] _sdf Pointer to the SDF.
   public: void ParsePoints(const std::shared_ptr<const sdf::Element> &_sdf);
 
-  /// \brief ToDo.
+  /// \brief Callback for receiving wave field updates.
+  /// \param[in] _msg The message containing all the wave field parameters.
   public: void OnWavefield(const msgs::Param &_msg);
 
   /// \brief The link entity.
