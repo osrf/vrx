@@ -15,6 +15,9 @@
  *
 */
 
+#include <gz/msgs/any.pb.h>
+#include <gz/msgs/param.pb.h>
+
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -63,6 +66,27 @@ class vrx::WavefieldPrivate
     gain(1.0)
   {
   }
+
+  /// \brief Populate a msg::Param with the current wavefield parameters.
+  public: void FillParameters();
+
+  /// \brief Recalculate for constant wavelength-amplitude ratio.
+  public: void RecalculateCwr();
+
+  /// \brief Recalculate for Pierson-Moskowitz spectrum sampling model.
+  public: void RecalculatePms();
+
+  /// \brief Recalculate all derived quantities from inputs.
+  public: void Recalculate();
+
+  /// \brief
+  public: double DeepWaterDispersionToOmega(double _wavenumber) const;
+
+  /// \brief
+  public: double DeepWaterDispersionToWavenumber(double _omega) const;
+
+  /// \brief Pierson-Moskowitz wave spectrum.
+  public: double Pm(double _omega, double _omegaP) const;
 
   /// \brief The size of the wavefield.
   public: math::Vector2d size;
@@ -133,163 +157,259 @@ class vrx::WavefieldPrivate
   /// \brief True when waves are present.
   public: bool active = false;
 
+  /// \brief Topic to publish/receive wavefield updates.
+  public: std::string topic = "/wavefield/parameters";
 
-  /// \brief Recalculate for constant wavelength-amplitude ratio
-  public: void RecalculateCwr()
-  {
-    // Normalize direction
-    this->direction.Normalize();
-
-    // Derived mean values
-    this->angularFrequency = 2.0 * M_PI / this->period;
-    this->wavenumber = \
-      this->DeepWaterDispersionToWavenumber(this->angularFrequency);
-    this->wavelength = 2.0 * M_PI / this->wavenumber;
-
-    // Update components
-    this->angularFrequencies.clear();
-    this->amplitudes.clear();
-    this->phases.clear();
-    this->wavenumbers.clear();
-    this->steepnesses.clear();
-    this->directions.clear();
-
-    for (size_t i = 0; i < this->number; ++i)
-    {
-      const int n = i - this->number / 2;
-      const double scaleFactor = std::pow(this->scale, n);
-      const double a = scaleFactor * this->amplitude;
-      const double k = this->wavenumber / scaleFactor;
-      const double omega = this->DeepWaterDispersionToOmega(k);
-      const double phi = this->phase;
-      double q = 0.0;
-      if (!math::equal(a, 0.0))
-      {
-        q = std::min(1.0, this->steepness / (a * k * this->number));
-      }
-
-      this->amplitudes.push_back(a);
-      this->angularFrequencies.push_back(omega);
-      this->phases.push_back(phi);
-      this->steepnesses.push_back(q);
-      this->wavenumbers.push_back(k);
-
-      // Direction
-      const double c = std::cos(n * this->angle);
-      const double s = std::sin(n * this->angle);
-
-      const math::Vector2d d(
-        c * this->direction.X() - s * this->direction.Y(),
-        s * this->direction.X() + c * this->direction.Y());
-      directions.push_back(d);
-    }
-  }
-
-  // \brief Pierson-Moskowitz wave spectrum
-  public: double pm(double _omega, double _omegaP)
-  {
-    double alpha = 0.0081;
-    double g = 9.81;
-    return alpha * std::pow(g, 2.0) / std::pow(_omega, 5.0) * \
-      std::exp(-(5.0 / 4.0) * std::pow(_omegaP / _omega, 4.0));
-  }
-
-  /// \brief Recalculate for Pierson-Moskowitz spectrum sampling model
-  public: void RecalculatePms()
-  {
-    // Normalize direction
-    this->direction.Normalize();
-
-    // Derived mean values
-    this->angularFrequency = 2.0 * M_PI / this->period;
-    this->wavenumber = \
-      this->DeepWaterDispersionToWavenumber(this->angularFrequency);
-    this->wavelength = 2.0 * M_PI / this->wavenumber;
-
-    // Update components
-    this->angularFrequencies.clear();
-    this->amplitudes.clear();
-    this->phases.clear();
-    this->wavenumbers.clear();
-    this->steepnesses.clear();
-    this->directions.clear();
-
-    // Vector for spaceing
-    std::vector<double> omegaSpacing;
-    omegaSpacing.push_back(this->angularFrequency * (1.0 - 1.0 / this->scale));
-    omegaSpacing.push_back(this->angularFrequency * \
-                            (this->scale - 1.0 / this->scale) / 2.0);
-    omegaSpacing.push_back(this->angularFrequency * (this->scale - 1.0));
-
-    for (size_t i = 0; i < this->number; ++i)
-    {
-      const int n = i - 1;
-      const double scaleFactor = std::pow(this->scale, n);
-      const double omega = this->angularFrequency * scaleFactor;
-      const double pms = pm(omega, this->angularFrequency);
-      const double a = this->gain * std::sqrt(2.0 * pms * omegaSpacing[i]);
-      const double k = this->DeepWaterDispersionToWavenumber(omega);
-      const double phi = this->phase;
-      double q = 0.0;
-      if (!math::equal(a, 0.0))
-      {
-        q = std::min(1.0, this->steepness / (a * k * this->number));
-      }
-
-      this->amplitudes.push_back(a);
-      this->angularFrequencies.push_back(omega);
-      this->phases.push_back(phi);
-      this->steepnesses.push_back(q);
-      this->wavenumbers.push_back(k);
-
-      // Direction
-      const double c = std::cos(n * this->angle);
-      const double s = std::sin(n * this->angle);
-
-      const math::Vector2d d(
-        c * this->direction.X() - s * this->direction.Y(),
-        s * this->direction.X() + c * this->direction.Y());
-      directions.push_back(d);
-    }
-  }
-
-  /// \brief Recalculate all derived quantities from inputs.
-  public: void Recalculate()
-  {
-    if (!this->model.compare("PMS"))
-    {
-      gzmsg << "Using Pierson-Moskowitz spectrum sampling wavefield model "
-            << std::endl;
-      this->RecalculatePms();
-    }
-    else if (!this->model.compare("CWR"))
-    {
-      gzmsg << "Using Constant wavelength-ampltude ratio wavefield model "
-            << std::endl;
-      this->RecalculateCwr();
-    }
-    else
-    {
-      gzwarn << "Wavefield model specified as <" << this->model
-             << "> which is not one of the two supported wavefield models: "
-             << "PMS or CWR!!!" << std::endl;
-    }
-  }
-
-  /////////////////////////////////////////////////
-  private: double DeepWaterDispersionToOmega(double _wavenumber)
-  {
-    const double g = std::fabs(-9.8);
-    return std::sqrt(g * _wavenumber);
-  }
-
-  /////////////////////////////////////////////////
-  private: double DeepWaterDispersionToWavenumber(double _omega)
-  {
-    const double g = std::fabs(-9.8);
-    return _omega * _omega / g;
-  }
+  /// \brief A msgs::Param containing all parameters. This is useful to
+  /// communicate all wavefield parameters via Transport.
+  public: msgs::Param params;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+void WavefieldPrivate::RecalculateCwr()
+{
+  // Normalize direction
+  this->direction.Normalize();
+
+  // Derived mean values
+  this->angularFrequency = 2.0 * M_PI / this->period;
+  this->wavenumber = \
+    this->DeepWaterDispersionToWavenumber(this->angularFrequency);
+  this->wavelength = 2.0 * M_PI / this->wavenumber;
+
+  // Update components
+  this->angularFrequencies.clear();
+  this->amplitudes.clear();
+  this->phases.clear();
+  this->wavenumbers.clear();
+  this->steepnesses.clear();
+  this->directions.clear();
+
+  for (size_t i = 0; i < this->number; ++i)
+  {
+    const int n = i - this->number / 2;
+    const double scaleFactor = std::pow(this->scale, n);
+    const double a = scaleFactor * this->amplitude;
+    const double k = this->wavenumber / scaleFactor;
+    const double omega = this->DeepWaterDispersionToOmega(k);
+    const double phi = this->phase;
+    double q = 0.0;
+    if (!math::equal(a, 0.0))
+    {
+      q = std::min(1.0, this->steepness / (a * k * this->number));
+    }
+
+    this->amplitudes.push_back(a);
+    this->angularFrequencies.push_back(omega);
+    this->phases.push_back(phi);
+    this->steepnesses.push_back(q);
+    this->wavenumbers.push_back(k);
+
+    // Direction
+    const double c = std::cos(n * this->angle);
+    const double s = std::sin(n * this->angle);
+
+    const math::Vector2d d(
+      c * this->direction.X() - s * this->direction.Y(),
+      s * this->direction.X() + c * this->direction.Y());
+    directions.push_back(d);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+double WavefieldPrivate::Pm(double _omega, double _omegaP) const
+{
+  double alpha = 0.0081;
+  double g = 9.81;
+  return alpha * std::pow(g, 2.0) / std::pow(_omega, 5.0) * \
+    std::exp(-(5.0 / 4.0) * std::pow(_omegaP / _omega, 4.0));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void WavefieldPrivate::RecalculatePms()
+{
+  // Normalize direction
+  this->direction.Normalize();
+
+  // Derived mean values
+  this->angularFrequency = 2.0 * M_PI / this->period;
+  this->wavenumber = \
+    this->DeepWaterDispersionToWavenumber(this->angularFrequency);
+  this->wavelength = 2.0 * M_PI / this->wavenumber;
+
+  // Update components
+  this->angularFrequencies.clear();
+  this->amplitudes.clear();
+  this->phases.clear();
+  this->wavenumbers.clear();
+  this->steepnesses.clear();
+  this->directions.clear();
+
+  // Vector for spaceing
+  std::vector<double> omegaSpacing;
+  omegaSpacing.push_back(this->angularFrequency * (1.0 - 1.0 / this->scale));
+  omegaSpacing.push_back(this->angularFrequency * \
+                          (this->scale - 1.0 / this->scale) / 2.0);
+  omegaSpacing.push_back(this->angularFrequency * (this->scale - 1.0));
+
+  for (size_t i = 0; i < this->number; ++i)
+  {
+    const int n = i - 1;
+    const double scaleFactor = std::pow(this->scale, n);
+    const double omega = this->angularFrequency * scaleFactor;
+    const double pms = this->Pm(omega, this->angularFrequency);
+    const double a = this->gain * std::sqrt(2.0 * pms * omegaSpacing[i]);
+    const double k = this->DeepWaterDispersionToWavenumber(omega);
+    const double phi = this->phase;
+    double q = 0.0;
+    if (!math::equal(a, 0.0))
+    {
+      q = std::min(1.0, this->steepness / (a * k * this->number));
+    }
+
+    this->amplitudes.push_back(a);
+    this->angularFrequencies.push_back(omega);
+    this->phases.push_back(phi);
+    this->steepnesses.push_back(q);
+    this->wavenumbers.push_back(k);
+
+    // Direction
+    const double c = std::cos(n * this->angle);
+    const double s = std::sin(n * this->angle);
+
+    const math::Vector2d d(
+      c * this->direction.X() - s * this->direction.Y(),
+      s * this->direction.X() + c * this->direction.Y());
+    directions.push_back(d);
+  }
+}
+
+/////////////////////////////////////////////////
+void WavefieldPrivate::Recalculate()
+{
+  if (!this->model.compare("PMS"))
+  {
+    gzmsg << "Using Pierson-Moskowitz spectrum sampling wavefield model "
+          << std::endl;
+    this->RecalculatePms();
+  }
+  else if (!this->model.compare("CWR"))
+  {
+    gzmsg << "Using Constant wavelength-ampltude ratio wavefield model "
+          << std::endl;
+    this->RecalculateCwr();
+  }
+  else
+  {
+    gzwarn << "Wavefield model specified as <" << this->model
+           << "> which is not one of the two supported wavefield models: "
+           << "PMS or CWR!!!" << std::endl;
+  }
+}
+
+/////////////////////////////////////////////////
+double WavefieldPrivate::DeepWaterDispersionToOmega(double _wavenumber)
+  const
+{
+  const double g = std::fabs(-9.8);
+  return std::sqrt(g * _wavenumber);
+}
+
+/////////////////////////////////////////////////
+double WavefieldPrivate::DeepWaterDispersionToWavenumber(double _omega)
+   const
+{
+  const double g = std::fabs(-9.8);
+  return _omega * _omega / g;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void WavefieldPrivate::FillParameters()
+{
+  this->params.mutable_params()->clear();
+  auto *params = this->params.mutable_params();
+
+  // size.
+  gz::msgs::Any sizeValue;
+  sizeValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_VECTOR3D);
+  sizeValue.mutable_vector3d_value()->set_x(this->size.X());
+  sizeValue.mutable_vector3d_value()->set_y(this->size.Y());
+  (*params)["size"] = sizeValue;
+
+  // cell_count
+  gz::msgs::Any cellCountValue;
+  cellCountValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_VECTOR3D);
+  cellCountValue.mutable_vector3d_value()->set_x(this->cellCount.X());
+  cellCountValue.mutable_vector3d_value()->set_y(this->cellCount.Y());
+  (*params)["cell_count"] = cellCountValue;
+
+  // number
+  gz::msgs::Any numberValue;
+  numberValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_INT32);
+  numberValue.set_int_value(this->number);
+  (*params)["number"] = numberValue;
+
+  // scale
+  gz::msgs::Any scaleValue;
+  scaleValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  scaleValue.set_double_value(this->scale);
+  (*params)["scale"] = scaleValue;
+
+  // angle
+  gz::msgs::Any angleValue;
+  angleValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  angleValue.set_double_value(this->angle);
+  (*params)["angle"] = angleValue;
+
+  // steepness
+  gz::msgs::Any steepnessValue;
+  steepnessValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  steepnessValue.set_double_value(this->steepness);
+  (*params)["steepness"] = steepnessValue;
+
+  // amplitude
+  gz::msgs::Any amplitudeValue;
+  amplitudeValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  amplitudeValue.set_double_value(this->amplitude);
+  (*params)["amplitude"] = amplitudeValue;
+
+  // period
+  gz::msgs::Any periodValue;
+  periodValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  periodValue.set_double_value(this->period);
+  (*params)["period"] = periodValue;
+
+  // phase
+  gz::msgs::Any phaseValue;
+  phaseValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  phaseValue.set_double_value(this->phase);
+  (*params)["phase"] = phaseValue;
+
+  // direction.
+  gz::msgs::Any directionValue;
+  directionValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_VECTOR3D);
+  directionValue.mutable_vector3d_value()->set_x(this->direction.X());
+  directionValue.mutable_vector3d_value()->set_y(this->direction.Y());
+  (*params)["direction"] = directionValue;
+
+  // model
+  gz::msgs::Any modelValue;
+  modelValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_STRING);
+  modelValue.set_string_value(this->model);
+  (*params)["model"] = modelValue;
+
+  // gain
+  gz::msgs::Any gainValue;
+  gainValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  gainValue.set_double_value(this->gain);
+  (*params)["gain"] = gainValue;
+
+  // tau
+  gz::msgs::Any tauValue;
+  tauValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  tauValue.set_double_value(this->tau);
+  (*params)["tau"] = tauValue;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 Wavefield::Wavefield()
@@ -312,6 +432,8 @@ void Wavefield::Load(const std::shared_ptr<const sdf::Element> &_sdf)
   auto ptr = const_cast<sdf::Element *>(_sdf.get());
   auto sdfWavefield = ptr->GetElement("wavefield");
 
+  this->data->topic = sdfWavefield->Get<std::string>("topic",
+    this->data->topic).first;
   this->data->size = sdfWavefield->Get<math::Vector2d>("size",
     this->data->size).first;
   this->data->cellCount = sdfWavefield->Get<math::Vector2d>("cell_count",
@@ -340,9 +462,43 @@ void Wavefield::Load(const std::shared_ptr<const sdf::Element> &_sdf)
 
     this->data->Recalculate();
   }
-  this->DebugPrint();
 
+  this->data->FillParameters();
+  this->DebugPrint();
   this->data->active = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void Wavefield::Load(const msgs::Param &_msg)
+{
+  auto params = _msg.params();
+
+  this->data->size = {params["size"].vector3d_value().x(),
+    params["size"].vector3d_value().y()};
+  this->data->cellCount = {params["cell_count"].vector3d_value().x(),
+    params["cell_count"].vector3d_value().y()};
+  this->data->number = params["number"].int_value();
+  this->data->scale = params["scale"].double_value();
+  this->data->angle = params["angle"].double_value();
+  this->data->steepness = params["steepness"].double_value();
+  this->data->amplitude = params["amplitude"].double_value();
+  this->data->period = params["period"].double_value();
+  this->data->phase = params["phase"].double_value();
+  this->data->direction = {params["direction"].vector3d_value().x(),
+    params["direction"].vector3d_value().y()};
+  this->data->model = params["model"].string_value();
+  this->data->gain = params["gain"].double_value();
+  this->data->tau = params["tau"].double_value();
+
+  this->data->FillParameters();
+  this->data->Recalculate();
+  this->data->active = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+std::string Wavefield::Topic() const
+{
+  return this->data->topic;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -699,4 +855,10 @@ double Wavefield::ComputeDepthDirectly(const math::Vector3d &_point,
   // const double h = pz - _point.Z();
   const double h = pz;
   return h;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+msgs::Param Wavefield::Parameters() const
+{
+  return this->data->params;
 }

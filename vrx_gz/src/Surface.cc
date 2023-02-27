@@ -14,21 +14,20 @@
  * limitations under the License.
  *
  */
-#include <gz/msgs/wrench.pb.h>
+#include <gz/msgs/param.pb.h>
 #include <chrono>
+#include <mutex>
 #include <string>
-#include <unordered_map>
 #include <gz/common/Profiler.hh>
 #include <gz/math/Vector3.hh>
 #include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
-#include "gz/sim/components/Inertial.hh"
-#include "gz/sim/components/Pose.hh"
 #include "gz/sim/Link.hh"
 #include "gz/sim/Model.hh"
 #include "gz/sim/Util.hh"
 #include "gz/sim/World.hh"
+#include "gz/transport/Node.hh"
 
 #include "Surface.hh"
 #include "Wavefield.hh"
@@ -42,6 +41,9 @@ class vrx::Surface::Implementation
   /// \brief Parse the points via SDF.
   /// \param[in] _sdf Pointer to the SDF.
   public: void ParsePoints(const std::shared_ptr<const sdf::Element> &_sdf);
+
+  /// \brief ToDo.
+  public: void OnWavefield(const msgs::Param &_msg);
 
   /// \brief The link entity.
   public: sim::Link link{sim::kNullEntity};
@@ -68,6 +70,12 @@ class vrx::Surface::Implementation
 
   /// \brief The wavefield.
   public: Wavefield wavefield;
+
+  /// \brief A node for receiving wavefield updates.
+  public: transport::Node node;
+
+  /// \brief Mutex to protect the wavefield.
+  public: std::mutex mutex;
 };
 
 //////////////////////////////////////////////////
@@ -96,50 +104,14 @@ void Surface::Implementation::ParsePoints(
     // Parse the next point.
     pointElem = pointElem->GetNextElement("point");
   }
-
-
-
-
-
-  // if (!_sdf->HasElement("hull"))
-  //  return;
-
-  // auto ptr = const_cast<sdf::Element *>(_sdf.get());
-
-
-  // auto sdfHull = ptr->GetElement("hull");
-  // while (sdfHull)
-  // {
-  //   // We need the hull's name.
-  //   if (!sdfHull->HasElement("name"))
-  //     gzerr << "Unable to find <hull><name> element in SDF." << std::endl;
-
-  //   std::string name = sdfHull->Get<std::string>("name");
-
-  //   // We need at least one point.
-  //   if (!sdfHull->HasElement("point"))
-  //     gzerr << "Unable to find <hull><point> element in SDF." << std::endl;
-
-  //   auto pointElem = sdfHull->GetElement("point");
-  //   while (pointElem)
-  //   {
-  //     math::Vector3d point;
-  //     pointElem->GetValue()->Get<math::Vector3d>(point);
-  //     this->hulls[name].push_back(point);
-
-  //     // Parse the next point.
-  //     pointElem = pointElem->GetNextElement("point");
-  //   }
-
-  //   sdfHull = sdfHull->GetNextElement("hull");
-  // }
 }
 
 //////////////////////////////////////////////////
-double Surface::CircleSegment(double _r, double _h) const
+void Surface::Implementation::OnWavefield(const msgs::Param &_msg)
 {
-  return _r * _r * acos((_r -_h) / _r ) -
-    (_r - _h) * sqrt(2 * _r * _h - _h * _h);
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->wavefield.Load(_msg);
+  this->node.Unsubscribe(this->wavefield.Topic());
 }
 
 //////////////////////////////////////////////////
@@ -222,6 +194,10 @@ void Surface::Configure(const sim::Entity &_entity,
   gzdbg << "  <points>:" << std::endl;
   for (const auto &p : this->dataPtr->points)
     gzdbg << "    [" << p << "]" << std::endl;
+
+  // Subscribe to receive wavefield parameters.
+  this->dataPtr->node.Subscribe(this->dataPtr->wavefield.Topic(),
+    &Surface::Implementation::OnWavefield, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////
@@ -243,6 +219,8 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
   }
   const math::Vector3d kEuler = (*kPose).Rot().Euler();
   math::Quaternion vq(kEuler.X(), kEuler.Y(), kEuler.Z());
+
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   for (auto const &bpnt : this->dataPtr->points)
   {
@@ -323,16 +301,11 @@ double Surface::FluidDensity() const
 }
 
 //////////////////////////////////////////////////
-// double Surface::BuoyancyAtPoint(const sim::UpdateInfo &/*_info*/,
-//     const math::Vector3d &/*_point*/, const uint16_t _pointsPerHull,
-//     double _deltaZ,
-//     sim::EntityComponentManager &/*_ecm*/)
-// {
-//   // Buoyancy force at this point.
-//   return this->CircleSegment(this->dataPtr->hullRadius, _deltaZ) *
-//     this->dataPtr->hullLength / _pointsPerHull *
-//     -this->dataPtr->gravity.Z() * this->dataPtr->fluidDensity;
-// }
+double Surface::CircleSegment(double _r, double _h) const
+{
+  return _r * _r * acos((_r -_h) / _r ) -
+    (_r - _h) * sqrt(2 * _r * _h - _h * _h);
+}
 
 GZ_ADD_PLUGIN(Surface,
               sim::System,

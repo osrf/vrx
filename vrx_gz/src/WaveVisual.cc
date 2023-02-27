@@ -27,6 +27,7 @@
 #include <gz/rendering/Scene.hh>
 #include <gz/rendering/ShaderParams.hh>
 #include <gz/rendering/Visual.hh>
+#include <gz/transport/Node.hh>
 
 #include <sdf/Element.hh>
 
@@ -103,6 +104,12 @@ class vrx::WaveVisualPrivate
 
   /// \brief Shader param. Color of deep water.
   public: math::Color deepColor = math::Color(0.0f, 0.05f, 0.2f, 1.0f);
+
+  /// \brief Transport node.
+  public: transport::Node node;
+
+  /// \brief Transport parameters publisher.
+  public: transport::Node::Publisher pub;
 
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
@@ -214,6 +221,13 @@ void WaveVisual::Configure(const sim::Entity &_entity,
   this->dataPtr->connection =
       _eventMgr.Connect<sim::events::SceneUpdate>(
       std::bind(&WaveVisualPrivate::OnUpdate, this->dataPtr.get()));
+
+  // Advertise this service to provide the current wavefield parameters (1Hz).
+  transport::AdvertiseMessageOptions opts;
+  opts.SetMsgsPerSec(1u);
+  this->dataPtr->pub =
+    this->dataPtr->node.Advertise<msgs::Param>(this->dataPtr->wavefield.Topic(),
+      opts);
 }
 
 //////////////////////////////////////////////////
@@ -224,6 +238,9 @@ void WaveVisual::PreUpdate(
   GZ_PROFILE("WaveVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
+
+  // Publish the wavefield parameters.
+  this->dataPtr->pub.Publish(this->dataPtr->wavefield.Parameters());
 }
 
 //////////////////////////////////////////////////

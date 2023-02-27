@@ -18,6 +18,8 @@
 #ifndef VRX_WAVEFIELD_HH_
 #define VRX_WAVEFIELD_HH_
 
+#include <gz/msgs/param.pb.h>
+
 #include <memory>
 #include <vector>
 
@@ -33,8 +35,12 @@ namespace vrx
 
   /// \brief A class to generate a wave field.
   /// This is a port from https://github.com/srmainwaring/asv_wave_sim
+  /// with some modifications.
   ///
   /// It uses SDF to parametrize the waves.
+  ///
+  /// * `<topic> (string, default: "/wavefield/parameters))
+  ///   The topic to publish and receive wavefield parameters.
   ///
   /// ## Required system parameters
   ///
@@ -111,9 +117,18 @@ namespace vrx
     /// \param[in] _sdf The SDF Element tree containing the wavefield parameters
     public: void Load(const std::shared_ptr<const sdf::Element> &_sdf);
 
+    /// \brief Set the parameters from a message.
+    ///
+    /// \param[in] _msg The SDF Element tree containing the wavefield parameters
+    public: void Load(const gz::msgs::Param &_msg);
+
     /// \brief Is the wavefield loaded.
     /// \return True when the wavefield has been loaded or false otherwise.
     public: bool Active() const;
+
+    /// \brief The wavefield topic to publish/receive updates.
+    /// \return The topic name.
+    public: std::string Topic() const;
 
     /// \brief The number of wave components (3 max if visualisation required).
     public: size_t Number() const;
@@ -266,6 +281,10 @@ namespace vrx
     public: double ComputeDepthDirectly(const gz::math::Vector3d &_point,
                                         double _time,
                                         double _timeInit = 0);
+
+    /// \brief Get all the parameters in a single message.
+    /// \return A message with all the parameters.
+    public: gz::msgs::Param Parameters() const;
 
     /// \internal
     /// \brief Pointer to the class private data.

@@ -15,6 +15,7 @@
  *
 */
 
+#include <mutex>
 #include <string>
 #include <ostream>
 #include <vector>
@@ -26,6 +27,7 @@
 #include <gz/sim/World.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/math/Vector3.hh>
+#include "gz/transport/Node.hh"
 #include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
@@ -154,6 +156,9 @@ void BuoyancyObject::Load(const sim::Entity &_entity,
 /// \brief Private PolyhedraBuoyancyDrag data class.
 class PolyhedraBuoyancyDrag::Implementation
 {
+  /// \brief ToDo.
+  public: void OnWavefield(const gz::msgs::Param &_msg);
+
   /// \brief The wavefield.
   public: Wavefield wavefield;
 
@@ -177,7 +182,21 @@ class PolyhedraBuoyancyDrag::Implementation
 
   /// \brief The world's gravity [m/s^2].
   public: math::Vector3d gravity;
+
+  /// \brief A node for receiving wavefield updates.
+  public: transport::Node node;
+
+  /// \brief Mutex to protect the wavefield.
+  public: std::mutex mutex;
 };
+
+//////////////////////////////////////////////////
+void PolyhedraBuoyancyDrag::Implementation::OnWavefield(const msgs::Param &_msg)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->wavefield.Load(_msg);
+  this->node.Unsubscribe(this->wavefield.Topic());
+}
 
 //////////////////////////////////////////////////
 PolyhedraBuoyancyDrag::PolyhedraBuoyancyDrag()
@@ -241,6 +260,10 @@ void PolyhedraBuoyancyDrag::Configure(const sim::Entity &_entity,
     return;
   }
   this->dataPtr->gravity = *gravityOpt;
+
+  // Subscribe to receive wafefield parameters.
+  this->dataPtr->node.Subscribe(this->dataPtr->wavefield.Topic(),
+    &PolyhedraBuoyancyDrag::Implementation::OnWavefield, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////
@@ -251,6 +274,8 @@ void PolyhedraBuoyancyDrag::PreUpdate(const sim::UpdateInfo &_info,
 
   if (_info.paused)
     return;
+
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
 
   // Elapsed time since the last update.
   double dt;

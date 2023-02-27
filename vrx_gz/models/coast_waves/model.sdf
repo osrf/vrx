@@ -24,6 +24,7 @@
             </parameters>
           </shader>
           <wavefield>
+            <topic>/vrx/wavefield/parameters</topic>
             <size>6000 6000</size>
             <cell_count>300 300</cell_count>
             <wave>
@@ -31,7 +32,7 @@
               <period>5.0</period>
               <number>3</number>
               <scale>1.1</scale>
-              <gain>0.3</gain>
+              <gain>0.01</gain>
               <direction>1 0</direction>
               <angle>0.4</angle>
               <tau>2.0</tau>
