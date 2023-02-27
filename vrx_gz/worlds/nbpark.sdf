@@ -348,7 +348,7 @@
 
     <include>
       <name>Coast Waves</name>
-      <pose>0 0 2.548 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
       <uri>coast_waves</uri>
     </include>
 
