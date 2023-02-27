@@ -39,10 +39,40 @@ namespace vrx
   ///
   /// It uses SDF to parametrize the waves.
   ///
-  /// * `<topic> (string, default: "/wavefield/parameters))
-  ///   The topic to publish and receive wavefield parameters.
+  /// ## Modes of operation: The class is designed to operate in two modes:
   ///
-  /// ## Required system parameters
+  /// 1. Primary: The plugin reads all the wavefield parameters from SDF.
+  /// 2. Secondary: The plugin subscribes to a topic and receives the wavefield
+  ///               parameters via a message.
+  ///
+  /// Note that the top level plugins using this class are responsible for
+  /// publishing or subscribing to the wavefield topic. When configured in
+  /// primary mode, you should use from the top level plugin:
+  ///
+  ///    Load(const std::shared_ptr<const sdf::Element> &_sdf)
+  ///
+  /// and:
+  ///
+  ///    Parameters()
+  ///
+  /// to read the current set of parameters and periodically send the wavefield
+  /// parameters to other plugins configured in secondary mode.
+  ///
+  /// When configured in secondary mode, you should use from the top level
+  /// plugin:
+  ///
+  ///    Load(const std::shared_ptr<const sdf::Element> &_sdf)
+  ///
+  /// and:
+  ///
+  ///    Load(const msgs::Param &_msg)
+  ///
+  /// to parse the topic and subscribe to the wavefield parameter updates.
+  /// When the parameters are received, the call to the latter version of Load()
+  /// will update the wavefield parameters.
+  ///
+  ///
+  /// ## SDF parameters in primary mode:
   ///
   /// * `<size>` (Vector2D, default: (1000 1000))
   ///   A two component vector for the size of the wave field in each direction.
@@ -87,7 +117,11 @@ namespace vrx
   /// * `<tau>` (double, default: 1.0)
   ///   Time constant used to gradually increase wavefield at startup.
   ///
-  /// ## Example
+  /// ## SDF parameters in secondary mode:
+  ///
+  /// * `<topic>` (string, default: "/wavefield/parameters")
+  ///
+  /// ## Example (primary mode)
   /// <wavefield>
   ///   <size>1000 1000</size>
   ///   <cell_count>50 50</cell_count>
@@ -103,6 +137,11 @@ namespace vrx
   ///     <amplitude>0.0</amplitude>
   ///     <steepness>0.0</steepness>
   ///   </wave>
+  /// </wavefield>
+  ///
+  /// ## Example (secondary mode)
+  /// <wavefield>
+  ///   <topic>/vrx/wavefield/parameters</topic>
   /// </wavefield>
   class Wavefield
   {
