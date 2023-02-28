@@ -170,6 +170,9 @@ class ScoringPlugin::Implementation
 
   /// \brief Event manager for exiting the simulation.
   public: sim::EventManager *eventManager{nullptr};
+
+  /// \brief Whether we have announced the VRX_EXIT_ON_COMPLETION warning.
+  public: bool exitWarningAnnounced = false;
 };
 
 //////////////////////////////////////////////////
@@ -354,11 +357,12 @@ void ScoringPlugin::Implementation::Exit()
     // shutdown gazebo
     this->eventManager->Emit<sim::events::Stop>();
   }
-  else
+  else if (!this->exitWarningAnnounced)
   {
     gzerr << "VRX_EXIT_ON_COMPLETION and <per_plugin_exit_on_completion> "
           << "both not set, will not shutdown on ScoringPlugin::Exit()"
           << std::endl;
+    this->exitWarningAnnounced = true;
   }
   return;
 }
