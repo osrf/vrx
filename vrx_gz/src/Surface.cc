@@ -112,7 +112,6 @@ void Surface::Implementation::OnWavefield(const msgs::Param &_msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
   this->wavefield.Load(_msg);
-  this->node.Unsubscribe(this->wavefield.Topic());
 }
 
 //////////////////////////////////////////////////
