@@ -15,6 +15,8 @@
  *
  */
 
+#include <gz/msgs/param.pb.h>
+
 #include <chrono>
 #include <list>
 #include <mutex>
@@ -108,11 +110,12 @@ class vrx::WaveVisualPrivate
   /// \brief Transport node.
   public: transport::Node node;
 
-  /// \brief Transport parameters publisher.
-  public: transport::Node::Publisher pub;
-
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
+
+  /// \brief Callback for receiving wave field updates.
+  /// \param[in] _msg The message containing all the wave field parameters.
+  public: void OnWavefield(const msgs::Param &_msg);
 };
 
 /////////////////////////////////////////////////
@@ -222,12 +225,9 @@ void WaveVisual::Configure(const sim::Entity &_entity,
       _eventMgr.Connect<sim::events::SceneUpdate>(
       std::bind(&WaveVisualPrivate::OnUpdate, this->dataPtr.get()));
 
-  // Advertise this service to provide the current wavefield parameters (1Hz).
-  transport::AdvertiseMessageOptions opts;
-  opts.SetMsgsPerSec(1u);
-  this->dataPtr->pub =
-    this->dataPtr->node.Advertise<msgs::Param>(this->dataPtr->wavefield.Topic(),
-      opts);
+  // Subscribe to receive the wavefield parameters.
+  this->dataPtr->node.Subscribe(this->dataPtr->wavefield.Topic(),
+    &WaveVisualPrivate::OnWavefield, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////
@@ -238,9 +238,6 @@ void WaveVisual::PreUpdate(
   GZ_PROFILE("WaveVisual::PreUpdate");
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   this->dataPtr->currentSimTime = _info.simTime;
-
-  // Publish the wavefield parameters.
-  this->dataPtr->pub.Publish(this->dataPtr->wavefield.Parameters());
 }
 
 //////////////////////////////////////////////////
@@ -300,6 +297,8 @@ void WaveVisualPrivate::OnUpdate()
 
   if (!this->material)
     return;
+
+  std::lock_guard<std::mutex> lock(this->mutex);
 
   // params that only need to be set once
   if (!this->paramsSet)
@@ -426,13 +425,20 @@ void WaveVisualPrivate::OnUpdate()
 
   // time variables need to be updated every iteration
   {
-    std::lock_guard<std::mutex> lock(this->mutex);
     float floatValue = (std::chrono::duration_cast<std::chrono::nanoseconds>(
         this->currentSimTime).count()) * 1e-9;
     rendering::ShaderParamsPtr params;
     params = this->material->VertexShaderParams();
     (*params)["t"] = floatValue;
   }
+}
+
+//////////////////////////////////////////////////
+void WaveVisualPrivate::OnWavefield(const msgs::Param &_msg)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->wavefield.Load(_msg);
+  this->node.Unsubscribe(this->wavefield.Topic());
 }
 
 GZ_ADD_PLUGIN(vrx::WaveVisual,
