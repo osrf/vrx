@@ -45,7 +45,6 @@ namespace vrx
   ///     the human-readable representation of a protobuf message as used by
   ///     `gz topic` for publishing messages.
   ///
-  /// ## Optional system parameters
   /// ## Example
   /// <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
   ///   <message type="gz.msgs.Param" topic="/vrx/wavefield/parameters"
