@@ -289,14 +289,10 @@ void WavefieldPrivate::Recalculate()
 {
   if (!this->model.compare("PMS"))
   {
-    gzmsg << "Using Pierson-Moskowitz spectrum sampling wavefield model "
-          << std::endl;
     this->RecalculatePms();
   }
   else if (!this->model.compare("CWR"))
   {
-    gzmsg << "Using Constant wavelength-ampltude ratio wavefield model "
-          << std::endl;
     this->RecalculateCwr();
   }
   else
