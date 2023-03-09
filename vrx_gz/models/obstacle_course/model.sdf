@@ -23,20 +23,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -61,20 +48,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -99,20 +73,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -137,20 +98,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -175,20 +123,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -213,20 +148,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -251,20 +173,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -289,20 +198,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -327,20 +223,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -365,20 +248,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -403,20 +273,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -440,20 +297,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
@@ -479,20 +323,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -517,20 +348,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>
@@ -555,20 +373,7 @@
           </geometry>
         </buoyancy>
         <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
+          <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
     </include>

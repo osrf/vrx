@@ -18,6 +18,8 @@
 #ifndef VRX_WAVEFIELD_HH_
 #define VRX_WAVEFIELD_HH_
 
+#include <gz/msgs/param.pb.h>
+
 #include <memory>
 #include <vector>
 
@@ -33,10 +35,47 @@ namespace vrx
 
   /// \brief A class to generate a wave field.
   /// This is a port from https://github.com/srmainwaring/asv_wave_sim
+  /// with some modifications.
   ///
   /// It uses SDF to parametrize the waves.
   ///
-  /// ## Required system parameters
+  /// ## Modes of operation: The class is designed to operate in two modes:
+  ///
+  /// 1. Primary: The plugin reads all the wavefield parameters from SDF.
+  /// 2. Secondary: The plugin subscribes to a topic and receives the wavefield
+  ///               parameters via a message.
+  ///
+  /// Note that the top level plugins using this class are responsible for
+  /// publishing or subscribing to the wavefield topic. When configured in
+  /// primary mode, you should use from the top level plugin:
+  ///
+  ///    Load(const std::shared_ptr<const sdf::Element> &_sdf)
+  ///
+  /// and:
+  ///
+  ///    Parameters()
+  ///
+  /// to read the current set of parameters and periodically send the wavefield
+  /// parameters to other plugins configured in secondary mode.
+  ///
+  /// When configured in secondary mode, you should use from the top level
+  /// plugin:
+  ///
+  ///    Load(const std::shared_ptr<const sdf::Element> &_sdf)
+  ///
+  /// and:
+  ///
+  ///    Load(const msgs::Param &_msg)
+  ///
+  /// to parse the topic and subscribe to the wavefield parameter updates.
+  /// When the parameters are received, the call to the latter version of Load()
+  /// will update the wavefield parameters.
+  ///
+  ///
+  /// ## SDF parameters in primary mode:
+  ///
+  /// * `<topic>` (string, default: "/wavefield/parameters")
+  ///    The topic for publishing wave field updates.
   ///
   /// * `<size>` (Vector2D, default: (1000 1000))
   ///   A two component vector for the size of the wave field in each direction.
@@ -81,7 +120,12 @@ namespace vrx
   /// * `<tau>` (double, default: 1.0)
   ///   Time constant used to gradually increase wavefield at startup.
   ///
-  /// ## Example
+  /// ## SDF parameters in secondary mode:
+  ///
+  /// * `<topic>` (string, default: "/wavefield/parameters")
+  ///    The topic for receiving wave field updates.
+  ///
+  /// ## Example (primary mode)
   /// <wavefield>
   ///   <size>1000 1000</size>
   ///   <cell_count>50 50</cell_count>
@@ -98,6 +142,11 @@ namespace vrx
   ///     <steepness>0.0</steepness>
   ///   </wave>
   /// </wavefield>
+  ///
+  /// ## Example (secondary mode)
+  /// <wavefield>
+  ///   <topic>/vrx/wavefield/parameters</topic>
+  /// </wavefield>
   class Wavefield
   {
     /// \brief Constructor.
@@ -111,9 +160,18 @@ namespace vrx
     /// \param[in] _sdf The SDF Element tree containing the wavefield parameters
     public: void Load(const std::shared_ptr<const sdf::Element> &_sdf);
 
+    /// \brief Set the parameters from a message.
+    ///
+    /// \param[in] _msg The SDF Element tree containing the wavefield parameters
+    public: void Load(const gz::msgs::Param &_msg);
+
     /// \brief Is the wavefield loaded.
     /// \return True when the wavefield has been loaded or false otherwise.
     public: bool Active() const;
+
+    /// \brief The wavefield topic to publish/receive updates.
+    /// \return The topic name.
+    public: std::string Topic() const;
 
     /// \brief The number of wave components (3 max if visualisation required).
     public: size_t Number() const;
@@ -266,6 +324,10 @@ namespace vrx
     public: double ComputeDepthDirectly(const gz::math::Vector3d &_point,
                                         double _time,
                                         double _timeInit = 0);
+
+    /// \brief Get all the parameters in a single message.
+    /// \return A message with all the parameters.
+    public: gz::msgs::Param Parameters() const;
 
     /// \internal
     /// \brief Pointer to the class private data.
