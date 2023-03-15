@@ -98,6 +98,7 @@ install(
 
 # Plugins
 list(APPEND VRX_GZ_PLUGINS
+  AcousticPerceptionScoringPlugin
   AcousticPingerPlugin
   BallShooterPlugin
   LightBuoyPlugin
