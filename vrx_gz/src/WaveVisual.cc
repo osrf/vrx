@@ -15,6 +15,8 @@
  *
  */
 
+#include <gz/msgs/param.pb.h>
+
 #include <chrono>
 #include <list>
 #include <mutex>
@@ -27,6 +29,7 @@
 #include <gz/rendering/Scene.hh>
 #include <gz/rendering/ShaderParams.hh>
 #include <gz/rendering/Visual.hh>
+#include <gz/transport/Node.hh>
 
 #include <sdf/Element.hh>
 
@@ -104,8 +107,15 @@ class vrx::WaveVisualPrivate
   /// \brief Shader param. Color of deep water.
   public: math::Color deepColor = math::Color(0.0f, 0.05f, 0.2f, 1.0f);
 
+  /// \brief Transport node.
+  public: transport::Node node;
+
   /// \brief All rendering operations must happen within this call
   public: void OnUpdate();
+
+  /// \brief Callback for receiving wave field updates.
+  /// \param[in] _msg The message containing all the wave field parameters.
+  public: void OnWavefield(const msgs::Param &_msg);
 };
 
 /////////////////////////////////////////////////
@@ -214,6 +224,10 @@ void WaveVisual::Configure(const sim::Entity &_entity,
   this->dataPtr->connection =
       _eventMgr.Connect<sim::events::SceneUpdate>(
       std::bind(&WaveVisualPrivate::OnUpdate, this->dataPtr.get()));
+
+  // Subscribe to receive the wavefield parameters.
+  this->dataPtr->node.Subscribe(this->dataPtr->wavefield.Topic(),
+    &WaveVisualPrivate::OnWavefield, this->dataPtr.get());
 }
 
 //////////////////////////////////////////////////
@@ -283,6 +297,8 @@ void WaveVisualPrivate::OnUpdate()
 
   if (!this->material)
     return;
+
+  std::lock_guard<std::mutex> lock(this->mutex);
 
   // params that only need to be set once
   if (!this->paramsSet)
@@ -409,13 +425,19 @@ void WaveVisualPrivate::OnUpdate()
 
   // time variables need to be updated every iteration
   {
-    std::lock_guard<std::mutex> lock(this->mutex);
     float floatValue = (std::chrono::duration_cast<std::chrono::nanoseconds>(
         this->currentSimTime).count()) * 1e-9;
     rendering::ShaderParamsPtr params;
     params = this->material->VertexShaderParams();
     (*params)["t"] = floatValue;
   }
+}
+
+//////////////////////////////////////////////////
+void WaveVisualPrivate::OnWavefield(const msgs::Param &_msg)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->wavefield.Load(_msg);
 }
 
 GZ_ADD_PLUGIN(vrx::WaveVisual,

@@ -105,6 +105,7 @@ list(APPEND VRX_GZ_PLUGINS
   GymkhanaScoringPlugin
   PerceptionScoringPlugin
   PlacardPlugin
+  PublisherPlugin
   ScanDockScoringPlugin
   SimpleHydrodynamics
   StationkeepingScoringPlugin
