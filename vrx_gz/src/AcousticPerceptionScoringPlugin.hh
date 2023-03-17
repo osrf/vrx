@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2023 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,22 @@
 
 namespace vrx
 {
-  /// \brief ToDo
+  /// \brief A plugin for computing the score of the acoustic perception task.
+  ///  This plugin derives from the generic ScoringPlugin class. Refer to that
+  /// plugin for an explanation of the four states defined (Initial, Ready,
+  /// Running and Finished) as well as other required SDF elements.
+  ///
+  /// This plugin requires the following SDF parameters:
+  ///
+  /// <pinger_position>: Position of the acoustic pinger.
+  ///
+  /// And the following SDF optional parameters:
+  ///
+  /// <goal_tolerance>: If the distance between the WAM-V and the pinger is
+  ///   within this tolerance, we consider the task completed (meters).
+  ///   Defaults to 1 meter.
+  /// <markers>: Optional parameter to enable visualization markers. Check the
+  /// WaypointMarkers class for SDF documentation.
   class AcousticPerceptionScoringPlugin : public ScoringPlugin
   {
     /// \brief Constructor.
@@ -38,7 +53,7 @@ namespace vrx
                            gz::sim::EntityComponentManager &_ecm,
                            gz::sim::EventManager &_eventMgr) override;
 
-    /// \brief Callback executed at every world update.
+    // Documentation inherited.
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
                            gz::sim::EntityComponentManager &_ecm) override;
 

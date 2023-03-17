@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="acoustic_perception_task">
+  <world name="practice_2022_acoustic_perception1_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -434,7 +434,7 @@
     </plugin>
 
     <wind>
-      <linear_velocity>0 0 0</linear_velocity>
+      <linear_velocity>0.2 0 0</linear_velocity>
     </wind>
 
     <!-- The acoustic perception scoring plugin -->
@@ -450,7 +450,7 @@
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>      
       <goal_tolerance>3</goal_tolerance>
-      <pinger_position>-540 180 -2</pinger_position>
+      <pinger_position>-540 181 -2</pinger_position>
       <markers>
         <scaling>0.2 0.2 2.0</scaling>
         <height>0.5</height>
@@ -535,7 +535,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.3
+            double_value: 0.5
           }
         }
         params {

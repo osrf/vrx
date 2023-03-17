@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2023 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ void AcousticPerceptionScoringPlugin::Configure(const sim::Entity &_entity,
 
   // Optional tolerance.
   if (_sdf->HasElement("goal_tolerance"))
-    _sdf->Get<double>("goal_tolerance");
+    this->dataPtr->goalTolerance = _sdf->Get<double>("goal_tolerance");
 
   // Optional pinger marker.
   if (_sdf->HasElement("markers"))
@@ -120,8 +120,6 @@ void AcousticPerceptionScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     this->Finish();
   }
 }
-
-//////////////////////////////////////////////////
 
 GZ_ADD_PLUGIN(vrx::AcousticPerceptionScoringPlugin,
               sim::System,
