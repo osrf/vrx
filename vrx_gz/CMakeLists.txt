@@ -96,6 +96,21 @@ install(
   TARGETS WayfindingScoringPlugin
   DESTINATION lib)
 
+# AcousticWayfinding scoring plugin
+add_library(AcousticWayfindingScoringPlugin SHARED
+  src/AcousticWayfindingScoringPlugin.cc
+  src/WaypointMarkers
+)
+target_link_libraries(AcousticWayfindingScoringPlugin PUBLIC
+  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+  gz-sim${GZ_SIM_VER}::core
+  gz-math${GZ_MATH_VER}
+  ScoringPlugin
+)
+install(
+  TARGETS AcousticWayfindingScoringPlugin
+  DESTINATION lib)
+
 # Plugins
 list(APPEND VRX_GZ_PLUGINS
   AcousticPingerPlugin
