@@ -472,14 +472,14 @@
     </plugin>
 
     <wind>
-      <linear_velocity>0 6000 0</linear_velocity>
+      <linear_velocity>0 2 0</linear_velocity>
     </wind>
 
     <!-- Load the plugin for the wind -->
     <plugin
       filename="gz-sim-wind-effects-system"
       name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>0.002</force_approximation_scaling_factor>
+      <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
       <horizontal>
         <magnitude>
           <time_for_rise>10</time_for_rise>
