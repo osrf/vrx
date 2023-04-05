@@ -424,7 +424,7 @@
     </include>
 
     <wind>
-      <linear_velocity>0 0.4 0</linear_velocity>
+      <linear_velocity>0 2 0</linear_velocity>
     </wind>
 
     <include>
