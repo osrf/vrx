@@ -443,7 +443,6 @@
       name="vrx::AcousticPerceptionScoringPlugin">
       <vehicle>wamv</vehicle>
       <task_name>acoustic_perception</task_name>
-      <task_info_topic>/vrx/acoustic_perception/task/info</task_info_topic>
       <contact_debug_topic>/vrx/acoustic_perception/debug/contact</contact_debug_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
