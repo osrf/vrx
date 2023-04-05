@@ -137,6 +137,8 @@ def competition_bridges(world_name):
         ]
     elif world_name in ACOUSTIC_WAYFINDING_WORLDS:
         task_bridges = [
+            vrx_gz.bridges.acoustic_wayfinding_mean_pose_error(),
+            vrx_gz.bridges.acoustic_wayfinding_pose_error(),
         ]
         
     bridges.extend(task_bridges)

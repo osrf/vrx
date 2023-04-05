@@ -424,39 +424,133 @@
     </include>
 
     <wind>
-      <linear_velocity>0 0 0</linear_velocity>
+      <linear_velocity>0.2 0 0</linear_velocity>
     </wind>
 
-    <!-- The acoustic perception scoring plugin -->
+    <include>
+      <name>mb_round_buoy_black_0</name>
+      <pose>-515 180 0.0 0 0 0 </pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_round_buoy_black_1</name>
+      <pose>-514 172 0.0 0 0 0 </pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <!-- The moving pinger -->
+    <model name="pinger">
+      <pose>-515 180 0 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <pose>0 0 -0.3 0 0 0</pose>
+          <mass>20</mass>
+          <inertia>
+            <ixx>0.24683</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.98016</iyy>
+            <iyz>0</iyz>
+            <izz>1.14166</izz>
+          </inertia>
+        </inertial>
+        <!-- Uncomment to visualize the pinger -->
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_box">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.75 0.35 0.16</size>
+            </box>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>20</force>
+        <torque>1.5</torque>
+        <waypoints>
+          <waypoint>-515 180</waypoint>
+          <waypoint>-511 168</waypoint>
+        </waypoints>
+      </plugin>
+    </model>
+
+    <!-- The acoustic wayfinding scoring plugin -->
     <plugin
       filename="libAcousticWayfindingScoringPlugin.so"
       name="vrx::AcousticWayfindingScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>acoustic_perception</task_name>
-      <task_info_topic>/vrx/acoustic_perception/task/info</task_info_topic>
-      <contact_debug_topic>/vrx/acoustic_perception/debug/contact</contact_debug_topic>
+      <task_name>acoustic_wayfinding</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <contact_debug_topic>/vrx/acoustic_wayfinding/debug/contact</contact_debug_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>      
-      <goal_tolerance>3</goal_tolerance>
       <set_pinger_position_topic>/wamv/pingers/pinger/set_pinger_position</set_pinger_position_topic>
-      <waypoints>
-        <!-- Approx. starting point of wamv -->
-        <waypoint>
-          <pose>-540 180 -2</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-540 190 -2</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-540 200 -2</pose>
-        </waypoint>
-      </waypoints>
-      <markers>
-        <scaling>0.2 0.2 2.0</scaling>
-        <height>0.5</height>
-      </markers>
+      <pinger_model>pinger</pinger_model>
+      <pinger_depth>2.0</pinger_depth>
     </plugin>
 
     <!-- Load the plugin for the wind -->

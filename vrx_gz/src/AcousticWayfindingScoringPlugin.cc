@@ -15,6 +15,8 @@
  *
  */
 
+#include <gz/msgs/float.pb.h>
+#include <gz/msgs/vector3d.pb.h>
 #include <gz/math/Vector3.hh>
 #include <gz/plugin/Register.hh>
 #include <gz/sim/components/Name.hh>
@@ -27,7 +29,7 @@
 using namespace gz;
 using namespace vrx;
 
-/// \brief Private ScoringPlugin data class.
+/// \brief Private AcousticMovingScoringPlugin data class.
 class AcousticWayfindingScoringPlugin::Implementation
 {
   /// \brief A transport node.
@@ -36,28 +38,55 @@ class AcousticWayfindingScoringPlugin::Implementation
   /// \brief Pointer to the SDF plugin element.
   public: sdf::ElementPtr sdf;
 
-  /// \brief If the distance between the WAM-V and the pinger is within this
-  /// tolerance we consider the task completed.
-  public: double goalTolerance = 1;
-
   /// \brief Waypoint visualization markers
   public: WaypointMarkers waypointMarkers{"pinger_marker"};
 
   /// \brief Entity of the vehicle used.
   public: sim::Entity vehicleEntity;
 
-  /// \brief The collection of waypoints.
-  public: std::vector<math::Vector3d> waypoints;
+  /// \brief Entity of the pinger.
+  public: sim::Entity pingerEntity;
 
-  // For publishing the current waypoint location.
-  public: msgs::Pose waypointMessage;
+  /// \brief Pinger model name.
+  public: std::string pingerModelName = "pinger";
+
+  /// \brief Pinger depth.
+  public: double pingerDepth = 2.0;
 
   /// \brief Publisher for the pinger location.
   public: transport::Node::Publisher waypointPub;
 
+  /// \brief Publisher for the combined 2D pose error.
+  public: transport::Node::Publisher poseErrorPub;
+
+  /// \brief Publisher for the current mean error.
+  public: transport::Node::Publisher meanErrorPub;
+
+  /// \brief Combined 2D pose error (distance and yaw).
+  public: double poseError;
+
+  /// \brief Number of instant pose error scores calculated so far.
+  public: unsigned int sampleCount = 0;
+
+  /// \brief Sum of all pose error scores calculated so far.
+  public: double totalPoseError = 0;
+
+  /// \brief Cumulative 2D RMS error in meters.
+  public: double meanError;
+
+  /// \brief Penalty added per collision.
+  public: double obstaclePenalty = 0.1;
+
   /// /brief The topic used to set the pinger position.
   public: std::string setPingerTopicName =
     "/wamv/pingers/pinger/set_pinger_position";
+
+  /// \brief Topic where 2D pose error is published.
+  public: std::string poseErrorTopic = "/vrx/acoustic_wayfinding/pose_error";
+
+  /// \brief Topic where mean pose error is published.
+  public: std::string meanErrorTopic =
+    "/vrx/acoustic_wayfinding/mean_pose_error";
 };
 
 /////////////////////////////////////////////////
@@ -78,29 +107,6 @@ void AcousticWayfindingScoringPlugin::Configure(const sim::Entity &_entity,
 
   this->dataPtr->sdf = _sdf->Clone();
 
-  // A waypoints element is required.
-  if (!this->dataPtr->sdf->HasElement("waypoints"))
-  {
-    gzerr << "Unable to find <waypoints> element in SDF." << std::endl;
-    return;
-  }
-  auto waypointsElem = this->dataPtr->sdf->GetElement("waypoints");
- 
-  // We need at least one waypoint
-  if (!waypointsElem->HasElement("waypoint"))
-  {
-    gzerr << "Unable to find <waypoint> element in <waypoints>." << std::endl;
-    return;
-  }
-  auto waypointElem = waypointsElem->GetElement("waypoint");
- 
-  while (waypointElem)
-  {
-    math::Vector3d waypoint = waypointElem->Get<math::Vector3d>("pose");
-    this->dataPtr->waypoints.push_back(waypoint);
-    waypointElem = waypointElem->GetNextElement("waypoint");
-  }
-
   // Optional set pinger position topic name.
   if (_sdf->HasElement("set_pinger_position_topic"))
   {
@@ -108,34 +114,48 @@ void AcousticWayfindingScoringPlugin::Configure(const sim::Entity &_entity,
       _sdf->Get<std::string>("set_pinger_position_topic");
   }
 
-  // Optional tolerance.
-  if (_sdf->HasElement("goal_tolerance"))
-    this->dataPtr->goalTolerance = _sdf->Get<double>("goal_tolerance");
+  // Optional Pinger model name.
+  if (_sdf->HasElement("pinger_model"))
+    this->dataPtr->pingerModelName = _sdf->Get<std::string>("pinger_model");
 
-  // Optional pinger marker.
-  if (_sdf->HasElement("markers"))
+  // Optional Pinger depth.
+  if (_sdf->HasElement("pinger_depth"))
+    this->dataPtr->pingerDepth = _sdf->Get<double>("pinger_depth");
+
+  // Optional pose error topic.
+  if (_sdf->HasElement("pose_error_topic"))
+    this->dataPtr->poseErrorTopic = _sdf->Get<std::string>("pose_error_topic");
+
+  // Optional mean error topic.
+  if (_sdf->HasElement("mean_error_topic"))
+    this->dataPtr->meanErrorTopic = _sdf->Get<std::string>("mean_error_topic");
+
+  // Optional <obstacle_penalty> element.
+  if (_sdf->HasElement("obstacle_penalty"))
   {
-    auto markersElement = _sdf->Clone()->GetElement("markers");
-
-    int markerId = 0;
-    for (const auto waypoint : this->dataPtr->waypoints)
-    {
-      if (!this->dataPtr->waypointMarkers.DrawMarker(markerId, waypoint.X(),
-            waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
-      {
-        gzerr << "Error creating visual marker" << std::endl;
-      }
-      markerId++;
-    }
+    this->dataPtr->obstaclePenalty = 
+      this->dataPtr->sdf->Get<double>("obstacle_penalty");
   }
 
   // Throttle messages to 1Hz.
-  transport::AdvertiseMessageOptions opts;
-  opts.SetMsgsPerSec(1u);
+  transport::AdvertiseMessageOptions opts1;
+  opts1.SetMsgsPerSec(1u);
+
+  // Throttle messages to 10Hz.
+  transport::AdvertiseMessageOptions opts10;
+  opts10.SetMsgsPerSec(10u);
 
   // The publisher to update the pinger position.
   this->dataPtr->waypointPub = this->dataPtr->node.Advertise<msgs::Vector3d>(
-    this->dataPtr->setPingerTopicName, opts);
+    this->dataPtr->setPingerTopicName, opts10);
+
+  // The publisher to update the pose error.
+  this->dataPtr->poseErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
+    this->dataPtr->poseErrorTopic, opts1);
+
+  // The publisher to update the mean error.
+  this->dataPtr->meanErrorPub = this->dataPtr->node.Advertise<msgs::Float>(
+    this->dataPtr->meanErrorTopic, opts1);
 }
 
 //////////////////////////////////////////////////
@@ -148,12 +168,8 @@ void AcousticWayfindingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
 
   ScoringPlugin::PreUpdate(_info, _ecm);
 
-  // Time to finish the task if there are no waypoints.
-  if (this->dataPtr->waypoints.empty())
-  {
-    this->SetScore(this->ElapsedTime().count());
-    this->Finish();
-  }
+  if (this->ScoringPlugin::TaskState() != "running")
+    return;
 
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->dataPtr->vehicleEntity)
@@ -166,24 +182,62 @@ void AcousticWayfindingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     this->dataPtr->vehicleEntity = entity;
   }
 
+  // The pinger might not be ready yet, let's try to get it.
+  if (!this->dataPtr->pingerEntity)
+  {
+    auto entity = _ecm.EntityByComponents(
+      sim::components::Name(this->dataPtr->pingerModelName));
+    if (entity == sim::kNullEntity)
+      return;
+
+    this->dataPtr->pingerEntity = entity;
+  }
+
   // Update the pinger position.
-  auto pingerPosition = this->dataPtr->waypoints.at(0);
+  auto pingerPose = _ecm.Component<sim::components::Pose>(
+    this->dataPtr->pingerEntity)->Data();
+  pingerPose.Pos().Z(this->dataPtr->pingerDepth);
   msgs::Vector3d msg;
-  msg.set_x(pingerPosition.X());
-  msg.set_y(pingerPosition.Y());
-  msg.set_z(pingerPosition.Z());
+  msg.set_x(pingerPose.Pos().X());
+  msg.set_y(pingerPose.Pos().Y());
+  msg.set_z(pingerPose.Pos().Z());
   this->dataPtr->waypointPub.Publish(msg);
 
+  // Read vehicle pose.
   auto vehiclePose = _ecm.Component<sim::components::Pose>(
     this->dataPtr->vehicleEntity)->Data();
 
-  double distance = vehiclePose.Pos().Distance(pingerPosition);
+  // Update stats.
+  double dx = pingerPose.Pos().X() - vehiclePose.Pos().X();
+  double dy = pingerPose.Pos().Y() - vehiclePose.Pos().Y();
+  double dist = sqrt(pow(dx, 2) + pow(dy, 2));
 
-  if (distance <= this->dataPtr->goalTolerance)
-  {
-    // Let's enable the next waypoint.
-    this->dataPtr->waypoints.erase(this->dataPtr->waypoints.begin());
-  }
+  this->dataPtr->poseError = dist;
+  this->dataPtr->totalPoseError += this->dataPtr->poseError;
+  this->dataPtr->sampleCount++;
+  this->dataPtr->meanError =
+    this->dataPtr->totalPoseError / this->dataPtr->sampleCount;
+
+  // Publish stats.
+  msgs::Float poseErrorMsg;
+  msgs::Float meanErrorMsg;
+  poseErrorMsg.set_data(this->dataPtr->poseError);
+  meanErrorMsg.set_data(this->dataPtr->meanError);
+
+  this->dataPtr->poseErrorPub.Publish(poseErrorMsg);
+  this->dataPtr->meanErrorPub.Publish(meanErrorMsg);
+
+  // Update the score.
+  ScoringPlugin::SetScore(this->dataPtr->meanError);
+}
+
+//////////////////////////////////////////////////
+void AcousticWayfindingScoringPlugin::OnFinished()
+{
+  double penalty = this->NumCollisions() * this->dataPtr->obstaclePenalty;
+  this->SetTimeoutScore(this->Score() + penalty);
+
+  ScoringPlugin::OnFinished();
 }
 
 GZ_ADD_PLUGIN(vrx::AcousticWayfindingScoringPlugin,
