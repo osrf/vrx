@@ -8,7 +8,7 @@ This repository is the home to the source code and software documentation for th
 We're happy to announce with release 2.0 VRX has transitioned from Gazebo Classic to the newer Gazebo simulator (formerly [Ignition Gazebo](https://www.openrobotics.org/blog/2022/4/6/a-new-era-for-gazebo)). 
 * Gazebo Garden and ROS 2 are now default prerequisites for VRX.
 * This is the recommended configuration for new users.
-* Users who wish to continue running Gazebo Classic and ROS 1 can still do so using the `vrx_classic` branch of this repository. 
+* Users who wish to continue running Gazebo Classic and ROS 1 can still do so using the `gazebo_classic` branch of this repository. 
   * Tutorials for VRX Classic will remain available on our Wiki.
   * VRX Classic will transition from an officially supported branch to a community supported branch by Spring 2023.
 
