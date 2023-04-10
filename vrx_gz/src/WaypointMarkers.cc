@@ -26,16 +26,13 @@ using namespace vrx;
 
 /////////////////////////////////////////////////
 WaypointMarkers::WaypointMarkers(const std::string &_namespace)
-  : ns(_namespace), material("Gazebo/Red"), scaling{0.2, 0.2, 1.5}, height(4.0)
+  : ns(_namespace), scaling{0.2, 0.2, 1.5}, height(4.0)
 {
 }
 
 /////////////////////////////////////////////////
 void WaypointMarkers::Load(const std::shared_ptr<const sdf::Element> &_sdf)
 {
-  if (_sdf->HasElement("material"))
-    this->material = _sdf->Get<std::string>("material");
-
   if (_sdf->HasElement("scaling"))
     this->scaling = _sdf->Get<math::Vector3d>("scaling");
 
@@ -47,22 +44,27 @@ void WaypointMarkers::Load(const std::shared_ptr<const sdf::Element> &_sdf)
 }
 
 /////////////////////////////////////////////////
-bool WaypointMarkers::DrawMarker(double _x, double _y, double _yaw,
-  const std::string &_text)
+bool WaypointMarkers::DrawMarker(double _x, double _y, double _yaw)
 {
-  return this->DrawMarker(this->id++, _x, _y, _yaw, _text);
+  return this->DrawMarker(this->id++, _x, _y, _yaw);
 }
 
 /////////////////////////////////////////////////
 bool WaypointMarkers::DrawMarker(int _markerId, double _x, double _y,
-  double _yaw, const std::string &_text)
+  double _yaw)
 {
- //TODO: Fix below. The markers are not showing up.
   msgs::Marker markerMsg;
   markerMsg.set_ns(this->ns);
   markerMsg.set_action(msgs::Marker_Action_ADD_MODIFY);
-  msgs::Material *matMsg = markerMsg.mutable_material();
-  matMsg->mutable_script()->set_name(this->material);
+  markerMsg.set_visibility(gz::msgs::Marker::GUI);
+  markerMsg.mutable_material()->mutable_ambient()->set_r(1);
+  markerMsg.mutable_material()->mutable_ambient()->set_g(1);
+  markerMsg.mutable_material()->mutable_ambient()->set_b(1);
+  markerMsg.mutable_material()->mutable_ambient()->set_a(1);
+  markerMsg.mutable_material()->mutable_diffuse()->set_r(1);
+  markerMsg.mutable_material()->mutable_diffuse()->set_g(1);
+  markerMsg.mutable_material()->mutable_diffuse()->set_b(1);
+  markerMsg.mutable_material()->mutable_diffuse()->set_a(1);
 
   // draw cylinder
   markerMsg.set_type(msgs::Marker_Type_CYLINDER);
@@ -79,25 +81,9 @@ bool WaypointMarkers::DrawMarker(int _markerId, double _x, double _y,
   msgs::Set(markerMsg.mutable_scale(), this->scaling);
   msgs::Set(markerMsg.mutable_pose(),  math::Pose3d(
     _x + cos(_yaw), _y + sin(_yaw), this->height + this->scaling.Z() / 2.0,
-    0, M_PI/2, _yaw));
+    0, M_PI / 2, _yaw));
   markerMsg.set_id((_markerId + 1) * 1000);
   result = node.Request("/marker", markerMsg);
-  if (!result)
-    return false;
 
-  // draw text
-//  if (!_text.empty())
-//  {
-//    markerMsg.set_type(msgs::Marker_Type_TEXT);
-//    markerMsg.set_text(_text);
-//    msgs::Set(markerMsg.mutable_scale(),
-//                        math::Vector3d(1.0, 1.0, 1.0));
-//    msgs::Set(markerMsg.mutable_pose(),
-//                        math::Pose3d(_x, _y - 0.2,
-//                            this->height + this->scaling.Z() + 0.8,
-//                            0, 0, 0));
-//    markerMsg.set_id((_markerId + 1) * 10000);
-//    result = node.Request("/marker", markerMsg);
-//  }
   return result;
 }
