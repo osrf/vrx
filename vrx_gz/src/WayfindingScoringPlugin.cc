@@ -200,7 +200,7 @@ void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
     for (const auto waypoint : this->dataPtr->localWaypoints)
     {
       if (!this->dataPtr->waypointMarkers.DrawMarker(markerId, waypoint.X(),
-            waypoint.Y(), waypoint.Z(), std::to_string(markerId)))
+            waypoint.Y(), waypoint.Z()))
       {
         gzerr << "Error creating visual marker" << std::endl;
       }
