@@ -494,13 +494,13 @@
           </inertia>
         </inertial>
         <!-- Uncomment to visualize the pinger -->
-        <visual name="visual">
+        <!-- <visual name="visual">
           <geometry>
             <box>
               <size>0.5 0.5 0.5</size>
             </box>
           </geometry>
-        </visual>
+        </visual> -->
       </link>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
