@@ -570,7 +570,7 @@
       </message>
     </plugin>
 
-    <!-- The base scoring plugin -->
+    <!-- The wayfinding scoring plugin -->
     <plugin
       filename="libWayfindingScoringPlugin.so"
       name="vrx::WayfindingScoringPlugin">

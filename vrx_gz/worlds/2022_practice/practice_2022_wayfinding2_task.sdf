@@ -570,24 +570,27 @@
       </message>
     </plugin>
 
-    <!-- The base scoring plugin -->
+    <!-- The wayfinding scoring plugin -->
     <plugin
       filename="libWayfindingScoringPlugin.so"
       name="vrx::WayfindingScoringPlugin">
       <vehicle>wamv</vehicle>
       <task_name>wayfinding</task_name>
       <waypoints>
-        <!-- Approx. starting point of wamv -->
         <waypoint>
-          <pose>-33.722611 150.674051 1.0</pose>
+          <pose>-33.722462 150.674268 1.0</pose>
         </waypoint>
-        <!-- A waypoint -->
         <waypoint>
-          <pose>-33.722574 150.6744381 0.0</pose>
+          <pose>-33.722262 150.674800 -1.0</pose>
         </waypoint>
-        <!-- Another waypoint -->
         <waypoint>
-          <pose>-33.722680 150.674756 -1.0</pose>
+          <pose>-33.7226908 150.6751165 0.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722925 150.675304 1.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.7226908 150.6755165 -2.5</pose>
         </waypoint>
       </waypoints>
       <markers>
