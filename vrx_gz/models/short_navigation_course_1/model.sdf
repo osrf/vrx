@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Model for the short navigation course -->
 <sdf version="1.6">
-  <model name="short_navigation_course_0">
+  <model name="short_navigation_course_1">
 
     <!-- Starboard_border -->
     <include>
