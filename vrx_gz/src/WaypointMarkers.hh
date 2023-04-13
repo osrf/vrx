@@ -27,11 +27,8 @@
 namespace vrx
 {
   /// \brief This class is used to display waypoint markers.
-  /// Cylindrical Gazebo markers are drawn with text on top
   ///
   /// The marker properties can be set using sdf:
-  /// material: Optional parameter (string type) to specify the material
-  ///           for marker. Default: Gazebo/Green
   /// scaling: Optional parameter (vector type) to specify marker scaling.
   ///          Default: 0.2 0.2 1.5
   /// height: Optional parameter (double type) height of marker above water.
@@ -39,7 +36,6 @@ namespace vrx
   /// drawing markers without explicitly specifying ID.
   /// E.g.
   /// <markers>
-  ///   <material>Gazebo/Green</material>
   ///   <scaling>0.2 0.2 2.0</scaling>
   ///   <height>0.5</height>
   /// </markers>
@@ -59,30 +55,23 @@ namespace vrx
     /// \param[in] _x X coordinate of waypoint marker
     /// \param[in] _y Y coordinate of waypoint marker
     /// \param[in] _yaw orientation of waypoint marker in radians
-    /// \param[in] _text (optional) Text above waypoint marker
     /// \return Returns true if marker is successfully sent to Gazebo
     public: bool DrawMarker(int _markerId,
                             double _x,
                             double _y,
-                            double _yaw,
-                            const std::string &_text = "");
+                            double _yaw);
 
     /// \brief Draw a new waypoint marker in Gazebo
     /// \param[in] _x X coordinate of waypoint marker
     /// \param[in] _y Y coordinate of waypoint marker
     /// \param[in] _yaw orientation of waypoint marker in radians
-    /// \param[in] _text (optional) Text above waypoint marker
     /// \return Returns true if marker is successfully sent to Gazebo
     public: bool DrawMarker(double _x,
                             double _y,
-                            double _yaw,
-                            const std::string &_text = "");
+                            double _yaw);
 
     /// \brief Namespace for Gazebo markers
     private: std::string ns;
-
-    /// \brief Name of Gazebo material for marker
-    private: std::string material;
 
     /// \brief Scaling factor for cylinder marker
     private: gz::math::Vector3d scaling;
@@ -93,7 +82,7 @@ namespace vrx
     /// \brief If an ID is not specified, the markers will start using this one.
     private: int id = 0;
 
-    /// \brief gazebo transport node
+    /// \brief Gazebo transport node
     private: gz::transport::Node node;
   };
 }
