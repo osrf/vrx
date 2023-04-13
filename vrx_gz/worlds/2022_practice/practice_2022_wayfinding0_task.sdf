@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="wayfinding_task">
+  <world name="practice_2022_wayfinding0_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -342,7 +342,7 @@
     </light>
 
     <include>
-      <pose> 0 0 0.2 0 0 0 </pose>
+      <pose>0 0 0.2 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
 
@@ -355,166 +355,6 @@
     <include>
       <name>platform</name>
       <uri>platform</uri>
-    </include>
-
-    <include>
-      <name>mb_marker_buoy_red</name>
-      <pose>-528 191 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_marker_buoy_black</name>
-      <pose>-528 190 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_marker_buoy_green</name>
-      <pose>-528 189 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_marker_buoy_white</name>
-      <pose>-528 188 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_round_buoy_orange</name>
-      <pose>-528 187 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>mb_round_buoy_black</name>
-      <pose>-528 186 0 0 1.57 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -624,35 +464,6 @@
       </vertical>
     </plugin>
 
-    <!-- The wayfinding scoring plugin -->
-    <plugin
-      filename="libWayfindingScoringPlugin.so"
-      name="vrx::WayfindingScoringPlugin">
-      <vehicle>wamv</vehicle>
-      <task_name>wayfinding</task_name>
-      <waypoints>
-        <waypoint>
-          <pose>-33.7226766699 150.6740630167 1.21756121843</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.7220832884 150.67379127877 1.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.7226013209 150.67504609858 1.0</pose>
-        </waypoint>
-      </waypoints>
-      <markers>
-        <scaling>0.2 0.2 2.0</scaling>
-        <height>0.5</height>
-      </markers>
-
-      <task_info_topic>/vrx/task/info</task_info_topic>
-      <initial_state_duration>10</initial_state_duration>
-      <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
-      <release_topic>/vrx/release</release_topic>
-    </plugin>
-
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
       <message type="gz.msgs.Param" topic="/vrx/wavefield/parameters"
@@ -694,7 +505,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.3
+            double_value: 0.2
           }
         }
         params {
@@ -757,6 +568,36 @@
           }
         }
       </message>
+    </plugin>
+
+    <!-- The wayfinding scoring plugin -->
+    <plugin
+      filename="libWayfindingScoringPlugin.so"
+      name="vrx::WayfindingScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>wayfinding</task_name>
+      <waypoints>
+        <waypoint>
+          <pose>-33.722611 150.674051 1.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722574 150.6744381 0.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722680 150.674756 -1.0</pose>
+        </waypoint>
+      </waypoints>
+      <markers>
+        <scaling>0.2 0.2 2.0 </scaling>
+        <height>0.5 </height>
+      </markers>
+
+
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_topic>/vrx/release</release_topic>
     </plugin>
 
   </world>
