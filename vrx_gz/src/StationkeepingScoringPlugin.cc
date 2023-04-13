@@ -24,6 +24,7 @@
 #include <gz/plugin/Register.hh>
 
 #include "StationkeepingScoringPlugin.hh"
+#include "WaypointMarkers.hh"
 
 using namespace gz;
 using namespace vrx;
@@ -91,31 +92,12 @@ class StationkeepingScoringPlugin::Implementation
   /// \brief Vehicle to score.
   public: sim::Entity vehicleEntity{sim::kNullEntity};
 
-  /// \brief Waypoint visualization markers
-  public: bool markers = false;
-
-  /// \brief Display goal marker (currently disabled)
-  public: void AddMarker();
-
   /// \brief Display or suppress state changes
   public: bool silent = false;
+
+  /// \brief Waypoint visualization markers
+  public: WaypointMarkers waypointMarkers{"station_keeping_marker"};
 };
-
-/////////////////////////////////////////////////
-void StationkeepingScoringPlugin::Implementation::AddMarker()
-{
-  msgs::Marker markerMsg;
-  markerMsg.set_id(0);
-  markerMsg.set_action(msgs::Marker::ADD_MODIFY);
-  markerMsg.set_type(msgs::Marker::TRIANGLE_FAN);
-
-  msgs::Material *matMsg = markerMsg.mutable_material();
-  matMsg->mutable_script()->set_name("Gazebo/Red");
-  msgs::Set(markerMsg.mutable_pose(),
-            math::Pose3d(this->goalX, this->goalY, 1, 0, 0, this->goalYaw));
-  bool markerRequest = this->node.Request("/marker", markerMsg);
-  this->markers = markerRequest;
-}
 
 /////////////////////////////////////////////////
 StationkeepingScoringPlugin::StationkeepingScoringPlugin()
@@ -235,10 +217,15 @@ void StationkeepingScoringPlugin::Configure(const sim::Entity &_entity,
   if (_sdf->HasElement("head_error_on"))
     this->dataPtr->headErrorOn = _sdf->Get<bool>("head_error_on");
 
-  // if (_sdf->HasElement("markers"))
-  // {
-  //   this->dataPtr->markers = true;
-  // }
+  if (_sdf->HasElement("markers"))
+  {
+    this->dataPtr->waypointMarkers.Load(_sdf->Clone()->GetElement("markers"));
+    if (!this->dataPtr->waypointMarkers.DrawMarker(0,
+           this->dataPtr->goalX, this->dataPtr->goalY, this->dataPtr->goalYaw))
+    {
+      gzerr << "Error creating visual marker" << std::endl;
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -250,12 +237,6 @@ void StationkeepingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     return;
 
   ScoringPlugin::PreUpdate(_info, _ecm);
-
-  // Check to see if we need to publish the marker(s)
-  // if (this->dataPtr->markers)
-  // {
-  //   this->dataPtr->AddMarker();
-  // }
 
   if (this->TaskState() == "finished")
     return;
