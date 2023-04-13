@@ -23,14 +23,14 @@
 #include <gz/sim/components/Pose.hh>
 #include <gz/sim/World.hh>
 
-#include "AcousticWayfindingScoringPlugin.hh"
+#include "AcousticTrackingScoringPlugin.hh"
 #include "WaypointMarkers.hh"
 
 using namespace gz;
 using namespace vrx;
 
 /// \brief Private AcousticMovingScoringPlugin data class.
-class AcousticWayfindingScoringPlugin::Implementation
+class AcousticTrackingScoringPlugin::Implementation
 {
   /// \brief A transport node.
   public: transport::Node node;
@@ -90,15 +90,15 @@ class AcousticWayfindingScoringPlugin::Implementation
 };
 
 /////////////////////////////////////////////////
-AcousticWayfindingScoringPlugin::AcousticWayfindingScoringPlugin()
+AcousticTrackingScoringPlugin::AcousticTrackingScoringPlugin()
   : ScoringPlugin(),
   dataPtr(utils::MakeUniqueImpl<Implementation>())
 {
-  gzmsg << "AcousticWayfindingScoringPlugin scoring plugin loaded" << std::endl;
+  gzmsg << "AcousticTrackingScoringPlugin scoring plugin loaded" << std::endl;
 }
 
 /////////////////////////////////////////////////
-void AcousticWayfindingScoringPlugin::Configure(const sim::Entity &_entity,
+void AcousticTrackingScoringPlugin::Configure(const sim::Entity &_entity,
   const std::shared_ptr<const sdf::Element> &_sdf,
   sim::EntityComponentManager &_ecm, sim::EventManager &_eventMgr)
 {
@@ -159,7 +159,7 @@ void AcousticWayfindingScoringPlugin::Configure(const sim::Entity &_entity,
 }
 
 //////////////////////////////////////////////////
-void AcousticWayfindingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
+void AcousticTrackingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   sim::EntityComponentManager &_ecm)
 {
   // Don't update when paused
@@ -232,7 +232,7 @@ void AcousticWayfindingScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
 }
 
 //////////////////////////////////////////////////
-void AcousticWayfindingScoringPlugin::OnFinished()
+void AcousticTrackingScoringPlugin::OnFinished()
 {
   double penalty = this->NumCollisions() * this->dataPtr->obstaclePenalty;
   this->SetTimeoutScore(this->Score() + penalty);
@@ -240,7 +240,7 @@ void AcousticWayfindingScoringPlugin::OnFinished()
   ScoringPlugin::OnFinished();
 }
 
-GZ_ADD_PLUGIN(vrx::AcousticWayfindingScoringPlugin,
+GZ_ADD_PLUGIN(vrx::AcousticTrackingScoringPlugin,
               sim::System,
-              vrx::AcousticWayfindingScoringPlugin::ISystemConfigure,
-              vrx::AcousticWayfindingScoringPlugin::ISystemPreUpdate)
+              vrx::AcousticTrackingScoringPlugin::ISystemConfigure,
+              vrx::AcousticTrackingScoringPlugin::ISystemPreUpdate)

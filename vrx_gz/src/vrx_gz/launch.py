@@ -63,11 +63,11 @@ SCAN_DOCK_DELIVER_WORLDS = [
   'scan_dock_deliver_task'
 ]
 
-ACOUSTIC_WAYFINDING_WORLDS = [
-  'acoustic_wayfinding_task',
-  'practice_2022_acoustic_wayfinding0_task',
-  'practice_2022_acoustic_wayfinding1_task',
-  'practice_2022_acoustic_wayfinding2_task'
+ACOUSTIC_TRACKING_WORLDS = [
+  'acoustic_tracking_task',
+  'practice_2022_acoustic_tracking0_task',
+  'practice_2022_acoustic_tracking1_task',
+  'practice_2022_acoustic_tracking2_task'
 ]
 
 def simulation(world_name, headless=False):
@@ -141,10 +141,10 @@ def competition_bridges(world_name):
         task_bridges = [
             vrx_gz.bridges.color_sequence_reports(),
         ]
-    elif world_name in ACOUSTIC_WAYFINDING_WORLDS:
+    elif world_name in ACOUSTIC_TRACKING_WORLDS:
         task_bridges = [
-            vrx_gz.bridges.acoustic_wayfinding_mean_pose_error(),
-            vrx_gz.bridges.acoustic_wayfinding_pose_error(),
+            vrx_gz.bridges.acoustic_tracking_mean_pose_error(),
+            vrx_gz.bridges.acoustic_tracking_pose_error(),
         ]
         
     bridges.extend(task_bridges)

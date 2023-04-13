@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_acoustic_wayfinding0_task">
+  <world name="acoustic_tracking_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -429,7 +429,7 @@
 
     <include>
       <name>mb_round_buoy_black_0</name>
-      <pose>-515 170 0.0 0 0 0 </pose>
+      <pose>-527 200 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -454,7 +454,107 @@
 
     <include>
       <name>mb_round_buoy_black_1</name>
-      <pose>-511 166 0.0 0 0 0 </pose>
+      <pose>-523 180 0.0 0 0 0 </pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_round_buoy_black_2</name>
+      <pose>-525 203 0.0 0 0 0 </pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_round_buoy_black_3</name>
+      <pose>-530 190 0.0 0 0 0 </pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_round_buoy_black_4</name>
+      <pose>-525 160 0.0 0 0 0 </pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+    </include>
+
+    <include>
+      <name>mb_round_buoy_black_5</name>
+      <pose>-505 203 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -479,7 +579,7 @@
 
     <!-- The moving pinger -->
     <model name="pinger">
-      <pose>-515 170 0 0 0 0</pose>
+      <pose>-525 167 0 0 0 0</pose>
       <link name="link">
         <inertial>
           <pose>0 0 -0.3 0 0 0</pose>
@@ -494,13 +594,13 @@
           </inertia>
         </inertial>
         <!-- Uncomment to visualize the pinger -->
-        <!-- <visual name="visual">
+        <visual name="visual">
           <geometry>
             <box>
               <size>0.5 0.5 0.5</size>
             </box>
           </geometry>
-        </visual> -->
+        </visual>
       </link>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -527,23 +627,24 @@
               name="gz::sim::systems::TrajectoryFollower">
         <link_name>link</link_name>
         <loop>true</loop>
-        <force>18</force>
+        <force>100</force>
         <torque>1.5</torque>
         <waypoints>
-          <waypoint>-515 170</waypoint>
-          <waypoint>-511 166</waypoint>
+          <waypoint>-525 167</waypoint>
+          <waypoint>-532 208</waypoint>
+          <waypoint>-501 200</waypoint>
         </waypoints>
       </plugin>
     </model>
 
-    <!-- The acoustic wayfinding scoring plugin -->
+    <!-- The acoustic tracking scoring plugin -->
     <plugin
-      filename="libAcousticWayfindingScoringPlugin.so"
-      name="vrx::AcousticWayfindingScoringPlugin">
+      filename="libAcousticTrackingScoringPlugin.so"
+      name="vrx::AcousticTrackingScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>acoustic_wayfinding</task_name>
+      <task_name>acoustic_tracking</task_name>
       <task_info_topic>/vrx/task/info</task_info_topic>
-      <contact_debug_topic>/vrx/acoustic_wayfinding/debug/contact</contact_debug_topic>
+      <contact_debug_topic>/vrx/acoustic_tracking/debug/contact</contact_debug_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>

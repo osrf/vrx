@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef VRX_ACOUSTIC_MOVING_SCORING_PLUGIN_HH_
-#define VRX_ACOUSTIC_MOVING_SCORING_PLUGIN_HH_
+#ifndef VRX_ACOUSTIC_TRACKING_SCORING_PLUGIN_HH_
+#define VRX_ACOUSTIC_TRACKING_SCORING_PLUGIN_HH_
 
 #include <gz/transport.hh>
 #include "ScoringPlugin.hh"
@@ -46,13 +46,13 @@ namespace vrx
   /// <goal_pose>: Optional parameter (vector type) specifying the latitude,
   /// longitude and yaw of the task goal. If not provided, all values default
   /// to 0.
-  class AcousticWayfindingScoringPlugin : public ScoringPlugin
+  class AcousticTrackingScoringPlugin : public ScoringPlugin
   {
     /// \brief Constructor.
-    public: AcousticWayfindingScoringPlugin();
+    public: AcousticTrackingScoringPlugin();
 
     /// \brief Destructor.
-    public: ~AcousticWayfindingScoringPlugin() override = default;
+    public: ~AcousticTrackingScoringPlugin() override = default;
 
     // Documentation inherited.
     public: void Configure(const gz::sim::Entity &_entity,
