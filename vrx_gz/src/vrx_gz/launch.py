@@ -56,7 +56,10 @@ WAYFINDING_WORLDS = [
 ]
 
 WILDLIFE_WORLDS = [
-  'wildlife_task'
+  'wildlife_task',
+  'practice_2022_wildlife0_task',
+  'practice_2022_wildlife1_task',
+  'practice_2022_wildlife2_task'
 ]
 
 SCAN_DOCK_DELIVER_WORLDS = [
@@ -139,6 +142,7 @@ def competition_bridges(world_name):
         ]
     elif world_name in WILDLIFE_WORLDS:
         task_bridges = [
+            vrx_gz.bridges.animal_poses(),
         ]
     elif world_name in SCAN_DOCK_DELIVER_WORLDS:
         task_bridges = [

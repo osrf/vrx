@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="wildlife_task">
+  <world name="practice_2022_wildlife2_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -359,7 +359,7 @@
 
     <!-- The crocodile buoy -->
     <include>
-      <pose>-552 170 0 0 0 0</pose>
+      <pose>-500 190 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -389,15 +389,15 @@
         <force>18</force>
         <torque>1.5</torque>
         <waypoints>
-          <waypoint>-554 172</waypoint>
-          <waypoint>-552 168</waypoint>
+          <waypoint>-407 189</waypoint>
+          <waypoint>-500 190</waypoint>
         </waypoints>
       </plugin>
     </include>
 
     <!-- The turtle buoy -->
     <include>
-      <pose>-472 170 0 0 0 0</pose>
+      <pose>-460 250 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -427,15 +427,15 @@
         <force>6</force>
         <torque>1</torque>
         <waypoints>
-          <waypoint>-474 172</waypoint>
-          <waypoint>-472 168</waypoint>
+          <waypoint>-463 249</waypoint>
+          <waypoint>-460 250</waypoint>
         </waypoints>
       </plugin>
     </include>
 
     <!-- The platypus buoy -->
     <include>
-      <pose>-512 170 0 0 0 0</pose>
+      <pose>-480 220 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -465,8 +465,8 @@
         <force>18</force>
         <torque>1.5</torque>
         <waypoints>
-          <waypoint>-514 172</waypoint>
-          <waypoint>-512 168</waypoint>
+          <waypoint>-476 220</waypoint>
+          <waypoint>-480 220</waypoint>
         </waypoints>
       </plugin>
     </include>
@@ -538,7 +538,7 @@
     </include>
 
     <wind>
-      <linear_velocity>0 0 0</linear_velocity>
+      <linear_velocity>0 2 0</linear_velocity>
     </wind>
 
     <!-- Load the plugin for the wind -->
@@ -576,39 +576,6 @@
          <stddev>0.03</stddev>
         </noise>
       </vertical>
-    </plugin>
-
-    <!-- The wildlife scoring plugin -->
-    <plugin
-      filename="libWildlifeScoringPlugin.so"
-      name="vrx::WildlifeScoringPlugin">
-
-      <!-- Common parameters -->
-      <vehicle>wamv</vehicle>
-      <task_name>wildlife</task_name>
-      <initial_state_duration>10</initial_state_duration>
-      <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
-      <collision_buffer>10</collision_buffer>
-
-      <!-- wildlife specific parameters -->
-      <buoys>
-        <buoy>
-          <name>crocodile::link</name>
-          <goal>avoid</goal>
-        </buoy>
-        <buoy>
-          <name>platypus::link</name>
-          <goal>circumnavigate_clockwise</goal>
-        </buoy>
-        <buoy>
-          <name>turtle::link</name>
-          <goal>circumnavigate_counterclockwise</goal>
-        </buoy>
-      </buoys>
-      <engagement_distance>10.0</engagement_distance>
-      <time_bonus>30.0</time_bonus>
-      <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
     </plugin>
 
     <!-- The wave field -->
@@ -652,7 +619,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.3
+            double_value: 0.8
           }
         }
         params {
@@ -715,6 +682,39 @@
           }
         }
       </message>
+    </plugin>
+
+    <!-- The wildlife scoring plugin -->
+    <plugin
+      filename="libWildlifeScoringPlugin.so"
+      name="vrx::WildlifeScoringPlugin">
+
+      <!-- Common parameters -->
+      <vehicle>wamv</vehicle>
+      <task_name>wildlife</task_name>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <collision_buffer>10</collision_buffer>
+
+      <!-- wildlife specific parameters -->
+      <buoys>
+        <buoy>
+          <name>crocodile::link</name>
+          <goal>avoid</goal>
+        </buoy>
+        <buoy>
+          <name>platypus::link</name>
+          <goal>circumnavigate_clockwise</goal>
+        </buoy>
+        <buoy>
+          <name>turtle::link</name>
+          <goal>circumnavigate_counterclockwise</goal>
+        </buoy>
+      </buoys>
+      <engagement_distance>10.0</engagement_distance>
+      <time_bonus>30.0</time_bonus>
+      <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
     </plugin>
 
   </world>
