@@ -118,6 +118,22 @@ def stationkeeping_pose_error():
         ros_type='std_msgs/msg/Float32',
         direction=BridgeDirection.GZ_TO_ROS)
 
+def acoustic_tracking_mean_pose_error():
+    return Bridge(
+        gz_topic=f'/vrx/acoustic_tracking/mean_pose_error',
+        ros_topic=f'/vrx/acoustic_tracking/mean_pose_error',
+        gz_type='ignition.msgs.Float',
+        ros_type='std_msgs/msg/Float32',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+def acoustic_tracking_pose_error():
+    return Bridge(
+        gz_topic=f'/vrx/acoustic_tracking/pose_error',
+        ros_topic=f'/vrx/acoustic_tracking/pose_error',
+        gz_type='ignition.msgs.Float',
+        ros_type='std_msgs/msg/Float32',
+        direction=BridgeDirection.GZ_TO_ROS)
+
 def wayfinding_waypoints():
     return Bridge(
         gz_topic=f'/vrx/wayfinding/waypoints',
