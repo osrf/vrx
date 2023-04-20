@@ -63,6 +63,13 @@ SCAN_DOCK_DELIVER_WORLDS = [
   'scan_dock_deliver_task'
 ]
 
+ACOUSTIC_TRACKING_WORLDS = [
+  'acoustic_tracking_task',
+  'practice_2022_acoustic_tracking0_task',
+  'practice_2022_acoustic_tracking1_task',
+  'practice_2022_acoustic_tracking2_task'
+]
+
 FOLLOWPATH_WORLDS = [
   'follow_path_task',
   'practice_2022_follow_path0_task',
@@ -141,10 +148,6 @@ def competition_bridges(world_name):
         task_bridges = [
             vrx_gz.bridges.color_sequence_reports(),
         ]
-    elif world_name in FOLLOWPATH_WORLDS:
-        task_bridges = [
-        ]
-        
     bridges.extend(task_bridges)
 
     nodes = []
