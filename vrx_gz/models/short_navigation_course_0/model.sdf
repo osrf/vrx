@@ -34,7 +34,7 @@
 
     <include>
       <name>red_bound_1</name>
-      <pose>-20 0 0 0 0 0</pose>
+      <pose>-30 0 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -62,7 +62,7 @@
 
     <include>
       <name>red_bound_2</name>
-      <pose>-40 0 0 0 0 0</pose>
+      <pose>-60 0 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -119,7 +119,7 @@
 
     <include>
       <name>green_bound_1</name>
-      <pose>-20 -20 0.2 0 0 0</pose>
+      <pose>-30 -20 0.2 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -147,7 +147,7 @@
 
     <include>
       <name>green_bound_2</name>
-      <pose>-40 -20 0.2 0 0 0</pose>
+      <pose>-60 -20 0.2 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -171,6 +171,33 @@
       </plugin>
 
     </include>
+
+    <!-- Obstacles -->
+    <include>
+      <name>obstacle_0</name>
+      <pose>-20 -18 0.0 0 0 0 </pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="collision_outer">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.25</radius>
+          </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+    </include>
+
   </model>
 
 </sdf>
