@@ -779,7 +779,7 @@
       </plugin>
     </include>
 
-    <include>
+<!--     <include>
       <name>mb_round_buoy_orange_1</name>
       <pose>-536 167 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
@@ -877,7 +877,7 @@
           <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
       </plugin>
-    </include>
+    </include> -->
 
 
     <!-- The moving pinger -->
@@ -897,7 +897,7 @@
           </inertia>
         </inertial>
         <!-- Uncomment to visualize the pinger -->
-        <visual name="visual">
+        <!-- <visual name="visual">
           <geometry>
             <box>
               <size>0.5 0.5 0.5</size>
@@ -908,7 +908,7 @@
             <diffuse>1 1 1</diffuse>
             <specular>1 1 1 1</specular>
           </material>
-        </visual>
+        </visual> -->
       </link>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
