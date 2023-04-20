@@ -66,6 +66,13 @@ SCAN_DOCK_DELIVER_WORLDS = [
   'practice_2022_scan_dock_deliver2_task'
 ]
 
+ACOUSTIC_TRACKING_WORLDS = [
+  'acoustic_tracking_task',
+  'practice_2022_acoustic_tracking0_task',
+  'practice_2022_acoustic_tracking1_task',
+  'practice_2022_acoustic_tracking2_task'
+]
+
 def simulation(world_name, headless=False):
     gz_args = ['-v 4', '-r']
     if headless:
@@ -137,6 +144,12 @@ def competition_bridges(world_name):
         task_bridges = [
             vrx_gz.bridges.color_sequence_reports(),
         ]
+    elif world_name in ACOUSTIC_TRACKING_WORLDS:
+        task_bridges = [
+            vrx_gz.bridges.acoustic_tracking_mean_pose_error(),
+            vrx_gz.bridges.acoustic_tracking_pose_error(),
+        ]
+        
     bridges.extend(task_bridges)
 
     nodes = []
