@@ -502,7 +502,27 @@
           <left_marker>red_bound_3</left_marker>
           <right_marker>green_bound_3</right_marker>
         </gate>
-      </gates>
+        <gate>
+          <left_marker>red_bound_4</left_marker>
+          <right_marker>green_bound_4</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_5</left_marker>
+          <right_marker>green_bound_5</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_6</left_marker>
+          <right_marker>green_bound_6</right_marker>
+        </gate>
+        <gate>
+          <left_marker>red_bound_7</left_marker>
+          <right_marker>green_bound_7</right_marker>
+        </gate>
+         <gate>
+          <left_marker>red_bound_8</left_marker>
+          <right_marker>green_bound_8</right_marker>
+        </gate>
+     </gates>
     </plugin>
 
   </world>
