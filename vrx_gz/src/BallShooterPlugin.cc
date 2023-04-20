@@ -19,6 +19,7 @@
 #include <string>
 
 #include <gz/math/Matrix4.hh>
+#include <gz/msgs/boolean.pb.h>
 #include <gz/plugin/Register.hh>
 
 #include <gz/sim/Link.hh>
@@ -44,7 +45,7 @@ class BallShooterPlugin::Implementation
 {
   /// \brief Callback function called when receiving a new fire message.
   /// \param[in] _msg Unused.
-  public: void OnFire(const gz::msgs::Empty &_msg);
+  public: void OnFire(const msgs::Boolean &_msg);
 
   /// \brief Protect some member variables used in the callback.
   public: std::mutex mutex;
@@ -287,7 +288,7 @@ void BallShooterPlugin::PreUpdate(const sim::UpdateInfo &,
 }
 
 //////////////////////////////////////////////////
-void BallShooterPlugin::Implementation::OnFire(const gz::msgs::Empty &_msg)
+void BallShooterPlugin::Implementation::OnFire(const msgs::Boolean &_msg)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
 
