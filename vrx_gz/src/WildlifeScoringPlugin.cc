@@ -15,7 +15,7 @@
  *
 */
 
-#include <gz/msgs/pose_v.pb.h>
+#include <gz/msgs/param_v.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -532,7 +532,7 @@ void WildlifeScoringPlugin::Configure(const sim::Entity &_entity,
 
   // Setup publisher.
   this->dataPtr->animalsPub =
-    this->dataPtr->node.Advertise<msgs::Pose_V>(this->dataPtr->animalsTopic);
+    this->dataPtr->node.Advertise<msgs::Param_V>(this->dataPtr->animalsTopic);
 }
 
 //////////////////////////////////////////////////
@@ -696,7 +696,7 @@ bool WildlifeScoringPlugin::Implementation::AddBuoy(const std::string &_name,
 void WildlifeScoringPlugin::Implementation::PublishAnimalLocations(
   const sim::UpdateInfo &_info, sim::EntityComponentManager &_ecm)
 {
-  msgs::Pose_V geoPathMsg;
+  msgs::Param_V geoPathMsg;
 
   auto stamp = sim::convert<msgs::Time>(_info.simTime);
   geoPathMsg.mutable_header()->mutable_stamp()->CopyFrom(stamp);
@@ -723,32 +723,57 @@ void WildlifeScoringPlugin::Implementation::PublishAnimalLocations(
     const math::Quaternion<double> orientation = pose.Rot();
 
     // Fill the message.
-    auto geoPoseMsg = geoPathMsg.add_pose();
+    auto *animal = geoPathMsg.add_param();
+    auto *param = animal->mutable_params();
 
-    // header->stamp
-    geoPoseMsg->mutable_header()->mutable_stamp()->CopyFrom(stamp);
+    msgs::Any positionXValue;
+    positionXValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+    positionXValue.set_double_value(latlon.X());
+    (*param)["position_x"] = positionXValue;
 
-    // header->frame_id - We set the buoy type based on its goal.
-    auto frame = geoPoseMsg->mutable_header()->add_data();
-    frame->set_key("frame_id");
+    msgs::Any positionYValue;
+    positionYValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+    positionYValue.set_double_value(latlon.Y());
+    (*param)["position_y"] = positionYValue;
 
+    msgs::Any positionZValue;
+    positionZValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+    positionZValue.set_double_value(latlon.Z());
+    (*param)["position_z"] = positionZValue;
+
+    msgs::Any orientationXValue;
+    orientationXValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+    orientationXValue.set_double_value(orientation.X());
+    (*param)["orientation_x"] = orientationXValue;
+
+    msgs::Any orientationYValue;
+    orientationYValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+    orientationYValue.set_double_value(orientation.Y());
+    (*param)["orientation_y"] = orientationYValue;
+
+    msgs::Any orientationZValue;
+    orientationZValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+    orientationZValue.set_double_value(orientation.Z());
+    (*param)["orientation_z"] = orientationZValue;
+
+    msgs::Any orientationWValue;
+    orientationWValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
+    orientationWValue.set_double_value(orientation.W());
+    (*param)["orientation_w"] = orientationWValue;
+
+    msgs::Any nameValue;
+    nameValue.set_type(msgs::Any_ValueType::Any_ValueType_STRING);
+    
     if (buoy.goal == BuoyGoal::AVOID)
-      frame->add_value("crocodile");
+      nameValue.set_string_value("crocodile");
     else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE)
-      frame->add_value("platypus");
+      nameValue.set_string_value("platypus");
     else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE)
-      frame->add_value("turtle");
+      nameValue.set_string_value("turtle");
     else
-      frame->add_value("unknown");
+      nameValue.set_string_value("unknown");
 
-    // pose
-    geoPoseMsg->mutable_position()->set_x(latlon.X());
-    geoPoseMsg->mutable_position()->set_y(latlon.Y());
-    geoPoseMsg->mutable_position()->set_z(latlon.Z());
-    geoPoseMsg->mutable_orientation()->set_x(orientation.X());
-    geoPoseMsg->mutable_orientation()->set_y(orientation.Y());
-    geoPoseMsg->mutable_orientation()->set_z(orientation.Z());
-    geoPoseMsg->mutable_orientation()->set_w(orientation.W());
+    (*param)["type"] = nameValue;
   }
 
   this->animalsPub.Publish(geoPathMsg);

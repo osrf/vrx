@@ -166,6 +166,14 @@ def perception_reports():
         ros_type='geometry_msgs/msg/PoseStamped',
         direction=BridgeDirection.ROS_TO_GZ)
 
+def animal_poses():
+    return Bridge(
+        gz_topic=f'/vrx/wildlife/animals/poses',
+        ros_topic=f'/vrx/wildlife/animals/poses',
+        gz_type='ignition.msgs.Param_V',
+        ros_type='ros_gz_interfaces/msg/ParamVec',
+        direction=BridgeDirection.GZ_TO_ROS)
+
 def gymkhana_blackbox_goal():
     return Bridge(
         gz_topic=f'/vrx/gymkhana_blackbox/goal',
