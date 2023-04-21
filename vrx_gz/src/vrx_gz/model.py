@@ -312,6 +312,8 @@ class Model:
             elif plugin.name() == 'gz::sim::systems::JointPositionController':
                 name = self.name_from_plugin(plugin.__str__())
                 payload['thruster_rotate_' + name] = [link.name(), name]
+            else:
+                payload[plugin.name()] = ['', plugin.filename()]
         return payload
 
 
