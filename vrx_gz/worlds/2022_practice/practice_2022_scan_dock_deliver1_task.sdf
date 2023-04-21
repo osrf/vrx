@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="scan_dock_deliver_task">
+  <world name="practice_2022_scan_dock_deliver1_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -358,9 +358,9 @@
     </include>
 
     <include>
-      <name>robotx_light_buoy_rgb</name>
-      <pose>-528 186 0.32 0 0 0</pose>
-      <uri>robotx_light_buoy_rgb</uri>
+      <name>robotx_light_buoy_ybr</name>
+      <pose>-515 180 0.32 0 0 0</pose>
+      <uri>robotx_light_buoy_ybr</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -472,7 +472,7 @@
     </plugin>
 
     <wind>
-      <linear_velocity>0 0 0</linear_velocity>
+      <linear_velocity>1 0 0</linear_velocity>
     </wind>
 
     <!-- Load the plugin for the wind -->
@@ -510,92 +510,6 @@
          <stddev>0.03</stddev>
         </noise>
       </vertical>
-    </plugin>
-
-
-    <include>
-      <uri>dock_2022</uri>
-      <pose>-480 190 0 0 0 1.0</pose>
-    </include>
-
-    <!-- The scan, dock, deliver scoring plugin -->
-    <plugin
-      filename="libScanDockScoringPlugin.so"
-      name="vrx::ScanDockScoringPlugin">
-      <vehicle>wamv</vehicle>
-      <task_name>scan_dock_deliver</task_name>
-      <task_info_topic>/vrx/task/info</task_info_topic>
-      <initial_state_duration>10</initial_state_duration>
-      <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
-      <release_topic>/vrx/release</release_topic>
-      <!-- Color sequence -->
-      <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>
-      <color_1>red</color_1>
-      <color_2>green</color_2>
-      <color_3>blue</color_3>
-      <!-- Dock checkers -->
-      <dock_bonus_points>15</dock_bonus_points>
-      <correct_dock_bonus_points>5</correct_dock_bonus_points>
-      <bays>
-        <bay>
-          <name>bay1</name>
-          <internal_activation_topic>/vrx/dock_2022/bay_1/contain</internal_activation_topic>
-          <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
-          <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
-          <min_dock_time>10.0</min_dock_time>
-          <correct_dock>False</correct_dock>
-          <symbol>red_rectangle</symbol>
-        </bay>
-        <bay>
-          <name>bay2</name>
-          <internal_activation_topic>/vrx/dock_2022/bay_2/contain</internal_activation_topic>
-          <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
-          <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
-          <min_dock_time>10.0</min_dock_time>
-          <correct_dock>True</correct_dock>
-          <symbol>blue_triangle</symbol>
-        </bay>
-        <bay>
-          <name>bay3</name>
-          <internal_activation_topic>/vrx/dock_2022/bay_3/contain</internal_activation_topic>
-          <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
-          <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
-          <min_dock_time>10.0</min_dock_time>
-          <correct_dock>False</correct_dock>
-          <symbol>yellow_circle</symbol>
-        </bay>
-      </bays>
-      <!-- Shooting targets -->
-      <targets>
-        <!-- Placard #1 -->
-        <target>
-          <topic>/vrx/dock_2022_placard1_big_hole/contain</topic>
-          <bonus_points>5</bonus_points>
-        </target>
-        <target>
-          <topic>/vrx/dock_2022_placard1_small_hole/contain</topic>
-          <bonus_points>10</bonus_points>
-        </target>
-        <!-- Placard #2 -->
-        <target>
-          <topic>/vrx/dock_2022_placard2_big_hole/contain</topic>
-          <bonus_points>5</bonus_points>
-        </target>
-        <target>
-          <topic>/vrx/dock_2022_placard2_small_hole/contain</topic>
-          <bonus_points>10</bonus_points>
-        </target>
-        <!-- Placard #3 -->
-        <target>
-          <topic>/vrx/dock_2022_placard3_big_hole/contain</topic>
-          <bonus_points>5</bonus_points>
-        </target>
-        <target>
-          <topic>/vrx/dock_2022_placard3_small_hole/contain</topic>
-          <bonus_points>10</bonus_points>
-        </target>
-      </targets>
     </plugin>
 
     <!-- The wave field -->
@@ -639,7 +553,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.3
+            double_value: 0.5
           }
         }
         params {
@@ -702,6 +616,91 @@
           }
         }
       </message>
+    </plugin>
+
+    <include>
+      <uri>dock_2022</uri>
+      <pose>-500 190 0 0 0 0</pose>
+    </include>
+
+    <!-- The scan, dock, deliver scoring plugin -->
+    <plugin
+      filename="libScanDockScoringPlugin.so"
+      name="vrx::ScanDockScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>scan_dock_deliver</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_topic>/vrx/release</release_topic>
+      <!-- Color sequence -->
+      <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>
+      <color_1>yellow</color_1>
+      <color_2>blue</color_2>
+      <color_3>red</color_3>
+      <!-- Dock checkers -->
+      <dock_bonus_points>15</dock_bonus_points>
+      <correct_dock_bonus_points>5</correct_dock_bonus_points>
+      <bays>
+        <bay>
+          <name>bay1</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_1/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>False</correct_dock>
+          <symbol>blue_rectangle</symbol>
+        </bay>
+        <bay>
+          <name>bay2</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_2/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>False</correct_dock>
+          <symbol>red_cross</symbol>
+        </bay>
+        <bay>
+          <name>bay3</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_3/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>True</correct_dock>
+          <symbol>yellow_circle</symbol>
+        </bay>
+      </bays>
+      <!-- Shooting targets -->
+      <targets>
+        <!-- Placard #1 -->
+        <target>
+          <topic>/vrx/dock_2022_placard1_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard1_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #2 -->
+        <target>
+          <topic>/vrx/dock_2022_placard2_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard2_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #3 -->
+        <target>
+          <topic>/vrx/dock_2022_placard3_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard3_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+      </targets>
     </plugin>
 
   </world>
