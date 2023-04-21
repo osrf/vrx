@@ -26,7 +26,7 @@
     * [Pull Request 598](https://github.com/osrf/vrx/pull/598) 
     * [Pull Request 615](https://github.com/osrf/vrx/pull/615) 
     * [Pull Request 625](https://github.com/osrf/vrx/pull/625) 
-    * [Pull Request 626](https://github.com/osrf/vrx/pull/626) 
+    * [Pull Request 627](https://github.com/osrf/vrx/pull/627) 
 
 ### VRX 2.0.0
 1. Port VRX Core Functionality to Gazebo Sim
