@@ -491,6 +491,12 @@ class WildlifeScoringPlugin::Implementation
 
   /// \brief Whether we are in the first plugin iteration or not.
   public: bool firstIteration = true;
+
+  /// \brief Animal pose publication frequency (Hz).
+  public: double pubFrequency = 1.0;
+
+  /// \brief Time of the last publication sent (sim time).
+  public: std::chrono::duration<double> lastPublicationTime{0};
 };
 
 //////////////////////////////////////////////////
@@ -527,6 +533,10 @@ void WildlifeScoringPlugin::Configure(const sim::Entity &_entity,
   // Parse the optional <time_bonus> element.
   if (_sdf->HasElement("time_bonus"))
     this->dataPtr->timeBonus = _sdf->Get<double>("time_bonus");
+
+  // Parse the optional <publication_frequency> element.
+  if (_sdf->HasElement("publication_frequency"))
+    this->dataPtr->pubFrequency = _sdf->Get<double>("publication_frequency");
 
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 }
@@ -700,6 +710,16 @@ bool WildlifeScoringPlugin::Implementation::AddBuoy(const std::string &_name,
 void WildlifeScoringPlugin::Implementation::PublishAnimalLocations(
   const sim::UpdateInfo &_info, sim::EntityComponentManager &_ecm)
 {
+  auto now = _info.simTime;
+  std::chrono::duration<double> elapsed = now - this->lastPublicationTime;
+  if (std::chrono::duration<double>(elapsed).count() <
+      1 / this->pubFrequency)
+  {
+    return;
+  }
+
+  this->lastPublicationTime = now;
+
   auto stamp = sim::convert<msgs::Time>(_info.simTime);
 
   uint8_t i = 0u;

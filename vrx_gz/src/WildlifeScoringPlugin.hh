@@ -42,6 +42,10 @@ namespace vrx
   ///                 starting from 0, followed by "/pose".
   ///                 E.g. of final topic: "/vrx/wildfile/animal0/pose"
   ///                 Note that this topic will be advertised for each animal.
+  ///
+  /// <publication_frequency>: How many messages per second are published with
+  ///                          the animal poses (Hz). Defaults to 1 Hz.
+  ///
   /// <buoys>: Specifies the collection of buoys to circumnavigate, avoid, etc.
   ///
   ///   <buoy>: A buoy to circumnavigate, avoid.
