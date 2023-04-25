@@ -36,8 +36,12 @@ namespace vrx
   ///
   /// * Optional parameters
   ///
-  /// <animals_topic>: The topic that publishes the animal poses.
-  ///                  Defaults to "/vrx/wildlife/animals/poses"
+  /// <topic_prefix>: The topic prefix used to publish an animal pose.
+  ///                 Defaults to "/vrx/wildlife/animal". The final topic will
+  ///                 be constructed by appending a numeric index
+  ///                 starting from 0, followed by "/pose".
+  ///                 E.g. of final topic: "/vrx/wildfile/animal0/pose"
+  ///                 Note that this topic will be advertised for each animal.
   /// <buoys>: Specifies the collection of buoys to circumnavigate, avoid, etc.
   ///
   ///   <buoy>: A buoy to circumnavigate, avoid.
@@ -79,7 +83,7 @@ namespace vrx
   ///   </buoys>
   ///   <engagement_distance>10.0</engagement_distance>
   ///   <time_bonus>30.0</time_bonus>
-  ///   <animals_topic>/vrx/wildlife/animals/poses</animals_topic>
+  ///   <topic_prefix>/vrx/wildlife/animal</topic_prefix>
   /// <plugin>
   class WildlifeScoringPlugin : public ScoringPlugin
   {
