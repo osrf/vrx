@@ -149,7 +149,9 @@ def competition_bridges(world_name):
         ]
     elif world_name in WILDLIFE_WORLDS:
         task_bridges = [
-            vrx_gz.bridges.animal_poses(),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal0/pose'),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal1/pose'),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal2/pose'),
         ]
     elif world_name in SCAN_DOCK_DELIVER_WORLDS:
         task_bridges = [
