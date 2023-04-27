@@ -395,10 +395,11 @@
       </plugin>
     </include>
 
-    <!-- The turtle buoy -->
+    <!-- A platypus buoy -->
     <include>
+      <name>platypus1</name>
       <pose>-460 250 0 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -406,13 +407,13 @@
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
-        <buoyancy name="buoyancy_sphere">
+        <buoyancy name="buoyancy_box">
           <link_name>link</link_name>
-          <pose>0 0 0.2 0 0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
           <geometry>
-            <sphere>
-              <radius>0.35</radius>
-            </sphere>
+            <box>
+              <size>0.75 0.35 0.16</size>
+            </box>
           </geometry>
         </buoyancy>
         <wavefield>
@@ -424,8 +425,8 @@
               name="gz::sim::systems::TrajectoryFollower">
         <link_name>link</link_name>
         <loop>true</loop>
-        <force>6</force>
-        <torque>1</torque>
+        <force>18</force>
+        <torque>1.5</torque>
         <waypoints>
           <waypoint>-463 249</waypoint>
           <waypoint>-460 250</waypoint>
@@ -433,8 +434,9 @@
       </plugin>
     </include>
 
-    <!-- The platypus buoy -->
+    <!-- A platypus buoy -->
     <include>
+      <name>platypus2</name>
       <pose>-480 220 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
 
@@ -704,12 +706,12 @@
           <goal>avoid</goal>
         </buoy>
         <buoy>
-          <name>platypus::link</name>
+          <name>platypus1::link</name>
           <goal>circumnavigate_clockwise</goal>
         </buoy>
         <buoy>
-          <name>turtle::link</name>
-          <goal>circumnavigate_counterclockwise</goal>
+          <name>platypus2::link</name>
+          <goal>circumnavigate_clockwise</goal>
         </buoy>
       </buoys>
       <engagement_distance>10.0</engagement_distance>

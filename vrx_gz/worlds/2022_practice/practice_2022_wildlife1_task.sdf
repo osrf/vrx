@@ -395,8 +395,9 @@
       </plugin>
     </include>
 
-    <!-- The turtle buoy -->
+    <!-- A turtle buoy -->
     <include>
+      <name>turtle1</name>
       <pose>-550 201 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
 
@@ -433,10 +434,11 @@
       </plugin>
     </include>
 
-    <!-- The platypus buoy -->
+    <!-- A turtle buoy -->
     <include>
+      <name>turtle2</name>
       <pose>-470 200 0 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -444,13 +446,13 @@
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
-        <buoyancy name="buoyancy_box">
+        <buoyancy name="buoyancy_sphere">
           <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
+          <pose>0 0 0.2 0 0 0</pose>
           <geometry>
-            <box>
-              <size>0.75 0.35 0.16</size>
-            </box>
+            <sphere>
+              <radius>0.35</radius>
+            </sphere>
           </geometry>
         </buoyancy>
         <wavefield>
@@ -462,8 +464,8 @@
               name="gz::sim::systems::TrajectoryFollower">
         <link_name>link</link_name>
         <loop>true</loop>
-        <force>18</force>
-        <torque>1.5</torque>
+        <force>6</force>
+        <torque>1</torque>
         <waypoints>
           <waypoint>-470 205</waypoint>
           <waypoint>-470 200</waypoint>
@@ -704,11 +706,11 @@
           <goal>avoid</goal>
         </buoy>
         <buoy>
-          <name>platypus::link</name>
-          <goal>circumnavigate_clockwise</goal>
+          <name>turtle1::link</name>
+          <goal>circumnavigate_counterclockwise</goal>
         </buoy>
         <buoy>
-          <name>turtle::link</name>
+          <name>turtle2::link</name>
           <goal>circumnavigate_counterclockwise</goal>
         </buoy>
       </buoys>
