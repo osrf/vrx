@@ -359,7 +359,8 @@
 
     <!-- The crocodile buoy -->
     <include>
-      <pose>-500 190 0 0 0 0</pose>
+      <name>crocodile1</name>
+      <pose>-550 189 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -389,16 +390,17 @@
         <force>18</force>
         <torque>1.5</torque>
         <waypoints>
-          <waypoint>-407 189</waypoint>
-          <waypoint>-500 190</waypoint>
+          <waypoint>-550 189</waypoint>
+          <waypoint>-520 190</waypoint>
         </waypoints>
       </plugin>
     </include>
 
-    <!-- The turtle buoy -->
+    <!-- The crocodile buoy -->
     <include>
-      <pose>-460 250 0 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
+      <name>crocodile2</name>
+      <pose>-520 225 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -406,13 +408,13 @@
         <fluid_level>0.0</fluid_level>
         <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
-        <buoyancy name="buoyancy_sphere">
+        <buoyancy name="buoyancy_box">
           <link_name>link</link_name>
-          <pose>0 0 0.2 0 0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
           <geometry>
-            <sphere>
-              <radius>0.35</radius>
-            </sphere>
+            <box>
+              <size>0.80 0.40 0.15</size>
+            </box>
           </geometry>
         </buoyancy>
         <wavefield>
@@ -424,18 +426,19 @@
               name="gz::sim::systems::TrajectoryFollower">
         <link_name>link</link_name>
         <loop>true</loop>
-        <force>6</force>
-        <torque>1</torque>
+        <force>18</force>
+        <torque>1.5</torque>
         <waypoints>
-          <waypoint>-463 249</waypoint>
-          <waypoint>-460 250</waypoint>
+          <waypoint>-520 225</waypoint>
+          <waypoint>-500 224</waypoint>
         </waypoints>
       </plugin>
     </include>
 
-    <!-- The platypus buoy -->
+    <!-- A platypus buoy -->
     <include>
-      <pose>-480 220 0 0 0 0</pose>
+      <name>platypus</name>
+      <pose>-500 260 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -465,8 +468,8 @@
         <force>18</force>
         <torque>1.5</torque>
         <waypoints>
-          <waypoint>-476 220</waypoint>
-          <waypoint>-480 220</waypoint>
+          <waypoint>-500 260</waypoint>
+          <waypoint>-500 270</waypoint>
         </waypoints>
       </plugin>
     </include>
@@ -700,21 +703,22 @@
       <!-- wildlife specific parameters -->
       <buoys>
         <buoy>
-          <name>crocodile::link</name>
+          <name>crocodile1::link</name>
+          <goal>avoid</goal>
+        </buoy>
+        <buoy>
+          <name>crocodile2::link</name>
           <goal>avoid</goal>
         </buoy>
         <buoy>
           <name>platypus::link</name>
           <goal>circumnavigate_clockwise</goal>
         </buoy>
-        <buoy>
-          <name>turtle::link</name>
-          <goal>circumnavigate_counterclockwise</goal>
-        </buoy>
       </buoys>
       <engagement_distance>10.0</engagement_distance>
       <time_bonus>30.0</time_bonus>
       <topic_prefix>/vrx/wildlife/animal</topic_prefix>
+      <publication_frequency>0.1</publication_frequency>
     </plugin>
 
   </world>
