@@ -437,7 +437,7 @@
 
     <!-- A platypus buoy -->
     <include>
-      <name>platypus1</name>
+      <name>platypus</name>
       <pose>-500 260 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
 
