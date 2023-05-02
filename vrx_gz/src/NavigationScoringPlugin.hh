@@ -30,7 +30,9 @@ namespace vrx
   ///
   /// This plugin requires the following SDF parameters:
   ///
+  /// <points_per_gate_crossed>: Number of points granted to cross any gate.
   /// <obstacle_penalty>: Specifies how many points are deducted per collision.
+  /// <gate_bonus>: ToDo.
   /// <gates>: Specifies the collection of gates delimiting the course.
   ///
   ///   Each gate accepts the following elements:
@@ -50,7 +52,21 @@ namespace vrx
   ///   <vehicle>wamv</vehicle>
   ///   <task_name>navigation_scoring_plugin</task_name>
   ///   <course_name>vrx_navigation_course</course_name>
-  ///   <obstacle_penalty>10</obstable_penalty>
+  ///   <points_per_gate_crossed>10</points_per_gate_crossed>
+  ///   <obstacle_penalty>3</obstable_penalty>
+  ///   <gate_bonus>
+  ///     <gate>1</gate>
+  ///     <gate>2</gate>
+  ///     <gate>4</gate>
+  ///     <gate>7</gate>
+  ///     <gate>11</gate>
+  ///     <gate>16</gate>
+  ///     <gate>22</gate>
+  ///     <gate>29</gate>
+  ///     <gate>37</gate>
+  ///     <gate>46</gate>
+  ///     <gate>56</gate>
+  ///   </gate_bonus>
   ///   <gates>
   ///     <gate>
   ///       <left_marker>red_bound_0</left_marker>

@@ -104,6 +104,11 @@ class NavigationScoringPlugin::Implementation
   /// \return True when the gates were successfully parsed or false othwerwise.
   public: bool ParseGates(sdf::ElementPtr _sdf);
 
+  /// \brief Parse the gate scoring bonus from SDF.
+  /// \param[in] _sdf The current SDF element.
+  /// \return True when the bonus was successfully parsed or false othwerwise.
+  public: bool ParseGateBonus(sdf::ElementPtr _sdf);
+
    /// \brief Name of the course used.
   public: std::string courseName;
 
@@ -126,10 +131,25 @@ class NavigationScoringPlugin::Implementation
   public: bool gatesLoaded = false;
 
   /// \brief Number of points deducted per collision.
-  public: double obstaclePenalty = 10.0;
+  public: double obstaclePenalty = 3.0;
+
+  /// \brief Number of points granted for crossing any gate.
+  public: double pointsPerGateCrossed = 10.0;
 
   /// \brief Display or suppress state changes
   public: bool silent = false;
+
+  /// \brief The collection of bonuses.
+  public: std::vector<double> bonuses;
+
+  /// \brief The index of the last gate crossed.
+  public: int lastGateCrossed = -1;
+
+  /// \brief Current number of consecutive gates crossed.
+  public: int currentConsecutiveGatesCrossed = 0;
+
+  /// \brief Previous number of collisions.
+  public: int prevCollisions = 0;
 };
 
 /////////////////////////////////////////////////
@@ -278,6 +298,35 @@ bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
   return true;
 }
 
+//////////////////////////////////////////////////
+bool NavigationScoringPlugin::Implementation::ParseGateBonus(
+  sdf::ElementPtr _sdf)
+{
+  // We need at least one gate.
+  if (!_sdf->HasElement("gate"))
+  {
+    gzerr << "Unable to find <gate> element in SDF." << std::endl;
+    return false;
+  }
+
+  auto gateElem = _sdf->GetElement("gate");
+
+  // Parse a new gate.
+  while (gateElem)
+  {
+    double bonus = gateElem->Get<double>();
+    gzerr << bonus << std::endl;
+
+    // Save the new bonus.
+    this->bonuses.push_back(bonus);
+
+    // Parse the next gate.
+    gateElem = gateElem->GetNextElement("gate");
+  }
+
+  return true;
+}
+
 /////////////////////////////////////////////////
 NavigationScoringPlugin::NavigationScoringPlugin()
   : ScoringPlugin(),
@@ -311,6 +360,13 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   if (_sdf->HasElement("obstacle_penalty"))
     this->dataPtr->obstaclePenalty = _sdf->Get<double>("obstacle_penalty");
 
+  // Optional.
+  if (_sdf->HasElement("points_per_gate_crossed"))
+  {
+    this->dataPtr->pointsPerGateCrossed =
+      _sdf->Get<double>("points_per_gate_crossed");
+  }
+
   // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
@@ -322,12 +378,31 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   auto const &gatesElem = this->dataPtr->sdf->GetElement("gates");
   if (!this->dataPtr->ParseGates(gatesElem))
   {
-    gzerr << "Score has been disabled" << std::endl;
+    gzerr << "Unable to parse gates. Score has been disabled" << std::endl;
     return;
   }
 
   // Save number of gates
   this->dataPtr->numGates = this->dataPtr->gates.size();
+
+  // This is a required element.
+  if (!_sdf->HasElement("gate_bonus"))
+  {
+    gzerr << "Unable to find <gate_bonus> element in SDF." << std::endl;
+    return;
+  }
+
+  // Parse gate bonuses.
+  auto const &gateBonusElem = this->dataPtr->sdf->GetElement("gate_bonus");
+  if (!this->dataPtr->ParseGateBonus(gateBonusElem))
+  {
+    gzerr << "Unable to parse bonuses. Score has been disabled" << std::endl;
+    return;
+  }
+
+  gzerr << "Bonuses:" << std::endl;
+  for (auto bonus : this->dataPtr->bonuses)
+    gzerr << bonus << std::endl;
 
   // Set default score in case of timeout.
   double timeoutScore = 200;
@@ -389,65 +464,88 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   if (this->ScoringPlugin::TaskState() != "running")
     return;
 
-  // Current score
-  this->ScoringPlugin::SetScore(std::min(this->RunningStateDuration(),
-    std::chrono::duration<double>(this->ElapsedTime()).count() +
-    this->NumCollisions() * this->dataPtr->obstaclePenalty) /
-      this->dataPtr->numGates);
+  // Compute collisions.
+  auto newCollisions = this->NumCollisions() - this->dataPtr->prevCollisions;
+  auto newScore =
+    this->Score() - newCollisions * this->dataPtr->obstaclePenalty;
+  newScore = std::max(0.0, newScore);
+  this->SetScore(newScore);
+  this->dataPtr->prevCollisions = this->NumCollisions();
 
   auto vehiclePose = _ecm.Component<sim::components::Pose>(
     this->dataPtr->vehicleEntity)->Data();
 
   // Update the state of all gates.
-  auto iter = std::begin(this->dataPtr->gates);
-  while (iter != std::end(this->dataPtr->gates))
+  for (auto i = 0; i < this->dataPtr->numGates; ++i)
   {
-    Implementation::Gate &gate = *iter;
+    Implementation::Gate &gate = this->dataPtr->gates[i];
 
     // Update this gate (in case it moved).
     gate.Update(_ecm);
 
     // Check if we have crossed this gate.
     auto currentState = gate.IsPoseInGate(vehiclePose);
-    if (currentState == Implementation::GateState::VEHICLE_AFTER &&
+
+    // Ignore a gate marked as invalid.
+    if (gate.state == Implementation::GateState::INVALID)
+      continue;
+    // Gate crossed.
+    else if (currentState == Implementation::GateState::VEHICLE_AFTER &&
         gate.state   == Implementation::GateState::VEHICLE_BEFORE)
     {
-      currentState = Implementation::GateState::CROSSED;
-      gzmsg << "New gate crossed!" << std::endl;
-      std::cout << std::flush;
-
-      // We need to cross all gates in order.
-      if (iter != this->dataPtr->gates.begin())
+      // Ignore if we haven't crossed the first gate yet.     
+      if (i == 0 ||
+          this->dataPtr->gates[0].state == Implementation::GateState::CROSSED)
       {
-        gzmsg << "Gate crossed in the wrong order" << std::endl;
-        this->Fail();
+        gate.state = Implementation::GateState::CROSSED;
+        gzmsg << "New gate crossed!" << std::endl;
+        std::cout << std::flush;
+
+        // Add the fix number of points for crossing a gate.
+        this->SetScore(this->Score() + this->dataPtr->pointsPerGateCrossed);
+
+        // Add a bonus for crossing a consecutive gate.
+        if (!this->dataPtr->bonuses.empty() &&
+            i == this->dataPtr->lastGateCrossed + 1)
+        {
+          double bonus = this->dataPtr->bonuses.back();
+          if (this->dataPtr->currentConsecutiveGatesCrossed <
+              this->dataPtr->bonuses.size())
+          {
+          double bonus = this->dataPtr->bonuses[
+            this->dataPtr->currentConsecutiveGatesCrossed];
+          }
+          this->dataPtr->currentConsecutiveGatesCrossed++;
+
+          this->SetScore(this->Score() + bonus);
+        }
+        else
+          this->dataPtr->currentConsecutiveGatesCrossed = 0;
+
+        this->dataPtr->lastGateCrossed = i;
+
+        // Course completed!
+        if (i == this->dataPtr->numGates - 1)
+        {
+          gzmsg << "Course completed!" << std::endl;
+          ScoringPlugin::Finish();
+        } 
+
         return;
       }
-
-      iter = this->dataPtr->gates.erase(iter);
     }
-    // Just checking: did we go backward through the gate?
+    // Just checking: did we go backwards through the gate?
     else if (currentState == Implementation::GateState::VEHICLE_BEFORE &&
               gate.state   == Implementation::GateState::VEHICLE_AFTER)
     {
        gate.state = Implementation::GateState::INVALID;
        gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
              << std::endl;
-       this->Fail();
        return;
     }
-    else
-      ++iter;
 
     gate.state = currentState;
   }
-
-  // Course completed!
-  if (this->dataPtr->gates.empty())
-  {
-    gzmsg << "Course completed!" << std::endl;
-    ScoringPlugin::Finish();
-  } 
 }
 
 //////////////////////////////////////////////////
