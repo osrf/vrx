@@ -359,7 +359,8 @@
 
     <!-- The crocodile buoy -->
     <include>
-      <pose>-500 190 0 0 0 0</pose>
+      <name>crocodile1</name>
+      <pose>-550 189 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -389,8 +390,47 @@
         <force>18</force>
         <torque>1.5</torque>
         <waypoints>
-          <waypoint>-407 189</waypoint>
-          <waypoint>-500 190</waypoint>
+          <waypoint>-550 189</waypoint>
+          <waypoint>-520 190</waypoint>
+        </waypoints>
+      </plugin>
+    </include>
+
+    <!-- The crocodile buoy -->
+    <include>
+      <name>crocodile2</name>
+      <pose>-520 225 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_box">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.80 0.40 0.15</size>
+            </box>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>18</force>
+        <torque>1.5</torque>
+        <waypoints>
+          <waypoint>-520 225</waypoint>
+          <waypoint>-500 224</waypoint>
         </waypoints>
       </plugin>
     </include>
@@ -398,7 +438,7 @@
     <!-- A platypus buoy -->
     <include>
       <name>platypus1</name>
-      <pose>-460 250 0 0 0 0</pose>
+      <pose>-500 260 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -428,47 +468,8 @@
         <force>18</force>
         <torque>1.5</torque>
         <waypoints>
-          <waypoint>-463 249</waypoint>
-          <waypoint>-460 250</waypoint>
-        </waypoints>
-      </plugin>
-    </include>
-
-    <!-- A platypus buoy -->
-    <include>
-      <name>platypus2</name>
-      <pose>-480 220 0 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="buoyancy_box">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>0.75 0.35 0.16</size>
-            </box>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-
-      <plugin filename="gz-sim-trajectory-follower-system"
-              name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>18</force>
-        <torque>1.5</torque>
-        <waypoints>
-          <waypoint>-476 220</waypoint>
-          <waypoint>-480 220</waypoint>
+          <waypoint>-500 260</waypoint>
+          <waypoint>-500 270</waypoint>
         </waypoints>
       </plugin>
     </include>
@@ -702,15 +703,15 @@
       <!-- wildlife specific parameters -->
       <buoys>
         <buoy>
-          <name>crocodile::link</name>
+          <name>crocodile1::link</name>
           <goal>avoid</goal>
         </buoy>
         <buoy>
-          <name>platypus1::link</name>
-          <goal>circumnavigate_clockwise</goal>
+          <name>crocodile2::link</name>
+          <goal>avoid</goal>
         </buoy>
         <buoy>
-          <name>platypus2::link</name>
+          <name>platypus::link</name>
           <goal>circumnavigate_clockwise</goal>
         </buoy>
       </buoys>
