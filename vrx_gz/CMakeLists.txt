@@ -110,6 +110,7 @@ list(APPEND VRX_GZ_PLUGINS
   SimpleHydrodynamics
   StationkeepingScoringPlugin
   Surface
+  USVWind
   WaveVisual
   WildlifeScoringPlugin
 )
