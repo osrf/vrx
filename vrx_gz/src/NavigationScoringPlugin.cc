@@ -517,7 +517,7 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
           i == this->dataPtr->lastGateCrossed + 1)
       {
         gzdbg << "Num consecutive gates: "
-              << this->dataPtr->currentConsecutiveGatesCrossed << std::endl;
+              << this->dataPtr->currentConsecutiveGatesCrossed + 1 << std::endl;
 
         double bonus = this->dataPtr->bonuses.back();
         if (this->dataPtr->currentConsecutiveGatesCrossed <
