@@ -487,7 +487,6 @@
       <points_per_gate_crossed>10</points_per_gate_crossed>
       <obstacle_penalty>3.0</obstacle_penalty>
       <gate_bonus>
-        <gate>0</gate>
         <gate>1</gate>
         <gate>2</gate>
         <gate>4</gate>

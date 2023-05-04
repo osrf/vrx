@@ -143,7 +143,7 @@ class NavigationScoringPlugin::Implementation
   public: std::vector<double> bonuses;
 
   /// \brief The index of the last gate crossed.
-  public: int lastGateCrossed = -1;
+  public: int lastGateCrossed = std::numeric_limits<int>::min();
 
   /// \brief Current number of consecutive gates crossed.
   public: int currentConsecutiveGatesCrossed = 0;
@@ -400,10 +400,6 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
     return;
   }
 
-  gzerr << "Bonuses:" << std::endl;
-  for (auto bonus : this->dataPtr->bonuses)
-    gzerr << bonus << std::endl;
-
   // Set default score in case of timeout.
   double timeoutScore = 200;
   gzmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
@@ -466,11 +462,16 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
 
   // Compute collisions.
   auto newCollisions = this->NumCollisions() - this->dataPtr->prevCollisions;
-  auto newScore =
-    this->Score() - newCollisions * this->dataPtr->obstaclePenalty;
-  newScore = std::max(0.0, newScore);
-  this->SetScore(newScore);
-  this->dataPtr->prevCollisions = this->NumCollisions();
+  if (newCollisions > 0)
+  {
+    auto newScore =
+      this->Score() - newCollisions * this->dataPtr->obstaclePenalty;
+    newScore = std::max(0.0, newScore);
+    this->SetScore(newScore);
+    this->dataPtr->prevCollisions = this->NumCollisions();
+    gzdbg << "New penalty. score: " << this->Score() << std::endl;
+    std::cout << std::flush;
+  }
 
   auto vehiclePose = _ecm.Component<sim::components::Pose>(
     this->dataPtr->vehicleEntity)->Data();
@@ -486,62 +487,79 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     // Check if we have crossed this gate.
     auto currentState = gate.IsPoseInGate(vehiclePose);
 
-    // Ignore a gate marked as invalid.
-    if (gate.state == Implementation::GateState::INVALID)
+    // Ignore if we haven't crossed the first gate yet.
+    if (i != 0 &&
+        this->dataPtr->gates[0].state != Implementation::GateState::CROSSED)
+    {
+      break;
+    }
+
+    // Ignore a gate marked as invalid or already crossed.
+    if (gate.state == Implementation::GateState::INVALID || 
+        gate.state == Implementation::GateState::CROSSED)
+    {
       continue;
+    }
+
     // Gate crossed.
     else if (currentState == Implementation::GateState::VEHICLE_AFTER &&
-        gate.state   == Implementation::GateState::VEHICLE_BEFORE)
+             gate.state == Implementation::GateState::VEHICLE_BEFORE)
     {
-      // Ignore if we haven't crossed the first gate yet.     
-      if (i == 0 ||
-          this->dataPtr->gates[0].state == Implementation::GateState::CROSSED)
+      gate.state = Implementation::GateState::CROSSED;
+      gzdbg << "New gate crossed!" << std::endl;
+      std::cout << std::flush;
+
+      // Add the fix number of points for crossing a gate.
+      this->SetScore(this->Score() + this->dataPtr->pointsPerGateCrossed);
+
+      // Add a bonus for crossing a consecutive gate.
+      if (!this->dataPtr->bonuses.empty() &&
+          i == this->dataPtr->lastGateCrossed + 1)
       {
-        gate.state = Implementation::GateState::CROSSED;
-        gzmsg << "New gate crossed!" << std::endl;
-        std::cout << std::flush;
+        gzdbg << "Num consecutive gates: "
+              << this->dataPtr->currentConsecutiveGatesCrossed << std::endl;
 
-        // Add the fix number of points for crossing a gate.
-        this->SetScore(this->Score() + this->dataPtr->pointsPerGateCrossed);
-
-        // Add a bonus for crossing a consecutive gate.
-        if (!this->dataPtr->bonuses.empty() &&
-            i == this->dataPtr->lastGateCrossed + 1)
+        double bonus = this->dataPtr->bonuses.back();
+        if (this->dataPtr->currentConsecutiveGatesCrossed <
+            this->dataPtr->bonuses.size())
         {
-          double bonus = this->dataPtr->bonuses.back();
-          if (this->dataPtr->currentConsecutiveGatesCrossed <
-              this->dataPtr->bonuses.size())
-          {
-          double bonus = this->dataPtr->bonuses[
-            this->dataPtr->currentConsecutiveGatesCrossed];
-          }
-          this->dataPtr->currentConsecutiveGatesCrossed++;
-
-          this->SetScore(this->Score() + bonus);
+          bonus = this->dataPtr->bonuses[
+          this->dataPtr->currentConsecutiveGatesCrossed];
         }
-        else
-          this->dataPtr->currentConsecutiveGatesCrossed = 0;
+        this->dataPtr->currentConsecutiveGatesCrossed++;
 
-        this->dataPtr->lastGateCrossed = i;
-
-        // Course completed!
-        if (i == this->dataPtr->numGates - 1)
-        {
-          gzmsg << "Course completed!" << std::endl;
-          ScoringPlugin::Finish();
-        } 
-
-        return;
+        this->SetScore(this->Score() + bonus);
+        gzdbg << "New bonus: " << bonus << std::endl;
       }
+      else
+        this->dataPtr->currentConsecutiveGatesCrossed = 0;
+
+      this->dataPtr->lastGateCrossed = i;
+
+      gzdbg << "Score: " << this->Score() << std::endl;
+      std::cout << std::flush;
+
+      // Course completed!
+      if (i == this->dataPtr->numGates - 1)
+      {
+        gzdbg << "Course completed!" << std::endl;
+        std::cout << std::flush;
+        ScoringPlugin::Finish();
+      }
+
+      return;
     }
     // Just checking: did we go backwards through the gate?
     else if (currentState == Implementation::GateState::VEHICLE_BEFORE &&
-              gate.state   == Implementation::GateState::VEHICLE_AFTER)
+             gate.state   == Implementation::GateState::VEHICLE_AFTER)
     {
-       gate.state = Implementation::GateState::INVALID;
-       gzmsg << "Transited the gate in the wrong direction. Gate invalidated!"
-             << std::endl;
-       return;
+      gate.state = Implementation::GateState::INVALID;
+      gzdbg << "Transited the gate in the wrong direction. Gate invalidated!"
+            << std::endl;
+      std::cout << std::flush;
+      this->dataPtr->currentConsecutiveGatesCrossed = 0;
+      this->dataPtr->lastGateCrossed = i;
+      return;
     }
 
     gate.state = currentState;
