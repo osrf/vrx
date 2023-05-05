@@ -4,31 +4,28 @@
 #include <gz/math/Vector3.hh>
 #include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
-
-#include "gz/sim/Link.hh"
-#include "gz/sim/Model.hh"
+#include <gz/sim/Util.hh>
+#include <gz/sim/Entity.hh>
 #include <gz/transport/Node.hh>
 #include <gz/msgs/vector3d.pb.h>
 #include <gz/msgs/double.pb.h>
 #include "USVWind.hh"
 
 using namespace gz;
-using namespace sim;
 using namespace vrx;
 
-    struct WindObj
-    {
-        bool init = false;
-        /// \brief The link information.
-        std::string modelName;
-        std::string linkName;
-        sim::Entity linkEntity;
-        math::Vector3d windCoeff;
-    };
+struct WindObj
+{
+    bool init = false;
+    /// \brief The link information.
+    std::string modelName;
+    std::string linkName;
+    sim::Entity linkEntity = sim::kNullEntity;
+    math::Vector3d windCoeff;
+};
 
 class USVWind::Implementation
 {
-
 
     /// \brief vector of simple objects effected by the wind
 public:
@@ -60,7 +57,7 @@ public:
 
     /// \brief Time constant
 public:
-    double timeConstant = 0;
+    double timeConstant = 0.1;
 
     /// \brief Previous time
 public:
@@ -108,12 +105,13 @@ USVWind::USVWind() : dataPtr(utils::MakeUniqueImpl<Implementation>())
 }
 
 //////////////////////////////////////////////////
-void USVWind::Configure(const Entity &_entity,
+void USVWind::Configure(const sim::Entity &_entity,
                         const std::shared_ptr<const sdf::Element> &_sdf,
-                        EntityComponentManager &_ecm,
-                        EventManager & /*_eventMgr*/)
+                        sim::EntityComponentManager &_ecm,
+                        sim::EventManager & /*_eventMgr*/)
 {
-    sdf::ElementPtr sdf = _sdf->Clone();;
+    sdf::ElementPtr sdf = _sdf->Clone();
+    
 
     // Retrieve models' parameters from SDF
     if (!sdf->HasElement("wind_obj"))
@@ -246,29 +244,74 @@ void USVWind::PreUpdate(
 {
     GZ_PROFILE("USVWind::PreUpdate");
 
+    auto time = std::chrono::duration<double>(_info.simTime);
     if (this->dataPtr->previousTime == std::chrono::duration<double>(0))
     {
-        this->dataPtr->previousTime = _info.simTime;
+        this->dataPtr->previousTime = time - std::chrono::duration<double>(0.001);
     }
-   gzmsg << "PreUpdate" << std::endl;
- /*  if (this->dataPtr->vehicleModel == sim::kNullEntity)
-    {
-        auto entity = sim::entitiesFromScopedName(this->dataPtr->vehicleName, _ecm);
-    }
-    // Transform the force and torque to the world frame.
-    math::Vector3d forceWorld = (*comPose).Rot().RotateVector(
-        math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
-    math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
-        math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));*/
+    gzmsg << "PreUpdate" << std::endl;
+    /*
+       // Transform the force and torque to the world frame.
+       math::Vector3d forceWorld = (*comPose).Rot().RotateVector(
+           math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
+       math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
+           math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));*/
 
     // Apply the force and torque at COM.
-    //this->dataPtr->link.AddWorldWrench(_ecm, forceWorld, torqueWorld);
+    // this->dataPtr->link.AddWorldWrench(_ecm, forceWorld, torqueWorld);
+    if (!this->dataPtr->windObjsInit)
+    {
+        for (auto &i : this->dataPtr->windObjs)
+        {
+
+            if (!i.init)
+            {
+                {
+                    auto entity = sim::entitiesFromScopedName(i.linkName, _ecm);
+                    if (!entity.empty())
+                    {
+                        i.linkEntity = *entity.begin();
+                        gzdbg << i.modelName << " initialized" << std::endl;
+                        ++this->dataPtr->windObjsInitCount;
+                        i.init = true;
+                    }
+                }
+            }
+        }
+        if (this->dataPtr->windObjsInitCount == this->dataPtr->windObjs.size())
+        {
+            this->dataPtr->windObjsInit = true;
+        }
+    }
+
+    auto dT = time - this->dataPtr->previousTime;
+
+    std::normal_distribution<double> dist(0, 1);
+    double randomDist = dist(*this->dataPtr->randGenerator);
+
+    // Current variable wind velocity
+    this->dataPtr->varVel += 1.0 / this->dataPtr->timeConstant *
+                             (-1.0 * this->dataPtr->varVel + this->dataPtr->filterGain /
+                                                                 sqrt(dT.count()) * randomDist) *
+                             dT.count();
+    // Current wind velocity
+    double velocity = this->dataPtr->varVel + this->dataPtr->windMeanVelocity;
+gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
+    for (auto &windObj : this->dataPtr->windObjs)
+    {
+        // Apply the forces of the wind to all wind objects only if they have been
+        // initialized
+        if (!windObj.init)
+            continue;
+
+            
+    }
+    this->dataPtr->previousTime = time;
 }
+    GZ_ADD_PLUGIN(vrx::USVWind,
+                  sim::System,
+                  USVWind::ISystemConfigure,
+                  USVWind::ISystemPreUpdate)
 
-GZ_ADD_PLUGIN(vrx::USVWind,
-              sim::System,
-              USVWind::ISystemConfigure,
-              USVWind::ISystemPreUpdate)
-
-GZ_ADD_PLUGIN_ALIAS(vrx::USVWind,
-                    "vrx::USVWind")
+    GZ_ADD_PLUGIN_ALIAS(vrx::USVWind,
+                        "vrx::USVWind")

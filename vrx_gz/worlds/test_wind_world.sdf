@@ -599,8 +599,8 @@
       <!-- Wind -->
       <wind_direction>240</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>0.0</wind_mean_velocity>
-      <var_wind_gain_constants>0</var_wind_gain_constants>
+      <wind_mean_velocity>10.0</wind_mean_velocity>
+      <var_wind_gain_constants>5</var_wind_gain_constants>
       <var_wind_time_constants>2</var_wind_time_constants>
       <random_seed>10</random_seed>
       <!-- set to zero/empty to randomize -->
