@@ -9,6 +9,11 @@
 #include <gz/transport/Node.hh>
 #include <gz/msgs/vector3d.pb.h>
 #include <gz/msgs/double.pb.h>
+#include "gz/msgs/Utility.hh"
+#include "gz/sim/components/LinearVelocity.hh"
+#include "gz/sim/components/Inertial.hh"
+#include "gz/sim/components/ExternalWorldWrenchCmd.hh"
+#include "gz/sim/components/Pose.hh"
 #include "USVWind.hh"
 
 using namespace gz;
@@ -111,7 +116,6 @@ void USVWind::Configure(const sim::Entity &_entity,
                         sim::EventManager & /*_eventMgr*/)
 {
     sdf::ElementPtr sdf = _sdf->Clone();
-    
 
     // Retrieve models' parameters from SDF
     if (!sdf->HasElement("wind_obj"))
@@ -274,6 +278,9 @@ void USVWind::PreUpdate(
                         gzdbg << i.modelName << " initialized" << std::endl;
                         ++this->dataPtr->windObjsInitCount;
                         i.init = true;
+                        sim::enableComponent<sim::components::WorldLinearVelocity>(_ecm, i.linkEntity, true);
+                        sim::enableComponent<sim::components::WorldPose>(_ecm, i.linkEntity, true);
+                        sim::enableComponent<sim::components::Inertial>(_ecm, i.linkEntity, true);
                     }
                 }
             }
@@ -296,22 +303,51 @@ void USVWind::PreUpdate(
                              dT.count();
     // Current wind velocity
     double velocity = this->dataPtr->varVel + this->dataPtr->windMeanVelocity;
-gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
+    gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
     for (auto &windObj : this->dataPtr->windObjs)
     {
         // Apply the forces of the wind to all wind objects only if they have been
         // initialized
         if (!windObj.init)
+        {
             continue;
+        }
+        // get world linear velocity of link
+        auto worldVel = *std::move(_ecm.ComponentData<sim::components::WorldLinearVelocity>(windObj.linkEntity));
+        math::Vector3d relativeWind = this->dataPtr->windDirection * velocity - worldVel;
 
-            
+        math::Vector3d windForce(
+            windObj.windCoeff.X() * relativeWind.X() * abs(relativeWind.X()),
+            windObj.windCoeff.Y() * relativeWind.Y() * abs(relativeWind.Y()), 0);
+        math::Vector3d windTorque(0.0, 0.0,
+                                  -2.0 * windObj.windCoeff.Z() * relativeWind.X() * relativeWind.Y());
+ auto linkWrenchComp =
+      _ecm.Component<sim::components::ExternalWorldWrenchCmd>(windObj.linkEntity);
+
+  sim::components::ExternalWorldWrenchCmd wrench;
+
+  if (!linkWrenchComp)
+  {
+    msgs::Set(wrench.Data().mutable_force(), windForce);
+    msgs::Set(wrench.Data().mutable_torque(), windTorque);
+    _ecm.CreateComponent(windObj.linkEntity, wrench);
+  }
+  else
+  {
+    msgs::Set(linkWrenchComp->Data().mutable_force(),
+              msgs::Convert(linkWrenchComp->Data().force()) + windForce);
+
+    msgs::Set(linkWrenchComp->Data().mutable_torque(),
+              msgs::Convert(linkWrenchComp->Data().torque()) + windTorque);
+  }
+        
     }
     this->dataPtr->previousTime = time;
 }
-    GZ_ADD_PLUGIN(vrx::USVWind,
-                  sim::System,
-                  USVWind::ISystemConfigure,
-                  USVWind::ISystemPreUpdate)
+GZ_ADD_PLUGIN(vrx::USVWind,
+              sim::System,
+              USVWind::ISystemConfigure,
+              USVWind::ISystemPreUpdate)
 
-    GZ_ADD_PLUGIN_ALIAS(vrx::USVWind,
-                        "vrx::USVWind")
+GZ_ADD_PLUGIN_ALIAS(vrx::USVWind,
+                    "vrx::USVWind")
