@@ -488,16 +488,16 @@
       <obstacle_penalty>3.0</obstacle_penalty>
       <bonus>
         <gate>1</gate>
-        <gate>2</gate>
-        <gate>4</gate>
+        <gate>3</gate>
+        <gate>5</gate>
         <gate>7</gate>
+        <gate>9</gate>
         <gate>11</gate>
-        <gate>16</gate>
-        <gate>22</gate>
-        <gate>29</gate>
-        <gate>37</gate>
-        <gate>46</gate>
-        <gate>56</gate>
+        <gate>13</gate>
+        <gate>15</gate>
+        <gate>17</gate>
+        <gate>19</gate>
+        <gate>21</gate>
       </bonus>
       <gates>
         <gate>
