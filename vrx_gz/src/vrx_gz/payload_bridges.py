@@ -130,8 +130,8 @@ def ball_shooter(model_name):
     return Bridge(
         gz_topic=f'/{model_name}/shooters/ball_shooter/fire',
         ros_topic=f'shooters/ball_shooter/fire',
-        gz_type='ignition.msgs.Empty',
-        ros_type='std_msgs/msg/Empty',
+        gz_type='ignition.msgs.Boolean',
+        ros_type='std_msgs/msg/Bool',
         direction=BridgeDirection.ROS_TO_GZ)
 
 def thrust(model_name, side):

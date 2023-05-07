@@ -358,9 +358,9 @@
     </include>
 
     <include>
-      <name>robotx_light_buoy</name>
+      <name>robotx_light_buoy_rgb</name>
       <pose>-528 186 0.32 0 0 0</pose>
-      <uri>robotx_light_buoy</uri>
+      <uri>robotx_light_buoy_rgb</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -479,7 +479,7 @@
     <plugin
       filename="gz-sim-wind-effects-system"
       name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>0.002</force_approximation_scaling_factor>
+      <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
       <horizontal>
         <magnitude>
           <time_for_rise>10</time_for_rise>

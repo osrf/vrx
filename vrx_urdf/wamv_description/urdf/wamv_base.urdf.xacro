@@ -146,13 +146,13 @@
     <sensor type="contact" name="contact_sensor">
       <contact>
         <!-- collisions are renamed during urdf -> sdf fixed joint lumping -->
-        <collision>${namespace}/base_link_fixed_joint_lump__top_base_collision_41</collision>
-        <collision>${namespace}/base_link_fixed_joint_lump__left_float_collision_17</collision>
-        <collision>${namespace}/base_link_fixed_joint_lump__left_mid_float_collision_18</collision>
-        <collision>${namespace}/base_link_fixed_joint_lump__left_front_float_collision_19</collision>
-        <collision>${namespace}/base_link_fixed_joint_lump__right_float_collision_29</collision>
-        <collision>${namespace}/base_link_fixed_joint_lump__right_mid_float_collision_30</collision>
-        <collision>${namespace}/base_link_fixed_joint_lump__right_front_float_collision_31</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__top_base_collision_24</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__left_float_collision</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__left_mid_float_collision_1</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__left_front_float_collision_2</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__right_float_collision_12</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__right_mid_float_collision_13</collision>
+        <collision>${namespace}/base_link_fixed_joint_lump__right_front_float_collision_14</collision>
         <topic>/vrx/contacts</topic>
       </contact>
       <always_on>1</always_on>

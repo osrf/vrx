@@ -591,7 +591,7 @@
     <plugin
       filename="gz-sim-wind-effects-system"
       name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>0.002</force_approximation_scaling_factor>
+      <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
       <horizontal>
         <magnitude>
           <time_for_rise>10</time_for_rise>
@@ -624,29 +624,26 @@
       </vertical>
     </plugin>
 
-    <!-- The base scoring plugin -->
+    <!-- The wayfinding scoring plugin -->
     <plugin
       filename="libWayfindingScoringPlugin.so"
       name="vrx::WayfindingScoringPlugin">
       <vehicle>wamv</vehicle>
       <task_name>wayfinding</task_name>
       <waypoints>
-        <!-- Approx. starting point of wamv -->
         <waypoint>
           <pose>-33.7226766699 150.6740630167 1.21756121843</pose>
         </waypoint>
-        <!-- A waypoint -->
         <waypoint>
           <pose>-33.7220832884 150.67379127877 1.0</pose>
         </waypoint>
-        <!-- Another waypoint -->
         <waypoint>
           <pose>-33.7226013209 150.67504609858 1.0</pose>
         </waypoint>
       </waypoints>
       <markers>
-        <scaling>0.2 0.2 2.0 </scaling>
-        <height>0.5 </height>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
       </markers>
 
       <task_info_topic>/vrx/task/info</task_info_topic>

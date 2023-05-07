@@ -42,19 +42,45 @@ PERCEPTION_WORLDS = [
 ]
 
 STATIONKEEPING_WORLDS = [
-  'stationkeeping_task'
+  'stationkeeping_task',
+  'practice_2022_stationkeeping0_task',
+  'practice_2022_stationkeeping1_task',
+  'practice_2022_stationkeeping2_task',
 ]
 
 WAYFINDING_WORLDS = [
-  'wayfinding_task'
+  'wayfinding_task',
+  'practice_2022_wayfinding0_task',
+  'practice_2022_wayfinding1_task',
+  'practice_2022_wayfinding2_task',
 ]
 
 WILDLIFE_WORLDS = [
-  'wildlife_task'
+  'wildlife_task',
+  'practice_2022_wildlife0_task',
+  'practice_2022_wildlife1_task',
+  'practice_2022_wildlife2_task'
 ]
 
 SCAN_DOCK_DELIVER_WORLDS = [
-  'scan_dock_deliver_task'
+  'scan_dock_deliver_task',
+  'practice_2022_scan_dock_deliver0_task',
+  'practice_2022_scan_dock_deliver1_task',
+  'practice_2022_scan_dock_deliver2_task'
+]
+
+ACOUSTIC_TRACKING_WORLDS = [
+  'acoustic_tracking_task',
+  'practice_2022_acoustic_tracking0_task',
+  'practice_2022_acoustic_tracking1_task',
+  'practice_2022_acoustic_tracking2_task'
+]
+
+FOLLOWPATH_WORLDS = [
+  'follow_path_task',
+  'practice_2022_follow_path0_task',
+  'practice_2022_follow_path1_task',
+  'practice_2022_follow_path2_task'
 ]
 
 def simulation(world_name, headless=False):
@@ -123,6 +149,9 @@ def competition_bridges(world_name):
         ]
     elif world_name in WILDLIFE_WORLDS:
         task_bridges = [
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal0/pose'),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal1/pose'),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal2/pose'),
         ]
     elif world_name in SCAN_DOCK_DELIVER_WORLDS:
         task_bridges = [
