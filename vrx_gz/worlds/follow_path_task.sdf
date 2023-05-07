@@ -486,7 +486,7 @@
       <course_name>short_navigation_course_0</course_name>
       <points_per_gate_crossed>10</points_per_gate_crossed>
       <obstacle_penalty>3.0</obstacle_penalty>
-      <gate_bonus>
+      <bonus>
         <gate>1</gate>
         <gate>2</gate>
         <gate>4</gate>
@@ -498,7 +498,7 @@
         <gate>37</gate>
         <gate>46</gate>
         <gate>56</gate>
-      </gate_bonus>
+      </bonus>
       <gates>
         <gate>
           <left_marker>red_bound_0</left_marker>

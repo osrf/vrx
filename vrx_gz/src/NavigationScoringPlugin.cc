@@ -386,14 +386,14 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   this->dataPtr->numGates = this->dataPtr->gates.size();
 
   // This is a required element.
-  if (!_sdf->HasElement("gate_bonus"))
+  if (!_sdf->HasElement("bonus"))
   {
-    gzerr << "Unable to find <gate_bonus> element in SDF." << std::endl;
+    gzerr << "Unable to find <bonus> element in SDF." << std::endl;
     return;
   }
 
   // Parse gate bonuses.
-  auto const &gateBonusElem = this->dataPtr->sdf->GetElement("gate_bonus");
+  auto const &gateBonusElem = this->dataPtr->sdf->GetElement("bonus");
   if (!this->dataPtr->ParseGateBonus(gateBonusElem))
   {
     gzerr << "Unable to parse bonuses. Score has been disabled" << std::endl;
@@ -487,9 +487,10 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     // Check if we have crossed this gate.
     auto currentState = gate.IsPoseInGate(vehiclePose);
 
-    // Ignore if we haven't crossed the first gate yet.
+    // Ignore if we haven't crossed or invalidated the first gate yet.
     if (i != 0 &&
-        this->dataPtr->gates[0].state != Implementation::GateState::CROSSED)
+        (this->dataPtr->gates[0].state != Implementation::GateState::CROSSED &&
+         this->dataPtr->gates[0].state != Implementation::GateState::INVALID))
     {
       break;
     }
@@ -517,7 +518,7 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
           i == this->dataPtr->lastGateCrossed + 1)
       {
         gzdbg << "Num consecutive gates: "
-              << this->dataPtr->currentConsecutiveGatesCrossed + 1 << std::endl;
+              << this->dataPtr->currentConsecutiveGatesCrossed + 2 << std::endl;
 
         double bonus = this->dataPtr->bonuses.back();
         if (this->dataPtr->currentConsecutiveGatesCrossed <
@@ -558,7 +559,16 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
             << std::endl;
       std::cout << std::flush;
       this->dataPtr->currentConsecutiveGatesCrossed = 0;
-      this->dataPtr->lastGateCrossed = i;
+      this->dataPtr->lastGateCrossed = std::numeric_limits<int>::min();
+
+      // Course completed!
+      if (i == this->dataPtr->numGates - 1)
+      {
+        gzdbg << "Course completed!" << std::endl;
+        std::cout << std::flush;
+        ScoringPlugin::Finish();
+      }
+
       return;
     }
 
