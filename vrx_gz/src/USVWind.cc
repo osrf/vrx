@@ -78,6 +78,9 @@ public:
   /// \brief Topic where the wind direction is published
 public:
   std::string topicWindDirection = "/vrx/debug/wind/direction";
+/// \brief Message to store wind vector (constant)
+public:
+  msgs::Vector3d windDirMsg;
 
   /// \brief Last time wind speed and direction was published
 public:
@@ -166,6 +169,9 @@ void USVWind::Configure(const sim::Entity &_entity,
     this->dataPtr->windDirection.X(cos(windAngle * M_PI / 180));
     this->dataPtr->windDirection.Y(sin(windAngle * M_PI / 180));
     this->dataPtr->windDirection.Z(0);
+    this->dataPtr->windDirMsg.set_x(cos(windAngle * M_PI / 180));
+    this->dataPtr->windDirMsg.set_y(sin(windAngle * M_PI / 180));
+    this->dataPtr->windDirMsg.set_z(0);
   }
 
   gzmsg << "Wind direction unit vector = " << this->dataPtr->windDirection << std::endl;
@@ -294,7 +300,11 @@ void USVWind::PreUpdate(
                            dT.count();
   // Current wind velocity
   double velocity = this->dataPtr->varVel + this->dataPtr->windMeanVelocity;
-  //gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
+  msgs::Double windVelMsg;
+  windVelMsg.set_data(velocity);
+  this->dataPtr->windSpeedPub.Publish(windVelMsg);
+  this->dataPtr->windDirectionPub.Publish(this->dataPtr->windDirMsg);
+  // gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
   for (auto &windObj : this->dataPtr->windObjs)
   {
     // Apply the forces of the wind to all wind objects only if they have been
