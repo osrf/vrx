@@ -294,7 +294,7 @@ void USVWind::PreUpdate(
                            dT.count();
   // Current wind velocity
   double velocity = this->dataPtr->varVel + this->dataPtr->windMeanVelocity;
-  gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
+  //gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
   for (auto &windObj : this->dataPtr->windObjs)
   {
     // Apply the forces of the wind to all wind objects only if they have been
