@@ -7,8 +7,7 @@
 #include <gz/sim/Util.hh>
 #include <gz/sim/Entity.hh>
 #include <gz/transport/Node.hh>
-#include <gz/msgs/vector3d.pb.h>
-#include <gz/msgs/double.pb.h>
+#include <gz/msgs/float.pb.h>
 #include "gz/msgs/Utility.hh"
 #include "gz/sim/components/LinearVelocity.hh"
 #include "gz/sim/components/Inertial.hh"
@@ -80,7 +79,7 @@ public:
   std::string topicWindDirection = "/vrx/debug/wind/direction";
   /// \brief Message to store wind vector (constant)
 public:
-  msgs::Double windDirMsg;
+  msgs::Float windDirMsg;
 
   /// \brief Last time wind speed and direction was published
 public:
@@ -247,10 +246,10 @@ void USVWind::Configure(const sim::Entity &_entity,
   transport::AdvertiseMessageOptions opts;
   opts.SetMsgsPerSec(this->dataPtr->updateRate);
 
-  this->dataPtr->windSpeedPub = this->dataPtr->node.Advertise<msgs::Double>(
+  this->dataPtr->windSpeedPub = this->dataPtr->node.Advertise<msgs::Float>(
       this->dataPtr->topicWindSpeed, opts);
 
-  this->dataPtr->windDirectionPub = this->dataPtr->node.Advertise<msgs::Double>(
+  this->dataPtr->windDirectionPub = this->dataPtr->node.Advertise<msgs::Float>(
       this->dataPtr->topicWindDirection, opts);
 }
 
@@ -310,7 +309,7 @@ void USVWind::PreUpdate(
                            randomDist) * dT.count();
   // Current wind velocity
   double velocity = this->dataPtr->varVel + this->dataPtr->windMeanVelocity;
-  msgs::Double windVelMsg;
+  msgs::Float windVelMsg;
   windVelMsg.set_data(velocity);
   this->dataPtr->windSpeedPub.Publish(windVelMsg);
   this->dataPtr->windDirectionPub.Publish(this->dataPtr->windDirMsg);
