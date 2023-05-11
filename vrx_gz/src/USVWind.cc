@@ -78,9 +78,9 @@ public:
   /// \brief Topic where the wind direction is published
 public:
   std::string topicWindDirection = "/vrx/debug/wind/direction";
-/// \brief Message to store wind vector (constant)
+  /// \brief Message to store wind vector (constant)
 public:
-  msgs::Vector3d windDirMsg;
+  msgs::Double windDirMsg;
 
   /// \brief Last time wind speed and direction was published
 public:
@@ -169,12 +169,11 @@ void USVWind::Configure(const sim::Entity &_entity,
     this->dataPtr->windDirection.X(cos(windAngle * M_PI / 180));
     this->dataPtr->windDirection.Y(sin(windAngle * M_PI / 180));
     this->dataPtr->windDirection.Z(0);
-    this->dataPtr->windDirMsg.set_x(cos(windAngle * M_PI / 180));
-    this->dataPtr->windDirMsg.set_y(sin(windAngle * M_PI / 180));
-    this->dataPtr->windDirMsg.set_z(0);
+    this->dataPtr->windDirMsg.set_data(windAngle);
   }
 
-  gzmsg << "Wind direction unit vector = " << this->dataPtr->windDirection << std::endl;
+  gzmsg << "Wind direction unit vector = " << this->dataPtr->windDirection 
+        << std::endl;
 
   if (sdf->HasElement("wind_mean_velocity"))
   {
@@ -182,7 +181,8 @@ void USVWind::Configure(const sim::Entity &_entity,
         sdf->Get<double>("wind_mean_velocity");
   }
 
-  gzmsg << "Wind mean velocity = " << this->dataPtr->windMeanVelocity << std::endl;
+  gzmsg << "Wind mean velocity = " << this->dataPtr->windMeanVelocity 
+        << std::endl;
 
   if (sdf->HasElement("var_wind_gain_constants"))
   {
@@ -190,7 +190,8 @@ void USVWind::Configure(const sim::Entity &_entity,
         sdf->Get<double>("var_wind_gain_constants");
   }
 
-  gzmsg << "var wind gain constants = " << this->dataPtr->gainConstant << std::endl;
+  gzmsg << "var wind gain constants = " << this->dataPtr->gainConstant 
+        << std::endl;
 
   if (sdf->HasElement("var_wind_time_constants"))
   {
@@ -198,7 +199,8 @@ void USVWind::Configure(const sim::Entity &_entity,
         sdf->Get<double>("var_wind_time_constants");
   }
 
-  gzmsg << "var wind time constants = " << this->dataPtr->timeConstant << std::endl;
+  gzmsg << "var wind time constants = " << this->dataPtr->timeConstant 
+        << std::endl;
 
   if (sdf->HasElement("update_rate"))
   {
@@ -222,7 +224,8 @@ void USVWind::Configure(const sim::Entity &_entity,
         sdf->Get<std::string>("topic_wind_direction");
   }
 
-  gzmsg << "topic wind direction  = " << this->dataPtr->topicWindDirection << std::endl;
+  gzmsg << "topic wind direction = " << 
+      this->dataPtr->topicWindDirection << std::endl;
 
   // Setting the  seed for the random generator.
   unsigned int seed = std::random_device{}();
@@ -236,15 +239,19 @@ void USVWind::Configure(const sim::Entity &_entity,
   this->dataPtr->randGenerator.reset(new std::mt19937(seed));
 
   // Calculate filter constant
-  this->dataPtr->filterGain = this->dataPtr->gainConstant * sqrt(2.0 * this->dataPtr->timeConstant);
+  this->dataPtr->filterGain = this->dataPtr->gainConstant * 
+      sqrt(2.0 * this->dataPtr->timeConstant);
   gzmsg << "Var wind filter gain = " << this->dataPtr->filterGain << std::endl;
 
-  // TODO: Publishers
-  this->dataPtr->windSpeedPub = this->dataPtr->node.Advertise<msgs::Double>(
-      this->dataPtr->topicWindSpeed);
+  // Set up publishers
+  transport::AdvertiseMessageOptions opts;
+  opts.SetMsgsPerSec(this->dataPtr->updateRate);
 
-  this->dataPtr->windDirectionPub = this->dataPtr->node.Advertise<msgs::Vector3d>(
-      this->dataPtr->topicWindDirection);
+  this->dataPtr->windSpeedPub = this->dataPtr->node.Advertise<msgs::Double>(
+      this->dataPtr->topicWindSpeed, opts);
+
+  this->dataPtr->windDirectionPub = this->dataPtr->node.Advertise<msgs::Double>(
+      this->dataPtr->topicWindDirection, opts);
 }
 
 //////////////////////////////////////////////////
@@ -275,9 +282,12 @@ void USVWind::PreUpdate(
             gzdbg << i.modelName << " initialized" << std::endl;
             ++this->dataPtr->windObjsInitCount;
             i.init = true;
-            sim::enableComponent<sim::components::WorldLinearVelocity>(_ecm, i.linkEntity, true);
-            sim::enableComponent<sim::components::WorldPose>(_ecm, i.linkEntity, true);
-            sim::enableComponent<sim::components::Inertial>(_ecm, i.linkEntity, true);
+            sim::enableComponent<sim::components::WorldLinearVelocity>
+              (_ecm, i.linkEntity, true);
+            sim::enableComponent<sim::components::WorldPose>
+              (_ecm, i.linkEntity, true);
+            sim::enableComponent<sim::components::Inertial>
+              (_ecm, i.linkEntity, true);
           }
         }
       }
@@ -295,16 +305,15 @@ void USVWind::PreUpdate(
 
   // Current variable wind velocity
   this->dataPtr->varVel += 1.0 / this->dataPtr->timeConstant *
-                           (-1.0 * this->dataPtr->varVel + this->dataPtr->filterGain /
-                                                               sqrt(dT.count()) * randomDist) *
-                           dT.count();
+                           (-1.0 * this->dataPtr->varVel + 
+                           this->dataPtr->filterGain / sqrt(dT.count()) * 
+                           randomDist) * dT.count();
   // Current wind velocity
   double velocity = this->dataPtr->varVel + this->dataPtr->windMeanVelocity;
   msgs::Double windVelMsg;
   windVelMsg.set_data(velocity);
   this->dataPtr->windSpeedPub.Publish(windVelMsg);
   this->dataPtr->windDirectionPub.Publish(this->dataPtr->windDirMsg);
-  // gzmsg << "velocity: " << velocity << ", prevTime: " << this->dataPtr->previousTime.count() << std::endl;
   for (auto &windObj : this->dataPtr->windObjs)
   {
     // Apply the forces of the wind to all wind objects only if they have been
@@ -314,17 +323,20 @@ void USVWind::PreUpdate(
       continue;
     }
     // get world linear velocity of link
-    auto worldVel = *std::move(_ecm.ComponentData<sim::components::WorldLinearVelocity>(windObj.linkEntity));
-    math::Vector3d relativeWind = this->dataPtr->windDirection * velocity - worldVel;
-
+    auto worldVel = 
+        *std::move(_ecm.ComponentData<sim::components::WorldLinearVelocity>
+        (windObj.linkEntity));
+    math::Vector3d relativeWind =
+        this->dataPtr->windDirection * velocity - worldVel;
     math::Vector3d windForce(
         windObj.windCoeff.X() * relativeWind.X() * abs(relativeWind.X()),
         windObj.windCoeff.Y() * relativeWind.Y() * abs(relativeWind.Y()), 0);
     math::Vector3d windTorque(0.0, 0.0,
-                              -2.0 * windObj.windCoeff.Z() * relativeWind.X() * relativeWind.Y());
+                              -2.0 * windObj.windCoeff.Z() * relativeWind.X() * 
+                              relativeWind.Y());
     auto linkWrenchComp =
-        _ecm.Component<sim::components::ExternalWorldWrenchCmd>(windObj.linkEntity);
-
+        _ecm.Component<sim::components::ExternalWorldWrenchCmd>
+        (windObj.linkEntity);
     sim::components::ExternalWorldWrenchCmd wrench;
 
     if (!linkWrenchComp)
