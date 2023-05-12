@@ -205,3 +205,19 @@ def color_sequence_reports():
         gz_type='ignition.msgs.StringMsg_V',
         ros_type='ros_gz_interfaces/msg/StringVec',
         direction=BridgeDirection.ROS_TO_GZ)
+
+def usv_wind_speed():
+    return Bridge(
+        gz_topic=f'/vrx/debug/wind/speed',
+        ros_topic=f'/vrx/debug/wind/speed',
+        gz_type='ignition.msgs.Float',
+        ros_type='std_msgs/msg/Float32',
+        direction=BridgeDirection.GZ_TO_ROS)
+        
+def usv_wind_direction():
+    return Bridge(
+        gz_topic=f'/vrx/debug/wind/direction',
+        ros_topic=f'/vrx/debug/wind/direction',
+        gz_type='ignition.msgs.Float',
+        ros_type='std_msgs/msg/Float32',
+        direction=BridgeDirection.GZ_TO_ROS)
