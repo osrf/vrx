@@ -136,17 +136,14 @@ class NavigationScoringPlugin::Implementation
   /// \brief Number of points granted for crossing any gate.
   public: double pointsPerGateCrossed = 10.0;
 
+  /// \brief Bonus points granted for crossing a consecutive gate.
+  public: double bonusConsecutiveGate = 10.0;
+
   /// \brief Display or suppress state changes
   public: bool silent = false;
 
-  /// \brief The collection of bonuses.
-  public: std::vector<double> bonuses;
-
   /// \brief The index of the last gate crossed.
   public: int lastGateCrossed = std::numeric_limits<int>::min();
-
-  /// \brief Current number of consecutive gates crossed.
-  public: int currentConsecutiveGatesCrossed = 0;
 
   /// \brief Previous number of collisions.
   public: int prevCollisions = 0;
@@ -298,35 +295,6 @@ bool NavigationScoringPlugin::Implementation::ParseGates(sdf::ElementPtr _sdf)
   return true;
 }
 
-//////////////////////////////////////////////////
-bool NavigationScoringPlugin::Implementation::ParseGateBonus(
-  sdf::ElementPtr _sdf)
-{
-  // We need at least one gate.
-  if (!_sdf->HasElement("gate"))
-  {
-    gzerr << "Unable to find <gate> element in SDF." << std::endl;
-    return false;
-  }
-
-  auto gateElem = _sdf->GetElement("gate");
-
-  // Parse a new gate.
-  while (gateElem)
-  {
-    double bonus = gateElem->Get<double>();
-    gzerr << bonus << std::endl;
-
-    // Save the new bonus.
-    this->bonuses.push_back(bonus);
-
-    // Parse the next gate.
-    gateElem = gateElem->GetNextElement("gate");
-  }
-
-  return true;
-}
-
 /////////////////////////////////////////////////
 NavigationScoringPlugin::NavigationScoringPlugin()
   : ScoringPlugin(),
@@ -367,6 +335,10 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
       _sdf->Get<double>("points_per_gate_crossed");
   }
 
+  // Optional.
+  if (_sdf->HasElement("bonus"))
+    this->dataPtr->bonusConsecutiveGate =  _sdf->Get<double>("bonus");
+
   // This is a required element.
   if (!_sdf->HasElement("gates"))
   {
@@ -389,14 +361,6 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
   if (!_sdf->HasElement("bonus"))
   {
     gzerr << "Unable to find <bonus> element in SDF." << std::endl;
-    return;
-  }
-
-  // Parse gate bonuses.
-  auto const &gateBonusElem = this->dataPtr->sdf->GetElement("bonus");
-  if (!this->dataPtr->ParseGateBonus(gateBonusElem))
-  {
-    gzerr << "Unable to parse bonuses. Score has been disabled" << std::endl;
     return;
   }
 
@@ -487,10 +451,9 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     // Check if we have crossed this gate.
     auto currentState = gate.IsPoseInGate(vehiclePose);
 
-    // Ignore if we haven't crossed or invalidated the first gate yet.
+    // Ignore if we haven't crossed the first gate yet.
     if (i != 0 &&
-        (this->dataPtr->gates[0].state != Implementation::GateState::CROSSED &&
-         this->dataPtr->gates[0].state != Implementation::GateState::INVALID))
+        this->dataPtr->gates[0].state != Implementation::GateState::CROSSED)
     {
       break;
     }
@@ -514,26 +477,12 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       this->SetScore(this->Score() + this->dataPtr->pointsPerGateCrossed);
 
       // Add a bonus for crossing a consecutive gate.
-      if (!this->dataPtr->bonuses.empty() &&
-          i == this->dataPtr->lastGateCrossed + 1)
+      if (i == this->dataPtr->lastGateCrossed + 1)
       {
-        gzdbg << "Num consecutive gates: "
-              << this->dataPtr->currentConsecutiveGatesCrossed + 2 << std::endl;
+        gzdbg << "  Consecutive gate!" << std::endl;
 
-        double bonus = this->dataPtr->bonuses.back();
-        if (this->dataPtr->currentConsecutiveGatesCrossed <
-            this->dataPtr->bonuses.size())
-        {
-          bonus = this->dataPtr->bonuses[
-          this->dataPtr->currentConsecutiveGatesCrossed];
-        }
-        this->dataPtr->currentConsecutiveGatesCrossed++;
-
-        this->SetScore(this->Score() + bonus);
-        gzdbg << "New bonus: " << bonus << std::endl;
+        this->SetScore(this->Score() + this->dataPtr->bonusConsecutiveGate);
       }
-      else
-        this->dataPtr->currentConsecutiveGatesCrossed = 0;
 
       this->dataPtr->lastGateCrossed = i;
 
@@ -543,6 +492,9 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       // Course completed!
       if (i == this->dataPtr->numGates - 1)
       {
+        this->SetScore(this->Score() + this->dataPtr->bonusConsecutiveGate);
+        gzdbg << "Extra bonus for completing the course" << std::endl;
+        gzdbg << "Score: " << this->Score() << std::endl;
         gzdbg << "Course completed!" << std::endl;
         std::cout << std::flush;
         ScoringPlugin::Finish();
@@ -551,14 +503,14 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       return;
     }
     // Just checking: did we go backwards through the gate?
-    else if (currentState == Implementation::GateState::VEHICLE_BEFORE &&
-             gate.state   == Implementation::GateState::VEHICLE_AFTER)
+    else if (i != 0 &&
+             (currentState == Implementation::GateState::VEHICLE_BEFORE &&
+              gate.state   == Implementation::GateState::VEHICLE_AFTER))
     {
       gate.state = Implementation::GateState::INVALID;
       gzdbg << "Transited the gate in the wrong direction. Gate invalidated!"
             << std::endl;
       std::cout << std::flush;
-      this->dataPtr->currentConsecutiveGatesCrossed = 0;
       this->dataPtr->lastGateCrossed = std::numeric_limits<int>::min();
 
       // Course completed!
