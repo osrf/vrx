@@ -122,6 +122,8 @@ def competition_bridges(world_name):
     bridges = [
         vrx_gz.bridges.clock(),
         vrx_gz.bridges.task_info(),
+        vrx_gz.bridges.usv_wind_speed(),
+        vrx_gz.bridges.usv_wind_direction()
     ]
 
     task_bridges = []

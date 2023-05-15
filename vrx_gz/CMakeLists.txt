@@ -154,6 +154,7 @@ list(APPEND VRX_GZ_PLUGINS
   ScanDockScoringPlugin
   SimpleHydrodynamics
   Surface
+  USVWind
   WaveVisual
   WildlifeScoringPlugin
 )
