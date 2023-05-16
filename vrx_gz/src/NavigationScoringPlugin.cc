@@ -137,7 +137,7 @@ class NavigationScoringPlugin::Implementation
   public: double pointsPerGateCrossed = 10.0;
 
   /// \brief Bonus points granted for crossing a consecutive gate.
-  public: double bonusConsecutiveGate = 10.0;
+  public: double bonusConsecutiveGate = 1.0;
 
   /// \brief Display or suppress state changes
   public: bool silent = false;
