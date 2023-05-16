@@ -143,7 +143,10 @@ class NavigationScoringPlugin::Implementation
   public: bool silent = false;
 
   /// \brief The index of the last gate crossed.
-  public: int lastGateCrossed = std::numeric_limits<int>::min();
+  public: int lastGateCrossed = -1;
+
+  /// \brief The index of the last successfully gate crossed.
+  public: int lastSuccessfullyGateCrossed = std::numeric_limits<int>::min();
 
   /// \brief Previous number of collisions.
   public: int prevCollisions = 0;
@@ -441,7 +444,8 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     this->dataPtr->vehicleEntity)->Data();
 
   // Update the state of all gates.
-  for (auto i = 0; i < this->dataPtr->numGates; ++i)
+  for (auto i = this->dataPtr->lastGateCrossed + 1;
+       i < this->dataPtr->numGates; ++i)
   {
     Implementation::Gate &gate = this->dataPtr->gates[i];
 
@@ -477,14 +481,14 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       this->SetScore(this->Score() + this->dataPtr->pointsPerGateCrossed);
 
       // Add a bonus for crossing two consecutive gates.
-      if (i == this->dataPtr->lastGateCrossed + 1)
+      if (i != 0 && i == this->dataPtr->lastSuccessfullyGateCrossed + 1)
       {
         gzdbg << "  Consecutive gate bonus!" << std::endl;
-
         this->SetScore(this->Score() + this->dataPtr->bonusConsecutiveGate);
       }
 
       this->dataPtr->lastGateCrossed = i;
+      this->dataPtr->lastSuccessfullyGateCrossed = i;
 
       gzdbg << "Score: " << this->Score() << std::endl;
       std::cout << std::flush;
@@ -511,7 +515,9 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       gzdbg << "Transited the gate in the wrong direction. Gate invalidated!"
             << std::endl;
       std::cout << std::flush;
-      this->dataPtr->lastGateCrossed = std::numeric_limits<int>::min();
+      this->dataPtr->lastSuccessfullyGateCrossed =
+        std::numeric_limits<int>::min();
+      this->dataPtr->lastGateCrossed = i;
 
       // Course completed!
       if (i == this->dataPtr->numGates - 1)
