@@ -54,19 +54,7 @@ namespace vrx
   ///   <course_name>vrx_navigation_course</course_name>
   ///   <points_per_gate_crossed>10</points_per_gate_crossed>
   ///   <obstacle_penalty>3</obstable_penalty>
-  ///   <gate_bonus>
-  ///     <gate>1</gate>
-  ///     <gate>2</gate>
-  ///     <gate>4</gate>
-  ///     <gate>7</gate>
-  ///     <gate>11</gate>
-  ///     <gate>16</gate>
-  ///     <gate>22</gate>
-  ///     <gate>29</gate>
-  ///     <gate>37</gate>
-  ///     <gate>46</gate>
-  ///     <gate>56</gate>
-  ///   </gate_bonus>
+  ///   <bonus>1</bonus>
   ///   <gates>
   ///     <gate>
   ///       <left_marker>red_bound_0</left_marker>
