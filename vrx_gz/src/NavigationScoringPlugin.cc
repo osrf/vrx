@@ -136,7 +136,7 @@ class NavigationScoringPlugin::Implementation
   /// \brief Number of points granted for crossing any gate.
   public: double pointsPerGateCrossed = 10.0;
 
-  /// \brief Bonus points granted for crossing a consecutive gate.
+  /// \brief Bonus points granted for crossing two consecutive gates.
   public: double bonusConsecutiveGate = 1.0;
 
   /// \brief Display or suppress state changes
@@ -476,10 +476,10 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       // Add the fix number of points for crossing a gate.
       this->SetScore(this->Score() + this->dataPtr->pointsPerGateCrossed);
 
-      // Add a bonus for crossing a consecutive gate.
+      // Add a bonus for crossing two consecutive gates.
       if (i == this->dataPtr->lastGateCrossed + 1)
       {
-        gzdbg << "  Consecutive gate!" << std::endl;
+        gzdbg << "  Consecutive gate bonus!" << std::endl;
 
         this->SetScore(this->Score() + this->dataPtr->bonusConsecutiveGate);
       }
