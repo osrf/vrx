@@ -32,7 +32,7 @@ namespace vrx
   ///
   /// <points_per_gate_crossed>: Number of points granted to cross any gate.
   /// <obstacle_penalty>: Specifies how many points are deducted per collision.
-  /// <gate_bonus>: ToDo.
+  /// <bonus>: Bonus granted after crossing a consecutive gate.
   /// <gates>: Specifies the collection of gates delimiting the course.
   ///
   ///   Each gate accepts the following elements:
