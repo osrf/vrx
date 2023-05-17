@@ -484,7 +484,9 @@
       <release_topic>/vrx/release</release_topic>
 
       <course_name>short_navigation_course_1</course_name>
-      <obstacle_penalty>10.0</obstacle_penalty>
+      <points_per_gate_crossed>10</points_per_gate_crossed>
+      <bonus>1</bonus>
+      <obstacle_penalty>3.0</obstacle_penalty>
       <gates>
         <gate>
           <left_marker>red_bound_0</left_marker>
