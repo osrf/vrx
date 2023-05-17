@@ -145,8 +145,8 @@ class NavigationScoringPlugin::Implementation
   /// \brief The index of the last gate crossed.
   public: int lastGateCrossed = -1;
 
-  /// \brief The index of the last successfully gate crossed.
-  public: int lastSuccessfullyGateCrossed = std::numeric_limits<int>::min();
+  /// \brief The index of the last gate successfully crossed.
+  public: int lastGateSuccessfullyCrossed = std::numeric_limits<int>::min();
 
   /// \brief Previous number of collisions.
   public: int prevCollisions = 0;
@@ -481,14 +481,14 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       this->SetScore(this->Score() + this->dataPtr->pointsPerGateCrossed);
 
       // Add a bonus for crossing two consecutive gates.
-      if (i != 0 && i == this->dataPtr->lastSuccessfullyGateCrossed + 1)
+      if (i != 0 && i == this->dataPtr->lastGateSuccessfullyCrossed + 1)
       {
         gzdbg << "  Consecutive gate bonus!" << std::endl;
         this->SetScore(this->Score() + this->dataPtr->bonusConsecutiveGate);
       }
 
       this->dataPtr->lastGateCrossed = i;
-      this->dataPtr->lastSuccessfullyGateCrossed = i;
+      this->dataPtr->lastGateSuccessfullyCrossed = i;
 
       gzdbg << "Score: " << this->Score() << std::endl;
       std::cout << std::flush;
@@ -515,7 +515,7 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
       gzdbg << "Transited the gate in the wrong direction. Gate invalidated!"
             << std::endl;
       std::cout << std::flush;
-      this->dataPtr->lastSuccessfullyGateCrossed =
+      this->dataPtr->lastGateSuccessfullyCrossed =
         std::numeric_limits<int>::min();
       this->dataPtr->lastGateCrossed = i;
 
