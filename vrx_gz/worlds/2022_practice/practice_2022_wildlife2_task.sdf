@@ -540,10 +540,6 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 2 0</linear_velocity>
-    </wind>
-
     <!-- Load the plugin for the wind -->
     <plugin
       filename="libUSVWind.so"

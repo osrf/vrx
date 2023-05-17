@@ -471,10 +471,6 @@
       </performer>
     </plugin>
 
-    <wind>
-      <linear_velocity>1 0 0</linear_velocity>
-    </wind>
-
     <!-- Load the plugin for the wind -->
     <plugin
       filename="libUSVWind.so"

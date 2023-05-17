@@ -433,10 +433,6 @@
       </message>
     </plugin>
 
-    <wind>
-      <linear_velocity>0 2 0</linear_velocity>
-    </wind>
-
     <!-- The acoustic perception scoring plugin -->
     <plugin
       filename="libAcousticPerceptionScoringPlugin.so"
