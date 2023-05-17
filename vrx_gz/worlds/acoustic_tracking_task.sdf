@@ -423,10 +423,6 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 0 0</linear_velocity>
-    </wind>
-
     <include>
       <name>mb_round_buoy_black_0</name>
       <pose>-527 200 0.0 0 0 0 </pose>
@@ -758,6 +754,11 @@
       <pinger_model>pinger</pinger_model>
       <pinger_depth>2.0</pinger_depth>
     </plugin>
+
+
+    <wind>
+      <linear_velocity>0 0 0</linear_velocity>
+    </wind>
 
     <!-- Load the plugin for the wind -->
     <plugin
