@@ -16,7 +16,7 @@
 
 1. Infrastructure updates
     * [Pull Request 628](https://github.com/osrf/vrx/pull/628)
-    * [Pull Request 628](https://github.com/osrf/vrx/pull/628)
+    * [Pull Request 656](https://github.com/osrf/vrx/pull/656)
 
 ### VRX 2.1.0
 1. Acoustic Perception Task
