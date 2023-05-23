@@ -3,7 +3,7 @@ name: Ubuntu CI
 on: [pull_request]
 
 jobs:
-  test-fortress-galactic:
+  test-humble-garden:
 
     runs-on: ubuntu-20.04
     container: 
@@ -11,13 +11,13 @@ jobs:
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - name: Checkout vrx
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
             ref: main
             path: vrx
 
       - name: Checkout Gazebosim 
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
             repository: gazebosim/ros_gz
             ref: humble
