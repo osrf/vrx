@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     container: 
       image: npslearninglab/watery_robots:humble_current
+      options: --user root
     steps:
       - run: sudo chown -R `whoami`:`whoami` .
       - name: Checkout vrx
