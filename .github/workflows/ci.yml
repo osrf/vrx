@@ -5,7 +5,7 @@ on: [pull_request]
 jobs:
   test-humble-garden:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: 
       image: npslearninglab/watery_robots:humble_current
     steps:
