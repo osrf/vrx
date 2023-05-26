@@ -32,11 +32,11 @@ jobs:
           mkdir -p /home/developer/vrx_ws/src;
           mv vrx ros_gz /home/developer/vrx_ws/src;
           chown -R developer:developer /home/developer;
-          su developer;
 
       - name: Build and run tests
         shell: bash
         run: |
+          su developer;
           id;
           cd ~/vrx_ws;
           source /opt/ros/humble/setup.bash;
