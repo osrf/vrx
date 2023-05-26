@@ -37,7 +37,8 @@ jobs:
       - name: Build and run tests
         shell: bash
         run: |
-          cd /home/developer/vrx_ws;
+          id;
+          cd ~/vrx_ws;
           source /opt/ros/humble/setup.bash;
           GZ_VERSION=garden colcon build --merge-install --executor sequential;
           GZ_VERSION=garden colcon test --merge-install --executor sequential --packages-skip-regex ros_gz* --return-code-on-test-failure --event-handlers console_direct+;
