@@ -23,15 +23,21 @@ jobs:
             ref: humble
             path: ros_gz
   
+      - name: Create developer user 
+        run: |
+          useradd -m -u 1001 developer;
+
       - name: Set up workspace
         run: |
-          mkdir -p /tmp/vrx_ws/src;
-          ln -s `pwd` /tmp/vrx_ws/src;
+          mkdir /home/developer/vrx_ws/src;
+          mv vrx ros_gz /home/developer/vrx_ws/src;
+          chown -R developer:developer /home/developer;
+          su developer;
 
       - name: Build and run tests
         shell: bash
         run: |
-          cd /tmp/vrx_ws;
+          cd /home/developer/vrx_ws;
           source /opt/ros/humble/setup.bash;
           GZ_VERSION=garden colcon build --merge-install --executor sequential;
           GZ_VERSION=garden colcon test --merge-install --executor sequential --packages-skip-regex ros_gz* --return-code-on-test-failure --event-handlers console_direct+;
