@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_wayfinding0_task">
+  <world name="practice_2023_scan_dock_deliver1_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -342,7 +342,7 @@
     </light>
 
     <include>
-      <pose>0 0 0.2 0 0 0 </pose>
+      <pose> 0 0 0.2 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
 
@@ -355,6 +355,42 @@
     <include>
       <name>platform</name>
       <uri>platform</uri>
+    </include>
+
+    <include>
+      <name>robotx_light_buoy_ybr</name>
+      <pose>-515 180 0.32 0 0 0</pose>
+      <uri>robotx_light_buoy_ybr</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>1000.0</linear_drag>
+        <angular_drag>200.0</angular_drag>
+        <buoyancy name="buoyancy_base">
+          <link_name>base_link</link_name>
+          <pose>0 0 -0.1 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 1.5 0.4</size>
+            </box>
+          </geometry>
+        </buoyancy>
+        <buoyancy name="buoyancy_body">
+          <link_name>base_link</link_name>
+          <pose>0 0 0.8 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.2</radius>
+              <length>0.15</length>
+            </cylinder>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -423,29 +459,40 @@
       </plugin>
     </include>
 
-    <!-- Load the plugin for the wind -->
+    <!-- Needed to detect the projectile in the placard detectors -->
+    <plugin name="gz::sim" filename="dummy">
+      <performer name="perf_blue_projectile">
+        <ref>blue_projectile</ref>
+        <geometry>
+          <box>
+            <size>0.057 0.057 0.057</size>
+          </box>
+        </geometry>
+      </performer>
+    </plugin>
 
+    <!-- Load the plugin for the wind -->
     <plugin
       filename="libUSVWind.so"
       name="vrx::USVWind">
-      <!-- models to be affected by the wind -->
       <wind_obj>
         <name>wamv</name>
         <link_name>wamv/base_link</link_name>
         <coeff_vector> .5 .5 .33</coeff_vector>
       </wind_obj>
       <!-- Wind -->
-      <wind_direction>244</wind_direction>
+      <wind_direction>96</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>8.0</wind_mean_velocity>
+      <wind_mean_velocity>3.0</wind_mean_velocity>
       <var_wind_gain_constants>2.0</var_wind_gain_constants>
       <var_wind_time_constants>2</var_wind_time_constants>
-      <random_seed>9</random_seed>
+      <random_seed>11</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
       <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
       <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
     </plugin>
+  
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
       <message type="gz.msgs.Param" topic="/vrx/wavefield/parameters"
@@ -487,7 +534,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.8
+            double_value: 0.5
           }
         }
         params {
@@ -552,40 +599,89 @@
       </message>
     </plugin>
 
-    <!-- The wayfinding scoring plugin -->
+    <include>
+      <uri>dock_2022</uri>
+      <pose>-500 190 0 0 0 0</pose>
+    </include>
+
+    <!-- The scan, dock, deliver scoring plugin -->
     <plugin
-      filename="libWayfindingScoringPlugin.so"
-      name="vrx::WayfindingScoringPlugin">
+      filename="libScanDockScoringPlugin.so"
+      name="vrx::ScanDockScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>wayfinding</task_name>
-      <waypoints>
-        <waypoint>
-          <pose>-33.722462 150.674268 1.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.722262 150.674800 -1.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.7226908 150.6751165 0.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.722925 150.675304 1.0</pose>
-        </waypoint>
-        <waypoint>
-          <pose>-33.7226908 150.6755165 -2.5</pose>
-        </waypoint>
-      </waypoints>
-      <markers>
-        <scaling>0.2 0.2 2.0 </scaling>
-        <height>0.5 </height>
-      </markers>
-
-
+      <task_name>scan_dock_deliver</task_name>
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>
+      <!-- Color sequence -->
+      <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>
+      <color_1>yellow</color_1>
+      <color_2>blue</color_2>
+      <color_3>red</color_3>
+      <!-- Dock checkers -->
+      <dock_bonus_points>15</dock_bonus_points>
+      <correct_dock_bonus_points>5</correct_dock_bonus_points>
+      <bays>
+        <bay>
+          <name>bay1</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_1/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>False</correct_dock>
+          <symbol>blue_rectangle</symbol>
+        </bay>
+        <bay>
+          <name>bay2</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_2/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>False</correct_dock>
+          <symbol>red_cross</symbol>
+        </bay>
+        <bay>
+          <name>bay3</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_3/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>True</correct_dock>
+          <symbol>yellow_circle</symbol>
+        </bay>
+      </bays>
+      <!-- Shooting targets -->
+      <targets>
+        <!-- Placard #1 -->
+        <target>
+          <topic>/vrx/dock_2022_placard1_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard1_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #2 -->
+        <target>
+          <topic>/vrx/dock_2022_placard2_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard2_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #3 -->
+        <target>
+          <topic>/vrx/dock_2022_placard3_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard3_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+      </targets>
     </plugin>
 
   </world>

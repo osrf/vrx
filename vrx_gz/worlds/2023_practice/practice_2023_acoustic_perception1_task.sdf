@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_acoustic_perception0_task">
+  <world name="practice_2023_acoustic_perception1_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -427,8 +427,8 @@
     <!-- Publish the pinger pose -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
       <message type="gz.msgs.Vector3d" topic="/wamv/pingers/pinger/set_pinger_position" at="1.0">
-        x: -560,
-        y: 185,
+        x: -528,
+        y: 225,
         z: -2
       </message>
     </plugin>
@@ -445,7 +445,7 @@
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>      
       <goal_tolerance>3</goal_tolerance>
-      <pinger_position>-560 185 -2</pinger_position>
+      <pinger_position>-528 225 -2</pinger_position>
       <markers>
         <scaling>0.2 0.2 2.0</scaling>
         <height>0.5</height>
@@ -454,26 +454,26 @@
 
     <!-- Load the plugin for the wind -->
     <plugin
-       filename="libUSVWind.so"
+      filename="libUSVWind.so"
       name="vrx::USVWind">
-     <!-- models to be effected by the wind -->
       <wind_obj>
         <name>wamv</name>
         <link_name>wamv/base_link</link_name>
-        <coeff_vector>.5 .5 .33</coeff_vector>
+        <coeff_vector> .5 .5 .33</coeff_vector>
       </wind_obj>
       <!-- Wind -->
-      <wind_direction>240</wind_direction>
+      <wind_direction>96</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>0.0</wind_mean_velocity>
-      <var_wind_gain_constants>0</var_wind_gain_constants>
+      <wind_mean_velocity>3.0</wind_mean_velocity>
+      <var_wind_gain_constants>2.0</var_wind_gain_constants>
       <var_wind_time_constants>2</var_wind_time_constants>
-      <random_seed>10</random_seed>
+      <random_seed>11</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
       <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
       <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
     </plugin>
+
 
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
@@ -516,7 +516,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.3
+            double_value: 0.5
           }
         }
         params {
