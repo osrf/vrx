@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_perception2_task">
+  <world name="practice_2023_wayfinding0_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -423,575 +423,27 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 0 0</linear_velocity>
-    </wind>
-
     <!-- Load the plugin for the wind -->
     <plugin
-      filename="gz-sim-wind-effects-system"
-      name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>0.002</force_approximation_scaling_factor>
-      <horizontal>
-        <magnitude>
-          <time_for_rise>10</time_for_rise>
-          <sin>
-            <amplitude_percent>0.05</amplitude_percent>
-            <period>60</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.0002</stddev>
-          </noise>
-        </magnitude>
-        <direction>
-          <time_for_rise>30</time_for_rise>
-          <sin>
-            <amplitude>5</amplitude>
-            <period>20</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.03</stddev>
-          </noise>
-        </direction>
-      </horizontal>
-      <vertical>
-        <noise type="gaussian">
-         <mean>0</mean>
-         <stddev>0.03</stddev>
-        </noise>
-      </vertical>
-    </plugin>
-
-    <!-- Include all the objects we plan to use for perception.
-       Stash them out of the field of view for now -->
-    <include>
-      <name>orange_round_0</name>
-      <pose>-200 100 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>orange_round_1</name>
-      <pose>-200 114 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>green_0</name>
-      <pose>-200 102 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>green_1</name>
-      <pose>-200 130 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>black_round_0</name>
-      <pose>-200 106 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>black_round_1</name>
-      <pose>-200 112 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.25</radius>
-          </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>white_0</name>
-      <pose>-200 118 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>white_1</name>
-      <pose>-200 120 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>white_2</name>
-      <pose>-200 122 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>white_3</name>
-      <pose>-200 124 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>black_0</name>
-      <pose>-200 108 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>black_1</name>
-      <pose>-200 132 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>red_0</name>
-      <pose>-200 110 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>red_1</name>
-      <pose>-200 126 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <include>
-      <name>red_2</name>
-      <pose>-200 128 1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.3 0 0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.325</radius>
-              <length>0.1</length>
-            </cylinder>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-    </include>
-
-    <!-- The perception scoring plugin -->
-    <plugin
-      filename="libPerceptionScoringPlugin.so"
-      name="vrx::PerceptionScoringPlugin">
-      <!-- Parameters for ScoringPlugin base class -->
-      <vehicle>wamv</vehicle>
-      <task_name>perception</task_name>
-      <initial_state_duration>10.0</initial_state_duration>
-      <ready_state_duration>10.0</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
-      <!-- Parameters for PerceptionScoringPlugin -->
-      <frame>wamv</frame>
-      <!-- Pose of each object is expressed relative to the body frame
-           of the object named in the frame field - i.e., relative to
-           the wam-v-->
-      <object_sequence>
-        <object>
-          <time>5.0</time>
-          <type>mb_round_buoy_orange</type>
-          <name>orange_round_0</name>
-          <pose>8 0.4 0.4 0 0 0</pose>
-        </object>
-        <object>
-          <time>5.0</time>
-          <type>mb_round_buoy_orange</type>
-          <name>orange_round_1</name>
-          <pose>7.5 1 0.4 0 0 0</pose>
-        </object>
-        <object>
-          <time>5.0</time>
-          <type>mb_round_buoy_black</type>
-          <name>black_round_0</name>
-          <pose>7.0 1.7 0.4 0 0 0</pose>
-        </object>
-        <object>
-          <time>5.0</time>
-          <type>mb_round_buoy_black</type>
-          <name>black_round_1</name>
-          <pose>6.5 2.34 0.4 0 0 0</pose>
-        </object>
-        <object>
-          <time>15.0</time>
-          <type>mb_marker_buoy_green</type>
-          <name>green_0</name>
-          <pose>9 0.1 0.7 0 0 0</pose>
-        </object>
-        <object>
-          <time>15.0</time>
-          <type>mb_marker_buoy_green</type>
-          <name>green_1</name>
-          <pose>6.5 0.7 0.7 0 0 0</pose>
-        </object>
-        <object>
-          <time>15.0</time>
-          <type>mb_marker_buoy_red</type>
-          <name>red_0</name>
-          <pose>8.63 1.9 0.7 0 0 0</pose>
-        </object>
-        <object>
-          <time>15.0</time>
-          <type>mb_marker_buoy_white</type>
-          <name>white_0</name>
-          <pose>4.4 2.37 0.7 0 0 0</pose>
-        </object>
-        <object>
-          <time>25.0</time>
-          <type>mb_marker_buoy_black</type>
-          <name>black_0</name>
-          <pose>10 0.15 0.3 0 0 0</pose>
-        </object>
-        <object>
-          <time>25.0</time>
-          <type>mb_marker_buoy_green</type>
-          <name>green_0</name>
-          <pose>16.5 0.7 0.3 0 0 0</pose>
-        </object>
-        <object>
-          <time>25.0</time>
-          <type>mb_marker_buoy_red</type>
-          <name>red_0</name>
-          <pose>7.63 1.85 0.3 0 0 0</pose>
-        </object>
-        <object>
-          <time>25.0</time>
-          <type>mb_marker_buoy_green</type>
-          <name>green_1</name>
-          <pose>12.4 2.37 0.3 0 0 0</pose>
-        </object>
-        <object>
-          <time>25.0</time>
-          <type>mb_marker_buoy_black</type>
-          <name>black_1</name>
-          <pose>5.4 2.1 0.3 0 0 0</pose>
-        </object>
-        <object>
-          <time>25.0</time>
-          <type>mb_marker_buoy_red</type>
-          <name>red_1</name>
-          <pose>4.4 -0.43 0.3 0 0 0</pose>
-        </object>
-        <object>
-          <time>35.0</time>
-          <type>mb_marker_buoy_white</type>
-          <name>white_0</name>
-          <pose>8.63 1.9 0.7 0 0 0</pose>
-        </object>
-        <object>
-          <time>35.0</time>
-          <type>mb_marker_buoy_white</type>
-          <name>white_1</name>
-          <pose>7.43 2.1 0.7 0 0 0</pose>
-        </object>
-        <object>
-          <time>35.0</time>
-          <type>mb_marker_buoy_white</type>
-          <name>white_2</name>
-          <pose>7 1.68 0.7 0 0 0</pose>
-        </object>
-        <object>
-          <time>35.0</time>
-          <type>mb_marker_buoy_white</type>
-          <name>white_3</name>
-          <pose>30 -1.99 0.7 0 0 0</pose>
-        </object>
-      </object_sequence>
+      filename="libUSVWind.so"
+      name="vrx::USVWind">
+      <!-- models to be affected by the wind -->
+      <wind_obj>
+        <name>wamv</name>
+        <link_name>wamv/base_link</link_name>
+        <coeff_vector> .5 .5 .33</coeff_vector>
+      </wind_obj>
+      <!-- Wind -->
+      <wind_direction>315</wind_direction>
+      <!-- in degrees -->
+      <wind_mean_velocity>4.0</wind_mean_velocity>
+      <var_wind_gain_constants>2.0</var_wind_gain_constants>
+      <var_wind_time_constants>2</var_wind_time_constants>
+      <random_seed>15</random_seed>
+      <!-- set to zero/empty to randomize -->
+      <update_rate>10</update_rate>
+      <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
+      <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
     </plugin>
 
     <!-- The wave field -->
@@ -1035,7 +487,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.8
+            double_value: 0.5
           }
         }
         params {
@@ -1098,6 +550,39 @@
           }
         }
       </message>
+    </plugin>
+
+    <!-- The wayfinding scoring plugin -->
+    <plugin
+      filename="libWayfindingScoringPlugin.so"
+      name="vrx::WayfindingScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>wayfinding</task_name>
+      <waypoints>
+        <waypoint>
+          <pose>-33.722726 150.674110 1.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722418 150.673634 1.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722106 150.673663 0.5</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722006 150.674110 -3</pose>
+        </waypoint>
+      </waypoints>
+      <markers>
+        <scaling>0.2 0.2 2.0 </scaling>
+        <height>0.5 </height>
+      </markers>
+
+
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_topic>/vrx/release</release_topic>
     </plugin>
 
   </world>

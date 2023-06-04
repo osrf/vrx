@@ -83,7 +83,7 @@ joy_teleop:
       axis_mappings:
         data:
           axis: 1
-          scale: 400.0
+          scale: 1000.0
           offset: 0
 
     right_thrust:
@@ -94,7 +94,7 @@ joy_teleop:
       axis_mappings:
         data:
           axis: 3
-          scale: 400.0
+          scale: 1000.0
           offset: 0
 
     left_pos:

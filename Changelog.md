@@ -1,5 +1,23 @@
 ## VRX 2
 
+### VRX 2.2.0
+
+1. Restore USVWind model
+    * [Pull Request 637](https://github.com/osrf/vrx/pull/637)
+    * [Pull Request 642](https://github.com/osrf/vrx/pull/642)
+    * [Pull Request 649](https://github.com/osrf/vrx/pull/649)
+
+1. Finalized scoring for Follow-the-path
+    * [Pull Request 635](https://github.com/osrf/vrx/pull/635)
+
+1. Enhancements to Wildlife Encounter Task 
+    * [Pull Request 630](https://github.com/osrf/vrx/pull/630)
+    * [Pull Request 634](https://github.com/osrf/vrx/pull/634)
+
+1. Infrastructure updates
+    * [Pull Request 628](https://github.com/osrf/vrx/pull/628)
+    * [Pull Request 656](https://github.com/osrf/vrx/pull/656)
+
 ### VRX 2.1.0
 1. Acoustic Perception Task
     * [Pull Request 609](https://github.com/osrf/vrx/pull/609) 

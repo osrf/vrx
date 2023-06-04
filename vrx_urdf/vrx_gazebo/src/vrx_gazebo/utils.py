@@ -41,7 +41,7 @@ def create_xacro_file(xacro_target,
         if requested_macros is None:
             xacro_file.write(boiler_plate_bot)
             xacro_file.close()
-            return
+            return True
 
     # Object must be available
     for key, objects in requested_macros.items():

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_acoustic_perception2_task">
+  <world name="practice_2023_stationkeeping0_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -423,75 +423,28 @@
       </plugin>
     </include>
 
-
-    <!-- Publish the pinger pose -->
-    <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
-      <message type="gz.msgs.Vector3d" topic="/wamv/pingers/pinger/set_pinger_position" at="1.0">
-        x: -490,
-        y: 175,
-        z: -2
-      </message>
-    </plugin>
-
-    <wind>
-      <linear_velocity>0 2 0</linear_velocity>
-    </wind>
-
-    <!-- The acoustic perception scoring plugin -->
-    <plugin
-      filename="libAcousticPerceptionScoringPlugin.so"
-      name="vrx::AcousticPerceptionScoringPlugin">
-      <vehicle>wamv</vehicle>
-      <task_name>acoustic_perception</task_name>
-      <contact_debug_topic>/vrx/acoustic_perception/debug/contact</contact_debug_topic>
-      <initial_state_duration>10</initial_state_duration>
-      <ready_state_duration>10</ready_state_duration>
-      <running_state_duration>300</running_state_duration>
-      <release_topic>/vrx/release</release_topic>      
-      <goal_tolerance>3</goal_tolerance>
-      <pinger_position>-490 175 -2</pinger_position>
-      <markers>
-        <scaling>0.2 0.2 2.0</scaling>
-        <height>0.5</height>
-      </markers>
-    </plugin>
-
     <!-- Load the plugin for the wind -->
     <plugin
-      filename="gz-sim-wind-effects-system"
-      name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
-      <horizontal>
-        <magnitude>
-          <time_for_rise>10</time_for_rise>
-          <sin>
-            <amplitude_percent>0.05</amplitude_percent>
-            <period>60</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.0002</stddev>
-          </noise>
-        </magnitude>
-        <direction>
-          <time_for_rise>30</time_for_rise>
-          <sin>
-            <amplitude>5</amplitude>
-            <period>20</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.03</stddev>
-          </noise>
-        </direction>
-      </horizontal>
-      <vertical>
-        <noise type="gaussian">
-         <mean>0</mean>
-         <stddev>0.03</stddev>
-        </noise>
-      </vertical>
-    </plugin>
+      filename="libUSVWind.so"
+      name="vrx::USVWind">
+      <wind_obj>
+        <name>wamv</name>
+        <link_name>wamv/base_link</link_name>
+        <coeff_vector>.5 .5 .33</coeff_vector>
+      </wind_obj>
+      <!-- Wind -->
+      <wind_direction>120</wind_direction>
+      <!-- in degrees -->
+      <wind_mean_velocity>5.0</wind_mean_velocity>
+      <var_wind_gain_constants>2.0</var_wind_gain_constants>
+      <var_wind_time_constants>2</var_wind_time_constants>
+      <random_seed>15</random_seed>
+      <!-- set to zero/empty to randomize -->
+      <update_rate>10</update_rate>
+      <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
+      <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
+     </plugin>
+
 
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
@@ -534,7 +487,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.8
+            double_value: 0.5
           }
         }
         params {
@@ -597,6 +550,25 @@
           }
         }
       </message>
+    </plugin>
+
+    <!-- The station keeping scoring plugin -->
+    <plugin
+      filename="libStationkeepingScoringPlugin.so"
+      name="vrx::StationkeepingScoringPlugin">
+      <vehicle>wamv</vehicle>
+      <task_name>stationkeeping</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
+      <initial_state_duration>10</initial_state_duration>
+      <ready_state_duration>10</ready_state_duration>
+      <running_state_duration>300</running_state_duration>
+      <release_topic>/vrx/release</release_topic>
+      <!-- <head_error_on>false</head_error_on> -->
+      <goal_pose>-33.72267 150.67406 2.0</goal_pose>
+      <markers>
+        <scaling>0.2 0.2 2.0</scaling>
+        <height>0.5</height>
+      </markers>
     </plugin>
 
   </world>

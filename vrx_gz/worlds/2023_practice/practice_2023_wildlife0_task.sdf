@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_follow_path2_task">
+  <world name="practice_2023_wildlife0_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -308,6 +308,7 @@
       filename="gz-sim-navsat-system"
       name="gz::sim::systems::NavSat">
     </plugin>
+
     <scene>
       <sky></sky>
       <grid>false</grid>
@@ -356,10 +357,118 @@
       <uri>platform</uri>
     </include>
 
-    <!-- The VRX short navigation course -->
+    <!-- The crocodile buoy -->
     <include>
-      <uri>model://short_navigation_course_2</uri>
-      <pose>-524 186 0 0 0 -1.44</pose>
+      <pose>-520 180 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_box">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.80 0.40 0.15</size>
+            </box>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>18</force>
+        <torque>1.5</torque>
+        <waypoints>
+          <waypoint>-523 179</waypoint>
+          <waypoint>-520 180</waypoint>
+        </waypoints>
+      </plugin>
+    </include>
+
+    <!-- The turtle buoy -->
+    <include>
+      <pose>-550 230 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_sphere">
+          <link_name>link</link_name>
+          <pose>0 0 0.2 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.35</radius>
+            </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>6</force>
+        <torque>1</torque>
+        <waypoints>
+          <waypoint>-551 233</waypoint>
+          <waypoint>-550 230</waypoint>
+        </waypoints>
+      </plugin>
+    </include>
+
+    <!-- The platypus buoy -->
+    <include>
+      <pose>-500 210 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_box">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.75 0.35 0.16</size>
+            </box>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>18</force>
+        <torque>1.5</torque>
+        <waypoints>
+          <waypoint>-496 211</waypoint>
+          <waypoint>-500 210</waypoint>
+        </waypoints>
+      </plugin>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -428,101 +537,165 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 2 0</linear_velocity>
-    </wind>
-
     <!-- Load the plugin for the wind -->
     <plugin
-      filename="gz-sim-wind-effects-system"
-      name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
-      <horizontal>
-        <magnitude>
-          <time_for_rise>10</time_for_rise>
-          <sin>
-            <amplitude_percent>0.05</amplitude_percent>
-            <period>60</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.0002</stddev>
-          </noise>
-        </magnitude>
-        <direction>
-          <time_for_rise>30</time_for_rise>
-          <sin>
-            <amplitude>5</amplitude>
-            <period>20</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.03</stddev>
-          </noise>
-        </direction>
-      </horizontal>
-      <vertical>
-        <noise type="gaussian">
-         <mean>0</mean>
-         <stddev>0.03</stddev>
-        </noise>
-      </vertical>
+      filename="libUSVWind.so"
+      name="vrx::USVWind">
+      <wind_obj>
+        <name>wamv</name>
+        <link_name>wamv/base_link</link_name>
+        <coeff_vector>.5 .5 .33</coeff_vector>
+      </wind_obj>
+      <!-- Wind -->
+      <wind_direction>240</wind_direction>
+      <!-- in degrees -->
+      <wind_mean_velocity>0.0</wind_mean_velocity>
+      <var_wind_gain_constants>0</var_wind_gain_constants>
+      <var_wind_time_constants>2</var_wind_time_constants>
+      <random_seed>10</random_seed>
+      <!-- set to zero/empty to randomize -->
+      <update_rate>10</update_rate>
+      <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
+      <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
+     </plugin>
+
+    <!-- The wave field -->
+    <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
+      <message type="gz.msgs.Param" topic="/vrx/wavefield/parameters"
+               every="2.0">
+        params {
+          key: "amplitude"
+          value {
+            type: DOUBLE
+            double_value: 0
+          }
+        }
+        params {
+          key: "angle"
+          value {
+            type: DOUBLE
+            double_value: 0.4
+          }
+        }
+        params {
+          key: "cell_count"
+          value {
+            type: VECTOR3D
+            vector3d_value {
+              x: 300
+              y: 300
+            }
+          }
+        }
+        params {
+          key: "direction"
+          value {
+            type: VECTOR3D
+            vector3d_value {
+              x: 1
+            }
+          }
+        }
+        params {
+          key: "gain"
+          value {
+            type: DOUBLE
+            double_value: 0.2
+          }
+        }
+        params {
+          key: "model"
+          value {
+            type: STRING
+            string_value: "PMS"
+          }
+        }
+        params {
+          key: "number"
+          value {
+            type: INT32
+            int_value: 3
+          }
+        }
+        params {
+          key: "period"
+          value {
+            type: DOUBLE
+            double_value: 5
+          }
+        }
+        params {
+          key: "phase"
+          value {
+            type: DOUBLE
+            double_value: 0
+          }
+        }
+        params {
+          key: "scale"
+          value {
+            type: DOUBLE
+            double_value: 1.1
+          }
+        }
+        params {
+          key: "size"
+          value {
+            type: VECTOR3D
+            vector3d_value {
+              x: 6000
+              y: 6000
+            }
+          }
+        }
+        params {
+          key: "steepness"
+          value {
+            type: DOUBLE
+            double_value: 0
+          }
+        }
+        params {
+          key: "tau"
+          value {
+            type: DOUBLE
+            double_value: 2
+          }
+        }
+      </message>
     </plugin>
 
-    <!-- Scoring Plugin -->
+    <!-- The wildlife scoring plugin -->
     <plugin
-      filename="libNavigationScoringPlugin.so"
-      name="vrx::NavigationScoringPlugin">
+      filename="libWildlifeScoringPlugin.so"
+      name="vrx::WildlifeScoringPlugin">
+
+      <!-- Common parameters -->
       <vehicle>wamv</vehicle>
-      <task_name>follow_path</task_name>
-      <task_info_topic>/vrx/task/info</task_info_topic>
-      <contact_debug_topic>/vrx/follow_path/debug/contact</contact_debug_topic>
+      <task_name>wildlife</task_name>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <collision_buffer>10</collision_buffer>
-      <release_topic>/vrx/release</release_topic>
 
-      <course_name>short_navigation_course_2</course_name>
-      <obstacle_penalty>10.0</obstacle_penalty>
-      <gates>
-        <gate>
-          <left_marker>red_bound_0</left_marker>
-          <right_marker>green_bound_0</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_1</left_marker>
-          <right_marker>green_bound_1</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_2</left_marker>
-          <right_marker>green_bound_2</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_3</left_marker>
-          <right_marker>green_bound_3</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_4</left_marker>
-          <right_marker>green_bound_4</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_5</left_marker>
-          <right_marker>green_bound_5</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_6</left_marker>
-          <right_marker>green_bound_6</right_marker>
-        </gate>
-        <gate>
-          <left_marker>red_bound_7</left_marker>
-          <right_marker>green_bound_7</right_marker>
-        </gate>
-         <gate>
-          <left_marker>red_bound_8</left_marker>
-          <right_marker>green_bound_8</right_marker>
-        </gate>
-     </gates>
+      <!-- wildlife specific parameters -->
+      <buoys>
+        <buoy>
+          <name>crocodile::link</name>
+          <goal>avoid</goal>
+        </buoy>
+        <buoy>
+          <name>platypus::link</name>
+          <goal>circumnavigate_clockwise</goal>
+        </buoy>
+        <buoy>
+          <name>turtle::link</name>
+          <goal>circumnavigate_counterclockwise</goal>
+        </buoy>
+      </buoys>
+      <engagement_distance>10.0</engagement_distance>
+      <time_bonus>30.0</time_bonus>
+      <topic_prefix>/vrx/wildlife/animal</topic_prefix>
     </plugin>
 
   </world>

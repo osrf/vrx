@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_stationkeeping0_task">
+  <world name="practice_2023_wildlife1_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -342,7 +342,7 @@
     </light>
 
     <include>
-      <pose>0 0 0.2 0 0 0 </pose>
+      <pose> 0 0 0.2 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
 
@@ -355,6 +355,122 @@
     <include>
       <name>platform</name>
       <uri>platform</uri>
+    </include>
+
+    <!-- The crocodile buoy -->
+    <include>
+      <pose>-510 199 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_box">
+          <link_name>link</link_name>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.80 0.40 0.15</size>
+            </box>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>18</force>
+        <torque>1.5</torque>
+        <waypoints>
+          <waypoint>-511 203</waypoint>
+          <waypoint>-510 199</waypoint>
+        </waypoints>
+      </plugin>
+    </include>
+
+    <!-- A turtle buoy -->
+    <include>
+      <name>turtle1</name>
+      <pose>-550 201 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_sphere">
+          <link_name>link</link_name>
+          <pose>0 0 0.2 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.35</radius>
+            </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>6</force>
+        <torque>1</torque>
+        <waypoints>
+          <waypoint>-551 203</waypoint>
+          <waypoint>-550 201</waypoint>
+        </waypoints>
+      </plugin>
+    </include>
+
+    <!-- A turtle buoy -->
+    <include>
+      <name>turtle2</name>
+      <pose>-470 200 0 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
+
+      <plugin name="vrx::PolyhedraBuoyancyDrag"
+              filename="libPolyhedraBuoyancyDrag.so">
+        <fluid_density>1000</fluid_density>
+        <fluid_level>0.0</fluid_level>
+        <linear_drag>25.0</linear_drag>
+        <angular_drag>2.0</angular_drag>
+        <buoyancy name="buoyancy_sphere">
+          <link_name>link</link_name>
+          <pose>0 0 0.2 0 0 0</pose>
+          <geometry>
+            <sphere>
+              <radius>0.35</radius>
+            </sphere>
+          </geometry>
+        </buoyancy>
+        <wavefield>
+          <topic>/vrx/wavefield/parameters</topic>
+        </wavefield>
+      </plugin>
+
+      <plugin filename="gz-sim-trajectory-follower-system"
+              name="gz::sim::systems::TrajectoryFollower">
+        <link_name>link</link_name>
+        <loop>true</loop>
+        <force>6</force>
+        <torque>1</torque>
+        <waypoints>
+          <waypoint>-470 205</waypoint>
+          <waypoint>-470 200</waypoint>
+        </waypoints>
+      </plugin>
     </include>
 
     <!-- The posts for securing the WAM-V -->
@@ -423,32 +539,28 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 0 0</linear_velocity>
-    </wind>
-
-    <!-- Load the plugin for the wind --> 
+    <!-- Load the plugin for the wind -->
     <plugin
       filename="libUSVWind.so"
       name="vrx::USVWind">
+      <!-- models to be effected by the wind -->
       <wind_obj>
         <name>wamv</name>
         <link_name>wamv/base_link</link_name>
-        <coeff_vector>.5 .5 .33</coeff_vector>
+        <coeff_vector> .5 .5 .33</coeff_vector>
       </wind_obj>
       <!-- Wind -->
-      <wind_direction>240</wind_direction>
+      <wind_direction>37</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>0.0</wind_mean_velocity>
-      <var_wind_gain_constants>0</var_wind_gain_constants>
+      <wind_mean_velocity>3.7</wind_mean_velocity>
+      <var_wind_gain_constants>3.0</var_wind_gain_constants>
       <var_wind_time_constants>2</var_wind_time_constants>
-      <random_seed>10</random_seed>
+      <random_seed>12</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
       <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
       <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
-     </plugin>
-
+    </plugin>
 
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
@@ -491,7 +603,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.2
+            double_value: 0.5
           }
         }
         params {
@@ -556,23 +668,38 @@
       </message>
     </plugin>
 
-    <!-- The station keeping scoring plugin -->
+    <!-- The wildlife scoring plugin -->
     <plugin
-      filename="libStationkeepingScoringPlugin.so"
-      name="vrx::StationkeepingScoringPlugin">
+      filename="libWildlifeScoringPlugin.so"
+      name="vrx::WildlifeScoringPlugin">
+
+      <!-- Common parameters -->
       <vehicle>wamv</vehicle>
-      <task_name>stationkeeping</task_name>
-      <task_info_topic>/vrx/task/info</task_info_topic>
+      <task_name>wildlife</task_name>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
-      <release_topic>/vrx/release</release_topic>
-      <!-- <head_error_on>false</head_error_on> -->
-      <goal_pose>-33.722718 150.674031 0</goal_pose>
-      <markers>
-        <scaling>0.2 0.2 2.0</scaling>
-        <height>0.5</height>
-      </markers>
+      <collision_buffer>10</collision_buffer>
+
+      <!-- wildlife specific parameters -->
+      <buoys>
+        <buoy>
+          <name>crocodile::link</name>
+          <goal>avoid</goal>
+        </buoy>
+        <buoy>
+          <name>turtle1::link</name>
+          <goal>circumnavigate_counterclockwise</goal>
+        </buoy>
+        <buoy>
+          <name>turtle2::link</name>
+          <goal>circumnavigate_counterclockwise</goal>
+        </buoy>
+      </buoys>
+      <engagement_distance>10.0</engagement_distance>
+      <time_bonus>30.0</time_bonus>
+      <topic_prefix>/vrx/wildlife/animal</topic_prefix>
+      <publication_frequency>0.33</publication_frequency>
     </plugin>
 
   </world>

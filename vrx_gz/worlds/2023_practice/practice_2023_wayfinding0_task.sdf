@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_stationkeeping2_task">
+  <world name="practice_2023_wayfinding0_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -342,7 +342,7 @@
     </light>
 
     <include>
-      <pose> 0 0 0.2 0 0 0 </pose>
+      <pose>0 0 0.2 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
 
@@ -423,12 +423,7 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 2 0</linear_velocity>
-    </wind>
-
     <!-- Load the plugin for the wind -->
-
     <plugin
       filename="libUSVWind.so"
       name="vrx::USVWind">
@@ -438,17 +433,18 @@
         <coeff_vector>.5 .5 .33</coeff_vector>
       </wind_obj>
       <!-- Wind -->
-      <wind_direction>265</wind_direction>
+      <wind_direction>240</wind_direction>
       <!-- in degrees -->
-      <wind_mean_velocity>7.0</wind_mean_velocity>
-      <var_wind_gain_constants>1.5</var_wind_gain_constants>
+      <wind_mean_velocity>0.0</wind_mean_velocity>
+      <var_wind_gain_constants>0</var_wind_gain_constants>
       <var_wind_time_constants>2</var_wind_time_constants>
-      <random_seed>12</random_seed>
+      <random_seed>10</random_seed>
       <!-- set to zero/empty to randomize -->
       <update_rate>10</update_rate>
       <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
       <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
      </plugin>
+
 
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
@@ -491,7 +487,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.8
+            double_value: 0.2
           }
         }
         params {
@@ -556,23 +552,34 @@
       </message>
     </plugin>
 
-    <!-- The station keeping scoring plugin -->
+    <!-- The wayfinding scoring plugin -->
     <plugin
-      filename="libStationkeepingScoringPlugin.so"
-      name="vrx::StationkeepingScoringPlugin">
+      filename="libWayfindingScoringPlugin.so"
+      name="vrx::WayfindingScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>stationkeeping</task_name>
+      <task_name>wayfinding</task_name>
+      <waypoints>
+        <waypoint>
+          <pose>-33.722611 150.674051 1.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722574 150.6744381 0.0</pose>
+        </waypoint>
+        <waypoint>
+          <pose>-33.722680 150.674756 -1.0</pose>
+        </waypoint>
+      </waypoints>
+      <markers>
+        <scaling>0.2 0.2 2.0 </scaling>
+        <height>0.5 </height>
+      </markers>
+
+
       <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
       <release_topic>/vrx/release</release_topic>
-      <!-- <head_error_on>false</head_error_on> -->
-      <goal_pose>-33.7226643 150.673947 -1.0</goal_pose>
-      <markers>
-        <scaling>0.2 0.2 2.0</scaling>
-        <height>0.5</height>
-      </markers>
     </plugin>
 
   </world>

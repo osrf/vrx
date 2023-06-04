@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2022_wildlife0_task">
+  <world name="practice_2023_scan_dock_deliver2_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>
@@ -357,117 +357,39 @@
       <uri>platform</uri>
     </include>
 
-    <!-- The crocodile buoy -->
     <include>
-      <pose>-520 180 0 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/crocodile</uri>
+      <name>robotx_light_buoy_yrg</name>
+      <pose>-510 175 0.32 0 0 0</pose>
+      <uri>robotx_light_buoy_yrg</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="buoyancy_box">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
+        <linear_drag>1000.0</linear_drag>
+        <angular_drag>200.0</angular_drag>
+        <buoyancy name="buoyancy_base">
+          <link_name>base_link</link_name>
+          <pose>0 0 -0.1 0 0 0</pose>
           <geometry>
             <box>
-              <size>0.80 0.40 0.15</size>
+              <size>1.5 1.5 0.4</size>
             </box>
           </geometry>
         </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-
-      <plugin filename="gz-sim-trajectory-follower-system"
-              name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>18</force>
-        <torque>1.5</torque>
-        <waypoints>
-          <waypoint>-523 179</waypoint>
-          <waypoint>-520 180</waypoint>
-        </waypoints>
-      </plugin>
-    </include>
-
-    <!-- The turtle buoy -->
-    <include>
-      <pose>-550 230 0 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/turtle</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="buoyancy_sphere">
-          <link_name>link</link_name>
-          <pose>0 0 0.2 0 0 0</pose>
+        <buoyancy name="buoyancy_body">
+          <link_name>base_link</link_name>
+          <pose>0 0 0.8 0 0 0</pose>
           <geometry>
-            <sphere>
-              <radius>0.35</radius>
-            </sphere>
+            <cylinder>
+              <radius>0.2</radius>
+              <length>0.15</length>
+            </cylinder>
           </geometry>
         </buoyancy>
         <wavefield>
           <topic>/vrx/wavefield/parameters</topic>
         </wavefield>
-      </plugin>
-
-      <plugin filename="gz-sim-trajectory-follower-system"
-              name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>6</force>
-        <torque>1</torque>
-        <waypoints>
-          <waypoint>-551 233</waypoint>
-          <waypoint>-550 230</waypoint>
-        </waypoints>
-      </plugin>
-    </include>
-
-    <!-- The platypus buoy -->
-    <include>
-      <pose>-500 210 0 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/platypus</uri>
-
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="buoyancy_box">
-          <link_name>link</link_name>
-          <pose>0 0 0 0 0 0</pose>
-          <geometry>
-            <box>
-              <size>0.75 0.35 0.16</size>
-            </box>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <topic>/vrx/wavefield/parameters</topic>
-        </wavefield>
-      </plugin>
-
-      <plugin filename="gz-sim-trajectory-follower-system"
-              name="gz::sim::systems::TrajectoryFollower">
-        <link_name>link</link_name>
-        <loop>true</loop>
-        <force>18</force>
-        <torque>1.5</torque>
-        <waypoints>
-          <waypoint>-496 211</waypoint>
-          <waypoint>-500 210</waypoint>
-        </waypoints>
       </plugin>
     </include>
 
@@ -537,45 +459,39 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 0 0</linear_velocity>
-    </wind>
+    <!-- Needed to detect the projectile in the placard detectors -->
+    <plugin name="gz::sim" filename="dummy">
+      <performer name="perf_blue_projectile">
+        <ref>blue_projectile</ref>
+        <geometry>
+          <box>
+            <size>0.057 0.057 0.057</size>
+          </box>
+        </geometry>
+      </performer>
+    </plugin>
 
     <!-- Load the plugin for the wind -->
     <plugin
-      filename="gz-sim-wind-effects-system"
-      name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
-      <horizontal>
-        <magnitude>
-          <time_for_rise>10</time_for_rise>
-          <sin>
-            <amplitude_percent>0.05</amplitude_percent>
-            <period>60</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.0002</stddev>
-          </noise>
-        </magnitude>
-        <direction>
-          <time_for_rise>30</time_for_rise>
-          <sin>
-            <amplitude>5</amplitude>
-            <period>20</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.03</stddev>
-          </noise>
-        </direction>
-      </horizontal>
-      <vertical>
-        <noise type="gaussian">
-         <mean>0</mean>
-         <stddev>0.03</stddev>
-        </noise>
-      </vertical>
+      filename="libUSVWind.so"
+      name="vrx::USVWind">
+      <!-- models to be effected by the wind -->
+      <wind_obj>
+        <name>wamv</name>
+        <link_name>wamv/base_link</link_name>
+        <coeff_vector> .5 .5 .33</coeff_vector>
+      </wind_obj>
+      <!-- Wind -->
+      <wind_direction>17</wind_direction>
+      <!-- in degrees -->
+      <wind_mean_velocity>8.0</wind_mean_velocity>
+      <var_wind_gain_constants>4.0</var_wind_gain_constants>
+      <var_wind_time_constants>2</var_wind_time_constants>
+      <random_seed>19</random_seed>
+      <!-- set to zero/empty to randomize -->
+      <update_rate>10</update_rate>
+      <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
+      <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
     </plugin>
 
     <!-- The wave field -->
@@ -619,7 +535,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.2
+            double_value: 0.8
           }
         }
         params {
@@ -684,37 +600,89 @@
       </message>
     </plugin>
 
-    <!-- The wildlife scoring plugin -->
-    <plugin
-      filename="libWildlifeScoringPlugin.so"
-      name="vrx::WildlifeScoringPlugin">
+    <include>
+      <uri>dock_2022</uri>
+      <pose>-540 210 0 0 0 3.14</pose>
+    </include>
 
-      <!-- Common parameters -->
+    <!-- The scan, dock, deliver scoring plugin -->
+    <plugin
+      filename="libScanDockScoringPlugin.so"
+      name="vrx::ScanDockScoringPlugin">
       <vehicle>wamv</vehicle>
-      <task_name>wildlife</task_name>
+      <task_name>scan_dock_deliver</task_name>
+      <task_info_topic>/vrx/task/info</task_info_topic>
       <initial_state_duration>10</initial_state_duration>
       <ready_state_duration>10</ready_state_duration>
       <running_state_duration>300</running_state_duration>
-      <collision_buffer>10</collision_buffer>
-
-      <!-- wildlife specific parameters -->
-      <buoys>
-        <buoy>
-          <name>crocodile::link</name>
-          <goal>avoid</goal>
-        </buoy>
-        <buoy>
-          <name>platypus::link</name>
-          <goal>circumnavigate_clockwise</goal>
-        </buoy>
-        <buoy>
-          <name>turtle::link</name>
-          <goal>circumnavigate_counterclockwise</goal>
-        </buoy>
-      </buoys>
-      <engagement_distance>10.0</engagement_distance>
-      <time_bonus>30.0</time_bonus>
-      <topic_prefix>/vrx/wildlife/animal</topic_prefix>
+      <release_topic>/vrx/release</release_topic>
+      <!-- Color sequence -->
+      <color_sequence_topic>/vrx/scan_dock_deliver/color_sequence</color_sequence_topic>
+      <color_1>yellow</color_1>
+      <color_2>red</color_2>
+      <color_3>green</color_3>
+      <!-- Dock checkers -->
+      <dock_bonus_points>15</dock_bonus_points>
+      <correct_dock_bonus_points>5</correct_dock_bonus_points>
+      <bays>
+        <bay>
+          <name>bay1</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_1/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_1_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard1/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>True</correct_dock>
+          <symbol>yellow_triangle</symbol>
+        </bay>
+        <bay>
+          <name>bay2</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_2/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_2_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard2/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>False</correct_dock>
+          <symbol>blue_cross</symbol>
+        </bay>
+        <bay>
+          <name>bay3</name>
+          <internal_activation_topic>/vrx/dock_2022/bay_3/contain</internal_activation_topic>
+          <external_activation_topic>/vrx/dock_2022/bay_3_external/contain</external_activation_topic>
+          <symbol_topic>/vrx/dock_2022_placard3/symbol</symbol_topic>
+          <min_dock_time>10.0</min_dock_time>
+          <correct_dock>False</correct_dock>
+          <symbol>green_rectangle</symbol>
+        </bay>
+      </bays>
+      <!-- Shooting targets -->
+      <targets>
+        <!-- Placard #1 -->
+        <target>
+          <topic>/vrx/dock_2022_placard1_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard1_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #2 -->
+        <target>
+          <topic>/vrx/dock_2022_placard2_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard2_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+        <!-- Placard #3 -->
+        <target>
+          <topic>/vrx/dock_2022_placard3_big_hole/contain</topic>
+          <bonus_points>5</bonus_points>
+        </target>
+        <target>
+          <topic>/vrx/dock_2022_placard3_small_hole/contain</topic>
+          <bonus_points>10</bonus_points>
+        </target>
+      </targets>
     </plugin>
 
   </world>
