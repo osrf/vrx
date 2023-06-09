@@ -101,7 +101,7 @@ namespace vrx
   ///       <angle>0.4</angle>
   ///       <tau>2.0</tau>
   ///       <amplitude>0.0</amplitude>
-  ///       <steepness>0.0</steepness>
+  ///       <steepness>1.0</steepness>
   ///     </wave>
   ///   </wavefield>
   /// </plugin>
