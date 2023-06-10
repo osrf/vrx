@@ -884,6 +884,36 @@
       <message type="gz.msgs.Param" topic="/vrx/wavefield/parameters"
                every="2.0">
         params {
+          key: "direction"
+          value {
+            type: VECTOR3D
+            vector3d_value {
+              x: 1
+            }
+          }
+        }
+        params {
+          key: "gain"
+          value {
+            type: DOUBLE
+            double_value: 0.8
+          }
+        }
+        params {
+          key: "period"
+          value {
+            type: DOUBLE
+            double_value: 5
+          }
+        }
+        params {
+          key: "steepness"
+          value {
+            type: DOUBLE
+            double_value: 0
+          }
+        }
+        params {
           key: "amplitude"
           value {
             type: DOUBLE
@@ -908,22 +938,6 @@
           }
         }
         params {
-          key: "direction"
-          value {
-            type: VECTOR3D
-            vector3d_value {
-              x: 1
-            }
-          }
-        }
-        params {
-          key: "gain"
-          value {
-            type: DOUBLE
-            double_value: 0.8
-          }
-        }
-        params {
           key: "model"
           value {
             type: STRING
@@ -935,13 +949,6 @@
           value {
             type: INT32
             int_value: 3
-          }
-        }
-        params {
-          key: "period"
-          value {
-            type: DOUBLE
-            double_value: 5
           }
         }
         params {
@@ -966,13 +973,6 @@
               x: 6000
               y: 6000
             }
-          }
-        }
-        params {
-          key: "steepness"
-          value {
-            type: DOUBLE
-            double_value: 0
           }
         }
         params {
