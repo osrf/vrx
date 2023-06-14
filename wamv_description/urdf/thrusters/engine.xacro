@@ -3,11 +3,7 @@
   <!-- Macro for inserting an engine with its propeller. -->
   <xacro:macro name="engine" params="prefix position:='0 0 0' orientation:='0 0 0'">
     <link name="${namespace}/${prefix}_engine_link">
-      <visual>
-        <geometry>
-          <mesh filename="package://wamv_description/models/engine/mesh/engine.dae"/>
-        </geometry>
-      </visual>
+      
       <collision name="${prefix}_engine_vertical_axis_collision">
         <origin xyz="-0.16 0 -0.24" rpy="0 0 0" />
         <geometry>
@@ -24,12 +20,17 @@
         <mass value="15"/>
         <inertia ixx="0.889245" ixy="0.0" ixz="0.0" iyy="0.911125" iyz="0.0" izz="0.078125"/>
       </inertial>
+      
+      
     </link>
+
+
+
 
     <link name="${namespace}/${prefix}_propeller_link">
       <visual>
         <geometry>
-          <mesh filename="package://wamv_description/models/propeller/mesh/propeller.dae"/>
+          <mesh filename="package://wamv_description/models/propeller/mesh/propeller.dae" scale="0.42 0.42 0.42"/>
         </geometry>
       </visual>
       <collision name="${prefix}_propeller_collision">
