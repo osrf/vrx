@@ -7,21 +7,19 @@
       <collision name="${prefix}_engine_vertical_axis_collision">
         <origin xyz="-0.16 0 -0.24" rpy="0 0 0" />
         <geometry>
-          <box size="0.2 0.15 0.83" />
+          <box size="0.01 0.01 0.01" />
         </geometry>
       </collision>
       <collision name="${prefix}_engine_rear_end_collision">
-        <origin xyz="-0.34 0 0.12" rpy="0 0 0" />
+        <origin xyz="-0.034 0 0.012" rpy="0 0 0" />
         <geometry>
-          <box size="0.12 0.15 0.12" />
+          <box size="0.012 0.015 0.012" />
         </geometry>
       </collision>
       <inertial>
         <mass value="15"/>
         <inertia ixx="0.889245" ixy="0.0" ixz="0.0" iyy="0.911125" iyz="0.0" izz="0.078125"/>
       </inertial>
-      
-      
     </link>
 
 
@@ -34,9 +32,9 @@
         </geometry>
       </visual>
       <collision name="${prefix}_propeller_collision">
-        <origin xyz="-0.08 0 0" rpy="0 1.57 0" />
+        <origin xyz="-0.04 0 0" rpy="0 1.57 0" />
         <geometry>
-          <cylinder length="0.18" radius="0.24" />
+          <cylinder length="0.05" radius="0.1" />
         </geometry>
       </collision>
       <inertial>
