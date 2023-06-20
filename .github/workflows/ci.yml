@@ -16,13 +16,6 @@ jobs:
             ref: main
             path: vrx
 
-      - name: Checkout Gazebosim 
-        uses: actions/checkout@v3
-        with:
-            repository: gazebosim/ros_gz
-            ref: humble
-            path: ros_gz
-  
       - name: Create developer user 
         run: |
           useradd -m -u 1001 developer;
@@ -37,6 +30,6 @@ jobs:
         shell: bash
         run: |
           cd /home/developer/vrx_ws;
-          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && GZ_VERSION=garden colcon build --merge-install --executor sequential" developer;
-          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && GZ_VERSION=garden colcon test --merge-install --executor sequential --packages-skip-regex ros_gz* --return-code-on-test-failure --event-handlers console_direct+" developer;
+          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --merge-install --executor sequential" developer;
+          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && colcon test --merge-install --executor sequential --packages-skip-regex ros_gz* --return-code-on-test-failure --event-handlers console_direct+" developer;
  
