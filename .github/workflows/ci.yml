@@ -23,7 +23,7 @@ jobs:
       - name: Set up workspace
         run: |
           mkdir -p /home/developer/vrx_ws/src;
-          mv vrx ros_gz /home/developer/vrx_ws/src;
+          mv vrx /home/developer/vrx_ws/src;
           chown -R developer:developer /home/developer;
 
       - name: Build and run tests
