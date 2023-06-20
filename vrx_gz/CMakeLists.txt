@@ -84,7 +84,7 @@ install(
 # Stationkeeping scoring plugin
 add_library(StationkeepingScoringPlugin SHARED
   src/StationkeepingScoringPlugin.cc
-  src/WaypointMarkers
+  src/WaypointMarkers.cc
 )
 target_link_libraries(StationkeepingScoringPlugin PUBLIC
   gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
