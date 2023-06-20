@@ -9,7 +9,6 @@ jobs:
     container: 
       image: npslearninglab/watery_robots:humble_current
     steps:
-      - run: sudo chown -R `whoami`:`whoami` .
       - name: Checkout vrx
         uses: actions/checkout@v3
         with:
