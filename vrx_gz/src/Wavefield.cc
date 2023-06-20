@@ -28,6 +28,8 @@
 #include <gz/math/Vector2.hh>
 #include <gz/math/Vector3.hh>
 
+#include <iostream>
+
 #include "Wavefield.hh"
 
 using namespace gz;
@@ -48,21 +50,21 @@ class vrx::WavefieldPrivate
 {
   /// \brief Constructor.
   public: WavefieldPrivate():
-    size({1000, 1000}),
-    cellCount({50, 50}),
+    size({6000, 6000}),
+    cellCount({300, 300}),
     model("PMS"),
-    number(1),
-    scale(2),
-    angle(2.0*M_PI/10.0),
-    steepness(1.0),
+    number(3),
+    scale(1.1),
+    angle(0.4),
+    steepness(0.0),
     amplitude(0.0),
-    period(1.0),
+    period(5.0),
     phase(0.0),
     direction(1, 0),
     angularFrequency(2.0*M_PI),
     wavelength(2 * M_PI / this->DeepWaterDispersionToWavenumber(2.0 * M_PI)),
     wavenumber(this->DeepWaterDispersionToWavenumber(2.0 * M_PI)),
-    tau(1.0),
+    tau(2.0),
     gain(1.0)
   {
   }
@@ -469,22 +471,52 @@ void Wavefield::Load(const msgs::Param &_msg)
 {
   auto params = _msg.params();
 
-  this->data->size = {params["size"].vector3d_value().x(),
-    params["size"].vector3d_value().y()};
-  this->data->cellCount = {params["cell_count"].vector3d_value().x(),
-    params["cell_count"].vector3d_value().y()};
-  this->data->number = params["number"].int_value();
-  this->data->scale = params["scale"].double_value();
-  this->data->angle = params["angle"].double_value();
-  this->data->steepness = params["steepness"].double_value();
-  this->data->amplitude = params["amplitude"].double_value();
-  this->data->period = params["period"].double_value();
-  this->data->phase = params["phase"].double_value();
-  this->data->direction = {params["direction"].vector3d_value().x(),
-    params["direction"].vector3d_value().y()};
-  this->data->model = params["model"].string_value();
-  this->data->gain = params["gain"].double_value();
-  this->data->tau = params["tau"].double_value();
+  if (params.count("size") > 0){
+    this->data->size = {params["size"].vector3d_value().x(),
+      params["size"].vector3d_value().y()};
+  }
+  if (params.count("cell_count") > 0){
+    this->data->cellCount = {params["cell_count"].vector3d_value().x(),
+      params["cell_count"].vector3d_value().y()};
+  }
+  if (params.count("number") > 0){
+    this->data->number = params["number"].int_value();
+  }
+  if (params.count("scale") > 0){
+    this->data->scale = params["scale"].double_value();
+  }
+  if (params.count("angle") > 0){
+    this->data->angle = params["angle"].double_value();
+  }
+  if (params.count("steepness") > 0){
+    this->data->steepness = params["steepness"].double_value();
+  }
+  if (params.count("amplitude") > 0){
+    this->data->amplitude = params["amplitude"].double_value();
+  }
+  if (params.count("period") > 0){
+    this->data->period = params["period"].double_value();
+  }
+  if (params.count("phase") > 0){
+    this->data->phase = params["phase"].double_value();
+  }
+  if (params.count("direction") > 0){
+    this->data->direction = {params["direction"].vector3d_value().x(),
+      params["direction"].vector3d_value().y()};
+  }
+  if (params.count("model") > 0){
+    this->data->model = params["model"].string_value();
+  }
+  if (params.count("gain") > 0){
+    this->data->gain = params["gain"].double_value();
+  }
+  if (params.count("tau") > 0){
+    this->data->tau = params["tau"].double_value();
+  }
+
+  // comment out after review
+  this->DebugPrint();
+  //
 
   this->data->FillParameters();
   this->data->Recalculate();
