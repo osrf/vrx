@@ -87,11 +87,7 @@ class Model:
                 vrx_gz.bridges.cmd_vel(self.model_name)
             ])
         elif self.is_USV():
-            bridges.extend([
-                # Acoustic pinger
-                vrx_gz.bridges.acoustic_pinger(self.model_name),
-                vrx_gz.bridges.set_acoustic_pinger(self.model_name),
-            ])
+            pass
 
         return [bridges, nodes, custom_launches]
 
