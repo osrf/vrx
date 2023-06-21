@@ -259,7 +259,8 @@ void USVWind::PreUpdate(
     sim::EntityComponentManager &_ecm)
 {
   GZ_PROFILE("USVWind::PreUpdate");
-
+  if (_info.paused)
+    return;
   auto time = std::chrono::duration<double>(_info.simTime);
   if (this->dataPtr->previousTime == std::chrono::duration<double>(0))
   {
