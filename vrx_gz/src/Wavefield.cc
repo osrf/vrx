@@ -514,10 +514,6 @@ void Wavefield::Load(const msgs::Param &_msg)
     this->data->tau = params["tau"].double_value();
   }
 
-  // comment out after review
-  this->DebugPrint();
-  //
-
   this->data->FillParameters();
   this->data->Recalculate();
   this->data->active = true;
