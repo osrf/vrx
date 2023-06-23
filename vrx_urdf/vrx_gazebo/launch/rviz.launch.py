@@ -10,14 +10,15 @@ import os.path
 def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    urdf_file = os.path.join(get_package_share_directory('wamv_gazebo'), 'urdf/wamv_ground_truth.urdf')
+    model_dir = os.path.join(get_package_share_directory('vrx_gazebo'), 'models/wamv/tmp')
+    urdf_file = os.path.join(model_dir, 'model.urdf')
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
     DeclareLaunchArgument(
         'use_sim_time',
         default_value='true',
         description='Use simulation (Gazebo) clock if true'),
-    params = {'use_sim_time': use_sim_time, 'robot_description': robot_desc}
+    params = {'use_sim_time': use_sim_time, 'ns': 'wamv', 'robot_description': robot_desc}
 
     rsp = Node(package='robot_state_publisher',
                                   executable='robot_state_publisher',
