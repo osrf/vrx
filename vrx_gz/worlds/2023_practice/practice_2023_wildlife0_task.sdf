@@ -576,14 +576,14 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.2
+            double_value: 0.0
           }
         }
         params {
           key: "period"
           value {
             type: DOUBLE
-            double_value: 5
+            double_value: 4
           }
         }
         params {

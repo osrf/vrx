@@ -509,7 +509,7 @@
           key: "period"
           value {
             type: DOUBLE
-            double_value: 5
+            double_value: 4
           }
         }
         params {
