@@ -14,20 +14,12 @@ def generate_launch_description():
     urdf_file = os.path.join(model_dir, 'model.urdf')
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
-    DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='true',
-        description='Use simulation (Gazebo) clock if true'),
-    params = {'use_sim_time': use_sim_time, 'ns': 'wamv', 'robot_description': robot_desc}
+    params = {'robot_description': robot_desc}
 
-    rsp = Node(package='robot_state_publisher',
-                                  executable='robot_state_publisher',
+    rdp = Node(package='vrx_gazebo',
+                                  executable='robot_desc_publisher.py',
                                   output='both',
                                   parameters=[params])
-    jsp = Node(package='joint_state_publisher',
-                                  executable='joint_state_publisher',
-                                  output='both',
-                                  parameters=[{'use_sim_time': use_sim_time}])
     rvz = Node(
             package='rviz2',
             namespace='',
@@ -35,4 +27,4 @@ def generate_launch_description():
             name='rviz2',
             arguments=['-d' + os.path.join(get_package_share_directory('vrx_gazebo'), 'config', 'rviz_vrx_final.rviz')]
         )
-    return LaunchDescription([rsp,jsp,rvz])
+    return LaunchDescription([rdp,rvz])
