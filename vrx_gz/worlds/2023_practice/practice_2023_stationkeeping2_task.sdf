@@ -477,7 +477,7 @@
           key: "steepness"
           value {
             type: DOUBLE
-            double_value: 0.5
+            double_value: 0.0
           }
         }
       </message>
