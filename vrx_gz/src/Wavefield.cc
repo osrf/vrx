@@ -28,8 +28,6 @@
 #include <gz/math/Vector2.hh>
 #include <gz/math/Vector3.hh>
 
-#include <iostream>
-
 #include "Wavefield.hh"
 
 using namespace gz;
@@ -471,46 +469,59 @@ void Wavefield::Load(const msgs::Param &_msg)
 {
   auto params = _msg.params();
 
-  if (params.count("size") > 0){
+  if (params.count("size") > 0)
+  {
     this->data->size = {params["size"].vector3d_value().x(),
       params["size"].vector3d_value().y()};
   }
-  if (params.count("cell_count") > 0){
+  if (params.count("cell_count") > 0)
+  {
     this->data->cellCount = {params["cell_count"].vector3d_value().x(),
       params["cell_count"].vector3d_value().y()};
   }
-  if (params.count("number") > 0){
+  if (params.count("number") > 0)
+  {
     this->data->number = params["number"].int_value();
   }
-  if (params.count("scale") > 0){
+  if (params.count("scale") > 0)
+  {
     this->data->scale = params["scale"].double_value();
   }
-  if (params.count("angle") > 0){
+  if (params.count("angle") > 0)
+  {
     this->data->angle = params["angle"].double_value();
   }
-  if (params.count("steepness") > 0){
+  if (params.count("steepness") > 0)
+  {
     this->data->steepness = params["steepness"].double_value();
   }
-  if (params.count("amplitude") > 0){
+  if (params.count("amplitude") > 0)
+  {
     this->data->amplitude = params["amplitude"].double_value();
   }
-  if (params.count("period") > 0){
+  if (params.count("period") > 0)
+  {
     this->data->period = params["period"].double_value();
   }
-  if (params.count("phase") > 0){
+  if (params.count("phase") > 0)
+  {
     this->data->phase = params["phase"].double_value();
   }
-  if (params.count("direction") > 0){
+  if (params.count("direction") > 0)
+  {
     this->data->direction = {params["direction"].vector3d_value().x(),
       params["direction"].vector3d_value().y()};
   }
-  if (params.count("model") > 0){
+  if (params.count("model") > 0)
+  {
     this->data->model = params["model"].string_value();
   }
-  if (params.count("gain") > 0){
+  if (params.count("gain") > 0)
+  {
     this->data->gain = params["gain"].double_value();
   }
-  if (params.count("tau") > 0){
+  if (params.count("tau") > 0)
+  {
     this->data->tau = params["tau"].double_value();
   }
 
