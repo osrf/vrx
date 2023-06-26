@@ -38,7 +38,10 @@ PERCEPTION_WORLDS = [
   'perception_task',
   'practice_2023_perception0_task',
   'practice_2023_perception1_task',
-  'practice_2023_perception2_task'
+  'practice_2023_perception2_task',
+  'perception0',
+  'perception1',
+  'perception2'
 ]
 
 STATIONKEEPING_WORLDS = [
@@ -46,6 +49,9 @@ STATIONKEEPING_WORLDS = [
   'practice_2023_stationkeeping0_task',
   'practice_2023_stationkeeping1_task',
   'practice_2023_stationkeeping2_task',
+  'stationkeeping0',
+  'stationkeeping1',
+  'stationkeeping2'
 ]
 
 WAYFINDING_WORLDS = [
@@ -53,34 +59,49 @@ WAYFINDING_WORLDS = [
   'practice_2023_wayfinding0_task',
   'practice_2023_wayfinding1_task',
   'practice_2023_wayfinding2_task',
+  'wayfinding0',
+  'wayfinding1',
+  'wayfinding2'
 ]
 
 WILDLIFE_WORLDS = [
   'wildlife_task',
   'practice_2023_wildlife0_task',
   'practice_2023_wildlife1_task',
-  'practice_2023_wildlife2_task'
+  'practice_2023_wildlife2_task',
+  'wildlife0',
+  'wildlife1',
+  'wildlife2'
 ]
 
 SCAN_DOCK_DELIVER_WORLDS = [
   'scan_dock_deliver_task',
   'practice_2023_scan_dock_deliver0_task',
   'practice_2023_scan_dock_deliver1_task',
-  'practice_2023_scan_dock_deliver2_task'
+  'practice_2023_scan_dock_deliver2_task',
+  'scan_dock_deliver0',
+  'scan_dock_deliver1',
+  'scan_dock_deliver2'
 ]
 
 ACOUSTIC_TRACKING_WORLDS = [
   'acoustic_tracking_task',
   'practice_2023_acoustic_tracking0_task',
   'practice_2023_acoustic_tracking1_task',
-  'practice_2023_acoustic_tracking2_task'
+  'practice_2023_acoustic_tracking2_task',
+  'acoustic_tracking0',
+  'acoustic_tracking1',
+  'acoustic_tracking2'
 ]
 
 FOLLOWPATH_WORLDS = [
   'follow_path_task',
   'practice_2023_follow_path0_task',
   'practice_2023_follow_path1_task',
-  'practice_2023_follow_path2_task'
+  'practice_2023_follow_path2_task',
+  'follow_path0',
+  'follow_path1',
+  'follow_path2'
 ]
 
 def simulation(world_name, headless=False):
