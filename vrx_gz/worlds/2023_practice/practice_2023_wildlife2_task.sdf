@@ -572,7 +572,7 @@
           value {
             type: VECTOR3D
             vector3d_value {
-              x: 1
+              x: -1
             }
           }
         }
