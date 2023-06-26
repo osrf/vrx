@@ -77,23 +77,23 @@ namespace vrx
   /// * `<topic>` (string, default: "/wavefield/parameters")
   ///    The topic for publishing wave field updates.
   ///
-  /// * `<size>` (Vector2D, default: (1000 1000))
+  /// * `<size>` (Vector2D, default: (6000 6000))
   ///   A two component vector for the size of the wave field in each direction.
   ///
-  /// * `<cell_count>` (int, default: (50 50))
+  /// * `<cell_count>` (int, default: (300 300))
   ///   A two component vector for the number of grid cells in each direction.
   ///
-  /// * `<number>` (int, default: 1)
+  /// * `<number>` (int, default: 3)
   ///   The number of component waves.
   ///
-  /// * `<scale>` (double, default: 2.0)
+  /// * `<scale>` (double, default: 1.1)
   ///   The scale between the mean and largest / smallest component waves.
   ///
-  /// * `<angle>` (double, default: 2*pi/10)
+  /// * `<angle>` (double, default: 0.4)
   ///   The angle between the mean wave direction and the
   ///   largest / smallest component waves.
   ///
-  /// * `<steepness>` (double, default: 1.0)
+  /// * `<steepness>` (double, default: 0.0)
   ///   A parameter in [0, 1] controlling the wave steepness with
   ///   1 being steepest.
   ///
@@ -101,7 +101,7 @@ namespace vrx
   ///   The amplitude of the mean wave in [m]. This parameter is only used when
   ///   model is CWR.
   ///
-  /// * `<period>` (double, default: 1.0)
+  /// * `<period>` (double, default: 5.0)
   ///   The period of the mean wave in [s].
   ///
   /// * `<phase>` (double, default: 0.0)
@@ -117,7 +117,7 @@ namespace vrx
   /// * `<gain>` (double, default: 1.0)
   ///   For PMS, the multiplier applied to component amplitudes.
   ///
-  /// * `<tau>` (double, default: 1.0)
+  /// * `<tau>` (double, default: 2.0)
   ///   Time constant used to gradually increase wavefield at startup.
   ///
   /// ## SDF parameters in secondary mode:
