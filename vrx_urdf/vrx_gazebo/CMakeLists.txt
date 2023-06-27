@@ -22,8 +22,6 @@ install(DIRECTORY config/
 # scripts
 install(PROGRAMS scripts/generate_wamv.py 
   DESTINATION lib/${PROJECT_NAME})
-install(PROGRAMS scripts/robot_desc_publisher.py
-  DESTINATION lib/${PROJECT_NAME})
 
 ament_python_install_package(
   vrx_gazebo
