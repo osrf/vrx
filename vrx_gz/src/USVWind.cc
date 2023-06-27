@@ -85,6 +85,10 @@ public:
 public:
   double lastPublishTime = 0;
 
+  /// \brief Debug option to turn off wind information publishers
+public:
+  bool debug = true;
+
   /// \brief Transport node
 public:
   transport::Node node;
@@ -242,6 +246,11 @@ void USVWind::Configure(const sim::Entity &_entity,
       sqrt(2.0 * this->dataPtr->timeConstant);
   gzmsg << "Var wind filter gain = " << this->dataPtr->filterGain << std::endl;
 
+  if (sdf->HasElement("debug"))
+  {
+    this->dataPtr->debug = sdf->Get<bool>("debug");
+  }
+
   // Set up publishers
   transport::AdvertiseMessageOptions opts;
   opts.SetMsgsPerSec(this->dataPtr->updateRate);
@@ -310,10 +319,16 @@ void USVWind::PreUpdate(
                            randomDist) * dT.count();
   // Current wind velocity
   double velocity = this->dataPtr->varVel + this->dataPtr->windMeanVelocity;
-  msgs::Float windVelMsg;
-  windVelMsg.set_data(velocity);
-  this->dataPtr->windSpeedPub.Publish(windVelMsg);
-  this->dataPtr->windDirectionPub.Publish(this->dataPtr->windDirMsg);
+
+  // Publish wind velocity and direction unless disabled (for competition)
+  if (this->dataPtr->debug)
+  {
+    msgs::Float windVelMsg;
+    windVelMsg.set_data(velocity);
+    this->dataPtr->windSpeedPub.Publish(windVelMsg);
+    this->dataPtr->windDirectionPub.Publish(this->dataPtr->windDirMsg);
+  }
+
   for (auto &windObj : this->dataPtr->windObjs)
   {
     // Apply the forces of the wind to all wind objects only if they have been
