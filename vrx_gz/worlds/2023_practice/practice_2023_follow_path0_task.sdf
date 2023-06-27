@@ -502,7 +502,7 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.3
+            double_value: 0.0
           }
         }
         params {
