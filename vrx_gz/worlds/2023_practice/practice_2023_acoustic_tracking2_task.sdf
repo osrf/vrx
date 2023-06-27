@@ -890,6 +890,7 @@
             type: VECTOR3D
             vector3d_value {
               x: 1
+              y: 1
             }
           }
         }
@@ -897,14 +898,14 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 2.0
+            double_value: 0.8
           }
         }
         params {
           key: "period"
           value {
             type: DOUBLE
-            double_value: 2.0
+            double_value: 6.0
           }
         }
         params {
