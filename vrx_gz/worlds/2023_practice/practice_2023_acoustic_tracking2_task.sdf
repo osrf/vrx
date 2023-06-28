@@ -854,7 +854,6 @@
       <set_pinger_position_topic>/wamv/pingers/pinger/set_pinger_position</set_pinger_position_topic>
       <pinger_model>pinger</pinger_model>
       <pinger_depth>2.0</pinger_depth>
-      <obstacle_penalty>1</obstacle_penalty>
     </plugin>
 
     <!-- Load the plugin for the wind -->
