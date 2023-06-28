@@ -32,6 +32,7 @@ def launch(context, *args, **kwargs):
     robot = LaunchConfiguration('robot').perform(context)
     headless = LaunchConfiguration('headless').perform(context).lower() == 'true'
     robot_urdf = LaunchConfiguration('urdf').perform(context)
+    gz_paused = LaunchConfiguration('paused').perform(context)
     extra_gz_args = LaunchConfiguration('extra_gz_args').perform(context)
 
     launch_processes = []
@@ -47,7 +48,8 @@ def launch(context, *args, **kwargs):
       models.append(m)
 
     world_name, ext = os.path.splitext(world_name)
-    launch_processes.extend(vrx_gz.launch.simulation(world_name, headless, extra_gz_args))
+    launch_processes.extend(vrx_gz.launch.simulation(world_name, headless, 
+                                                     paused, extra_gz_args))
     world_name_base = os.path.basename(world_name)
     launch_processes.extend(vrx_gz.launch.spawn(sim_mode, world_name_base, models, robot))
 
@@ -92,6 +94,10 @@ def generate_launch_description():
             'urdf',
             default_value='',
             description='URDF file of the wam-v model. '),
+        DeclareLaunchArgument(
+            'paused',
+            default_value='False',
+            description='True to start the simulation paused. '),
         DeclareLaunchArgument(
             'extra_gz_args',
             default_value='',
