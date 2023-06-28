@@ -19,7 +19,9 @@ from launch.actions import IncludeLaunchDescription
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch.actions import ExecuteProcess, EmitEvent
 from launch.events import Shutdown
 
@@ -196,6 +198,11 @@ def competition_bridges(world_name):
 def spawn(sim_mode, world_name, models, robot=None):
     if type(models) != list:
         models = [models]
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='true',
+        description='Use simulation (Gazebo) clock if true'),
 
     launch_processes = []
     for model in models:
@@ -231,12 +238,24 @@ def spawn(sim_mode, world_name, models, robot=None):
                 remappings=[bridge.remapping() for bridge in bridges],
             ))
 
-            # tf broadcaster
+            # tf broadcaster (sensors)
             nodes.append(Node(
                 package='vrx_ros',
                 executable='pose_tf_broadcaster',
                 output='screen',
             ))
+
+            # robot_state_publisher (tf for wamv)
+            model_dir = os.path.join(get_package_share_directory('vrx_gazebo'), 'models/wamv/tmp')
+            urdf_file = os.path.join(model_dir, 'model.urdf')
+            with open(urdf_file, 'r') as infp:
+                robot_desc = infp.read()
+            params = {'use_sim_time': use_sim_time, 'frame_prefix': 'wamv/', 'robot_description': robot_desc}
+            nodes.append(Node(package='robot_state_publisher',
+                                  executable='robot_state_publisher',
+                                  output='both',
+                                  parameters=[params],
+                                  remappings=[('/joint_states', '/wamv/joint_states')]))
 
             group_action = GroupAction([
                 PushRosNamespace(model.model_name),
