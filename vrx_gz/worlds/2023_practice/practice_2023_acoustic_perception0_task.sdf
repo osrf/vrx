@@ -426,7 +426,7 @@
 
     <!-- Publish the pinger pose -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
-      <message type="gz.msgs.Vector3d" topic="/wamv/pingers/pinger/set_pinger_position" at="1.0">
+      <message type="gz.msgs.Vector3d" topic="/pinger/set_pinger_position" at="1.0">
         x: -560,
         y: 185,
         z: -2
