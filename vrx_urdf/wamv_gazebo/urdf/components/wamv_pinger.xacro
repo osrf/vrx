@@ -29,7 +29,7 @@
         <topic>/${namespace}/${sensor_namespace}${acoustic_namespace}${sensor_name}/range_bearing</topic>
         <set_position_topic>/${pinger_name}/set_pinger_position
         </set_position_topic>
-        <frame_id>${namespace}/${sensor_name}</frame_id>
+        <frame_id>${pinger_name}</frame_id>
         <range_noise>
           <noise>
             <type>gaussian</type>
