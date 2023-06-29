@@ -32,6 +32,8 @@ def launch(context, *args, **kwargs):
     robot = LaunchConfiguration('robot').perform(context)
     headless = LaunchConfiguration('headless').perform(context).lower() == 'true'
     robot_urdf = LaunchConfiguration('urdf').perform(context)
+    robot_name = LaunchConfiguration('name').perform(context)
+    model_type = LaunchConfiguration('model').perform(context)
 
     launch_processes = []
 
@@ -40,7 +42,7 @@ def launch(context, *args, **kwargs):
         with open(config_file, 'r') as stream:
             models = Model.FromConfig(stream)
     else:
-      m = Model('wamv', 'wam-v', [-532, 162, 0, 0, 0, 1])
+      m = Model(robot_name, model_type, [-532, 162, 0, 0, 0, 1])
       if robot_urdf and robot_urdf != '':
           m.set_urdf(robot_urdf)
       models.append(m)
@@ -92,4 +94,12 @@ def generate_launch_description():
             default_value='',
             description='URDF file of the wam-v model. '),
         OpaqueFunction(function=launch),
+        DeclareLaunchArgument(
+            'name',
+            default_value='wamv',
+            description='Name of robot to spawn'),
+        DeclareLaunchArgument(
+            'model',
+            default_value='wam-v',
+            description='SDF model to spawn'),
     ])
