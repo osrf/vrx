@@ -783,30 +783,6 @@
       <message type="gz.msgs.Param" topic="/vrx/wavefield/parameters"
                every="2.0">
         params {
-          key: "amplitude"
-          value {
-            type: DOUBLE
-            double_value: 0
-          }
-        }
-        params {
-          key: "angle"
-          value {
-            type: DOUBLE
-            double_value: 0.4
-          }
-        }
-        params {
-          key: "cell_count"
-          value {
-            type: VECTOR3D
-            vector3d_value {
-              x: 300
-              y: 300
-            }
-          }
-        }
-        params {
           key: "direction"
           value {
             type: VECTOR3D
@@ -819,52 +795,14 @@
           key: "gain"
           value {
             type: DOUBLE
-            double_value: 0.3
-          }
-        }
-        params {
-          key: "model"
-          value {
-            type: STRING
-            string_value: "PMS"
-          }
-        }
-        params {
-          key: "number"
-          value {
-            type: INT32
-            int_value: 3
+            double_value: 0.0
           }
         }
         params {
           key: "period"
           value {
             type: DOUBLE
-            double_value: 5
-          }
-        }
-        params {
-          key: "phase"
-          value {
-            type: DOUBLE
-            double_value: 0
-          }
-        }
-        params {
-          key: "scale"
-          value {
-            type: DOUBLE
-            double_value: 1.1
-          }
-        }
-        params {
-          key: "size"
-          value {
-            type: VECTOR3D
-            vector3d_value {
-              x: 6000
-              y: 6000
-            }
+            double_value: 4
           }
         }
         params {
@@ -872,13 +810,6 @@
           value {
             type: DOUBLE
             double_value: 0
-          }
-        }
-        params {
-          key: "tau"
-          value {
-            type: DOUBLE
-            double_value: 2
           }
         }
       </message>
