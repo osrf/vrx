@@ -104,10 +104,16 @@ FOLLOWPATH_WORLDS = [
   'follow_path2'
 ]
 
-def simulation(world_name, headless=False):
-    gz_args = ['-v 4', '-r']
+def simulation(world_name, headless=False, paused=False, extra_gz_args=''):
+    gz_args = ['-v 4']
+    if not paused:
+        gz_args.append('-r')
+
     if headless:
         gz_args.append('-s')
+
+    gz_args.append(extra_gz_args)
+
     gz_args.append(f'{world_name}.sdf')
 
     gz_sim = IncludeLaunchDescription(
