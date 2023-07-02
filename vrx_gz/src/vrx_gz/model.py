@@ -234,7 +234,7 @@ class Model:
         xacro_command.append(f'namespace:={self.model_name}')
         xacro_command.append(f'locked:=true')
         xacro_command.append(f'vrx_sensors_enabled:=true')
-        xacro_command.append(f'thruster_config:=H')
+        xacro_command.append(f'thruster_config:=T')
         xacro_process = subprocess.Popen(xacro_command,
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE)
