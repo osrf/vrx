@@ -1,5 +1,28 @@
 ## VRX 2
 
+### VRX 2.3.0
+
+1. Enhancements to Perception Task 
+    * [Pull Request 699](https://github.com/osrf/vrx/pull/699)
+
+1. Infrastructure updates
+    * [Pull Request 694](https://github.com/osrf/vrx/pull/694)
+    * [Pull Request 688](https://github.com/osrf/vrx/pull/688)
+    * [Pull Request 682](https://github.com/osrf/vrx/pull/682)
+    * [Pull Request 671](https://github.com/osrf/vrx/pull/671)
+    * [Pull Request 663](https://github.com/osrf/vrx/pull/663)
+    * [Pull Request 661](https://github.com/osrf/vrx/pull/661)
+    * [Pull Request 658](https://github.com/osrf/vrx/pull/658)
+
+1. Acoustic pinger updates
+    * [Pull Request 692](https://github.com/osrf/vrx/pull/692)
+    * [Pull Request 669](https://github.com/osrf/vrx/pull/669)
+
+1. Environmental updates
+    * [Pull Request 686](https://github.com/osrf/vrx/pull/686)
+    * [Pull Request 678](https://github.com/osrf/vrx/pull/678)
+    * [Pull Request 668](https://github.com/osrf/vrx/pull/668)
+
 ### VRX 2.2.0
 
 1. Restore USVWind model
