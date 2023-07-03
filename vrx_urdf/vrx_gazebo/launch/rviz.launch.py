@@ -39,13 +39,14 @@ def generate_launch_description():
                 parameters=[jsp_params])
     
     # rviz
+    rviz_config_file = os.path.join(get_package_share_directory('vrx_gazebo'), 'config', 'rviz.config.rviz')
     rviz = Node(
             package='rviz2',
             namespace='',
             executable='rviz2',
             name='rviz2',
             parameters=[{'use_sim_time': use_sim_time}],
-            arguments=['-d' + os.path.join(get_package_share_directory('vrx_gazebo'), 'config', 'rviz.config.rviz')]
+            arguments=['-d' + rviz_config_file]
         )
 
     group_action = GroupAction([
