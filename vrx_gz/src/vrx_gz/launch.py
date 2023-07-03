@@ -237,12 +237,18 @@ def spawn(sim_mode, world_name, models, robot=None):
                 remappings=[bridge.remapping() for bridge in bridges],
             ))
 
+            # <aniket> 04-Jul-2023
+            # remove pose tf broadcaster as it is not used anywhere right now, 
+            # it is creating unecessary tfs which generates warning and clutters tf tree
+            
             # tf broadcaster
-            nodes.append(Node(
-                package='vrx_ros',
-                executable='pose_tf_broadcaster',
-                output='screen',
-            ))
+            # nodes.append(Node(
+            #     package='vrx_ros',
+            #     executable='pose_tf_broadcaster',
+            #     output='screen',
+            # ))
+
+   
 
             group_action = GroupAction([
                 PushRosNamespace(model.model_name),
