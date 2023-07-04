@@ -36,8 +36,12 @@ def generate_launch_description():
     package_prefix = get_package_share_directory('vrx_localization')
     localization = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([package_prefix, '/launch/localization.launch.py']))
+    
+    # Path publisher
+    robot_path_publisher = Node(package='vrx_localization', executable='robot_path_publisher.py')
 
     return LaunchDescription([
         rviz,
-        localization
+        localization,
+        robot_path_publisher
     ])
