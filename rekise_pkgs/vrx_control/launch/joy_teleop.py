@@ -23,7 +23,7 @@ def generate_launch_description():
 
     parameters_file = os.path.join(
         get_package_share_directory('vrx_control'),
-        'config', 't-config-thrust.yaml'
+        'config', 'vrx-t-config-thrust.yaml'
     )
 
     ld = LaunchDescription([

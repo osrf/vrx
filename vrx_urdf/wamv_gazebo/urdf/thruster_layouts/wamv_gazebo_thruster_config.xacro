@@ -5,7 +5,8 @@
   <gazebo>
     <xacro:property name="x_uu" value="72.4" />
     <xacro:property name="x_u" value="51.3" />
-    <xacro:property name="max_velocity_mps" value="7.71667" />
+    <!-- vmax = 5 knots ==> 2.5722 m/s  -->
+    <xacro:property name="max_velocity_mps" value="2.5722" />
 
     <plugin
       filename="gz-sim-thruster-system"

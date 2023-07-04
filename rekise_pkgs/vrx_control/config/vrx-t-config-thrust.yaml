@@ -72,6 +72,15 @@
 # D-pad Horiz.     4
 # D-pad Vert.      5
 
+# --------------------------------------------------------------------------------------------
+# Note :
+# This file is only valid for simulator, since we are sending thrust commands to the thrusters,
+# however in reality we need to send rpm to the propellers
+# --------------------------------------------------------------------------------------------
+
+# Calculation of max thrust according to formula and values in wamv_gazebo_thruster_config.xacro
+#  262.67 
+
 joy_teleop:
   ros__parameters:
 
@@ -83,7 +92,7 @@ joy_teleop:
       axis_mappings:
         data:
           axis: 3
-          scale: 1000.0
+          scale: 263.0
           offset: 0
 
     right_thrust:
@@ -94,8 +103,19 @@ joy_teleop:
       axis_mappings:
         data:
           axis: 3
-          scale: 1000.0
+          scale: 263.0
           offset: 0
+
+    # lateral_thrust:
+    #   type: topic
+    #   interface_type: std_msgs/msg/Float64
+    #   topic_name: /wamv/thrusters/lateral/thrust
+    #   deadman_buttons: [4]
+    #   axis_mappings:
+    #     data:
+    #       axis: 3
+    #       scale: 1000.0
+    #       offset: 0
 
     left_pos:
       type: topic
@@ -105,7 +125,7 @@ joy_teleop:
       axis_mappings:
         data:
           axis: 0
-          scale: -1.0
+          scale: -1.57
           offset: 0
 
     right_pos:
@@ -116,15 +136,7 @@ joy_teleop:
       axis_mappings:
         data:
           axis: 0
-          scale: -1.0
+          scale: -1.57
           offset: 0
 
-    ball_shooter:
-      type: topic
-      interface_type: std_msgs/msg/Bool
-      topic_name: /wamv/shooters/ball_shooter/fire
-      deadman_buttons: [1]
-      message_value:
-        data:
-          value: true
     
