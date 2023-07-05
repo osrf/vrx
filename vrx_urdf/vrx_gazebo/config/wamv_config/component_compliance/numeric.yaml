@@ -59,7 +59,7 @@ wamv_ball_shooter:
 wamv_pinger:
     num: 1
     allowed_params:
-        name
+        sensor_name
         position
 
 wamv_p3d:
