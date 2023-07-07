@@ -76,8 +76,11 @@ def generate_launch_description():
 
     tf_gps_link_to_gps_sensor = Node(package='tf2_ros',
                                      executable='static_transform_publisher',
-                                     arguments=['0', '0', '0', '0', '0', '0', 'wamv/gps_wamv_link', 'wamv/wamv/gps_wamv_link/navsat']) 
+                                     arguments=['0', '0', '0', '0', '0', '0', 'wamv/gps_wamv_link', 'wamv/wamv/gps_wamv_link/navsat'])
     
+    tf_lidar_link_to_lidar_sensor = Node(package='tf2_ros',
+                                     executable='static_transform_publisher',
+                                     arguments=['0', '0', '0', '0', '0', '0', 'wamv/lidar_wamv_post_link', 'wamv/wamv/base_link/lidar_wamv_sensor'])
 
     return LaunchDescription([
         robot_localization_node, 
@@ -85,5 +88,6 @@ def generate_launch_description():
         tf_map_to_odom, 
         tf_imu_link_to_imu_sensor, 
         tf_gps_link_to_gps_sensor,
+        tf_lidar_link_to_lidar_sensor
         # rviz_r
     ])
