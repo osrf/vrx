@@ -17,16 +17,16 @@ from vrx_common_interfaces.msg import PidDiagnose
 #
 import pypid
 
-class FwdVelocityController(Node):
+class YawRateController(Node):
     def __init__(self):
-        super().__init__('fwd_vel_controller')
+        super().__init__('yaw_rate_controller')
 
         # Declare parameters 
         self.declare_parameter('cmd_topic', '/cmd_vel')
         self.declare_parameter('state_topic', '/odometry/filtered')
-        self.declare_parameter('thrust_topic_l', '/wamv/thrusters/left/thrust')
-        self.declare_parameter('thrust_topic_r', '/wamv/thrusters/right/thrust')
-        self.declare_parameter('pid_diagnose_topic', '/fwd_vel_pid_debug')
+        self.declare_parameter('thrust_topic_l', '/wamv/thrusters/left/pos')
+        self.declare_parameter('thrust_topic_r', '/wamv/thrusters/right/pos')
+        self.declare_parameter('pid_diagnose_topic', '/yaw_rate_pid_debug')
         
         self.declare_parameter('kp', 100.0)
         self.declare_parameter('ki', 0.00001)
@@ -44,6 +44,7 @@ class FwdVelocityController(Node):
         self.kd                 = self.get_parameter('kd').get_parameter_value().double_value
 
 
+
         # -- Set up pid
         self.pid = pypid.pypid.Pid(self.kp, self.ki, self.kd)
         self.pid.set_setpoint(0.0)
@@ -53,7 +54,7 @@ class FwdVelocityController(Node):
         wc = fc*(2.0*math.pi)  # cutoff freq. in rad/s
         self.pid.set_derivfilter(1,wc)
 
-
+        
         # Subscribers
         self.cmd_subscription   = self.create_subscription(Twist, self.cmd_topic, self.cmd_callback, 10)
         self.state_subscription = self.create_subscription(Odometry, self.state_topic, self.state_callback, 10)
@@ -64,24 +65,24 @@ class FwdVelocityController(Node):
         self.debug_publisher      = self.create_publisher(PidDiagnose, self.pid_diagnose_topic, 10)
 
         # Other variables
-        self.target_vel    = Float64()
-        self.current_vel   = Float64()
-        self.lasttime      = None
-        self.thruster_max  = 263.0
-        self.publish_debug = True #None
+        self.target_yaw_rate    = Float64()
+        self.current_yaw_rate   = Float64()
+        self.lasttime           = None
+        self.rudder_max         = 263.0
+        self.publish_debug      = True #None
 
-
-        self.get_logger().info('fwd_vel_controller initialized')
+        
+        self.get_logger().info('yaw_rate_controller initialized')
 
 
     def cmd_callback(self, msg : Twist) : 
-        self.target_vel = msg.linear.x
-        # self.get_logger().info('Recieved Command Velocity : "%s"' % self.target_vel)
-        self.pid.set_setpoint(self.target_vel)
+        self.target_yaw_rate = msg.linear.x
+        # self.get_logger().info('Recieved Command Velocity : "%s"' % self.target_yaw_rate)
+        self.pid.set_setpoint(self.target_yaw_rate)
 
     def state_callback(self, msg : Odometry):
-        self.current_vel = msg.twist.twist.linear.x
-        # self.get_logger().info('Current Velocity : "%s"' % self.current_vel)
+        self.current_yaw_rate = msg.twist.twist.angular.z
+        # self.get_logger().info('Current Velocity : "%s"' % self.current_yaw_rate)
 
         self.send_output()
 
@@ -97,11 +98,11 @@ class FwdVelocityController(Node):
         dt = dt.nanoseconds // (10 ** 3)
         self.lasttime = self.get_clock().now()
 
-        thrustmsg, pidout = self.get_output_msg(dt)
+        ruddermsg, pidout = self.get_output_msg(dt)
         
-        self.thruster_l_publisher.publish(thrustmsg)
-        self.thruster_r_publisher.publish(thrustmsg)
-        self.get_logger().info('\tPublishing: "%s" to thruster' % thrustmsg.data)
+        self.thruster_l_publisher.publish(ruddermsg)
+        self.thruster_r_publisher.publish(ruddermsg)
+        self.get_logger().info('\tPublishing: "%s" to rudder' % ruddermsg.data)
 
         if self.publish_debug : 
             debugmsg            = PidDiagnose()
@@ -118,20 +119,20 @@ class FwdVelocityController(Node):
 
 
     def get_output_msg(self, dt) : 
-        thrustmsg = Float64()
+        ruddermsg = Float64()
 
-        pidout = self.pid.execute(dt, self.current_vel)
-        thrustmsg.data = self.saturate_thrust(float(pidout[0]))
+        pidout = self.pid.execute(dt, self.current_yaw_rate)
+        ruddermsg.data = self.saturate_rudder(float(pidout[0]))
 
-        return thrustmsg, pidout
+        return ruddermsg, pidout
     
 
-    def saturate_thrust(self, thrust) : 
-        if thrust > self.thruster_max:
-            thrust = self.thruster_max
+    def saturate_rudder(self, thrust) : 
+        if thrust > self.rudder_max:
+            thrust = self.rudder_max
 
-        elif thrust < -self.thruster_max:
-            thrust = -self.thruster_max
+        elif thrust < -self.rudder_max:
+            thrust = -self.rudder_max
 
         return thrust
     
@@ -139,9 +140,9 @@ class FwdVelocityController(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    fwd_vel_controller = FwdVelocityController()
-    rclpy.spin(fwd_vel_controller)
-    fwd_vel_controller.destroy_node()
+    yaw_rate_controller = YawRateController()
+    rclpy.spin(yaw_rate_controller)
+    yaw_rate_controller.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':

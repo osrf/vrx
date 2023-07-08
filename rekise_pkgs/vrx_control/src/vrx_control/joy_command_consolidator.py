@@ -20,23 +20,35 @@ class JoyCommandConsolidator(Node):
     def __init__(self):
         super().__init__('joy_command_consolidator')
 
-        # Declare parameters 
-        self.fwd_vel_cmd_topic = '/cmd_fwd_velocity'
-        self.cmd_vel_topic     = '/cmd_vel'
+        # Declare topics 
+        self.fwd_vel_cmd_topic  = '/cmd_fwd_velocity'
+        self.yaw_rate_cmd_topic = '/cmd_yaw_rate'
+        self.cmd_vel_topic      = '/cmd_vel'
         
-        self.cmd_subscription   = self.create_subscription(Float, self.fwd_vel_cmd_topic, self.cmd_fwd_vel_callback, 10)
+        # Subscribers
+        self.fwd_vel_cmd_subsc   = self.create_subscription(Float64, self.fwd_vel_cmd_topic, self.cmd_fwd_vel_callback, 10)
+        self.yaw_rate_cmd_subsc  = self.create_subscription(Float64, self.yaw_rate_cmd_topic, self.cmd_yaw_rate_callback, 10)
 
-        self.cmd_vel_publisher  = self.create_publisher(Twist, self.cmd_vel_topic, 10)        
-        # self.debug_publisher      = self.create_publisher(PidDiagnose, self.pid_diagnose_topic, 10)
+        # Publishers
+        self.timer = self.create_timer(0.1, self.publish_twist)
+        self.cmd_twist_publisher = self.create_publisher(Twist, self.cmd_vel_topic, 10)
 
+        # Other data variables
+        self.twist_msg = Twist()    
+        
         self.get_logger().info('joy_command_consolidator initialized')
 
 
-    def cmd_fwd_vel_callback(self, msg : Float) : 
-        self.fwd_vel_cmd = msg.data
+    def cmd_fwd_vel_callback(self, msg : Float64) : 
+        self.twist_msg.linear.x = msg.data
+    
+    def cmd_yaw_rate_callback(self, msg : Float64) : 
+        self.twist_msg.angular.z = msg.data
 
-    def cmd_vel_publisher(mst : Twist) : 
-        self.cmd_vel_publisher.publish(msg)
+
+    def publish_twist(self) : 
+        # self.get_logger().info('Sending command velocity : "%s"' % msg)
+        self.cmd_twist_publisher.publish(self.twist_msg)
 
 
 def main(args=None):
