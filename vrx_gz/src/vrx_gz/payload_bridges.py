@@ -158,16 +158,16 @@ def thrust_joint_pos(model_name, side):
 
 def acoustic_pinger(model_name):
     return Bridge(
-        gz_topic=f'{model_name}/pingers/pinger/range_bearing',
-        ros_topic=f'pingers/pinger/range_bearing',
+        gz_topic=f'{model_name}/sensors/acoustics/receiver/range_bearing',
+        ros_topic=f'sensors/acoustics/receiver/range_bearing',
         gz_type='ignition.msgs.Param',
         ros_type='ros_gz_interfaces/msg/ParamVec',
         direction=BridgeDirection.GZ_TO_ROS)
 
-def set_acoustic_pinger(model_name):
+def set_acoustic_pinger():
     return Bridge(
-        gz_topic=f'{model_name}/pingers/pinger/set_pinger_position',
-        ros_topic=f'pingers/pinger/set_pinger_position',
+        gz_topic=f'/pinger/set_pinger_position',
+        ros_topic=f'/pinger/set_pinger_position',
         gz_type='ignition.msgs.Vector3d',
         ros_type='geometry_msgs/msg/Vector3',
         direction=BridgeDirection.ROS_TO_GZ)
@@ -222,7 +222,7 @@ def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type)
     elif 'AcousticPinger' in sensor_name:
         bridges = [
             acoustic_pinger(model_name),
-            set_acoustic_pinger(model_name),
+            set_acoustic_pinger(),
         ]
 
     return bridges

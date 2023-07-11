@@ -60,5 +60,5 @@ wamv_ball_shooter:
       pitch: ${radians(-20)}
       yaw: 0.0
 wamv_pinger:
-    - name: pinger
+    - sensor_name: receiver
       position: 1.0 0 -1.0

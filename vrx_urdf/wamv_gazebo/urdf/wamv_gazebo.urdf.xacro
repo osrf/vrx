@@ -15,7 +15,7 @@
   <xacro:arg name="thruster_namespace" default="thrusters/"/>
   <xacro:arg name="camera_namespace" default="cameras/"/>
   <xacro:arg name="sensor_namespace" default="sensors/"/>
-  <xacro:arg name="pinger_namespace" default="pingers/"/>
+  <xacro:arg name="acoustic_namespace" default="acoustics/"/>
   <xacro:arg name="shooter_namespace" default="shooters/"/>
   <!-- Note: this is only used for some sensors that do not correctly use the
   robotNamespace parameter -->
@@ -23,7 +23,7 @@
   <xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global" />
   <xacro:property name="camera_namespace" value="$(arg camera_namespace)" scope="global" />
   <xacro:property name="sensor_namespace" value="$(arg sensor_namespace)" scope="global" />
-  <xacro:property name="pinger_namespace" value="$(arg pinger_namespace)" scope="global" />
+  <xacro:property name="acoustic_namespace" value="$(arg acoustic_namespace)" scope="global" />
   <xacro:property name="shooter_namespace" value="$(arg shooter_namespace)" scope="global" />
   <xacro:property name="namespace" value="$(arg namespace)" scope="global" />
 
@@ -186,7 +186,7 @@
 
     <!-- Add pinger -->
     <xacro:if value="$(arg pinger_enabled)">
-      <xacro:wamv_pinger name="pinger" position="-528 191 -2.0" />
+      <xacro:wamv_pinger sensor_name="receiver" position="-528 191 -2.0" />
     </xacro:if>
 
     <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
@@ -218,7 +218,7 @@
       <xacro:lidar name="lidar_wamv" type="16_beam"/>
 
       <!-- Add pinger -->
-      <xacro:wamv_pinger name="pinger" position="-528 191 -2.0" />
+      <xacro:wamv_pinger sensor_name="receiver" position="-528 191 -2.0" />
 
       <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
       <xacro:wamv_ball_shooter name="ball_shooter" x="0.54" y="0.30" z="1.296" pitch="-1.04"/>

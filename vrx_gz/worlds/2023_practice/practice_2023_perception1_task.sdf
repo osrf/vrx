@@ -457,14 +457,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -510,14 +510,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -536,14 +536,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -624,25 +624,25 @@
           <time>25.0</time>
           <type>mb_round_buoy_black</type>
           <name>black_round_0</name>
-          <pose>4.9 1.32 0.2 0 0 0</pose>
+          <pose>4.9 1.32 0.7 0 0 0</pose>
         </object>
         <object>
           <time>25.0</time>
           <type>mb_round_buoy_black</type>
           <name>black_round_1</name>
-          <pose>4.7 0.7 0.2 0 0 0</pose>
+          <pose>4.7 0.7 0.7 0 0 0</pose>
         </object>
         <object>
           <time>35.0</time>
           <type>mb_marker_buoy_white</type>
           <name>white_0</name>
-          <pose>4.1 -2.2 0.2 0 0 0</pose>
+          <pose>4.1 -2.2 0.7 0 0 0</pose>
         </object>
         <object>
           <time>35.0</time>
           <type>mb_round_buoy_black</type>
           <name>black_round_0</name>
-          <pose>6.1 0.2 0.2 0 0 0</pose>
+          <pose>6.1 0.2 0.7 0 0 0</pose>
         </object>
       </object_sequence>
     </plugin>
