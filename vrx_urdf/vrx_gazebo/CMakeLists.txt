@@ -20,7 +20,7 @@ install(DIRECTORY config/
 
 
 # scripts
-install(PROGRAMS scripts/generate_wamv.py 
+install(PROGRAMS scripts/generate_wamv.py
   DESTINATION lib/${PROJECT_NAME})
 
 ament_python_install_package(

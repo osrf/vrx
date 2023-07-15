@@ -67,9 +67,9 @@ class Model:
         nodes = []
         bridges = [
             # pose
-             vrx_gz.bridges.pose(self.model_name),
+            vrx_gz.bridges.pose(self.model_name),
             # pose static
-             vrx_gz.bridges.pose_static(self.model_name),
+            vrx_gz.bridges.pose_static(self.model_name),
             # joint states
             vrx_gz.bridges.joint_states(world_name, self.model_name),
             # comms tx
