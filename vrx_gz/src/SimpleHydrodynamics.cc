@@ -132,24 +132,24 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
   this->dataPtr->link.EnableVelocityChecks(_ecm);
   this->dataPtr->link.EnableAccelerationChecks(_ecm);
 
-  this->dataPtr->paramXdotU       = _sdf->Get<double>("xDotU",  5  ).first;
-  this->dataPtr->paramYdotV       = _sdf->Get<double>("yDotV",  5  ).first;
-  this->dataPtr->paramZdotW       = _sdf->Get<double>("zDotW",  0.1).first;
-  this->dataPtr->paramKdotP       = _sdf->Get<double>("kDotP",  0.1).first;
-  this->dataPtr->paramMdotQ       = _sdf->Get<double>("mDotQ",  0.1).first;
-  this->dataPtr->paramNdotR       = _sdf->Get<double>("nDotR",  1  ).first;
-  this->dataPtr->paramXu          = _sdf->Get<double>("xU",    20  ).first;
-  this->dataPtr->paramXuu         = _sdf->Get<double>("xUU",    0  ).first;
-  this->dataPtr->paramYv          = _sdf->Get<double>("yV",    20  ).first;
-  this->dataPtr->paramYvv         = _sdf->Get<double>("yVV",    0  ).first;
-  this->dataPtr->paramZw          = _sdf->Get<double>("zW",    20  ).first;
-  this->dataPtr->paramZww         = _sdf->Get<double>("zWW",    0  ).first;
-  this->dataPtr->paramKp          = _sdf->Get<double>("kP",    20  ).first;
-  this->dataPtr->paramKpp         = _sdf->Get<double>("kPP",    0  ).first;
-  this->dataPtr->paramMq          = _sdf->Get<double>("mQ",    20  ).first;
-  this->dataPtr->paramMqq         = _sdf->Get<double>("mQQ",    0  ).first;
-  this->dataPtr->paramNr          = _sdf->Get<double>("nR",    20  ).first;
-  this->dataPtr->paramNrr         = _sdf->Get<double>("nRR",    0  ).first;
+  this->dataPtr->paramXdotU       = _sdf->Get<double>("xDotU", 5  ).first;
+  this->dataPtr->paramYdotV       = _sdf->Get<double>("yDotV", 5  ).first;
+  this->dataPtr->paramZdotW       = _sdf->Get<double>("zDotW", 0.1).first;
+  this->dataPtr->paramKdotP       = _sdf->Get<double>("kDotP", 0.1).first;
+  this->dataPtr->paramMdotQ       = _sdf->Get<double>("mDotQ", 0.1).first;
+  this->dataPtr->paramNdotR       = _sdf->Get<double>("nDotR", 1  ).first;
+  this->dataPtr->paramXu          = _sdf->Get<double>("xU",   20  ).first;
+  this->dataPtr->paramXuu         = _sdf->Get<double>("xUU",   0  ).first;
+  this->dataPtr->paramYv          = _sdf->Get<double>("yV",   20  ).first;
+  this->dataPtr->paramYvv         = _sdf->Get<double>("yVV",   0  ).first;
+  this->dataPtr->paramZw          = _sdf->Get<double>("zW",   20  ).first;
+  this->dataPtr->paramZww         = _sdf->Get<double>("zWW",   0  ).first;
+  this->dataPtr->paramKp          = _sdf->Get<double>("kP",   20  ).first;
+  this->dataPtr->paramKpp         = _sdf->Get<double>("kPP",   0  ).first;
+  this->dataPtr->paramMq          = _sdf->Get<double>("mQ",   20  ).first;
+  this->dataPtr->paramMqq         = _sdf->Get<double>("mQQ",   0  ).first;
+  this->dataPtr->paramNr          = _sdf->Get<double>("nR",   20  ).first;
+  this->dataPtr->paramNrr         = _sdf->Get<double>("nRR",   0  ).first;
 
   // Added mass according to Fossen's equations (p 37).
   this->dataPtr->Ma = Eigen::MatrixXd::Zero(6, 6);
