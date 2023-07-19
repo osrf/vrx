@@ -64,8 +64,6 @@ namespace vrx
   ///  * <mQ>         - Stability derivative, 1st order, pitch component [kg/m]
   ///  * <nRR>        - Stability derivative, 2nd order, yaw component [kg/m^2]
   ///  * <nR>         - Stability derivative, 1st order, yaw component [kg/m]
-  ///  * <max_effort> - Max force component applied to the force and torque
-  ///                   vectors [N]
   ///
   /// # Example
   /// <plugin

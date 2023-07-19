@@ -93,9 +93,6 @@ class vrx::SimpleHydrodynamicsPrivate
   /// \brief Quadratic drag in yaw.
   public: double paramNrr{0.0};
 
-  /// \brief Max force applied at each vector component (force and torque).
-  public: double paramMaxEffort{10000.0};
-
   /// \brief Added mass of vehicle.
   /// See: https://en.wikipedia.org/wiki/Added_mass
   public: Eigen::MatrixXd Ma;
@@ -153,7 +150,6 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
   this->dataPtr->paramMqq         = _sdf->Get<double>("mQQ",           0  ).first;
   this->dataPtr->paramNr          = _sdf->Get<double>("nR",           20  ).first;
   this->dataPtr->paramNrr         = _sdf->Get<double>("nRR",           0  ).first;
-  this->dataPtr->paramMaxEffort   = _sdf->Get<double>("max_effort", 10000 ).first;
 
   // Added mass according to Fossen's equations (p 37).
   this->dataPtr->Ma = Eigen::MatrixXd::Zero(6, 6);
@@ -166,27 +162,26 @@ void SimpleHydrodynamics::Configure(const Entity &_entity,
   this->dataPtr->Ma(5, 5) = this->dataPtr->paramNdotR;
 
   gzdbg << "SimpleHydrodynamics plugin successfully configured with the "
-        << "following parameters:"                          << std::endl;
-  gzdbg << "  <link_name>: "   << linkName                  << std::endl;
-  gzdbg << "  <xDotU>: "       << this->dataPtr->paramXdotU << std::endl;
-  gzdbg << "  <yDotV>: "       << this->dataPtr->paramYdotV << std::endl;
-  gzdbg << "  <zDotW>: "       << this->dataPtr->paramZdotW << std::endl;
-  gzdbg << "  <kDotP>: "       << this->dataPtr->paramKdotP << std::endl;
-  gzdbg << "  <mDotQ>: "       << this->dataPtr->paramMdotQ << std::endl;
-  gzdbg << "  <nDotR>: "       << this->dataPtr->paramNdotR << std::endl;
-  gzdbg << "  <xU>: "          << this->dataPtr->paramXu    << std::endl;
-  gzdbg << "  <xUU>: "         << this->dataPtr->paramXuu   << std::endl;
-  gzdbg << "  <yV>: "          << this->dataPtr->paramYv    << std::endl;
-  gzdbg << "  <yVV>: "         << this->dataPtr->paramYvv   << std::endl;
-  gzdbg << "  <zW>: "          << this->dataPtr->paramZw    << std::endl;
-  gzdbg << "  <zWW>: "         << this->dataPtr->paramZww   << std::endl;
-  gzdbg << "  <kP>: "          << this->dataPtr->paramKp    << std::endl;
-  gzdbg << "  <kPP>: "         << this->dataPtr->paramKpp   << std::endl;
-  gzdbg << "  <mQ>: "          << this->dataPtr->paramMq    << std::endl;
-  gzdbg << "  <mQQ>: "         << this->dataPtr->paramMqq   << std::endl;
-  gzdbg << "  <nR>: "          << this->dataPtr->paramNr    << std::endl;
-  gzdbg << "  <nRR>: "         << this->dataPtr->paramNrr   << std::endl;
-  gzdbg << "  <max_effort>: "  << this->dataPtr->paramNrr   << std::endl;
+        << "following parameters:"                        << std::endl;
+  gzdbg << "  <link_name>: " << linkName                  << std::endl;
+  gzdbg << "  <xDotU>: "     << this->dataPtr->paramXdotU << std::endl;
+  gzdbg << "  <yDotV>: "     << this->dataPtr->paramYdotV << std::endl;
+  gzdbg << "  <zDotW>: "     << this->dataPtr->paramZdotW << std::endl;
+  gzdbg << "  <kDotP>: "     << this->dataPtr->paramKdotP << std::endl;
+  gzdbg << "  <mDotQ>: "     << this->dataPtr->paramMdotQ << std::endl;
+  gzdbg << "  <nDotR>: "     << this->dataPtr->paramNdotR << std::endl;
+  gzdbg << "  <xU>: "        << this->dataPtr->paramXu    << std::endl;
+  gzdbg << "  <xUU>: "       << this->dataPtr->paramXuu   << std::endl;
+  gzdbg << "  <yV>: "        << this->dataPtr->paramYv    << std::endl;
+  gzdbg << "  <yVV>: "       << this->dataPtr->paramYvv   << std::endl;
+  gzdbg << "  <zW>: "        << this->dataPtr->paramZw    << std::endl;
+  gzdbg << "  <zWW>: "       << this->dataPtr->paramZww   << std::endl;
+  gzdbg << "  <kP>: "        << this->dataPtr->paramKp    << std::endl;
+  gzdbg << "  <kPP>: "       << this->dataPtr->paramKpp   << std::endl;
+  gzdbg << "  <mQ>: "        << this->dataPtr->paramMq    << std::endl;
+  gzdbg << "  <mQQ>: "       << this->dataPtr->paramMqq   << std::endl;
+  gzdbg << "  <nR>: "        << this->dataPtr->paramNr    << std::endl;
+  gzdbg << "  <nRR>: "       << this->dataPtr->paramNrr   << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -284,20 +279,6 @@ void SimpleHydrodynamics::PreUpdate(
     math::Vector3d(kForceSum(0), kForceSum(1), kForceSum(2)));
   math::Vector3d torqueWorld = (*comPose).Rot().RotateVector(
     math::Vector3d(kForceSum(3), kForceSum(4), kForceSum(5)));
-
-  // Crop.
-  forceWorld.X(std::min(this->dataPtr->paramMaxEffort,
-    std::max(-this->dataPtr->paramMaxEffort, forceWorld.X())));
-  forceWorld.Y(std::min(this->dataPtr->paramMaxEffort,
-    std::max(-this->dataPtr->paramMaxEffort, forceWorld.Y())));
-  forceWorld.Z(std::min(this->dataPtr->paramMaxEffort,
-    std::max(-this->dataPtr->paramMaxEffort, forceWorld.Z())));
-  torqueWorld.X(std::min(this->dataPtr->paramMaxEffort,
-    std::max(-this->dataPtr->paramMaxEffort, torqueWorld.X())));
-  torqueWorld.Y(std::min(this->dataPtr->paramMaxEffort,
-    std::max(-this->dataPtr->paramMaxEffort, torqueWorld.Y())));
-  torqueWorld.Z(std::min(this->dataPtr->paramMaxEffort,
-    std::max(-this->dataPtr->paramMaxEffort, torqueWorld.Z())));
 
   // Apply the force and torque at COM.
   this->dataPtr->link.AddWorldWrench(_ecm, forceWorld, torqueWorld);

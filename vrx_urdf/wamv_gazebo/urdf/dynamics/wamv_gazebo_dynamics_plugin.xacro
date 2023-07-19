@@ -46,9 +46,9 @@
         <yDotV>0.0</yDotV>
         <nDotR>0.0</nDotR>
         <!-- Linear and quadratic drag -->
-        <xU>151.3</xU>
-        <xUU>272.4</xUU>
-        <yV>140.0</yV>
+        <xU>100.0</xU>
+        <xUU>150.0</xUU>
+        <yV>100.0</yV>
         <yVV>100.0</yVV>
         <zW>500.0</zW>
         <kP>300.0</kP>
