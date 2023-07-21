@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="articulated_platform">
+    <static>false</static>
+    <link name="dummy_upper"/>
+    <link name="dummy_lower"/>
+
+    <joint name="platform_pivot_joint" type="universal">
+      <parent>dummy_lower</parent>
+      <child>dummy_upper</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+      </axis>
+      <axis2>
+        <xyz>0 1 0</xyz>
+      </axis2>
+    </joint>
+
+    <joint name="world_joint" type="prismatic">
+      <parent>world</parent>
+      <child>dummy_lower</child>
+      <axis>
+        <limit>
+          <lower>-3</lower>
+          <upper>3</upper>
+        </limit>
+        <xyz>0 0 1</xyz>
+      </axis>
+    </joint>
+  </model>
+</sdf>
