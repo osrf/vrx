@@ -101,6 +101,9 @@
               </noise>
             </z>
           </linear_acceleration>
+          <orientation_reference_frame>
+            <localization>ENU</localization>
+          </orientation_reference_frame>
         </imu>
       </sensor>
     </gazebo>
