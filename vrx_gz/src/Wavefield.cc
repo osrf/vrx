@@ -58,7 +58,7 @@ class vrx::WavefieldPrivate
     amplitude(0.0),
     period(5.0),
     phase(0.0),
-    direction(1, 0),
+    direction(0.0),
     angularFrequency(2.0*M_PI),
     wavelength(2 * M_PI / this->DeepWaterDispersionToWavenumber(2.0 * M_PI)),
     wavenumber(this->DeepWaterDispersionToWavenumber(2.0 * M_PI)),
@@ -119,7 +119,7 @@ class vrx::WavefieldPrivate
   public: double phase;
 
   /// \brief The mean wave direction.
-  public: math::Vector2d direction;
+  public: double direction;
 
   /// \brief The time constant for exponential increasing waves on startup
   public: double tau;
@@ -168,9 +168,6 @@ class vrx::WavefieldPrivate
 ///////////////////////////////////////////////////////////////////////////////
 void WavefieldPrivate::RecalculateCwr()
 {
-  // Normalize direction
-  this->direction.Normalize();
-
   // Derived mean values
   this->angularFrequency = 2.0 * M_PI / this->period;
   this->wavenumber = \
@@ -206,12 +203,11 @@ void WavefieldPrivate::RecalculateCwr()
     this->wavenumbers.push_back(k);
 
     // Direction
-    const double c = std::cos(n * this->angle);
-    const double s = std::sin(n * this->angle);
+    const double c = std::cos((n * this->angle) + this->direction);
+    const double s = std::sin((n * this->angle) + this->direction);
 
-    const math::Vector2d d(
-      c * this->direction.X() - s * this->direction.Y(),
-      s * this->direction.X() + c * this->direction.Y());
+    const math::Vector2d d(c, s);
+
     directions.push_back(d);
   }
 }
@@ -228,9 +224,6 @@ double WavefieldPrivate::Pm(double _omega, double _omegaP) const
 ///////////////////////////////////////////////////////////////////////////////
 void WavefieldPrivate::RecalculatePms()
 {
-  // Normalize direction
-  this->direction.Normalize();
-
   // Derived mean values
   this->angularFrequency = 2.0 * M_PI / this->period;
   this->wavenumber = \
@@ -274,12 +267,11 @@ void WavefieldPrivate::RecalculatePms()
     this->wavenumbers.push_back(k);
 
     // Direction
-    const double c = std::cos(n * this->angle);
-    const double s = std::sin(n * this->angle);
+    const double c = std::cos((n * this->angle) + this->direction);
+    const double s = std::sin((n * this->angle) + this->direction);
 
-    const math::Vector2d d(
-      c * this->direction.X() - s * this->direction.Y(),
-      s * this->direction.X() + c * this->direction.Y());
+    const math::Vector2d d(c, s);
+
     directions.push_back(d);
   }
 }
@@ -383,9 +375,8 @@ void WavefieldPrivate::FillParameters()
 
   // direction.
   gz::msgs::Any directionValue;
-  directionValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_VECTOR3D);
-  directionValue.mutable_vector3d_value()->set_x(this->direction.X());
-  directionValue.mutable_vector3d_value()->set_y(this->direction.Y());
+  directionValue.set_type(gz::msgs::Any_ValueType::Any_ValueType_DOUBLE);
+  directionValue.set_double_value(this->direction);
   (*params)["direction"] = directionValue;
 
   // model
@@ -447,8 +438,7 @@ void Wavefield::Load(const std::shared_ptr<const sdf::Element> &_sdf)
       sdfWave->Get<double>("period", this->data->period).first;
     this->data->phase = sdfWave->Get<double>("phase", this->data->phase).first;
     this->data->direction =
-      sdfWave->Get<math::Vector2d>("direction",
-        this->data->direction).first;
+      sdfWave->Get<double>("direction", this->data->direction).first;
     this->data->scale = sdfWave->Get<double>("scale", this->data->scale).first;
     this->data->angle = sdfWave->Get<double>("angle", this->data->angle).first;
     this->data->steepness =
@@ -509,8 +499,7 @@ void Wavefield::Load(const msgs::Param &_msg)
   }
   if (params.count("direction") > 0)
   {
-    this->data->direction = {params["direction"].vector3d_value().x(),
-      params["direction"].vector3d_value().y()};
+    this->data->direction = params["direction"].double_value();
   }
   if (params.count("model") > 0)
   {
@@ -527,6 +516,9 @@ void Wavefield::Load(const msgs::Param &_msg)
 
   this->data->FillParameters();
   this->data->Recalculate();
+
+  this->DebugPrint();
+
   this->data->active = true;
 }
 
@@ -615,7 +607,7 @@ float Wavefield::Gain() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-math::Vector2d Wavefield::Direction() const
+double Wavefield::Direction() const
 {
   return this->data->direction;
 }
@@ -682,7 +674,7 @@ void Wavefield::SetGain(double _gain)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Wavefield::SetDirection(const math::Vector2d &_direction)
+void Wavefield::SetDirection(double _direction)
 {
   this->data->direction = _direction;
   this->data->Recalculate();
