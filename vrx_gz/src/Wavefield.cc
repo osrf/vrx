@@ -516,9 +516,6 @@ void Wavefield::Load(const msgs::Param &_msg)
 
   this->data->FillParameters();
   this->data->Recalculate();
-
-  this->DebugPrint();
-
   this->data->active = true;
 }
 
