@@ -134,17 +134,23 @@
   <gazebo>
     <plugin filename="libgz-sim-pose-publisher-system.so"
       name="gz::sim::systems::PosePublisher">
-      <publish_link_pose>true</publish_link_pose>
+      <publish_link_pose>false</publish_link_pose>
       <publish_sensor_pose>true</publish_sensor_pose>
       <publish_collision_pose>false</publish_collision_pose>
       <publish_visual_pose>false</publish_visual_pose>
-      <publish_nested_model_pose>true</publish_nested_model_pose>
+      <publish_nested_model_pose>false</publish_nested_model_pose>
       <publish_model_pose>false</publish_model_pose>
       <use_pose_vector_msg>true</use_pose_vector_msg>
-      <static_publisher>true</static_publisher>
+      <static_publisher>false</static_publisher>
       <static_update_frequency>1</static_update_frequency>
     </plugin>
+
+    <plugin
+      filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+    </plugin>
   </gazebo>
+
 
   <!-- === Sensors === -->
   <!-- Use sensor yaml file if given -->

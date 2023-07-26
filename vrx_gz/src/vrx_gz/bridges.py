@@ -38,6 +38,14 @@ def pose_static(model_name):
         ros_type='tf2_msgs/msg/TFMessage',
         direction=BridgeDirection.GZ_TO_ROS)
 
+def joint_states(world_name, model_name):
+    return Bridge(
+        gz_topic=f'/world/{world_name}/model/{model_name}/joint_state',
+        ros_topic='joint_states',
+        gz_type='ignition.msgs.Model',
+        ros_type='sensor_msgs/msg/JointState',
+        direction=BridgeDirection.GZ_TO_ROS)
+
 def cmd_vel(model_name):
     return Bridge(
         gz_topic=f'/model/{model_name}/cmd_vel',
