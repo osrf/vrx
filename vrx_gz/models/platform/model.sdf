@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
-    <model name="platform">
-        <static>false</static>
-        <link name="dummy_base"/>
+  <model name="platform">
+    <static>false</static>
+    <link name="dummy_upper"/>
 
-        <joint name="world_joint" type="fixed">
-          <parent>world</parent>
-          <child>dummy_base</child>
-        </joint>
-    </model>
+    <joint name="world_joint" type="fixed">
+      <parent>world</parent>
+      <child>dummy_upper</child>
+    </joint>
+  </model>
 </sdf>

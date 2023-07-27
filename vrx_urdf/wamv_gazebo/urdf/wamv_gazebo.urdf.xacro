@@ -69,65 +69,16 @@
     </xacro:if>
   </xacro:unless>
 
-  <!-- === Decide if we lock the robot to the world === -->
-  <xacro:if value="$(arg locked)">
-    <gazebo>
-      <link name="wamv_external_link">
-        <inertial>
-          <mass>0.001</mass>
-          <inertia>
-            <ixx>0.00000004</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.00000004</iyy>
-            <iyz>0</iyz>
-            <izz>0.00000004</izz>
-          </inertia>
-        </inertial>
-      </link>
-      <link name="wamv_external_link_base">
-        <inertial>
-          <mass>0.001</mass>
-          <inertia>
-            <ixx>0.00000004</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.00000004</iyy>
-            <iyz>0</iyz>
-            <izz>0.00000004</izz>
-          </inertia>
-        </inertial>
-      </link>
-      <joint name="wamv_external_pivot_joint" type="universal">
-        <parent>wamv_external_link</parent>
-        <child>$(arg namespace)/base_link</child>
-        <axis>
-          <xyz>1 0 0</xyz>
-        </axis>
-        <axis2>
-          <xyz>0 1 0</xyz>
-        </axis2>
-      </joint>
-      <joint name="wamv_external_riser" type="prismatic">
-        <parent>wamv_external_link_base</parent>
-        <child>wamv_external_link</child>
-        <axis>
-          <limit>
-            <lower>-3</lower>
-            <upper>3</upper>
-          </limit>
-          <xyz>0 0 1</xyz>
-        </axis>
-      </joint>
-      <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
-        <parent_link>wamv_external_link_base</parent_link>
-        <child_model>platform</child_model>
-        <child_link>dummy_base</child_link>
-        <topic>/vrx/release</topic>
-        <suppress_child_warning>true</suppress_child_warning>
-      </plugin>
-    </gazebo>
-  </xacro:if>
+  <!-- === [Un]lock the robot to the world === -->
+  <gazebo>
+    <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+      <parent_link>$(arg namespace)/base_link</parent_link>
+      <child_model>platform</child_model>
+      <child_link>dummy_upper</child_link>
+      <topic>/vrx/release</topic>
+      <suppress_child_warning>true</suppress_child_warning>
+    </plugin>
+  </gazebo>
 
   <!-- === TF === -->
   <!-- Publish robot state information -->
