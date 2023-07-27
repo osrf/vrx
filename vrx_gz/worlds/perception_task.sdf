@@ -353,8 +353,9 @@
     </include>
 
     <include>
+      <pose>-532 162 -1 0 0 0</pose>
       <name>platform</name>
-      <uri>platform</uri>
+      <uri>articulated_platform</uri>
     </include>
 
     <!-- The posts for securing the WAM-V -->
