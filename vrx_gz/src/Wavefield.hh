@@ -107,8 +107,8 @@ namespace vrx
   /// * `<phase>` (double, default: 0.0)
   ///   The phase of the mean wave.
   ///
-  /// * `<direction>` (Vector2D, default: (1 0))
-  ///   A two component vector specifiying the direction of the mean wave.
+  /// * `<direction>` (double, default: 0.0)
+  ///   An angle defining mean wave direction (theta_m)
   ///
   /// * `<model>` (string, default: default)
   ///   The model used to generate component waves.
@@ -135,7 +135,7 @@ namespace vrx
   ///     <number>3</number>
   ///     <scale>1.5</scale>
   ///     <gain>0.1</gain>
-  ///     <direction>1 0</direction>
+  ///     <direction>0.0</direction>
   ///     <angle>0.4</angle>
   ///     <tau>2.0</tau>
   ///     <amplitude>0.0</amplitude>
@@ -212,9 +212,8 @@ namespace vrx
     /// \brief Amplitude multiplier for PMS.
     public: float Gain() const;
 
-    /// \brief A two component vector specifiying the direction
-    /// of the mean wave.
-    public: gz::math::Vector2d Direction() const;
+    /// \brief A double specifiying the mean wave direction.
+    public: double Direction() const;
 
     /// \brief Set the number of wave components (3 max).
     ///
@@ -266,8 +265,8 @@ namespace vrx
 
     /// \brief Set the mean wave direction.
     ///
-    /// \param[in] _direction The direction parameter, a two component vector.
-    public: void SetDirection(const gz::math::Vector2d &_direction);
+    /// \param[in] _direction The direction parameter, a double.
+    public: void SetDirection(double _direction);
 
     /// \brief Access the component angular frequencies.
     public: const std::vector<double> &AngularFrequency_V() const;

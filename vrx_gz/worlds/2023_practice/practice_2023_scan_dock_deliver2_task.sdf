@@ -501,10 +501,8 @@
         params {
           key: "direction"
           value {
-            type: VECTOR3D
-            vector3d_value {
-              x: 1
-            }
+            type: DOUBLE
+            double_value: 0.0
           }
         }
         params {
