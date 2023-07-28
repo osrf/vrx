@@ -147,13 +147,17 @@ def simulation(world_name, headless=False, paused=False, extra_gz_args=''):
     return [gz_sim, monitor_sim_proc, sim_exit_event_handler]
 
 
-def competition_bridges(world_name):
+def competition_bridges(world_name, competition_mode=False):
     bridges = [
         vrx_gz.bridges.clock(),
         vrx_gz.bridges.task_info(),
-        vrx_gz.bridges.usv_wind_speed(),
-        vrx_gz.bridges.usv_wind_direction()
     ]
+
+    if not competition_mode:
+        bridges.extend([
+          vrx_gz.bridges.usv_wind_speed(),
+          vrx_gz.bridges.usv_wind_direction()
+        ])
 
     task_bridges = []
     if world_name in PERCEPTION_WORLDS:
