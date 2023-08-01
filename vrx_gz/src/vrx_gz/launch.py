@@ -155,8 +155,8 @@ def competition_bridges(world_name, competition_mode=False):
 
     if not competition_mode:
         bridges.extend([
-          vrx_gz.bridges.usv_wind_speed(),
-          vrx_gz.bridges.usv_wind_direction()
+            vrx_gz.bridges.usv_wind_speed(),
+            vrx_gz.bridges.usv_wind_direction()
         ])
 
     task_bridges = []
@@ -167,21 +167,30 @@ def competition_bridges(world_name, competition_mode=False):
     elif world_name in STATIONKEEPING_WORLDS:
         task_bridges = [
             vrx_gz.bridges.stationkeeping_goal(),
-            vrx_gz.bridges.stationkeeping_mean_pose_error(),
-            vrx_gz.bridges.stationkeeping_pose_error(),
         ]
+        if not competition_mode:
+            vrx_gz.bridges.extend([
+                vrx_gz.bridges.stationkeeping_mean_pose_error(),
+                vrx_gz.bridges.stationkeeping_pose_error(),
+            ])
     elif world_name in WAYFINDING_WORLDS:
         task_bridges = [
             vrx_gz.bridges.wayfinding_waypoints(),
-            vrx_gz.bridges.wayfinding_mean_error(),
-            vrx_gz.bridges.wayfinding_min_errors(),
         ]
+        if not competition_mode:
+            task_bridges.extend([
+                vrx_gz.bridges.wayfinding_mean_error(),
+                vrx_gz.bridges.wayfinding_min_errors(),
+            ])
     elif world_name in GYMKHANA_WORLDS:
         task_bridges = [
             vrx_gz.bridges.gymkhana_blackbox_goal(),
-            vrx_gz.bridges.gymkhana_blackbox_mean_pose_error(),
-            vrx_gz.bridges.gymkhana_blackbox_pose_error(),
         ]
+        if not competition_mode:
+            task_bridges.extend([
+                vrx_gz.bridges.gymkhana_blackbox_mean_pose_error(),
+                vrx_gz.bridges.gymkhana_blackbox_pose_error(),
+            ])
     elif world_name in WILDLIFE_WORLDS:
         task_bridges = [
             vrx_gz.bridges.animal_pose('/vrx/wildlife/animal0/pose'),
