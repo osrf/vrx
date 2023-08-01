@@ -169,7 +169,7 @@ def competition_bridges(world_name, competition_mode=False):
             vrx_gz.bridges.stationkeeping_goal(),
         ]
         if not competition_mode:
-            vrx_gz.bridges.extend([
+            task_bridges.extend([
                 vrx_gz.bridges.stationkeeping_mean_pose_error(),
                 vrx_gz.bridges.stationkeeping_pose_error(),
             ])
