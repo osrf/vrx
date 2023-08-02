@@ -33,6 +33,7 @@ def launch(context, *args, **kwargs):
     headless = LaunchConfiguration('headless').perform(context).lower() == 'true'
     robot_urdf = LaunchConfiguration('urdf').perform(context)
     gz_paused = LaunchConfiguration('paused').perform(context).lower() == 'true'
+    competition_mode = LaunchConfiguration('competition_mode').perform(context).lower() == 'true'
     extra_gz_args = LaunchConfiguration('extra_gz_args').perform(context)
 
     launch_processes = []
@@ -54,7 +55,7 @@ def launch(context, *args, **kwargs):
     launch_processes.extend(vrx_gz.launch.spawn(sim_mode, world_name_base, models, robot))
 
     if (sim_mode == 'bridge' or sim_mode == 'full') and bridge_competition_topics:
-        launch_processes.extend(vrx_gz.launch.competition_bridges(world_name_base))
+        launch_processes.extend(vrx_gz.launch.competition_bridges(world_name_base, competition_mode))
 
     return launch_processes
 
@@ -98,6 +99,10 @@ def generate_launch_description():
             'paused',
             default_value='False',
             description='True to start the simulation paused. '),
+        DeclareLaunchArgument(
+            'competition_mode',
+            default_value='False',
+            description='True to disable debug topics. '),
         DeclareLaunchArgument(
             'extra_gz_args',
             default_value='',
