@@ -17,6 +17,9 @@
 1. Resolve TF issues and enable RViz
     * [Pull Request 698](https://github.com/osrf/vrx/pull/698)
 
+1. Multi-vehicle fix
+    * [Pull Request 644](https://github.com/osrf/vrx/pull/644)
+
 ### VRX 2.3.0
 
 1. Enhancements to Perception Task 
