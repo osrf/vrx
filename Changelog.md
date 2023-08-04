@@ -14,6 +14,9 @@
 1. Create competition_mode argument
     * [Pull Request 710](https://github.com/osrf/vrx/pull/710)
 
+1. Resolve TF issues and enable RViz
+    * [Pull Request 698](https://github.com/osrf/vrx/pull/698)
+
 ### VRX 2.3.0
 
 1. Enhancements to Perception Task 
