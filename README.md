@@ -20,7 +20,7 @@ The VRX environment is also the "virtual venue" for the [VRX Competition](https:
 
 ## Getting Started
 
- * Watch the [Release 1.5 Highlight Video](https://youtu.be/-2BP2P3CHYw) (Update for release 2.0 coming soon!)
+ * Watch the [Release 2.3 Highlight Video](https://vimeo.com/851696025).
  * The [VRX Wiki](https://github.com/osrf/vrx/wiki) provides documentation and tutorials.
  * The instructions assume a basic familiarity with the ROS environment and Gazebo.  If these tools are new to you, we recommend starting with the excellent [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials)
  * For technical problems, please use the [project issue tracker](https://github.com/osrf/vrx/issues) to describe your problem or request support. 
