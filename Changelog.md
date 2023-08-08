@@ -1,5 +1,25 @@
 ## VRX 2
 
+### VRX 2.3.1
+
+1. Fix simulation crash 
+    * [Pull Request 706](https://github.com/osrf/vrx/pull/706)
+
+1. Set IMU to reflect sensor position in global coordinates
+    * [Pull Request 708](https://github.com/osrf/vrx/pull/708)
+
+1. Updated code to use angle as input for wavefield parameter direction
+    * [Pull Request 708](https://github.com/osrf/vrx/pull/709)
+
+1. Create competition_mode argument
+    * [Pull Request 710](https://github.com/osrf/vrx/pull/710)
+
+1. Resolve TF issues and enable RViz
+    * [Pull Request 698](https://github.com/osrf/vrx/pull/698)
+
+1. Multi-vehicle fix
+    * [Pull Request 644](https://github.com/osrf/vrx/pull/644)
+
 ### VRX 2.3.0
 
 1. Enhancements to Perception Task 
