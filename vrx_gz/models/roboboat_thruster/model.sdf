@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="roboboat_thruster">
+    <pose>0 0 -0.0762 0 0 0</pose>
+    <link name="base_link">
+      <inertial>
+        <pose>0 0 -0.2 0 0 0</pose>
+        <!-- 6.35 Kg. (dock block) x 9 (num blocks) + 10 Kg (estimated). -->
+        <mass>67.15</mass>
+        <inertia>
+          <ixx>13.486</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>13.486</iyy>
+          <iyz>0</iyz>
+          <izz>25.1813</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual_housing">
+        <geometry>
+           <mesh>
+            <uri>file://roboboat_thruster/meshes/housing.dae</uri>
+          </mesh>
+        </geometry>
+        <!-- <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://robotx_light_buoy_rgb/mesh/LightTower_Albedo.png</albedo_map>
+              <normal_map>file://robotx_light_buoy_rgb/mesh/LightTower_Normal.png</normal_map>
+              <roughness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Roughness.png</roughness_map>
+              <metalness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material> -->
+      </visual>
+
+      <visual name="visual_mount">
+        <geometry>
+           <mesh>
+            <uri>file://roboboat_thruster/meshes/housing.dae</uri>
+          </mesh>
+        </geometry>
+        <!-- <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://robotx_light_buoy_rgb/mesh/LightTower_Albedo.png</albedo_map>
+              <normal_map>file://robotx_light_buoy_rgb/mesh/LightTower_Normal.png</normal_map>
+              <roughness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Roughness.png</roughness_map>
+              <metalness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material> -->
+      </visual>
+
+      <visual name="visual_prop">
+        <geometry>
+           <mesh>
+            <uri>file://roboboat_thruster/meshes/housing.dae</uri>
+          </mesh>
+        </geometry>
+        <!-- <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://robotx_light_buoy_rgb/mesh/LightTower_Albedo.png</albedo_map>
+              <normal_map>file://robotx_light_buoy_rgb/mesh/LightTower_Normal.png</normal_map>
+              <roughness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Roughness.png</roughness_map>
+              <metalness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Metalness.png</metalness_map>
+            </metal>
+          </pbr>
+        </material> -->
+      </visual>
+    </link>
+  </model>
+</sdf>
