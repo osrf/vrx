@@ -36,8 +36,91 @@
         </material> -->
       </visual>
 
-      <!-- <visual name="visual_housing_left">
-        <pose>-0.3 -0.35 -0.15 0 0 0</pose>
+      <collision name="Box042">
+        <pose>0.0802271 -0.433496 0.067182 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.806774 0.145078 0.226941</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box043">
+        <pose>0.0802271 0.4335 0.067182 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.806774 0.145078 0.226941</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box044">
+        <pose>0.245224 0.0 0.111301 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>1.38539 0.332228 0.367644</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box045">
+        <pose>-0.0725149 0.0 0.334772 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.644487 0.523591 0.037272</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box046">
+        <pose>0.161773 -0.242136 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box047">
+        <pose>0.161773 0.24214 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box048">
+        <pose>-0.155861 0.24214 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box049">
+        <pose>-0.155861 -0.242136 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box050">
+        <pose>0.16328 0.0 0.193494 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.0861031 0.929524 0.0166388</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box051">
+        <pose>-0.136293 0.0 0.193494 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.123127 0.95741 0.0166388</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <!-- Thrusters -->
+
+      <visual name="visual_housing_left">
+        <pose>-0.25 0.44 -0.15 0 0 0</pose>
         <geometry>
            <mesh>
             <uri>file://roboboat_thruster/meshes/housing.dae</uri>
@@ -46,7 +129,7 @@
       </visual>
 
       <visual name="visual_mount_left">
-        <pose>-0.3 -0.35 -0.15 0 0 0</pose>
+        <pose>-0.25 0.44 -0.15 0 0 0</pose>
         <geometry>
            <mesh>
             <uri>file://roboboat_thruster/meshes/mount.dae</uri>
@@ -55,7 +138,7 @@
       </visual>
 
       <visual name="visual_prop_left">
-        <pose>-0.3 -0.35 -0.15 0 0 0</pose>
+        <pose>-0.25 0.44 -0.15 0 0 0</pose>
         <geometry>
            <mesh>
             <uri>file://roboboat_thruster/meshes/prop.dae</uri>
@@ -64,7 +147,7 @@
       </visual>
 
       <visual name="visual_housing_right">
-        <pose>0.3 -0.35 -0.15 0 0 0</pose>
+        <pose>-0.25 -0.44 -0.15 0 0 0</pose>
         <geometry>
            <mesh>
             <uri>file://roboboat_thruster/meshes/housing.dae</uri>
@@ -73,7 +156,7 @@
       </visual>
 
       <visual name="visual_mount_right">
-        <pose>0.3 -0.35 -0.15 0 0 0</pose>
+        <pose>-0.25 -0.44 -0.15 0 0 0</pose>
         <geometry>
            <mesh>
             <uri>file://roboboat_thruster/meshes/mount.dae</uri>
@@ -82,13 +165,13 @@
       </visual>
 
       <visual name="visual_prop_right">
-        <pose>0.3 -0.35 -0.15 0 0 0</pose>
+        <pose>-0.25 -0.44 -0.15 0 0 0</pose>
         <geometry>
            <mesh>
             <uri>file://roboboat_thruster/meshes/prop.dae</uri>
           </mesh>
         </geometry>
-      </visual> -->
+      </visual>
 
     </link>
   </model>
