@@ -11,14 +11,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -36,14 +36,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -61,14 +61,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -86,14 +86,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -111,14 +111,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -136,14 +136,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -161,14 +161,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -186,14 +186,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -211,14 +211,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -236,14 +236,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -261,14 +261,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -285,14 +285,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -311,14 +311,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -336,14 +336,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -361,14 +361,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
