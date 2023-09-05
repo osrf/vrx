@@ -22,18 +22,24 @@
             <uri>file://roboboat02/meshes/roboboat02.dae</uri>
           </mesh>
         </geometry>
-        <!-- <material>
+        <material>
           <diffuse>1.0 1.0 1.0</diffuse>
           <specular>1.0 1.0 1.0</specular>
           <pbr>
             <metal>
-              <albedo_map>file://robotx_light_buoy_rgb/mesh/LightTower_Albedo.png</albedo_map>
-              <normal_map>file://robotx_light_buoy_rgb/mesh/LightTower_Normal.png</normal_map>
-              <roughness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Roughness.png</roughness_map>
-              <metalness_map>file://robotx_light_buoy_rgb/mesh/LightTower_Metalness.png</metalness_map>
+              <albedo_map>file://roboboat02/materials/textures/Boat02_Albedo.png</albedo_map>
+              <normal_map>file://roboboat02/materials/textures/Boat02_Normal.png</normal_map>
+              <roughness_map>file://roboboat02/materials/textures/Boat02_Roughness.png</roughness_map>
+              <metalness_map>file://roboboat02/materials/textures/Boat02_Metallic.png</metalness_map>
             </metal>
           </pbr>
-        </material> -->
+          <!-- fallback to script if no PBR support-->
+          <script>
+            <uri>file://roboboat02/materials/scripts/</uri>
+            <uri>file://roboboat02/materials/textures/</uri>
+            <name>Fallback/Boat02_Diffuse</name>
+          </script>
+        </material>
       </visual>
 
       <collision name="Box042">
