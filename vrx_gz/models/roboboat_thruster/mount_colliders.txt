@@ -1,0 +1,8 @@
+<collision name="Box011">
+  <pose>0.0 0.0 0.100951 0.0 0.0 0.0</pose>
+  <geometry>
+    <box>
+      <size>0.0810453 0.0430519 0.070925</size>
+    </box>
+  </geometry>
+</collision>

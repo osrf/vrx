@@ -123,6 +123,26 @@
         </geometry>
       </collision>
 
+      <!-- CPU case -->
+      <visual name="visual_cpubox">
+        <pose>0.0 0.0 0.35 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat_cpubox/meshes/drybox.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat_cpubox/materials/textures/DryBox_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat_cpubox/materials/textures/DryBox_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
       <!-- Thrusters -->
 
       <visual name="visual_housing_left">
