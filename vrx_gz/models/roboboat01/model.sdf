@@ -130,6 +130,16 @@
             <uri>file://roboboat_thruster/meshes/housing.dae</uri>
           </mesh>
         </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat_thruster/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat_thruster/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
 
       <visual name="visual_mount_left">
@@ -139,6 +149,16 @@
             <uri>file://roboboat_thruster/meshes/mount.dae</uri>
           </mesh>
         </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat_thruster/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat_thruster/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
 
       <visual name="visual_prop_left">
@@ -148,6 +168,16 @@
             <uri>file://roboboat_thruster/meshes/prop.dae</uri>
           </mesh>
         </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat_thruster/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat_thruster/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
       </visual>
 
       <visual name="visual_housing_right">
