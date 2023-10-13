@@ -86,6 +86,8 @@ void AcousticPerceptionScoringPlugin::Configure(const sim::Entity &_entity,
       gzerr << "Error creating visual marker" << std::endl;
     }
   }
+
+  this->SetScore(this->remainingTime().count());
 }
 
 //////////////////////////////////////////////////
