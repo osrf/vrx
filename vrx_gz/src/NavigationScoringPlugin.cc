@@ -367,11 +367,6 @@ void NavigationScoringPlugin::Configure(const sim::Entity &_entity,
     return;
   }
 
-  // Set default score in case of timeout.
-  double timeoutScore = 200;
-  gzmsg << "Setting timeoutScore = " << timeoutScore << std::endl;
-  this->ScoringPlugin::SetTimeoutScore(timeoutScore);
-
   gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 }
 
@@ -532,13 +527,6 @@ void NavigationScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
 
     gate.state = currentState;
   }
-}
-
-//////////////////////////////////////////////////
-void NavigationScoringPlugin::Fail()
-{
-  ScoringPlugin::SetScore(ScoringPlugin::TimeoutScore());
-  ScoringPlugin::Finish();
 }
 
 GZ_ADD_PLUGIN(vrx::NavigationScoringPlugin,

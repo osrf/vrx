@@ -104,9 +104,6 @@ namespace vrx
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
                            gz::sim::EntityComponentManager &_ecm) override;
 
-    /// \brief Set the score to 0 and change to state to "finish".
-    protected: void Fail();
-
     /// \brief Private data pointer.
     GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)
   };
