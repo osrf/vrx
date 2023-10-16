@@ -86,8 +86,6 @@ void AcousticPerceptionScoringPlugin::Configure(const sim::Entity &_entity,
       gzerr << "Error creating visual marker" << std::endl;
     }
   }
-
-  this->SetScore(this->RemainingTime().count());
 }
 
 //////////////////////////////////////////////////
@@ -99,6 +97,8 @@ void AcousticPerceptionScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
     return;
 
   ScoringPlugin::PreUpdate(_info, _ecm);
+
+  this->SetScore(this->ElapsedTime().count());
 
   // The vehicle might not be ready yet, let's try to get it.
   if (!this->dataPtr->vehicleEntity)
@@ -117,10 +117,7 @@ void AcousticPerceptionScoringPlugin::PreUpdate( const sim::UpdateInfo &_info,
   double distance = vehiclePose.Pos().Distance(this->dataPtr->pingerPosition);
 
   if (distance <= this->dataPtr->goalTolerance)
-  {
-    this->SetScore(this->ElapsedTime().count());
     this->Finish();
-  }
 }
 
 GZ_ADD_PLUGIN(vrx::AcousticPerceptionScoringPlugin,
