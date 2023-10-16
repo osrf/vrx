@@ -87,7 +87,7 @@ void AcousticPerceptionScoringPlugin::Configure(const sim::Entity &_entity,
     }
   }
 
-  this->SetScore(this->remainingTime().count());
+  this->SetScore(this->RemainingTime().count());
 }
 
 //////////////////////////////////////////////////
