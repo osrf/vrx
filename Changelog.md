@@ -1,5 +1,14 @@
 ## VRX 2
 
+### VRX 2.3.3
+
+1. Initialize acoustic perception score
+    * [Pull Request 747](https://github.com/osrf/vrx/pull/747)
+1. Fix score in follow-the-path
+    * [Pull Request 748](https://github.com/osrf/vrx/pull/748)
+1. Add extra models and extra bridge worlds
+    * [Pull Request 745](https://github.com/osrf/vrx/pull/745)
+
 ### VRX 2.3.2
 
 1. Update camera clip
