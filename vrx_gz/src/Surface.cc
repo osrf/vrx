@@ -210,18 +210,17 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
   if (_info.paused)
     return;
 
-  sim::enableComponent<sim::components::WorldPose>(
-    _ecm, this->dataPtr->link.Entity(), true);
-
   // Vehicle frame transform.
   const auto kPose = this->dataPtr->link.WorldPose(_ecm);
   if (!kPose)
   {
+    sim::enableComponent<sim::components::WorldPose>(
+      _ecm, this->dataPtr->link.Entity(), true);
+
     gzerr << "Unable to get world pose from link ["
            << this->dataPtr->link.Entity() << "]" << std::endl;
     return;
   }
-
   const math::Vector3d kEuler = (*kPose).Rot().Euler();
   math::Quaternion vq(kEuler.X(), kEuler.Y(), kEuler.Z());
 
