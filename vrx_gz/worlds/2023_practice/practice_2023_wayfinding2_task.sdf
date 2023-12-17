@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <sdf version="1.9">
-  <world name="practice_2023_wayfinding0_task">
+  <world name="practice_2023_wayfinding2_task">
 
     <physics name="4ms" type="dart">
       <max_step_size>0.004</max_step_size>

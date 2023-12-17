@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Model for the short navigation course -->
 <sdf version="1.6">
-  <model name="short_navigation_course_1">
+  <model name="short_navigation_course_4">
 
     <!-- Starboard_border -->
     <include>
@@ -129,7 +129,7 @@
 
     <include>
       <name>red_bound_3</name>
-      <pose>-74 4 0 0 0 0</pose>
+      <pose>-80 -8 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -170,7 +170,7 @@
 
     <include>
       <name>red_bound_4</name>
-      <pose>-62 45 0 0 0 0</pose>
+      <pose>-105 -35 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -211,7 +211,7 @@
 
     <include>
       <name>red_bound_5</name>
-      <pose>-37 65 0 0 0 0</pose>
+      <pose>-130 0 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -375,7 +375,7 @@
 
     <include>
       <name>green_bound_3</name>
-      <pose>-90 4 0.2 0 0 0</pose>
+      <pose>-80 -30 0.2 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -415,7 +415,7 @@
 
     <include>
       <name>green_bound_4</name>
-      <pose>-80 60 0.2 0 0 0</pose>
+      <pose>-100 -50 0.2 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -455,7 +455,7 @@
 
     <include>
       <name>green_bound_5</name>
-      <pose>-43 84 0.2 0 0 0</pose>
+      <pose>-131 -20 0.2 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
@@ -502,14 +502,14 @@
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>75.0</linear_drag>
+        <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.21</radius>
+              <radius>0.25</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -521,20 +521,20 @@
 
     <include>
       <name>obstacle_1</name>
-      <pose>-22 -12 0.0 0 0 0 </pose>
+      <pose>-30 -14 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>75.0</linear_drag>
+        <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.21</radius>
+              <radius>0.25</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -546,20 +546,20 @@
 
     <include>
       <name>obstacle_2</name>
-      <pose>-48 -2 0.0 0 0 0 </pose>
+      <pose>-45 -12 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>75.0</linear_drag>
+        <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.21</radius>
+              <radius>0.25</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -571,20 +571,20 @@
 
     <include>
       <name>obstacle_3</name>
-      <pose>-80 30 0.0 0 0 0 </pose>
+      <pose>-63 -21 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>75.0</linear_drag>
+        <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.21</radius>
+              <radius>0.25</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -596,20 +596,20 @@
 
     <include>
       <name>obstacle_4</name>
-      <pose>-80 40 0.0 0 0 0 </pose>
+      <pose>-84 -25 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>75.0</linear_drag>
+        <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.21</radius>
+              <radius>0.25</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -621,20 +621,20 @@
 
     <include>
       <name>obstacle_5</name>
-      <pose>-60 60 0.0 0 0 0 </pose>
+      <pose>-90 -35 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>75.0</linear_drag>
+        <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.21</radius>
+              <radius>0.25</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -646,20 +646,20 @@
 
     <include>
       <name>obstacle_6</name>
-      <pose>-50 70 0.0 0 0 0 </pose>
+      <pose>-120 -30 0.0 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>75.0</linear_drag>
+        <linear_drag>25.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.21</radius>
+              <radius>0.25</radius>
           </sphere>
           </geometry>
         </buoyancy>

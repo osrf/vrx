@@ -1,5 +1,25 @@
 ## VRX 2
 
+### VRX 2.3.3
+
+1. Initialize acoustic perception score
+    * [Pull Request 747](https://github.com/osrf/vrx/pull/747)
+1. Fix score in follow-the-path
+    * [Pull Request 748](https://github.com/osrf/vrx/pull/748)
+1. Add extra models and extra bridge worlds
+    * [Pull Request 745](https://github.com/osrf/vrx/pull/745)
+
+### VRX 2.3.2
+
+1. Update camera clip
+    * [Pull Request 728](https://github.com/osrf/vrx/pull/728)
+1. Buoy update
+    * [Pull Request 727](https://github.com/osrf/vrx/pull/727)
+1. Fix GPS/IMU update rates
+    * [Pull Request 723](https://github.com/osrf/vrx/pull/723)
+1. Add license
+    * [Pull Request 720](https://github.com/osrf/vrx/pull/720)
+
 ### VRX 2.3.1
 
 1. Fix simulation crash 

@@ -6,7 +6,7 @@
     <!-- Starboard_border -->
     <include>
       <name>red_bound_0</name>
-      <pose>0 16 0 0 0 0</pose>
+      <pose>0.5 17 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -47,7 +47,7 @@
 
     <include>
       <name>red_bound_1</name>
-      <pose>-30 5 0 0 0 0</pose>
+      <pose>-30 4 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -88,7 +88,7 @@
 
     <include>
       <name>red_bound_2</name>
-      <pose>-54 -6 0 0 0 0</pose>
+      <pose>-55 -6 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -129,7 +129,7 @@
 
     <include>
       <name>red_bound_3</name>
-      <pose>-74 4 0 0 0 0</pose>
+      <pose>-74 3 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -170,7 +170,7 @@
 
     <include>
       <name>red_bound_4</name>
-      <pose>-62 45 0 0 0 0</pose>
+      <pose>-61 45 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -211,7 +211,7 @@
 
     <include>
       <name>red_bound_5</name>
-      <pose>-37 65 0 0 0 0</pose>
+      <pose>-36 64 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
