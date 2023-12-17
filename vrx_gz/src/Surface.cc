@@ -23,6 +23,7 @@
 #include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
+#include "gz/sim/components/Pose.hh"
 #include "gz/sim/Link.hh"
 #include "gz/sim/Model.hh"
 #include "gz/sim/Util.hh"
@@ -209,6 +210,9 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
   if (_info.paused)
     return;
 
+  sim::enableComponent<sim::components::WorldPose>(
+    _ecm, this->dataPtr->link.Entity(), true);
+
   // Vehicle frame transform.
   const auto kPose = this->dataPtr->link.WorldPose(_ecm);
   if (!kPose)
@@ -217,6 +221,7 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
            << this->dataPtr->link.Entity() << "]" << std::endl;
     return;
   }
+
   const math::Vector3d kEuler = (*kPose).Rot().Euler();
   math::Quaternion vq(kEuler.X(), kEuler.Y(), kEuler.Z());
 
