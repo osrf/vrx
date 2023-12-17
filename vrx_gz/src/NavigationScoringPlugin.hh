@@ -30,7 +30,9 @@ namespace vrx
   ///
   /// This plugin requires the following SDF parameters:
   ///
+  /// <points_per_gate_crossed>: Number of points granted to cross any gate.
   /// <obstacle_penalty>: Specifies how many points are deducted per collision.
+  /// <bonus>: Bonus granted after crossing a consecutive gate.
   /// <gates>: Specifies the collection of gates delimiting the course.
   ///
   ///   Each gate accepts the following elements:
@@ -50,7 +52,9 @@ namespace vrx
   ///   <vehicle>wamv</vehicle>
   ///   <task_name>navigation_scoring_plugin</task_name>
   ///   <course_name>vrx_navigation_course</course_name>
-  ///   <obstacle_penalty>10</obstable_penalty>
+  ///   <points_per_gate_crossed>10</points_per_gate_crossed>
+  ///   <obstacle_penalty>3</obstable_penalty>
+  ///   <bonus>1</bonus>
   ///   <gates>
   ///     <gate>
   ///       <left_marker>red_bound_0</left_marker>
@@ -99,9 +103,6 @@ namespace vrx
     /// \brief Callback executed at every world update.
     public: void PreUpdate(const gz::sim::UpdateInfo &_info,
                            gz::sim::EntityComponentManager &_ecm) override;
-
-    /// \brief Set the score to 0 and change to state to "finish".
-    protected: void Fail();
 
     /// \brief Private data pointer.
     GZ_UTILS_UNIQUE_IMPL_PTR(dataPtr)

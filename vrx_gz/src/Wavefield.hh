@@ -77,23 +77,23 @@ namespace vrx
   /// * `<topic>` (string, default: "/wavefield/parameters")
   ///    The topic for publishing wave field updates.
   ///
-  /// * `<size>` (Vector2D, default: (1000 1000))
+  /// * `<size>` (Vector2D, default: (6000 6000))
   ///   A two component vector for the size of the wave field in each direction.
   ///
-  /// * `<cell_count>` (int, default: (50 50))
+  /// * `<cell_count>` (int, default: (300 300))
   ///   A two component vector for the number of grid cells in each direction.
   ///
-  /// * `<number>` (int, default: 1)
+  /// * `<number>` (int, default: 3)
   ///   The number of component waves.
   ///
-  /// * `<scale>` (double, default: 2.0)
+  /// * `<scale>` (double, default: 1.1)
   ///   The scale between the mean and largest / smallest component waves.
   ///
-  /// * `<angle>` (double, default: 2*pi/10)
+  /// * `<angle>` (double, default: 0.4)
   ///   The angle between the mean wave direction and the
   ///   largest / smallest component waves.
   ///
-  /// * `<steepness>` (double, default: 1.0)
+  /// * `<steepness>` (double, default: 0.0)
   ///   A parameter in [0, 1] controlling the wave steepness with
   ///   1 being steepest.
   ///
@@ -101,14 +101,14 @@ namespace vrx
   ///   The amplitude of the mean wave in [m]. This parameter is only used when
   ///   model is CWR.
   ///
-  /// * `<period>` (double, default: 1.0)
+  /// * `<period>` (double, default: 5.0)
   ///   The period of the mean wave in [s].
   ///
   /// * `<phase>` (double, default: 0.0)
   ///   The phase of the mean wave.
   ///
-  /// * `<direction>` (Vector2D, default: (1 0))
-  ///   A two component vector specifiying the direction of the mean wave.
+  /// * `<direction>` (double, default: 0.0)
+  ///   An angle defining mean wave direction (theta_m)
   ///
   /// * `<model>` (string, default: default)
   ///   The model used to generate component waves.
@@ -117,7 +117,7 @@ namespace vrx
   /// * `<gain>` (double, default: 1.0)
   ///   For PMS, the multiplier applied to component amplitudes.
   ///
-  /// * `<tau>` (double, default: 1.0)
+  /// * `<tau>` (double, default: 2.0)
   ///   Time constant used to gradually increase wavefield at startup.
   ///
   /// ## SDF parameters in secondary mode:
@@ -135,7 +135,7 @@ namespace vrx
   ///     <number>3</number>
   ///     <scale>1.5</scale>
   ///     <gain>0.1</gain>
-  ///     <direction>1 0</direction>
+  ///     <direction>0.0</direction>
   ///     <angle>0.4</angle>
   ///     <tau>2.0</tau>
   ///     <amplitude>0.0</amplitude>
@@ -212,9 +212,8 @@ namespace vrx
     /// \brief Amplitude multiplier for PMS.
     public: float Gain() const;
 
-    /// \brief A two component vector specifiying the direction
-    /// of the mean wave.
-    public: gz::math::Vector2d Direction() const;
+    /// \brief A double specifiying the mean wave direction.
+    public: double Direction() const;
 
     /// \brief Set the number of wave components (3 max).
     ///
@@ -266,8 +265,8 @@ namespace vrx
 
     /// \brief Set the mean wave direction.
     ///
-    /// \param[in] _direction The direction parameter, a two component vector.
-    public: void SetDirection(const gz::math::Vector2d &_direction);
+    /// \param[in] _direction The direction parameter, a double.
+    public: void SetDirection(double _direction);
 
     /// \brief Access the component angular frequencies.
     public: const std::vector<double> &AngularFrequency_V() const;

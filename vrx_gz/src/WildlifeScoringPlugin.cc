@@ -15,7 +15,7 @@
  *
 */
 
-#include <gz/msgs/param_v.pb.h>
+#include <gz/msgs/pose.pb.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -468,7 +468,7 @@ class WildlifeScoringPlugin::Implementation
   public: std::vector<Buoy> buoys;
 
   /// \brief The name of the topic where the animal locations are published.
-  public: std::string animalsTopic = "/vrx/wildlife_animals";
+  public: std::string topicPrefix = "/vrx/wildlife/animal";
 
   /// \brief Time bonus granted for each goal achieved.
   public: double timeBonus = 30.0;
@@ -480,8 +480,8 @@ class WildlifeScoringPlugin::Implementation
   /// \brief Transport node.
   public: transport::Node node;
 
-  /// \brief Publisher for the animal locations.
-  public: transport::Node::Publisher animalsPub;
+  /// \brief Vector of publishers for the animal locations.
+  public: std::vector<transport::Node::Publisher> animalPubs;
 
   /// \brief True when a vehicle collision is detected.
   public: std::atomic<bool> collisionDetected{false};
@@ -491,6 +491,12 @@ class WildlifeScoringPlugin::Implementation
 
   /// \brief Whether we are in the first plugin iteration or not.
   public: bool firstIteration = true;
+
+  /// \brief Animal pose publication frequency (Hz).
+  public: double pubFrequency = 1.0;
+
+  /// \brief Time of the last publication sent (sim time).
+  public: std::chrono::duration<double> lastPublicationTime{0};
 };
 
 //////////////////////////////////////////////////
@@ -513,9 +519,9 @@ void WildlifeScoringPlugin::Configure(const sim::Entity &_entity,
   sim::World world(worldEntity);
   this->dataPtr->sc = world.SphericalCoordinates(_ecm).value();
 
-  // Parse the optional <animals_topic> element.
-  if (_sdf->HasElement("animals_topic"))
-    this->dataPtr->animalsTopic = _sdf->Get<std::string>("animals_topic");
+  // Parse the optional <topic_prefix> element.
+  if (_sdf->HasElement("topic_prefix"))
+    this->dataPtr->topicPrefix = _sdf->Get<std::string>("topic_prefix");
 
   // Parse the optional <engagement_distance> element.
   if (_sdf->HasElement("engagement_distance"))
@@ -528,11 +534,11 @@ void WildlifeScoringPlugin::Configure(const sim::Entity &_entity,
   if (_sdf->HasElement("time_bonus"))
     this->dataPtr->timeBonus = _sdf->Get<double>("time_bonus");
 
-  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
+  // Parse the optional <publication_frequency> element.
+  if (_sdf->HasElement("publication_frequency"))
+    this->dataPtr->pubFrequency = _sdf->Get<double>("publication_frequency");
 
-  // Setup publisher.
-  this->dataPtr->animalsPub =
-    this->dataPtr->node.Advertise<msgs::Param_V>(this->dataPtr->animalsTopic);
+  gzmsg << "Task [" << this->TaskName() << "]" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -557,6 +563,14 @@ void WildlifeScoringPlugin::PreUpdate(const sim::UpdateInfo &_info,
         gzerr << "Score has been disabled" << std::endl;
         return;
       }
+
+      // Advertise the topic for each animal.
+      for (auto i = 0; i < this->dataPtr->buoys.size(); ++i)
+      {
+        auto topic = this->dataPtr->topicPrefix + std::to_string(i) + "/pose";
+        this->dataPtr->animalPubs.push_back(
+          this->dataPtr->node.Advertise<msgs::Pose>(topic));
+      };
     }
   }
 
@@ -696,11 +710,19 @@ bool WildlifeScoringPlugin::Implementation::AddBuoy(const std::string &_name,
 void WildlifeScoringPlugin::Implementation::PublishAnimalLocations(
   const sim::UpdateInfo &_info, sim::EntityComponentManager &_ecm)
 {
-  msgs::Param_V geoPathMsg;
+  auto now = _info.simTime;
+  std::chrono::duration<double> elapsed = now - this->lastPublicationTime;
+  if (std::chrono::duration<double>(elapsed).count() <
+      1 / this->pubFrequency)
+  {
+    return;
+  }
+
+  this->lastPublicationTime = now;
 
   auto stamp = sim::convert<msgs::Time>(_info.simTime);
-  geoPathMsg.mutable_header()->mutable_stamp()->CopyFrom(stamp);
 
+  uint8_t i = 0u;
   for (auto const &buoy : this->buoys)
   {
     // Conversion from Gazebo Cartesian coordinates to spherical.
@@ -723,60 +745,36 @@ void WildlifeScoringPlugin::Implementation::PublishAnimalLocations(
     const math::Quaternion<double> orientation = pose.Rot();
 
     // Fill the message.
-    auto *animal = geoPathMsg.add_param();
-    auto *param = animal->mutable_params();
+    msgs::Pose geoPoseMsg;
 
-    msgs::Any positionXValue;
-    positionXValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
-    positionXValue.set_double_value(latlon.X());
-    (*param)["position_x"] = positionXValue;
+    // header->stamp
+    geoPoseMsg.mutable_header()->mutable_stamp()->CopyFrom(stamp);
 
-    msgs::Any positionYValue;
-    positionYValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
-    positionYValue.set_double_value(latlon.Y());
-    (*param)["position_y"] = positionYValue;
+    // header->frame_id - We set the buoy type based on its goal.
+    auto frame = geoPoseMsg.mutable_header()->add_data();
+    frame->set_key("frame_id");
 
-    msgs::Any positionZValue;
-    positionZValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
-    positionZValue.set_double_value(latlon.Z());
-    (*param)["position_z"] = positionZValue;
-
-    msgs::Any orientationXValue;
-    orientationXValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
-    orientationXValue.set_double_value(orientation.X());
-    (*param)["orientation_x"] = orientationXValue;
-
-    msgs::Any orientationYValue;
-    orientationYValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
-    orientationYValue.set_double_value(orientation.Y());
-    (*param)["orientation_y"] = orientationYValue;
-
-    msgs::Any orientationZValue;
-    orientationZValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
-    orientationZValue.set_double_value(orientation.Z());
-    (*param)["orientation_z"] = orientationZValue;
-
-    msgs::Any orientationWValue;
-    orientationWValue.set_type(msgs::Any_ValueType::Any_ValueType_DOUBLE);
-    orientationWValue.set_double_value(orientation.W());
-    (*param)["orientation_w"] = orientationWValue;
-
-    msgs::Any nameValue;
-    nameValue.set_type(msgs::Any_ValueType::Any_ValueType_STRING);
-    
     if (buoy.goal == BuoyGoal::AVOID)
-      nameValue.set_string_value("crocodile");
+      frame->add_value("crocodile");
     else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_CLOCKWISE)
-      nameValue.set_string_value("platypus");
+      frame->add_value("platypus");
     else if (buoy.goal == BuoyGoal::CIRCUMNAVIGATE_COUNTERCLOCKWISE)
-      nameValue.set_string_value("turtle");
+      frame->add_value("turtle");
     else
-      nameValue.set_string_value("unknown");
+      frame->add_value("unknown");
 
-    (*param)["type"] = nameValue;
+    // pose
+    geoPoseMsg.mutable_position()->set_x(latlon.X());
+    geoPoseMsg.mutable_position()->set_y(latlon.Y());
+    geoPoseMsg.mutable_position()->set_z(latlon.Z());
+    geoPoseMsg.mutable_orientation()->set_x(orientation.X());
+    geoPoseMsg.mutable_orientation()->set_y(orientation.Y());
+    geoPoseMsg.mutable_orientation()->set_z(orientation.Z());
+    geoPoseMsg.mutable_orientation()->set_w(orientation.W());
+
+    this->animalPubs[i].Publish(geoPoseMsg);
+    ++i;
   }
-
-  this->animalsPub.Publish(geoPathMsg);
 }
 
 //////////////////////////////////////////////////

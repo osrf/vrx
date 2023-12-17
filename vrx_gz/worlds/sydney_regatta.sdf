@@ -354,7 +354,7 @@
 
     <include>
       <name>mb_marker_buoy_red</name>
-      <pose>-528 191 0 0 1.57 0</pose>
+      <pose>-528 191 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_red</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -381,7 +381,7 @@
 
     <include>
       <name>mb_marker_buoy_black</name>
-      <pose>-528 190 0 0 1.57 0</pose>
+      <pose>-528 190 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_black</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -408,7 +408,7 @@
 
     <include>
       <name>mb_marker_buoy_green</name>
-      <pose>-528 189 0 0 1.57 0</pose>
+      <pose>-528 189 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_green</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -435,7 +435,7 @@
 
     <include>
       <name>mb_marker_buoy_white</name>
-      <pose>-528 188 0 0 1.57 0</pose>
+      <pose>-528 188 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_marker_buoy_white</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
@@ -462,21 +462,21 @@
 
     <include>
       <name>mb_round_buoy_orange</name>
-      <pose>-528 187 0 0 1.57 0</pose>
+      <pose>-528 187 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_orange</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -488,21 +488,21 @@
 
     <include>
       <name>mb_round_buoy_black</name>
-      <pose>-528 186 0 0 1.57 0</pose>
+      <pose>-528 186 0 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/mb_round_buoy_black</uri>
 
       <plugin name="vrx::PolyhedraBuoyancyDrag"
               filename="libPolyhedraBuoyancyDrag.so">
         <fluid_density>1000</fluid_density>
         <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
+        <linear_drag>75.0</linear_drag>
         <angular_drag>2.0</angular_drag>
         <buoyancy name="collision_outer">
           <link_name>link</link_name>
           <pose>0 0 0 0 0 0</pose>
           <geometry>
             <sphere>
-              <radius>0.25</radius>
+              <radius>0.21</radius>
           </sphere>
           </geometry>
         </buoyancy>
@@ -578,82 +578,37 @@
       </plugin>
     </include>
 
-    <wind>
-      <linear_velocity>0 0 0</linear_velocity>
-    </wind>
-
-    <!-- Load the plugin for the wind -->
+    <!-- Load the plugin for the wind --> 
     <plugin
-      filename="gz-sim-wind-effects-system"
-      name="gz::sim::systems::WindEffects">
-      <force_approximation_scaling_factor>0.002</force_approximation_scaling_factor>
-      <horizontal>
-        <magnitude>
-          <time_for_rise>10</time_for_rise>
-          <sin>
-            <amplitude_percent>0.05</amplitude_percent>
-            <period>60</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.0002</stddev>
-          </noise>
-        </magnitude>
-        <direction>
-          <time_for_rise>30</time_for_rise>
-          <sin>
-            <amplitude>5</amplitude>
-            <period>20</period>
-          </sin>
-          <noise type="gaussian">
-           <mean>0</mean>
-           <stddev>0.03</stddev>
-          </noise>
-        </direction>
-      </horizontal>
-      <vertical>
-        <noise type="gaussian">
-         <mean>0</mean>
-         <stddev>0.03</stddev>
-        </noise>
-      </vertical>
-    </plugin>
+      filename="libUSVWind.so"
+      name="vrx::USVWind">
+      <wind_obj>
+        <name>wamv</name>
+        <link_name>wamv/base_link</link_name>
+        <coeff_vector>.5 .5 .33</coeff_vector>
+      </wind_obj>
+      <!-- Wind -->
+      <wind_direction>240</wind_direction>
+      <!-- in degrees -->
+      <wind_mean_velocity>0.0</wind_mean_velocity>
+      <var_wind_gain_constants>0</var_wind_gain_constants>
+      <var_wind_time_constants>2</var_wind_time_constants>
+      <random_seed>10</random_seed>
+      <!-- set to zero/empty to randomize -->
+      <update_rate>10</update_rate>
+      <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
+      <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
+     </plugin>
 
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
       <message type="gz.msgs.Param" topic="/vrx/wavefield/parameters"
                every="2.0">
         params {
-          key: "amplitude"
-          value {
-            type: DOUBLE
-            double_value: 0
-          }
-        }
-        params {
-          key: "angle"
-          value {
-            type: DOUBLE
-            double_value: 0.4
-          }
-        }
-        params {
-          key: "cell_count"
-          value {
-            type: VECTOR3D
-            vector3d_value {
-              x: 300
-              y: 300
-            }
-          }
-        }
-        params {
           key: "direction"
           value {
-            type: VECTOR3D
-            vector3d_value {
-              x: 1
-            }
+            type: DOUBLE
+            double_value: 0.0
           }
         }
         params {
@@ -664,20 +619,6 @@
           }
         }
         params {
-          key: "model"
-          value {
-            type: STRING
-            string_value: "PMS"
-          }
-        }
-        params {
-          key: "number"
-          value {
-            type: INT32
-            int_value: 3
-          }
-        }
-        params {
           key: "period"
           value {
             type: DOUBLE
@@ -685,41 +626,10 @@
           }
         }
         params {
-          key: "phase"
-          value {
-            type: DOUBLE
-            double_value: 0
-          }
-        }
-        params {
-          key: "scale"
-          value {
-            type: DOUBLE
-            double_value: 1.1
-          }
-        }
-        params {
-          key: "size"
-          value {
-            type: VECTOR3D
-            vector3d_value {
-              x: 6000
-              y: 6000
-            }
-          }
-        }
-        params {
           key: "steepness"
           value {
             type: DOUBLE
             double_value: 0
-          }
-        }
-        params {
-          key: "tau"
-          value {
-            type: DOUBLE
-            double_value: 2
           }
         }
       </message>

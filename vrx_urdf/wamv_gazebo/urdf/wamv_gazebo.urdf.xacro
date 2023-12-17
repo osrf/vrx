@@ -15,7 +15,7 @@
   <xacro:arg name="thruster_namespace" default="thrusters/"/>
   <xacro:arg name="camera_namespace" default="cameras/"/>
   <xacro:arg name="sensor_namespace" default="sensors/"/>
-  <xacro:arg name="pinger_namespace" default="pingers/"/>
+  <xacro:arg name="acoustic_namespace" default="acoustics/"/>
   <xacro:arg name="shooter_namespace" default="shooters/"/>
   <!-- Note: this is only used for some sensors that do not correctly use the
   robotNamespace parameter -->
@@ -23,7 +23,7 @@
   <xacro:property name="thruster_namespace" value="$(arg thruster_namespace)" scope="global" />
   <xacro:property name="camera_namespace" value="$(arg camera_namespace)" scope="global" />
   <xacro:property name="sensor_namespace" value="$(arg sensor_namespace)" scope="global" />
-  <xacro:property name="pinger_namespace" value="$(arg pinger_namespace)" scope="global" />
+  <xacro:property name="acoustic_namespace" value="$(arg acoustic_namespace)" scope="global" />
   <xacro:property name="shooter_namespace" value="$(arg shooter_namespace)" scope="global" />
   <xacro:property name="namespace" value="$(arg namespace)" scope="global" />
 
@@ -69,82 +69,39 @@
     </xacro:if>
   </xacro:unless>
 
-  <!-- === Decide if we lock the robot to the world === -->
-  <xacro:if value="$(arg locked)">
-    <gazebo>
-      <link name="wamv_external_link">
-        <inertial>
-          <mass>0.001</mass>
-          <inertia>
-            <ixx>0.00000004</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.00000004</iyy>
-            <iyz>0</iyz>
-            <izz>0.00000004</izz>
-          </inertia>
-        </inertial>
-      </link>
-      <link name="wamv_external_link_base">
-        <inertial>
-          <mass>0.001</mass>
-          <inertia>
-            <ixx>0.00000004</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.00000004</iyy>
-            <iyz>0</iyz>
-            <izz>0.00000004</izz>
-          </inertia>
-        </inertial>
-      </link>
-      <joint name="wamv_external_pivot_joint" type="universal">
-        <parent>wamv_external_link</parent>
-        <child>wamv/base_link</child>
-        <axis>
-          <xyz>1 0 0</xyz>
-        </axis>
-        <axis2>
-          <xyz>0 1 0</xyz>
-        </axis2>
-      </joint>
-      <joint name="wamv_external_riser" type="prismatic">
-        <parent>wamv_external_link_base</parent>
-        <child>wamv_external_link</child>
-        <axis>
-          <limit>
-            <lower>-3</lower>
-            <upper>3</upper>
-          </limit>
-          <xyz>0 0 1</xyz>
-        </axis>
-      </joint>
-      <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
-        <parent_link>wamv_external_link_base</parent_link>
-        <child_model>platform</child_model>
-        <child_link>dummy_base</child_link>
-        <topic>/vrx/release</topic>
-        <suppress_child_warning>true</suppress_child_warning>
-      </plugin>
-    </gazebo>
-  </xacro:if>
+  <!-- === [Un]lock the robot to the world === -->
+  <gazebo>
+    <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+      <parent_link>$(arg namespace)/base_link</parent_link>
+      <child_model>platform</child_model>
+      <child_link>dummy_upper</child_link>
+      <topic>/vrx/release</topic>
+      <suppress_child_warning>true</suppress_child_warning>
+    </plugin>
+  </gazebo>
 
   <!-- === TF === -->
   <!-- Publish robot state information -->
   <gazebo>
     <plugin filename="libgz-sim-pose-publisher-system.so"
       name="gz::sim::systems::PosePublisher">
-      <publish_link_pose>true</publish_link_pose>
+      <publish_link_pose>false</publish_link_pose>
       <publish_sensor_pose>true</publish_sensor_pose>
       <publish_collision_pose>false</publish_collision_pose>
       <publish_visual_pose>false</publish_visual_pose>
-      <publish_nested_model_pose>true</publish_nested_model_pose>
+      <publish_nested_model_pose>false</publish_nested_model_pose>
       <publish_model_pose>false</publish_model_pose>
       <use_pose_vector_msg>true</use_pose_vector_msg>
-      <static_publisher>true</static_publisher>
+      <static_publisher>false</static_publisher>
       <static_update_frequency>1</static_update_frequency>
     </plugin>
+
+    <plugin
+      filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+    </plugin>
   </gazebo>
+
 
   <!-- === Sensors === -->
   <!-- Use sensor yaml file if given -->
@@ -186,7 +143,7 @@
 
     <!-- Add pinger -->
     <xacro:if value="$(arg pinger_enabled)">
-      <xacro:wamv_pinger name="pinger" position="-528 191 -2.0" />
+      <xacro:wamv_pinger sensor_name="receiver" position="-528 191 -2.0" />
     </xacro:if>
 
     <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
@@ -218,7 +175,7 @@
       <xacro:lidar name="lidar_wamv" type="16_beam"/>
 
       <!-- Add pinger -->
-      <xacro:wamv_pinger name="pinger" position="-528 191 -2.0" />
+      <xacro:wamv_pinger sensor_name="receiver" position="-528 191 -2.0" />
 
       <!-- Add ball shooter (default pitch angle: ~-60 deg) -->
       <xacro:wamv_ball_shooter name="ball_shooter" x="0.54" y="0.30" z="1.296" pitch="-1.04"/>

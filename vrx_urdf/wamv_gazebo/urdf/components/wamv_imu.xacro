@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_imu" params="name:=imu x:=0.3 y:=0.5 z:=1.3 R:=0 P:=0 Y:=0 update_rate:=15">
+  <xacro:macro name="wamv_imu" params="name:=imu x:=0.3 y:=0.5 z:=1.3 R:=0 P:=0 Y:=0 update_rate:=100">
     <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">>
         <geometry>
@@ -101,6 +101,9 @@
               </noise>
             </z>
           </linear_acceleration>
+          <orientation_reference_frame>
+            <localization>ENU</localization>
+          </orientation_reference_frame>
         </imu>
       </sensor>
     </gazebo>

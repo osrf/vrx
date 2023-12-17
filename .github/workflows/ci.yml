@@ -3,36 +3,31 @@ name: Ubuntu CI
 on: [pull_request]
 
 jobs:
-  test-fortress-galactic:
+  test-humble-garden:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: 
       image: npslearninglab/watery_robots:humble_current
     steps:
-      - run: sudo chown -R `whoami`:`whoami` .
       - name: Checkout vrx
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
             ref: main
             path: vrx
 
-      - name: Checkout Gazebosim 
-        uses: actions/checkout@v2.4.0
-        with:
-            repository: gazebosim/ros_gz
-            ref: humble
-            path: ros_gz
-  
+      - name: Create developer user 
+        run: |
+          useradd -m -u 1001 developer;
+
       - name: Set up workspace
         run: |
-          mkdir -p /tmp/vrx_ws/src;
-          ln -s `pwd` /tmp/vrx_ws/src;
+          mkdir -p /home/developer/vrx_ws/src;
+          mv vrx /home/developer/vrx_ws/src;
+          chown -R developer:developer /home/developer;
 
       - name: Build and run tests
         shell: bash
         run: |
-          cd /tmp/vrx_ws;
-          source /opt/ros/humble/setup.bash;
-          GZ_VERSION=garden colcon build --merge-install --executor sequential;
-          GZ_VERSION=garden colcon test --merge-install --executor sequential --packages-skip-regex ros_gz* --return-code-on-test-failure --event-handlers console_direct+;
- 
+          cd /home/developer/vrx_ws;
+          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --merge-install --executor sequential" developer;
+          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && colcon test --merge-install --executor sequential --packages-skip-regex ros_gz* --return-code-on-test-failure --event-handlers console_direct+" developer;

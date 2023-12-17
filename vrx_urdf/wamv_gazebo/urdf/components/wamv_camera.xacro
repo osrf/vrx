@@ -167,7 +167,7 @@
           </image>
           <clip>
             <near>0.05</near>
-            <far>300</far>
+            <far>400</far>
           </clip>
           <noise>
             <type>gaussian</type>

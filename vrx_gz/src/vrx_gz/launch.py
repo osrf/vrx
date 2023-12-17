@@ -19,7 +19,9 @@ from launch.actions import IncludeLaunchDescription
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch.actions import ExecuteProcess, EmitEvent
 from launch.events import Shutdown
 
@@ -36,54 +38,105 @@ GYMKHANA_WORLDS = [
 
 PERCEPTION_WORLDS = [
   'perception_task',
-  'practice_2022_perception0_task',
-  'practice_2022_perception1_task',
-  'practice_2022_perception2_task'
+  'practice_2023_perception0_task',
+  'practice_2023_perception1_task',
+  'practice_2023_perception2_task',
+  'perception0',
+  'perception1',
+  'perception2',
+  'perception3',
+  'perception4',
+  'perception5'
 ]
 
 STATIONKEEPING_WORLDS = [
   'stationkeeping_task',
-  'practice_2022_stationkeeping0_task',
-  'practice_2022_stationkeeping1_task',
-  'practice_2022_stationkeeping2_task',
+  'practice_2023_stationkeeping0_task',
+  'practice_2023_stationkeeping1_task',
+  'practice_2023_stationkeeping2_task',
+  'stationkeeping0',
+  'stationkeeping1',
+  'stationkeeping2',
+  'stationkeeping3',
+  'stationkeeping4',
+  'stationkeeping5'
 ]
 
 WAYFINDING_WORLDS = [
   'wayfinding_task',
-  'practice_2022_wayfinding0_task',
-  'practice_2022_wayfinding1_task',
-  'practice_2022_wayfinding2_task',
+  'practice_2023_wayfinding0_task',
+  'practice_2023_wayfinding1_task',
+  'practice_2023_wayfinding2_task',
+  'wayfinding0',
+  'wayfinding1',
+  'wayfinding2',
+  'wayfinding3',
+  'wayfinding4',
+  'wayfinding5'
 ]
 
 WILDLIFE_WORLDS = [
   'wildlife_task',
-  'practice_2022_wildlife0_task',
-  'practice_2022_wildlife1_task',
-  'practice_2022_wildlife2_task'
+  'practice_2023_wildlife0_task',
+  'practice_2023_wildlife1_task',
+  'practice_2023_wildlife2_task',
+  'wildlife0',
+  'wildlife1',
+  'wildlife2',
+  'wildlife3',
+  'wildlife4',
+  'wildlife5'
 ]
 
 SCAN_DOCK_DELIVER_WORLDS = [
-  'scan_dock_deliver_task'
+  'scan_dock_deliver_task',
+  'practice_2023_scan_dock_deliver0_task',
+  'practice_2023_scan_dock_deliver1_task',
+  'practice_2023_scan_dock_deliver2_task',
+  'scan_dock_deliver0',
+  'scan_dock_deliver1',
+  'scan_dock_deliver2',
+  'scan_dock_deliver3',
+  'scan_dock_deliver4',
+  'scan_dock_deliver5'
 ]
 
 ACOUSTIC_TRACKING_WORLDS = [
   'acoustic_tracking_task',
-  'practice_2022_acoustic_tracking0_task',
-  'practice_2022_acoustic_tracking1_task',
-  'practice_2022_acoustic_tracking2_task'
+  'practice_2023_acoustic_tracking0_task',
+  'practice_2023_acoustic_tracking1_task',
+  'practice_2023_acoustic_tracking2_task',
+  'acoustic_tracking0',
+  'acoustic_tracking1',
+  'acoustic_tracking2',
+  'acoustic_tracking3',
+  'acoustic_tracking4',
+  'acoustic_tracking5'
 ]
 
 FOLLOWPATH_WORLDS = [
   'follow_path_task',
-  'practice_2022_follow_path0_task',
-  'practice_2022_follow_path1_task',
-  'practice_2022_follow_path2_task'
+  'practice_2023_follow_path0_task',
+  'practice_2023_follow_path1_task',
+  'practice_2023_follow_path2_task',
+  'follow_path0',
+  'follow_path1',
+  'follow_path2',
+  'follow_path3',
+  'follow_path4',
+  'follow_path5'
 ]
 
-def simulation(world_name, headless=False):
-    gz_args = ['-v 4', '-r']
+def simulation(world_name, headless=False, paused=False, extra_gz_args=''):
+    gz_args = ['-v 4']
+    if not paused:
+        gz_args.append('-r')
+
     if headless:
         gz_args.append('-s')
+
+    gz_args.append(extra_gz_args)
+
     gz_args.append(f'{world_name}.sdf')
 
     gz_sim = IncludeLaunchDescription(
@@ -115,11 +168,17 @@ def simulation(world_name, headless=False):
     return [gz_sim, monitor_sim_proc, sim_exit_event_handler]
 
 
-def competition_bridges(world_name):
+def competition_bridges(world_name, competition_mode=False):
     bridges = [
         vrx_gz.bridges.clock(),
         vrx_gz.bridges.task_info(),
     ]
+
+    if not competition_mode:
+        bridges.extend([
+            vrx_gz.bridges.usv_wind_speed(),
+            vrx_gz.bridges.usv_wind_direction()
+        ])
 
     task_bridges = []
     if world_name in PERCEPTION_WORLDS:
@@ -129,24 +188,35 @@ def competition_bridges(world_name):
     elif world_name in STATIONKEEPING_WORLDS:
         task_bridges = [
             vrx_gz.bridges.stationkeeping_goal(),
-            vrx_gz.bridges.stationkeeping_mean_pose_error(),
-            vrx_gz.bridges.stationkeeping_pose_error(),
         ]
+        if not competition_mode:
+            task_bridges.extend([
+                vrx_gz.bridges.stationkeeping_mean_pose_error(),
+                vrx_gz.bridges.stationkeeping_pose_error(),
+            ])
     elif world_name in WAYFINDING_WORLDS:
         task_bridges = [
             vrx_gz.bridges.wayfinding_waypoints(),
-            vrx_gz.bridges.wayfinding_mean_error(),
-            vrx_gz.bridges.wayfinding_min_errors(),
         ]
+        if not competition_mode:
+            task_bridges.extend([
+                vrx_gz.bridges.wayfinding_mean_error(),
+                vrx_gz.bridges.wayfinding_min_errors(),
+            ])
     elif world_name in GYMKHANA_WORLDS:
         task_bridges = [
             vrx_gz.bridges.gymkhana_blackbox_goal(),
-            vrx_gz.bridges.gymkhana_blackbox_mean_pose_error(),
-            vrx_gz.bridges.gymkhana_blackbox_pose_error(),
         ]
+        if not competition_mode:
+            task_bridges.extend([
+                vrx_gz.bridges.gymkhana_blackbox_mean_pose_error(),
+                vrx_gz.bridges.gymkhana_blackbox_pose_error(),
+            ])
     elif world_name in WILDLIFE_WORLDS:
         task_bridges = [
-            vrx_gz.bridges.animal_poses(),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal0/pose'),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal1/pose'),
+            vrx_gz.bridges.animal_pose('/vrx/wildlife/animal2/pose'),
         ]
     elif world_name in SCAN_DOCK_DELIVER_WORLDS:
         task_bridges = [
@@ -168,6 +238,11 @@ def competition_bridges(world_name):
 def spawn(sim_mode, world_name, models, robot=None):
     if type(models) != list:
         models = [models]
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='true',
+        description='Use simulation (Gazebo) clock if true'),
 
     launch_processes = []
     for model in models:
@@ -203,12 +278,24 @@ def spawn(sim_mode, world_name, models, robot=None):
                 remappings=[bridge.remapping() for bridge in bridges],
             ))
 
-            # tf broadcaster
+            # tf broadcaster (sensors)
             nodes.append(Node(
                 package='vrx_ros',
                 executable='pose_tf_broadcaster',
                 output='screen',
             ))
+
+            # robot_state_publisher (tf for wamv)
+            model_dir = os.path.join(get_package_share_directory('vrx_gazebo'), 'models/wamv/tmp')
+            urdf_file = os.path.join(model_dir, 'model.urdf')
+            with open(urdf_file, 'r') as infp:
+                robot_desc = infp.read()
+            params = {'use_sim_time': use_sim_time, 'frame_prefix': 'wamv/', 'robot_description': robot_desc}
+            nodes.append(Node(package='robot_state_publisher',
+                                  executable='robot_state_publisher',
+                                  output='both',
+                                  parameters=[params],
+                                  remappings=[('/joint_states', '/wamv/joint_states')]))
 
             group_action = GroupAction([
                 PushRosNamespace(model.model_name),

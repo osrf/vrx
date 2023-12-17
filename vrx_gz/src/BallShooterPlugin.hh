@@ -18,8 +18,6 @@
 #ifndef VRX_BALL_SHOOTER_PLUGIN_HH_
 #define VRX_BALL_SHOOTER_PLUGIN_HH_
 
-#include <gz/msgs/empty.pb.h>
-
 #include <memory>
 #include <gz/sim/System.hh>
 #include <gz/utils/ImplPtr.hh>

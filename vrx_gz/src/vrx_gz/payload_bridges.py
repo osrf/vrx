@@ -130,8 +130,8 @@ def ball_shooter(model_name):
     return Bridge(
         gz_topic=f'/{model_name}/shooters/ball_shooter/fire',
         ros_topic=f'shooters/ball_shooter/fire',
-        gz_type='ignition.msgs.Empty',
-        ros_type='std_msgs/msg/Empty',
+        gz_type='ignition.msgs.Boolean',
+        ros_type='std_msgs/msg/Bool',
         direction=BridgeDirection.ROS_TO_GZ)
 
 def thrust(model_name, side):
@@ -154,6 +154,22 @@ def thrust_joint_pos(model_name, side):
         ros_topic=f'thrusters/{side}/pos',
         gz_type='ignition.msgs.Double',
         ros_type='std_msgs/msg/Float64',
+        direction=BridgeDirection.ROS_TO_GZ)
+
+def acoustic_pinger(model_name):
+    return Bridge(
+        gz_topic=f'{model_name}/sensors/acoustics/receiver/range_bearing',
+        ros_topic=f'sensors/acoustics/receiver/range_bearing',
+        gz_type='ignition.msgs.Param',
+        ros_type='ros_gz_interfaces/msg/ParamVec',
+        direction=BridgeDirection.GZ_TO_ROS)
+
+def set_acoustic_pinger():
+    return Bridge(
+        gz_topic=f'/pinger/set_pinger_position',
+        ros_topic=f'/pinger/set_pinger_position',
+        gz_type='ignition.msgs.Vector3d',
+        ros_type='geometry_msgs/msg/Vector3',
         direction=BridgeDirection.ROS_TO_GZ)
 
 def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type):
@@ -202,6 +218,11 @@ def payload_bridges(world_name, model_name, link_name, sensor_name, sensor_type)
     elif 'thruster_rotate_' in sensor_name:
         bridges = [
             thrust_joint_pos(model_name, sensor_type),
+        ]
+    elif 'AcousticPinger' in sensor_name:
+        bridges = [
+            acoustic_pinger(model_name),
+            set_acoustic_pinger(),
         ]
 
     return bridges

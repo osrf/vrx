@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:macro name="wamv_gps" params="name:=gps x:=0.3 y:=0 z:=1.3
-				       R:=0 P:=0 Y:=0 update_rate:=15">
+				       R:=0 P:=0 Y:=0 update_rate:=20">
     <link name="${namespace}/${name}_link">
       <visual name="${name}_visual">
         <geometry>
@@ -38,7 +38,7 @@
     <gazebo reference="${namespace}/${name}_link">
       <sensor name="navsat" type="navsat">
         <always_on>1</always_on>
-        <update_rate>15</update_rate>
+        <update_rate>${update_rate}</update_rate>
         <!--<topic>${namespace}/${sensor_namespace}gps/gps/fix</topic>-->
       </sensor>
     </gazebo>

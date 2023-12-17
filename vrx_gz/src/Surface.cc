@@ -261,9 +261,6 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
 
     // Debug output:
     // gzdbg << bpnt.X() << "," << bpnt.Y() << "," << bpnt.Z() << std::endl;
-    // gzdbg << "-" << std::endl;
-    // gzdbg << bpntW.X() << "," << bpntW.Y() << "," << bpntW.Z() << std::endl;
-    // gzdbg << "X: " << X << std::endl;
     // gzdbg << "depth: " << depth << std::endl;
     // gzdbg << "dz: " << dz << std::endl;
     // gzdbg << "kDdz: " << kDdz << std::endl;

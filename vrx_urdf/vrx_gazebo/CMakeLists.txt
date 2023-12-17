@@ -23,7 +23,6 @@ install(DIRECTORY config/
 install(PROGRAMS scripts/generate_wamv.py
   DESTINATION lib/${PROJECT_NAME})
 
-
 ament_python_install_package(
   vrx_gazebo
   PACKAGE_DIR src/vrx_gazebo

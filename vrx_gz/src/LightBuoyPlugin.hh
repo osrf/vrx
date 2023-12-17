@@ -51,7 +51,7 @@ namespace vrx
       public gz::sim::ISystemConfigure,
       public gz::sim::ISystemPreUpdate
   {
-    // \brief Constructor
+    /// \brief Constructor
     public: LightBuoyPlugin();
 
     /// \brief Destructor.

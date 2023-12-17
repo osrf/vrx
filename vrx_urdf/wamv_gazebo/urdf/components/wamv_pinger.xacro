@@ -1,18 +1,24 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="wamv_pinger" params="name:='pinger' frameId:='wamv/pinger' position:='0 0 0' orientation:='0 0 0'">
-    <link name="${namespace}/${name}">
+  <xacro:macro name="wamv_pinger" params="pinger_name:='pinger' sensor_name:='receiver' frameId:='/pinger' position:='0 0 0' orientation:='0 0 0'">
+    <link name="${namespace}/${sensor_name}">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.01" />
+        </geometry>
       </visual>
       <inertial>
         <mass value="0.1"/>
         <inertia ixx="0.00000542" ixy="0.0" ixz="0.0" iyy="0.00002104" iyz="0.0" izz="0.00002604"/>
       </inertial>
     </link>
-    <joint name="${namespace}/${name}_pinger_joint" type="fixed">
+    <joint name="${namespace}/${sensor_name}_pinger_joint" type="revolute">
+      <axis xyz="0 0 1"/>
+      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <parent link="${namespace}/base_link"/>
-      <child link="${namespace}/${name}"/>
+      <child link="${namespace}/${sensor_name}"/>
     </joint>
 
     <gazebo>
@@ -20,10 +26,10 @@
         filename="libAcousticPingerPlugin.so"
         name="vrx::AcousticPingerPlugin">
         <position>${position}</position>
-        <topic>${namespace}/${pinger_namespace}${name}/range_bearing</topic>
-        <set_position_topic>${namespace}/${pinger_namespace}${name}/set_pinger_position
+        <topic>/${namespace}/${sensor_namespace}${acoustic_namespace}${sensor_name}/range_bearing</topic>
+        <set_position_topic>/${pinger_name}/set_pinger_position
         </set_position_topic>
-        <frame_id>${namespace}/${name}</frame_id>
+        <frame_id>${pinger_name}</frame_id>
         <range_noise>
           <noise>
             <type>gaussian</type>

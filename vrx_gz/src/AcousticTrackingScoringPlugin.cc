@@ -75,11 +75,10 @@ class AcousticTrackingScoringPlugin::Implementation
   public: double meanError;
 
   /// \brief Penalty added per collision.
-  public: double obstaclePenalty = 0.1;
+  public: double obstaclePenalty = 1.0;
 
   /// /brief The topic used to set the pinger position.
-  public: std::string setPingerTopicName =
-    "/wamv/pingers/pinger/set_pinger_position";
+  public: std::string setPingerTopicName = "/pinger/set_pinger_position";
 
   /// \brief Topic where 2D pose error is published.
   public: std::string poseErrorTopic = "/vrx/acoustic_wayfinding/pose_error";

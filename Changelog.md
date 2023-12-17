@@ -1,5 +1,114 @@
 ## VRX 2
 
+### VRX 2.3.3
+
+1. Initialize acoustic perception score
+    * [Pull Request 747](https://github.com/osrf/vrx/pull/747)
+1. Fix score in follow-the-path
+    * [Pull Request 748](https://github.com/osrf/vrx/pull/748)
+1. Add extra models and extra bridge worlds
+    * [Pull Request 745](https://github.com/osrf/vrx/pull/745)
+
+### VRX 2.3.2
+
+1. Update camera clip
+    * [Pull Request 728](https://github.com/osrf/vrx/pull/728)
+1. Buoy update
+    * [Pull Request 727](https://github.com/osrf/vrx/pull/727)
+1. Fix GPS/IMU update rates
+    * [Pull Request 723](https://github.com/osrf/vrx/pull/723)
+1. Add license
+    * [Pull Request 720](https://github.com/osrf/vrx/pull/720)
+
+### VRX 2.3.1
+
+1. Fix simulation crash 
+    * [Pull Request 706](https://github.com/osrf/vrx/pull/706)
+
+1. Set IMU to reflect sensor position in global coordinates
+    * [Pull Request 708](https://github.com/osrf/vrx/pull/708)
+
+1. Updated code to use angle as input for wavefield parameter direction
+    * [Pull Request 708](https://github.com/osrf/vrx/pull/709)
+
+1. Create competition_mode argument
+    * [Pull Request 710](https://github.com/osrf/vrx/pull/710)
+
+1. Resolve TF issues and enable RViz
+    * [Pull Request 698](https://github.com/osrf/vrx/pull/698)
+
+1. Multi-vehicle fix
+    * [Pull Request 644](https://github.com/osrf/vrx/pull/644)
+
+### VRX 2.3.0
+
+1. Enhancements to Perception Task 
+    * [Pull Request 699](https://github.com/osrf/vrx/pull/699)
+
+1. Infrastructure updates
+    * [Pull Request 694](https://github.com/osrf/vrx/pull/694)
+    * [Pull Request 688](https://github.com/osrf/vrx/pull/688)
+    * [Pull Request 682](https://github.com/osrf/vrx/pull/682)
+    * [Pull Request 671](https://github.com/osrf/vrx/pull/671)
+    * [Pull Request 663](https://github.com/osrf/vrx/pull/663)
+    * [Pull Request 661](https://github.com/osrf/vrx/pull/661)
+    * [Pull Request 658](https://github.com/osrf/vrx/pull/658)
+
+1. Acoustic pinger updates
+    * [Pull Request 692](https://github.com/osrf/vrx/pull/692)
+    * [Pull Request 669](https://github.com/osrf/vrx/pull/669)
+
+1. Environmental updates
+    * [Pull Request 686](https://github.com/osrf/vrx/pull/686)
+    * [Pull Request 678](https://github.com/osrf/vrx/pull/678)
+    * [Pull Request 668](https://github.com/osrf/vrx/pull/668)
+
+### VRX 2.2.0
+
+1. Restore USVWind model
+    * [Pull Request 637](https://github.com/osrf/vrx/pull/637)
+    * [Pull Request 642](https://github.com/osrf/vrx/pull/642)
+    * [Pull Request 649](https://github.com/osrf/vrx/pull/649)
+
+1. Finalized scoring for Follow-the-path
+    * [Pull Request 635](https://github.com/osrf/vrx/pull/635)
+
+1. Enhancements to Wildlife Encounter Task 
+    * [Pull Request 630](https://github.com/osrf/vrx/pull/630)
+    * [Pull Request 634](https://github.com/osrf/vrx/pull/634)
+
+1. Infrastructure updates
+    * [Pull Request 628](https://github.com/osrf/vrx/pull/628)
+    * [Pull Request 656](https://github.com/osrf/vrx/pull/656)
+
+### VRX 2.1.0
+1. Acoustic Perception Task
+    * [Pull Request 609](https://github.com/osrf/vrx/pull/609) 
+
+1. Follow the Path Task
+    * [Pull Request 610](https://github.com/osrf/vrx/pull/610) 
+
+1. Acoustic Tracking Task
+    * [Pull Request 614](https://github.com/osrf/vrx/pull/614) 
+
+1. VRX 2023 Practice Worlds
+    * [Pull Request 582](https://github.com/osrf/vrx/pull/582) 
+    * [Pull Request 583](https://github.com/osrf/vrx/pull/583) 
+    * [Pull Request 584](https://github.com/osrf/vrx/pull/584) 
+    * [Pull Request 585](https://github.com/osrf/vrx/pull/585) 
+    * [Pull Request 591](https://github.com/osrf/vrx/pull/591) 
+
+1. Nathan Benderson Park World for RoboBoat 
+    * [Pull Request 588](https://github.com/osrf/vrx/pull/588) 
+
+1. Bug Fixes and Cleanup 
+    * [Pull Request 578](https://github.com/osrf/vrx/pull/578) 
+    * [Pull Request 597](https://github.com/osrf/vrx/pull/597) 
+    * [Pull Request 598](https://github.com/osrf/vrx/pull/598) 
+    * [Pull Request 615](https://github.com/osrf/vrx/pull/615) 
+    * [Pull Request 625](https://github.com/osrf/vrx/pull/625) 
+    * [Pull Request 627](https://github.com/osrf/vrx/pull/627) 
+
 ### VRX 2.0.0
 1. Port VRX Core Functionality to Gazebo Sim
     * [Pull Request 474](https://github.com/osrf/vrx/pull/474) 
