@@ -1,0 +1,566 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="roboboat02">
+    <link name="base_link">
+      <inertial>
+        <pose>0.2 0 -0.2 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>0.5666666666666668</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.0416666666666667</iyy>
+          <iyz>0</iyz>
+          <izz>1.5416666666666667</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <geometry>
+           <mesh>
+            <uri>file://roboboat02/meshes/roboboat02.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat02/materials/textures/Boat02_Albedo.png</albedo_map>
+              <normal_map>file://roboboat02/materials/textures/Boat02_Normal.png</normal_map>
+              <roughness_map>file://roboboat02/materials/textures/Boat02_Roughness.png</roughness_map>
+              <metalness_map>file://roboboat02/materials/textures/Boat02_Metallic.png</metalness_map>
+            </metal>
+          </pbr>
+          <!-- fallback to script if no PBR support-->
+          <script>
+            <uri>file://roboboat02/materials/scripts/</uri>
+            <uri>file://roboboat02/materials/textures/</uri>
+            <name>Fallback/Boat02_Diffuse</name>
+          </script>
+        </material>
+      </visual>
+
+      <collision name="Box042">
+        <pose>0.0802271 -0.433496 0.067182 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.806774 0.145078 0.226941</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box043">
+        <pose>0.0802271 0.4335 0.067182 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.806774 0.145078 0.226941</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box044">
+        <pose>0.245224 0.0 0.111301 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>1.38539 0.332228 0.367644</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box045">
+        <pose>-0.0725149 0.0 0.334772 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.644487 0.523591 0.037272</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box046">
+        <pose>0.161773 -0.242136 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box047">
+        <pose>0.161773 0.24214 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box048">
+        <pose>-0.155861 0.24214 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box049">
+        <pose>-0.155861 -0.242136 0.266935 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.038 0.038 0.134869</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box050">
+        <pose>0.16328 0.0 0.193494 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.0861031 0.929524 0.0166388</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="Box051">
+        <pose>-0.136293 0.0 0.193494 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.123127 0.95741 0.0166388</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <!-- CPU case -->
+      <visual name="visual_cpubox">
+        <pose>0.0 0.0 0.35 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat_cpubox/meshes/drybox.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat_cpubox/materials/textures/DryBox_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat_cpubox/materials/textures/DryBox_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <collision name="cpu_box">
+        <pose>0 0 0.35 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.3 0.3</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+     <!-- Left thruster housing -->
+    <link name="left_housing_link">
+      <inertial>
+        <pose>-0.25 0.44 -0.15 0 0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.0020290833333333333</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.002408333333333333</iyy>
+          <iyz>0</iyz>
+          <izz>0.0006874166666666666</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="left_housing_visual">
+        <pose>-0.25 0.44 -0.15 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat01/meshes/housing.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat01/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat01/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <visual name="left_mount_visual">
+        <pose>-0.25 0.44 -0.15 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat01/meshes/mount.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat01/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat01/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <collision name="Box011d">
+        <pose>-0.25 0.44 -0.049048999999999995 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.0810453 0.0430519 0.070925</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="Cylinder264d">
+        <pose>-0.25 0.44 -0.08719339999999999 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.125613</length>
+            <radius>0.014703</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+  
+      <collision name="Cylinder263d">
+        <pose>-0.2333463 0.44013299 -0.15 1.5708 0.0 -1.5708</pose>
+        <geometry>
+          <cylinder>
+            <length>0.14376</length>
+            <radius>0.0243692</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Left propeller -->
+    <link name="left_prop_link">
+      <inertial>
+        <pose>-0.250872875 0.440132984 -0.15 1.5708 0.0 -1.5708</pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00010562499999999999</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00010562499999999999</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015125000000000002</izz>
+        </inertia>
+      </inertial>
+      <visual name="left_prop_visual">
+        <pose>-0.25 0.44 -0.15 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat01/meshes/prop.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat01/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat01/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <collision name="Cylinder262d">
+        <pose>-0.250872875 0.440132984 -0.15 1.5708 0.0 -1.5708</pose>
+        <geometry>
+          <cylinder>
+            <length>0.0608172</length>
+            <radius>0.0553844</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Right thruster housing -->
+    <link name="right_housing_link">
+      <inertial>
+        <pose>-0.25 -0.44 -0.15 0 0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.0020290833333333333</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.002408333333333333</iyy>
+          <iyz>0</iyz>
+          <izz>0.0006874166666666666</izz>
+        </inertia>
+      </inertial>
+      <visual name="right_housing_visual">
+        <pose>-0.25 -0.44 -0.15 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat01/meshes/housing.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat01/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat01/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <visual name="right_mount_visual">
+        <pose>-0.25 -0.44 -0.15 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat01/meshes/mount.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat01/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat01/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <!-- Thruster collisions -->
+      <collision name="Box011i">
+        <pose>-0.25 -0.44 -0.049048999999999995 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.0810453 0.0430519 0.070925</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="Cylinder264i">
+        <pose>-0.25 -0.44 -0.08719339999999999 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.125613</length>
+            <radius>0.014703</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="Cylinder263i">
+        <pose>-0.2333463 -0.44013299 -0.15 1.5708 0.0 -1.5708</pose>
+        <geometry>
+          <cylinder>
+            <length>0.14376</length>
+            <radius>0.0243692</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Right propeller -->
+    <link name="right_prop_link">
+      <inertial>
+        <pose>-0.250872875 -0.440132984 -0.15 1.5708 0.0 -1.5708</pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00010562499999999999</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00010562499999999999</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015125000000000002</izz>
+        </inertia>
+      </inertial>
+      <visual name="right_prop_visual">
+        <pose>-0.25 -0.44 -0.15 0 0 0</pose>
+        <geometry>
+           <mesh>
+            <uri>file://roboboat01/meshes/prop.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat01/materials/textures/Thruster_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat01/materials/textures/Thruster_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <collision name="Cylinder262i">
+        <pose>-0.250872875 -0.440132984 -0.15 1.5708 0.0 -1.5708</pose>
+        <geometry>
+          <cylinder>
+            <length>0.0608172</length>
+            <radius>0.0553844</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Chassis-left engine joint -->
+    <joint name="left_chasis_engine_joint" type="revolute">
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>10</effort>
+          <velocity>10</velocity>
+        </limit>
+      </axis>
+      <parent>base_link</parent>
+      <child>left_housing_link</child>
+    </joint>
+
+    <!-- Left joint housing-propeller -->
+    <joint name="left_engine_propeller_joint" type="revolute">
+      <pose>-0.250872875 0.440132984 -0.15 1.5708 0.0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>100</effort>
+          <velocity>100</velocity>
+        </limit>
+        <dynamics>
+          <friction>0.05</friction>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+      <parent>left_housing_link</parent>
+      <child>left_prop_link</child>
+    </joint>
+
+    <!-- Chassis-right engine joint -->
+    <joint name="right_chasis_engine_joint" type="revolute">
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>10</effort>
+          <velocity>10</velocity>
+        </limit>
+      </axis>
+      <parent>base_link</parent>
+      <child>right_housing_link</child>
+    </joint>
+
+    <!-- Right joint housing-propeller -->
+    <joint name="right_engine_propeller_joint" type="revolute">
+      <pose>-0.250872875 -0.440132984 -0.15 1.5708 0.0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>100</effort>
+          <velocity>100</velocity>
+        </limit>
+        <dynamics>
+          <friction>0.05</friction>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+      <parent>right_housing_link</parent>
+      <child>right_prop_link</child>
+    </joint>
+
+    <!-- Left hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>0.8</hull_length>
+      <hull_radius>0.075</hull_radius>
+      <fluid_level>0.1</fluid_level>
+      <points>
+        <point>0.48 0.4335 0.067</point>
+        <point>-0.32 0.4335 0.067</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- Central hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>1.385</hull_length>
+      <hull_radius>0.165</hull_radius>
+      <fluid_level>0.1</fluid_level>
+      <points>
+        <point>0.94 0 0.111301</point>
+        <point>-0.45 0 0.111301</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- Right hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>0.8</hull_length>
+      <hull_radius>0.075</hull_radius>
+      <fluid_level>0.1</fluid_level>
+      <points>
+        <point>0.48 -0.4335 0.067</point>
+        <point>-0.32 -0.4335 0.067</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <plugin
+      filename="libSimpleHydrodynamics.so"
+      name="vrx::SimpleHydrodynamics">
+      <link_name>base_link</link_name>
+      <!-- Added mass -->
+      <xDotU>0.0</xDotU>
+      <yDotV>0.0</yDotV>
+      <nDotR>0.0</nDotR>
+      <!-- Linear and quadratic drag -->
+      <xU>4.0</xU>
+      <xUU>6.0</xUU>
+      <yV>4.0</yV>
+      <yVV>4.0</yVV>
+      <zW>20.0</zW>
+      <kP>12.0</kP>
+      <kPP>24.0</kPP>
+      <mQ>36.0</mQ>
+      <mQQ>35.0</mQQ>
+      <nR>32.0</nR>
+      <nRR>32.0</nRR>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-thruster-system"
+      name="gz::sim::systems::Thruster">
+      <joint_name>left_engine_propeller_joint</joint_name>
+      <thrust_coefficient>0.0001</thrust_coefficient>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.1</propeller_diameter>
+      <velocity_control>true</velocity_control>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-thruster-system"
+      name="gz::sim::systems::Thruster">
+      <joint_name>right_engine_propeller_joint</joint_name>
+      <thrust_coefficient>0.0001</thrust_coefficient>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.1</propeller_diameter>
+      <velocity_control>true</velocity_control>
+    </plugin>
+  </model>
+</sdf>
