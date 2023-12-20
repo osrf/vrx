@@ -31,7 +31,6 @@ def launch(context, *args, **kwargs):
         'bridge_competition_topics').perform(context).lower() == 'true'
     robot = LaunchConfiguration('robot').perform(context)
     headless = LaunchConfiguration('headless').perform(context).lower() == 'true'
-    robot_urdf = LaunchConfiguration('urdf').perform(context)
     gz_paused = LaunchConfiguration('paused').perform(context).lower() == 'true'
     competition_mode = LaunchConfiguration('competition_mode').perform(context).lower() == 'true'
     extra_gz_args = LaunchConfiguration('extra_gz_args').perform(context)
@@ -42,11 +41,6 @@ def launch(context, *args, **kwargs):
     if config_file and config_file != '':
         with open(config_file, 'r') as stream:
             models = Model.FromConfig(stream)
-    else:
-      m = Model('wamv', 'wam-v', [-532, 162, 0, 0, 0, 1])
-      if robot_urdf and robot_urdf != '':
-          m.set_urdf(robot_urdf)
-      models.append(m)
 
     world_name, ext = os.path.splitext(world_name)
     launch_processes.extend(vrx_gz.launch.simulation(world_name, headless, 
@@ -91,10 +85,6 @@ def generate_launch_description():
             'headless',
             default_value='False',
             description='True to run simulation headless (no GUI). '),
-        DeclareLaunchArgument(
-            'urdf',
-            default_value='',
-            description='URDF file of the wam-v model. '),
         DeclareLaunchArgument(
             'paused',
             default_value='False',
