@@ -23,6 +23,7 @@
 #include <gz/plugin/Register.hh>
 #include <sdf/sdf.hh>
 
+#include "gz/sim/components/Pose.hh"
 #include "gz/sim/Link.hh"
 #include "gz/sim/Model.hh"
 #include "gz/sim/Util.hh"
@@ -213,6 +214,9 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
   const auto kPose = this->dataPtr->link.WorldPose(_ecm);
   if (!kPose)
   {
+    sim::enableComponent<sim::components::WorldPose>(
+      _ecm, this->dataPtr->link.Entity(), true);
+
     gzerr << "Unable to get world pose from link ["
            << this->dataPtr->link.Entity() << "]" << std::endl;
     return;

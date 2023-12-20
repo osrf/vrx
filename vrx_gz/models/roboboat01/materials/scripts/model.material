@@ -1,0 +1,14 @@
+
+material Fallback/Boat01_Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Boat01_Albedo.png
+        }
+      }
+    }
+  }

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="roboboat_cpubox">
+    <pose>0 0 0.0 0 0 0</pose>
+    <link name="base_link">
+      <inertial>
+        <pose>0 0 0.0 0 0 0</pose>
+        <!-- 6.35 Kg. (dock block) x 9 (num blocks) + 10 Kg (estimated). -->
+        <mass>6.715</mass>
+        <inertia>
+          <ixx>1.3486</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.3486</iyy>
+          <iyz>0</iyz>
+          <izz>2.51813</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <geometry>
+           <mesh>
+            <uri>file://roboboat_cpubox/meshes/drybox.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://roboboat_cpubox/meshes/DryBox_Albedo.png</albedo_map>
+              <roughness_map>file://roboboat_cpubox/mesh/DryBox_Roughness.png</roughness_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+    </link>
+  </model>
+</sdf>
