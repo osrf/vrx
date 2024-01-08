@@ -51,7 +51,7 @@ class vrx::Surface::Implementation
   public: sim::Link link{sim::kNullEntity};
 
   /// \brief Vessel length [m].
-  public: double hullLength = 4.9;
+  public: double hullLength = 2.45;
 
   /// \brief Demi-hull radius [m].
   public: double hullRadius = 0.213;
