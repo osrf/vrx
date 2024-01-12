@@ -1,5 +1,18 @@
 ## VRX 2
 
+### VRX 2.4.1
+
+1. Add configuration file for RoboBoat teleop
+    * [Pull Request 764](https://github.com/osrf/vrx/pull/764)
+
+### VRX 2.4.0
+
+1. Adding extra RoboBoat models
+    * [Pull Request 758](https://github.com/osrf/vrx/pull/758)
+    * [Pull Request 759](https://github.com/osrf/vrx/pull/759)
+1. Spawn robot and world separately
+    * [Pull Request 594](https://github.com/osrf/vrx/pull/594)
+
 ### VRX 2.3.3
 
 1. Initialize acoustic perception score

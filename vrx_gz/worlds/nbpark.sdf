@@ -391,6 +391,13 @@
       </plugin>
     </include>
 
+    <!-- RoboBoat 01 -->
+    <include>
+      <name>roboboat01</name>
+      <pose>-185 1088 0 0 0 0</pose>
+      <uri>roboboat01</uri>
+    </include>
+
     <!-- Load the plugin for the wind --> 
     <plugin
       filename="libUSVWind.so"
