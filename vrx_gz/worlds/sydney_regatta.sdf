@@ -512,27 +512,6 @@
       </plugin>
     </include>
 
-    <!-- RoboBoat 01 -->
-    <!-- <include>
-      <name>roboboat01_2</name>
-      <pose>-528 184 0 0 0 0</pose>
-      <uri>roboboat01</uri>
-    </include> -->
-
-    <!-- RoboBoat 02 -->
-    <!-- <include>
-      <name>roboboat01_1</name>
-      <pose>-528 180 0 0 0 0</pose>
-      <uri>roboboat01</uri>
-    </include> -->
-
-    <!-- My custom roboboat -->
-    <!-- <include>
-      <name>my_roboboat</name>
-      <pose>-528 176 0 0 0 0</pose>
-      <uri>my_roboboat</uri>
-    </include> -->
-
     <!-- The posts for securing the WAM-V -->
     <include>
       <name>post_0</name>
