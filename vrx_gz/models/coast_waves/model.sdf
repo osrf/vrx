@@ -4,6 +4,7 @@
     <static>true</static>
     <link name="link">
       <visual name= "wave_visual">
+        <laser_retro>1000</laser_retro>
         <geometry>
           <mesh>
             <uri>meshes/waterlow.dae</uri>
