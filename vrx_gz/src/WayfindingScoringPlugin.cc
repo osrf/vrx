@@ -27,7 +27,9 @@
 #include <gz/sim/World.hh>
 #include <gz/plugin/Register.hh>
 #include <gz/transport/Node.hh>
+#include <gz/msgs.hh>
 #include <sdf/sdf.hh>
+
 
 #include "WayfindingScoringPlugin.hh"
 #include "WaypointMarkers.hh"
