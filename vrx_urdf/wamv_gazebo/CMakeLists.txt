@@ -5,6 +5,10 @@ find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
 find_package(wamv_description REQUIRED)
 
+# Hooks
+ament_environment_hooks("hooks/resource_paths.dsv.in")
+ament_environment_hooks("hooks/resource_paths.sh")
+
 # Generate urdf files from xacro and install
 # xacro_add_files(
 #   urdf/wamv_gazebo.urdf.xacro
