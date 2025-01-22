@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+    <model name="mb_round_buoy_orange">
+        <link name="link">
+            <inertial>
+                <pose>0 0 0 0 0 0</pose>
+                <mass>3.5</mass>
+                <inertia>
+                    <ixx>0.0875</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.0875</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.0875</izz>
+                </inertia>
+            </inertial>
+            <collision name="collision">
+                <geometry>
+                    <sphere>
+                        <radius>0.25</radius>
+                    </sphere>
+                </geometry>
+            </collision>
+            <visual name="visual">
+                <geometry>
+                    <mesh>
+                        <uri>meshes/mb_round_buoy.dae</uri>
+                    </mesh>
+                </geometry>
+                <material>
+                    <ambient>0 1 0</ambient>
+                    <diffuse>0 1 0</diffuse>
+                    <specular>0 1 0 1</specular>
+                    <pbr>
+                        <metal>
+                            <roughness_map>materials/textures/RoundBarrierBuoy_Roughness.png</roughness_map>
+                        </metal>
+                    </pbr>
+                </material>
+            </visual>
+        </link>
+    </model>
+</sdf>
