@@ -4,6 +4,10 @@ This repository is the home to the source code and software documentation for th
 * For RobotX competitors this simulation environment is intended as a first step toward developing tools prototyping solutions in advance of physical on-water testing.
 * We also welcome users with simulation needs beyond RobotX. As we continue to improve the environment, we hope to offer support to a wide range of potential applications.
 
+## Arcturus Sim Usage
+* To specify which world the sim launches, modify world parameter name in `sim.launch.py` and `vrx_gymkhana.launch.py`
+  * If the world is in a subfolder within worlds (such as `rb2025`), make sure to put `folder_name/world_name` in the world parameter!
+
 ## Now supporting Gazebo Sim and ROS 2 by default
 We're happy to announce with release 2.0 VRX has transitioned from Gazebo Classic to the newer Gazebo simulator (formerly [Ignition Gazebo](https://www.openrobotics.org/blog/2022/4/6/a-new-era-for-gazebo)). 
 * Gazebo Garden and ROS 2 are now default prerequisites for VRX.
