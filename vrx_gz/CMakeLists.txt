@@ -5,30 +5,50 @@ project(vrx_gz)
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
-find_package(gz-sim7 REQUIRED)
-set(GZ_SIM_VER ${gz-sim7_VERSION_MAJOR})
+#find_package(gz-sim7 REQUIRED)
+#set(GZ_SIM_VER ${gz-sim7_VERSION_MAJOR})
+#find_package(gz-common5 REQUIRED COMPONENTS graphics)
+#set(GZ_COMMON_VER ${gz-common5_VERSION_MAJOR})
+#find_package(gz-fuel_tools8 REQUIRED)
+#find_package(gz-math7 REQUIRED)
+#set(GZ_MATH_VER ${gz-math7_VERSION_MAJOR})
+#find_package(gz-msgs9 REQUIRED)
+#find_package(gz-transport12 REQUIRED)
+#set(GZ_TRANSPORT_VER ${gz-transport12_VERSION_MAJOR})
+#find_package(gz-plugin2 REQUIRED COMPONENTS loader register)
+#set(GZ_PLUGIN_VER ${gz-plugin2_VERSION_MAJOR})
+#find_package(gz-rendering7 REQUIRED)
+#set(GZ_RENDERING_VER ${gz-rendering7_VERSION_MAJOR})
+#find_package(gz-sensors7 REQUIRED)
+#set(GZ_SENSORS_VER ${gz-sensors7_VERSION_MAJOR})
+#find_package(gz-utils2 REQUIRED)
+#set(GZ_UTILS_VER ${gz-utils2_VERSION_MAJOR})
+#find_package(sdformat13 REQUIRED)
 
-find_package(gz-common5 REQUIRED COMPONENTS graphics)
-set(GZ_COMMON_VER ${gz-common5_VERSION_MAJOR})
-find_package(gz-fuel_tools8 REQUIRED)
-find_package(gz-math7 REQUIRED)
-set(GZ_MATH_VER ${gz-math7_VERSION_MAJOR})
-find_package(gz-msgs9 REQUIRED)
-find_package(gz-transport12 REQUIRED)
-set(GZ_TRANSPORT_VER ${gz-transport12_VERSION_MAJOR})
-find_package(gz-plugin2 REQUIRED COMPONENTS loader register)
-set(GZ_PLUGIN_VER ${gz-plugin2_VERSION_MAJOR})
-find_package(gz-rendering7 REQUIRED)
-set(GZ_RENDERING_VER ${gz-rendering7_VERSION_MAJOR})
-find_package(gz-sensors7 REQUIRED)
-set(GZ_SENSORS_VER ${gz-sensors7_VERSION_MAJOR})
-find_package(gz-utils2 REQUIRED)
-set(GZ_UTILS_VER ${gz-utils2_VERSION_MAJOR})
-find_package(sdformat13 REQUIRED)
-
-find_package(std_msgs REQUIRED)
+find_package(gz_sim_vendor REQUIRED)
+find_package(gz-sim REQUIRED)
+find_package(gz_common_vendor REQUIRED)
+find_package(gz-common REQUIRED)
+find_package(gz_math_vendor REQUIRED)
+find_package(gz-math REQUIRED)
+find_package(gz_msgs_vendor REQUIRED)
+find_package(gz-msgs REQUIRED)
+find_package(gz_transport_vendor REQUIRED)
+find_package(gz-transport REQUIRED)
+find_package(gz_plugin_vendor REQUIRED)
+find_package(gz-plugin REQUIRED)
+find_package(gz_rendering_vendor REQUIRED)
+find_package(gz-rendering REQUIRED)
+find_package(gz_sensors_vendor REQUIRED)
+find_package(gz-sensors REQUIRED)
+find_package(gz_utils_vendor REQUIRED)
+find_package(gz-utils REQUIRED)
+find_package(sdformat_vendor REQUIRED)
+find_package(sdformat REQUIRED)
 
 find_package(Eigen3 REQUIRED)
+find_package(std_msgs REQUIRED)
+
 
 #============================================================================
 # Hooks
@@ -42,9 +62,9 @@ add_library(Waves SHARED
   src/Wavefield.cc
 )
 target_link_libraries(Waves PUBLIC
-  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-  gz-sim${GZ_SIM_VER}::core
-  gz-math${GZ_MATH_VER}
+  gz-common::gz-common
+  gz-sim::core
+  gz-math::gz-math
   Eigen3::Eigen
 )
 install(
@@ -58,9 +78,9 @@ add_library(PolyhedraBuoyancyDrag SHARED
   src/ShapeVolume.cc
 )
 target_link_libraries(PolyhedraBuoyancyDrag PUBLIC
-  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-  gz-sim${GZ_SIM_VER}::core
-  gz-math${GZ_MATH_VER}
+  gz-common::gz-common
+  gz-sim::core
+  gz-math::gz-math
   Waves
 )
 install(
@@ -73,9 +93,9 @@ add_library(ScoringPlugin SHARED
   src/ScoringPlugin.cc
 )
 target_link_libraries(ScoringPlugin PUBLIC
-  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-  gz-sim${GZ_SIM_VER}::core
-  gz-math${GZ_MATH_VER}
+  gz-common::gz-common
+  gz-sim::core
+  gz-math::gz-math
 )
 install(
   TARGETS ScoringPlugin
@@ -87,9 +107,9 @@ add_library(StationkeepingScoringPlugin SHARED
   src/WaypointMarkers.cc
 )
 target_link_libraries(StationkeepingScoringPlugin PUBLIC
-  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-  gz-sim${GZ_SIM_VER}::core
-  gz-math${GZ_MATH_VER}
+  gz-common::gz-common
+  gz-sim::core
+  gz-math::gz-math
   ScoringPlugin
 )
 install(
@@ -102,9 +122,9 @@ add_library(WayfindingScoringPlugin SHARED
   src/WaypointMarkers
 )
 target_link_libraries(WayfindingScoringPlugin PUBLIC
-  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-  gz-sim${GZ_SIM_VER}::core
-  gz-math${GZ_MATH_VER}
+  gz-common::gz-common
+  gz-sim::core
+  gz-math::gz-math
   ScoringPlugin
 )
 install(
@@ -117,9 +137,9 @@ add_library(AcousticPerceptionScoringPlugin SHARED
   src/WaypointMarkers
 )
 target_link_libraries(AcousticPerceptionScoringPlugin PUBLIC
-  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-  gz-sim${GZ_SIM_VER}::core
-  gz-math${GZ_MATH_VER}
+  gz-common::gz-common
+  gz-sim::core
+  gz-math::gz-math
   ScoringPlugin
 )
 install(
@@ -132,9 +152,9 @@ add_library(AcousticTrackingScoringPlugin SHARED
   src/WaypointMarkers
 )
 target_link_libraries(AcousticTrackingScoringPlugin PUBLIC
-  gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
-  gz-sim${GZ_SIM_VER}::core
-  gz-math${GZ_MATH_VER}
+  gz-common::gz-common
+  gz-sim::core
+  gz-math::gz-math
   ScoringPlugin
 )
 install(
@@ -162,11 +182,11 @@ list(APPEND VRX_GZ_PLUGINS
 foreach(PLUGIN ${VRX_GZ_PLUGINS})
   add_library(${PLUGIN} SHARED src/${PLUGIN}.cc)
   target_link_libraries(${PLUGIN} PUBLIC
-    gz-sim${GZ_SIM_VER}::core
-    gz-plugin${GZ_PLUGIN_VER}::gz-plugin${GZ_PLUGIN_VER}
-    gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
-    gz-sensors${GZ_SENSORS_VER}::gz-sensors${GZ_SENSORS_VER}
-    gz-utils${GZ_UTILS_VER}::gz-utils${GZ_UTILS_VER}
+    gz-sim::core
+    gz-plugin::gz-plugin
+    gz-rendering::gz-rendering
+    gz-sensors::gz-sensors
+    gz-utils::gz-utils
     ScoringPlugin
     Waves
     Eigen3::Eigen
