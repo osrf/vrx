@@ -25,17 +25,6 @@
   <exec_depend>xacro</exec_depend>
   <exec_depend>vrx_ros</exec_depend>
 
-  <depend>gz_common_vendor</depend>
-  <depend>gz_math_vendor</depend>
-  <depend>gz_msgs_vendor</depend>
-  <depend>gz_plugin_vendor</depend>
-  <depend>gz_rendering_vendor</depend>
-  <depend>gz_sensors_vendor</depend>
-  <depend>gz_sim_vendor</depend>
-  <depend>gz_transport_vendor</depend>
-  <depend>gz_utils_vendor</depend>
-  <depend>sdformat_vendor</depend>
-
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_flake8</test_depend>
   <test_depend>ament_cmake_pycodestyle</test_depend>
