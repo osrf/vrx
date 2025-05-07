@@ -15,6 +15,9 @@
  *
 */
 
+#include <gz/msgs/float_v.pb.h>
+#include <gz/msgs/pose_v.pb.h>
+
 #include <chrono>
 #include <string>
 #include <vector>
