@@ -1,33 +1,53 @@
-name: Ubuntu CI
+name: ROS 2 CI
 
-on: [pull_request]
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: '0 0 * * *'  # every day to test Jazzy packages updates
 
 jobs:
-  test-humble-garden:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        ros_distribution: [jazzy]
+        include:
+          - ros_distribution: jazzy
+            # desktop-full provides less time spent in installing 179 pkgs with respect to desktop
+            # in exchange for using 500Mb more.
+            ros_container: ghcr.io/sloretz/ros:jazzy-desktop-full
 
-    runs-on: ubuntu-22.04
+    name: ${{ matrix.ros_distribution }}
+    runs-on: ubuntu-latest
     container: 
-      image: npslearninglab/watery_robots:humble_current
+      image: ${{ matrix.ros_container }}
+
     steps:
-      - name: Checkout vrx
+      - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup ROS environment
+        uses: ros-tooling/setup-ros@2b99a8a2967082335154a0dcfa9cbdcf2901ba15  # v 0.7.12
         with:
-            ref: main
-            path: vrx
+          required-ros-distributions: ${{ matrix.ros_distribution }}
 
-      - name: Create developer user 
-        run: |
-          useradd -m -u 1001 developer;
-
-      - name: Set up workspace
-        run: |
-          mkdir -p /home/developer/vrx_ws/src;
-          mv vrx /home/developer/vrx_ws/src;
-          chown -R developer:developer /home/developer;
-
-      - name: Build and run tests
-        shell: bash
-        run: |
-          cd /home/developer/vrx_ws;
-          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --merge-install --executor sequential" developer;
-          su -s /bin/bash -c "source /opt/ros/humble/setup.bash && colcon test --merge-install --executor sequential --packages-skip-regex ros_gz* --return-code-on-test-failure --event-handlers console_direct+" developer;
+      - name: Build and test
+        uses: ros-tooling/action-ros-ci@1ff2c804b4c2383146d8cd8444dfda64ab4bf7ac  # v 0.4.3
+        with:
+          target-ros2-distro: ${{ matrix.ros_distribution }}
+          no-symlink-install: true  # code has problems to work with symlink installations
+          colcon-defaults: |
+            {
+              "build": {
+                "merge-install": true
+              },
+              "test": {
+                "executor": "sequential",
+                "event-handlers": [
+                  "console_direct+"
+                ],
+                "merge-install": true,
+                "return-code-on-test-failure": true
+              }
+            }
