@@ -59,6 +59,9 @@ class vrx::WaveVisualPrivate
   /// \brief Connection to pre-render event callback
   public: common::ConnectionPtr connection{nullptr};
 
+  /// \brief Connection to render tear down event callback
+  public: common::ConnectionPtr teardownConnection{nullptr};
+
   /// \brief Name of visual this plugin is attached to
   public: std::string visualName;
 
@@ -116,6 +119,9 @@ class vrx::WaveVisualPrivate
   /// \brief Callback for receiving wave field updates.
   /// \param[in] _msg The message containing all the wave field parameters.
   public: void OnWavefield(const msgs::Param &_msg);
+
+  /// \brief Callback to rendering engine tear down
+  public: void OnRenderTeardown();
 };
 
 /////////////////////////////////////////////////
@@ -224,6 +230,10 @@ void WaveVisual::Configure(const sim::Entity &_entity,
   this->dataPtr->connection =
       _eventMgr.Connect<sim::events::SceneUpdate>(
       std::bind(&WaveVisualPrivate::OnUpdate, this->dataPtr.get()));
+
+  this->dataPtr->teardownConnection =
+      _eventMgr.Connect<sim::events::RenderTeardown>(
+      std::bind(&WaveVisualPrivate::OnRenderTeardown, this->dataPtr.get()));
 
   // Subscribe to receive the wavefield parameters.
   this->dataPtr->node.Subscribe(this->dataPtr->wavefield.Topic(),
@@ -431,6 +441,14 @@ void WaveVisualPrivate::OnUpdate()
     params = this->material->VertexShaderParams();
     (*params)["t"] = floatValue;
   }
+}
+
+//////////////////////////////////////////////////
+void WaveVisualPrivate::OnRenderTeardown()
+{
+  this->visual.reset();
+  this->scene.reset();
+  this->material.reset();
 }
 
 //////////////////////////////////////////////////
