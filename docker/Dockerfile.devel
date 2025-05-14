@@ -1,0 +1,74 @@
+FROM vrx-builder AS vrx-devel
+
+# Install some 'standard' ROS packages and utilities.
+RUN apt update \
+  && apt install -y --no-install-recommends \
+     ros-${ROS_DISTRO}-ackermann-msgs \
+     ros-${ROS_DISTRO}-actuator-msgs \
+     ros-${ROS_DISTRO}-ament-cmake-pycodestyle \
+     ros-${ROS_DISTRO}-image-transport \
+     ros-${ROS_DISTRO}-image-transport-plugins \
+     ros-${ROS_DISTRO}-joy-teleop \
+     ros-${ROS_DISTRO}-joy-linux \
+     ros-${ROS_DISTRO}-mavros-msgs \
+     ros-${ROS_DISTRO}-navigation2 \
+     ros-${ROS_DISTRO}-nav2-bringup \
+     ros-${ROS_DISTRO}-nav2-minimal-tb3-sim \
+     ros-${ROS_DISTRO}-nav2-minimal-tb4-description\
+     ros-${ROS_DISTRO}-nav2-minimal-tb4-sim \
+     ros-${ROS_DISTRO}-radar-msgs \
+     ros-${ROS_DISTRO}-ros-gz-sim\
+     ros-${ROS_DISTRO}-vision-msgs \
+     ros-${ROS_DISTRO}-xacro \
+  && rm -rf /var/lib/apt/lists/* \
+  && apt clean -qq
+
+# Tools necessary and useful during development
+RUN apt update && \
+ apt install --no-install-recommends -y \
+        atop \
+        expect \
+        gdb \
+        iputils-ping \
+        gnutls-bin \
+        libbluetooth-dev \
+        libcwiid-dev \
+        net-tools \
+        python3-dbg \
+        python3-pip \
+        python3-venv \
+        vim \
+        wget \
+        xvfb \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt clean -qq
+
+# Nvidia setup
+RUN dpkg --add-architecture i386 && \
+    apt-get update && apt-get install -y --no-install-recommends \
+        libxau6 libxau6:i386 \
+        libxdmcp6 libxdmcp6:i386 \
+        libxcb1 libxcb1:i386 \
+        libxext6 libxext6:i386 \
+        libx11-6 libx11-6:i386 \
+        libglvnd0 libglvnd0:i386 \
+        libgl1 libgl1:i386 \
+        libglx0 libglx0:i386 \
+        libegl1 libegl1:i386 \
+        libgles2 libgles2:i386 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt clean -qq
+COPY 10_nvidia.json /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES \
+        ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+        ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,compat32,utility
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
+    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+# Required for non-glvnd setups.
+ENV LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+WORKDIR /ws
+
+CMD ["bash"]
