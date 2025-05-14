@@ -1,4 +1,4 @@
-FROM vrx-builder AS vrx-devel
+FROM vrx-base AS vrx-devel
 
 # Install some 'standard' ROS packages and utilities.
 RUN apt update \
