@@ -13,9 +13,14 @@ can be used independently if desired:
    * `Dockerfile.builder`: built on top of `vrx-base`. Compiles the vrx packages
      using colcon.
 
+     * `Dockerfile.release`: built on top of `vrx-builder`. Install the NVIDIA
+     setup to run GPU and an entrypoint to source ROS setup.bash and workspace
+     setup.bash.
+
    * `Dockerfile.devel`: built on top of `vrx-base`. development image with extra ROS 2 development packages
      and other dev utilities. It configures the GPU support and a development
      user. Runs a shell into the container with local sources mapped in /ws.
+
 
 # Development container
 

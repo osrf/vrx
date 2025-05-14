@@ -14,7 +14,15 @@ services:
     depends_on:
       - base
     image: vrx-builder:latest
- 
+
+  release:
+    build:
+      context: ./
+      dockerfile: Dockerfile.release
+    depends_on:
+      - builder
+    image: vrx-release:latest
+
   devel:
     build:
       context: .
