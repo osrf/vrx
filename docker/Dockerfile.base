@@ -23,12 +23,3 @@ RUN apt update \
        gz-harmonic \
     && rm -rf /var/lib/apt/lists/* \
     && apt clean -qq
-
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
-    && apt update \
-    && rosdep install -r \
-      --from-paths /ws/src/ \
-      --ignore-src \
-      --rosdistro ${ROS_DISTRO} -y \
-  && rm -rf /var/lib/apt/lists/* \
-  && apt clean -qq
