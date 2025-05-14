@@ -475,7 +475,7 @@
       <link_name>base_link</link_name>
       <hull_length>1.15</hull_length>
       <hull_radius>0.12</hull_radius>
-      <fluid_level>0.1</fluid_level>
+      <fluid_level>0</fluid_level>
       <points>
         <point>0.68 0.314338 0.0352701</point>
         <point>-0.465 0.314338 0.0352701</point>
@@ -492,7 +492,7 @@
       <link_name>base_link</link_name>
       <hull_length>1.15</hull_length>
       <hull_radius>0.12</hull_radius>
-      <fluid_level>0.1</fluid_level>
+      <fluid_level>0</fluid_level>
       <points>
         <point>0.68 -0.314338 0.0352701</point>
         <point>-0.465 -0.314338 0.0352701</point>
