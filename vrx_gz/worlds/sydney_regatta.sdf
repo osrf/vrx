@@ -342,7 +342,7 @@
     </light>
 
     <include>
-      <pose> 0 0 0.2 0 0 0 </pose>
+      <pose>0 0 0.2 0 0 0 </pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/sydney_regatta</uri>
     </include>
 
@@ -598,7 +598,7 @@
       <update_rate>10</update_rate>
       <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
       <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
-     </plugin>
+    </plugin>
 
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">

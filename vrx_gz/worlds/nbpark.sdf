@@ -342,7 +342,7 @@
     </light>
 
     <include>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>0 0 -1 0 0 0</pose>
       <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/nathan_benderson_park</uri>
     </include>
 
@@ -350,45 +350,6 @@
       <name>Coast Waves</name>
       <pose>0 0 0 0 0 0</pose>
       <uri>coast_waves</uri>
-    </include>
-
-    <!-- The projectile for the ball shooter -->
-    <include>
-      <name>blue_projectile</name>
-      <pose>-545 60 0.03 0 0 0</pose>
-      <uri>blue_projectile</uri>
-      <plugin name="vrx::PolyhedraBuoyancyDrag"
-              filename="libPolyhedraBuoyancyDrag.so">
-        <fluid_density>1000</fluid_density>
-        <fluid_level>0.0</fluid_level>
-        <linear_drag>25.0</linear_drag>
-        <angular_drag>2.0</angular_drag>
-        <buoyancy name="collision_outer">
-          <link_name>link</link_name>
-          <pose>0 0 -0.02 0 0 0</pose>
-          <geometry>
-            <sphere>
-              <radius>0.0285</radius>
-            </sphere>
-          </geometry>
-        </buoyancy>
-        <wavefield>
-          <size>1000 1000</size>
-          <cell_count>50 50></cell_count>
-          <wave>
-            <model>PMS</model>
-            <period>5.0</period>
-            <number>3</number>
-            <scale>1.1</scale>
-            <gain>0.3</gain>
-            <direction>1 0</direction>
-            <angle>0.4</angle>
-            <tau>2.0</tau>
-            <amplitude>0.0</amplitude>
-            <steepness>0.0</steepness>
-          </wave>
-        </wavefield>
-      </plugin>
     </include>
 
     <!-- Load the plugin for the wind --> 
@@ -411,7 +372,7 @@
       <update_rate>10</update_rate>
       <topic_wind_speed>/vrx/debug/wind/speed</topic_wind_speed>
       <topic_wind_direction>/vrx/debug/wind/direction</topic_wind_direction>
-     </plugin>
+    </plugin>
 
     <!-- The wave field -->
     <plugin filename="libPublisherPlugin.so" name="vrx::PublisherPlugin">
