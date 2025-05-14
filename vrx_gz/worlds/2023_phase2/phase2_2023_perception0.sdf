@@ -291,8 +291,8 @@
       name="gz::sim::systems::ForceTorque">
     </plugin>
     <plugin
-      filename="gz-sim-particle-emitter2-system"
-      name="gz::sim::systems::ParticleEmitter2">
+      filename="gz-sim-particle-emitter-system"
+      name="gz::sim::systems::ParticleEmitter">
     </plugin>
     <plugin
       filename="gz-sim-scene-broadcaster-system"
