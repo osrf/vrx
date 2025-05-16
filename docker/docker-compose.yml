@@ -28,6 +28,7 @@ services:
     user: ubuntu
     group_add:
       - video
+      - sudo
     # TODO: support for intel by enabling /dev/dri
     # devices:  # for intel dri
     #  - /dev/dri
