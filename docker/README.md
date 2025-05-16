@@ -8,14 +8,15 @@ can be used independently if desired:
 
  * `Dockerfile.base`: built on top of osrf desktop-full. Install
    gz-harmonic from packages.osrfoundation.org repostiory and
-   the VRX dependencies using rosdep.
+   the VRX dependencies using rosdep. Generates the `vrx-base` image.
 
    * `Dockerfile.builder`: built on top of `vrx-base`. Compiles the vrx packages
-     using colcon.
+     using colcon. Generates the `vrx-builder` image.
 
-   * `Dockerfile.devel`: built on top of `vrx-base`. development image with extra ROS 2 development packages
-     and other dev utilities. It configures the GPU support and a development
-     user. Runs a shell into the container with local sources mapped in /ws.
+   * `Dockerfile.devel`: built on top of `vrx-base`. development image with
+     extra ROS 2 development packages and other dev utilities. It configures
+     the GPU support and a development user. Runs a shell into the container
+     with local sources mapped in /ws. Generates the `vrx-devel` image.
 
 # Development container
 
