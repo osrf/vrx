@@ -1,0 +1,25 @@
+# Ubuntu 24.04 
+FROM osrf/ros:jazzy-desktop-full AS vrx-base
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ROS_DISTRO=jazzy
+
+# Setup timezone
+ENV TZ=Etc/UTC
+RUN echo $TZ > /etc/timezone && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    apt update && \
+    apt install -y locales && \
+    locale-gen en_US en_US.UTF-8 && \
+    update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+
+# Set up repo to install Gazebo
+RUN curl -s https://packages.osrfoundation.org/gazebo.gpg -o /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+
+# Install some 'standard' ROS packages and utilities.
+RUN apt update \
+    && apt install -y --no-install-recommends \
+       gz-harmonic \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt clean -qq
