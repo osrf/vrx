@@ -37,11 +37,8 @@ $ cd vrx/docker
 $ docker-compose run --rm devel
 ...
 ... 
-# docker building and return a shell inside the container
-$ ubuntu@locashot:/ws$ export ROS_DISTRO=jazzy
-# compile vrx code
-$ ubuntu@localhost:/ws$ . /opt/ros/${ROS_DISTRO}/setup.sh \
-  && sudo apt update \
+# check that no more dependencies needs to be installed and compile vrx code
+$ ubuntu@localhost:/ws$ sudo apt update \
   && rosdep install -r --from-paths src/ --ignore-src --rosdistro ${ROS_DISTRO} -y 
 $ ubuntu@locashot:/ws$ colcon build --merge-install
 ... # colcon compilation happen
