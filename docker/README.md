@@ -10,7 +10,7 @@ for VRX. The usage is mainly controlled by `docker-compose` although docker file
 can be used independently if desired:
 
  * `Dockerfile.base`: built on top of osrf desktop-full. Install
-   gz-harmonic from packages.osrfoundation.org repostiory and
+   gz-harmonic from packages.osrfoundation.org repository and
    the VRX dependencies using rosdep. Generates the `vrx-base` image.
 
    * `Dockerfile.builder`: built on top of `vrx-base`. Compiles the vrx packages
