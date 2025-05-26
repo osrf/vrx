@@ -2,7 +2,6 @@
 FROM osrf/ros:jazzy-desktop-full AS vrx-base
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV ROS_DISTRO=jazzy
 
 # Setup timezone
 ENV TZ=Etc/UTC
