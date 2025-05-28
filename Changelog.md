@@ -32,7 +32,7 @@
 1. Import the dockwater/jazzy Dockerfile and cleanup
     * [Pull Request 815](https://github.com/osrf/vrx/pull/815)
 
-1. Fix particle emiter plugin name
+1. Fix particle emitter plugin name
     * [Pull Request 816](https://github.com/osrf/vrx/pull/816)
 
 1. Development container support using docker-compose
