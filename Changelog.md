@@ -2,8 +2,23 @@
 
 ### VRX 3.0.0
 
+1. Fix ocean detection by the lidar
+    * [Pull Request 796](https://github.com/osrf/vrx/pull/796)
+
+1. Removed unused symlink
+    * [Pull Request 787](https://github.com/osrf/vrx/pull/787)
+
+1. Fix runtime error in package wamv_gazebo
+    * [Pull Request 711](https://github.com/osrf/vrx/pull/711)
+
 1. Update the project to use Ubuntu 24.04, ROS 2 Jazzy and Gazebo Harmonic
     * [Pull Request 807](https://github.com/osrf/vrx/pull/807)
+
+1. Add 2023 phase 2 worlds
+    * [Pull Request 749](https://github.com/osrf/vrx/pull/749)
+
+1. Add Honu Robotics headers to copyrights
+    * [Pull Request 809](https://github.com/osrf/vrx/pull/809)
 
 1. Migrate CI to use Jazzy + Harmonic: use ros-tooling actions
     * [Pull Request 810](https://github.com/osrf/vrx/pull/810)
@@ -16,6 +31,9 @@
 
 1. Import the dockwater/jazzy Dockerfile and cleanup
     * [Pull Request 815](https://github.com/osrf/vrx/pull/815)
+
+1. Fix particle emiter plugin name
+    * [Pull Request 816](https://github.com/osrf/vrx/pull/816)
 
 1. Development container support using docker-compose
     * [Pull Request 817](https://github.com/osrf/vrx/pull/817)
