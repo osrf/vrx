@@ -1,3 +1,31 @@
+## VRX 3
+
+### VRX 3.0.0
+
+1. Update the project to use Ubuntu 24.04, ROS 2 Jazzy and Gazebo Harmonic
+    * [Pull Request 807](https://github.com/osrf/vrx/pull/807)
+
+1. Migrate CI to use Jazzy + Harmonic: use ros-tooling actions
+    * [Pull Request 810](https://github.com/osrf/vrx/pull/810)
+
+1. Fix segfault on shutdown
+    * [Pull Request 811](https://github.com/osrf/vrx/pull/811)
+
+1. Updated README
+    * [Pull Request 814](https://github.com/osrf/vrx/pull/814)
+
+1. Import the dockwater/jazzy Dockerfile and cleanup
+    * [Pull Request 815](https://github.com/osrf/vrx/pull/815)
+
+1. Development container support using docker-compose
+    * [Pull Request 817](https://github.com/osrf/vrx/pull/817)
+
+1. Fix nbpark world issue
+    * [Pull Request 819](https://github.com/osrf/vrx/pull/819)
+
+1. Modify docker_release to release to ghrc.io
+    * [Pull Request 820](https://github.com/osrf/vrx/pull/820)
+
 ## VRX 2
 
 ### VRX 2.4.1
