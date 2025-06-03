@@ -1,5 +1,10 @@
 ## VRX 3
 
+### VRX 3.0.1
+
+1.  Use a workaround to avoid ROS 2 key deprecation
+    * [Pull Request 826](https://github.com/osrf/vrx/pull/826)
+
 ### VRX 3.0.0
 
 1. Fix ocean detection by the lidar
@@ -81,7 +86,7 @@
 
 ### VRX 2.3.1
 
-1. Fix simulation crash 
+1. Fix simulation crash
     * [Pull Request 706](https://github.com/osrf/vrx/pull/706)
 
 1. Set IMU to reflect sensor position in global coordinates
@@ -101,7 +106,7 @@
 
 ### VRX 2.3.0
 
-1. Enhancements to Perception Task 
+1. Enhancements to Perception Task
     * [Pull Request 699](https://github.com/osrf/vrx/pull/699)
 
 1. Infrastructure updates
@@ -132,7 +137,7 @@
 1. Finalized scoring for Follow-the-path
     * [Pull Request 635](https://github.com/osrf/vrx/pull/635)
 
-1. Enhancements to Wildlife Encounter Task 
+1. Enhancements to Wildlife Encounter Task
     * [Pull Request 630](https://github.com/osrf/vrx/pull/630)
     * [Pull Request 634](https://github.com/osrf/vrx/pull/634)
 
@@ -142,130 +147,130 @@
 
 ### VRX 2.1.0
 1. Acoustic Perception Task
-    * [Pull Request 609](https://github.com/osrf/vrx/pull/609) 
+    * [Pull Request 609](https://github.com/osrf/vrx/pull/609)
 
 1. Follow the Path Task
-    * [Pull Request 610](https://github.com/osrf/vrx/pull/610) 
+    * [Pull Request 610](https://github.com/osrf/vrx/pull/610)
 
 1. Acoustic Tracking Task
-    * [Pull Request 614](https://github.com/osrf/vrx/pull/614) 
+    * [Pull Request 614](https://github.com/osrf/vrx/pull/614)
 
 1. VRX 2023 Practice Worlds
-    * [Pull Request 582](https://github.com/osrf/vrx/pull/582) 
-    * [Pull Request 583](https://github.com/osrf/vrx/pull/583) 
-    * [Pull Request 584](https://github.com/osrf/vrx/pull/584) 
-    * [Pull Request 585](https://github.com/osrf/vrx/pull/585) 
-    * [Pull Request 591](https://github.com/osrf/vrx/pull/591) 
+    * [Pull Request 582](https://github.com/osrf/vrx/pull/582)
+    * [Pull Request 583](https://github.com/osrf/vrx/pull/583)
+    * [Pull Request 584](https://github.com/osrf/vrx/pull/584)
+    * [Pull Request 585](https://github.com/osrf/vrx/pull/585)
+    * [Pull Request 591](https://github.com/osrf/vrx/pull/591)
 
-1. Nathan Benderson Park World for RoboBoat 
-    * [Pull Request 588](https://github.com/osrf/vrx/pull/588) 
+1. Nathan Benderson Park World for RoboBoat
+    * [Pull Request 588](https://github.com/osrf/vrx/pull/588)
 
-1. Bug Fixes and Cleanup 
-    * [Pull Request 578](https://github.com/osrf/vrx/pull/578) 
-    * [Pull Request 597](https://github.com/osrf/vrx/pull/597) 
-    * [Pull Request 598](https://github.com/osrf/vrx/pull/598) 
-    * [Pull Request 615](https://github.com/osrf/vrx/pull/615) 
-    * [Pull Request 625](https://github.com/osrf/vrx/pull/625) 
-    * [Pull Request 627](https://github.com/osrf/vrx/pull/627) 
+1. Bug Fixes and Cleanup
+    * [Pull Request 578](https://github.com/osrf/vrx/pull/578)
+    * [Pull Request 597](https://github.com/osrf/vrx/pull/597)
+    * [Pull Request 598](https://github.com/osrf/vrx/pull/598)
+    * [Pull Request 615](https://github.com/osrf/vrx/pull/615)
+    * [Pull Request 625](https://github.com/osrf/vrx/pull/625)
+    * [Pull Request 627](https://github.com/osrf/vrx/pull/627)
 
 ### VRX 2.0.0
 1. Port VRX Core Functionality to Gazebo Sim
-    * [Pull Request 474](https://github.com/osrf/vrx/pull/474) 
-    * [Pull Request 482](https://github.com/osrf/vrx/pull/482) 
-    * [Pull Request 490](https://github.com/osrf/vrx/pull/490) 
-    * [Pull Request 500](https://github.com/osrf/vrx/pull/500) 
-    * [Pull Request 503](https://github.com/osrf/vrx/pull/503) 
-    * [Pull Request 512](https://github.com/osrf/vrx/pull/512) 
-    * [Pull Request 520](https://github.com/osrf/vrx/pull/520) 
-    * [Pull Request 526](https://github.com/osrf/vrx/pull/526) 
-    * [Pull Request 531](https://github.com/osrf/vrx/pull/531) 
-    * [Pull Request 535](https://github.com/osrf/vrx/pull/535) 
-    * [Pull Request 543](https://github.com/osrf/vrx/pull/543) 
+    * [Pull Request 474](https://github.com/osrf/vrx/pull/474)
+    * [Pull Request 482](https://github.com/osrf/vrx/pull/482)
+    * [Pull Request 490](https://github.com/osrf/vrx/pull/490)
+    * [Pull Request 500](https://github.com/osrf/vrx/pull/500)
+    * [Pull Request 503](https://github.com/osrf/vrx/pull/503)
+    * [Pull Request 512](https://github.com/osrf/vrx/pull/512)
+    * [Pull Request 520](https://github.com/osrf/vrx/pull/520)
+    * [Pull Request 526](https://github.com/osrf/vrx/pull/526)
+    * [Pull Request 531](https://github.com/osrf/vrx/pull/531)
+    * [Pull Request 535](https://github.com/osrf/vrx/pull/535)
+    * [Pull Request 543](https://github.com/osrf/vrx/pull/543)
 
-1. Port VRX 2022 Tasks to Gazebo Sim 
-    * [Pull Request 501](https://github.com/osrf/vrx/pull/501) 
-    * [Pull Request 502](https://github.com/osrf/vrx/pull/502) 
-    * [Pull Request 504](https://github.com/osrf/vrx/pull/504) 
-    * [Pull Request 505](https://github.com/osrf/vrx/pull/505) 
-    * [Pull Request 506](https://github.com/osrf/vrx/pull/506) 
-    * [Pull Request 508](https://github.com/osrf/vrx/pull/508) 
-    * [Pull Request 513](https://github.com/osrf/vrx/pull/513) 
-    * [Pull Request 522](https://github.com/osrf/vrx/pull/522) 
-    * [Pull Request 523](https://github.com/osrf/vrx/pull/523) 
-    * [Pull Request 525](https://github.com/osrf/vrx/pull/525) 
-    * [Pull Request 527](https://github.com/osrf/vrx/pull/527) 
-    * [Pull Request 537](https://github.com/osrf/vrx/pull/537) 
-    * [Pull Request 540](https://github.com/osrf/vrx/pull/540) 
-    * [Pull Request 541](https://github.com/osrf/vrx/pull/541) 
-    * [Pull Request 542](https://github.com/osrf/vrx/pull/542) 
-    * [Pull Request 547](https://github.com/osrf/vrx/pull/547) 
+1. Port VRX 2022 Tasks to Gazebo Sim
+    * [Pull Request 501](https://github.com/osrf/vrx/pull/501)
+    * [Pull Request 502](https://github.com/osrf/vrx/pull/502)
+    * [Pull Request 504](https://github.com/osrf/vrx/pull/504)
+    * [Pull Request 505](https://github.com/osrf/vrx/pull/505)
+    * [Pull Request 506](https://github.com/osrf/vrx/pull/506)
+    * [Pull Request 508](https://github.com/osrf/vrx/pull/508)
+    * [Pull Request 513](https://github.com/osrf/vrx/pull/513)
+    * [Pull Request 522](https://github.com/osrf/vrx/pull/522)
+    * [Pull Request 523](https://github.com/osrf/vrx/pull/523)
+    * [Pull Request 525](https://github.com/osrf/vrx/pull/525)
+    * [Pull Request 527](https://github.com/osrf/vrx/pull/527)
+    * [Pull Request 537](https://github.com/osrf/vrx/pull/537)
+    * [Pull Request 540](https://github.com/osrf/vrx/pull/540)
+    * [Pull Request 541](https://github.com/osrf/vrx/pull/541)
+    * [Pull Request 542](https://github.com/osrf/vrx/pull/542)
+    * [Pull Request 547](https://github.com/osrf/vrx/pull/547)
 
 1. Add physically based rendering to select components
-    * [Pull Request 555](https://github.com/osrf/vrx/pull/555) 
-    * [Pull Request 560](https://github.com/osrf/vrx/pull/560) 
-    * [Pull Request 561](https://github.com/osrf/vrx/pull/561) 
-    * [Pull Request 567](https://github.com/osrf/vrx/pull/567) 
-    * [Pull Request 568](https://github.com/osrf/vrx/pull/568) 
-    * [Pull Request 569](https://github.com/osrf/vrx/pull/569) 
-    * [Pull Request 570](https://github.com/osrf/vrx/pull/570) 
-    * [Pull Request 572](https://github.com/osrf/vrx/pull/572) 
+    * [Pull Request 555](https://github.com/osrf/vrx/pull/555)
+    * [Pull Request 560](https://github.com/osrf/vrx/pull/560)
+    * [Pull Request 561](https://github.com/osrf/vrx/pull/561)
+    * [Pull Request 567](https://github.com/osrf/vrx/pull/567)
+    * [Pull Request 568](https://github.com/osrf/vrx/pull/568)
+    * [Pull Request 569](https://github.com/osrf/vrx/pull/569)
+    * [Pull Request 570](https://github.com/osrf/vrx/pull/570)
+    * [Pull Request 572](https://github.com/osrf/vrx/pull/572)
 
 1. Bug fixes and cleanup
-    * [Pull Request 519](https://github.com/osrf/vrx/pull/519) 
-    * [Pull Request 530](https://github.com/osrf/vrx/pull/530) 
-    * [Pull Request 549](https://github.com/osrf/vrx/pull/549) 
-    * [Pull Request 550](https://github.com/osrf/vrx/pull/550) 
-    * [Pull Request 553](https://github.com/osrf/vrx/pull/553) 
-    * [Pull Request 554](https://github.com/osrf/vrx/pull/554) 
-    * [Pull Request 557](https://github.com/osrf/vrx/pull/557) 
-    * [Pull Request 558](https://github.com/osrf/vrx/pull/558) 
-    * [Pull Request 565](https://github.com/osrf/vrx/pull/565) 
-    * [Pull Request 566](https://github.com/osrf/vrx/pull/566) 
+    * [Pull Request 519](https://github.com/osrf/vrx/pull/519)
+    * [Pull Request 530](https://github.com/osrf/vrx/pull/530)
+    * [Pull Request 549](https://github.com/osrf/vrx/pull/549)
+    * [Pull Request 550](https://github.com/osrf/vrx/pull/550)
+    * [Pull Request 553](https://github.com/osrf/vrx/pull/553)
+    * [Pull Request 554](https://github.com/osrf/vrx/pull/554)
+    * [Pull Request 557](https://github.com/osrf/vrx/pull/557)
+    * [Pull Request 558](https://github.com/osrf/vrx/pull/558)
+    * [Pull Request 565](https://github.com/osrf/vrx/pull/565)
+    * [Pull Request 566](https://github.com/osrf/vrx/pull/566)
 
 ## VRX 1
 
 ### VRX 1.6.1
 1. VRX 2022 Examples and Usability Enhancements
-    * [Pull Request 397](https://github.com/osrf/vrx/pull/397) 
-    * [Pull Request 404](https://github.com/osrf/vrx/pull/404) 
-    * [Pull Request 443](https://github.com/osrf/vrx/pull/443) 
-    * [Pull Request 448](https://github.com/osrf/vrx/pull/448) 
+    * [Pull Request 397](https://github.com/osrf/vrx/pull/397)
+    * [Pull Request 404](https://github.com/osrf/vrx/pull/404)
+    * [Pull Request 443](https://github.com/osrf/vrx/pull/443)
+    * [Pull Request 448](https://github.com/osrf/vrx/pull/448)
 
 1. Enforce Compliance with VRX 2022 Competition Guidelines
-    * [Pull Request 405](https://github.com/osrf/vrx/pull/405) 
-    * [Pull Request 432](https://github.com/osrf/vrx/pull/432) 
-    * [Pull Request 446](https://github.com/osrf/vrx/pull/446) 
-    * [Pull Request 449](https://github.com/osrf/vrx/pull/449) 
-    * [Pull Request 452](https://github.com/osrf/vrx/pull/452) 
+    * [Pull Request 405](https://github.com/osrf/vrx/pull/405)
+    * [Pull Request 432](https://github.com/osrf/vrx/pull/432)
+    * [Pull Request 446](https://github.com/osrf/vrx/pull/446)
+    * [Pull Request 449](https://github.com/osrf/vrx/pull/449)
+    * [Pull Request 452](https://github.com/osrf/vrx/pull/452)
 
 1. Pinger support
-    * [Pull Request 424](https://github.com/osrf/vrx/pull/424) 
-    * [Pull Request 438](https://github.com/osrf/vrx/pull/439) 
-    * [Pull Request 439](https://github.com/osrf/vrx/pull/439) 
+    * [Pull Request 424](https://github.com/osrf/vrx/pull/424)
+    * [Pull Request 438](https://github.com/osrf/vrx/pull/439)
+    * [Pull Request 439](https://github.com/osrf/vrx/pull/439)
 
 1. Enhance wildlife follow plugin
-    * [Pull Request 416](https://github.com/osrf/vrx/pull/416) 
-    * [Pull Request 429](https://github.com/osrf/vrx/pull/429) 
+    * [Pull Request 416](https://github.com/osrf/vrx/pull/416)
+    * [Pull Request 429](https://github.com/osrf/vrx/pull/429)
 
 1. Workaround for Ignition Math FromLocal bug
-    * [Pull Request 428](https://github.com/osrf/vrx/pull/428) 
+    * [Pull Request 428](https://github.com/osrf/vrx/pull/428)
 
 1. Resolve Robot Localization TF Warnings
-    * [Pull Request 402](https://github.com/osrf/vrx/pull/402) 
+    * [Pull Request 402](https://github.com/osrf/vrx/pull/402)
 
 1. Other minor fixes and enhancements
-    * [Pull Request 400](https://github.com/osrf/vrx/pull/400) 
-    * [Pull Request 408](https://github.com/osrf/vrx/pull/408) 
-    * [Pull Request 411](https://github.com/osrf/vrx/pull/411) 
-    * [Pull Request 419](https://github.com/osrf/vrx/pull/419) 
-    * [Pull Request 422](https://github.com/osrf/vrx/pull/422) 
+    * [Pull Request 400](https://github.com/osrf/vrx/pull/400)
+    * [Pull Request 408](https://github.com/osrf/vrx/pull/408)
+    * [Pull Request 411](https://github.com/osrf/vrx/pull/411)
+    * [Pull Request 419](https://github.com/osrf/vrx/pull/419)
+    * [Pull Request 422](https://github.com/osrf/vrx/pull/422)
 
 
 ### VRX 1.6.0
 1. Update pinger.yaml to support 2019 and 2022 worlds
     * [Pull Request 394](https://github.com/osrf/vrx/pull/394)
 
-1. Improve Sydney Regatta performance 
+1. Improve Sydney Regatta performance
     * [Pull Request 380](https://github.com/osrf/vrx/pull/380)
 
 1. Update and extend generate worlds capability to include new tasks
@@ -292,56 +297,56 @@
     * [Pull Request 389](https://github.com/osrf/vrx/pull/389)
 
 ### VRX 1.5.X
-1. New VRX example with 2022 course elements 
-    * [Pull Request 359](https://github.com/osrf/vrx/pull/359) 
+1. New VRX example with 2022 course elements
+    * [Pull Request 359](https://github.com/osrf/vrx/pull/359)
 
-1. Created Scan, Dock and Deliver task 
-    * [Pull Request 333](https://github.com/osrf/vrx/pull/333) 
+1. Created Scan, Dock and Deliver task
+    * [Pull Request 333](https://github.com/osrf/vrx/pull/333)
 
-1. Created Wildlife Encounter task 
-    * [Pull Request 326](https://github.com/osrf/vrx/pull/326) 
-    * [Pull Request 330](https://github.com/osrf/vrx/pull/330) 
+1. Created Wildlife Encounter task
+    * [Pull Request 326](https://github.com/osrf/vrx/pull/326)
+    * [Pull Request 330](https://github.com/osrf/vrx/pull/330)
 
-1. New animal models and motion plugin for Wildlife Encounter task  
-    * [Pull Request 319](https://github.com/osrf/vrx/pull/319) 
-    * [Pull Request 321](https://github.com/osrf/vrx/pull/321) 
+1. New animal models and motion plugin for Wildlife Encounter task
+    * [Pull Request 319](https://github.com/osrf/vrx/pull/319)
+    * [Pull Request 321](https://github.com/osrf/vrx/pull/321)
 
 1. New placards and docks for Scan and Dock and Deliver task
-    * [Pull Request 332](https://github.com/osrf/vrx/pull/332) 
-    * [Pull Request 338](https://github.com/osrf/vrx/pull/333) 
+    * [Pull Request 332](https://github.com/osrf/vrx/pull/332)
+    * [Pull Request 338](https://github.com/osrf/vrx/pull/333)
 
 1. New ball shooter model and plugin for Scan and Dock and Deliver task
-    * [Pull Request 311](https://github.com/osrf/vrx/pull/311) 
-    * [Pull Request 316](https://github.com/osrf/vrx/pull/316) 
-    * [Pull Request 345](https://github.com/osrf/vrx/pull/345) 
-    * [Pull Request 352](https://github.com/osrf/vrx/pull/352) 
+    * [Pull Request 311](https://github.com/osrf/vrx/pull/311)
+    * [Pull Request 316](https://github.com/osrf/vrx/pull/316)
+    * [Pull Request 345](https://github.com/osrf/vrx/pull/345)
+    * [Pull Request 352](https://github.com/osrf/vrx/pull/352)
 
-1. Update Station keeping, Wayfinding, Perception and Gymkhana tasks for VRX Competition 2022 
-    * [Pull Request 307](https://github.com/osrf/vrx/pull/307) 
-    * [Pull Request 313](https://github.com/osrf/vrx/pull/313) 
-    * [Pull Request 314](https://github.com/osrf/vrx/pull/314) 
-    * [Pull Request 315](https://github.com/osrf/vrx/pull/315) 
-    * [Pull Request 325](https://github.com/osrf/vrx/pull/325) 
-    * [Pull Request 337](https://github.com/osrf/vrx/pull/337) 
-    * [Pull Request 356](https://github.com/osrf/vrx/pull/356) 
+1. Update Station keeping, Wayfinding, Perception and Gymkhana tasks for VRX Competition 2022
+    * [Pull Request 307](https://github.com/osrf/vrx/pull/307)
+    * [Pull Request 313](https://github.com/osrf/vrx/pull/313)
+    * [Pull Request 314](https://github.com/osrf/vrx/pull/314)
+    * [Pull Request 315](https://github.com/osrf/vrx/pull/315)
+    * [Pull Request 325](https://github.com/osrf/vrx/pull/325)
+    * [Pull Request 337](https://github.com/osrf/vrx/pull/337)
+    * [Pull Request 356](https://github.com/osrf/vrx/pull/356)
 
 1. Refactored Docker images to integrate with Rocker:
-    * [Pull Request 304](https://github.com/osrf/vrx/pull/304) 
+    * [Pull Request 304](https://github.com/osrf/vrx/pull/304)
 
 
 ### VRX 1.4.X
 
 1. New hydro params:
     * [Pull request 214](https://github.com/osrf/vrx/pull/214)
-1. Migrate to Noetic and Gazebo 11 
+1. Migrate to Noetic and Gazebo 11
     * [Pull request 247](https://github.com/osrf/vrx/pull/247)
-1. Add Noetic Docker Image 
+1. Add Noetic Docker Image
     * [Pull request 248](https://github.com/osrf/vrx/pull/248)
 1. Updated CI test image for Noetic
     * [Pull request 256](https://github.com/osrf/vrx/pull/256)
 1. Sydney International Regatta Centre arena mesh
     * [Pull request 253](https://github.com/osrf/vrx/pull/253)
-1. Updated buoys for VRX 2022  
+1. Updated buoys for VRX 2022
     * [Pull request 264](https://github.com/osrf/vrx/pull/264)
 
 
