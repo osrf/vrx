@@ -1,5 +1,10 @@
 ## VRX 3
 
+### VRX 3.0.2
+
+1. Handle the new ROS image with key updated
+    * [Pull Request 827](https://github.com/osrf/vrx/pull/827)
+
 ### VRX 3.0.1
 
 1.  Use a workaround to avoid ROS 2 key deprecation
