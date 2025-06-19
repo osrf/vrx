@@ -796,7 +796,8 @@ double Wavefield::ComputeDepthDirectly(const math::Vector3d &_point,
   // Compute the target function and Jacobian. Also calculate pz,
   // the z-component of the Gerstner wave, which we essentially get for free.
   // cppcheck-suppress constParameter
-  auto wave_fdf = [=](auto x, auto p, auto t, auto &wp, auto &F, auto &J)
+  auto wave_fdf = [this, _time, _timeInit](auto x, auto p, auto t, auto &wp,
+                   auto &F, auto &J)
   {
     double pz = 0;
     F(0) = p.x() - x.x();
@@ -838,8 +839,8 @@ double Wavefield::ComputeDepthDirectly(const math::Vector3d &_point,
   // this version returns the z-component of the
   // wave field at the desired point p.
   // cppcheck-suppress constParameter
-  auto solver = [=](auto& fdfunc, auto x0, auto p, auto t, \
-                    auto& wp, auto tol, auto nmax)
+  auto solver = [](auto& fdfunc, auto x0, auto p, auto t,
+                   auto& wp, auto tol, auto nmax)
   {
     int n = 0;
     double err = 1;
