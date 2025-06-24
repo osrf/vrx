@@ -243,11 +243,8 @@ void Surface::PreUpdate(const sim::UpdateInfo &_info,
     double simTime = std::chrono::duration<double>(_info.simTime).count();
     double depth = this->dataPtr->wavefield.ComputeDepthSimply(point, simTime);
 
-    // Vertical wave displacement.
-    double dz = depth + point.Z();
-
     // Total z location of boat grid point relative to fluid surface.
-    double deltaZ = (this->dataPtr->fluidLevel + dz) - kDdz;
+    double deltaZ = (this->dataPtr->fluidLevel + depth) - kDdz;
     // Enforce only upward buoy force
     deltaZ = std::max(deltaZ, 0.0);
     deltaZ = std::min(deltaZ, this->dataPtr->hullRadius);
