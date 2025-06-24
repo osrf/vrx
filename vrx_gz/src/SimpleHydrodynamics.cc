@@ -254,6 +254,7 @@ void SimpleHydrodynamics::PreUpdate(
   Cmat(1, 5) = this->dataPtr->paramXdotU * localLinearVel.X();
   Cmat(5, 0) = this->dataPtr->paramYdotV * localLinearVel.Y();
   Cmat(5, 1) = this->dataPtr->paramXdotU * localLinearVel.X();
+  const Eigen::VectorXd kCmat = Cmat * state;
 
   // Drag.
   Dmat(0, 0) = this->dataPtr->paramXu +
@@ -272,7 +273,7 @@ void SimpleHydrodynamics::PreUpdate(
   const Eigen::VectorXd kDvec = -1.0 * Dmat * state;
 
   // Sum all forces - in body frame.
-  const Eigen::VectorXd kForceSum = kAmassVec + kDvec;
+  const Eigen::VectorXd kForceSum = kAmassVec + kCmat + kDvec;
 
   // Transform the force and torque to the world frame.
   math::Vector3d forceWorld = (*comPose).Rot().RotateVector(
