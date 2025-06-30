@@ -1,5 +1,16 @@
 ## VRX 3
 
+### VRX 3.0.3
+
+1. Remove addition of zero Z valued grid point
+    * [Pull Request 830](https://github.com/osrf/vrx/pull/830)
+
+1. Added Cmat in hydrodynamic forces equation
+    * [Pull Request 829](https://github.com/osrf/vrx/pull/829)
+
+1. Use C++17
+    * [Pull Request 828](https://github.com/osrf/vrx/pull/828)
+
 ### VRX 3.0.2
 
 1. Handle the new ROS image with key updated
