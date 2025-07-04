@@ -35,6 +35,8 @@ def launch(context, *args, **kwargs):
     gz_paused = LaunchConfiguration('paused').perform(context).lower() == 'true'
     competition_mode = LaunchConfiguration('competition_mode').perform(context).lower() == 'true'
     extra_gz_args = LaunchConfiguration('extra_gz_args').perform(context)
+    robot_name = LaunchConfiguration('name').perform(context)
+    model_type = LaunchConfiguration('model').perform(context)
 
     launch_processes = []
 
@@ -43,7 +45,7 @@ def launch(context, *args, **kwargs):
         with open(config_file, 'r') as stream:
             models = Model.FromConfig(stream)
     else:
-      m = Model('wamv', 'wam-v', [-532, 162, 0, 0, 0, 1])
+      m = Model(robot_name, model_type, [-532, 162, 0, 0, 0, 1])
       if robot_urdf and robot_urdf != '':
           m.set_urdf(robot_urdf)
       models.append(m)
@@ -107,5 +109,13 @@ def generate_launch_description():
             'extra_gz_args',
             default_value='',
             description='Additional arguments to be passed to gz sim. '),
+        DeclareLaunchArgument(
+            'name',
+            default_value='wamv',
+            description='Name of robot to spawn'),
+        DeclareLaunchArgument(
+            'model',
+            default_value='wam-v',
+            description='SDF model to spawn'),
         OpaqueFunction(function=launch),
     ])
