@@ -46,7 +46,7 @@ namespace vrx
   /// * `<vehicle_length>` is the length of the vessel [m].
   /// * `<hull_radius>` is the radius of the vessel's hull [m].
   /// * `<fluid_level>` is the depth at which the fluid should be in the vehicle
-  /// * `<fluid_density>` is the density of the fluid.
+  /// * `<fluid_density>` is the density of the fluid. Default value is 1000.
   /// * `<points>` contains a collection of points where the forces generated
   ///              by this plugin will be applied. See the format of each point
   ///              next:

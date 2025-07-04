@@ -60,7 +60,7 @@ class vrx::Surface::Implementation
   public: double fluidLevel = 0;
 
   /// \brief Fluid density [kg/m^3].
-  public: double fluidDensity = 997.7735;
+  public: double fluidDensity = 1000.0;
 
   /// \brief The world's gravity [m/s^2].
   public: math::Vector3d gravity;

@@ -164,7 +164,7 @@ class PolyhedraBuoyancyDrag::Implementation
   public: Wavefield wavefield;
 
   /// \brief The density of the fluid in which the object is submerged in kg/m^3
-  public: double fluidDensity = 997;
+  public: double fluidDensity = 1000.0;
 
   /// \brief The height of the fluid/air interface [m]. Defaults to 0.
   public: double fluidLevel = 0;
