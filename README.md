@@ -44,11 +44,20 @@ If you use the VRX simulation in your work, please cite our summary publication,
   Month                    = {October}
 }
 ```
+## 🛠️ Getting Help and Contributing
 
-## Contributing
-This project is under active development to support the VRX and RobotX teams. We are adding and improving things all the time. Our primary focus is to provide the fundamental aspects of the robot and environment, but we rely on the community to develop additional functionality around their particular use cases.
+VRX is an open source project supported by the community. If you run into issues, need help, or have suggestions:
 
-If you have any questions about these topics, or would like to work on other aspects, please contribute.  You can contact us directly (see below), submit an [issue](https://github.com/osrf/vrx/issues) or, better yet, submit a [pull request](https://github.com/osrf/vrx/pulls/)!
+- 💬 **Ask for help or report bugs** by opening an [issue](https://github.com/osrf/vrx/issues). Please include as much detail as possible, including:
+  - Steps to reproduce the issue
+  - Your system setup (OS, ROS version, etc.)
+  - Relevant error messages or logs
+
+- 🛠️ **Found a fix or improvement?** We welcome contributions! Submit a [pull request](https://github.com/osrf/vrx/pulls) with your proposed changes.
+
+- 📫 **Please do not email the maintainers with technical questions.** Using GitHub issues helps ensure that questions and solutions are visible and searchable for the whole community.
+
+Your feedback and participation help make VRX better for everyone — thank you for contributing!
 
 ## Contributors
 
@@ -59,8 +68,3 @@ If you have any questions about these topics, or would like to work on other asp
 
 We continue to receive important improvements from the community.  We have done our best to document this on our [Contributors Wiki](https://github.com/osrf/vrx/wiki/Contributors).
 
-## Contacts
-
- * Carlos Agüero <caguero@honurobotics.com>
- * Brian Bingham <bbingham@honurobotics.com>
- * Michael McCarrin <mrmccarr@nps.edu>
