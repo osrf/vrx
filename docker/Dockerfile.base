@@ -1,5 +1,5 @@
 # Ubuntu 24.04 
-FROM osrf/ros:jazzy-desktop-full AS vrx-base
+FROM osrf/ros:jazzy-desktop AS vrx-base
 
 # Workaround from https://discourse.ros.org/t/ros-signing-key-migration-guide/43937
 RUN rm -f /etc/apt/sources.list.d/ros2-latest.list \
