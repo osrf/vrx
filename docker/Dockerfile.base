@@ -37,3 +37,22 @@ RUN apt update \
        gz-harmonic \
     && rm -rf /var/lib/apt/lists/* \
     && apt clean -qq
+
+# copy the gz.repos file to the container
+ADD gz.repos /tmp/gz.repos
+
+# Need to compile ros_gz and gz_ros2_control from source for Gazebo Harmonic
+#
+RUN mkdir -p ~/ros_gz_ws/src \
+    && cd ~/ros_gz_ws/src \
+    && vcs import . < /tmp/gz.repos \
+    && git clone https://github.com/gazebosim/ros_gz.git -b jazzy \
+    && rm -r ros_gz/ros_gz_sim_demos \
+    && apt update \
+    && apt-mark hold ros-jazzy-gz-sim-vendor ros-jazzy-gz-physics-vendor ros-jazzy-gz-launch-vendor ros-jazzy-gz-sensors-vendor ros-jazzy-sdformat-vendor \
+    && rosdep install -r --from-paths . --ignore-src --rosdistro jazzy -y --skip-keys="gz_sim_vendor gz_physics_vendor gz_launch_vendor gz_sensors_vendor sdformat_vendor ros_gz_sim_demos" \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt clean -qq
+RUN cd ~/ros_gz_ws \
+    && . /opt/ros/jazzy/setup.sh \
+    && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
