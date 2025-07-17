@@ -1,0 +1,21 @@
+repositories:
+  gz_libs/gz_math_vendor:
+    type: git
+    url: https://github.com/gazebo-release/gz_math_vendor.git
+    version: jazzy
+  gz_libs/gz_msgs_vendor:
+    type: git
+    url: https://github.com/gazebo-release/gz_msgs_vendor.git
+    version: jazzy
+  gz_libs/gz_sim_vendor:
+    type: git
+    url: https://github.com/gazebo-release/gz_sim_vendor.git
+    version: jazzy
+  gz_libs/gz_transport_vendor:
+    type: git
+    url: https://github.com/gazebo-release/gz_transport_vendor.git
+    version: jazzy
+  gz_libs/sdformat_vendor:
+    type: git
+    url: https://github.com/gazebo-release/sdformat_vendor.git
+    version: jazzy

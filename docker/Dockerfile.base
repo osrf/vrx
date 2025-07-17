@@ -1,5 +1,5 @@
-# Ubuntu 24.04 
-FROM osrf/ros:jazzy-desktop-full AS vrx-base
+# Ubuntu 24.04
+FROM ros:jazzy-ros-base AS vrx-base
 
 # Workaround from https://discourse.ros.org/t/ros-signing-key-migration-guide/43937
 RUN rm -f /etc/apt/sources.list.d/ros2-latest.list \
@@ -31,9 +31,51 @@ RUN echo $TZ > /etc/timezone && \
 RUN curl -s https://packages.osrfoundation.org/gazebo.gpg -o /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 
-# Install some 'standard' ROS packages and utilities.
+# Install gz-harmonic
 RUN apt update \
     && apt install -y --no-install-recommends \
        gz-harmonic \
+       equivs \
     && rm -rf /var/lib/apt/lists/* \
     && apt clean -qq
+
+# Solution for problem https://github.com/osrf/vrx/issues/839
+# Create fake providers for the ROS Gazebo vendor packages of the Gz libraries
+# that support Python bindings and use a colcon workspace to inject
+# the real ROS packages.
+
+# Create the dummy package control file for ROS Jazzy Gazebo vendor packages
+COPY <<EOF /tmp/fake-ros-jazzy-gz-vendor
+Package: fake-ros-jazzy-gz-vendor
+Version: 999.999
+Architecture: all
+Description: Fake ROS Jazzy Gazebo vendor packages for containers
+ This package provides dummy implementations to satisfy
+ ROS Jazzy Gazebo vendor package dependencies without actual functionality.
+Provides: ros-jazzy-gz-math-vendor, ros-jazzy-gz-msgs-vendor, ros-jazzy-gz-transport-vendor, ros-jazzy-gz-sim-vendor, ros-jazzy-sdformat-vendor
+EOF
+
+# Build and install the dummy package
+RUN cd /tmp \
+    && cat fake-ros-jazzy-gz-vendor \
+    && equivs-build fake-ros-jazzy-gz-vendor \
+    && dpkg -i fake-ros-jazzy-gz-vendor_*_all.deb \
+    && rm -f /tmp/fake-ros-jazzy-gz-vendor /tmp/fake-ros-jazzy-gz-vendor_*_all.deb
+
+ADD gz.repos /tmp/gz.repos
+
+RUN mkdir -p /opt/ros_gz_ws/src \
+    && cd /opt/ros_gz_ws \
+    && vcs import src < /tmp/gz.repos \
+    && apt update \
+    && rosdep install -r --from-paths . --ignore-src --rosdistro jazzy -y --skip-keys="gz_math_vendor gz_msgs_vendor gz_sim_vendor gz_transport_vendor sdformat_vendor" \
+    && . /opt/ros/jazzy/setup.sh \
+    && colcon build --merge-install --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# Source for interactive shells (both login and non-login)
+RUN echo "source /opt/ros_gz_ws/install/setup.bash" > /etc/profile.d/ros_gz_pythons.sh \
+    && echo "export GZ_CONFIG_PATH=\$GZ_CONFIG_PATH:/usr/share/gz/" > /etc/profile.d/ros_gz_pythons.sh \
+    && chmod +x /etc/profile.d/ros_gz_pythons.sh \
+    && echo "source /etc/profile.d/ros_gz_pythons.sh" >> /etc/bash.bashrc
+# Source for non-interactive shells
+ENV BASH_ENV=/etc/profile.d/ros_gz_pythons.sh
