@@ -1,5 +1,16 @@
 ## VRX 3
 
+### VRX 3.0.4
+
+1. Inject custom vendor packages for Harmonic to avoid Python ABI problems
+    * [Pull Request 840](https://github.com/osrf/vrx/pull/840)
+
+1. Consistent density water default value
+    * [Pull Request 834](https://github.com/osrf/vrx/pull/834)
+
+1. Launch individual vehicle name
+    * [Pull Request 833](https://github.com/osrf/vrx/pull/833)
+
 ### VRX 3.0.3
 
 1. Remove addition of zero Z valued grid point
