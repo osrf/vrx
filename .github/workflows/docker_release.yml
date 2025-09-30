@@ -1,4 +1,4 @@
-name: Release to ghrc.io
+name: Release to ghcr.io
 
 on:
  push:

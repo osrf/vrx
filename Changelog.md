@@ -73,7 +73,7 @@
 1. Fix nbpark world issue
     * [Pull Request 819](https://github.com/osrf/vrx/pull/819)
 
-1. Modify docker_release to release to ghrc.io
+1. Modify docker_release to release to ghcr.io
     * [Pull Request 820](https://github.com/osrf/vrx/pull/820)
 
 ## VRX 2
