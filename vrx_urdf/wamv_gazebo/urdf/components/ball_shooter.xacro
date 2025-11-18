@@ -47,16 +47,12 @@
       </inertial>
     </link>
 
-    <joint name="${namespace}/${name}_base_joint" type="revolute">
-      <axis xyz="0 0 1"/>
-      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+    <joint name="${namespace}/${name}_base_joint" type="fixed">
       <origin xyz="${x} ${y} ${z}" rpy="0 0 ${yaw}"/>
       <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}_base_link"/>
     </joint>
-    <joint name="${namespace}/${name}_launcher_joint" type="revolute">
-      <axis xyz="0 0 1"/>
-      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+    <joint name="${namespace}/${name}_launcher_joint" type="fixed">
       <origin xyz="-0.0204 0 0.107877" rpy="0 ${pitch} 0"/>
       <parent link="${namespace}/${name}_base_link"/>
       <child link="${namespace}/${name}_launcher_link"/>
