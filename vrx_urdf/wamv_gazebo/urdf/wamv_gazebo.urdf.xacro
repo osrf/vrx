@@ -36,6 +36,7 @@
   <xacro:arg name="thruster_xacro_file" default = ""/>
 
   <!-- === The WAM-V platform === -->
+  <xacro:arg name="macros_file" default="$(find wamv_gazebo)/urdf/macros.xacro"/>
   <xacro:include filename="$(find wamv_gazebo)/urdf/wamv_gazebo.xacro"/>
 
   <!-- === Batteries === -->

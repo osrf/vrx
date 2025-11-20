@@ -29,6 +29,7 @@ def launch(context, *args, **kwargs):
     component_yaml = LaunchConfiguration('component_yaml').perform(context)
     thruster_yaml = LaunchConfiguration('thruster_yaml').perform(context)
     wamv_target = LaunchConfiguration('wamv_target').perform(context)
+    macros_file = LaunchConfiguration('alternative_macros_file').perform(context)
 
     if not component_yaml:
         component_yaml = os.path.join(get_package_share_directory('vrx_gazebo'),
@@ -36,6 +37,10 @@ def launch(context, *args, **kwargs):
     if not thruster_yaml:
         thruster_yaml = os.path.join(get_package_share_directory('vrx_gazebo'),
                                      'config', 'wamv_config', 'example_thruster_config.yaml')
+        
+    if not macros_file:
+        macros_file = os.path.join(get_package_share_directory('wamv_gazebo'),
+                                    'urdf', 'macros.xacro')
 
     components_dir = os.path.join(get_package_share_directory('wamv_gazebo'),
                                   'urdf', 'components')
@@ -53,7 +58,8 @@ def launch(context, *args, **kwargs):
                             {'wamv_target': wamv_target},
                             {'components_dir': components_dir},
                             {'thrusters_dir': thrusters_dir},
-                            {'wamv_gazebo': wamv_gazebo}])
+                            {'wamv_gazebo': wamv_gazebo},
+                            {'macros_file': macros_file},])
 
     return [node]
 
@@ -76,5 +82,9 @@ def generate_launch_description():
             'wamv_target',
             default_value='',
             description='WAM-V target output URDF file'),
+        DeclareLaunchArgument(
+            'alternative_macros_file',
+            default_value='',
+            description='Path to optional alternative xacro file that loads plugins.'),
         OpaqueFunction(function=launch),
     ])

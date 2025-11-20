@@ -115,7 +115,7 @@ def main(args=None):
     node.declare_parameter('wamv_locked', '')
     node.declare_parameter('components_dir', '')
     node.declare_parameter('thrusters_dir', '')
-
+    node.declare_parameter('macros_file', '')
     # Check if yaml files were given
     thruster_yaml = node.get_parameter('thruster_yaml').get_parameter_value().string_value
     component_yaml = node.get_parameter('component_yaml').get_parameter_value().string_value
@@ -137,9 +137,10 @@ def main(args=None):
     wamv_target = node.get_parameter('wamv_target').get_parameter_value().string_value
     wamv_gazebo = node.get_parameter('wamv_gazebo').get_parameter_value().string_value
     wamv_locked = node.get_parameter('wamv_locked').get_parameter_value().string_value
+    macros_file = node.get_parameter('macros_file').get_parameter_value().string_value
 
     create_urdf_command = ("ros2 run xacro xacro -o " + wamv_target +
-                           " '" + wamv_gazebo + "'")
+                           " '" + wamv_gazebo + "' macros_file:='" + macros_file + "'")
 
     if wamv_locked:
         create_urdf_command += (" locked:=" +

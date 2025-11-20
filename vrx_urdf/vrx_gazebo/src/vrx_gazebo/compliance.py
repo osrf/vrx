@@ -35,8 +35,7 @@ class ComponentCompliance:
         if component_type not in self.default_parameters:
             rclpy.logging.get_logger("compliance").error('%s is not defined anywhere under %s' %
                          (component_type, self.config_dir))
-        assert component_type in self.default_parameters,\
-            '%s is not defined anywhere under %s' % (component_type, self.config_dir)
+            return False
         for i in params:
             if i not in self.numeric[component_type]['allowed_params']:
                 rclpy.logging.get_logger("compliance").error('%s parameter specification of %s not permitted' %
@@ -67,6 +66,9 @@ class ComponentCompliance:
             return True
 
     def number_compliance(self, component_type, n):
+        if not component_type in self.numeric:
+            rclpy.logging.get_logger("compliance").error('%s is not defined' % component_type)
+            return False
         # ie: are n wamv_cameras allowed?
         if n > self.numeric[component_type]['num']:
             rclpy.logging.get_logger("compliance").error('Too many %s requested' % component_type)
