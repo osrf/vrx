@@ -1,5 +1,16 @@
 ## VRX 3
 
+### VRX 3.1.0
+
+1. Allow external components
+    * [Pull Request 870](https://github.com/osrf/vrx/pull/870)
+
+1. Set executable flag on generate_wamv.py script
+    * [Pull Request 865](https://github.com/osrf/vrx/pull/865)
+
+1. Replace malicious container registry references with ghcr
+    * [Pull Request 860](https://github.com/osrf/vrx/pull/860)
+
 ### VRX 3.0.4
 
 1. Inject custom vendor packages for Harmonic to avoid Python ABI problems
