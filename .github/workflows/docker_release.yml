@@ -30,11 +30,13 @@ jobs:
         id: docker-build-push
         run: |
           cd docker
-          # Define image types in an array
+          # Define image types in an array, order matters due to inter-dependencies
           IMAGE_TYPES=("base" "builder" "devel")
 
-          # Build images
-          docker compose -f docker-compose.yml build ${IMAGE_TYPES[@]}
+          # Build images sequentially (builder and devel depend on base)
+          for type in "${IMAGE_TYPES[@]}"; do
+            docker compose -f docker-compose.yml build ${type}
+          done
 
           # Tag and push images
           for type in "${IMAGE_TYPES[@]}"; do
