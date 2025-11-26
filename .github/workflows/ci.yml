@@ -4,19 +4,19 @@ on:
   pull_request:
   push:
   schedule:
-    - cron: '0 0 * * *'  # every day to test Jazzy packages updates
+    - cron: '0 0 * * *'  # every day to test Kilted packages updates
 
 jobs:
   build-and-test:
     strategy:
       fail-fast: false
       matrix:
-        ros_distribution: [jazzy]
+        ros_distribution: [kilted]
         include:
-          - ros_distribution: jazzy
+          - ros_distribution: kilted
             # desktop-full provides less time spent in installing 179 pkgs with respect to desktop
             # in exchange for using 500Mb more.
-            ros_container: ghcr.io/sloretz/ros:jazzy-desktop-full
+            ros_container: ghcr.io/sloretz/ros:kilted-desktop-full
 
     name: ${{ matrix.ros_distribution }}
     runs-on: ubuntu-latest
