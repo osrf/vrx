@@ -37,7 +37,7 @@ def parse_from_cli(context, world_name):
 
     robot_urdf = LaunchConfiguration('urdf').perform(context)
 
-    model = Model(robot_name, model_type, position)
+    model = Model(robot_name, model_type, position, world_name)
 
     if robot_urdf and robot_urdf != '':
         model.set_urdf(robot_urdf)

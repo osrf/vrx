@@ -70,15 +70,16 @@
   </xacro:unless>
 
   <!-- === [Un]lock the robot to the world === -->
-  <gazebo>
-    <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
-      <parent_link>$(arg namespace)/base_link</parent_link>
-      <child_model>platform</child_model>
-      <child_link>dummy_upper</child_link>
-      <topic>/vrx/release</topic>
-      <suppress_child_warning>true</suppress_child_warning>
-    </plugin>
-  </gazebo>
+  <xacro:if value="$(arg locked)">
+    <gazebo>
+      <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+        <parent_link>$(arg namespace)/base_link</parent_link>
+        <child_model>platform</child_model>
+        <child_link>dummy_upper</child_link>
+        <topic>/vrx/release</topic>
+      </plugin>
+    </gazebo>
+  </xacro:if>
 
   <!-- === TF === -->
   <!-- Publish robot state information -->

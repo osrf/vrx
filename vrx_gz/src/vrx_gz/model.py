@@ -45,13 +45,27 @@ USVS = [
 
 WAVEFIELD_SIZE = {'sydney_regatta': 1000,}
 
+# Worlds that include a platform model for locking the vehicle at start
+WORLDS_WITH_PLATFORM = [
+    'acoustic_perception_task',
+    'acoustic_tracking_task',
+    'follow_path_task',
+    'gymkhana_task',
+    'navigation_task',
+    'scan_dock_deliver_task',
+    'stationkeeping_task',
+    'wayfinding_task',
+    'wildlife_task',
+]
+
 
 class Model:
 
-    def __init__(self, model_name, model_type, position):
+    def __init__(self, model_name, model_type, position, world_name=''):
         self.model_name = model_name
         self.model_type = model_type
         self.position = position
+        self.world_name = world_name
         self.battery_capacity = 0
         self.wavefield_size = 0
         self.payload = {}
@@ -235,7 +249,9 @@ class Model:
         xacro_command = ['xacro']
         xacro_command.append(self.urdf)
         xacro_command.append(f'namespace:={self.model_name}')
-        xacro_command.append(f'locked:=true')
+        # Only lock the vehicle if the world has a platform model
+        world_has_platform = any(world in self.world_name for world in WORLDS_WITH_PLATFORM)
+        xacro_command.append(f'locked:={str(world_has_platform).lower()}')
         xacro_command.append(f'vrx_sensors_enabled:=true')
         xacro_command.append(f'thruster_config:=H')
         xacro_process = subprocess.Popen(xacro_command,
@@ -334,26 +350,26 @@ class Model:
         self.urdf = urdf
 
     @classmethod
-    def FromConfig(cls, stream):
+    def FromConfig(cls, stream, world_name=''):
         # Generate a Model instance (or multiple instances) from a stream
         # Stream can be either a file input or string
         config = yaml.safe_load(stream)
 
         if type(config) == list:
-            return cls._FromConfigList(config)
+            return cls._FromConfigList(config, world_name)
         elif type(config) == dict:
-            return cls._FromConfigDict(config)
+            return cls._FromConfigDict(config, world_name)
 
     @classmethod
-    def _FromConfigList(cls, entries):
+    def _FromConfigList(cls, entries, world_name=''):
         # Parse an array of configurations
         ret = []
         for entry in entries:
-            ret.append(cls._FromConfigDict(entry))
+            ret.append(cls._FromConfigDict(entry, world_name))
         return ret
 
     @classmethod
-    def _FromConfigDict(cls, config):
+    def _FromConfigDict(cls, config, world_name=''):
         # Parse a single configuration
         if 'model_name' not in config:
             raise RuntimeError('Cannot construct model without model_name in config')
@@ -369,7 +385,7 @@ class Model:
                 xyz = config['position']['xyz']
             if 'rpy' in config['position']:
                 rpy = config['position']['rpy']
-        model = cls(config['model_name'], config['model_type'], [*xyz, *rpy])
+        model = cls(config['model_name'], config['model_type'], [*xyz, *rpy], world_name)
 
         if 'flight_time' in config:
             model.set_flight_time(config['flight_time'])

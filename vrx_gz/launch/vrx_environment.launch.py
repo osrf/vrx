@@ -38,14 +38,14 @@ def launch(context, *args, **kwargs):
     launch_processes = []
 
     models = []
+    world_name, ext = os.path.splitext(world_name)
+    world_name_base = os.path.basename(world_name)
     if config_file and config_file != '':
         with open(config_file, 'r') as stream:
-            models = Model.FromConfig(stream)
+            models = Model.FromConfig(stream, world_name_base)
 
-    world_name, ext = os.path.splitext(world_name)
     launch_processes.extend(vrx_gz.launch.simulation(world_name, headless, 
                                                      gz_paused, extra_gz_args))
-    world_name_base = os.path.basename(world_name)
     launch_processes.extend(vrx_gz.launch.spawn(sim_mode, world_name_base, models, robot))
 
     if (sim_mode == 'bridge' or sim_mode == 'full') and bridge_competition_topics:

@@ -33,7 +33,7 @@ def launch(context, *args, **kwargs):
     launch_processes = []
 
     with open(config_file, 'r') as stream:
-        models = Model.FromConfig(stream)
+        models = Model.FromConfig(stream, world_name)
 
     launch_processes.extend(vrx_gz.launch.spawn(sim_mode, world_name, models, robot))
 
