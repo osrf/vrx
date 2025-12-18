@@ -57,7 +57,11 @@
       <parent link="${namespace}/${name}_base_link"/>
       <child link="${namespace}/${name}_launcher_link"/>
     </joint>
-
+    
+    <gazebo reference="${namespace}/${name}_launcher_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    
     <gazebo reference="${namespace}/${name}_base_link">
       <visual>
         <material>
