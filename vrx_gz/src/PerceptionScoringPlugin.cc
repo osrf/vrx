@@ -379,8 +379,14 @@ void PerceptionScoringPlugin::Implementation::ProcessAttempts(
       if (obj.type == typeReported)
       {
         // Convert geo pose to Gazebo pose.
-        math::Vector3d scVec(_msg.position().x(), _msg.position().y(), 0);
-        math::Vector3d cartVec = this->world->SphericalCoordinates(
+        math::Angle lat;
+        lat.SetDegree(_msg.position().x());
+        math::Angle lon;
+        lon.SetDegree(_msg.position().y());
+        math::CoordinateVector3 scVec =
+          math::CoordinateVector3::Spherical(lat, lon, 0.0);
+
+        auto cartVec = this->world->SphericalCoordinates(
           _ecm)->LocalFromSphericalPosition(scVec);
 
         // Get current pose of the current object.
@@ -388,8 +394,8 @@ void PerceptionScoringPlugin::Implementation::ProcessAttempts(
           _ecm.Component<sim::components::Pose>(obj.entity)->Data();
 
         // 2D Error.
-        double error = sqrt(pow(cartVec.X() - truePose.Pos().X(), 2) +
-                            pow(cartVec.Y() - truePose.Pos().Y(), 2));
+        double error = sqrt(pow((*(*cartVec).X()) - truePose.Pos().X(), 2) +
+                            pow((*(*cartVec).Y()) - truePose.Pos().Y(), 2));
         obj.SetError(error);
       }
     }

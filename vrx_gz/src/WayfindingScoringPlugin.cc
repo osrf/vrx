@@ -146,11 +146,17 @@ void WayfindingScoringPlugin::Configure(const sim::Entity &_entity,
   
     // Convert lat/lon to local
     //  snippet from UUV Simulator SphericalCoordinatesROSInterfacePlugin.cc
-    math::Vector3d scVec(latlonyaw.X(), latlonyaw.Y(), 0.0);
+    math::Angle lat;
+    lat.SetDegree(latlonyaw.X());
+    math::Angle lon;
+    lon.SetDegree(latlonyaw.Y());
+    math::CoordinateVector3 scVec =
+      math::CoordinateVector3::Spherical(lat, lon, 0.0);
   
-    math::Vector3d cartVec =
-      this->dataPtr->sc.LocalFromSphericalPosition(scVec);
-  
+    math::Vector3d cartVec;
+    if (auto resultOpt = this->dataPtr->sc.LocalFromSphericalPosition(scVec))
+      cartVec = *(*resultOpt).AsMetricVector();
+
     cartVec.Z() = latlonyaw.Z();
 
     // build message

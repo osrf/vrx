@@ -735,12 +735,11 @@ void WildlifeScoringPlugin::Implementation::PublishAnimalLocations(
     }
 
     math::Pose3d pose = comp->Data();
-
+    math::CoordinateVector3 cartVec = math::CoordinateVector3::Metric(
+      pose.Pos());
     auto in = math::SphericalCoordinates::CoordinateType::GLOBAL;
     auto out = math::SphericalCoordinates::CoordinateType::SPHERICAL;
-    auto latlon = this->sc.PositionTransform(pose.Pos(), in, out);
-    latlon.X(GZ_RTOD(latlon.X()));
-    latlon.Y(GZ_RTOD(latlon.Y()));
+    auto latlon = this->sc.PositionTransform(cartVec, in, out);
 
     const math::Quaternion<double> orientation = pose.Rot();
 
@@ -764,9 +763,9 @@ void WildlifeScoringPlugin::Implementation::PublishAnimalLocations(
       frame->add_value("unknown");
 
     // pose
-    geoPoseMsg.mutable_position()->set_x(latlon.X());
-    geoPoseMsg.mutable_position()->set_y(latlon.Y());
-    geoPoseMsg.mutable_position()->set_z(latlon.Z());
+    geoPoseMsg.mutable_position()->set_x((*(*latlon).Lat()).Degree());
+    geoPoseMsg.mutable_position()->set_y((*(*latlon).Lon()).Degree());
+    geoPoseMsg.mutable_position()->set_z((*(*latlon).Z()));
     geoPoseMsg.mutable_orientation()->set_x(orientation.X());
     geoPoseMsg.mutable_orientation()->set_y(orientation.Y());
     geoPoseMsg.mutable_orientation()->set_z(orientation.Z());
