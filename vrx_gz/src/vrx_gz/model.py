@@ -17,7 +17,7 @@ import codecs
 import os
 import subprocess
 
-import sdformat14 as sdf
+import sdformat15 as sdf
 
 from ament_index_python.packages import get_package_share_directory
 from ament_index_python.packages import PackageNotFoundError

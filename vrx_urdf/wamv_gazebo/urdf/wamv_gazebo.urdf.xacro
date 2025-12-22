@@ -75,7 +75,7 @@
       <parent_link>$(arg namespace)/base_link</parent_link>
       <child_model>platform</child_model>
       <child_link>dummy_upper</child_link>
-      <topic>/vrx/release</topic>
+      <detach_topic>/vrx/release</detach_topic>
       <suppress_child_warning>true</suppress_child_warning>
     </plugin>
   </gazebo>
