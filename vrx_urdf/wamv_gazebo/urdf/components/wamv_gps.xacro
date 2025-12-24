@@ -31,8 +31,9 @@
       <parent link="${namespace}/base_link" />
       <child link="${namespace}/${name}_link" />
     </joint>
-
-
+    <gazebo reference="${namespace}/${name}_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <gazebo reference="${namespace}/${name}_link">
       <sensor name="navsat" type="navsat">
         <always_on>1</always_on>

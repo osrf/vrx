@@ -18,7 +18,9 @@
       <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${sensor_name}"/>
     </joint>
-
+    <gazebo reference="${namespace}/${sensor_name}_pinger_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <gazebo>
       <plugin
         filename="libAcousticPingerPlugin.so"

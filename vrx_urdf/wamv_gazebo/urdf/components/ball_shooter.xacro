@@ -52,12 +52,17 @@
       <parent link="${namespace}/base_link"/>
       <child link="${namespace}/${name}_base_link"/>
     </joint>
+
+    <gazebo reference="${namespace}/${name}_base_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+
     <joint name="${namespace}/${name}_launcher_joint" type="fixed">
       <origin xyz="-0.0204 0 0.107877" rpy="0 ${pitch} 0"/>
       <parent link="${namespace}/${name}_base_link"/>
       <child link="${namespace}/${name}_launcher_link"/>
     </joint>
-    
+
     <gazebo reference="${namespace}/${name}_launcher_joint">
       <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
