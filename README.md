@@ -61,10 +61,5 @@ Your feedback and participation help make VRX better for everyone — thank you 
 
 ## Contributors
 
-> [!NOTE]
-> The [Honu Robotics](https://honurobotics.com) team, thanks to the
-> sponsorship of [RoboNation](https://robonation.org/) is currently the
-> maintainer of this repository.
-
 We continue to receive important improvements from the community.  We have done our best to document this on our [Contributors Wiki](https://github.com/osrf/vrx/wiki/Contributors).
 
