@@ -26,15 +26,14 @@
 		 iyy="0.006458" iyz="0.0" izz="0.01125"/>
       </inertial>
     </link>
-    <joint name="${namespace}/${name}_joint" type="revolute">
-      <axis xyz="0 0 1"/>
-      <limit effort="1000.0" lower="0.0" upper="0" velocity="0"/>
+    <joint name="${namespace}/${name}_joint" type="fixed">
       <origin xyz="${x} ${y} ${z}" rpy="${R} ${P} ${Y}" />
       <parent link="${namespace}/base_link" />
       <child link="${namespace}/${name}_link" />
     </joint>
-
-
+    <gazebo reference="${namespace}/${name}_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
     <gazebo reference="${namespace}/${name}_link">
       <sensor name="navsat" type="navsat">
         <always_on>1</always_on>
@@ -44,5 +43,3 @@
     </gazebo>
   </xacro:macro>
 </robot>
-
-
