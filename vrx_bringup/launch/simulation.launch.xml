@@ -1,0 +1,28 @@
+<launch>
+
+  <!-- Launch arguments -->
+  <arg name="world" default="open_water.sdf" description="World SDF file name (resolved via GZ_SIM_RESOURCE_PATH)"/>
+  <arg name="use_composition" default="true" description="Use composable nodes for GzServer and bridge"/>
+  <arg name="gazebo_gui" default="true" description="Launch Gazebo GUI"/>
+
+  <!-- 1. Gazebo Server (composable node) -->
+  <gz_server
+      world_sdf_file="$(var world)"
+      container_name="ros_gz_container"
+      create_own_container="true"
+      use_composition="$(var use_composition)">
+  </gz_server>
+
+  <!-- 2. Gazebo GUI (separate process) -->
+  <executable cmd="gz sim -g" output="screen" if="$(var gazebo_gui)"/>
+
+  <!-- 3. ROS-Gazebo bridge (shares ros_gz_container) -->
+  <ros_gz_bridge
+      bridge_name="ros_gz_bridge"
+      config_file="$(find-pkg-share vrx_bringup)/config/ros_gz_bridge.yaml"
+      container_name="ros_gz_container"
+      create_own_container="false"
+      use_composition="$(var use_composition)">
+  </ros_gz_bridge>
+
+</launch>
