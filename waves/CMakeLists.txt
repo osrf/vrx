@@ -28,6 +28,7 @@ find_package(gz-plugin REQUIRED COMPONENTS register)
 add_library(${PROJECT_NAME} SHARED
   src/WaveSimulation.cc
   src/GerstnerWaveSimulation.cc
+  src/FFTWaveSimulation.cc
   src/components.cc
 )
 target_include_directories(${PROJECT_NAME}
@@ -114,6 +115,9 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(eval_test test/eval_test.cc)
   target_link_libraries(eval_test ${PROJECT_NAME})
+
+  ament_add_gtest(fft_test test/fft_test.cc)
+  target_link_libraries(fft_test ${PROJECT_NAME})
 endif()
 
 ament_package()

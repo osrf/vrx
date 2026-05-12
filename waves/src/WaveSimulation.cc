@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "gz/sim/waves/FFTWaveSimulation.hh"
 #include "gz/sim/waves/GerstnerWaveSimulation.hh"
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -26,9 +27,18 @@ std::shared_ptr<IWaveSimulation> CreateWaveSimulation(
   {
     return std::make_shared<GerstnerWaveSimulation>(_params);
   }
-  // FFT will be wired here at Stage 2.
+  if (_algorithm == "fft")
+  {
+    // Sensible defaults for tile size / grid resolution / seed. These will
+    // become SDF-tunable once Stage 3 wires FFT into the Waves system.
+    constexpr double kDefaultTileSize = 200.0;
+    constexpr std::size_t kDefaultGridSize = 128;
+    constexpr std::uint32_t kDefaultSeed = 0;
+    return std::make_shared<FFTWaveSimulation>(
+      _params, kDefaultTileSize, kDefaultGridSize, kDefaultSeed);
+  }
   std::cerr << "[CreateWaveSimulation] unknown algorithm '"
-            << _algorithm << "'; supported: 'gerstner'" << std::endl;
+            << _algorithm << "'; supported: 'gerstner', 'fft'" << std::endl;
   return nullptr;
 }
 
