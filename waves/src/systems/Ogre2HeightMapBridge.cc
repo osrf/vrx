@@ -33,6 +33,11 @@ namespace
   {
     Ogre::TextureGpu *texture{nullptr};
     Ogre::TextureGpuManager *manager{nullptr};
+    // Persistent staging texture, reused on every Upload(). Acquiring a
+    // fresh one per frame from Ogre's pool was causing rapid pool growth
+    // and "Texture memory budget exceeded. Stalling GPU." stalls that
+    // visibly froze the GUI for a couple of minutes.
+    Ogre::StagingTexture *staging{nullptr};
     Ogre::HlmsSamplerblock samplerblock;
     std::size_t gridSize{0};
     bool ready{false};
@@ -123,6 +128,34 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   texUnit->setTexture(hm->texture);
   texUnit->setSamplerblock(hm->samplerblock);
   hm->ready = true;
+
+  // Allocate one persistent staging texture sized for the full heightmap
+  // and reuse it on every Upload(). Acquiring a fresh staging texture per
+  // frame leaks them into Ogre's pool, which then trips the engine's
+  // "Texture memory budget exceeded" stall and visibly hangs the GUI.
+  hm->staging = hm->manager->getStagingTexture(
+      static_cast<Ogre::uint32>(_gridSize),
+      static_cast<Ogre::uint32>(_gridSize),
+      1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+
+  // Zero the heightmap immediately so the shader doesn't sample garbage
+  // GPU memory in the brief window between the texture going Resident and
+  // the first frame's CPU upload. Without this the surface can flash to
+  // arbitrary positions for a frame or two.
+  if (hm->texture->getResidencyStatus() == Ogre::GpuResidency::Resident &&
+      hm->staging)
+  {
+    hm->staging->startMapRegion();
+    Ogre::TextureBox box =
+        hm->staging->mapRegion(static_cast<Ogre::uint32>(_gridSize),
+                               static_cast<Ogre::uint32>(_gridSize),
+                               1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+    const std::size_t bytes =
+        static_cast<std::size_t>(_gridSize) * _gridSize * 4u * sizeof(float);
+    std::memset(box.at(0, 0, 0), 0, bytes);
+    hm->staging->stopMapRegion();
+    hm->staging->upload(box, hm->texture, 0u, nullptr, nullptr);
+  }
   return hm;
 }
 
@@ -143,12 +176,12 @@ int waves_ogre2_heightmap_upload(
   }
   if (hm->texture->getResidencyStatus() != Ogre::GpuResidency::Resident)
     return 0;
+  if (!hm->staging)
+    return 0;
 
-  Ogre::StagingTexture *staging = hm->manager->getStagingTexture(
-      N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
-  staging->startMapRegion();
+  hm->staging->startMapRegion();
   Ogre::TextureBox box =
-      staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+      hm->staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
 
   // Pack one RGBA32F texel per (row, col): (η, Dx, Dy, 0).
   for (int row = 0; row < N; ++row)
@@ -166,9 +199,8 @@ int waves_ogre2_heightmap_upload(
     }
   }
 
-  staging->stopMapRegion();
-  staging->upload(box, hm->texture, 0u, nullptr, nullptr);
-  hm->manager->removeStagingTexture(staging);
+  hm->staging->stopMapRegion();
+  hm->staging->upload(box, hm->texture, 0u, nullptr, nullptr);
   return 1;
 }
 
@@ -187,17 +219,26 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
   // engine shuts down its TextureGpuManager before our owners run their
   // destructors). Otherwise the unhandled exception escapes through the
   // extern "C" boundary and aborts the process.
-  if (hm->manager && hm->texture)
+  if (hm->manager)
   {
-    try
+    if (hm->staging)
     {
-      hm->manager->destroyTexture(hm->texture);
+      try { hm->manager->removeStagingTexture(hm->staging); }
+      catch (const Ogre::Exception &) { /* engine already torn down */ }
+      hm->staging = nullptr;
     }
-    catch (const Ogre::Exception &e)
+    if (hm->texture)
     {
-      gzdbg << "[waves_ogre2_heightmap] destroyTexture threw during "
-            << "shutdown (likely already destroyed): " << e.getDescription()
-            << std::endl;
+      try
+      {
+        hm->manager->destroyTexture(hm->texture);
+      }
+      catch (const Ogre::Exception &e)
+      {
+        gzdbg << "[waves_ogre2_heightmap] destroyTexture threw during "
+              << "shutdown (likely already destroyed): "
+              << e.getDescription() << std::endl;
+      }
     }
   }
   delete hm;
