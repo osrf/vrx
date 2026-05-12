@@ -38,6 +38,7 @@
 #include <sdf/Element.hh>
 
 #include "gz/sim/components/Wavefield.hh"
+#include "gz/sim/waves/GerstnerWaveSimulation.hh"
 #include "gz/sim/waves/Wavefield.hh"
 
 namespace gz::sim::systems
@@ -415,31 +416,47 @@ void WaterVisual::PreUpdate(
     return;
   }
   const auto &data = wfComp->Data();
+
+  // Visual shader is Gerstner-specific. For other backends (e.g. FFT)
+  // the visual path will go through a heightmap texture instead; skip
+  // for now.
+  const auto *gerstner =
+    dynamic_cast<const waves::GerstnerWaveSimulation *>(data.simulation.get());
+  if (!gerstner)
+  {
+    if (this->dataPtr->haveWavefield)
+      gzwarn << "[WaterVisual] backend '" << data.algorithm
+             << "' has no shader path yet" << std::endl;
+    this->dataPtr->haveWavefield = false;
+    return;
+  }
+
   if (!this->dataPtr->haveWavefield)
   {
-    gzmsg << "[WaterVisual] Wavefield component found (generation="
-          << data.generation << ", N=" << data.amplitudes.size()
-          << ")" << std::endl;
+    gzmsg << "[WaterVisual] Wavefield component found (algorithm="
+          << data.algorithm
+          << ", N=" << gerstner->Amplitudes().size()
+          << ", generation=" << data.generation << ")" << std::endl;
   }
   this->dataPtr->haveWavefield = true;
   if (data.generation == this->dataPtr->cachedGeneration)
     return;
-  gzdbg << "[WaterVisual] caching new wavefield generation="
-        << data.generation << std::endl;
 
   this->dataPtr->cachedGeneration = data.generation;
-  this->dataPtr->cachedTau = static_cast<float>(data.params.tau);
-  this->dataPtr->cachedNwaves = static_cast<int>(data.amplitudes.size());
+  this->dataPtr->cachedTau = static_cast<float>(gerstner->Tau());
+  this->dataPtr->cachedNwaves =
+    static_cast<int>(gerstner->Amplitudes().size());
   this->dataPtr->cachedAmplitudes.assign(
-    data.amplitudes.begin(), data.amplitudes.end());
+    gerstner->Amplitudes().begin(), gerstner->Amplitudes().end());
   this->dataPtr->cachedWavenumbers.assign(
-    data.wavenumbers.begin(), data.wavenumbers.end());
+    gerstner->Wavenumbers().begin(), gerstner->Wavenumbers().end());
   this->dataPtr->cachedOmegas.assign(
-    data.angularFrequencies.begin(), data.angularFrequencies.end());
+    gerstner->AngularFrequencies().begin(),
+    gerstner->AngularFrequencies().end());
   this->dataPtr->cachedSteepnesses.assign(
-    data.steepnesses.begin(), data.steepnesses.end());
+    gerstner->Steepnesses().begin(), gerstner->Steepnesses().end());
   this->dataPtr->cachedDirections.clear();
-  for (const auto &d : data.directions)
+  for (const auto &d : gerstner->Directions())
   {
     this->dataPtr->cachedDirections.emplace_back(
       static_cast<float>(d.X()), static_cast<float>(d.Y()));

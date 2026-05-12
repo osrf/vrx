@@ -16,7 +16,7 @@
 #include <sdf/Element.hh>
 
 #include "gz/sim/components/Wavefield.hh"
-#include "gz/sim/waves/WaveSpectrum.hh"
+#include "gz/sim/waves/WaveSimulation.hh"
 #include "gz/sim/waves/Wavefield.hh"
 
 namespace gz::sim::systems
@@ -45,6 +45,10 @@ class Waves::Implementation
 
 void Waves::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
 {
+  // Top-level <algorithm> selects which backend to instantiate.
+  this->data.algorithm =
+    _sdf->Get<std::string>("algorithm", this->data.algorithm).first;
+
   if (!_sdf->HasElement("wave"))
   {
     gzwarn << "[Waves] no <wave> element found; using defaults" << std::endl;
@@ -81,7 +85,15 @@ void Waves::Configure(
   this->dataPtr->ParseSdf(
     std::const_pointer_cast<sdf::Element>(_sdf));
 
-  waves::SampleSpectrum(this->dataPtr->data);
+  this->dataPtr->data.simulation = waves::CreateWaveSimulation(
+    this->dataPtr->data.algorithm, this->dataPtr->data.params);
+  if (!this->dataPtr->data.simulation)
+  {
+    gzerr << "[Waves] failed to create simulation for algorithm '"
+          << this->dataPtr->data.algorithm << "'; aborting" << std::endl;
+    return;
+  }
+  this->dataPtr->data.generation = 1;
 
   this->dataPtr->worldEnt = worldEntity(_ecm);
   if (this->dataPtr->worldEnt == kNullEntity)
@@ -97,8 +109,8 @@ void Waves::Configure(
 
   gzmsg << "[Waves] wavefield component created on world entity "
         << this->dataPtr->worldEnt
-        << " (model=" << this->dataPtr->data.params.model
-        << ", N=" << this->dataPtr->data.amplitudes.size()
+        << " (algorithm=" << this->dataPtr->data.algorithm
+        << ", spectrum=" << this->dataPtr->data.params.model
         << ", generation=" << this->dataPtr->data.generation << ")"
         << std::endl;
 }

@@ -23,10 +23,11 @@ find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
 
 # --------------------------------------------------------------------------
-# Core spectrum library (header-shared math + SampleSpectrum).
+# Core wave-simulation library: backend interface, factory, Gerstner impl.
 # --------------------------------------------------------------------------
 add_library(${PROJECT_NAME} SHARED
-  src/WaveSpectrum.cc
+  src/WaveSimulation.cc
+  src/GerstnerWaveSimulation.cc
   src/components.cc
 )
 target_include_directories(${PROJECT_NAME}
