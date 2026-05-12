@@ -87,6 +87,25 @@
       </graded_buoyancy>
     </plugin>
 
+    <plugin filename="gz-sim-waves-system"
+            name="gz::sim::systems::Waves">
+      <wave>
+        <model>PMS</model>
+        <number>3</number>
+        <!-- Longer period → longer wavelength. The water mesh has vertices
+             ~30 m apart; we need at least several vertices per wavelength
+             for the surface to displace visibly. 12 s period gives a
+             wavelength of about 225 m. -->
+        <period>12.0</period>
+        <gain>2.0</gain>
+        <direction>0.0</direction>
+        <angle>0.4</angle>
+        <scale>1.1</scale>
+        <steepness>0.0</steepness>
+        <tau>2.0</tau>
+      </wave>
+    </plugin>
+
     <!-- GUI -->
     <gui fullscreen="0">
       <!-- 3D scene -->
@@ -100,7 +119,11 @@
         <scene>scene</scene>
         <ambient_light>0.4 0.4 0.4</ambient_light>
         <background_color>0.0 0.7 0.8</background_color>
-        <camera_pose>3 3 0 0 0.3 -2.36</camera_pose>
+        <!-- Sailor's-eye view: 15 m back from the buoy at 2 m above the
+             water, looking along +X toward the buoy with a slight downward
+             tilt. Wave displacements at this distance and angle look like
+             real ocean swells. -->
+        <camera_pose>-15 0 2 0 0.13 0</camera_pose>
         <camera_clip>
           <near>0.1</near>
           <far>50000</far>
@@ -264,32 +287,18 @@
       </plugin>
     </gui>
 
-    <!-- Portuguese Ledge Tile 1 - DEM heightmap from Gazebo Fuel
-         Source: MBARI/OpenRobotics, Monterey Bay bathymetry
-         Tile covers 1000m x 1000m, depth range ~0 to -25m -->
+    <!-- Water surface visual (Gerstner-shader-displaced mesh). -->
     <include>
-      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Portuguese Ledge</uri>
+      <uri>model://water_surface</uri>
     </include>
 
-    <!-- Water surface visual (semi-transparent plane at z=0) -->
-    <model name="water_surface">
-      <static>true</static>
-      <link name="link">
-        <visual name="visual">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>1000 1000</size>
-            </plane>
-          </geometry>
-          <transparency>0.6</transparency>
-          <material>
-            <ambient>0.0 0.2 0.4 1</ambient>
-            <diffuse>0.0 0.3 0.6 1</diffuse>
-          </material>
-        </visual>
-      </link>
-    </model>
+    <!-- Test buoy: stubby horizontal cylinder with WaveBuoyancy attached.
+         Floats and bobs on the wavefield. -->
+    <include>
+      <name>test_buoy</name>
+      <pose>0 0 2 0 0 0</pose>
+      <uri>model://test_buoy</uri>
+    </include>
 
   </world>
 </sdf>

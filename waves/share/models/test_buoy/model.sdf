@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<sdf version="1.10">
+  <model name="test_buoy">
+    <!-- Stubby horizontal cylinder with a low center of gravity. The COG
+         offset below the geometric center provides the "keel effect" that
+         keeps a horizontal cylinder from spinning freely around its long
+         axis. Combined with 4 off-axis buoyancy points (one per corner of
+         the bounding rectangle when seen from above), this gives both roll
+         and pitch restoring moments. -->
+    <link name="link">
+      <inertial>
+        <!-- Pull the center of mass below the geometric center for stability. -->
+        <pose>0 0 -0.15 0 0 0</pose>
+        <mass>10.0</mass>
+        <inertia>
+          <ixx>0.42</ixx>
+          <iyy>0.34</iyy>
+          <izz>0.34</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <pose>0 0 0 0 1.5707963 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.3</radius>
+            <length>0.6</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <pose>0 0 0 0 1.5707963 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.3</radius>
+            <length>0.6</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>1 0.5 0 1</ambient>
+          <diffuse>1 0.5 0 1</diffuse>
+        </material>
+      </visual>
+    </link>
+
+    <plugin filename="gz-sim-wave-buoyancy-system"
+            name="gz::sim::systems::WaveBuoyancy">
+      <link_name>link</link_name>
+      <hull_length>0.6</hull_length>
+      <hull_radius>0.3</hull_radius>
+      <fluid_level>0</fluid_level>
+      <fluid_density>1025</fluid_density>
+      <!-- 4 sample points, one near each corner of the hull viewed from
+           above. Off-axis points provide a roll-restoring moment that
+           co-axial points (along the cylinder's long axis only) can't. -->
+      <points>
+        <point> 0.15  0.15 0</point>
+        <point> 0.15 -0.15 0</point>
+        <point>-0.15  0.15 0</point>
+        <point>-0.15 -0.15 0</point>
+      </points>
+    </plugin>
+
+    <!-- Gazebo's built-in Fossen-style hydrodynamics. Provides linear +
+         quadratic damping so the buoy doesn't accumulate energy from wave
+         forces forever. Values are negative per Fossen convention. -->
+    <plugin filename="gz-sim-hydrodynamics-system"
+            name="gz::sim::systems::Hydrodynamics">
+      <link_name>link</link_name>
+      <xU>-50</xU>
+      <yV>-50</yV>
+      <zW>-100</zW>
+      <kP>-15</kP>
+      <mQ>-15</mQ>
+      <nR>-15</nR>
+      <xUabsU>-30</xUabsU>
+      <yVabsV>-30</yVabsV>
+      <zWabsW>-60</zWabsW>
+      <kPabsP>-5</kPabsP>
+      <mQabsQ>-5</mQabsQ>
+      <nRabsR>-5</nRabsR>
+    </plugin>
+  </model>
+</sdf>
