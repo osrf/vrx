@@ -13,6 +13,7 @@
                 name="gz::sim::systems::WaterVisual">
           <shader>
             <vertex>shaders/gerstner_waves_vs_330.glsl</vertex>
+            <fft_vertex>shaders/fft_water_vs_330.glsl</fft_vertex>
             <fragment>shaders/water_fs_330.glsl</fragment>
             <parameters>
               <rescale>0.5</rescale>

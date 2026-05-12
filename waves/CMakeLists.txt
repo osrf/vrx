@@ -68,10 +68,49 @@ endfunction()
 
 add_waves_system(gz-sim-waves-system        src/systems/Waves.cc)
 add_waves_system(gz-sim-water-visual-system src/systems/WaterVisual.cc)
+# Thin dlopen-based wrapper for the Ogre2 heightmap bridge. Compiles
+# without any Ogre2 headers, so WaterVisual's plugin .so stays Ogre2-free.
+target_sources(gz-sim-water-visual-system
+  PRIVATE
+    src/systems/HeightMapTexture.cc
+)
+
+find_package(gz-rendering REQUIRED COMPONENTS ogre2)
+find_package(gz_ogre_next_vendor REQUIRED)
+
+# The Ogre Next dynamic heightmap-texture helper for the FFT visual path
+# lives in a SEPARATE shared library. Linking it directly into WaterVisual
+# would force the plugin's DT_NEEDED to include libgz-rendering-ogre2.so,
+# which interferes with gz-rendering's own engine-plugin loader (same SONAME
+# already in process when gz-rendering tries to dlopen its engine plugin →
+# the engine never initialises and the GUI shows a default-material plane).
+# WaterVisual loads this bridge on demand via dlopen, so its symbols never
+# enter the WaterVisual plugin's link map. This mirrors the asv_wave_sim /
+# gz_fft_waves split (their "rendering-ogre2" component is isolated from
+# the visual plugin in exactly the same way).
+add_library(waves-ogre2-bridge SHARED
+  src/systems/Ogre2HeightMapBridge.cc
+)
+target_link_libraries(waves-ogre2-bridge
+  PRIVATE
+    gz-rendering::gz-rendering
+    gz-rendering::ogre2
+    gz-common::gz-common
+)
+target_include_directories(waves-ogre2-bridge PRIVATE
+  /opt/ros/rolling/opt/gz_ogre_next_vendor/include/OGRE-Next
+)
+install(
+  TARGETS waves-ogre2-bridge
+  LIBRARY DESTINATION lib
+)
+
+# WaterVisual itself links only the engine-agnostic gz-rendering core.
 target_link_libraries(gz-sim-water-visual-system
   PRIVATE
     gz-rendering::gz-rendering
     gz-common::gz-common
+    ${CMAKE_DL_LIBS}
 )
 add_waves_system(gz-sim-wave-buoyancy-system src/systems/WaveBuoyancy.cc)
 

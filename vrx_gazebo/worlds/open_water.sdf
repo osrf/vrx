@@ -90,9 +90,8 @@
     <plugin filename="gz-sim-waves-system"
             name="gz::sim::systems::Waves">
       <!-- Switch between "gerstner" (analytic, has shader path) and "fft"
-           (stochastic; Stage 3 has physics-only integration, visual falls
-           back gracefully). -->
-      <algorithm>gerstner</algorithm>
+           (stochastic; visual samples a CPU-generated heightmap each tick). -->
+      <algorithm>fft</algorithm>
       <update_rate>30</update_rate>
       <wave>
         <model>PMS</model>

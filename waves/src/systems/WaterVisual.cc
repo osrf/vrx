@@ -38,8 +38,11 @@
 #include <sdf/Element.hh>
 
 #include "gz/sim/components/Wavefield.hh"
+#include "gz/sim/waves/FFTWaveSimulation.hh"
 #include "gz/sim/waves/GerstnerWaveSimulation.hh"
 #include "gz/sim/waves/Wavefield.hh"
+
+#include "HeightMapTexture.hh"
 
 namespace gz::sim::systems
 {
@@ -60,8 +63,9 @@ class WaterVisual::Implementation
   public: void OnRenderTeardown();
 
   // ---- Configuration (set once at Configure) ----
-  public: std::string vertexShaderUri;
-  public: std::string fragmentShaderUri;
+  public: std::string vertexShaderUri;        ///< Gerstner vertex shader
+  public: std::string fftVertexShaderUri;     ///< FFT vertex shader (optional)
+  public: std::string fragmentShaderUri;      ///< Shared fragment shader
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
   public: float rescale{0.125f};
@@ -93,6 +97,13 @@ class WaterVisual::Implementation
     {1.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 0.0f}};
   public: float cachedTau{2.0f};
   public: float currentSimTime{0.0f};
+
+  // ---- FFT path state ----
+  public: bool useFft{false};
+  public: std::shared_ptr<gz::sim::waves::FFTWaveSimulation> fftSim;
+  public: std::unique_ptr<HeightMapTexture> heightMap;
+  public: float cachedTileSize{200.0f};
+  public: int   cachedGridSize{128};
 
   // ---- Render-thread state ----
   public: gz::rendering::ScenePtr scene;
@@ -137,9 +148,13 @@ bool WaterVisual::Implementation::ResolveVisual()
 
   if (!this->material)
   {
-    gzmsg << "[WaterVisual] creating material with shaders" << std::endl;
+    const std::string &vsUri = this->useFft && !this->fftVertexShaderUri.empty()
+      ? this->fftVertexShaderUri
+      : this->vertexShaderUri;
+    gzmsg << "[WaterVisual] creating material with shaders ("
+          << (this->useFft ? "fft" : "gerstner") << ")" << std::endl;
     auto mat = this->scene->CreateMaterial();
-    mat->SetVertexShader(this->vertexShaderUri);
+    mat->SetVertexShader(vsUri);
     mat->SetFragmentShader(this->fragmentShaderUri);
 
     // Inherit CastShadows from the visual's existing material (mirrors the
@@ -166,6 +181,20 @@ bool WaterVisual::Implementation::ResolveVisual()
     // material creation. Ogre Next compiles/caches the material the first
     // time it's used; uniforms must be present at that point.
     this->UploadUniforms();
+
+    // FFT path also needs a dynamic heightmap texture bound to the material.
+    if (this->useFft)
+    {
+      this->heightMap = std::make_unique<HeightMapTexture>(
+        this->scene, this->material,
+        static_cast<std::size_t>(this->cachedGridSize),
+        "wavefield_heightmap_" + std::to_string(this->visualEntity));
+      if (!this->heightMap->Ready())
+      {
+        gzerr << "[WaterVisual] heightmap texture failed to initialize"
+              << std::endl;
+      }
+    }
   }
   return this->material != nullptr;
 }
@@ -174,12 +203,21 @@ void WaterVisual::Implementation::UploadUniforms()
 {
   if (!this->material)
     return;
-  gzmsg << "[WaterVisual] uploading uniforms: Nwaves="
-        << std::min(this->cachedNwaves, 3)
-        << " a0=" << (this->cachedAmplitudes.size() > 0 ? this->cachedAmplitudes[0] : 0.0)
-        << " k0=" << (this->cachedWavenumbers.size() > 0 ? this->cachedWavenumbers[0] : 0.0)
-        << " w0=" << (this->cachedOmegas.size() > 0 ? this->cachedOmegas[0] : 0.0)
-        << " tau=" << this->cachedTau << std::endl;
+  if (this->useFft)
+  {
+    gzmsg << "[WaterVisual] uploading uniforms (fft): tileSize="
+          << this->cachedTileSize << " gridSize=" << this->cachedGridSize
+          << " tau=" << this->cachedTau << std::endl;
+  }
+  else
+  {
+    gzmsg << "[WaterVisual] uploading uniforms (gerstner): Nwaves="
+          << std::min(this->cachedNwaves, 3)
+          << " a0=" << (this->cachedAmplitudes.size() > 0 ? this->cachedAmplitudes[0] : 0.0)
+          << " k0=" << (this->cachedWavenumbers.size() > 0 ? this->cachedWavenumbers[0] : 0.0)
+          << " w0=" << (this->cachedOmegas.size() > 0 ? this->cachedOmegas[0] : 0.0)
+          << " tau=" << this->cachedTau << std::endl;
+  }
 
   auto vsParams = this->material->VertexShaderParams();
   auto fsParams = this->material->FragmentShaderParams();
@@ -188,7 +226,7 @@ void WaterVisual::Implementation::UploadUniforms()
   (*vsParams)["worldviewproj_matrix"] = 1;
   (*vsParams)["camera_position_object_space"] = 1;
 
-  // Static scalars/vec2s.
+  // Static scalars/vec2s shared by both shaders.
   (*vsParams)["rescale"] = this->rescale;
   {
     float v[2] = {static_cast<float>(this->bumpScale.X()),
@@ -204,47 +242,57 @@ void WaterVisual::Implementation::UploadUniforms()
   }
   (*vsParams)["tau"] = this->cachedTau;
 
-  // Pack up to 3 components into vec3 / per-direction vec2 uniforms, matching
-  // the conservative GLSL layout that Ogre Next compiles reliably.
-  // Extra components beyond 3 are dropped on the visual side; physics
-  // consumers can still see them via the component arrays.
-  float amp[3]   = {0.0f, 0.0f, 0.0f};
-  float knum[3]  = {0.0f, 0.0f, 0.0f};
-  float om[3]    = {0.0f, 0.0f, 0.0f};
-  float steep[3] = {0.0f, 0.0f, 0.0f};
-  float d0[2]    = {1.0f, 0.0f};
-  float d1[2]    = {1.0f, 0.0f};
-  float d2[2]    = {1.0f, 0.0f};
-  const int n = std::min(this->cachedNwaves, 3);
-  for (int i = 0; i < n; ++i)
+  if (this->useFft)
   {
-    amp[i]   = this->cachedAmplitudes[i];
-    knum[i]  = this->cachedWavenumbers[i];
-    om[i]    = this->cachedOmegas[i];
-    steep[i] = this->cachedSteepnesses[i];
+    // FFT shader: heightmap texture (bound separately by HeightMapTexture)
+    // plus the geometry of the periodic tile.
+    (*vsParams)["tileSize"] = this->cachedTileSize;
+    (*vsParams)["gridSize"] = this->cachedGridSize;
   }
-  if (n > 0) { d0[0] = this->cachedDirections[0].X();
-               d0[1] = this->cachedDirections[0].Y(); }
-  if (n > 1) { d1[0] = this->cachedDirections[1].X();
-               d1[1] = this->cachedDirections[1].Y(); }
-  if (n > 2) { d2[0] = this->cachedDirections[2].X();
-               d2[1] = this->cachedDirections[2].Y(); }
+  else
+  {
+    // Pack up to 3 components into vec3 / per-direction vec2 uniforms,
+    // matching the conservative GLSL layout that Ogre Next compiles
+    // reliably. Extra components beyond 3 are dropped on the visual side;
+    // physics consumers can still see them via the component arrays.
+    float amp[3]   = {0.0f, 0.0f, 0.0f};
+    float knum[3]  = {0.0f, 0.0f, 0.0f};
+    float om[3]    = {0.0f, 0.0f, 0.0f};
+    float steep[3] = {0.0f, 0.0f, 0.0f};
+    float d0[2]    = {1.0f, 0.0f};
+    float d1[2]    = {1.0f, 0.0f};
+    float d2[2]    = {1.0f, 0.0f};
+    const int n = std::min(this->cachedNwaves, 3);
+    for (int i = 0; i < n; ++i)
+    {
+      amp[i]   = this->cachedAmplitudes[i];
+      knum[i]  = this->cachedWavenumbers[i];
+      om[i]    = this->cachedOmegas[i];
+      steep[i] = this->cachedSteepnesses[i];
+    }
+    if (n > 0) { d0[0] = this->cachedDirections[0].X();
+                 d0[1] = this->cachedDirections[0].Y(); }
+    if (n > 1) { d1[0] = this->cachedDirections[1].X();
+                 d1[1] = this->cachedDirections[1].Y(); }
+    if (n > 2) { d2[0] = this->cachedDirections[2].X();
+                 d2[1] = this->cachedDirections[2].Y(); }
 
-  (*vsParams)["Nwaves"] = n;
-  (*vsParams)["amplitude"].InitializeBuffer(3);
-  (*vsParams)["amplitude"].UpdateBuffer(amp);
-  (*vsParams)["wavenumber"].InitializeBuffer(3);
-  (*vsParams)["wavenumber"].UpdateBuffer(knum);
-  (*vsParams)["omega"].InitializeBuffer(3);
-  (*vsParams)["omega"].UpdateBuffer(om);
-  (*vsParams)["steepness"].InitializeBuffer(3);
-  (*vsParams)["steepness"].UpdateBuffer(steep);
-  (*vsParams)["dir0"].InitializeBuffer(2);
-  (*vsParams)["dir0"].UpdateBuffer(d0);
-  (*vsParams)["dir1"].InitializeBuffer(2);
-  (*vsParams)["dir1"].UpdateBuffer(d1);
-  (*vsParams)["dir2"].InitializeBuffer(2);
-  (*vsParams)["dir2"].UpdateBuffer(d2);
+    (*vsParams)["Nwaves"] = n;
+    (*vsParams)["amplitude"].InitializeBuffer(3);
+    (*vsParams)["amplitude"].UpdateBuffer(amp);
+    (*vsParams)["wavenumber"].InitializeBuffer(3);
+    (*vsParams)["wavenumber"].UpdateBuffer(knum);
+    (*vsParams)["omega"].InitializeBuffer(3);
+    (*vsParams)["omega"].UpdateBuffer(om);
+    (*vsParams)["steepness"].InitializeBuffer(3);
+    (*vsParams)["steepness"].UpdateBuffer(steep);
+    (*vsParams)["dir0"].InitializeBuffer(2);
+    (*vsParams)["dir0"].UpdateBuffer(d0);
+    (*vsParams)["dir1"].InitializeBuffer(2);
+    (*vsParams)["dir1"].UpdateBuffer(d1);
+    (*vsParams)["dir2"].InitializeBuffer(2);
+    (*vsParams)["dir2"].UpdateBuffer(d2);
+  }
 
   // Fragment shader: colors + lighting params + textures.
   (*fsParams)["hdrMultiplier"] = this->hdrMultiplier;
@@ -294,6 +342,17 @@ void WaterVisual::Implementation::OnSceneUpdate()
   {
     auto vsParams = this->material->VertexShaderParams();
     (*vsParams)["t"] = this->currentSimTime;
+  }
+
+  // FFT visual path: re-evaluate the height field for the current sim time
+  // on the GUI side, then upload it to the GPU heightmap texture. The GUI
+  // and server own independent FFTWaveSimulation instances seeded from the
+  // same `<seed>` in SDF, so the two grids agree bit-for-bit at each t.
+  if (this->useFft && this->fftSim && this->heightMap &&
+      this->heightMap->Ready())
+  {
+    this->fftSim->Update(static_cast<double>(this->currentSimTime));
+    this->heightMap->Upload(this->fftSim->HeightGrid());
   }
 }
 
@@ -347,6 +406,11 @@ void WaterVisual::Configure(
     resolve(shader->GetElement("vertex")->Get<std::string>());
   this->dataPtr->fragmentShaderUri =
     resolve(shader->GetElement("fragment")->Get<std::string>());
+  if (shader->HasElement("fft_vertex"))
+  {
+    this->dataPtr->fftVertexShaderUri =
+      resolve(shader->GetElement("fft_vertex")->Get<std::string>());
+  }
 
   if (shader->HasElement("parameters"))
   {
@@ -417,9 +481,29 @@ void WaterVisual::PreUpdate(
   }
   const auto &data = wfComp->Data();
 
-  // Visual shader is Gerstner-specific. For other backends (e.g. FFT)
-  // the visual path will go through a heightmap texture instead; skip
-  // for now.
+  // Dispatch on backend type. The FFT path samples a heightmap texture
+  // uploaded each frame; the Gerstner path uploads per-component vec3
+  // uniforms.
+  if (auto fft = std::dynamic_pointer_cast<waves::FFTWaveSimulation>(
+        data.simulation))
+  {
+    if (!this->dataPtr->haveWavefield)
+    {
+      gzmsg << "[WaterVisual] Wavefield component found (algorithm=fft, "
+            << "tile=" << fft->TileSizeMeters() << " m, "
+            << "grid=" << fft->GridSize() << ", generation="
+            << data.generation << ")" << std::endl;
+    }
+    this->dataPtr->useFft = true;
+    this->dataPtr->fftSim = fft;
+    this->dataPtr->cachedTileSize = static_cast<float>(fft->TileSizeMeters());
+    this->dataPtr->cachedGridSize = static_cast<int>(fft->GridSize());
+    this->dataPtr->cachedTau = static_cast<float>(data.params.tau);
+    this->dataPtr->haveWavefield = true;
+    this->dataPtr->cachedGeneration = data.generation;
+    return;
+  }
+
   const auto *gerstner =
     dynamic_cast<const waves::GerstnerWaveSimulation *>(data.simulation.get());
   if (!gerstner)
