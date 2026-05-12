@@ -157,6 +157,17 @@ if(BUILD_TESTING)
 
   ament_add_gtest(fft_test test/fft_test.cc)
   target_link_libraries(fft_test ${PROJECT_NAME})
+
+  # Some Gazebo Jetty source builds ship a `libgz-transport.so` whose
+  # DT_NEEDED libzenohc.so isn't accompanied by a DT_RUNPATH/RPATH. ld then
+  # can't walk the transitive shared-lib graph to find Zenoh's symbols
+  # while linking our tests, even though libzenohc.so sits in /usr/lib and
+  # resolves cleanly at runtime. Tolerate that here so the tests build
+  # against custom Gazebo workspaces without further env setup.
+  foreach(_t IN ITEMS eval_test fft_test)
+    target_link_options(${_t} PRIVATE
+      "LINKER:--unresolved-symbols=ignore-in-shared-libs")
+  endforeach()
 endif()
 
 ament_package()

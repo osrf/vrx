@@ -11,6 +11,7 @@
 #include "WaterVisual.hh"
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <list>
@@ -104,6 +105,7 @@ class WaterVisual::Implementation
   public: std::unique_ptr<HeightMapTexture> heightMap;
   public: float cachedTileSize{200.0f};
   public: int   cachedGridSize{128};
+  public: float cachedChopFactor{-1.0f};
 
   // ---- Render-thread state ----
   public: gz::rendering::ScenePtr scene;
@@ -185,10 +187,21 @@ bool WaterVisual::Implementation::ResolveVisual()
     // FFT path also needs a dynamic heightmap texture bound to the material.
     if (this->useFft)
     {
+      // Destroy any previous instance first so its GPU texture frees up
+      // before we ask Ogre Next to create the new one. Otherwise the new
+      // `createOrRetrieveTexture` returns the still-Resident texture and
+      // `setResolution` asserts (`mResidencyStatus == OnStorage`).
+      this->heightMap.reset();
+      // Use a process-unique texture name so we never collide with a
+      // stale entry in `TextureGpuManager` left behind by a previous
+      // engine teardown/reload cycle.
+      static std::atomic<std::uint64_t> heightMapCounter{0};
+      const auto seq = heightMapCounter.fetch_add(1);
       this->heightMap = std::make_unique<HeightMapTexture>(
         this->scene, this->material,
         static_cast<std::size_t>(this->cachedGridSize),
-        "wavefield_heightmap_" + std::to_string(this->visualEntity));
+        "wavefield_heightmap_" + std::to_string(this->visualEntity) +
+            "_" + std::to_string(seq));
       if (!this->heightMap->Ready())
       {
         gzerr << "[WaterVisual] heightmap texture failed to initialize"
@@ -245,9 +258,10 @@ void WaterVisual::Implementation::UploadUniforms()
   if (this->useFft)
   {
     // FFT shader: heightmap texture (bound separately by HeightMapTexture)
-    // plus the geometry of the periodic tile.
-    (*vsParams)["tileSize"] = this->cachedTileSize;
-    (*vsParams)["gridSize"] = this->cachedGridSize;
+    // plus the geometry of the periodic tile and the choppiness factor.
+    (*vsParams)["tileSize"]   = this->cachedTileSize;
+    (*vsParams)["gridSize"]   = this->cachedGridSize;
+    (*vsParams)["chopFactor"] = this->cachedChopFactor;
   }
   else
   {
@@ -352,12 +366,34 @@ void WaterVisual::Implementation::OnSceneUpdate()
       this->heightMap->Ready())
   {
     this->fftSim->Update(static_cast<double>(this->currentSimTime));
-    this->heightMap->Upload(this->fftSim->HeightGrid());
+    const bool ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
+                                            this->fftSim->DispXGrid(),
+                                            this->fftSim->DispYGrid());
+    // One-shot diagnostic on the very first successful upload so we can
+    // see the actual amplitudes the GPU is sampling. Helps distinguish
+    // "upload silently failing" from "Phillips spectrum is tiny".
+    static bool logged = false;
+    if (ok && !logged)
+    {
+      logged = true;
+      const auto &eta = this->fftSim->HeightGrid();
+      const auto &dx  = this->fftSim->DispXGrid();
+      const auto &dy  = this->fftSim->DispYGrid();
+      gzmsg << "[WaterVisual] first FFT upload: η range=["
+            << eta.minCoeff() << ", " << eta.maxCoeff()
+            << "] m, |Dx|max=" << dx.cwiseAbs().maxCoeff()
+            << " m, |Dy|max=" << dy.cwiseAbs().maxCoeff()
+            << " m, chopFactor=" << this->cachedChopFactor << std::endl;
+    }
   }
 }
 
 void WaterVisual::Implementation::OnRenderTeardown()
 {
+  // Destroy the FFT heightmap texture BEFORE the scene/material handles
+  // go away, so the bridge can still walk Ogre's TextureGpuManager to
+  // release it. After teardown the next ResolveVisual will rebuild it.
+  this->heightMap.reset();
   this->visual.reset();
   this->material.reset();
   this->scene.reset();
@@ -499,6 +535,8 @@ void WaterVisual::PreUpdate(
     this->dataPtr->cachedTileSize = static_cast<float>(fft->TileSizeMeters());
     this->dataPtr->cachedGridSize = static_cast<int>(fft->GridSize());
     this->dataPtr->cachedTau = static_cast<float>(data.params.tau);
+    this->dataPtr->cachedChopFactor =
+        static_cast<float>(data.params.choppiness);
     this->dataPtr->haveWavefield = true;
     this->dataPtr->cachedGeneration = data.generation;
     return;

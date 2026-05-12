@@ -73,6 +73,12 @@ struct WaveParameters
   /// \brief RNG seed used to generate the stochastic Phillips-spectrum
   /// amplitudes. Same seed → bit-for-bit identical wave field.
   std::uint32_t seed{0};
+
+  /// \brief Tessendorf "choppiness" multiplier applied to the horizontal
+  /// displacement field in the visual shader. Negative values bunch
+  /// particles toward wave crests (the canonical choice). Typical range
+  /// [-2, 0]; 0 disables choppy displacement.
+  double choppiness{-1.0};
 };
 
 /// \brief State held by the `Wavefield` ECM component. Wraps a polymorphic
@@ -119,7 +125,8 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.gain << ' '
       << _d.params.tileSize << ' '
       << _d.params.gridSize << ' '
-      << _d.params.seed << ' ';
+      << _d.params.seed << ' '
+      << _d.params.choppiness << ' ';
   return _os;
 }
 
@@ -142,7 +149,8 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.gain
       >> _d.params.tileSize
       >> _d.params.gridSize
-      >> _d.params.seed;
+      >> _d.params.seed
+      >> _d.params.choppiness;
   _d.simulation = CreateWaveSimulation(_d.algorithm, _d.params);
   return _is;
 }

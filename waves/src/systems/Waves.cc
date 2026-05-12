@@ -80,9 +80,10 @@ void Waves::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
   p.gain      = wave->Get<double>("gain",           p.gain     ).first;
 
   // FFT-only parameters; ignored by Gerstner. Kept in <wave> for locality.
-  p.tileSize  = wave->Get<double>("tile_size",      p.tileSize ).first;
-  p.gridSize  = wave->Get<unsigned int>("grid_size", p.gridSize).first;
-  p.seed      = wave->Get<unsigned int>("seed",      p.seed    ).first;
+  p.tileSize   = wave->Get<double>("tile_size",       p.tileSize  ).first;
+  p.gridSize   = wave->Get<unsigned int>("grid_size", p.gridSize  ).first;
+  p.seed       = wave->Get<unsigned int>("seed",      p.seed      ).first;
+  p.choppiness = wave->Get<double>("choppiness",      p.choppiness).first;
 }
 
 Waves::Waves() : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())

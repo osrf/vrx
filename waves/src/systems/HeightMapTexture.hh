@@ -55,11 +55,15 @@ namespace gz::sim::systems
     /// \brief Destructor — releases the TextureGpu.
     ~HeightMapTexture();
 
-    /// \brief Upload the supplied height grid to the GPU. Expects an
-    /// `gridSize × gridSize` matrix of `double` heights.
+    /// \brief Upload the supplied height + horizontal-displacement grids to
+    /// the GPU. All three matrices must be `gridSize × gridSize`. They are
+    /// packed into a single RGBA32F texture (η, Dx, Dy, 0) and consumed by
+    /// the FFT vertex shader.
     /// \return True on success, false if the upload couldn't proceed (e.g.
     ///   texture not yet resident, or unexpected grid size).
-    bool Upload(const Eigen::MatrixXd &_grid);
+    bool Upload(const Eigen::MatrixXd &_eta,
+                const Eigen::MatrixXd &_dispX,
+                const Eigen::MatrixXd &_dispY);
 
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }

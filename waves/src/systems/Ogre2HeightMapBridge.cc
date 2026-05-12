@@ -84,7 +84,9 @@ waves_heightmap_t waves_ogre2_heightmap_create(
       static_cast<Ogre::uint32>(_gridSize),
       static_cast<Ogre::uint32>(_gridSize));
   hm->texture->setNumMipmaps(1u);
-  hm->texture->setPixelFormat(Ogre::PFG_R32_FLOAT);
+  // RGBA32F so we can pack (η, Dx, Dy, α) per texel. Alpha is unused for
+  // now (reserved for a Jacobian/foam mask in a future stage).
+  hm->texture->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
   hm->texture->scheduleTransitionTo(Ogre::GpuResidency::Resident);
 
   hm->samplerblock.setFiltering(Ogre::TFO_BILINEAR);
@@ -125,10 +127,12 @@ waves_heightmap_t waves_ogre2_heightmap_create(
 }
 
 int waves_ogre2_heightmap_upload(
-    waves_heightmap_t _handle, const double *_grid, int _rows, int _cols)
+    waves_heightmap_t _handle, const double *_eta, const double *_dx,
+    const double *_dy, int _rows, int _cols)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
-  if (!hm || !hm->ready || !hm->texture || !hm->manager || !_grid)
+  if (!hm || !hm->ready || !hm->texture || !hm->manager ||
+      !_eta || !_dx || !_dy)
     return 0;
   const int N = static_cast<int>(hm->gridSize);
   if (_rows != N || _cols != N)
@@ -141,17 +145,25 @@ int waves_ogre2_heightmap_upload(
     return 0;
 
   Ogre::StagingTexture *staging = hm->manager->getStagingTexture(
-      N, N, 1u, 1u, Ogre::PFG_R32_FLOAT);
+      N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
   staging->startMapRegion();
   Ogre::TextureBox box =
-      staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_R32_FLOAT);
+      staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
 
+  // Pack one RGBA32F texel per (row, col): (η, Dx, Dy, 0).
   for (int row = 0; row < N; ++row)
   {
     auto *dst = reinterpret_cast<float *>(box.at(0, row, 0));
-    const double *src = _grid + static_cast<std::size_t>(row) * N;
+    const double *seta = _eta + static_cast<std::size_t>(row) * N;
+    const double *sdx  = _dx  + static_cast<std::size_t>(row) * N;
+    const double *sdy  = _dy  + static_cast<std::size_t>(row) * N;
     for (int col = 0; col < N; ++col)
-      dst[col] = static_cast<float>(src[col]);
+    {
+      dst[col * 4 + 0] = static_cast<float>(seta[col]);
+      dst[col * 4 + 1] = static_cast<float>(sdx[col]);
+      dst[col * 4 + 2] = static_cast<float>(sdy[col]);
+      dst[col * 4 + 3] = 0.0f;
+    }
   }
 
   staging->stopMapRegion();
@@ -171,8 +183,23 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
   auto *hm = static_cast<HeightMap *>(_handle);
   if (!hm)
     return;
+  // Tolerate Ogre having already torn the texture down (e.g. on Ctrl-C the
+  // engine shuts down its TextureGpuManager before our owners run their
+  // destructors). Otherwise the unhandled exception escapes through the
+  // extern "C" boundary and aborts the process.
   if (hm->manager && hm->texture)
-    hm->manager->destroyTexture(hm->texture);
+  {
+    try
+    {
+      hm->manager->destroyTexture(hm->texture);
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzdbg << "[waves_ogre2_heightmap] destroyTexture threw during "
+            << "shutdown (likely already destroyed): " << e.getDescription()
+            << std::endl;
+    }
+  }
   delete hm;
 }
 

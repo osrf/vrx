@@ -102,7 +102,23 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
     }
   }
 
+  // Continuous-spectrum-to-discrete-IFFT amplitude correction.
+  // Variance argument: we want σ²_η = ∫ P(k) dk_x dk_y. The discrete sum
+  // gives Σ P(k_n) · (2π/L)², and Eigen's inverse FFT additionally
+  // normalises by 1/N². Pre-scaling h0 by `2π·N²/L` makes the per-cell
+  // variance recover the continuous integral; the √2 compensates for the
+  // (1/√2) factor already baked into the random h0 amplitudes above.
+  // Without this fix the resulting η is ~200× too small for typical
+  // tile/grid choices (e.g. L=200 m, N=128).
+  const double specScale =
+      std::sqrt(2.0) * k2Pi * static_cast<double>(N) *
+      static_cast<double>(N) / L;
+  this->h0_     *= specScale;
+  this->h0Conj_ *= specScale;
+
   this->heightGrid_ = Eigen::MatrixXd::Zero(N, N);
+  this->dispXGrid_  = Eigen::MatrixXd::Zero(N, N);
+  this->dispYGrid_  = Eigen::MatrixXd::Zero(N, N);
   this->Update(0.0);
 }
 
@@ -138,13 +154,50 @@ double FFTWaveSimulation::Ramp(double t) const
   return 1.0 - std::exp(-t / this->tau_);
 }
 
+namespace
+{
+  // 2D inverse FFT via row-then-column passes (Eigen::FFT is 1D). Returns
+  // the real part of the result, multiplied by `scale`.
+  Eigen::MatrixXd Ifft2DReal(const Eigen::MatrixXcd &spectrum, double scale)
+  {
+    const int N = static_cast<int>(spectrum.rows());
+    Eigen::FFT<double> fft;
+    Eigen::MatrixXcd rowOut(N, N);
+    for (int i = 0; i < N; ++i)
+    {
+      Eigen::VectorXcd freq = spectrum.row(i);
+      Eigen::VectorXcd time(N);
+      fft.inv(time, freq);
+      rowOut.row(i) = time;
+    }
+    Eigen::MatrixXcd colOut(N, N);
+    for (int j = 0; j < N; ++j)
+    {
+      Eigen::VectorXcd freq = rowOut.col(j);
+      Eigen::VectorXcd time(N);
+      fft.inv(time, freq);
+      colOut.col(j) = time;
+    }
+    return colOut.real() * scale;
+  }
+}
+
 void FFTWaveSimulation::Update(double t)
 {
   const int N = static_cast<int>(this->gridSize_);
   const double ramp = this->Ramp(t);
 
-  // Evolve spectrum: h(k, t) = h0(k)·exp(i·ω·t) + h0_conj(k)·exp(-i·ω·t).
+  // Evolve the height spectrum:
+  //   h(k, t) = h0(k)·exp(i·ω·t) + h0_conj(k)·exp(-i·ω·t).
+  // Then derive the horizontal-displacement spectra by Tessendorf eq. 29:
+  //   Dx(k, t) = -i · (kx / |k|) · h(k, t)
+  //   Dy(k, t) = -i · (ky / |k|) · h(k, t)
+  // (the unit-vector k̂ projects the displacement into the wave's
+  // propagation direction). All three IFFTs share a single ifft2 pass.
   Eigen::MatrixXcd hkt(N, N);
+  Eigen::MatrixXcd dxkt(N, N);
+  Eigen::MatrixXcd dykt(N, N);
+  const std::complex<double> kMinusI(0.0, -1.0);
   for (int i = 0; i < N; ++i)
   {
     for (int j = 0; j < N; ++j)
@@ -152,32 +205,30 @@ void FFTWaveSimulation::Update(double t)
       const double w = this->omegaGrid_(i, j);
       const std::complex<double> e_plus(std::cos(w * t), std::sin(w * t));
       const std::complex<double> e_minus = std::conj(e_plus);
-      hkt(i, j) = this->h0_(i, j) * e_plus +
-                  this->h0Conj_(i, j) * e_minus;
+      const std::complex<double> h = this->h0_(i, j) * e_plus +
+                                     this->h0Conj_(i, j) * e_minus;
+      hkt(i, j) = h;
+
+      const double kx = this->kxRow_[i];
+      const double ky = this->kyCol_[j];
+      const double kmag = std::hypot(kx, ky);
+      if (kmag < 1e-12)
+      {
+        dxkt(i, j) = 0.0;
+        dykt(i, j) = 0.0;
+      }
+      else
+      {
+        const std::complex<double> factor = kMinusI / kmag;
+        dxkt(i, j) = factor * kx * h;
+        dykt(i, j) = factor * ky * h;
+      }
     }
   }
 
-  // 2D inverse FFT via row-then-column passes (Eigen::FFT is 1D).
-  Eigen::FFT<double> fft;
-  Eigen::MatrixXcd rowOut(N, N);
-  for (int i = 0; i < N; ++i)
-  {
-    Eigen::VectorXcd freq = hkt.row(i);
-    Eigen::VectorXcd time(N);
-    fft.inv(time, freq);
-    rowOut.row(i) = time;
-  }
-  Eigen::MatrixXcd colOut(N, N);
-  for (int j = 0; j < N; ++j)
-  {
-    Eigen::VectorXcd freq = rowOut.col(j);
-    Eigen::VectorXcd time(N);
-    fft.inv(time, freq);
-    colOut.col(j) = time;
-  }
-
-  // Real part is the height field. Apply the startup ramp.
-  this->heightGrid_ = colOut.real() * ramp;
+  this->heightGrid_ = Ifft2DReal(hkt, ramp);
+  this->dispXGrid_  = Ifft2DReal(dxkt, ramp);
+  this->dispYGrid_  = Ifft2DReal(dykt, ramp);
 }
 
 double FFTWaveSimulation::BilinearSample(const Eigen::MatrixXd &grid,

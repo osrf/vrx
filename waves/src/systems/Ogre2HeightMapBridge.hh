@@ -37,14 +37,17 @@ extern "C"
       std::size_t grid_size,
       const char *name);
 
-  /// Upload an `rows × cols` matrix of double heights to the heightmap.
-  /// The data is interpreted with `row_stride` doubles between successive
-  /// rows in memory (Eigen column-major matrices set row_stride=1 and
-  /// col_stride=rows; callers are expected to pass a row-major view).
+  /// Upload three `rows × cols` row-major double matrices (height,
+  /// horizontal x-displacement, horizontal y-displacement) into the
+  /// RGBA32F heightmap texture. The alpha channel is reserved for a future
+  /// foam/Jacobian mask and is currently written as zero. Each pointer
+  /// must reference at least `rows * cols` doubles in row-major order.
   /// Returns 1 on success, 0 on failure (e.g. texture not yet resident).
   int waves_ogre2_heightmap_upload(
       waves_heightmap_t handle,
-      const double *grid,
+      const double *eta_grid,
+      const double *disp_x_grid,
+      const double *disp_y_grid,
       int rows,
       int cols);
 

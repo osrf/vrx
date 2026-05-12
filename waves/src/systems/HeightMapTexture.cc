@@ -23,7 +23,9 @@ namespace
   // Function-pointer typedefs matching the bridge's C-ABI exactly.
   using CreateFn = waves_heightmap_t (*)(void *, void *, std::size_t,
                                           const char *);
-  using UploadFn = int (*)(waves_heightmap_t, const double *, int, int);
+  using UploadFn = int (*)(waves_heightmap_t,
+                            const double *, const double *, const double *,
+                            int, int);
   using ReadyFn  = int (*)(waves_heightmap_t);
   using DestroyFn = void (*)(waves_heightmap_t);
 
@@ -105,7 +107,9 @@ HeightMapTexture::~HeightMapTexture()
     api.destroy(this->impl_->handle);
 }
 
-bool HeightMapTexture::Upload(const Eigen::MatrixXd &_grid)
+bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
+                              const Eigen::MatrixXd &_dispX,
+                              const Eigen::MatrixXd &_dispY)
 {
   if (!this->ready_ || !this->impl_->handle)
     return false;
@@ -113,19 +117,24 @@ bool HeightMapTexture::Upload(const Eigen::MatrixXd &_grid)
   if (!api.loaded)
     return false;
   const int N = static_cast<int>(this->gridSize_);
-  if (_grid.rows() != N || _grid.cols() != N)
+  if (_eta.rows() != N || _eta.cols() != N ||
+      _dispX.rows() != N || _dispX.cols() != N ||
+      _dispY.rows() != N || _dispY.cols() != N)
   {
-    gzerr << "[HeightMapTexture] grid size mismatch (got "
-          << _grid.rows() << "x" << _grid.cols()
-          << ", expected " << N << "x" << N << ")" << std::endl;
+    gzerr << "[HeightMapTexture] grid size mismatch (expected "
+          << N << "x" << N << ")" << std::endl;
     return false;
   }
-  // Eigen defaults to column-major storage. The bridge expects a
-  // row-major view of the matrix (rows contiguous in memory). Copy into a
-  // local row-major buffer first so the bridge can iterate naturally.
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-      rowMajor = _grid;
-  return api.upload(this->impl_->handle, rowMajor.data(), N, N) != 0;
+  // Eigen defaults to column-major storage. The bridge expects row-major
+  // views (rows contiguous in memory), so reflow each matrix once into a
+  // local row-major copy before forwarding.
+  using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+                                  Eigen::RowMajor>;
+  RowMatrix eta   = _eta;
+  RowMatrix dispX = _dispX;
+  RowMatrix dispY = _dispY;
+  return api.upload(this->impl_->handle,
+                    eta.data(), dispX.data(), dispY.data(), N, N) != 0;
 }
 
 }  // namespace gz::sim::systems

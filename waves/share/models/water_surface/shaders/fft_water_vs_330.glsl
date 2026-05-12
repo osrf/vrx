@@ -3,17 +3,26 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 //
-// Vertex displacement from a precomputed FFT heightmap. The heightmap is a
-// 2D scalar texture of surface elevation η(x, y, t) generated each tick on
-// the CPU (via FFTWaveSimulation) and uploaded to this shader's sampler.
+// Tessendorf ocean vertex shader. The heightmap texture is RGBA32F:
+//   .r = η(x, y, t)           surface elevation
+//   .g = Dx(x, y, t)          horizontal x-displacement
+//   .b = Dy(x, y, t)          horizontal y-displacement
+//   .a = (reserved)
+// All four channels come from CPU-side IFFTs (see FFTWaveSimulation) and
+// are uploaded once per simulation tick.
 //
-// World→texture mapping: the FFT tile is periodic with extent `tileSize`
-// metres along both axes; UV = fract(world.xy / tileSize). Surface normal
-// is reconstructed by sampling the height at four neighbour texels.
+// Displacement model (Tessendorf 2001, eq. 29):
+//   x' = x + chopFactor · Dx
+//   y' = y + chopFactor · Dy
+//   z' = z + η
+// `chopFactor` is typically in [-2, -1]: negative values bunch particles
+// toward wave crests, producing the sharp, asymmetric crests that
+// distinguish a Tessendorf ocean from a pure height-field. The default of
+// 0 falls back to a non-choppy surface, identical to the old r32f path.
 //
-// The vertex output block matches the existing water_fs_330.glsl so the
-// fragment shader doesn't need a variant — both the Gerstner and FFT
-// vertex shaders produce (rotMatrix, eyeVec, bumpCoord).
+// Surface normals are reconstructed with central differences against the
+// displaced field, so the same shader handles chop=0 and chop≠0 without
+// branching.
 
 #version 330
 
@@ -30,7 +39,8 @@ uniform vec2 bumpSpeed;
 
 uniform float tileSize;          // physical extent of the heightmap tile [m]
 uniform int   gridSize;          // heightmap resolution per axis
-uniform sampler2D heightMap;     // R32F texture; .r is η(x, y, t)
+uniform float chopFactor;        // Tessendorf choppiness multiplier
+uniform sampler2D heightMap;     // RGBA32F: (η, Dx, Dy, _)
 
 out block
 {
@@ -44,40 +54,47 @@ out gl_PerVertex
   vec4 gl_Position;
 };
 
+// Apply the displacement field at world position `xy` and return the
+// displaced 3D position. The startup ramp is already baked into the
+// uploaded grids on the CPU side, so we don't double-multiply by ramp here.
+vec3 SampleDisplaced(vec2 xy)
+{
+  vec2 uv = fract(xy / tileSize);
+  vec4 hd = texture(heightMap, uv);
+  vec2 dxy = chopFactor * hd.gb;
+  return vec3(xy + dxy, hd.r);
+}
+
 void main()
 {
   vec4 P = vertex;
 
-  // World position → tile-local UV. fract() handles wrap.
-  vec2 uv = fract(P.xy / tileSize);
+  // Displaced position at the vertex.
+  vec3 disp = SampleDisplaced(P.xy);
+  P.xy = disp.xy;
+  P.z += disp.z;
 
-  // Sample η at the vertex.
-  float h = texture(heightMap, uv).r;
+  // Finite-difference normal from neighbouring displaced positions. One
+  // texel side in world space is (tileSize / gridSize) metres.
+  float texel = tileSize / float(gridSize);
+  vec3 px = SampleDisplaced(vertex.xy + vec2( texel, 0.0));
+  vec3 nx = SampleDisplaced(vertex.xy + vec2(-texel, 0.0));
+  vec3 py = SampleDisplaced(vertex.xy + vec2(0.0,  texel));
+  vec3 ny = SampleDisplaced(vertex.xy + vec2(0.0, -texel));
+  vec3 dxv = (px - nx) * 0.5;
+  vec3 dyv = (py - ny) * 0.5;
+  // dxv now holds (Δx', Δy', Δz') along the +x sampling axis (and similarly
+  // for dyv). Cross product gives the surface normal.
+  vec3 N = normalize(cross(dxv, dyv));
+  // Match the existing fragment shader's expectation that +Z is "up";
+  // flip if the cross product produced a downward-facing normal.
+  if (N.z < 0.0) N = -N;
 
-  // Startup ramp factor matches the analytic Gerstner one.
-  float ramp = 1.0 - exp(-1.0 * t / tau);
-  P.z += h * ramp;
-
-  // Finite-difference surface normal.
-  // texel side in tile space = 1 / gridSize.
-  float du = 1.0 / float(gridSize);
-  float hL = texture(heightMap, fract(uv + vec2(-du, 0.0))).r;
-  float hR = texture(heightMap, fract(uv + vec2( du, 0.0))).r;
-  float hD = texture(heightMap, fract(uv + vec2(0.0, -du))).r;
-  float hU = texture(heightMap, fract(uv + vec2(0.0,  du))).r;
-  // Each texel corresponds to (tileSize / gridSize) metres of world span.
-  float dx = (hR - hL) * 0.5 * float(gridSize) / tileSize;
-  float dy = (hU - hD) * 0.5 * float(gridSize) / tileSize;
-  vec3 N = normalize(vec3(-dx * ramp, -dy * ramp, 1.0));
-
-  // Build a tangent basis (T, B) compatible with the fragment shader,
-  // which expects rotMatrix to transform tangent-space bump-map normals
-  // back into world space. T is chosen as the orthogonalised world-x axis
-  // projected onto the surface plane.
-  vec3 T = normalize(vec3(1.0, 0.0, dx * ramp));
+  // Tangent basis: T along the +x finite-difference direction (projected
+  // onto the tangent plane), B = N × T.
+  vec3 T = normalize(dxv - dot(dxv, N) * N);
+  if (length(T) < 1e-4) T = vec3(1.0, 0.0, 0.0);
   vec3 B = cross(N, T);
-  T = cross(B, N);            // re-orthogonalise
-
   outVs.rotMatrix = mat3(B * rescale, T * rescale, N);
 
   gl_Position = worldviewproj_matrix * P;
