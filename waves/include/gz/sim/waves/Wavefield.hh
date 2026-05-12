@@ -59,6 +59,20 @@ struct WaveParameters
 
   /// \brief PMS amplitude multiplier (unitless).
   double gain{1.0};
+
+  // ---- FFT-only parameters (ignored by the Gerstner backend) -------------
+
+  /// \brief Physical tile extent [m] along each axis for the periodic
+  /// FFT wave field.
+  double tileSize{200.0};
+
+  /// \brief Number of grid samples per axis for the FFT. Must be a power of
+  /// two (FFT/IFFT requirement). 64/128/256 typical.
+  std::size_t gridSize{128};
+
+  /// \brief RNG seed used to generate the stochastic Phillips-spectrum
+  /// amplitudes. Same seed → bit-for-bit identical wave field.
+  std::uint32_t seed{0};
 };
 
 /// \brief State held by the `Wavefield` ECM component. Wraps a polymorphic
@@ -102,7 +116,10 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.steepness << ' '
       << _d.params.phase << ' '
       << _d.params.tau << ' '
-      << _d.params.gain << ' ';
+      << _d.params.gain << ' '
+      << _d.params.tileSize << ' '
+      << _d.params.gridSize << ' '
+      << _d.params.seed << ' ';
   return _os;
 }
 
@@ -122,7 +139,10 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.steepness
       >> _d.params.phase
       >> _d.params.tau
-      >> _d.params.gain;
+      >> _d.params.gain
+      >> _d.params.tileSize
+      >> _d.params.gridSize
+      >> _d.params.seed;
   _d.simulation = CreateWaveSimulation(_d.algorithm, _d.params);
   return _is;
 }

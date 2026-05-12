@@ -89,13 +89,14 @@
 
     <plugin filename="gz-sim-waves-system"
             name="gz::sim::systems::Waves">
+      <!-- Switch between "gerstner" (analytic, has shader path) and "fft"
+           (stochastic; Stage 3 has physics-only integration, visual falls
+           back gracefully). -->
+      <algorithm>gerstner</algorithm>
+      <update_rate>30</update_rate>
       <wave>
         <model>PMS</model>
         <number>3</number>
-        <!-- Longer period → longer wavelength. The water mesh has vertices
-             ~30 m apart; we need at least several vertices per wavelength
-             for the surface to displace visibly. 12 s period gives a
-             wavelength of about 225 m. -->
         <period>12.0</period>
         <gain>2.0</gain>
         <direction>0.0</direction>
@@ -103,6 +104,10 @@
         <scale>1.1</scale>
         <steepness>0.0</steepness>
         <tau>2.0</tau>
+        <!-- FFT-only -->
+        <tile_size>200</tile_size>
+        <grid_size>128</grid_size>
+        <seed>42</seed>
       </wave>
     </plugin>
 

@@ -29,13 +29,8 @@ std::shared_ptr<IWaveSimulation> CreateWaveSimulation(
   }
   if (_algorithm == "fft")
   {
-    // Sensible defaults for tile size / grid resolution / seed. These will
-    // become SDF-tunable once Stage 3 wires FFT into the Waves system.
-    constexpr double kDefaultTileSize = 200.0;
-    constexpr std::size_t kDefaultGridSize = 128;
-    constexpr std::uint32_t kDefaultSeed = 0;
     return std::make_shared<FFTWaveSimulation>(
-      _params, kDefaultTileSize, kDefaultGridSize, kDefaultSeed);
+      _params, _params.tileSize, _params.gridSize, _params.seed);
   }
   std::cerr << "[CreateWaveSimulation] unknown algorithm '"
             << _algorithm << "'; supported: 'gerstner', 'fft'" << std::endl;

@@ -41,6 +41,14 @@ class Waves::Implementation
   public: ComponentTypeId componentType{0};
   public: bool componentReady{false};
   public: std::chrono::steady_clock::duration configureSimTime{0};
+
+  /// \brief Throttle backend updates to at most this rate [Hz]. Default 30 Hz
+  /// matches asv_wave_sim; cheap for analytic Gerstner, sets a sensible
+  /// ceiling on FFT IFFT cost.
+  public: double updateRate{30.0};
+
+  /// \brief Last sim time at which `simulation->Update` was called.
+  public: double lastUpdateTime{-1.0};
 };
 
 void Waves::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
@@ -48,6 +56,8 @@ void Waves::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
   // Top-level <algorithm> selects which backend to instantiate.
   this->data.algorithm =
     _sdf->Get<std::string>("algorithm", this->data.algorithm).first;
+  this->updateRate =
+    _sdf->Get<double>("update_rate", this->updateRate).first;
 
   if (!_sdf->HasElement("wave"))
   {
@@ -68,6 +78,11 @@ void Waves::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
   p.phase     = wave->Get<double>("phase",          p.phase    ).first;
   p.tau       = wave->Get<double>("tau",            p.tau      ).first;
   p.gain      = wave->Get<double>("gain",           p.gain     ).first;
+
+  // FFT-only parameters; ignored by Gerstner. Kept in <wave> for locality.
+  p.tileSize  = wave->Get<double>("tile_size",      p.tileSize ).first;
+  p.gridSize  = wave->Get<unsigned int>("grid_size", p.gridSize).first;
+  p.seed      = wave->Get<unsigned int>("seed",      p.seed    ).first;
 }
 
 Waves::Waves() : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
@@ -119,30 +134,47 @@ void Waves::PreUpdate(
   const UpdateInfo &_info,
   EntityComponentManager &_ecm)
 {
-  if (!this->dataPtr->componentReady)
+  if (!this->dataPtr->data.simulation)
     return;
 
-  if (this->dataPtr->configureSimTime ==
-      std::chrono::steady_clock::duration{0})
+  const double simTime = std::chrono::duration<double>(
+    _info.simTime).count();
+
+  // Throttle backend updates. Analytic Gerstner has a no-op Update(); FFT
+  // regenerates the height grid each call (~ms at 128²).
+  const double updatePeriod =
+    this->dataPtr->updateRate > 0.0 ? 1.0 / this->dataPtr->updateRate : 0.0;
+  if (simTime - this->dataPtr->lastUpdateTime >= updatePeriod)
   {
-    this->dataPtr->configureSimTime = _info.simTime;
+    this->dataPtr->data.simulation->Update(simTime);
+    this->dataPtr->lastUpdateTime = simTime;
   }
 
-  const double elapsed = std::chrono::duration<double>(
-    _info.simTime - this->dataPtr->configureSimTime).count();
-
-  if (elapsed > kInitialReplicationSeconds)
+  // SceneBroadcaster replication. Custom components don't reliably reach
+  // the GUI on the initial scene state (it arrives before the GUI's plugin
+  // libraries have registered our type). Re-marking the component as
+  // changed for the first few seconds lets us catch the GUI when it's
+  // ready.
+  if (this->dataPtr->componentReady)
   {
-    this->dataPtr->componentReady = false;
-    return;
+    if (this->dataPtr->configureSimTime ==
+        std::chrono::steady_clock::duration{0})
+    {
+      this->dataPtr->configureSimTime = _info.simTime;
+    }
+    const double elapsed = std::chrono::duration<double>(
+      _info.simTime - this->dataPtr->configureSimTime).count();
+    if (elapsed > kInitialReplicationSeconds)
+    {
+      this->dataPtr->componentReady = false;
+    }
+    else
+    {
+      _ecm.SetChanged(this->dataPtr->worldEnt,
+                      this->dataPtr->componentType,
+                      ComponentState::OneTimeChange);
+    }
   }
-
-  // Force SceneBroadcaster to re-broadcast the component to any process
-  // (most importantly the GUI) that wasn't ready to deserialize it the
-  // first time around.
-  _ecm.SetChanged(this->dataPtr->worldEnt,
-                  this->dataPtr->componentType,
-                  ComponentState::OneTimeChange);
 }
 
 }  // namespace gz::sim::systems
