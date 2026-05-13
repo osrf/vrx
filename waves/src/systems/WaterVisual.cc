@@ -89,6 +89,9 @@ class WaterVisual::Implementation
   public: float fresnelPower{5.0f};
   public: float foamStrength{0.85f};    ///< Foam blend amount at J=0
   public: float foamThreshold{0.7f};    ///< Foam ramps in below this J
+  public: gz::math::Color crestColor{0.45f, 0.75f, 0.9f, 1.0f};
+  public: float crestStrength{0.25f};   ///< Max blend toward crestColor
+  public: float crestRefHeight{1.5f};   ///< η at which crestStrength is hit
   public: gz::math::Color shallowColor{0.0f, 0.1f, 0.2f, 1.0f};
   public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
   public: std::string visualName;
@@ -400,19 +403,34 @@ void WaterVisual::Implementation::UploadUniforms()
   // path where the heightmap is bound and chop is non-zero.
   if (this->useFft)
   {
-    (*fsParams)["tileSize"]     = this->cachedTileSize;
-    (*fsParams)["chopFactor"]   = this->cachedChopFactor;
-    (*fsParams)["foamStrength"] = this->foamStrength;
+    (*fsParams)["tileSize"]      = this->cachedTileSize;
+    (*fsParams)["chopFactor"]    = this->cachedChopFactor;
+    (*fsParams)["foamStrength"]  = this->foamStrength;
     (*fsParams)["foamThreshold"] = this->foamThreshold;
+    (*fsParams)["crestStrength"]  = this->crestStrength;
+    (*fsParams)["crestRefHeight"] = this->crestRefHeight;
+    {
+      float v[3] = {this->crestColor.R(), this->crestColor.G(),
+                    this->crestColor.B()};
+      (*fsParams)["crestColor"].InitializeBuffer(3);
+      (*fsParams)["crestColor"].UpdateBuffer(v);
+    }
   }
   else
   {
     // Gerstner path: no heightmap bound, so the FS must skip the
-    // foam sampling entirely.
-    (*fsParams)["tileSize"]     = 1.0f;
-    (*fsParams)["chopFactor"]   = 0.0f;
-    (*fsParams)["foamStrength"] = 0.0f;
+    // foam sampling AND the η-based crest colour blending.
+    (*fsParams)["tileSize"]      = 1.0f;
+    (*fsParams)["chopFactor"]    = 0.0f;
+    (*fsParams)["foamStrength"]  = 0.0f;
     (*fsParams)["foamThreshold"] = 1.0f;
+    (*fsParams)["crestStrength"]  = 0.0f;
+    (*fsParams)["crestRefHeight"] = 1.0f;
+    {
+      float v[3] = {0.0f, 0.0f, 0.0f};
+      (*fsParams)["crestColor"].InitializeBuffer(3);
+      (*fsParams)["crestColor"].UpdateBuffer(v);
+    }
   }
   {
     float v[4] = {this->shallowColor.R(), this->shallowColor.G(),
@@ -1074,6 +1092,12 @@ void WaterVisual::Configure(
       this->dataPtr->foamStrength = p->Get<float>("foamStrength");
     if (p->HasElement("foamThreshold"))
       this->dataPtr->foamThreshold = p->Get<float>("foamThreshold");
+    if (p->HasElement("crestColor"))
+      this->dataPtr->crestColor = p->Get<gz::math::Color>("crestColor");
+    if (p->HasElement("crestStrength"))
+      this->dataPtr->crestStrength = p->Get<float>("crestStrength");
+    if (p->HasElement("crestRefHeight"))
+      this->dataPtr->crestRefHeight = p->Get<float>("crestRefHeight");
     if (p->HasElement("shallowColor"))
       this->dataPtr->shallowColor = p->Get<gz::math::Color>("shallowColor");
     if (p->HasElement("deepColor"))

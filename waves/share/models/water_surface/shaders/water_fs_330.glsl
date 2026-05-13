@@ -42,13 +42,21 @@ uniform float tileSize;
 uniform float foamStrength;
 uniform float foamThreshold;
 
+// Crest colour modulation. Where η > 0 we lerp the water colour
+// toward `crestColor` to give wave tops visible relief and break the
+// uniform deep-blue. Strength scales the maximum blend; reference η
+// at which crestStrength is fully applied is `crestRefHeight` (m).
+uniform vec3  crestColor;
+uniform float crestStrength;
+uniform float crestRefHeight;
+
 ////////// Input computed in vertex shader //////////
 in block
 {
   mat3 rotMatrix;
   vec3 eyeVec;
   vec2 bumpCoord;
-  vec2 heightUV;
+  vec2 baseXY;       // undisplaced world XY at this fragment
 } inPs;
 
 out vec4 fragColor;
@@ -62,15 +70,16 @@ float ComputeFoamMask()
 {
   if (foamStrength <= 0.0)
     return 0.0;
+  vec2 heightUV = fract(inPs.baseXY / tileSize);
   ivec2 texSize = textureSize(heightMap, 0);
   vec2 texel = 1.0 / vec2(texSize);
   // World-space step across one texel.
   float dStep = tileSize / float(texSize.x);
 
-  vec4 px = texture(heightMap, inPs.heightUV + vec2( texel.x, 0.0));
-  vec4 nx = texture(heightMap, inPs.heightUV + vec2(-texel.x, 0.0));
-  vec4 py = texture(heightMap, inPs.heightUV + vec2(0.0,  texel.y));
-  vec4 ny = texture(heightMap, inPs.heightUV + vec2(0.0, -texel.y));
+  vec4 px = texture(heightMap, heightUV + vec2( texel.x, 0.0));
+  vec4 nx = texture(heightMap, heightUV + vec2(-texel.x, 0.0));
+  vec4 py = texture(heightMap, heightUV + vec2(0.0,  texel.y));
+  vec4 ny = texture(heightMap, heightUV + vec2(0.0, -texel.y));
 
   float dDxdx = (px.g - nx.g) * 0.5 / dStep;
   float dDydy = (py.b - ny.b) * 0.5 / dStep;
@@ -110,6 +119,20 @@ void main()
 
   // Refracted ray only considers deep and shallow water colors:
   vec4 waterColor = mix(shallowColor, deepColor, facing);
+
+  // Height-based color: read η at the heightmap-aligned UV (only
+  // meaningful on the FFT path, where foamStrength > 0 also guards
+  // an otherwise-unbound heightMap sampler) and lerp toward
+  // crestColor on the positive-η side. Negative η leaves the colour
+  // untouched, so troughs stay the existing deep colour.
+  if (foamStrength > 0.0)
+  {
+    vec2 heightUV = fract(inPs.baseXY / tileSize);
+    float eta = texture(heightMap, heightUV).r;
+    float crestMix = clamp(eta / max(crestRefHeight, 0.01), 0.0, 1.0);
+    crestMix *= crestStrength;
+    waterColor.rgb = mix(waterColor.rgb, crestColor, crestMix);
+  }
 
   // Perform linear interpolation between reflection and refraction.
   vec4 color = mix(waterColor, envColor, waterEnvRatio);
