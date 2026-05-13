@@ -43,6 +43,8 @@ namespace
                              const double *, int, int);
   using DebugFn = int (*)(waves_heightmap_t, const char *, float, float);
   using ViewHktFn = int (*)(waves_heightmap_t, const char *, float);
+  using ReadbackH0Fn = int (*)(waves_heightmap_t, int, int,
+                                float *, float *, float *, float *);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -61,6 +63,7 @@ namespace
     CpuFeedFn  cpuFeed{nullptr};
     DebugFn    debug{nullptr};
     ViewHktFn  viewHkt{nullptr};
+    ReadbackH0Fn readbackH0{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -109,6 +112,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_debug_dispatch"));
       api.viewHkt = reinterpret_cast<ViewHktFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_view_hkt_dispatch"));
+      api.readbackH0 = reinterpret_cast<ReadbackH0Fn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_readback_h0"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -279,6 +284,21 @@ bool HeightMapTexture::CpuFeed(const Eigen::MatrixXd &_eta,
   RowMatrix dispY = _dispY;
   return api.cpuFeed(this->impl_->handle,
                      eta.data(), dispX.data(), dispY.data(), N, N) != 0;
+}
+
+bool HeightMapTexture::ReadbackH0Cell(int _i, int _j,
+                                       float *_outRe, float *_outIm,
+                                       float *_outConjRe,
+                                       float *_outConjIm) const
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.readbackH0)
+    return false;
+  return api.readbackH0(this->impl_->handle, _i, _j,
+                        _outRe, _outIm,
+                        _outConjRe, _outConjIm) != 0;
 }
 
 bool HeightMapTexture::GpuOutputBound() const

@@ -549,6 +549,44 @@ void WaterVisual::Implementation::OnSceneUpdate()
         {
           this->spectrumUploaded = true;
         }
+
+        // GPU readback to verify what landed on the GPU vs what CPU
+        // intended to upload. Done once after the upload succeeds.
+        if (this->spectrumUploaded)
+        {
+          const auto dump = [&](int i, int j)
+          {
+            float gpuRe = 0, gpuIm = 0, gpuConjRe = 0, gpuConjIm = 0;
+            const bool ok = this->heightMap->ReadbackH0Cell(
+                i, j, &gpuRe, &gpuIm, &gpuConjRe, &gpuConjIm);
+            const double cpuRe = h0(i, j).real();
+            const double cpuIm = h0(i, j).imag();
+            const double cpuMag = std::abs(h0(i, j));
+            const double gpuMag =
+                std::sqrt(static_cast<double>(gpuRe) * gpuRe +
+                           static_cast<double>(gpuIm) * gpuIm);
+            const double cpuConjRe = hc(i, j).real();
+            const double cpuConjIm = hc(i, j).imag();
+            gzmsg << "[WaterVisual] h0(" << i << "," << j << ")  "
+                  << "CPU:(re=" << cpuRe << " im=" << cpuIm
+                  << " |h0|=" << cpuMag << ")  "
+                  << "GPU:(re=" << gpuRe << " im=" << gpuIm
+                  << " |h0|=" << gpuMag << ")  "
+                  << "ok=" << ok << std::endl;
+            gzmsg << "[WaterVisual] h0Conj(" << i << "," << j << ") "
+                  << "CPU:(re=" << cpuConjRe << " im=" << cpuConjIm
+                  << ")  "
+                  << "GPU:(re=" << gpuConjRe << " im=" << gpuConjIm
+                  << ")" << std::endl;
+          };
+          dump(0, 0);
+          dump(1, 0);
+          dump(0, 1);
+          dump(maxI, maxJ);
+          dump(N / 2, N / 2);
+          dump(N - 1, 0);
+          dump(N - 1, N - 1);
+        }
       }
       if (this->spectrumUploaded)
       {

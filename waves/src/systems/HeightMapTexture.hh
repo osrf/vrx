@@ -149,6 +149,15 @@ namespace gz::sim::systems
     /// Gate with `GZ_WAVES_GPU_FFT_VIEW_HKT=1`.
     bool ViewHktDispatch(const std::string &_shaderAbsPath, float _scale);
 
+    /// \brief Diagnostic: async readback of one cell of `h0Tex` for
+    /// GPU↔CPU value comparison. Returns the four floats stored at
+    /// pixel (col=_j, row=_i) of h0Tex — i.e. CPU's
+    /// (h0(_i, _j).real, h0(_i, _j).imag,
+    ///  h0Conj(_i, _j).real, h0Conj(_i, _j).imag).
+    bool ReadbackH0Cell(int _i, int _j,
+                        float *_outRe, float *_outIm,
+                        float *_outConjRe, float *_outConjIm) const;
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 

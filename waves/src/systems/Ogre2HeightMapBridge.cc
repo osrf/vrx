@@ -19,6 +19,7 @@
 
 #include <filesystem>
 
+#include <OgreAsyncTextureTicket.h>
 #include <OgreCommon.h>
 #include <OgreDescriptorSetTexture.h>
 #include <OgreHlmsCompute.h>
@@ -1593,6 +1594,67 @@ int waves_ogre2_heightmap_cpu_feed(
     return 0;
   }
   return 1;
+}
+
+/// Async readback of a single cell from h0Tex. Used to verify what
+/// the GPU sees vs the CPU values that were uploaded.
+/// On return, *_re and *_im receive h0Tex(i_row, j_col) interpreted
+/// as the original (h0.re, h0.im) pair. Returns 1 on success, 0 if
+/// the texture isn't allocated or the readback fails.
+int waves_ogre2_heightmap_readback_h0(
+    waves_heightmap_t _handle, int _i, int _j,
+    float *_outRe, float *_outIm,
+    float *_outConjRe, float *_outConjIm)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->h0Tex || !hm->manager || _outRe == nullptr ||
+      _outIm == nullptr)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  if (_i < 0 || _i >= N || _j < 0 || _j >= N)
+    return 0;
+
+  try
+  {
+    Ogre::AsyncTextureTicket *ticket =
+        hm->manager->createAsyncTextureTicket(
+            static_cast<Ogre::uint32>(N),
+            static_cast<Ogre::uint32>(N),
+            1u, Ogre::TextureTypes::Type2D,
+            Ogre::PFG_RGBA32_FLOAT);
+    if (!ticket)
+      return 0;
+    ticket->download(hm->h0Tex, 0u, true /*accurateTracking*/,
+                     nullptr, true /*bImmediate*/);
+
+    // Poll for completion. The transfer is typically immediate on GL3+
+    // since we requested bImmediate=true and the texture is Resident,
+    // but be defensive.
+    int spins = 0;
+    while (!ticket->queryIsTransferDone() && spins < 1000)
+      ++spins;
+
+    const Ogre::TextureBox box = ticket->map(0u);
+    // Pixel at (col=_j, row=_i) holds h0(_i, _j) per the upload layout.
+    const std::uint8_t *base = static_cast<const std::uint8_t *>(box.data);
+    const std::uint8_t *pixelPtr =
+        base + static_cast<std::size_t>(_i) * box.bytesPerRow +
+        static_cast<std::size_t>(_j) * 16u;
+    const float *p = reinterpret_cast<const float *>(pixelPtr);
+    *_outRe = p[0];
+    *_outIm = p[1];
+    if (_outConjRe) *_outConjRe = p[2];
+    if (_outConjIm) *_outConjIm = p[3];
+    ticket->unmap();
+    hm->manager->destroyAsyncTextureTicket(ticket);
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] h0 readback threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
 }
 
 int waves_ogre2_heightmap_ifft_bound(waves_heightmap_t _handle)
