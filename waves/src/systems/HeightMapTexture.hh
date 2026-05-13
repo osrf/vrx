@@ -102,6 +102,16 @@ namespace gz::sim::systems
     bool EvolveDispatch(const std::string &_shaderAbsPath,
                         float _simTimeS);
 
+    /// \brief Stage 3 dispatch: run the GPU IFFT (Cooley-Tukey radix-2)
+    /// on the latest `h(k, t)` texture produced by EvolveDispatch. The
+    /// result is the spatial wave height field η(x, y, t). Must follow
+    /// EvolveDispatch each frame. Two shaders are required:
+    /// \param[in] _bitrevShaderAbsPath bit-reversal permutation pass.
+    /// \param[in] _butterShaderAbsPath butterfly stage (parameterised
+    ///   by axis + stage).
+    bool IfftDispatch(const std::string &_bitrevShaderAbsPath,
+                      const std::string &_butterShaderAbsPath);
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 

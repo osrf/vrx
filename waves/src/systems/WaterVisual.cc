@@ -72,6 +72,8 @@ class WaterVisual::Implementation
   public: std::string computeShaderUri;       ///< GPU-FFT compute shader (optional)
   public: std::string evolveShaderUri;        ///< Stage 2 evolve shader (optional)
   public: bool         spectrumUploaded{false}; ///< Stage 2 one-shot init
+  public: std::string bitrevShaderUri;        ///< Stage 3 IFFT bit-reverse pass (optional)
+  public: std::string butterShaderUri;        ///< Stage 3 IFFT butterfly stage (optional)
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
   public: float rescale{0.125f};
@@ -492,8 +494,31 @@ void WaterVisual::Implementation::OnSceneUpdate()
                 << "until Stage 3 (IFFT) lands." << std::endl;
         }
       }
-      // Stage 2 doesn't update the spatial heightmap, so we still
-      // need *something* there for the visual; fall through to the
+      // Stage 3: 2D IFFT over h(k, t) on the GPU. Produces the spatial
+      // η(x, y, t) in a ping-pong texture. Stage 3 still doesn't bind
+      // that texture to the visual material — Stage 4 will. For now
+      // this exercises the full Cooley-Tukey pipeline end-to-end.
+      const char *stage3Env = std::getenv("GZ_WAVES_GPU_FFT_STAGE3");
+      const bool useStage3 = stage3Env && std::string(stage3Env) == "1" &&
+                             !this->bitrevShaderUri.empty() &&
+                             !this->butterShaderUri.empty() &&
+                             this->spectrumUploaded;
+      if (useStage3)
+      {
+        const bool ifftOk = this->heightMap->IfftDispatch(
+            this->bitrevShaderUri, this->butterShaderUri);
+        static bool loggedStage3 = false;
+        if (ifftOk && !loggedStage3)
+        {
+          loggedStage3 = true;
+          gzmsg << "[WaterVisual] GPU-FFT Stage 3 (IFFT) online — "
+                << "η(x, t) computed on GPU. Visual stays on CPU "
+                << "upload path until Stage 4 binds the GPU output."
+                << std::endl;
+        }
+      }
+      // Stage 2/3 don't update the spatial heightmap the visual reads
+      // from, so we still need *something* there; fall through to the
       // standard CPU/Stage-1 path below.
     }
     if (useGpu)
@@ -614,6 +639,16 @@ void WaterVisual::Configure(
   {
     this->dataPtr->computeShaderUri =
       resolve(shader->GetElement("gpu_compute")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_ifft_bitreverse"))
+  {
+    this->dataPtr->bitrevShaderUri =
+      resolve(shader->GetElement("gpu_ifft_bitreverse")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_ifft_butterfly"))
+  {
+    this->dataPtr->butterShaderUri =
+      resolve(shader->GetElement("gpu_ifft_butterfly")->Get<std::string>());
   }
   if (shader->HasElement("gpu_evolve"))
   {

@@ -35,6 +35,7 @@ namespace
                                     const double *, const double *,
                                     const double *, int);
   using EvolveFn = int (*)(waves_heightmap_t, const char *, float);
+  using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -47,6 +48,7 @@ namespace
     PbsVisualFn pbsVisual{nullptr};
     UploadSpectrumFn uploadSpectrum{nullptr};
     EvolveFn   evolve{nullptr};
+    IfftFn     ifft{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -83,6 +85,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_upload_spectrum"));
       api.evolve = reinterpret_cast<EvolveFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_evolve_dispatch"));
+      api.ifft = reinterpret_cast<IfftFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_ifft_dispatch"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -208,6 +212,20 @@ bool HeightMapTexture::EvolveDispatch(const std::string &_shaderAbsPath,
     return false;
   return api.evolve(this->impl_->handle, _shaderAbsPath.c_str(),
                     _simTimeS) != 0;
+}
+
+bool HeightMapTexture::IfftDispatch(
+    const std::string &_bitrevShaderAbsPath,
+    const std::string &_butterShaderAbsPath)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.ifft)
+    return false;
+  return api.ifft(this->impl_->handle,
+                  _bitrevShaderAbsPath.c_str(),
+                  _butterShaderAbsPath.c_str()) != 0;
 }
 
 }  // namespace gz::sim::systems

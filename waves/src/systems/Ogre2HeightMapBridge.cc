@@ -102,6 +102,26 @@ namespace
     std::string             h0TexName;
     std::string             omegaTexName;
     std::string             hktTexName;
+
+    // Stage 3 (GPU IFFT): two ping-pong textures, one bitreverse job and
+    // one butterfly job (both reused across all 2·(log2N+1) passes), plus
+    // one tiny ConstBufferPacked per pass with the params baked at init.
+    // Per-pass params are time-invariant (axis, stage, log2N) so we never
+    // touch the buffers after init — no per-frame upload-then-dispatch
+    // synchronisation to worry about.
+    Ogre::TextureGpu       *ifftBufA{nullptr};
+    Ogre::TextureGpu       *ifftBufB{nullptr};
+    Ogre::HlmsComputeJob   *bitrevJob{nullptr};
+    Ogre::HlmsComputeJob   *butterJob{nullptr};
+    std::vector<Ogre::ConstBufferPacked *> ifftParams;
+    std::string             bitrevShaderName;
+    std::string             butterShaderName;
+    std::string             ifftBufAName;
+    std::string             ifftBufBName;
+    int                     ifftLog2N{0};
+    /// After the last pass, this aliases whichever of bufA/bufB ended
+    /// up holding the spatial η output. Exposed for Stage 4's binding.
+    Ogre::TextureGpu       *ifftFinalTex{nullptr};
   };
 
   // std140-packed uniform layout matching evolve.glsl's `Params` block.
@@ -114,6 +134,26 @@ namespace
   };
   static_assert(sizeof(EvolveParams) == 16,
                 "EvolveParams must be a single std140 vec4 block");
+
+  // std140-packed uniform layouts matching fft_bitreverse.glsl and
+  // fft_butterfly.glsl's `Params` blocks. Both fit in a single vec4.
+  struct alignas(16) BitrevParams
+  {
+    int gridSize;
+    int axis;
+    int log2N;
+    int _pad;
+  };
+  static_assert(sizeof(BitrevParams) == 16, "BitrevParams must be a vec4");
+
+  struct alignas(16) ButterParams
+  {
+    int   gridSize;
+    int   stage;
+    int   axis;
+    float invertSign;
+  };
+  static_assert(sizeof(ButterParams) == 16, "ButterParams must be a vec4");
 }
 
 extern "C"
@@ -822,6 +862,240 @@ int waves_ogre2_heightmap_evolve_dispatch(
   return 1;
 }
 
+namespace
+{
+  /// Returns true iff n is a positive power of two.
+  bool IsPow2(std::size_t n) { return n > 0 && (n & (n - 1)) == 0; }
+
+  /// log2(n) for n a power of two. UB if not.
+  int Log2Pow2(std::size_t n)
+  {
+    int r = 0;
+    while ((static_cast<std::size_t>(1u) << r) < n) ++r;
+    return r;
+  }
+}
+
+int waves_ogre2_heightmap_ifft_dispatch(
+    waves_heightmap_t _handle,
+    const char *_bitrevShaderAbsPath,
+    const char *_butterShaderAbsPath)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->hktTex || !hm->sceneManager ||
+      !_bitrevShaderAbsPath || !_butterShaderAbsPath)
+    return 0;
+  if (!IsPow2(hm->gridSize))
+  {
+    gzerr << "[waves_ogre2_heightmap] IFFT requires power-of-two gridSize ("
+          << hm->gridSize << ")" << std::endl;
+    return 0;
+  }
+
+  // Lazy init of the IFFT pipeline. Same pattern as evolve_dispatch:
+  // register the shader directories, build the two compute jobs, pre-bake
+  // one ConstBufferPacked per pass.
+  if (!hm->bitrevJob)
+  {
+    try
+    {
+      const int N     = static_cast<int>(hm->gridSize);
+      const int log2N = Log2Pow2(hm->gridSize);
+      hm->ifftLog2N   = log2N;
+
+      auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
+      const std::filesystem::path bitrevPath(_bitrevShaderAbsPath);
+      const std::filesystem::path butterPath(_butterShaderAbsPath);
+      hm->bitrevShaderName = bitrevPath.stem().string();
+      hm->butterShaderName = butterPath.stem().string();
+      for (const auto &dir : {bitrevPath.parent_path().string(),
+                              butterPath.parent_path().string()})
+      {
+        try
+        {
+          rgMgr.addResourceLocation(
+              dir, "FileSystem",
+              Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+              false);
+        }
+        catch (const Ogre::Exception &) { /* already added */ }
+      }
+
+      // Ping-pong textures.
+      const std::string base =
+          "WavesIfft_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->ifftBufAName = base + "_A";
+      hm->ifftBufBName = base + "_B";
+      hm->ifftBufA = MakeSpectrumTexture(hm->manager, hm->ifftBufAName,
+                                          hm->gridSize,
+                                          Ogre::PFG_RGBA32_FLOAT);
+      hm->ifftBufB = MakeSpectrumTexture(hm->manager, hm->ifftBufBName,
+                                          hm->gridSize,
+                                          Ogre::PFG_RGBA32_FLOAT);
+
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      hm->hlmsCompute = hlmsManager->getComputeHlms();
+      if (!hm->hlmsCompute)
+      {
+        gzerr << "[waves_ogre2_heightmap] no HlmsCompute for IFFT"
+              << std::endl;
+        return 0;
+      }
+
+      const std::string bitrevJobName = base + "_bitrev";
+      const std::string butterJobName = base + "_butter";
+      hm->bitrevJob = hm->hlmsCompute->createComputeJob(
+          bitrevJobName, bitrevJobName, hm->bitrevShaderName,
+          Ogre::StringVector{});
+      hm->butterJob = hm->hlmsCompute->createComputeJob(
+          butterJobName, butterJobName, hm->butterShaderName,
+          Ogre::StringVector{});
+      if (!hm->bitrevJob || !hm->butterJob)
+      {
+        gzerr << "[waves_ogre2_heightmap] createComputeJob(ifft) failed"
+              << std::endl;
+        return 0;
+      }
+      hm->bitrevJob->setThreadsPerGroup(16u, 16u, 1u);
+      hm->butterJob->setThreadsPerGroup(16u, 16u, 1u);
+      const Ogre::uint32 groups =
+          static_cast<Ogre::uint32>((N + 15) / 16);
+      hm->bitrevJob->setNumThreadGroups(groups, groups, 1u);
+      hm->butterJob->setNumThreadGroups(groups, groups, 1u);
+      hm->bitrevJob->setNumUavUnits(2u);
+      hm->butterJob->setNumUavUnits(2u);
+
+      // Pre-bake one tiny ConstBuffer per pass. Layout (per axis a in
+      // {0, 1}): 1 bitrev params + log2N butterfly params. Total
+      // 2·(log2N + 1) buffers.
+      auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+      auto *vaoManager   = renderSystem->getVaoManager();
+      hm->ifftParams.reserve(
+          static_cast<std::size_t>(2 * (log2N + 1)));
+      for (int axis = 0; axis < 2; ++axis)
+      {
+        BitrevParams bp{};
+        bp.gridSize = N;
+        bp.axis     = axis;
+        bp.log2N    = log2N;
+        bp._pad     = 0;
+        auto *buf = vaoManager->createConstBuffer(
+            sizeof(BitrevParams), Ogre::BT_DEFAULT, &bp, false);
+        hm->ifftParams.push_back(buf);
+
+        for (int s = 0; s < log2N; ++s)
+        {
+          ButterParams btp{};
+          btp.gridSize   = N;
+          btp.stage      = s;
+          btp.axis       = axis;
+          btp.invertSign = +1.0f;  // IFFT
+          auto *bbuf = vaoManager->createConstBuffer(
+              sizeof(ButterParams), Ogre::BT_DEFAULT, &btp, false);
+          hm->ifftParams.push_back(bbuf);
+        }
+      }
+
+      gzmsg << "[waves_ogre2_heightmap] IFFT pipeline initialised: N=" << N
+            << " log2N=" << log2N
+            << " passes_per_frame=" << (2 * (log2N + 1))
+            << " bitrev=" << hm->bitrevShaderName
+            << " butter=" << hm->butterShaderName << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] IFFT setup threw: "
+            << e.getDescription() << std::endl;
+      hm->bitrevJob = nullptr;
+      hm->butterJob = nullptr;
+      return 0;
+    }
+  }
+
+  if (!hm->bitrevJob || !hm->butterJob || hm->ifftParams.empty())
+    return 0;
+
+  // Keep our textures Resident defensively each frame (same pattern as
+  // evolve/upload paths).
+  hm->ifftBufA->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+  hm->ifftBufB->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+
+  try
+  {
+    auto bindUav =
+        [&](Ogre::HlmsComputeJob *job, Ogre::uint8 slot,
+            Ogre::TextureGpu *tex,
+            Ogre::ResourceAccess::ResourceAccess access)
+    {
+      Ogre::DescriptorSetUav::TextureSlot s =
+          Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+      s.texture     = tex;
+      s.access      = access;
+      s.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+      job->_setUavTexture(slot, s);
+    };
+
+    auto runPass =
+        [&](Ogre::HlmsComputeJob *job, std::size_t paramIdx,
+            Ogre::TextureGpu *src, Ogre::TextureGpu *dst)
+    {
+      job->setConstBuffer(0u, hm->ifftParams[paramIdx]);
+      bindUav(job, 0u, src, Ogre::ResourceAccess::Read);
+      bindUav(job, 1u, dst, Ogre::ResourceAccess::Write);
+      hm->hlmsCompute->dispatch(job, hm->sceneManager, nullptr);
+    };
+
+    const int log2N      = hm->ifftLog2N;
+    const std::size_t perAxis =
+        static_cast<std::size_t>(log2N + 1);
+
+    Ogre::TextureGpu *cur  = hm->hktTex;
+    Ogre::TextureGpu *next = hm->ifftBufA;
+
+    // --- Row pass ---
+    runPass(hm->bitrevJob, 0u, cur, next);
+    cur = hm->ifftBufA;
+    next = hm->ifftBufB;
+    for (int s = 0; s < log2N; ++s)
+    {
+      runPass(hm->butterJob, 1u + static_cast<std::size_t>(s), cur, next);
+      std::swap(cur, next);
+    }
+    // `cur` now holds the row-FFT result (in {bufA, bufB}).
+
+    // --- Column pass ---
+    Ogre::TextureGpu *other =
+        (cur == hm->ifftBufA) ? hm->ifftBufB : hm->ifftBufA;
+    runPass(hm->bitrevJob, perAxis, cur, other);
+    cur  = other;
+    next = (cur == hm->ifftBufA) ? hm->ifftBufB : hm->ifftBufA;
+    for (int s = 0; s < log2N; ++s)
+    {
+      runPass(hm->butterJob, perAxis + 1u + static_cast<std::size_t>(s),
+              cur, next);
+      std::swap(cur, next);
+    }
+
+    hm->ifftFinalTex = cur;
+    if (!hm->ifftFinalTex->isDataReady())
+      hm->ifftFinalTex->notifyDataIsReady();
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] IFFT dispatch threw: "
+            << e.getDescription()
+            << " (further failures suppressed)" << std::endl;
+    }
+    return 0;
+  }
+  return 1;
+}
+
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
@@ -884,6 +1158,53 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
       *tex = nullptr;
     }
   }
+
+  // Stage 3 IFFT pipeline teardown.
+  if (hm->hlmsCompute)
+  {
+    if (hm->bitrevJob)
+    {
+      try { hm->hlmsCompute->destroyComputeJob(hm->bitrevJob->getName()); }
+      catch (const Ogre::Exception &) {}
+      hm->bitrevJob = nullptr;
+    }
+    if (hm->butterJob)
+    {
+      try { hm->hlmsCompute->destroyComputeJob(hm->butterJob->getName()); }
+      catch (const Ogre::Exception &) {}
+      hm->butterJob = nullptr;
+    }
+  }
+  if (!hm->ifftParams.empty())
+  {
+    try
+    {
+      auto *renderSystem = Ogre::Root::getSingletonPtr() ?
+          Ogre::Root::getSingleton().getRenderSystem() : nullptr;
+      auto *vaoManager = renderSystem ? renderSystem->getVaoManager()
+                                       : nullptr;
+      if (vaoManager)
+      {
+        for (auto *buf : hm->ifftParams)
+        {
+          if (buf)
+            vaoManager->destroyConstBuffer(buf);
+        }
+      }
+    }
+    catch (const Ogre::Exception &) {}
+    hm->ifftParams.clear();
+  }
+  for (auto **tex : {&hm->ifftBufA, &hm->ifftBufB})
+  {
+    if (*tex && hm->manager)
+    {
+      try { hm->manager->destroyTexture(*tex); }
+      catch (const Ogre::Exception &) {}
+      *tex = nullptr;
+    }
+  }
+  hm->ifftFinalTex = nullptr;
   if (hm->manager)
   {
     if (hm->staging)
