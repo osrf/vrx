@@ -100,7 +100,8 @@ namespace gz::sim::systems
     /// \brief Stage 2 dispatch: evolve the spectrum to `h(k, t)` on the
     /// GPU. Must follow `UploadSpectrum`.
     bool EvolveDispatch(const std::string &_shaderAbsPath,
-                        float _simTimeS, float _tauS = 0.0f);
+                        float _simTimeS, float _tauS = 0.0f,
+                        float _tileSizeM = 200.0f);
 
     /// \brief Stage 3 dispatch: run the GPU IFFT (Cooley-Tukey radix-2)
     /// on the latest `h(k, t)` texture produced by EvolveDispatch. The
@@ -165,6 +166,12 @@ namespace gz::sim::systems
     /// `ifftFinalTex` (the Stage 3 IFFT output that the visual
     /// samples). Compare to CPU's heightGrid_(i, j) at the same t.
     bool ReadbackIfftCell(int _i, int _j, float *_outEta) const;
+
+    /// \brief Diagnostic: async readback of h(k, t) at one cell of
+    /// `hktTex` (the Stage 2 evolve output). Compare to CPU's
+    /// freshly-computed h(k, t) at the same t.
+    bool ReadbackHktCell(int _i, int _j,
+                         float *_outRe, float *_outIm) const;
 
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }

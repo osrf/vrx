@@ -11,14 +11,19 @@
 // Resource bindings:
 //   UAV  slot 0 (image2D)    hktTex   RGBA32F  output
 //   Tex  slot 0 (sampler2D)  h0Tex    RGBA32F  read-only spectrum
-//   Tex  slot 1 (sampler2D)  omegaTex R32F     read-only frequencies
 //
 // We deliberately put inputs on TEXTURE slots, not UAV slots — in
 // OgreNext's OpenGL compute path, UAVs and textures share slots, and
 // reading from `image2D` at UAV slot 1+ in a multi-UAV job silently
-// returns zero. Texture-sampler binding works correctly. We use
-// `texelFetch` (no filtering, no LOD) so the read is equivalent to
-// `imageLoad`.
+// returns zero.
+//
+// IMPORTANT: TEXTURE samplers ALSO don't bind reliably at slot 1+ in
+// OgreNext's compute path — a sampler declared at `binding = 1`
+// silently returns slot-0's texture's data. So we only bind h0Tex at
+// slot 0 and compute ω from the cell index on the fly instead of
+// reading it from an omegaTex texture. (The omegaGrid upload still
+// happens — and the bridge's omega readback is bit-exact CPU↔GPU —
+// but evolve doesn't actually sample it.)
 //
 // Workgroup is 16×16 → one thread per spectrum cell.
 
@@ -26,17 +31,19 @@
 
 layout(rgba32f, binding = 0) uniform writeonly image2D hktTex;
 layout(binding = 0) uniform sampler2D h0Tex;
-layout(binding = 1) uniform sampler2D omegaTex;
 
 layout(std140, binding = 0) uniform Params
 {
   float t;          // simulation time [s]
   float tau;        // ramp time constant (matches CPU FFTWaveSimulation)
-  int   gridSize;   // texture resolution per axis
-  int   _pad;
+  int   gridSize;   // N (texture resolution per axis)
+  float tileSize;   // L (physical tile extent in meters)
 };
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+const float TWO_PI = 6.28318530717958647692;
+const float G      = 9.81;
 
 void main()
 {
@@ -44,16 +51,20 @@ void main()
   if (texel.x >= gridSize || texel.y >= gridSize)
     return;
 
-  // h0Tex is uploaded so that pixel (col=j, row=i) holds h0(i, j).
-  // For thread (x, y) to process the spectrum at index (x, y) — at
-  // frequency (kx[x], ky[y]) — we must read pixel (col=y, row=x),
-  // i.e. texel.yx. Without this swap, the IFFT runs on a transposed
-  // spectrum: energy that Phillips places near kx-aligned cells
-  // (because of wind direction) lands at ky-aligned spatial
-  // frequencies instead — yielding short, fast-changing wavelets.
+  // h0Tex is uploaded so pixel (col=j, row=i) = h0(i, j). To make
+  // thread (x, y) process the spectrum at index (x, y) — frequency
+  // (kx[x], ky[y]) — we read pixel (col=y, row=x) via texel.yx.
   ivec2 specT = texel.yx;
   vec4 h0Pack = texelFetch(h0Tex, specT, 0);   // (re_h0, im_h0, re_conj, im_conj)
-  float omega = texelFetch(omegaTex, specT, 0).r;
+
+  // Compute ω(k) = sqrt(g · |k|) from the cell's FFT-layout index.
+  // kx[i] = (2π/L) · (i if i<N/2 else i-N); same for ky[j].
+  int ix = (texel.x < gridSize / 2) ? texel.x : texel.x - gridSize;
+  int iy = (texel.y < gridSize / 2) ? texel.y : texel.y - gridSize;
+  float kx = TWO_PI * float(ix) / tileSize;
+  float ky = TWO_PI * float(iy) / tileSize;
+  float kmag = sqrt(kx * kx + ky * ky);
+  float omega = sqrt(G * kmag);
 
   float c = cos(omega * t);
   float s = sin(omega * t);

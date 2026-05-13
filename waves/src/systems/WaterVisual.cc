@@ -611,7 +611,8 @@ void WaterVisual::Implementation::OnSceneUpdate()
       {
         ok = this->heightMap->EvolveDispatch(this->evolveShaderUri,
                                              this->currentSimTime,
-                                             this->cachedTau);
+                                             this->cachedTau,
+                                             this->cachedTileSize);
         static bool loggedStage2 = false;
         if (ok && !loggedStage2)
         {
@@ -666,6 +667,24 @@ void WaterVisual::Implementation::OnSceneUpdate()
             const float t = this->currentSimTime;
             this->fftSim->Update(static_cast<double>(t));
             const auto &eta = this->fftSim->HeightGrid();
+            // Also compute expected h(k, t) directly for comparison
+            // against GPU's hktTex readback at the same cells.
+            const auto &h0  = this->fftSim->H0();
+            const auto &hc  = this->fftSim->H0Conj();
+            const auto &om  = this->fftSim->OmegaGrid();
+            // Compute ramp at this t exactly like CPU does.
+            const double rampVal = (this->cachedTau > 0.0)
+                ? (1.0 - std::exp(-t / this->cachedTau)) : 1.0;
+            auto cpuHkt = [&](int i, int j) -> std::complex<double>
+            {
+              const double w = om(i, j);
+              const std::complex<double> e_plus(std::cos(w * t),
+                                                  std::sin(w * t));
+              const std::complex<double> e_minus = std::conj(e_plus);
+              const std::complex<double> h =
+                  h0(i, j) * e_plus + hc(i, j) * e_minus;
+              return h * rampVal;
+            };
             gzmsg << "[WaterVisual] IFFT η comparison at t=" << t
                   << " (300 frames after Stage 3 online)" << std::endl;
             auto cmp = [&](int i, int j)
@@ -692,6 +711,25 @@ void WaterVisual::Implementation::OnSceneUpdate()
             cmp(100, 50);
             cmp(127, 0);
             cmp(127, 127);
+
+            // Compare evolve's hktTex output to CPU's expected
+            // h(k, t) cell-by-cell.
+            auto cmpHkt = [&](int i, int j)
+            {
+              float gpuRe = 0.0f, gpuIm = 0.0f;
+              const bool ok =
+                  this->heightMap->ReadbackHktCell(i, j, &gpuRe, &gpuIm);
+              const std::complex<double> hh = cpuHkt(i, j);
+              gzmsg << "[WaterVisual] hkt(" << i << "," << j << ")  "
+                    << "CPU=(" << hh.real() << "," << hh.imag() << ")  "
+                    << "GPU=(" << gpuRe << "," << gpuIm << ")  "
+                    << "ok=" << ok << std::endl;
+            };
+            cmpHkt(0, 0);
+            cmpHkt(1, 0);
+            cmpHkt(126, 127);
+            cmpHkt(64, 64);
+            cmpHkt(127, 127);
 
             // Magnitude statistics across the whole CPU heightGrid.
             double cpuMin = 1e9, cpuMax = -1e9, cpuSumSq = 0.0;

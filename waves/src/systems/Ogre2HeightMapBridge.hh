@@ -139,7 +139,8 @@ extern "C"
       waves_heightmap_t handle,
       const char *shader_abs_path,
       float sim_time_s,
-      float tau_s);
+      float tau_s,
+      float tile_size_m);
 
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);

@@ -34,7 +34,8 @@ namespace
                                     const double *, const double *,
                                     const double *, const double *,
                                     const double *, int);
-  using EvolveFn = int (*)(waves_heightmap_t, const char *, float, float);
+  using EvolveFn = int (*)(waves_heightmap_t, const char *,
+                            float, float, float);
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
   using IfftNaiveFn = int (*)(waves_heightmap_t, const char *);
   using IfftBoundFn = int (*)(waves_heightmap_t);
@@ -47,6 +48,8 @@ namespace
                                 float *, float *, float *, float *);
   using ReadbackOmegaFn = int (*)(waves_heightmap_t, int, int, float *);
   using ReadbackIfftFn  = int (*)(waves_heightmap_t, int, int, float *);
+  using ReadbackHktFn   = int (*)(waves_heightmap_t, int, int,
+                                   float *, float *);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -68,6 +71,7 @@ namespace
     ReadbackH0Fn readbackH0{nullptr};
     ReadbackOmegaFn readbackOmega{nullptr};
     ReadbackIfftFn  readbackIfft{nullptr};
+    ReadbackHktFn   readbackHkt{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -122,6 +126,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_readback_omega"));
       api.readbackIfft = reinterpret_cast<ReadbackIfftFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_readback_ifft"));
+      api.readbackHkt = reinterpret_cast<ReadbackHktFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_readback_hkt"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -238,7 +244,8 @@ bool HeightMapTexture::UploadSpectrum(
 }
 
 bool HeightMapTexture::EvolveDispatch(const std::string &_shaderAbsPath,
-                                      float _simTimeS, float _tauS)
+                                      float _simTimeS, float _tauS,
+                                      float _tileSizeM)
 {
   if (!this->impl_->handle)
     return false;
@@ -246,7 +253,7 @@ bool HeightMapTexture::EvolveDispatch(const std::string &_shaderAbsPath,
   if (!api.loaded || !api.evolve)
     return false;
   return api.evolve(this->impl_->handle, _shaderAbsPath.c_str(),
-                    _simTimeS, _tauS) != 0;
+                    _simTimeS, _tauS, _tileSizeM) != 0;
 }
 
 bool HeightMapTexture::IfftDispatch(
@@ -329,6 +336,19 @@ bool HeightMapTexture::ReadbackIfftCell(int _i, int _j,
   if (!api.loaded || !api.readbackIfft)
     return false;
   return api.readbackIfft(this->impl_->handle, _i, _j, _outEta) != 0;
+}
+
+bool HeightMapTexture::ReadbackHktCell(int _i, int _j,
+                                        float *_outRe,
+                                        float *_outIm) const
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.readbackHkt)
+    return false;
+  return api.readbackHkt(this->impl_->handle, _i, _j,
+                         _outRe, _outIm) != 0;
 }
 
 bool HeightMapTexture::GpuOutputBound() const

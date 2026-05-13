@@ -190,7 +190,7 @@ namespace
     float t;
     float tau;
     int   gridSize;
-    int   _pad;
+    float tileSize;   // L, in meters
   };
   static_assert(sizeof(EvolveParams) == 16,
                 "EvolveParams must be a single std140 vec4 block");
@@ -816,7 +816,7 @@ int waves_ogre2_heightmap_upload_spectrum(
 
 int waves_ogre2_heightmap_evolve_dispatch(
     waves_heightmap_t _handle, const char *_shaderAbsPath,
-    float _simTimeS, float _tauS)
+    float _simTimeS, float _tauS, float _tileSizeM)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
   if (!hm || !hm->h0Tex || !hm->omegaTex || !hm->hktTex ||
@@ -878,7 +878,7 @@ int waves_ogre2_heightmap_evolve_dispatch(
       // unreliable. The supported idiom is: writes via UAV, reads
       // via regular texture samplers (texelFetch in GLSL).
       hm->evolveJob->setNumUavUnits(1u);
-      hm->evolveJob->setNumTexUnits(2u);
+      hm->evolveJob->setNumTexUnits(1u);  // omegaTex no longer sampled
       // GL: UAVs and textures share slot indices. Offset textures to
       // start at GL slot 1 so they don't collide with the UAV at
       // slot 0.
@@ -898,7 +898,9 @@ int waves_ogre2_heightmap_evolve_dispatch(
         hm->evolveJob->setTexture(slot, s, &hm->samplerblock);
       };
       bindTex(0u, hm->h0Tex);
-      bindTex(1u, hm->omegaTex);
+      // Note: omegaTex is intentionally NOT bound — evolve computes
+      // ω in-shader because slot-1 samplers don't work in OgreNext
+      // compute. The omegaGrid upload is kept for readback diagnostics.
 
       // Params const buffer.
       auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
@@ -937,9 +939,6 @@ int waves_ogre2_heightmap_evolve_dispatch(
     solver.resolveTransition(transitions, hm->h0Tex,
         Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
         Ogre::c_computeStageMask);
-    solver.resolveTransition(transitions, hm->omegaTex,
-        Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
-        Ogre::c_computeStageMask);
     solver.resolveTransition(transitions, hm->hktTex,
         Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
         Ogre::c_computeStageMask);
@@ -949,6 +948,7 @@ int waves_ogre2_heightmap_evolve_dispatch(
     p.t        = _simTimeS;
     p.tau      = _tauS;
     p.gridSize = static_cast<int>(hm->gridSize);
+    p.tileSize = _tileSizeM;
     hm->evolveParams->upload(&p, 0u, sizeof(p));
     hm->hlmsCompute->dispatch(hm->evolveJob, hm->sceneManager, nullptr);
     if (!hm->hktTex->isDataReady())
@@ -1723,9 +1723,12 @@ int waves_ogre2_heightmap_readback_ifft(
       ++spins;
     const Ogre::TextureBox box = ticket->map(0u);
     const std::uint8_t *base = static_cast<const std::uint8_t *>(box.data);
+    // CPU heightGrid_(i, j) is written by GPU thread (texel.x=i,
+    // texel.y=j) to pixel(col=i, row=j). Memory: row j starts at
+    // j*bytesPerRow; col i is at i*16 inside the row.
     const float *p = reinterpret_cast<const float *>(
-        base + static_cast<std::size_t>(_i) * box.bytesPerRow +
-        static_cast<std::size_t>(_j) * 16u);
+        base + static_cast<std::size_t>(_j) * box.bytesPerRow +
+        static_cast<std::size_t>(_i) * 16u);
     *_outEta = p[0];   // .r = η
     ticket->unmap();
     hm->manager->destroyAsyncTextureTicket(ticket);
@@ -1734,6 +1737,51 @@ int waves_ogre2_heightmap_readback_ifft(
   catch (const Ogre::Exception &e)
   {
     gzerr << "[waves_ogre2_heightmap] ifft readback threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
+}
+
+int waves_ogre2_heightmap_readback_hkt(
+    waves_heightmap_t _handle, int _i, int _j,
+    float *_outRe, float *_outIm)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->hktTex || !hm->manager || !_outRe || !_outIm)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  if (_i < 0 || _i >= N || _j < 0 || _j >= N)
+    return 0;
+  try
+  {
+    Ogre::AsyncTextureTicket *ticket =
+        hm->manager->createAsyncTextureTicket(
+            static_cast<Ogre::uint32>(N),
+            static_cast<Ogre::uint32>(N),
+            1u, Ogre::TextureTypes::Type2D,
+            Ogre::PFG_RGBA32_FLOAT);
+    if (!ticket)
+      return 0;
+    ticket->download(hm->hktTex, 0u, true, nullptr, true);
+    int spins = 0;
+    while (!ticket->queryIsTransferDone() && spins < 10000)
+      ++spins;
+    const Ogre::TextureBox box = ticket->map(0u);
+    const std::uint8_t *base = static_cast<const std::uint8_t *>(box.data);
+    // Evolve writes hkt at pixel(col=texel.x=i, row=texel.y=j). So
+    // h(k=(i, j), t) is at memory offset j*bytesPerRow + i*16.
+    const float *p = reinterpret_cast<const float *>(
+        base + static_cast<std::size_t>(_j) * box.bytesPerRow +
+        static_cast<std::size_t>(_i) * 16u);
+    *_outRe = p[0];
+    *_outIm = p[1];
+    ticket->unmap();
+    hm->manager->destroyAsyncTextureTicket(ticket);
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] hkt readback threw: "
           << e.getDescription() << std::endl;
     return 0;
   }
