@@ -122,6 +122,14 @@ namespace
     /// After the last pass, this aliases whichever of bufA/bufB ended
     /// up holding the spatial η output. Exposed for Stage 4's binding.
     Ogre::TextureGpu       *ifftFinalTex{nullptr};
+
+    // Stage 4: gz::rendering Material we're bound to, saved at create
+    // time so the first successful IFFT dispatch can swap its
+    // "heightMap" TextureUnitState from the CPU-uploaded `texture` to
+    // the GPU-IFFT-output `ifftFinalTex`. Cleared on null-material
+    // (HlmsPbs) creates.
+    Ogre::Material         *ogreMaterial{nullptr};
+    bool                    ifftBoundToMaterial{false};
   };
 
   // std140-packed uniform layout matching evolve.glsl's `Params` block.
@@ -248,6 +256,7 @@ waves_heightmap_t waves_ogre2_heightmap_create(
       return nullptr;
     }
     auto mat = ogreMat->Material();
+    hm->ogreMaterial = mat.get();
     auto *pass = mat->getTechnique(0u)->getPass(0u);
     Ogre::TextureUnitState *texUnit = nullptr;
     for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
@@ -1080,6 +1089,34 @@ int waves_ogre2_heightmap_ifft_dispatch(
     hm->ifftFinalTex = cur;
     if (!hm->ifftFinalTex->isDataReady())
       hm->ifftFinalTex->notifyDataIsReady();
+
+    // Stage 4: on the first successful dispatch, rebind the visual
+    // material's "heightMap" sampler from the CPU-uploaded `texture`
+    // to the GPU IFFT output. After this point the CPU `Upload(...)`
+    // path is dead weight; WaterVisual stops calling it.
+    if (!hm->ifftBoundToMaterial && hm->ogreMaterial && hm->ifftFinalTex)
+    {
+      auto *pass = hm->ogreMaterial->getTechnique(0u)->getPass(0u);
+      Ogre::TextureUnitState *texUnit = nullptr;
+      for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
+      {
+        auto *u = pass->getTextureUnitState(i);
+        if (u->getName() == "heightMap")
+        {
+          texUnit = u;
+          break;
+        }
+      }
+      if (texUnit)
+      {
+        texUnit->setTexture(hm->ifftFinalTex);
+        texUnit->setSamplerblock(hm->samplerblock);
+        hm->ifftBoundToMaterial = true;
+        gzmsg << "[waves_ogre2_heightmap] heightMap sampler swapped to "
+              << "GPU IFFT output (" << hm->ifftFinalTex->getNameStr()
+              << "); CPU upload path retired" << std::endl;
+      }
+    }
   }
   catch (const Ogre::Exception &e)
   {
@@ -1094,6 +1131,12 @@ int waves_ogre2_heightmap_ifft_dispatch(
     return 0;
   }
   return 1;
+}
+
+int waves_ogre2_heightmap_ifft_bound(waves_heightmap_t _handle)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  return (hm && hm->ifftBoundToMaterial) ? 1 : 0;
 }
 
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)

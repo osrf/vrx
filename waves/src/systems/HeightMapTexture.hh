@@ -112,6 +112,12 @@ namespace gz::sim::systems
     bool IfftDispatch(const std::string &_bitrevShaderAbsPath,
                       const std::string &_butterShaderAbsPath);
 
+    /// \brief Stage 4: true once the visual material's "heightMap"
+    /// sampler has been swapped to the GPU IFFT output. Until then
+    /// the CPU `Upload(...)` path must continue running so the
+    /// material has *something* sensible to sample.
+    bool GpuOutputBound() const;
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 

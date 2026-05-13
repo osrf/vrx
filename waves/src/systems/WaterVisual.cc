@@ -534,6 +534,22 @@ void WaterVisual::Implementation::OnSceneUpdate()
               << this->computeShaderUri << std::endl;
       }
     }
+    else if (this->heightMap->GpuOutputBound())
+    {
+      // Stage 4: GPU IFFT output is bound to the visual material.
+      // CPU `fftSim->Update + Upload` is no longer needed on the
+      // render path. The CPU FFTWaveSimulation still runs server-side
+      // for buoyancy queries (Stage 5).
+      ok = true;
+      static bool loggedStage4 = false;
+      if (!loggedStage4)
+      {
+        loggedStage4 = true;
+        gzmsg << "[WaterVisual] GPU-FFT Stage 4 online — visual now "
+              << "samples the GPU IFFT output directly; CPU heightmap "
+              << "upload skipped on the render thread." << std::endl;
+      }
+    }
     else
     {
       this->fftSim->Update(static_cast<double>(this->currentSimTime));

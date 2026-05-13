@@ -36,6 +36,7 @@ namespace
                                     const double *, int);
   using EvolveFn = int (*)(waves_heightmap_t, const char *, float);
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
+  using IfftBoundFn = int (*)(waves_heightmap_t);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -49,6 +50,7 @@ namespace
     UploadSpectrumFn uploadSpectrum{nullptr};
     EvolveFn   evolve{nullptr};
     IfftFn     ifft{nullptr};
+    IfftBoundFn ifftBound{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -87,6 +89,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_evolve_dispatch"));
       api.ifft = reinterpret_cast<IfftFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_dispatch"));
+      api.ifftBound = reinterpret_cast<IfftBoundFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_ifft_bound"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -226,6 +230,16 @@ bool HeightMapTexture::IfftDispatch(
   return api.ifft(this->impl_->handle,
                   _bitrevShaderAbsPath.c_str(),
                   _butterShaderAbsPath.c_str()) != 0;
+}
+
+bool HeightMapTexture::GpuOutputBound() const
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.ifftBound)
+    return false;
+  return api.ifftBound(this->impl_->handle) != 0;
 }
 
 }  // namespace gz::sim::systems
