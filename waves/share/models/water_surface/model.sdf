@@ -19,6 +19,9 @@
                  Stage 1 ships with a hello-world procedural pattern;
                  Stages 2-3 replace it with the real FFT pipeline. -->
             <gpu_compute>shaders/compute/hello_world.glsl</gpu_compute>
+            <!-- Stage 2 evolve shader: writes h(k, t) to a GPU texture
+                 each frame, reading h0 + omega uploaded once at init. -->
+            <gpu_evolve>shaders/compute/evolve.glsl</gpu_evolve>
             <parameters>
               <rescale>0.5</rescale>
               <bumpScale>25 25</bumpScale>

@@ -70,6 +70,8 @@ class WaterVisual::Implementation
   public: std::string fftVertexShaderUri;     ///< FFT vertex shader (optional)
   public: std::string fragmentShaderUri;      ///< Shared fragment shader
   public: std::string computeShaderUri;       ///< GPU-FFT compute shader (optional)
+  public: std::string evolveShaderUri;        ///< Stage 2 evolve shader (optional)
+  public: bool         spectrumUploaded{false}; ///< Stage 2 one-shot init
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
   public: float rescale{0.125f};
@@ -441,7 +443,59 @@ void WaterVisual::Implementation::OnSceneUpdate()
     const char *gpuEnv = std::getenv("GZ_WAVES_GPU_FFT");
     const bool useGpu = gpuEnv && std::string(gpuEnv) == "1" &&
                         !this->computeShaderUri.empty();
+    const char *stage2Env = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
+    const bool useStage2 = stage2Env && std::string(stage2Env) == "1" &&
+                           !this->evolveShaderUri.empty();
     bool ok = false;
+    if (useStage2)
+    {
+      // Stage 2 of the GPU-FFT plan: dispatch the evolve compute
+      // shader so h(k, t) is recomputed on the GPU each frame from
+      // the once-uploaded h0 / omega textures. No spatial output
+      // yet — Stage 3 (IFFT) is what produces the heightmap the
+      // visual samples. Until then this path produces no visual
+      // change; we're just exercising the compute pipeline.
+      if (!this->spectrumUploaded)
+      {
+        // Convert Eigen complex matrices (column-major) to row-major
+        // double buffers the bridge expects.
+        using RowMatrix =
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+                           Eigen::RowMajor>;
+        const auto &h0 = this->fftSim->H0();
+        const auto &hc = this->fftSim->H0Conj();
+        const auto &om = this->fftSim->OmegaGrid();
+        const int N = static_cast<int>(this->fftSim->GridSize());
+        RowMatrix h0Re   = h0.real();
+        RowMatrix h0Im   = h0.imag();
+        RowMatrix hcRe   = hc.real();
+        RowMatrix hcIm   = hc.imag();
+        RowMatrix omR    = om;
+        if (this->heightMap->UploadSpectrum(
+                h0Re.data(), h0Im.data(),
+                hcRe.data(), hcIm.data(),
+                omR.data(), N))
+        {
+          this->spectrumUploaded = true;
+        }
+      }
+      if (this->spectrumUploaded)
+      {
+        ok = this->heightMap->EvolveDispatch(this->evolveShaderUri,
+                                             this->currentSimTime);
+        static bool loggedStage2 = false;
+        if (ok && !loggedStage2)
+        {
+          loggedStage2 = true;
+          gzmsg << "[WaterVisual] GPU-FFT Stage 2 (evolve) online — "
+                << "h(k, t) computed on GPU. Visual is unchanged "
+                << "until Stage 3 (IFFT) lands." << std::endl;
+        }
+      }
+      // Stage 2 doesn't update the spatial heightmap, so we still
+      // need *something* there for the visual; fall through to the
+      // standard CPU/Stage-1 path below.
+    }
     if (useGpu)
     {
       ok = this->heightMap->Dispatch(this->computeShaderUri,
@@ -560,6 +614,11 @@ void WaterVisual::Configure(
   {
     this->dataPtr->computeShaderUri =
       resolve(shader->GetElement("gpu_compute")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_evolve"))
+  {
+    this->dataPtr->evolveShaderUri =
+      resolve(shader->GetElement("gpu_evolve")->Get<std::string>());
   }
 
   if (shader->HasElement("parameters"))

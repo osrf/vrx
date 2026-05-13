@@ -88,6 +88,20 @@ namespace gz::sim::systems
                          double _wx, double _wy, double _wz,
                          const std::string &_name);
 
+    /// \brief Stage 2 of the GPU-FFT plan: upload the time-invariant
+    /// Phillips spectrum + dispersion frequencies to persistent GPU
+    /// textures. Called once after creation; reads from
+    /// `FFTWaveSimulation::H0`/`H0Conj`/`OmegaGrid`. Sizes must equal
+    /// `_gridSize × _gridSize` row-major doubles.
+    bool UploadSpectrum(const double *_h0Re, const double *_h0Im,
+                        const double *_h0ConjRe, const double *_h0ConjIm,
+                        const double *_omega, int _gridSize);
+
+    /// \brief Stage 2 dispatch: evolve the spectrum to `h(k, t)` on the
+    /// GPU. Must follow `UploadSpectrum`.
+    bool EvolveDispatch(const std::string &_shaderAbsPath,
+                        float _simTimeS);
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 

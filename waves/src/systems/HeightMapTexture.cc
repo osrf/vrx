@@ -30,6 +30,11 @@ namespace
   using ComputeFn = int (*)(waves_heightmap_t, const char *, float, float);
   using PbsVisualFn = int (*)(waves_heightmap_t, double, int,
                                double, double, double, const char *);
+  using UploadSpectrumFn = int (*)(waves_heightmap_t,
+                                    const double *, const double *,
+                                    const double *, const double *,
+                                    const double *, int);
+  using EvolveFn = int (*)(waves_heightmap_t, const char *, float);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -40,6 +45,8 @@ namespace
     ReadyFn    ready{nullptr};
     ComputeFn  compute{nullptr};
     PbsVisualFn pbsVisual{nullptr};
+    UploadSpectrumFn uploadSpectrum{nullptr};
+    EvolveFn   evolve{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -72,6 +79,10 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_compute_dispatch"));
       api.pbsVisual = reinterpret_cast<PbsVisualFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_create_pbs_visual"));
+      api.uploadSpectrum = reinterpret_cast<UploadSpectrumFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_upload_spectrum"));
+      api.evolve = reinterpret_cast<EvolveFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_evolve_dispatch"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -170,6 +181,33 @@ bool HeightMapTexture::CreatePbsVisual(double _planeSizeM,
     return false;
   return api.pbsVisual(this->impl_->handle, _planeSizeM, _planeSegments,
                        _wx, _wy, _wz, _name.c_str()) != 0;
+}
+
+bool HeightMapTexture::UploadSpectrum(
+    const double *_h0Re, const double *_h0Im,
+    const double *_h0ConjRe, const double *_h0ConjIm,
+    const double *_omega, int _gridSize)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.uploadSpectrum)
+    return false;
+  return api.uploadSpectrum(this->impl_->handle,
+                            _h0Re, _h0Im, _h0ConjRe, _h0ConjIm, _omega,
+                            _gridSize) != 0;
+}
+
+bool HeightMapTexture::EvolveDispatch(const std::string &_shaderAbsPath,
+                                      float _simTimeS)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.evolve)
+    return false;
+  return api.evolve(this->impl_->handle, _shaderAbsPath.c_str(),
+                    _simTimeS) != 0;
 }
 
 }  // namespace gz::sim::systems

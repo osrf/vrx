@@ -105,6 +105,41 @@ extern "C"
       double world_z,
       const char *name);
 
+  /// Stage 2 (Phillips spectrum on GPU). One-shot upload of the
+  /// time-invariant Phillips spectrum (`h0`, `h0conj`) and the
+  /// dispersion frequencies (`omega`) to persistent GPU textures.
+  /// Called once after the heightmap is created; subsequent
+  /// `compute_dispatch` calls into the evolve shader read from these
+  /// textures.
+  /// \param handle Heightmap handle.
+  /// \param h0_re,h0_im  N²-element row-major arrays of the
+  ///   Phillips-spectrum amplitudes `h0(k)`.
+  /// \param h0conj_re,h0conj_im  N²-element arrays of `conj(h0(-k))`.
+  /// \param omega  N²-element array of `omega(k) = sqrt(g·|k|)`.
+  /// \param grid_size Side length N (must match the heightmap's).
+  /// \return 1 on success, 0 on failure.
+  int waves_ogre2_heightmap_upload_spectrum(
+      waves_heightmap_t handle,
+      const double *h0_re,
+      const double *h0_im,
+      const double *h0conj_re,
+      const double *h0conj_im,
+      const double *omega,
+      int grid_size);
+
+  /// Stage 2 dispatch: run the evolve compute shader to write the
+  /// time-evolved spectrum h(k, t) into the bridge's `hktTex`. Lazily
+  /// creates the HlmsComputeJob on first call, similar to
+  /// `_compute_dispatch`.
+  /// \param handle  Heightmap handle.
+  /// \param shader_abs_path  Absolute path to `evolve.glsl`.
+  /// \param sim_time_s  Current simulation time [s].
+  /// \return 1 on success.
+  int waves_ogre2_heightmap_evolve_dispatch(
+      waves_heightmap_t handle,
+      const char *shader_abs_path,
+      float sim_time_s);
+
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);
 }

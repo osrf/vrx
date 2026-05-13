@@ -90,7 +90,30 @@ namespace
     std::string             pbsMeshNameV1;
     std::string             pbsMeshNameV2;
     std::string             pbsDatablockName;
+
+    // Stage 2 (Phillips on GPU): persistent spectrum textures and the
+    // evolve compute job that reads from them each frame.
+    Ogre::TextureGpu       *h0Tex{nullptr};     // RGBA32F (re, im, re, im)
+    Ogre::TextureGpu       *omegaTex{nullptr};  // R32F omega(k)
+    Ogre::TextureGpu       *hktTex{nullptr};    // RGBA32F (h.re, h.im, _, _)
+    Ogre::HlmsComputeJob   *evolveJob{nullptr};
+    Ogre::ConstBufferPacked *evolveParams{nullptr};
+    std::string             evolveShaderName;
+    std::string             h0TexName;
+    std::string             omegaTexName;
+    std::string             hktTexName;
   };
+
+  // std140-packed uniform layout matching evolve.glsl's `Params` block.
+  struct alignas(16) EvolveParams
+  {
+    float t;
+    float _pad0;
+    int   gridSize;
+    int   _pad1;
+  };
+  static_assert(sizeof(EvolveParams) == 16,
+                "EvolveParams must be a single std140 vec4 block");
 }
 
 extern "C"
@@ -529,6 +552,276 @@ int waves_ogre2_heightmap_create_pbs_visual(
   }
 }
 
+namespace
+{
+  // Helper: create a manual TextureGpu of the given pixel format at
+  // gridSize × gridSize, ready for compute-shader UAV use.
+  Ogre::TextureGpu *MakeSpectrumTexture(
+      Ogre::TextureGpuManager *manager,
+      const std::string &name,
+      std::size_t gridSize,
+      Ogre::PixelFormatGpu format)
+  {
+    Ogre::TextureGpu *tex = manager->createOrRetrieveTexture(
+        name,
+        Ogre::GpuPageOutStrategy::SaveToSystemRam,
+        Ogre::TextureFlags::ManualTexture | Ogre::TextureFlags::Uav,
+        Ogre::TextureTypes::Type2D);
+    tex->setResolution(static_cast<Ogre::uint32>(gridSize),
+                       static_cast<Ogre::uint32>(gridSize));
+    tex->setNumMipmaps(1u);  // spectrum textures aren't mipmapped
+    tex->setPixelFormat(format);
+    tex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+    return tex;
+  }
+}
+
+int waves_ogre2_heightmap_upload_spectrum(
+    waves_heightmap_t _handle,
+    const double *_h0Re, const double *_h0Im,
+    const double *_h0ConjRe, const double *_h0ConjIm,
+    const double *_omega, int _gridSize)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->manager || !hm->sceneManager || _gridSize <= 0)
+    return 0;
+  if (!_h0Re || !_h0Im || !_h0ConjRe || !_h0ConjIm || !_omega)
+    return 0;
+  if (static_cast<std::size_t>(_gridSize) != hm->gridSize)
+  {
+    gzerr << "[waves_ogre2_heightmap] upload_spectrum size mismatch ("
+          << _gridSize << " vs handle's " << hm->gridSize << ")"
+          << std::endl;
+    return 0;
+  }
+  if (hm->h0Tex)
+    return 1;  // already uploaded
+
+  try
+  {
+    const std::string base =
+        "WavesSpec_" +
+        std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+    hm->h0TexName    = base + "_h0";
+    hm->omegaTexName = base + "_omega";
+    hm->hktTexName   = base + "_hkt";
+
+    hm->h0Tex    = MakeSpectrumTexture(hm->manager, hm->h0TexName,
+                                        hm->gridSize,
+                                        Ogre::PFG_RGBA32_FLOAT);
+    hm->omegaTex = MakeSpectrumTexture(hm->manager, hm->omegaTexName,
+                                        hm->gridSize,
+                                        Ogre::PFG_R32_FLOAT);
+    hm->hktTex   = MakeSpectrumTexture(hm->manager, hm->hktTexName,
+                                        hm->gridSize,
+                                        Ogre::PFG_RGBA32_FLOAT);
+
+    // Pack spectrum into RGBA32F via a staging texture.
+    auto upload_rgba = [&](Ogre::TextureGpu *dst,
+                           const double *re0, const double *im0,
+                           const double *re1, const double *im1)
+    {
+      Ogre::StagingTexture *staging = hm->manager->getStagingTexture(
+          static_cast<Ogre::uint32>(hm->gridSize),
+          static_cast<Ogre::uint32>(hm->gridSize),
+          1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+      staging->startMapRegion();
+      Ogre::TextureBox box = staging->mapRegion(
+          static_cast<Ogre::uint32>(hm->gridSize),
+          static_cast<Ogre::uint32>(hm->gridSize),
+          1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+      const int N = static_cast<int>(hm->gridSize);
+      for (int row = 0; row < N; ++row)
+      {
+        auto *outRow = reinterpret_cast<float *>(box.at(0, row, 0));
+        for (int col = 0; col < N; ++col)
+        {
+          const std::size_t idx =
+              static_cast<std::size_t>(row) * N + col;
+          outRow[col * 4 + 0] = static_cast<float>(re0[idx]);
+          outRow[col * 4 + 1] = static_cast<float>(im0[idx]);
+          outRow[col * 4 + 2] = static_cast<float>(re1[idx]);
+          outRow[col * 4 + 3] = static_cast<float>(im1[idx]);
+        }
+      }
+      staging->stopMapRegion();
+      staging->upload(box, dst, 0u, nullptr, nullptr);
+      hm->manager->removeStagingTexture(staging);
+      if (!dst->isDataReady())
+        dst->notifyDataIsReady();
+    };
+
+    auto upload_r32 = [&](Ogre::TextureGpu *dst, const double *src)
+    {
+      Ogre::StagingTexture *staging = hm->manager->getStagingTexture(
+          static_cast<Ogre::uint32>(hm->gridSize),
+          static_cast<Ogre::uint32>(hm->gridSize),
+          1u, 1u, Ogre::PFG_R32_FLOAT);
+      staging->startMapRegion();
+      Ogre::TextureBox box = staging->mapRegion(
+          static_cast<Ogre::uint32>(hm->gridSize),
+          static_cast<Ogre::uint32>(hm->gridSize),
+          1u, 1u, Ogre::PFG_R32_FLOAT);
+      const int N = static_cast<int>(hm->gridSize);
+      for (int row = 0; row < N; ++row)
+      {
+        auto *outRow = reinterpret_cast<float *>(box.at(0, row, 0));
+        const double *srcRow = src + static_cast<std::size_t>(row) * N;
+        for (int col = 0; col < N; ++col)
+          outRow[col] = static_cast<float>(srcRow[col]);
+      }
+      staging->stopMapRegion();
+      staging->upload(box, dst, 0u, nullptr, nullptr);
+      hm->manager->removeStagingTexture(staging);
+      if (!dst->isDataReady())
+        dst->notifyDataIsReady();
+    };
+
+    upload_rgba(hm->h0Tex, _h0Re, _h0Im, _h0ConjRe, _h0ConjIm);
+    upload_r32(hm->omegaTex, _omega);
+    gzmsg << "[waves_ogre2_heightmap] spectrum uploaded ("
+          << hm->gridSize << "×" << hm->gridSize << " h0+omega)"
+          << std::endl;
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] upload_spectrum threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
+}
+
+int waves_ogre2_heightmap_evolve_dispatch(
+    waves_heightmap_t _handle, const char *_shaderAbsPath, float _simTimeS)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->h0Tex || !hm->omegaTex || !hm->hktTex ||
+      !hm->sceneManager || !_shaderAbsPath)
+    return 0;
+
+  // Make sure the spectrum textures are addressable each frame
+  // (same defensive pattern as the compute_dispatch path).
+  hm->h0Tex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+  hm->omegaTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+  hm->hktTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+
+  // Lazy init of the evolve compute job (mirrors compute_dispatch).
+  if (!hm->evolveJob)
+  {
+    try
+    {
+      auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
+      const std::filesystem::path absPath(_shaderAbsPath);
+      const std::string dir = absPath.parent_path().string();
+      hm->evolveShaderName = absPath.stem().string();
+      try
+      {
+        rgMgr.addResourceLocation(
+            dir, "FileSystem",
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            false);
+      }
+      catch (const Ogre::Exception &) { /* already added — fine */ }
+
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      hm->hlmsCompute = hlmsManager->getComputeHlms();
+      if (!hm->hlmsCompute)
+      {
+        gzerr << "[waves_ogre2_heightmap] no HlmsCompute for evolve"
+              << std::endl;
+        return 0;
+      }
+
+      const std::string jobName =
+          "WavesEvolve_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->evolveJob = hm->hlmsCompute->createComputeJob(
+          jobName, jobName, hm->evolveShaderName, Ogre::StringVector{});
+      if (!hm->evolveJob)
+      {
+        gzerr << "[waves_ogre2_heightmap] createComputeJob(evolve) failed"
+              << std::endl;
+        return 0;
+      }
+
+      hm->evolveJob->setThreadsPerGroup(16u, 16u, 1u);
+      const Ogre::uint32 groups =
+          static_cast<Ogre::uint32>((hm->gridSize + 15) / 16);
+      hm->evolveJob->setNumThreadGroups(groups, groups, 1u);
+
+      // 3 UAV slots: 0=h0, 1=omega, 2=hkt.
+      hm->evolveJob->setNumUavUnits(3u);
+
+      auto bindUav = [&](Ogre::uint8 slot, Ogre::TextureGpu *tex,
+                         Ogre::ResourceAccess::ResourceAccess access,
+                         Ogre::PixelFormatGpu fmt)
+      {
+        Ogre::DescriptorSetUav::TextureSlot s =
+            Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+        s.texture = tex;
+        s.access  = access;
+        s.pixelFormat = fmt;
+        hm->evolveJob->_setUavTexture(slot, s);
+      };
+      bindUav(0u, hm->h0Tex,    Ogre::ResourceAccess::Read,
+              Ogre::PFG_RGBA32_FLOAT);
+      bindUav(1u, hm->omegaTex, Ogre::ResourceAccess::Read,
+              Ogre::PFG_R32_FLOAT);
+      bindUav(2u, hm->hktTex,   Ogre::ResourceAccess::Write,
+              Ogre::PFG_RGBA32_FLOAT);
+
+      // Params const buffer.
+      auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+      auto *vaoManager   = renderSystem->getVaoManager();
+      hm->evolveParams = vaoManager->createConstBuffer(
+          sizeof(EvolveParams),
+          Ogre::BT_DYNAMIC_PERSISTENT,
+          nullptr, false);
+      hm->evolveJob->setConstBuffer(0u, hm->evolveParams);
+
+      gzmsg << "[waves_ogre2_heightmap] evolve pipeline initialised: "
+            << "shader=" << hm->evolveShaderName << " "
+            << "thread_groups=" << groups << "x" << groups << "x1"
+            << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] evolve setup threw: "
+            << e.getDescription() << std::endl;
+      hm->evolveJob = nullptr;
+      return 0;
+    }
+  }
+
+  if (!hm->evolveJob || !hm->evolveParams)
+    return 0;
+
+  try
+  {
+    EvolveParams p{};
+    p.t        = _simTimeS;
+    p.gridSize = static_cast<int>(hm->gridSize);
+    hm->evolveParams->upload(&p, 0u, sizeof(p));
+    hm->hlmsCompute->dispatch(hm->evolveJob, hm->sceneManager, nullptr);
+    if (!hm->hktTex->isDataReady())
+      hm->hktTex->notifyDataIsReady();
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] evolve dispatch threw: "
+            << e.getDescription() << " (further failures suppressed)"
+            << std::endl;
+    }
+    return 0;
+  }
+  return 1;
+}
+
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
@@ -561,6 +854,35 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
     }
     catch (const Ogre::Exception &) {}
     hm->paramsBuffer = nullptr;
+  }
+
+  // Stage 2 evolve job + spectrum textures cleanup.
+  if (hm->hlmsCompute && hm->evolveJob)
+  {
+    try { hm->hlmsCompute->destroyComputeJob(hm->evolveJob->getName()); }
+    catch (const Ogre::Exception &) {}
+    hm->evolveJob = nullptr;
+  }
+  if (hm->evolveParams)
+  {
+    try
+    {
+      auto *renderSystem = Ogre::Root::getSingletonPtr() ?
+          Ogre::Root::getSingleton().getRenderSystem() : nullptr;
+      if (renderSystem && renderSystem->getVaoManager())
+        renderSystem->getVaoManager()->destroyConstBuffer(hm->evolveParams);
+    }
+    catch (const Ogre::Exception &) {}
+    hm->evolveParams = nullptr;
+  }
+  for (auto **tex : {&hm->h0Tex, &hm->omegaTex, &hm->hktTex})
+  {
+    if (*tex && hm->manager)
+    {
+      try { hm->manager->destroyTexture(*tex); }
+      catch (const Ogre::Exception &) {}
+      *tex = nullptr;
+    }
   }
   if (hm->manager)
   {
