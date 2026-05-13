@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <OgreCommon.h>
+#include <OgreDescriptorSetTexture.h>
 #include <OgreHlmsCompute.h>
 #include <OgreHlmsComputeJob.h>
 #include <OgreHlmsManager.h>
@@ -31,6 +33,7 @@
 #include <OgrePixelFormatGpuUtils.h>
 #include <OgreRenderSystem.h>
 #include <OgreResourceGroupManager.h>
+#include <OgreResourceTransition.h>
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
@@ -130,7 +133,45 @@ namespace
     // (HlmsPbs) creates.
     Ogre::Material         *ogreMaterial{nullptr};
     bool                    ifftBoundToMaterial{false};
+
+    // Diagnostic: a single-pass compute job that overwrites
+    // ifftFinalTex with a known sine pattern, bypassing the IFFT. Used
+    // to isolate binding/sampling bugs from compute bugs.
+    Ogre::HlmsComputeJob   *debugJob{nullptr};
+    Ogre::ConstBufferPacked *debugParams{nullptr};
+    std::string             debugShaderName;
+
+    // Diagnostic: copies a scaled view of hktTex into ifftFinalTex,
+    // bypassing the IFFT. Used to determine whether evolve produces
+    // non-zero output.
+    Ogre::HlmsComputeJob   *viewHktJob{nullptr};
+    Ogre::ConstBufferPacked *viewHktParams{nullptr};
+    std::string             viewHktShaderName;
   };
+
+  // std140 layout for debug_view_hkt.glsl's `Params` block.
+  struct alignas(16) ViewHktParams
+  {
+    float scale;
+    float _pad0;
+    int   gridSize;
+    int   _pad1;
+  };
+  static_assert(sizeof(ViewHktParams) == 16,
+                "ViewHktParams must be a vec4");
+
+  // std140 layout for debug_pattern.glsl's `Params` block.
+  struct alignas(16) DebugParams
+  {
+    float t;
+    float amplitude;
+    int   gridSize;
+    int   _pad;
+  };
+  static_assert(sizeof(DebugParams) == 16, "DebugParams must be a vec4");
+}
+namespace
+{
 
   // std140-packed uniform layout matching evolve.glsl's `Params` block.
   struct alignas(16) EvolveParams
@@ -154,14 +195,24 @@ namespace
   };
   static_assert(sizeof(BitrevParams) == 16, "BitrevParams must be a vec4");
 
+  // Two std140 vec4 slots: (gridSize, stage, axis, invertSign) and
+  // (extraScale, _pad, _pad, _pad). extraScale folds Eigen FFT's
+  // default 1/N normalisation into the last butterfly stage of each
+  // axis so the 2D IFFT total scaling is 1/N², matching the CPU
+  // FFTWaveSimulation convention.
   struct alignas(16) ButterParams
   {
     int   gridSize;
     int   stage;
     int   axis;
     float invertSign;
+    float extraScale;
+    float _pad0;
+    float _pad1;
+    float _pad2;
   };
-  static_assert(sizeof(ButterParams) == 16, "ButterParams must be a vec4");
+  static_assert(sizeof(ButterParams) == 32,
+                "ButterParams must occupy two std140 vec4 slots");
 }
 
 extern "C"
@@ -605,6 +656,16 @@ namespace
 {
   // Helper: create a manual TextureGpu of the given pixel format at
   // gridSize × gridSize, ready for compute-shader UAV use.
+  //
+  // For manually-created (not file-backed) textures, OgreNext's docs
+  // are explicit: use `_transitionTo` + `_setNextResidencyStatus`
+  // directly — `scheduleTransitionTo` is async and intended for the
+  // file-loading path. If we use `scheduleTransitionTo` here, the
+  // residency transition may still be in flight when our subsequent
+  // staging-texture upload fires; the upload then silently fails and
+  // the texture stays zero. (This was the root cause of "view-hkt
+  // shows flat" in early Stage 4 testing: spectrum upload was a
+  // no-op.)
   Ogre::TextureGpu *MakeSpectrumTexture(
       Ogre::TextureGpuManager *manager,
       const std::string &name,
@@ -620,7 +681,8 @@ namespace
                        static_cast<Ogre::uint32>(gridSize));
     tex->setNumMipmaps(1u);  // spectrum textures aren't mipmapped
     tex->setPixelFormat(format);
-    tex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+    tex->_setNextResidencyStatus(Ogre::GpuResidency::Resident);
+    tex->_transitionTo(Ogre::GpuResidency::Resident, nullptr);
     return tex;
   }
 }
@@ -799,26 +861,29 @@ int waves_ogre2_heightmap_evolve_dispatch(
           static_cast<Ogre::uint32>((hm->gridSize + 15) / 16);
       hm->evolveJob->setNumThreadGroups(groups, groups, 1u);
 
-      // 3 UAV slots: 0=h0, 1=omega, 2=hkt.
-      hm->evolveJob->setNumUavUnits(3u);
+      // 1 UAV slot (write target) + 2 texture slots (read inputs).
+      // In OgreNext's OpenGL compute path, UAVs at slot 1+ are
+      // unreliable. The supported idiom is: writes via UAV, reads
+      // via regular texture samplers (texelFetch in GLSL).
+      hm->evolveJob->setNumUavUnits(1u);
+      hm->evolveJob->setNumTexUnits(2u);
 
-      auto bindUav = [&](Ogre::uint8 slot, Ogre::TextureGpu *tex,
-                         Ogre::ResourceAccess::ResourceAccess access,
-                         Ogre::PixelFormatGpu fmt)
+      Ogre::DescriptorSetUav::TextureSlot uavSlot =
+          Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+      uavSlot.texture = hm->hktTex;
+      uavSlot.access  = Ogre::ResourceAccess::Write;
+      uavSlot.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+      hm->evolveJob->_setUavTexture(0u, uavSlot);
+
+      auto bindTex = [&](Ogre::uint8 slot, Ogre::TextureGpu *tex)
       {
-        Ogre::DescriptorSetUav::TextureSlot s =
-            Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+        Ogre::DescriptorSetTexture2::TextureSlot s =
+            Ogre::DescriptorSetTexture2::TextureSlot::makeEmpty();
         s.texture = tex;
-        s.access  = access;
-        s.pixelFormat = fmt;
-        hm->evolveJob->_setUavTexture(slot, s);
+        hm->evolveJob->setTexture(slot, s, &hm->samplerblock);
       };
-      bindUav(0u, hm->h0Tex,    Ogre::ResourceAccess::Read,
-              Ogre::PFG_RGBA32_FLOAT);
-      bindUav(1u, hm->omegaTex, Ogre::ResourceAccess::Read,
-              Ogre::PFG_R32_FLOAT);
-      bindUav(2u, hm->hktTex,   Ogre::ResourceAccess::Write,
-              Ogre::PFG_RGBA32_FLOAT);
+      bindTex(0u, hm->h0Tex);
+      bindTex(1u, hm->omegaTex);
 
       // Params const buffer.
       auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
@@ -848,6 +913,23 @@ int waves_ogre2_heightmap_evolve_dispatch(
 
   try
   {
+    // Tell the BarrierSolver what the evolve pass is about to do.
+    // h0Tex/omegaTex are now bound as textures (not UAVs) so they
+    // transition to ResourceLayout::Texture.
+    auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+    auto &solver = renderSystem->getBarrierSolver();
+    auto &transitions = solver.getNewResourceTransitionsArrayTmp();
+    solver.resolveTransition(transitions, hm->h0Tex,
+        Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+        Ogre::c_computeStageMask);
+    solver.resolveTransition(transitions, hm->omegaTex,
+        Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+        Ogre::c_computeStageMask);
+    solver.resolveTransition(transitions, hm->hktTex,
+        Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
+        Ogre::c_computeStageMask);
+    renderSystem->executeResourceTransition(transitions);
+
     EvolveParams p{};
     p.t        = _simTimeS;
     p.gridSize = static_cast<int>(hm->gridSize);
@@ -972,8 +1054,12 @@ int waves_ogre2_heightmap_ifft_dispatch(
           static_cast<Ogre::uint32>((N + 15) / 16);
       hm->bitrevJob->setNumThreadGroups(groups, groups, 1u);
       hm->butterJob->setNumThreadGroups(groups, groups, 1u);
-      hm->bitrevJob->setNumUavUnits(2u);
-      hm->butterJob->setNumUavUnits(2u);
+      // 1 UAV (write target) + 1 texture (read source) per job.
+      // See evolve_dispatch for the OgreNext-OpenGL rationale.
+      hm->bitrevJob->setNumUavUnits(1u);
+      hm->butterJob->setNumUavUnits(1u);
+      hm->bitrevJob->setNumTexUnits(1u);
+      hm->butterJob->setNumTexUnits(1u);
 
       // Pre-bake one tiny ConstBuffer per pass. Layout (per axis a in
       // {0, 1}): 1 bitrev params + log2N butterfly params. Total
@@ -1000,6 +1086,11 @@ int waves_ogre2_heightmap_ifft_dispatch(
           btp.stage      = s;
           btp.axis       = axis;
           btp.invertSign = +1.0f;  // IFFT
+          // 1/N on the last stage of each axis → 1/N² total across
+          // both axes, matching Eigen::FFT::inv()'s default scaling.
+          btp.extraScale = (s == log2N - 1)
+              ? 1.0f / static_cast<float>(N)
+              : 1.0f;
           auto *bbuf = vaoManager->createConstBuffer(
               sizeof(ButterParams), Ogre::BT_DEFAULT, &btp, false);
           hm->ifftParams.push_back(bbuf);
@@ -1032,26 +1123,47 @@ int waves_ogre2_heightmap_ifft_dispatch(
 
   try
   {
-    auto bindUav =
-        [&](Ogre::HlmsComputeJob *job, Ogre::uint8 slot,
-            Ogre::TextureGpu *tex,
-            Ogre::ResourceAccess::ResourceAccess access)
-    {
-      Ogre::DescriptorSetUav::TextureSlot s =
-          Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
-      s.texture     = tex;
-      s.access      = access;
-      s.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
-      job->_setUavTexture(slot, s);
-    };
+    // Ping-pong compute dispatches need explicit UAV→Texture barriers
+    // between passes — `HlmsComputeJob::_setUavTexture` does NOT
+    // insert them (that's the Compositor's job, which we bypass here).
+    // Without these, the next pass reads stale/uninitialised data
+    // from the texture the previous pass just wrote, and the IFFT
+    // output collapses to ~0.
+    auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+    auto &solver = renderSystem->getBarrierSolver();
 
     auto runPass =
         [&](Ogre::HlmsComputeJob *job, std::size_t paramIdx,
             Ogre::TextureGpu *src, Ogre::TextureGpu *dst)
     {
+      // src was last written as a UAV (or never written, if it's the
+      // initial input texture). Transition it to Texture for read.
+      // dst will be written as a UAV.
+      auto &transitions = solver.getNewResourceTransitionsArrayTmp();
+      solver.resolveTransition(transitions, src,
+          Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+          Ogre::c_computeStageMask);
+      solver.resolveTransition(transitions, dst,
+          Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
+          Ogre::c_computeStageMask);
+      renderSystem->executeResourceTransition(transitions);
+
       job->setConstBuffer(0u, hm->ifftParams[paramIdx]);
-      bindUav(job, 0u, src, Ogre::ResourceAccess::Read);
-      bindUav(job, 1u, dst, Ogre::ResourceAccess::Write);
+
+      // Output as UAV at slot 0.
+      Ogre::DescriptorSetUav::TextureSlot uavSlot =
+          Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+      uavSlot.texture     = dst;
+      uavSlot.access      = Ogre::ResourceAccess::Write;
+      uavSlot.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+      job->_setUavTexture(0u, uavSlot);
+
+      // Input as texture sampler at slot 0.
+      Ogre::DescriptorSetTexture2::TextureSlot texSlot =
+          Ogre::DescriptorSetTexture2::TextureSlot::makeEmpty();
+      texSlot.texture = src;
+      job->setTexture(0u, texSlot, &hm->samplerblock);
+
       hm->hlmsCompute->dispatch(job, hm->sceneManager, nullptr);
     };
 
@@ -1089,6 +1201,19 @@ int waves_ogre2_heightmap_ifft_dispatch(
     hm->ifftFinalTex = cur;
     if (!hm->ifftFinalTex->isDataReady())
       hm->ifftFinalTex->notifyDataIsReady();
+
+    // Transition the final IFFT output from Uav to Texture so the
+    // visual's vertex shader can sample it safely. On GL this emits
+    // glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT). Next frame's
+    // first IFFT pass will transition it back to Uav.
+    {
+      auto &t2 = solver.getNewResourceTransitionsArrayTmp();
+      solver.resolveTransition(t2, hm->ifftFinalTex,
+          Ogre::ResourceLayout::Texture,
+          Ogre::ResourceAccess::Read,
+          Ogre::c_allGraphicStagesMask);
+      renderSystem->executeResourceTransition(t2);
+    }
 
     // Stage 4: on the first successful dispatch, rebind the visual
     // material's "heightMap" sampler from the CPU-uploaded `texture`
@@ -1137,6 +1262,244 @@ int waves_ogre2_heightmap_ifft_bound(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
   return (hm && hm->ifftBoundToMaterial) ? 1 : 0;
+}
+
+int waves_ogre2_heightmap_debug_dispatch(
+    waves_heightmap_t _handle, const char *_shaderAbsPath,
+    float _simTimeS, float _amplitude)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->ifftFinalTex || !hm->sceneManager || !_shaderAbsPath)
+    return 0;
+
+  if (!hm->debugJob)
+  {
+    try
+    {
+      auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
+      const std::filesystem::path absPath(_shaderAbsPath);
+      const std::string dir = absPath.parent_path().string();
+      hm->debugShaderName = absPath.stem().string();
+      try
+      {
+        rgMgr.addResourceLocation(
+            dir, "FileSystem",
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            false);
+      }
+      catch (const Ogre::Exception &) { /* already added — fine */ }
+
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      hm->hlmsCompute = hlmsManager->getComputeHlms();
+      if (!hm->hlmsCompute)
+        return 0;
+
+      const std::string jobName =
+          "WavesDebug_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->debugJob = hm->hlmsCompute->createComputeJob(
+          jobName, jobName, hm->debugShaderName, Ogre::StringVector{});
+      if (!hm->debugJob)
+        return 0;
+
+      hm->debugJob->setThreadsPerGroup(16u, 16u, 1u);
+      const Ogre::uint32 groups =
+          static_cast<Ogre::uint32>((hm->gridSize + 15) / 16);
+      hm->debugJob->setNumThreadGroups(groups, groups, 1u);
+      hm->debugJob->setNumUavUnits(1u);
+
+      auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+      auto *vaoManager   = renderSystem->getVaoManager();
+      hm->debugParams = vaoManager->createConstBuffer(
+          sizeof(DebugParams),
+          Ogre::BT_DYNAMIC_PERSISTENT,
+          nullptr, false);
+      hm->debugJob->setConstBuffer(0u, hm->debugParams);
+
+      gzmsg << "[waves_ogre2_heightmap] debug pattern pipeline online — "
+            << "writing directly to ifftFinalTex ("
+            << hm->ifftFinalTex->getNameStr() << ")" << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] debug setup threw: "
+            << e.getDescription() << std::endl;
+      hm->debugJob = nullptr;
+      return 0;
+    }
+  }
+
+  if (!hm->debugJob || !hm->debugParams)
+    return 0;
+
+  try
+  {
+    auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+    auto &solver = renderSystem->getBarrierSolver();
+
+    // Bind ifftFinalTex as the sole UAV and transition it to Uav-Write.
+    auto &t1 = solver.getNewResourceTransitionsArrayTmp();
+    solver.resolveTransition(t1, hm->ifftFinalTex,
+        Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
+        Ogre::c_computeStageMask);
+    renderSystem->executeResourceTransition(t1);
+
+    Ogre::DescriptorSetUav::TextureSlot s =
+        Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+    s.texture     = hm->ifftFinalTex;
+    s.access      = Ogre::ResourceAccess::Write;
+    s.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+    hm->debugJob->_setUavTexture(0u, s);
+
+    DebugParams p{};
+    p.t         = _simTimeS;
+    p.amplitude = _amplitude;
+    p.gridSize  = static_cast<int>(hm->gridSize);
+    hm->debugParams->upload(&p, 0u, sizeof(p));
+    hm->hlmsCompute->dispatch(hm->debugJob, hm->sceneManager, nullptr);
+
+    // Transition back to Texture so the visual can sample it.
+    auto &t2 = solver.getNewResourceTransitionsArrayTmp();
+    solver.resolveTransition(t2, hm->ifftFinalTex,
+        Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+        Ogre::c_allGraphicStagesMask);
+    renderSystem->executeResourceTransition(t2);
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] debug dispatch threw: "
+            << e.getDescription() << std::endl;
+    }
+    return 0;
+  }
+  return 1;
+}
+
+int waves_ogre2_heightmap_view_hkt_dispatch(
+    waves_heightmap_t _handle, const char *_shaderAbsPath, float _scale)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->ifftFinalTex || !hm->hktTex || !hm->sceneManager ||
+      !_shaderAbsPath)
+    return 0;
+
+  if (!hm->viewHktJob)
+  {
+    try
+    {
+      auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
+      const std::filesystem::path absPath(_shaderAbsPath);
+      const std::string dir = absPath.parent_path().string();
+      hm->viewHktShaderName = absPath.stem().string();
+      try
+      {
+        rgMgr.addResourceLocation(
+            dir, "FileSystem",
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            false);
+      }
+      catch (const Ogre::Exception &) { /* already added */ }
+
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      hm->hlmsCompute = hlmsManager->getComputeHlms();
+      if (!hm->hlmsCompute)
+        return 0;
+
+      const std::string jobName =
+          "WavesViewHkt_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->viewHktJob = hm->hlmsCompute->createComputeJob(
+          jobName, jobName, hm->viewHktShaderName,
+          Ogre::StringVector{});
+      if (!hm->viewHktJob)
+        return 0;
+
+      hm->viewHktJob->setThreadsPerGroup(16u, 16u, 1u);
+      const Ogre::uint32 groups =
+          static_cast<Ogre::uint32>((hm->gridSize + 15) / 16);
+      hm->viewHktJob->setNumThreadGroups(groups, groups, 1u);
+      hm->viewHktJob->setNumUavUnits(1u);
+      hm->viewHktJob->setNumTexUnits(1u);
+
+      auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+      auto *vaoManager   = renderSystem->getVaoManager();
+      hm->viewHktParams = vaoManager->createConstBuffer(
+          sizeof(ViewHktParams),
+          Ogre::BT_DYNAMIC_PERSISTENT,
+          nullptr, false);
+      hm->viewHktJob->setConstBuffer(0u, hm->viewHktParams);
+
+      gzmsg << "[waves_ogre2_heightmap] view-hkt pipeline online — "
+            << "copies |h(k,t)| · " << _scale << " into ifftFinalTex"
+            << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] view-hkt setup threw: "
+            << e.getDescription() << std::endl;
+      hm->viewHktJob = nullptr;
+      return 0;
+    }
+  }
+
+  if (!hm->viewHktJob || !hm->viewHktParams)
+    return 0;
+
+  try
+  {
+    auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+    auto &solver = renderSystem->getBarrierSolver();
+
+    auto &t1 = solver.getNewResourceTransitionsArrayTmp();
+    solver.resolveTransition(t1, hm->hktTex,
+        Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+        Ogre::c_computeStageMask);
+    solver.resolveTransition(t1, hm->ifftFinalTex,
+        Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
+        Ogre::c_computeStageMask);
+    renderSystem->executeResourceTransition(t1);
+
+    // UAV slot 0 = output, texture slot 0 = input.
+    Ogre::DescriptorSetUav::TextureSlot uavSlot =
+        Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+    uavSlot.texture     = hm->ifftFinalTex;
+    uavSlot.access      = Ogre::ResourceAccess::Write;
+    uavSlot.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+    hm->viewHktJob->_setUavTexture(0u, uavSlot);
+
+    Ogre::DescriptorSetTexture2::TextureSlot texSlot =
+        Ogre::DescriptorSetTexture2::TextureSlot::makeEmpty();
+    texSlot.texture = hm->hktTex;
+    hm->viewHktJob->setTexture(0u, texSlot, &hm->samplerblock);
+
+    ViewHktParams p{};
+    p.scale    = _scale;
+    p.gridSize = static_cast<int>(hm->gridSize);
+    hm->viewHktParams->upload(&p, 0u, sizeof(p));
+    hm->hlmsCompute->dispatch(hm->viewHktJob, hm->sceneManager, nullptr);
+
+    auto &t2 = solver.getNewResourceTransitionsArrayTmp();
+    solver.resolveTransition(t2, hm->ifftFinalTex,
+        Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+        Ogre::c_allGraphicStagesMask);
+    renderSystem->executeResourceTransition(t2);
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] view-hkt dispatch threw: "
+            << e.getDescription() << std::endl;
+    }
+    return 0;
+  }
+  return 1;
 }
 
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)

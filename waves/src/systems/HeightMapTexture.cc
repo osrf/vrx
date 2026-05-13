@@ -37,6 +37,8 @@ namespace
   using EvolveFn = int (*)(waves_heightmap_t, const char *, float);
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
   using IfftBoundFn = int (*)(waves_heightmap_t);
+  using DebugFn = int (*)(waves_heightmap_t, const char *, float, float);
+  using ViewHktFn = int (*)(waves_heightmap_t, const char *, float);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -51,6 +53,8 @@ namespace
     EvolveFn   evolve{nullptr};
     IfftFn     ifft{nullptr};
     IfftBoundFn ifftBound{nullptr};
+    DebugFn    debug{nullptr};
+    ViewHktFn  viewHkt{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -91,6 +95,10 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_dispatch"));
       api.ifftBound = reinterpret_cast<IfftBoundFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_bound"));
+      api.debug = reinterpret_cast<DebugFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_debug_dispatch"));
+      api.viewHkt = reinterpret_cast<ViewHktFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_view_hkt_dispatch"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -240,6 +248,30 @@ bool HeightMapTexture::GpuOutputBound() const
   if (!api.loaded || !api.ifftBound)
     return false;
   return api.ifftBound(this->impl_->handle) != 0;
+}
+
+bool HeightMapTexture::TestPatternDispatch(
+    const std::string &_shaderAbsPath, float _simTimeS, float _amplitude)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.debug)
+    return false;
+  return api.debug(this->impl_->handle, _shaderAbsPath.c_str(),
+                   _simTimeS, _amplitude) != 0;
+}
+
+bool HeightMapTexture::ViewHktDispatch(
+    const std::string &_shaderAbsPath, float _scale)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.viewHkt)
+    return false;
+  return api.viewHkt(this->impl_->handle, _shaderAbsPath.c_str(),
+                     _scale) != 0;
 }
 
 }  // namespace gz::sim::systems

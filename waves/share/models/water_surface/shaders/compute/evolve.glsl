@@ -8,20 +8,25 @@
 // frequency-space amplitude that Stage 3's IFFT will transform into the
 // spatial heightmap.
 //
-// Inputs (all UAV slots, identical NxN grid):
-//   slot 0  h0Tex   RGBA32F  packs (h0.re, h0.im, h0conj.re, h0conj.im)
-//                            uploaded once at init from the CPU-side
-//                            FFTWaveSimulation.
-//   slot 1  omegaTex R32F    packs ω(k) per cell (also one-shot)
-//   slot 2  hktTex  RGBA32F  output, packs (h_kt.re, h_kt.im, 0, 0)
+// Resource bindings:
+//   UAV  slot 0 (image2D)    hktTex   RGBA32F  output
+//   Tex  slot 0 (sampler2D)  h0Tex    RGBA32F  read-only spectrum
+//   Tex  slot 1 (sampler2D)  omegaTex R32F     read-only frequencies
+//
+// We deliberately put inputs on TEXTURE slots, not UAV slots — in
+// OgreNext's OpenGL compute path, UAVs and textures share slots, and
+// reading from `image2D` at UAV slot 1+ in a multi-UAV job silently
+// returns zero. Texture-sampler binding works correctly. We use
+// `texelFetch` (no filtering, no LOD) so the read is equivalent to
+// `imageLoad`.
 //
 // Workgroup is 16×16 → one thread per spectrum cell.
 
 #version 430
 
-layout(rgba32f, binding = 0) uniform readonly  image2D h0Tex;
-layout(r32f,    binding = 1) uniform readonly  image2D omegaTex;
-layout(rgba32f, binding = 2) uniform writeonly image2D hktTex;
+layout(rgba32f, binding = 0) uniform writeonly image2D hktTex;
+layout(binding = 0) uniform sampler2D h0Tex;
+layout(binding = 1) uniform sampler2D omegaTex;
 
 layout(std140, binding = 0) uniform Params
 {
@@ -39,8 +44,8 @@ void main()
   if (texel.x >= gridSize || texel.y >= gridSize)
     return;
 
-  vec4 h0Pack = imageLoad(h0Tex, texel);    // (re_h0, im_h0, re_conj, im_conj)
-  float omega = imageLoad(omegaTex, texel).r;
+  vec4 h0Pack = texelFetch(h0Tex, texel, 0);   // (re_h0, im_h0, re_conj, im_conj)
+  float omega = texelFetch(omegaTex, texel, 0).r;
 
   float c = cos(omega * t);
   float s = sin(omega * t);

@@ -16,8 +16,10 @@
 // scale into h0 (matching Eigen/KissFFT's unnormalised convention), so
 // the GPU output reproduces the same physical amplitude.
 
-layout(rgba32f, binding = 0) uniform readonly  image2D src;
-layout(rgba32f, binding = 1) uniform writeonly image2D dst;
+// UAV slot 0 = output (write), texture slot 0 = input (read).
+// See fft_bitreverse.glsl for the OgreNext-OpenGL rationale.
+layout(rgba32f, binding = 0) uniform writeonly image2D dst;
+layout(binding = 0) uniform sampler2D src;
 
 layout(std140, binding = 0) uniform Params
 {
@@ -25,6 +27,13 @@ layout(std140, binding = 0) uniform Params
   int   stage;        // 0..log2(N)-1
   int   axis;         // 0 = row, 1 = column
   float invertSign;   // +1 for IFFT, -1 for forward FFT
+  float extraScale;   // multiplier applied to the output (1/N on the
+                      // last stage of each axis → 1/N² total for the
+                      // 2D IFFT, matching Eigen::FFT::inv()'s default
+                      // normalisation). 1.0 on all other stages.
+  float _pad0;
+  float _pad1;
+  float _pad2;
 };
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
@@ -60,8 +69,8 @@ void main()
   ivec2 aT = (axis == 0) ? ivec2(aPos, orth) : ivec2(orth, aPos);
   ivec2 bT = (axis == 0) ? ivec2(bPos, orth) : ivec2(orth, bPos);
 
-  vec4 aVal = imageLoad(src, aT);
-  vec4 bVal = imageLoad(src, bT);
+  vec4 aVal = texelFetch(src, aT, 0);
+  vec4 bVal = texelFetch(src, bT, 0);
 
   // Complex multiply: tw_b = tw * b (b in bVal.xy).
   vec2 tw_b = vec2(bVal.x * tw.x - bVal.y * tw.y,
@@ -70,5 +79,5 @@ void main()
   vec2 result = isLower ? (aVal.xy + tw_b)
                         : (aVal.xy - tw_b);
 
-  imageStore(dst, t, vec4(result, 0.0, 0.0));
+  imageStore(dst, t, vec4(result * extraScale, 0.0, 0.0));
 }

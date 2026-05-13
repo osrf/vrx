@@ -74,6 +74,8 @@ class WaterVisual::Implementation
   public: bool         spectrumUploaded{false}; ///< Stage 2 one-shot init
   public: std::string bitrevShaderUri;        ///< Stage 3 IFFT bit-reverse pass (optional)
   public: std::string butterShaderUri;        ///< Stage 3 IFFT butterfly stage (optional)
+  public: std::string testPatternShaderUri;   ///< Diagnostic test-pattern fill (optional)
+  public: std::string viewHktShaderUri;       ///< Diagnostic hktTex viewer (optional)
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
   public: float rescale{0.125f};
@@ -516,6 +518,59 @@ void WaterVisual::Implementation::OnSceneUpdate()
                 << "upload path until Stage 4 binds the GPU output."
                 << std::endl;
         }
+
+        // Diagnostic: after the IFFT, optionally view hktTex (Stage
+        // 2's output) directly. Distinguishes "evolve produces zero"
+        // from "IFFT loses evolve's output".
+        const char *vhEnv = std::getenv("GZ_WAVES_GPU_FFT_VIEW_HKT");
+        if (vhEnv && std::string(vhEnv) == "1" &&
+            !this->viewHktShaderUri.empty() &&
+            this->heightMap->GpuOutputBound())
+        {
+          const float scale = 0.01f;
+          const bool vhOk =
+              this->heightMap->ViewHktDispatch(
+                  this->viewHktShaderUri, scale);
+          static bool loggedVh = false;
+          if (vhOk && !loggedVh)
+          {
+            loggedVh = true;
+            gzmsg << "[WaterVisual] GPU-FFT view-hkt ENABLED — "
+                  << "ifftFinalTex overwritten with |h(k,t)| · "
+                  << scale << ". If patterns are visible, evolve "
+                  << "produced data and the IFFT is what's broken; "
+                  << "if still flat, evolve/upload is what's broken."
+                  << std::endl;
+          }
+        }
+
+        // Diagnostic: after the IFFT, optionally overwrite
+        // ifftFinalTex with a known sine pattern to isolate
+        // binding/sampling bugs from compute bugs. If waves appear
+        // with this flag set but not without, the compute pipeline
+        // is broken; if still flat, the binding path is broken.
+        const char *tpEnv =
+            std::getenv("GZ_WAVES_GPU_FFT_TEST_PATTERN");
+        if (tpEnv && std::string(tpEnv) == "1" &&
+            !this->testPatternShaderUri.empty() &&
+            this->heightMap->GpuOutputBound())
+        {
+          const float amplitude = 1.5f;
+          const bool tpOk = this->heightMap->TestPatternDispatch(
+              this->testPatternShaderUri,
+              this->currentSimTime, amplitude);
+          static bool loggedTp = false;
+          if (tpOk && !loggedTp)
+          {
+            loggedTp = true;
+            gzmsg << "[WaterVisual] GPU-FFT test pattern ENABLED — "
+                  << "ifftFinalTex overwritten with a moving sine "
+                  << "(amp=" << amplitude << " m). If waves are now "
+                  << "visible, the IFFT compute is at fault; if "
+                  << "still flat, the binding/sampling path is."
+                  << std::endl;
+          }
+        }
       }
       // Stage 2/3 don't update the spatial heightmap the visual reads
       // from, so we still need *something* there; fall through to the
@@ -665,6 +720,16 @@ void WaterVisual::Configure(
   {
     this->dataPtr->butterShaderUri =
       resolve(shader->GetElement("gpu_ifft_butterfly")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_test_pattern"))
+  {
+    this->dataPtr->testPatternShaderUri =
+      resolve(shader->GetElement("gpu_test_pattern")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_view_hkt"))
+  {
+    this->dataPtr->viewHktShaderUri =
+      resolve(shader->GetElement("gpu_view_hkt")->Get<std::string>());
   }
   if (shader->HasElement("gpu_evolve"))
   {

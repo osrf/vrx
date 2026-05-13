@@ -27,6 +27,12 @@
                  over h(k, t), producing the spatial η(x, y, t). -->
             <gpu_ifft_bitreverse>shaders/compute/fft_bitreverse.glsl</gpu_ifft_bitreverse>
             <gpu_ifft_butterfly>shaders/compute/fft_butterfly.glsl</gpu_ifft_butterfly>
+            <!-- Diagnostic: writes a moving sine wave straight into
+                 ifftFinalTex, bypassing the IFFT. Used with the
+                 GZ_WAVES_GPU_FFT_TEST_PATTERN=1 env var to isolate
+                 binding/sampling bugs from compute bugs. -->
+            <gpu_test_pattern>shaders/compute/debug_pattern.glsl</gpu_test_pattern>
+            <gpu_view_hkt>shaders/compute/debug_view_hkt.glsl</gpu_view_hkt>
             <parameters>
               <rescale>0.5</rescale>
               <bumpScale>25 25</bumpScale>

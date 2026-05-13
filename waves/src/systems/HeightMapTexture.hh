@@ -118,6 +118,22 @@ namespace gz::sim::systems
     /// material has *something* sensible to sample.
     bool GpuOutputBound() const;
 
+    /// \brief Diagnostic: dispatch a compute shader that overwrites
+    /// the IFFT output texture with a known sine pattern. Used to
+    /// isolate binding/sampling bugs from compute bugs. Gate it with
+    /// the `GZ_WAVES_GPU_FFT_TEST_PATTERN=1` env var so it's a no-op
+    /// in production. Must follow `IfftDispatch` (so ifftFinalTex
+    /// exists).
+    bool TestPatternDispatch(const std::string &_shaderAbsPath,
+                             float _simTimeS, float _amplitude);
+
+    /// \brief Diagnostic: dispatch a compute shader that views the
+    /// hkt texture (Stage 2 evolve's output) by copying a scaled
+    /// magnitude into the IFFT output texture. Used to distinguish
+    /// "evolve produces nothing" from "IFFT mangles evolve's output".
+    /// Gate with `GZ_WAVES_GPU_FFT_VIEW_HKT=1`.
+    bool ViewHktDispatch(const std::string &_shaderAbsPath, float _scale);
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 
