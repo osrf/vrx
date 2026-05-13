@@ -50,6 +50,9 @@ namespace
   using ReadbackIfftFn  = int (*)(waves_heightmap_t, int, int, float *);
   using ReadbackHktFn   = int (*)(waves_heightmap_t, int, int,
                                    float *, float *);
+  using ReadbackCombinedScanFn = int (*)(waves_heightmap_t,
+                                          int *, float *, float *,
+                                          int *, int *, float *);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -73,6 +76,7 @@ namespace
     ReadbackH0Fn readbackH0{nullptr};
     ReadbackIfftFn  readbackIfft{nullptr};
     ReadbackHktFn   readbackHkt{nullptr};
+    ReadbackCombinedScanFn readbackCombinedScan{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -131,6 +135,10 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_readback_ifft"));
       api.readbackHkt = reinterpret_cast<ReadbackHktFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_readback_hkt"));
+      api.readbackCombinedScan =
+          reinterpret_cast<ReadbackCombinedScanFn>(dlsym(
+              api.handle,
+              "waves_ogre2_heightmap_readback_combined_scan"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -368,6 +376,24 @@ bool HeightMapTexture::ReadbackHktCell(int _i, int _j,
     return false;
   return api.readbackHkt(this->impl_->handle, _i, _j,
                          _outRe, _outIm) != 0;
+}
+
+bool HeightMapTexture::ReadbackCombinedScan(
+    int *_outBadCount,
+    float *_outMinRgba, float *_outMaxRgba,
+    int *_outFirstBadI, int *_outFirstBadJ,
+    float *_outFirstBadRgba) const
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.readbackCombinedScan)
+    return false;
+  return api.readbackCombinedScan(this->impl_->handle,
+                                   _outBadCount,
+                                   _outMinRgba, _outMaxRgba,
+                                   _outFirstBadI, _outFirstBadJ,
+                                   _outFirstBadRgba) != 0;
 }
 
 bool HeightMapTexture::GpuOutputBound() const

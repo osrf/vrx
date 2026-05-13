@@ -161,6 +161,20 @@ extern "C"
       const char *combine_eta_dx_shader_abs_path,
       const char *combine_dy_shader_abs_path);
 
+  /// Diagnostic: scan all `combinedTex` cells and report per-channel
+  /// min/max plus the number of cells where any channel is not
+  /// finite. If `out_first_bad_*` are non-null and at least one bad
+  /// cell exists, the (i, j) and (r, g, b, a) of the first such cell
+  /// are written. Returns 1 on success, 0 on failure.
+  int waves_ogre2_heightmap_readback_combined_scan(
+      waves_heightmap_t handle,
+      int *out_bad_count,
+      float *out_min_rgba,    // length 4
+      float *out_max_rgba,    // length 4
+      int *out_first_bad_i,
+      int *out_first_bad_j,
+      float *out_first_bad_rgba);  // length 4
+
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);
 }

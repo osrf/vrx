@@ -656,6 +656,44 @@ void WaterVisual::Implementation::OnSceneUpdate()
                   << "(η, Dx, Dy) bound to material; CPU upload path "
                   << "retired." << std::endl;
           }
+
+          // Diagnostic: scan combinedTex once for non-finite cells +
+          // per-channel ranges. Gated by GZ_WAVES_GPU_FFT_DEBUG=1.
+          const char *scanEnv = std::getenv("GZ_WAVES_GPU_FFT_DEBUG");
+          static int scanFrameCounter = 0;
+          static bool ranScan = false;
+          if (combineOk && scanEnv && std::string(scanEnv) == "1"
+              && !ranScan)
+          {
+            ++scanFrameCounter;
+            if (scanFrameCounter == 60)  // ~1s after combine online
+            {
+              ranScan = true;
+              int badCount = 0;
+              float mn[4] = {0, 0, 0, 0}, mx[4] = {0, 0, 0, 0};
+              int bi = -1, bj = -1;
+              float br[4] = {0, 0, 0, 0};
+              if (this->heightMap->ReadbackCombinedScan(
+                      &badCount, mn, mx, &bi, &bj, br))
+              {
+                gzmsg << "[WaterVisual] combinedTex scan: bad="
+                      << badCount
+                      << "  η[min,max]=[" << mn[0] << "," << mx[0]
+                      << "]  Dx[min,max]=[" << mn[1] << "," << mx[1]
+                      << "]  Dy[min,max]=[" << mn[2] << "," << mx[2]
+                      << "]  a[min,max]=[" << mn[3] << "," << mx[3]
+                      << "]" << std::endl;
+                if (badCount > 0)
+                {
+                  gzwarn << "[WaterVisual] first bad cell @ ("
+                         << bi << "," << bj << ") = ("
+                         << br[0] << "," << br[1] << ","
+                         << br[2] << "," << br[3] << ")"
+                         << std::endl;
+                }
+              }
+            }
+          }
         }
 
         // Diagnostic: ~5s after Stage 3 comes online, read back the

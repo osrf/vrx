@@ -7,7 +7,9 @@
 
 #include "Ogre2HeightMapBridge.hh"
 
+#include <cmath>
 #include <cstring>
+#include <limits>
 #include <dlfcn.h>
 
 #include <gz/common/Console.hh>
@@ -1970,6 +1972,103 @@ int waves_ogre2_heightmap_ifft_bound(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
   return (hm && hm->ifftBoundToMaterial) ? 1 : 0;
+}
+
+int waves_ogre2_heightmap_readback_combined_scan(
+    waves_heightmap_t _handle,
+    int *_outBadCount,
+    float *_outMinRgba,
+    float *_outMaxRgba,
+    int *_outFirstBadI,
+    int *_outFirstBadJ,
+    float *_outFirstBadRgba)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->combinedTex || !hm->manager)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  try
+  {
+    Ogre::AsyncTextureTicket *ticket =
+        hm->manager->createAsyncTextureTicket(
+            static_cast<Ogre::uint32>(N),
+            static_cast<Ogre::uint32>(N),
+            1u, Ogre::TextureTypes::Type2D,
+            Ogre::PFG_RGBA32_FLOAT);
+    if (!ticket)
+      return 0;
+    ticket->download(hm->combinedTex, 0u, true, nullptr, true);
+    int spins = 0;
+    while (!ticket->queryIsTransferDone() && spins < 1000)
+      ++spins;
+    const Ogre::TextureBox box = ticket->map(0u);
+    const std::uint8_t *base = static_cast<const std::uint8_t *>(box.data);
+
+    float mn[4] = { std::numeric_limits<float>::infinity(),
+                    std::numeric_limits<float>::infinity(),
+                    std::numeric_limits<float>::infinity(),
+                    std::numeric_limits<float>::infinity() };
+    float mx[4] = { -std::numeric_limits<float>::infinity(),
+                    -std::numeric_limits<float>::infinity(),
+                    -std::numeric_limits<float>::infinity(),
+                    -std::numeric_limits<float>::infinity() };
+    int badCount = 0;
+    int firstBadI = -1, firstBadJ = -1;
+    float firstBadRgba[4] = { 0, 0, 0, 0 };
+
+    for (int row = 0; row < N; ++row)
+    {
+      const float *p = reinterpret_cast<const float *>(
+          base + static_cast<std::size_t>(row) * box.bytesPerRow);
+      for (int col = 0; col < N; ++col)
+      {
+        const float r = p[col * 4 + 0];
+        const float g = p[col * 4 + 1];
+        const float b = p[col * 4 + 2];
+        const float a = p[col * 4 + 3];
+        const bool bad = !std::isfinite(r) || !std::isfinite(g) ||
+                         !std::isfinite(b) || !std::isfinite(a);
+        if (bad)
+        {
+          if (firstBadI < 0)
+          {
+            firstBadI = row;
+            firstBadJ = col;
+            firstBadRgba[0] = r;
+            firstBadRgba[1] = g;
+            firstBadRgba[2] = b;
+            firstBadRgba[3] = a;
+          }
+          ++badCount;
+        }
+        else
+        {
+          if (r < mn[0]) mn[0] = r; if (r > mx[0]) mx[0] = r;
+          if (g < mn[1]) mn[1] = g; if (g > mx[1]) mx[1] = g;
+          if (b < mn[2]) mn[2] = b; if (b > mx[2]) mx[2] = b;
+          if (a < mn[3]) mn[3] = a; if (a > mx[3]) mx[3] = a;
+        }
+      }
+    }
+
+    ticket->unmap();
+    hm->manager->destroyAsyncTextureTicket(ticket);
+
+    if (_outBadCount) *_outBadCount = badCount;
+    if (_outMinRgba) std::memcpy(_outMinRgba, mn, sizeof(mn));
+    if (_outMaxRgba) std::memcpy(_outMaxRgba, mx, sizeof(mx));
+    if (_outFirstBadI) *_outFirstBadI = firstBadI;
+    if (_outFirstBadJ) *_outFirstBadJ = firstBadJ;
+    if (_outFirstBadRgba)
+      std::memcpy(_outFirstBadRgba, firstBadRgba, sizeof(firstBadRgba));
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] combined scan threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
 }
 
 int waves_ogre2_heightmap_debug_dispatch(

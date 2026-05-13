@@ -185,6 +185,17 @@ namespace gz::sim::systems
     bool ReadbackHktCell(int _i, int _j,
                          float *_outRe, float *_outIm) const;
 
+    /// \brief Diagnostic: scan `combinedTex` for non-finite (NaN/Inf)
+    /// cells and report per-channel ranges. `outBadCount` returns the
+    /// number of cells where any channel is non-finite. If at least
+    /// one such cell exists, `outFirstBadI/J` and `outFirstBadRgba`
+    /// are populated with the first bad cell's coordinates + values.
+    /// `outMinRgba`/`outMaxRgba` summarise the finite cells.
+    bool ReadbackCombinedScan(int *_outBadCount,
+                              float *_outMinRgba, float *_outMaxRgba,
+                              int *_outFirstBadI, int *_outFirstBadJ,
+                              float *_outFirstBadRgba) const;
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 
