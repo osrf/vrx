@@ -158,6 +158,14 @@ namespace gz::sim::systems
                         float *_outRe, float *_outIm,
                         float *_outConjRe, float *_outConjIm) const;
 
+    /// \brief Diagnostic: async readback of one cell of `omegaTex`.
+    bool ReadbackOmegaCell(int _i, int _j, float *_outOmega) const;
+
+    /// \brief Diagnostic: async readback of η at one cell of
+    /// `ifftFinalTex` (the Stage 3 IFFT output that the visual
+    /// samples). Compare to CPU's heightGrid_(i, j) at the same t.
+    bool ReadbackIfftCell(int _i, int _j, float *_outEta) const;
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 

@@ -1657,6 +1657,88 @@ int waves_ogre2_heightmap_readback_h0(
   }
 }
 
+int waves_ogre2_heightmap_readback_omega(
+    waves_heightmap_t _handle, int _i, int _j, float *_outOmega)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->omegaTex || !hm->manager || _outOmega == nullptr)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  if (_i < 0 || _i >= N || _j < 0 || _j >= N)
+    return 0;
+  try
+  {
+    Ogre::AsyncTextureTicket *ticket =
+        hm->manager->createAsyncTextureTicket(
+            static_cast<Ogre::uint32>(N),
+            static_cast<Ogre::uint32>(N),
+            1u, Ogre::TextureTypes::Type2D,
+            Ogre::PFG_R32_FLOAT);
+    if (!ticket)
+      return 0;
+    ticket->download(hm->omegaTex, 0u, true, nullptr, true);
+    int spins = 0;
+    while (!ticket->queryIsTransferDone() && spins < 1000)
+      ++spins;
+    const Ogre::TextureBox box = ticket->map(0u);
+    const std::uint8_t *base = static_cast<const std::uint8_t *>(box.data);
+    const float *p = reinterpret_cast<const float *>(
+        base + static_cast<std::size_t>(_i) * box.bytesPerRow +
+        static_cast<std::size_t>(_j) * 4u);
+    *_outOmega = *p;
+    ticket->unmap();
+    hm->manager->destroyAsyncTextureTicket(ticket);
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] omega readback threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
+}
+
+int waves_ogre2_heightmap_readback_ifft(
+    waves_heightmap_t _handle, int _i, int _j, float *_outEta)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->ifftFinalTex || !hm->manager || _outEta == nullptr)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  if (_i < 0 || _i >= N || _j < 0 || _j >= N)
+    return 0;
+  try
+  {
+    Ogre::AsyncTextureTicket *ticket =
+        hm->manager->createAsyncTextureTicket(
+            static_cast<Ogre::uint32>(N),
+            static_cast<Ogre::uint32>(N),
+            1u, Ogre::TextureTypes::Type2D,
+            Ogre::PFG_RGBA32_FLOAT);
+    if (!ticket)
+      return 0;
+    ticket->download(hm->ifftFinalTex, 0u, true, nullptr, true);
+    int spins = 0;
+    while (!ticket->queryIsTransferDone() && spins < 10000)
+      ++spins;
+    const Ogre::TextureBox box = ticket->map(0u);
+    const std::uint8_t *base = static_cast<const std::uint8_t *>(box.data);
+    const float *p = reinterpret_cast<const float *>(
+        base + static_cast<std::size_t>(_i) * box.bytesPerRow +
+        static_cast<std::size_t>(_j) * 16u);
+    *_outEta = p[0];   // .r = η
+    ticket->unmap();
+    hm->manager->destroyAsyncTextureTicket(ticket);
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] ifft readback threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
+}
+
 int waves_ogre2_heightmap_ifft_bound(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);

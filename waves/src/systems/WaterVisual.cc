@@ -586,6 +586,25 @@ void WaterVisual::Implementation::OnSceneUpdate()
           dump(N / 2, N / 2);
           dump(N - 1, 0);
           dump(N - 1, N - 1);
+
+          // Also readback omega for the dominant cell + a few
+          // others — we need to verify omegaTex content matches CPU.
+          auto dumpOmega = [&](int i, int j)
+          {
+            float gpuOmega = 0.0f;
+            const bool ok =
+                this->heightMap->ReadbackOmegaCell(i, j, &gpuOmega);
+            const double cpuOmega = om(i, j);
+            gzmsg << "[WaterVisual] omega(" << i << "," << j << ")  "
+                  << "CPU=" << cpuOmega << "  GPU=" << gpuOmega
+                  << "  diff=" << (gpuOmega - cpuOmega)
+                  << "  ok=" << ok << std::endl;
+          };
+          dumpOmega(0, 0);
+          dumpOmega(1, 0);
+          dumpOmega(maxI, maxJ);
+          dumpOmega(N / 2, N / 2);
+          dumpOmega(N - 1, N - 1);
         }
       }
       if (this->spectrumUploaded)
@@ -628,6 +647,70 @@ void WaterVisual::Implementation::OnSceneUpdate()
                 << "η(x, t) computed on GPU. Visual stays on CPU "
                 << "upload path until Stage 4 binds the GPU output."
                 << std::endl;
+        }
+
+        // Diagnostic: ~5s after Stage 3 comes online, read back the
+        // GPU's ifftFinalTex and compare cell-by-cell to CPU's
+        // heightGrid_ at the same simTime. If GPU η differs
+        // significantly from CPU η, the IFFT pipeline (despite all
+        // unit tests passing) is producing different output for the
+        // full Phillips spectrum.
+        static int diagFrameCounter = 0;
+        static bool ranIfftDiag = false;
+        if (ifftOk && this->heightMap->GpuOutputBound())
+        {
+          ++diagFrameCounter;
+          if (!ranIfftDiag && diagFrameCounter == 300)
+          {
+            ranIfftDiag = true;
+            const float t = this->currentSimTime;
+            this->fftSim->Update(static_cast<double>(t));
+            const auto &eta = this->fftSim->HeightGrid();
+            gzmsg << "[WaterVisual] IFFT η comparison at t=" << t
+                  << " (300 frames after Stage 3 online)" << std::endl;
+            auto cmp = [&](int i, int j)
+            {
+              float gpuEta = 0.0f;
+              const bool ok =
+                  this->heightMap->ReadbackIfftCell(i, j, &gpuEta);
+              const double cpuEta = eta(i, j);
+              const double diff =
+                  static_cast<double>(gpuEta) - cpuEta;
+              const double ratio = (std::abs(cpuEta) > 1e-9)
+                  ? gpuEta / cpuEta : 0.0;
+              gzmsg << "[WaterVisual] η(" << i << "," << j << ")  "
+                    << "CPU=" << cpuEta << "  GPU=" << gpuEta
+                    << "  diff=" << diff
+                    << "  ratio=" << ratio
+                    << "  ok=" << ok << std::endl;
+            };
+            cmp(0, 0);
+            cmp(1, 1);
+            cmp(32, 32);
+            cmp(64, 0);
+            cmp(64, 64);
+            cmp(100, 50);
+            cmp(127, 0);
+            cmp(127, 127);
+
+            // Magnitude statistics across the whole CPU heightGrid.
+            double cpuMin = 1e9, cpuMax = -1e9, cpuSumSq = 0.0;
+            for (int i = 0; i < eta.rows(); ++i)
+            {
+              for (int j = 0; j < eta.cols(); ++j)
+              {
+                const double v = eta(i, j);
+                if (v < cpuMin) cpuMin = v;
+                if (v > cpuMax) cpuMax = v;
+                cpuSumSq += v * v;
+              }
+            }
+            gzmsg << "[WaterVisual] CPU η stats: min=" << cpuMin
+                  << "  max=" << cpuMax
+                  << "  rms=" << std::sqrt(cpuSumSq /
+                                             (eta.rows() * eta.cols()))
+                  << std::endl;
+          }
         }
 
         // Diagnostic: after the IFFT, optionally view hktTex (Stage

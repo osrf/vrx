@@ -45,6 +45,8 @@ namespace
   using ViewHktFn = int (*)(waves_heightmap_t, const char *, float);
   using ReadbackH0Fn = int (*)(waves_heightmap_t, int, int,
                                 float *, float *, float *, float *);
+  using ReadbackOmegaFn = int (*)(waves_heightmap_t, int, int, float *);
+  using ReadbackIfftFn  = int (*)(waves_heightmap_t, int, int, float *);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -64,6 +66,8 @@ namespace
     DebugFn    debug{nullptr};
     ViewHktFn  viewHkt{nullptr};
     ReadbackH0Fn readbackH0{nullptr};
+    ReadbackOmegaFn readbackOmega{nullptr};
+    ReadbackIfftFn  readbackIfft{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -114,6 +118,10 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_view_hkt_dispatch"));
       api.readbackH0 = reinterpret_cast<ReadbackH0Fn>(
           dlsym(api.handle, "waves_ogre2_heightmap_readback_h0"));
+      api.readbackOmega = reinterpret_cast<ReadbackOmegaFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_readback_omega"));
+      api.readbackIfft = reinterpret_cast<ReadbackIfftFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_readback_ifft"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -299,6 +307,28 @@ bool HeightMapTexture::ReadbackH0Cell(int _i, int _j,
   return api.readbackH0(this->impl_->handle, _i, _j,
                         _outRe, _outIm,
                         _outConjRe, _outConjIm) != 0;
+}
+
+bool HeightMapTexture::ReadbackOmegaCell(int _i, int _j,
+                                          float *_outOmega) const
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.readbackOmega)
+    return false;
+  return api.readbackOmega(this->impl_->handle, _i, _j, _outOmega) != 0;
+}
+
+bool HeightMapTexture::ReadbackIfftCell(int _i, int _j,
+                                         float *_outEta) const
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.readbackIfft)
+    return false;
+  return api.readbackIfft(this->impl_->handle, _i, _j, _outEta) != 0;
 }
 
 bool HeightMapTexture::GpuOutputBound() const
