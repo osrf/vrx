@@ -487,7 +487,8 @@ void WaterVisual::Implementation::OnSceneUpdate()
       if (this->spectrumUploaded)
       {
         ok = this->heightMap->EvolveDispatch(this->evolveShaderUri,
-                                             this->currentSimTime);
+                                             this->currentSimTime,
+                                             this->cachedTau);
         static bool loggedStage2 = false;
         if (ok && !loggedStage2)
         {

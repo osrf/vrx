@@ -31,9 +31,9 @@ layout(binding = 1) uniform sampler2D omegaTex;
 layout(std140, binding = 0) uniform Params
 {
   float t;          // simulation time [s]
-  float _pad0;
+  float tau;        // ramp time constant (matches CPU FFTWaveSimulation)
   int   gridSize;   // texture resolution per axis
-  int   _pad1;
+  int   _pad;
 };
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
@@ -62,6 +62,13 @@ void main()
              + h0Pack.z * c + h0Pack.w * s;
   float h_im = h0Pack.x * s + h0Pack.y * c
              - h0Pack.z * s + h0Pack.w * c;
+
+  // Startup ramp, matches CPU FFTWaveSimulation. Multiplied into the
+  // spectrum here (linear → equivalent to multiplying η by ramp on
+  // the spatial side, like CPU's Ifft2DReal(hkt, ramp)).
+  float ramp = (tau > 0.0) ? (1.0 - exp(-t / tau)) : 1.0;
+  h_re *= ramp;
+  h_im *= ramp;
 
   imageStore(hktTex, texel, vec4(h_re, h_im, 0.0, 0.0));
 }

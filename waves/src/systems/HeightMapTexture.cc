@@ -34,7 +34,7 @@ namespace
                                     const double *, const double *,
                                     const double *, const double *,
                                     const double *, int);
-  using EvolveFn = int (*)(waves_heightmap_t, const char *, float);
+  using EvolveFn = int (*)(waves_heightmap_t, const char *, float, float);
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
   using IfftNaiveFn = int (*)(waves_heightmap_t, const char *);
   using IfftBoundFn = int (*)(waves_heightmap_t);
@@ -219,7 +219,7 @@ bool HeightMapTexture::UploadSpectrum(
 }
 
 bool HeightMapTexture::EvolveDispatch(const std::string &_shaderAbsPath,
-                                      float _simTimeS)
+                                      float _simTimeS, float _tauS)
 {
   if (!this->impl_->handle)
     return false;
@@ -227,7 +227,7 @@ bool HeightMapTexture::EvolveDispatch(const std::string &_shaderAbsPath,
   if (!api.loaded || !api.evolve)
     return false;
   return api.evolve(this->impl_->handle, _shaderAbsPath.c_str(),
-                    _simTimeS) != 0;
+                    _simTimeS, _tauS) != 0;
 }
 
 bool HeightMapTexture::IfftDispatch(

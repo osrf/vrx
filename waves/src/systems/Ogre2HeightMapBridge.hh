@@ -138,7 +138,8 @@ extern "C"
   int waves_ogre2_heightmap_evolve_dispatch(
       waves_heightmap_t handle,
       const char *shader_abs_path,
-      float sim_time_s);
+      float sim_time_s,
+      float tau_s);
 
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);

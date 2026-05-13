@@ -100,7 +100,7 @@ namespace gz::sim::systems
     /// \brief Stage 2 dispatch: evolve the spectrum to `h(k, t)` on the
     /// GPU. Must follow `UploadSpectrum`.
     bool EvolveDispatch(const std::string &_shaderAbsPath,
-                        float _simTimeS);
+                        float _simTimeS, float _tauS = 0.0f);
 
     /// \brief Stage 3 dispatch: run the GPU IFFT (Cooley-Tukey radix-2)
     /// on the latest `h(k, t)` texture produced by EvolveDispatch. The

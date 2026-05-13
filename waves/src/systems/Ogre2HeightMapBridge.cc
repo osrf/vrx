@@ -8,6 +8,7 @@
 #include "Ogre2HeightMapBridge.hh"
 
 #include <cstring>
+#include <dlfcn.h>
 
 #include <gz/common/Console.hh>
 
@@ -186,9 +187,9 @@ namespace
   struct alignas(16) EvolveParams
   {
     float t;
-    float _pad0;
+    float tau;
     int   gridSize;
-    int   _pad1;
+    int   _pad;
   };
   static_assert(sizeof(EvolveParams) == 16,
                 "EvolveParams must be a single std140 vec4 block");
@@ -813,7 +814,8 @@ int waves_ogre2_heightmap_upload_spectrum(
 }
 
 int waves_ogre2_heightmap_evolve_dispatch(
-    waves_heightmap_t _handle, const char *_shaderAbsPath, float _simTimeS)
+    waves_heightmap_t _handle, const char *_shaderAbsPath,
+    float _simTimeS, float _tauS)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
   if (!hm || !hm->h0Tex || !hm->omegaTex || !hm->hktTex ||
@@ -944,6 +946,7 @@ int waves_ogre2_heightmap_evolve_dispatch(
 
     EvolveParams p{};
     p.t        = _simTimeS;
+    p.tau      = _tauS;
     p.gridSize = static_cast<int>(hm->gridSize);
     hm->evolveParams->upload(&p, 0u, sizeof(p));
     hm->hlmsCompute->dispatch(hm->evolveJob, hm->sceneManager, nullptr);
@@ -1200,6 +1203,24 @@ int waves_ogre2_heightmap_ifft_dispatch(
     auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
     auto &solver = renderSystem->getBarrierSolver();
 
+    // Belt-and-braces explicit memory barrier between dispatches.
+    // OgreNext's BarrierSolver/executeResourceTransition should emit
+    // the right glMemoryBarrier on GL3+, but if its tracking of
+    // compute-to-compute UAV/Texture transitions is incomplete, the
+    // chain reads stale data and produces wrong output. We look up
+    // glMemoryBarrier at runtime (the symbol is already loaded by
+    // the GL3+ render system) and call it ourselves with
+    // GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT
+    // between dispatches.
+    static constexpr unsigned GL_SHADER_IMAGE_ACCESS_BARRIER_BIT_VAL =
+        0x00000020u;
+    static constexpr unsigned GL_TEXTURE_FETCH_BARRIER_BIT_VAL =
+        0x00000008u;
+    using PFN_glMemoryBarrier = void (*)(unsigned);
+    static auto glMemoryBarrierPtr =
+        reinterpret_cast<PFN_glMemoryBarrier>(
+            dlsym(RTLD_DEFAULT, "glMemoryBarrier"));
+
     for (std::size_t i = 0; i < hm->ifftPassJobs.size(); ++i)
     {
       Ogre::TextureGpu *src = hm->ifftPassSrcDst[i].first;
@@ -1216,6 +1237,14 @@ int waves_ogre2_heightmap_ifft_dispatch(
 
       hm->hlmsCompute->dispatch(hm->ifftPassJobs[i],
                                 hm->sceneManager, nullptr);
+
+      // Explicit GL memory barrier so subsequent dispatches see this
+      // pass's writes. No-op if glMemoryBarrier wasn't located.
+      if (glMemoryBarrierPtr)
+      {
+        glMemoryBarrierPtr(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT_VAL |
+                           GL_TEXTURE_FETCH_BARRIER_BIT_VAL);
+      }
     }
 
     Ogre::TextureGpu *cur = hm->ifftFinalTex;
