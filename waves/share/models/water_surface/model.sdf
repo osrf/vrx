@@ -27,6 +27,12 @@
                  over h(k, t), producing the spatial η(x, y, t). -->
             <gpu_ifft_bitreverse>shaders/compute/fft_bitreverse.glsl</gpu_ifft_bitreverse>
             <gpu_ifft_butterfly>shaders/compute/fft_butterfly.glsl</gpu_ifft_butterfly>
+            <!-- Diagnostic: naive O(N²) 2D IFFT reference
+                 implementation. Enable with
+                 GZ_WAVES_GPU_FFT_NAIVE=1 to bypass the radix-2
+                 Cooley-Tukey pipeline and run a brute-force IFFT
+                 instead. -->
+            <gpu_ifft_naive>shaders/compute/fft_naive.glsl</gpu_ifft_naive>
             <!-- Diagnostic: writes a moving sine wave straight into
                  ifftFinalTex, bypassing the IFFT. Used with the
                  GZ_WAVES_GPU_FFT_TEST_PATTERN=1 env var to isolate

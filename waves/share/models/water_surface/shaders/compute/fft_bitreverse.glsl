@@ -10,9 +10,6 @@
 // Run once per axis: axis=0 reverses x for the row pass, axis=1
 // reverses y for the column pass.
 
-// UAV slot 0 = output (write), texture slot 0 = input (read).
-// OgreNext OpenGL compute can't reliably read via image2D at non-zero
-// UAV slots, so we route reads through a regular texture sampler.
 layout(rgba32f, binding = 0) uniform writeonly image2D dst;
 layout(binding = 0) uniform sampler2D src;
 

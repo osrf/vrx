@@ -74,6 +74,7 @@ class WaterVisual::Implementation
   public: bool         spectrumUploaded{false}; ///< Stage 2 one-shot init
   public: std::string bitrevShaderUri;        ///< Stage 3 IFFT bit-reverse pass (optional)
   public: std::string butterShaderUri;        ///< Stage 3 IFFT butterfly stage (optional)
+  public: std::string naiveShaderUri;         ///< Diagnostic naive O(N²) IFFT reference
   public: std::string testPatternShaderUri;   ///< Diagnostic test-pattern fill (optional)
   public: std::string viewHktShaderUri;       ///< Diagnostic hktTex viewer (optional)
   public: std::string bumpMapPath;
@@ -507,8 +508,13 @@ void WaterVisual::Implementation::OnSceneUpdate()
                              this->spectrumUploaded;
       if (useStage3)
       {
-        const bool ifftOk = this->heightMap->IfftDispatch(
-            this->bitrevShaderUri, this->butterShaderUri);
+        const char *naiveEnv = std::getenv("GZ_WAVES_GPU_FFT_NAIVE");
+        const bool useNaive = naiveEnv && std::string(naiveEnv) == "1"
+                              && !this->naiveShaderUri.empty();
+        const bool ifftOk = useNaive
+            ? this->heightMap->IfftNaiveDispatch(this->naiveShaderUri)
+            : this->heightMap->IfftDispatch(this->bitrevShaderUri,
+                                            this->butterShaderUri);
         static bool loggedStage3 = false;
         if (ifftOk && !loggedStage3)
         {
@@ -720,6 +726,11 @@ void WaterVisual::Configure(
   {
     this->dataPtr->butterShaderUri =
       resolve(shader->GetElement("gpu_ifft_butterfly")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_ifft_naive"))
+  {
+    this->dataPtr->naiveShaderUri =
+      resolve(shader->GetElement("gpu_ifft_naive")->Get<std::string>());
   }
   if (shader->HasElement("gpu_test_pattern"))
   {

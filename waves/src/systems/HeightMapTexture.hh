@@ -112,6 +112,12 @@ namespace gz::sim::systems
     bool IfftDispatch(const std::string &_bitrevShaderAbsPath,
                       const std::string &_butterShaderAbsPath);
 
+    /// \brief Diagnostic: brute-force O(N²) 2D IFFT in one dispatch.
+    /// Used to verify whether the radix-2 Cooley-Tukey pipeline's
+    /// output matches a known-correct reference implementation. Gated
+    /// by `GZ_WAVES_GPU_FFT_NAIVE=1`.
+    bool IfftNaiveDispatch(const std::string &_naiveShaderAbsPath);
+
     /// \brief Stage 4: true once the visual material's "heightMap"
     /// sampler has been swapped to the GPU IFFT output. Until then
     /// the CPU `Upload(...)` path must continue running so the

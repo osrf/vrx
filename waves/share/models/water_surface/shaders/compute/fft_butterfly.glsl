@@ -16,8 +16,6 @@
 // scale into h0 (matching Eigen/KissFFT's unnormalised convention), so
 // the GPU output reproduces the same physical amplitude.
 
-// UAV slot 0 = output (write), texture slot 0 = input (read).
-// See fft_bitreverse.glsl for the OgreNext-OpenGL rationale.
 layout(rgba32f, binding = 0) uniform writeonly image2D dst;
 layout(binding = 0) uniform sampler2D src;
 
@@ -80,4 +78,6 @@ void main()
                         : (aVal.xy - tw_b);
 
   imageStore(dst, t, vec4(result * extraScale, 0.0, 0.0));
+  // Original line (restored after diagnostic):
+  // imageStore(dst, t, vec4(result * extraScale, 0.0, 0.0));
 }

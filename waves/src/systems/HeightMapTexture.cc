@@ -36,6 +36,7 @@ namespace
                                     const double *, int);
   using EvolveFn = int (*)(waves_heightmap_t, const char *, float);
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
+  using IfftNaiveFn = int (*)(waves_heightmap_t, const char *);
   using IfftBoundFn = int (*)(waves_heightmap_t);
   using DebugFn = int (*)(waves_heightmap_t, const char *, float, float);
   using ViewHktFn = int (*)(waves_heightmap_t, const char *, float);
@@ -52,6 +53,7 @@ namespace
     UploadSpectrumFn uploadSpectrum{nullptr};
     EvolveFn   evolve{nullptr};
     IfftFn     ifft{nullptr};
+    IfftNaiveFn ifftNaive{nullptr};
     IfftBoundFn ifftBound{nullptr};
     DebugFn    debug{nullptr};
     ViewHktFn  viewHkt{nullptr};
@@ -93,6 +95,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_evolve_dispatch"));
       api.ifft = reinterpret_cast<IfftFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_dispatch"));
+      api.ifftNaive = reinterpret_cast<IfftNaiveFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_ifft_naive_dispatch"));
       api.ifftBound = reinterpret_cast<IfftBoundFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_bound"));
       api.debug = reinterpret_cast<DebugFn>(
@@ -238,6 +242,18 @@ bool HeightMapTexture::IfftDispatch(
   return api.ifft(this->impl_->handle,
                   _bitrevShaderAbsPath.c_str(),
                   _butterShaderAbsPath.c_str()) != 0;
+}
+
+bool HeightMapTexture::IfftNaiveDispatch(
+    const std::string &_naiveShaderAbsPath)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.ifftNaive)
+    return false;
+  return api.ifftNaive(this->impl_->handle,
+                       _naiveShaderAbsPath.c_str()) != 0;
 }
 
 bool HeightMapTexture::GpuOutputBound() const
