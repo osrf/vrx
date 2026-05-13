@@ -279,8 +279,15 @@ int waves_ogre2_heightmap_compute_dispatch(
     {
       auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
       const std::filesystem::path absPath(_shaderAbsPath);
-      const std::string dir  = absPath.parent_path().string();
-      hm->computeShaderName  = absPath.filename().string();
+      const std::string dir = absPath.parent_path().string();
+      // OgreNext's HlmsCompute appends the render-system extension
+      // (.glsl on GL, .hlsl on D3D, .metal on Metal) to the source name
+      // automatically — passing "foo.glsl" makes it look for
+      // "foo.glsl.glsl". So we strip our own .glsl extension before
+      // handing the name to createComputeJob, matching the convention
+      // used by the bundled `ClearUav_cs.glsl` shader (registered as
+      // "ClearUav_cs", not "ClearUav_cs.glsl").
+      hm->computeShaderName = absPath.stem().string();
 
       // Only add the location once per process. addResourceLocation will
       // throw if the same path is re-added; we tolerate that.
@@ -320,6 +327,13 @@ int waves_ogre2_heightmap_compute_dispatch(
 
       // Workgroup is 16x16 in the shader, so we need ceil(N/16) groups
       // per axis. With N=128 that's 8x8 groups (one thread per texel).
+      // setThreadsPerGroup is REQUIRED even though our GLSL already
+      // declares `layout(local_size_x = 16, ...)` — OgreNext insists on
+      // knowing the workgroup size at C++ level (so it can substitute
+      // into Metal/HLSL templates and dispatch on those backends).
+      // Without it, dispatch throws "Shader or C++ must set
+      // threads_per_group_x, ...".
+      hm->computeJob->setThreadsPerGroup(16u, 16u, 1u);
       const Ogre::uint32 groups =
           static_cast<Ogre::uint32>((N + 15) / 16);
       hm->computeJob->setNumThreadGroups(groups, groups, 1u);
@@ -360,21 +374,36 @@ int waves_ogre2_heightmap_compute_dispatch(
   if (!hm->computeJob || !hm->paramsBuffer)
     return 0;
 
-  // Update the params buffer with the current frame's uniforms.
-  ComputeParams params{};
-  params.t        = _simTimeS;
-  params.tileSize = _tileSizeM;
-  params.gridSize = N;
-  params._pad     = 0.0f;
-  hm->paramsBuffer->upload(&params, 0u, sizeof(params));
+  // Update the params buffer with the current frame's uniforms and
+  // dispatch. Anything throwing from inside Ogre here would otherwise
+  // escape the extern "C" boundary and abort the process; swallow it.
+  try
+  {
+    ComputeParams params{};
+    params.t        = _simTimeS;
+    params.tileSize = _tileSizeM;
+    params.gridSize = N;
+    params._pad     = 0.0f;
+    hm->paramsBuffer->upload(&params, 0u, sizeof(params));
 
-  // Dispatch. Camera arg is null because our shader doesn't reference
-  // any per-camera state.
-  hm->hlmsCompute->dispatch(hm->computeJob, hm->sceneManager, nullptr);
+    // Camera arg is null — our shader doesn't reference per-camera state.
+    hm->hlmsCompute->dispatch(hm->computeJob, hm->sceneManager, nullptr);
 
-  // Tell the engine the texture's data is now fresh.
-  if (!hm->texture->isDataReady())
-    hm->texture->notifyDataIsReady();
+    if (!hm->texture->isDataReady())
+      hm->texture->notifyDataIsReady();
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] compute dispatch threw: "
+            << e.getDescription() << " (further failures suppressed)"
+            << std::endl;
+    }
+    return 0;
+  }
   return 1;
 }
 

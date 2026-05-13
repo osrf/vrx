@@ -41,17 +41,20 @@ void main()
   vec2 pos = uv * tileSize;
 
   // Two-component sine pattern — a slow wave along x, a faster one
-  // along y. ~1 m amplitude so it's clearly visible.
-  const float kx = 0.05;       // [rad/m]
-  const float ky = 0.10;       // [rad/m]
+  // along y. Amplitude exaggerated (~3 m peaks) so it's unambiguously
+  // visible from the default camera (15 m back, 2 m up), making it
+  // easy to confirm the GPU compute path is producing data and the
+  // visual is sampling it.
+  const float kx = 0.05;       // [rad/m] → 125 m wavelength along x
+  const float ky = 0.10;       // [rad/m] → 63 m wavelength along y
   const float wx = 0.5;        // [rad/s]
   const float wy = 0.7;        // [rad/s]
 
-  float eta = 0.5 * sin(kx * pos.x - wx * t)
-            + 0.5 * sin(ky * pos.y - wy * t);
+  float eta = 1.5 * sin(kx * pos.x - wx * t)
+            + 1.5 * sin(ky * pos.y - wy * t);
   // Choppy displacement in phase with η so wave crests visibly sharpen.
-  float Dx  = 0.2 * cos(kx * pos.x - wx * t);
-  float Dy  = 0.2 * cos(ky * pos.y - wy * t);
+  float Dx  = 0.6 * cos(kx * pos.x - wx * t);
+  float Dy  = 0.6 * cos(ky * pos.y - wy * t);
 
   imageStore(heightMapOut, texel, vec4(eta, Dx, Dy, 0.0));
 }
