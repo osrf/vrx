@@ -16,10 +16,17 @@
 #include <gz/rendering/ogre2/Ogre2Material.hh>
 #include <gz/rendering/ogre2/Ogre2Scene.hh>
 
+#include <filesystem>
+
+#include <OgreHlmsCompute.h>
+#include <OgreHlmsComputeJob.h>
+#include <OgreHlmsManager.h>
 #include <OgreHlmsSamplerblock.h>
 #include <OgrePass.h>
 #include <OgrePixelFormatGpu.h>
 #include <OgrePixelFormatGpuUtils.h>
+#include <OgreRenderSystem.h>
+#include <OgreResourceGroupManager.h>
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
 #include <OgreStagingTexture.h>
@@ -27,9 +34,23 @@
 #include <OgreTextureGpu.h>
 #include <OgreTextureGpuManager.h>
 #include <OgreTextureUnitState.h>
+#include <Vao/OgreConstBufferPacked.h>
+#include <Vao/OgreVaoManager.h>
 
 namespace
 {
+  // std140-packed uniform layout matching the GLSL `Params` block.
+  // Must stay in sync with shaders/compute/*.glsl.
+  struct alignas(16) ComputeParams
+  {
+    float t;
+    float tileSize;
+    int   gridSize;
+    float _pad;
+  };
+  static_assert(sizeof(ComputeParams) == 16,
+                "ComputeParams must be a single std140 vec4 block");
+
   struct HeightMap
   {
     Ogre::TextureGpu *texture{nullptr};
@@ -42,6 +63,15 @@ namespace
     Ogre::HlmsSamplerblock samplerblock;
     std::size_t gridSize{0};
     bool ready{false};
+
+    // GPU-FFT compute pipeline state. Initialised lazily on the first
+    // `compute_dispatch` call (so the CPU upload path doesn't pay any
+    // setup cost when GPU-FFT is disabled).
+    Ogre::SceneManager     *sceneManager{nullptr};
+    Ogre::HlmsCompute      *hlmsCompute{nullptr};
+    Ogre::HlmsComputeJob   *computeJob{nullptr};
+    Ogre::ConstBufferPacked *paramsBuffer{nullptr};
+    std::string             computeShaderName;  // basename, not full path
   };
 }
 
@@ -88,6 +118,7 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   auto *hm = new HeightMap();
   hm->gridSize = _gridSize;
   hm->manager = manager;
+  hm->sceneManager = sceneManager;
   // SaveToSystemRam (matches asv_wave_sim's Ogre2DisplacementMap): Ogre Next
   // retains a CPU-side copy of the texture so it doesn't have to round-trip
   // the GPU to validate residency state during streaming uploads.
@@ -224,6 +255,129 @@ int waves_ogre2_heightmap_upload(
   return 1;
 }
 
+int waves_ogre2_heightmap_compute_dispatch(
+    waves_heightmap_t _handle, const char *_shaderAbsPath,
+    float _simTimeS, float _tileSizeM)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->ready || !hm->texture || !hm->sceneManager ||
+      !_shaderAbsPath)
+    return 0;
+
+  // Schedule residency every dispatch — same reasoning as the upload
+  // path. No-op once already Resident.
+  hm->texture->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+
+  const int N = static_cast<int>(hm->gridSize);
+
+  // First-call init: register the shader directory as a resource
+  // location, create the HlmsComputeJob, create the params ConstBuffer,
+  // wire up the UAV binding and thread groups.
+  if (!hm->computeJob)
+  {
+    try
+    {
+      auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
+      const std::filesystem::path absPath(_shaderAbsPath);
+      const std::string dir  = absPath.parent_path().string();
+      hm->computeShaderName  = absPath.filename().string();
+
+      // Only add the location once per process. addResourceLocation will
+      // throw if the same path is re-added; we tolerate that.
+      try
+      {
+        rgMgr.addResourceLocation(
+            dir, "FileSystem",
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            false);
+      }
+      catch (const Ogre::Exception &)
+      {
+        // Already registered — fine.
+      }
+
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      hm->hlmsCompute = hlmsManager->getComputeHlms();
+      if (!hm->hlmsCompute)
+      {
+        gzerr << "[waves_ogre2_heightmap] no HlmsCompute available; "
+              << "is the engine ogre2?" << std::endl;
+        return 0;
+      }
+
+      // Process-unique job name so multiple bridge instances can coexist.
+      const std::string jobName =
+          "WavesGpuFft_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->computeJob = hm->hlmsCompute->createComputeJob(
+          jobName, jobName, hm->computeShaderName, Ogre::StringVector{});
+      if (!hm->computeJob)
+      {
+        gzerr << "[waves_ogre2_heightmap] createComputeJob failed for "
+              << hm->computeShaderName << std::endl;
+        return 0;
+      }
+
+      // Workgroup is 16x16 in the shader, so we need ceil(N/16) groups
+      // per axis. With N=128 that's 8x8 groups (one thread per texel).
+      const Ogre::uint32 groups =
+          static_cast<Ogre::uint32>((N + 15) / 16);
+      hm->computeJob->setNumThreadGroups(groups, groups, 1u);
+
+      // One UAV (the heightmap output) and one const buffer (params).
+      hm->computeJob->setNumUavUnits(1u);
+
+      Ogre::DescriptorSetUav::TextureSlot uavSlot =
+          Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+      uavSlot.texture = hm->texture;
+      uavSlot.access  = Ogre::ResourceAccess::Write;
+      uavSlot.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+      hm->computeJob->_setUavTexture(0u, uavSlot);
+
+      // Const buffer for the (t, tileSize, gridSize) uniforms.
+      auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+      auto *vaoManager   = renderSystem->getVaoManager();
+      hm->paramsBuffer = vaoManager->createConstBuffer(
+          sizeof(ComputeParams),
+          Ogre::BT_DYNAMIC_PERSISTENT,
+          nullptr, false);
+      hm->computeJob->setConstBuffer(0u, hm->paramsBuffer);
+
+      gzmsg << "[waves_ogre2_heightmap] compute pipeline initialised: "
+            << "shader=" << hm->computeShaderName
+            << " thread_groups=" << groups << "x" << groups << "x1"
+            << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] compute setup threw: "
+            << e.getDescription() << std::endl;
+      hm->computeJob = nullptr;
+      return 0;
+    }
+  }
+
+  if (!hm->computeJob || !hm->paramsBuffer)
+    return 0;
+
+  // Update the params buffer with the current frame's uniforms.
+  ComputeParams params{};
+  params.t        = _simTimeS;
+  params.tileSize = _tileSizeM;
+  params.gridSize = N;
+  params._pad     = 0.0f;
+  hm->paramsBuffer->upload(&params, 0u, sizeof(params));
+
+  // Dispatch. Camera arg is null because our shader doesn't reference
+  // any per-camera state.
+  hm->hlmsCompute->dispatch(hm->computeJob, hm->sceneManager, nullptr);
+
+  // Tell the engine the texture's data is now fresh.
+  if (!hm->texture->isDataReady())
+    hm->texture->notifyDataIsReady();
+  return 1;
+}
+
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
@@ -239,6 +393,24 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
   // engine shuts down its TextureGpuManager before our owners run their
   // destructors). Otherwise the unhandled exception escapes through the
   // extern "C" boundary and aborts the process.
+  if (hm->hlmsCompute && hm->computeJob)
+  {
+    try { hm->hlmsCompute->destroyComputeJob(hm->computeJob->getName()); }
+    catch (const Ogre::Exception &) {}
+    hm->computeJob = nullptr;
+  }
+  if (hm->paramsBuffer)
+  {
+    try
+    {
+      auto *renderSystem = Ogre::Root::getSingletonPtr() ?
+          Ogre::Root::getSingleton().getRenderSystem() : nullptr;
+      if (renderSystem && renderSystem->getVaoManager())
+        renderSystem->getVaoManager()->destroyConstBuffer(hm->paramsBuffer);
+    }
+    catch (const Ogre::Exception &) {}
+    hm->paramsBuffer = nullptr;
+  }
   if (hm->manager)
   {
     if (hm->staging)

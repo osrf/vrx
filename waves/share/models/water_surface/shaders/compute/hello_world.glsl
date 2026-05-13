@@ -3,27 +3,31 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 //
 // Hello-world compute shader for the GPU-FFT pipeline. Writes a
-// deterministic procedural pattern to an RGBA32F texture that the FFT
-// vertex shader binds as `heightMap`. The pattern moves with simulation
-// time so we can confirm: (a) the compute dispatch runs every frame,
-// (b) the output texture is correctly bound to the visual material,
-// (c) the visual receives time-varying displacement.
+// time-varying procedural pattern to an RGBA32F texture that the FFT
+// vertex shader binds as `heightMap`. Used to validate Stage 1 of
+// `docs/waves_gpu_fft_plan.md`: the compute dispatch runs every frame,
+// the output texture is bound to the visual material, the visual
+// receives time-varying displacement.
 //
-// Once Stage 1 is validated we replace this with the real Phillips +
-// IFFT pipeline (Stages 2-3).
-//
-// Layout: 16×16 workgroup (256 threads), one thread per texel.
+// Once Stage 1 is validated we replace this with the real
+// Phillips + IFFT pipeline (Stages 2-3).
 
 #version 430
 
-// `image2D` (vs `sampler2D`) lets us WRITE to the texture. Format must
-// match the TextureGpu's pixel format (PFG_RGBA32_FLOAT).
-layout(rgba32f, binding = 0) uniform image2D heightMapOut;
+// UAV slot 0 — matches the bridge's `_setUavTexture(0u, ...)` call.
+layout(rgba32f, binding = 0) uniform writeonly image2D heightMapOut;
 
-uniform float t;          // simulation time [s]
-uniform int   gridSize;   // texture resolution per axis (e.g. 128)
-uniform float tileSize;   // physical tile size [m]
+// std140-packed const buffer slot 0 — matches the bridge's
+// `setConstBuffer(0u, paramsBuffer)` upload.
+layout(std140, binding = 0) uniform Params
+{
+  float t;          // simulation time [s]
+  float tileSize;   // physical tile size [m]
+  int   gridSize;   // texture resolution per axis
+  float _pad;
+};
 
+// 16×16 workgroup, one thread per texel of the heightmap.
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 void main()
@@ -32,25 +36,22 @@ void main()
   if (texel.x >= gridSize || texel.y >= gridSize)
     return;
 
-  // Normalised position in [0, 1) across the tile.
-  vec2 uv = (vec2(texel) + 0.5) / float(gridSize);
-
-  // World-space position in metres for the centre of this texel.
+  // Normalised position in [0, 1) across the tile, then in metres.
+  vec2 uv  = (vec2(texel) + 0.5) / float(gridSize);
   vec2 pos = uv * tileSize;
 
-  // Two-component sine pattern — a slow "wave" along x, a faster one
+  // Two-component sine pattern — a slow wave along x, a faster one
   // along y. ~1 m amplitude so it's clearly visible.
-  float kx = 0.05;  // [rad/m]
-  float ky = 0.10;
-  float omega_x = 0.5;  // [rad/s]
-  float omega_y = 0.7;
+  const float kx = 0.05;       // [rad/m]
+  const float ky = 0.10;       // [rad/m]
+  const float wx = 0.5;        // [rad/s]
+  const float wy = 0.7;        // [rad/s]
 
-  float eta = 0.5 * sin(kx * pos.x - omega_x * t)
-            + 0.5 * sin(ky * pos.y - omega_y * t);
-
-  // Choppy displacement: small horizontal motion in phase with η.
-  float Dx = 0.2 * cos(kx * pos.x - omega_x * t);
-  float Dy = 0.2 * cos(ky * pos.y - omega_y * t);
+  float eta = 0.5 * sin(kx * pos.x - wx * t)
+            + 0.5 * sin(ky * pos.y - wy * t);
+  // Choppy displacement in phase with η so wave crests visibly sharpen.
+  float Dx  = 0.2 * cos(kx * pos.x - wx * t);
+  float Dy  = 0.2 * cos(ky * pos.y - wy * t);
 
   imageStore(heightMapOut, texel, vec4(eta, Dx, Dy, 0.0));
 }

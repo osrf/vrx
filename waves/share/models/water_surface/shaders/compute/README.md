@@ -5,44 +5,71 @@ GLSL compute shaders for the GPU-FFT pipeline (see
 
 ## Status
 
-**Stage 1 — Ogre Next compute-shader infrastructure: IN PROGRESS.**
+**Stage 1 — Ogre Next compute-shader infrastructure: WIRED, needs smoke test.**
 
-The `hello_world.glsl` compute shader is in place. The bridge entry
-point that creates an `Ogre::HlmsComputeJob`, binds the heightmap
-texture as UAV slot 0, allocates a `ConstBufferPacked` for the runtime
-uniforms (`t`, `tileSize`, `gridSize`), and dispatches the job each
-frame is **not yet wired**. That's the bulk of Stage 1 and needs a
-focused implementation session.
+What's now in place:
 
-When it's wired:
+- `hello_world.glsl`: a GLSL 430 compute shader that writes a
+  time-varying procedural displacement pattern to the heightmap
+  texture.
+- `Ogre2HeightMapBridge.cc`'s `waves_ogre2_heightmap_compute_dispatch`
+  C-ABI entry: creates an `Ogre::HlmsComputeJob` on the first call,
+  allocates a 16-byte `ConstBufferPacked` for runtime uniforms,
+  registers the shader directory as a resource location, binds the
+  heightmap as UAV slot 0, and dispatches the job each frame.
+- `HeightMapTexture::Dispatch(...)`: thin C++ wrapper for the bridge
+  C-ABI.
+- `WaterVisual::OnSceneUpdate`: when `GZ_WAVES_GPU_FFT=1` is set in the
+  environment AND the model SDF supplies `<gpu_compute>`, calls
+  `Dispatch` instead of `Upload`. CPU IFFT is skipped on that path.
+- `model.sdf`: a new `<gpu_compute>` element under `<shader>` lets the
+  user pick the compute-shader source.
 
-1. The bridge adds a `waves_ogre2_heightmap_compute_dispatch` C-ABI
-   entry that takes a shader filename + sim time and dispatches the
-   compute job.
-2. `WaterVisual::OnSceneUpdate` calls the dispatch instead of the
-   CPU `Upload` when `GZ_WAVES_GPU_FFT=1` is set.
-3. The procedural displacement pattern in `hello_world.glsl` appears
-   on the water surface and moves with time.
+## How to test
 
-Validation criteria for declaring Stage 1 done:
+```bash
+# Run as usual but with GPU-FFT enabled:
+GZ_WAVES_GPU_FFT=1 ros2 launch vrx_bringup simulation.launch.xml
+```
 
-- Pattern visibly applied to the water surface, time-varying.
-- Pattern is regenerated each frame via compute (no CPU upload).
-- Smoke-test the FFT load time on Jetty + Blackwell. If load is fast
-  (~5 s), the compute path already bypasses the `HlmsLowLevel` slow
-  init and Stage 6 (HlmsPbs migration) may be unnecessary.
+Look for the log line:
+
+```
+[WaterVisual] GPU-FFT dispatch online — compute shader …/hello_world.glsl
+```
+
+Validation criteria:
+
+1. A time-varying sinusoidal displacement pattern visibly applied to
+   the water surface.
+2. No `[WaterVisual] first FFT upload: …` line (CPU IFFT skipped).
+3. Load time on the FFT path: if it's now ~5 s instead of ~2 min, the
+   compute pipeline already bypasses the `HlmsLowLevel` slow init and
+   Stage 6 (HlmsPbs migration) might be unnecessary.
+
+## Next stages
+
+- Stage 2: replace the procedural pattern with `phillips_init.glsl`
+  (one-shot, builds `h0(k)`) plus `evolve.glsl` (per-frame, evolves to
+  `h(k, t)`).
+- Stage 3: `fft_butterfly.glsl`, a 2D inverse FFT in `log₂N` passes per
+  axis.
+- Stage 4: bridge's `_upload` becomes a no-op when GPU path is active.
 
 ## Notes for the implementer
 
-Useful reference: `gz_rendering_vendor`'s `ClearUav` compute shader at
-`/opt/ros/rolling/opt/gz_rendering_vendor/share/gz/gz-rendering/ogre2/media/Compute/Tools/`
-shows the standard OgreNext compute-shader template format with HLMS
-piece substitution. We don't need full HLMS templating for our case —
-plain GLSL 430 with explicit `layout(rgba32f, binding=0) uniform
-image2D` is sufficient.
+The OgreNext compute API surface we're using:
 
-For runtime uniforms (t, tileSize, gridSize), allocate one
-`ConstBufferPacked` via `vaoManager->createConstBuffer(16, BT_DYNAMIC_PERSISTENT_COHERENT, nullptr, false)`,
-update its contents each frame, and bind via
-`job->setConstBuffer(0, buf)`. The shader declares it as a
-`layout(std140, binding = 0) uniform Params { ... }`.
+- `Ogre::HlmsCompute::createComputeJob(jobName, refName, sourceFilename, includedPieces)`
+- `Ogre::HlmsComputeJob::setNumThreadGroups(x, y, z)`
+- `Ogre::HlmsComputeJob::setNumUavUnits(n)`
+- `Ogre::HlmsComputeJob::_setUavTexture(slot, DescriptorSetUav::TextureSlot)`
+- `Ogre::HlmsComputeJob::setConstBuffer(slot, ConstBufferPacked *)`
+- `Ogre::VaoManager::createConstBuffer(size, bufferType, data, keepAsShadow)`
+- `Ogre::HlmsCompute::dispatch(job, sceneManager, camera = nullptr)`
+
+The GLSL uses standard OpenGL 4.30 syntax with explicit `layout(binding
+= N)` qualifiers — we don't use HLMS template `@insertpiece` directives.
+Reference: `gz_rendering_vendor`'s `ClearUav` compute shader at
+`/opt/ros/rolling/opt/gz_rendering_vendor/share/gz/gz-rendering/ogre2/media/Compute/Tools/`
+shows the HLMS-template form, but plain GLSL is sufficient for our case.

@@ -15,6 +15,10 @@
             <vertex>shaders/gerstner_waves_vs_330.glsl</vertex>
             <fft_vertex>shaders/fft_water_vs_330.glsl</fft_vertex>
             <fragment>shaders/water_fs_330.glsl</fragment>
+            <!-- GPU-FFT compute shader (used when GZ_WAVES_GPU_FFT=1).
+                 Stage 1 ships with a hello-world procedural pattern;
+                 Stages 2-3 replace it with the real FFT pipeline. -->
+            <gpu_compute>shaders/compute/hello_world.glsl</gpu_compute>
             <parameters>
               <rescale>0.5</rescale>
               <bumpScale>25 25</bumpScale>

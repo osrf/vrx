@@ -65,6 +65,18 @@ namespace gz::sim::systems
                 const Eigen::MatrixXd &_dispX,
                 const Eigen::MatrixXd &_dispY);
 
+    /// \brief GPU-FFT path: dispatch a compute shader that writes the
+    /// heightmap texture directly on the GPU, replacing the CPU
+    /// `Upload(...)` call. The bridge lazily sets up the
+    /// `HlmsComputeJob` on the first invocation.
+    /// \param _shaderAbsPath Absolute path to the `.glsl` compute shader.
+    /// \param _simTimeS Current simulation time [s].
+    /// \param _tileSizeM Physical tile extent [m].
+    /// \return True if the dispatch was issued.
+    bool Dispatch(const std::string &_shaderAbsPath,
+                  float _simTimeS,
+                  float _tileSizeM);
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 

@@ -27,6 +27,7 @@ namespace
                             const double *, const double *, const double *,
                             int, int);
   using ReadyFn  = int (*)(waves_heightmap_t);
+  using ComputeFn = int (*)(waves_heightmap_t, const char *, float, float);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -35,6 +36,7 @@ namespace
     CreateFn   create{nullptr};
     UploadFn   upload{nullptr};
     ReadyFn    ready{nullptr};
+    ComputeFn  compute{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -63,6 +65,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_upload"));
       api.ready   = reinterpret_cast<ReadyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ready"));
+      api.compute = reinterpret_cast<ComputeFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_compute_dispatch"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -135,6 +139,18 @@ bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
   RowMatrix dispY = _dispY;
   return api.upload(this->impl_->handle,
                     eta.data(), dispX.data(), dispY.data(), N, N) != 0;
+}
+
+bool HeightMapTexture::Dispatch(const std::string &_shaderAbsPath,
+                                float _simTimeS, float _tileSizeM)
+{
+  if (!this->ready_ || !this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.compute)
+    return false;
+  return api.compute(this->impl_->handle, _shaderAbsPath.c_str(),
+                     _simTimeS, _tileSizeM) != 0;
 }
 
 }  // namespace gz::sim::systems

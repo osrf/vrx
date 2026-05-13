@@ -55,6 +55,32 @@ extern "C"
   /// 0 otherwise.
   int waves_ogre2_heightmap_ready(waves_heightmap_t handle);
 
+  /// GPU-FFT path. Dispatch a compute shader that writes the heightmap
+  /// texture directly on the GPU. The bridge creates the
+  /// `Ogre::HlmsComputeJob` on first call (loading `shader_abs_path` and
+  /// registering its parent directory as a resource location), and
+  /// reuses it on subsequent calls. Each invocation refreshes the
+  /// `(t, tileSize, gridSize)` const buffer and dispatches.
+  ///
+  /// Stage 1 of `docs/waves_gpu_fft_plan.md`. Replaces the CPU
+  /// `*_upload` path once the GPU pipeline is producing real wave data
+  /// (Stages 2-3).
+  ///
+  /// \param handle  Heightmap handle returned by `_create`.
+  /// \param shader_abs_path  Absolute path to a `.glsl` compute shader.
+  ///   Its directory is registered as a "General" resource location on
+  ///   first call.
+  /// \param sim_time_s  Current simulation time [s]; uploaded as the `t`
+  ///   uniform.
+  /// \param tile_size_m  Physical tile extent passed to the shader.
+  /// \return 1 on success, 0 on any failure (texture not resident,
+  ///   shader compile failure, etc.).
+  int waves_ogre2_heightmap_compute_dispatch(
+      waves_heightmap_t handle,
+      const char *shader_abs_path,
+      float sim_time_s,
+      float tile_size_m);
+
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);
 }

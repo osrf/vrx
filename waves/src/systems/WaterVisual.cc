@@ -14,6 +14,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <list>
 #include <mutex>
 #include <set>
@@ -68,6 +69,7 @@ class WaterVisual::Implementation
   public: std::string vertexShaderUri;        ///< Gerstner vertex shader
   public: std::string fftVertexShaderUri;     ///< FFT vertex shader (optional)
   public: std::string fragmentShaderUri;      ///< Shared fragment shader
+  public: std::string computeShaderUri;       ///< GPU-FFT compute shader (optional)
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
   public: float rescale{0.125f};
@@ -383,22 +385,42 @@ void WaterVisual::Implementation::OnSceneUpdate()
     (*vsParams)["t"] = this->currentSimTime;
   }
 
-  // FFT visual path: re-evaluate the height field for the current sim time
-  // on the GUI side, then upload it to the GPU heightmap texture. The GUI
-  // and server own independent FFTWaveSimulation instances seeded from the
-  // same `<seed>` in SDF, so the two grids agree bit-for-bit at each t.
+  // FFT visual path: either dispatch the GPU compute shader (Stage 1+ of
+  // the GPU-FFT plan) when GZ_WAVES_GPU_FFT=1 and a compute shader URI
+  // was configured, or fall back to the CPU IFFT + upload.
   if (this->useFft && this->fftSim && this->heightMap &&
       this->heightMap->Ready())
   {
-    this->fftSim->Update(static_cast<double>(this->currentSimTime));
-    const bool ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
-                                            this->fftSim->DispXGrid(),
-                                            this->fftSim->DispYGrid());
-    // One-shot diagnostic on the very first successful upload so we can
-    // see the actual amplitudes the GPU is sampling. Helps distinguish
-    // "upload silently failing" from "Phillips spectrum is tiny".
+    const char *gpuEnv = std::getenv("GZ_WAVES_GPU_FFT");
+    const bool useGpu = gpuEnv && std::string(gpuEnv) == "1" &&
+                        !this->computeShaderUri.empty();
+    bool ok = false;
+    if (useGpu)
+    {
+      ok = this->heightMap->Dispatch(this->computeShaderUri,
+                                     this->currentSimTime,
+                                     this->cachedTileSize);
+      static bool loggedGpu = false;
+      if (ok && !loggedGpu)
+      {
+        loggedGpu = true;
+        gzmsg << "[WaterVisual] GPU-FFT dispatch online — compute shader "
+              << this->computeShaderUri << std::endl;
+      }
+    }
+    else
+    {
+      this->fftSim->Update(static_cast<double>(this->currentSimTime));
+      ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
+                                   this->fftSim->DispXGrid(),
+                                   this->fftSim->DispYGrid());
+    }
+    // One-shot diagnostic on the very first successful CPU upload so we
+    // can see the actual amplitudes the GPU is sampling. Helps
+    // distinguish "upload silently failing" from "Phillips spectrum is
+    // tiny". (Skipped on the GPU-FFT path; that path has its own log.)
     static bool logged = false;
-    if (ok && !logged)
+    if (ok && !useGpu && !logged)
     {
       logged = true;
       const auto &eta = this->fftSim->HeightGrid();
@@ -486,6 +508,11 @@ void WaterVisual::Configure(
   {
     this->dataPtr->fftVertexShaderUri =
       resolve(shader->GetElement("fft_vertex")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_compute"))
+  {
+    this->dataPtr->computeShaderUri =
+      resolve(shader->GetElement("gpu_compute")->Get<std::string>());
   }
 
   if (shader->HasElement("parameters"))
