@@ -317,11 +317,13 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   hm->texture->setResolution(
       static_cast<Ogre::uint32>(_gridSize),
       static_cast<Ogre::uint32>(_gridSize));
-  // Full mipmap chain matches asv_wave_sim's configuration; the engine
-  // appears to take a slow init path on textures with setNumMipmaps(1).
-  hm->texture->setNumMipmaps(
-      Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
-          hm->texture->getWidth(), hm->texture->getHeight()));
+  // Single mip: we only upload mip 0 each frame, and the engine doesn't
+  // auto-generate the rest (would need RenderToTexture + allowsAutoMipmaps,
+  // which conflict with our ManualTexture upload contract). With a full
+  // mip chain in place but only mip 0 populated, the FS would sample
+  // garbage from higher mips at distance — visible as fine dotted lines
+  // that drift with the waves. Matches `combinedTex` on the GPU path.
+  hm->texture->setNumMipmaps(1u);
   // RGBA32F so we can pack (η, Dx, Dy, α) per texel. Alpha is unused for
   // now (reserved for a Jacobian/foam mask in a future stage).
   hm->texture->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
