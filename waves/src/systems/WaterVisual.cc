@@ -516,32 +516,6 @@ void WaterVisual::Implementation::OnSceneUpdate()
           }
         }
 
-        // One-shot log of magnitude statistics so we can spot
-        // upload-side scaling problems. Compute |h0(1, 0)| and the
-        // cell with the largest |h0| as ground-truth references.
-        double maxAbsH0 = 0.0;
-        int maxI = 0, maxJ = 0;
-        for (int i = 0; i < N; ++i)
-        {
-          for (int j = 0; j < N; ++j)
-          {
-            const double mag = std::abs(h0(i, j));
-            if (mag > maxAbsH0)
-            {
-              maxAbsH0 = mag;
-              maxI = i;
-              maxJ = j;
-            }
-          }
-        }
-        gzmsg << "[WaterVisual] spectrum stats: |h0(1,0)|="
-              << std::abs(h0(1, 0))
-              << " |h0|_max=" << maxAbsH0
-              << " @ (i=" << maxI << ", j=" << maxJ << ")"
-              << " omega(1,0)=" << om(1, 0)
-              << " omega(maxI,maxJ)=" << om(maxI, maxJ)
-              << std::endl;
-
         if (this->heightMap->UploadSpectrum(
                 h0Re.data(), h0Im.data(),
                 hcRe.data(), hcIm.data(),
@@ -550,10 +524,37 @@ void WaterVisual::Implementation::OnSceneUpdate()
           this->spectrumUploaded = true;
         }
 
-        // GPU readback to verify what landed on the GPU vs what CPU
-        // intended to upload. Done once after the upload succeeds.
-        if (this->spectrumUploaded)
+        // GPU readback diagnostics (gated by GZ_WAVES_GPU_FFT_DEBUG=1).
+        const char *dbgEnv = std::getenv("GZ_WAVES_GPU_FFT_DEBUG");
+        const bool debugOn =
+            dbgEnv && std::string(dbgEnv) == "1";
+        if (debugOn && this->spectrumUploaded)
         {
+          // Magnitude statistics so we can spot upload-side scaling
+          // problems. Compute |h0(1, 0)| and the cell with the
+          // largest |h0| as ground-truth references.
+          double maxAbsH0 = 0.0;
+          int maxI = 0, maxJ = 0;
+          for (int i = 0; i < N; ++i)
+          {
+            for (int j = 0; j < N; ++j)
+            {
+              const double mag = std::abs(h0(i, j));
+              if (mag > maxAbsH0)
+              {
+                maxAbsH0 = mag;
+                maxI = i;
+                maxJ = j;
+              }
+            }
+          }
+          gzmsg << "[WaterVisual] spectrum stats: |h0(1,0)|="
+                << std::abs(h0(1, 0))
+                << " |h0|_max=" << maxAbsH0
+                << " @ (i=" << maxI << ", j=" << maxJ << ")"
+                << " omega(1,0)=" << om(1, 0)
+                << " omega(maxI,maxJ)=" << om(maxI, maxJ)
+                << std::endl;
           const auto dump = [&](int i, int j)
           {
             float gpuRe = 0, gpuIm = 0, gpuConjRe = 0, gpuConjIm = 0;
@@ -652,13 +653,14 @@ void WaterVisual::Implementation::OnSceneUpdate()
 
         // Diagnostic: ~5s after Stage 3 comes online, read back the
         // GPU's ifftFinalTex and compare cell-by-cell to CPU's
-        // heightGrid_ at the same simTime. If GPU η differs
-        // significantly from CPU η, the IFFT pipeline (despite all
-        // unit tests passing) is producing different output for the
-        // full Phillips spectrum.
+        // heightGrid_ at the same simTime. Gated by
+        // GZ_WAVES_GPU_FFT_DEBUG=1.
+        const char *ifftDbgEnv = std::getenv("GZ_WAVES_GPU_FFT_DEBUG");
+        const bool ifftDebugOn =
+            ifftDbgEnv && std::string(ifftDbgEnv) == "1";
         static int diagFrameCounter = 0;
         static bool ranIfftDiag = false;
-        if (ifftOk && this->heightMap->GpuOutputBound())
+        if (ifftDebugOn && ifftOk && this->heightMap->GpuOutputBound())
         {
           ++diagFrameCounter;
           if (!ranIfftDiag && diagFrameCounter == 300)
