@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <list>
 #include <mutex>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -113,7 +114,29 @@ class WaterVisual::Implementation
   public: gz::rendering::MaterialPtr material;
   public: gz::common::ConnectionPtr sceneUpdateConn;
   public: gz::common::ConnectionPtr teardownConn;
+
+  /// \brief gz-sim's `GuiRunner` loads this system *twice* for the same
+  /// entity (once via the model SDF, once via the visual SDF — known
+  /// upstream issue mentioned in asv_wave_sim#177). The two instances
+  /// race on SetMaterial / heightmap creation. Dedupe at our level: the
+  /// first `Configure` for an entity claims it; the second becomes a
+  /// no-op so the render thread only does one round of material setup.
+  public: bool active{true};
 };
+
+namespace
+{
+  std::mutex &VisualClaimMutex()
+  {
+    static std::mutex m;
+    return m;
+  }
+  std::set<gz::sim::Entity> &VisualClaimSet()
+  {
+    static std::set<gz::sim::Entity> s;
+    return s;
+  }
+}
 
 bool WaterVisual::Implementation::ResolveVisual()
 {
@@ -341,6 +364,8 @@ void WaterVisual::Implementation::UploadUniforms()
 
 void WaterVisual::Implementation::OnSceneUpdate()
 {
+  if (!this->active)
+    return;
   if (this->visualName.empty())
     return;
   if (!this->ResolveVisual())
@@ -428,6 +453,21 @@ void WaterVisual::Configure(
   if (auto *name = _ecm.Component<components::Name>(_entity))
     this->dataPtr->visualName = name->Data();
 
+  // Dedupe: only the first instance for this entity does real work.
+  {
+    std::lock_guard<std::mutex> lock(VisualClaimMutex());
+    auto &claims = VisualClaimSet();
+    if (claims.count(_entity))
+    {
+      gzmsg << "[WaterVisual] entity " << _entity
+            << " already claimed by another WaterVisual instance — "
+            << "this one will be inactive" << std::endl;
+      this->dataPtr->active = false;
+      return;
+    }
+    claims.insert(_entity);
+  }
+
   // Resolve the model path for relative shader / texture URIs.
   const auto modelEnt = topLevelModel(_entity, _ecm);
   if (auto *src = _ecm.Component<components::SourceFilePath>(modelEnt))
@@ -495,6 +535,9 @@ void WaterVisual::PreUpdate(
   EntityComponentManager &_ecm)
 {
   GZ_PROFILE("WaterVisual::PreUpdate");
+
+  if (!this->dataPtr->active)
+    return;
 
   // Snapshot sim time for the render thread.
   const float t = std::chrono::duration<float>(_info.simTime).count();

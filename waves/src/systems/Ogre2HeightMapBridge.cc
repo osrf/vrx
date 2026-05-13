@@ -19,6 +19,7 @@
 #include <OgreHlmsSamplerblock.h>
 #include <OgrePass.h>
 #include <OgrePixelFormatGpu.h>
+#include <OgrePixelFormatGpuUtils.h>
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
 #include <OgreStagingTexture.h>
@@ -77,22 +78,38 @@ waves_heightmap_t waves_ogre2_heightmap_create(
     return nullptr;
   }
 
+  // Bump Ogre Next's staging-texture budget so multiple streaming textures
+  // (heightMap, bumpMap, cubeMap) can coexist without tripping
+  // "Texture memory budget exceeded. Stalling GPU." early in scene load.
+  // Default in 2.3.x is conservative for a scene with several streaming
+  // textures.
+  manager->setStagingTextureMaxBudgetBytes(256u * 1024u * 1024u);  // 256 MB
+
   auto *hm = new HeightMap();
   hm->gridSize = _gridSize;
   hm->manager = manager;
+  // SaveToSystemRam (matches asv_wave_sim's Ogre2DisplacementMap): Ogre Next
+  // retains a CPU-side copy of the texture so it doesn't have to round-trip
+  // the GPU to validate residency state during streaming uploads.
   hm->texture = manager->createOrRetrieveTexture(
       _name,
-      Ogre::GpuPageOutStrategy::Discard,
+      Ogre::GpuPageOutStrategy::SaveToSystemRam,
       Ogre::TextureFlags::ManualTexture,
       Ogre::TextureTypes::Type2D);
   hm->texture->setResolution(
       static_cast<Ogre::uint32>(_gridSize),
       static_cast<Ogre::uint32>(_gridSize));
-  hm->texture->setNumMipmaps(1u);
+  // Full mipmap chain matches asv_wave_sim's configuration; the engine
+  // appears to take a slow init path on textures with setNumMipmaps(1).
+  hm->texture->setNumMipmaps(
+      Ogre::PixelFormatGpuUtils::getMaxMipmapCount(
+          hm->texture->getWidth(), hm->texture->getHeight()));
   // RGBA32F so we can pack (η, Dx, Dy, α) per texel. Alpha is unused for
   // now (reserved for a Jacobian/foam mask in a future stage).
   hm->texture->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
-  hm->texture->scheduleTransitionTo(Ogre::GpuResidency::Resident);
+  // Don't schedule residency at creation time — asv_wave_sim does it from
+  // the upload path so the call is repeated every frame, which seems to
+  // keep the engine's state machine "alive" through the streaming flow.
 
   hm->samplerblock.setFiltering(Ogre::TFO_BILINEAR);
   hm->samplerblock.mU = Ogre::TAM_WRAP;
@@ -126,36 +143,29 @@ waves_heightmap_t waves_ogre2_heightmap_create(
     texUnit->setName("heightMap");
   }
   texUnit->setTexture(hm->texture);
+  texUnit->setTextureCoordSet(0);
   texUnit->setSamplerblock(hm->samplerblock);
+
+  // On OpenGL: explicitly bind the GLSL `sampler2D heightMap` uniform to
+  // the texture unit index. Without this, Ogre Next's HlmsLowLevel path
+  // can fall back to a slow program-introspection step on first render to
+  // figure out the binding. Mirrors asv_wave_sim's pattern.
+  const int texIndex =
+      static_cast<int>(pass->getTextureUnitStateIndex(texUnit));
+  auto ogreParams = pass->getVertexProgramParameters();
+  if (ogreParams)
+  {
+    ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
+  }
   hm->ready = true;
 
-  // Allocate one persistent staging texture sized for the full heightmap
-  // and reuse it on every Upload(). Acquiring a fresh staging texture per
-  // frame leaks them into Ogre's pool, which then trips the engine's
-  // "Texture memory budget exceeded" stall and visibly hangs the GUI.
+  // Allocate one persistent staging texture and reuse it on every Upload().
+  // Acquiring a fresh staging texture per frame leaks them into Ogre's
+  // pool, which trips the engine's "Texture memory budget exceeded" path.
   hm->staging = hm->manager->getStagingTexture(
       static_cast<Ogre::uint32>(_gridSize),
       static_cast<Ogre::uint32>(_gridSize),
       1u, 1u, Ogre::PFG_RGBA32_FLOAT);
-
-  // Zero the heightmap immediately so the shader doesn't sample garbage
-  // GPU memory in the brief window between the texture going Resident and
-  // the first frame's CPU upload. Without this the surface can flash to
-  // arbitrary positions for a frame or two.
-  if (hm->texture->getResidencyStatus() == Ogre::GpuResidency::Resident &&
-      hm->staging)
-  {
-    hm->staging->startMapRegion();
-    Ogre::TextureBox box =
-        hm->staging->mapRegion(static_cast<Ogre::uint32>(_gridSize),
-                               static_cast<Ogre::uint32>(_gridSize),
-                               1u, 1u, Ogre::PFG_RGBA32_FLOAT);
-    const std::size_t bytes =
-        static_cast<std::size_t>(_gridSize) * _gridSize * 4u * sizeof(float);
-    std::memset(box.at(0, 0, 0), 0, bytes);
-    hm->staging->stopMapRegion();
-    hm->staging->upload(box, hm->texture, 0u, nullptr, nullptr);
-  }
   return hm;
 }
 
@@ -174,10 +184,14 @@ int waves_ogre2_heightmap_upload(
           << _cols << ", expected " << N << "x" << N << ")" << std::endl;
     return 0;
   }
-  if (hm->texture->getResidencyStatus() != Ogre::GpuResidency::Resident)
-    return 0;
   if (!hm->staging)
     return 0;
+
+  // Schedule residency on every upload (asv_wave_sim's pattern). No-op
+  // once the texture is already Resident, but the repeated call appears
+  // to be what keeps the engine's state machine "alive" through the
+  // first-frame streaming flow on Jetty + NVIDIA.
+  hm->texture->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
 
   hm->staging->startMapRegion();
   Ogre::TextureBox box =
@@ -201,6 +215,12 @@ int waves_ogre2_heightmap_upload(
 
   hm->staging->stopMapRegion();
   hm->staging->upload(box, hm->texture, 0u, nullptr, nullptr);
+
+  // Tell Ogre Next the texture data has arrived (asv_wave_sim's
+  // contract). Without this the engine can keep the texture in an
+  // "awaiting data" state on the render thread.
+  if (!hm->texture->isDataReady())
+    hm->texture->notifyDataIsReady();
   return 1;
 }
 
