@@ -5,10 +5,11 @@
 // 1D FFT/IFFT of that axis is complete. Doing it once along each
 // axis yields the 2D FFT/IFFT.
 //
-// The data layout is (real, imag, _, _) per RGBA32F texel: the FFT is
-// run on the complex values in xy; zw are unused (reserved for a future
-// 2-spectrum-per-texel packing that would let us IFFT η and Dx (or Dy)
-// together for the same dispatch cost).
+// The data layout is two complex values per RGBA32F texel: xy carries
+// the first signal (η for the packed pipeline, Dy for the Dy
+// pipeline), zw carries the second signal (Dx for the packed pipeline,
+// or zero padding for Dy). Both pairs run through identical butterfly
+// arithmetic so a single dispatch produces both 2D IFFTs.
 //
 // invertSign selects the direction: +1.0 for IFFT (used here, sign in
 // the wave equation is exp(+iωt)), -1.0 for forward FFT. We do NOT
@@ -70,14 +71,15 @@ void main()
   vec4 aVal = texelFetch(src, aT, 0);
   vec4 bVal = texelFetch(src, bT, 0);
 
-  // Complex multiply: tw_b = tw * b (b in bVal.xy).
-  vec2 tw_b = vec2(bVal.x * tw.x - bVal.y * tw.y,
-                   bVal.x * tw.y + bVal.y * tw.x);
+  // Two independent complex butterflies per texel: signal 1 in xy,
+  // signal 2 in zw. tw_b1 = tw * b1, tw_b2 = tw * b2.
+  vec2 tw_b1 = vec2(bVal.x * tw.x - bVal.y * tw.y,
+                    bVal.x * tw.y + bVal.y * tw.x);
+  vec2 tw_b2 = vec2(bVal.z * tw.x - bVal.w * tw.y,
+                    bVal.z * tw.y + bVal.w * tw.x);
 
-  vec2 result = isLower ? (aVal.xy + tw_b)
-                        : (aVal.xy - tw_b);
+  vec2 r1 = isLower ? (aVal.xy + tw_b1) : (aVal.xy - tw_b1);
+  vec2 r2 = isLower ? (aVal.zw + tw_b2) : (aVal.zw - tw_b2);
 
-  imageStore(dst, t, vec4(result * extraScale, 0.0, 0.0));
-  // Original line (restored after diagnostic):
-  // imageStore(dst, t, vec4(result * extraScale, 0.0, 0.0));
+  imageStore(dst, t, vec4(r1, r2) * extraScale);
 }

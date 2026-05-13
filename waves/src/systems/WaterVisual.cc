@@ -71,9 +71,12 @@ class WaterVisual::Implementation
   public: std::string fragmentShaderUri;      ///< Shared fragment shader
   public: std::string computeShaderUri;       ///< GPU-FFT compute shader (optional)
   public: std::string evolveShaderUri;        ///< Stage 2 evolve shader (optional)
+  public: std::string evolveDyShaderUri;      ///< Stage 2 evolve Dy companion (optional)
   public: bool         spectrumUploaded{false}; ///< Stage 2 one-shot init
   public: std::string bitrevShaderUri;        ///< Stage 3 IFFT bit-reverse pass (optional)
   public: std::string butterShaderUri;        ///< Stage 3 IFFT butterfly stage (optional)
+  public: std::string combineEtaDxShaderUri;  ///< Stage 4 combine η+Dx (optional)
+  public: std::string combineDyShaderUri;     ///< Stage 4 combine Dy (optional)
   public: std::string naiveShaderUri;         ///< Diagnostic naive O(N²) IFFT reference
   public: std::string testPatternShaderUri;   ///< Diagnostic test-pattern fill (optional)
   public: std::string viewHktShaderUri;       ///< Diagnostic hktTex viewer (optional)
@@ -589,6 +592,13 @@ void WaterVisual::Implementation::OnSceneUpdate()
                                              this->currentSimTime,
                                              this->cachedTau,
                                              this->cachedTileSize);
+        if (ok && !this->evolveDyShaderUri.empty())
+        {
+          this->heightMap->EvolveDyDispatch(this->evolveDyShaderUri,
+                                            this->currentSimTime,
+                                            this->cachedTau,
+                                            this->cachedTileSize);
+        }
         static bool loggedStage2 = false;
         if (ok && !loggedStage2)
         {
@@ -624,6 +634,28 @@ void WaterVisual::Implementation::OnSceneUpdate()
                 << "η(x, t) computed on GPU. Visual stays on CPU "
                 << "upload path until Stage 4 binds the GPU output."
                 << std::endl;
+        }
+
+        // Stage 4: assemble (η, Dx, Dy, _) into the visual texture.
+        // Only runs when both the Dy evolve and the combine shaders
+        // are configured. Without combine, ifft_dispatch's fallback
+        // binds the packed η+Dx texture directly (degraded mode, no
+        // chop displacement).
+        if (ifftOk && !useNaive &&
+            !this->evolveDyShaderUri.empty() &&
+            !this->combineEtaDxShaderUri.empty() &&
+            !this->combineDyShaderUri.empty())
+        {
+          const bool combineOk = this->heightMap->CombineDispatch(
+              this->combineEtaDxShaderUri, this->combineDyShaderUri);
+          static bool loggedStage4 = false;
+          if (combineOk && !loggedStage4)
+          {
+            loggedStage4 = true;
+            gzmsg << "[WaterVisual] GPU-FFT Stage 4 (combine) online — "
+                  << "(η, Dx, Dy) bound to material; CPU upload path "
+                  << "retired." << std::endl;
+          }
         }
 
         // Diagnostic: ~5s after Stage 3 comes online, read back the
@@ -949,6 +981,21 @@ void WaterVisual::Configure(
   {
     this->dataPtr->evolveShaderUri =
       resolve(shader->GetElement("gpu_evolve")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_evolve_dy"))
+  {
+    this->dataPtr->evolveDyShaderUri =
+      resolve(shader->GetElement("gpu_evolve_dy")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_combine_eta_dx"))
+  {
+    this->dataPtr->combineEtaDxShaderUri = resolve(
+        shader->GetElement("gpu_combine_eta_dx")->Get<std::string>());
+  }
+  if (shader->HasElement("gpu_combine_dy"))
+  {
+    this->dataPtr->combineDyShaderUri =
+      resolve(shader->GetElement("gpu_combine_dy")->Get<std::string>());
   }
 
   if (shader->HasElement("parameters"))

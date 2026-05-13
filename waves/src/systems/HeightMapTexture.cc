@@ -36,6 +36,7 @@ namespace
                                     int);
   using EvolveFn = int (*)(waves_heightmap_t, const char *,
                             float, float, float);
+  using CombineFn = int (*)(waves_heightmap_t, const char *, const char *);
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
   using IfftNaiveFn = int (*)(waves_heightmap_t, const char *);
   using IfftBoundFn = int (*)(waves_heightmap_t);
@@ -61,6 +62,8 @@ namespace
     PbsVisualFn pbsVisual{nullptr};
     UploadSpectrumFn uploadSpectrum{nullptr};
     EvolveFn   evolve{nullptr};
+    EvolveFn   evolveDy{nullptr};
+    CombineFn  combine{nullptr};
     IfftFn     ifft{nullptr};
     IfftNaiveFn ifftNaive{nullptr};
     IfftBoundFn ifftBound{nullptr};
@@ -106,6 +109,10 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_upload_spectrum"));
       api.evolve = reinterpret_cast<EvolveFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_evolve_dispatch"));
+      api.evolveDy = reinterpret_cast<EvolveFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_evolve_dy_dispatch"));
+      api.combine = reinterpret_cast<CombineFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_combine_dispatch"));
       api.ifft = reinterpret_cast<IfftFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_dispatch"));
       api.ifftNaive = reinterpret_cast<IfftNaiveFn>(
@@ -250,6 +257,33 @@ bool HeightMapTexture::EvolveDispatch(const std::string &_shaderAbsPath,
     return false;
   return api.evolve(this->impl_->handle, _shaderAbsPath.c_str(),
                     _simTimeS, _tauS, _tileSizeM) != 0;
+}
+
+bool HeightMapTexture::EvolveDyDispatch(const std::string &_shaderAbsPath,
+                                        float _simTimeS, float _tauS,
+                                        float _tileSizeM)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.evolveDy)
+    return false;
+  return api.evolveDy(this->impl_->handle, _shaderAbsPath.c_str(),
+                      _simTimeS, _tauS, _tileSizeM) != 0;
+}
+
+bool HeightMapTexture::CombineDispatch(
+    const std::string &_etaDxShaderAbsPath,
+    const std::string &_dyShaderAbsPath)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.combine)
+    return false;
+  return api.combine(this->impl_->handle,
+                     _etaDxShaderAbsPath.c_str(),
+                     _dyShaderAbsPath.c_str()) != 0;
 }
 
 bool HeightMapTexture::IfftDispatch(

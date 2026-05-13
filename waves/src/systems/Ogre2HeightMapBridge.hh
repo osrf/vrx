@@ -127,7 +127,9 @@ extern "C"
   /// Stage 2 dispatch: run the evolve compute shader to write the
   /// time-evolved spectrum h(k, t) into the bridge's `hktTex`. Lazily
   /// creates the HlmsComputeJob on first call, similar to
-  /// `_compute_dispatch`.
+  /// `_compute_dispatch`. Output texture packs (h.re, h.im, Dx.re,
+  /// Dx.im) per texel so the radix-2 butterfly can run both signals
+  /// for the cost of one dispatch.
   /// \param handle  Heightmap handle.
   /// \param shader_abs_path  Absolute path to `evolve.glsl`.
   /// \param sim_time_s  Current simulation time [s].
@@ -138,6 +140,26 @@ extern "C"
       float sim_time_s,
       float tau_s,
       float tile_size_m);
+
+  /// Stage 2 dispatch (Dy companion). Writes the Tessendorf y-chop
+  /// displacement spectrum Dy(k, t) into a dedicated `hktTexDy` so it
+  /// can be IFFT'd alongside the packed (η, Dx) signal.
+  int waves_ogre2_heightmap_evolve_dy_dispatch(
+      waves_heightmap_t handle,
+      const char *shader_abs_path,
+      float sim_time_s,
+      float tau_s,
+      float tile_size_m);
+
+  /// Stage 4 dispatch: combine the η+Dx packed IFFT output and the Dy
+  /// IFFT output into the final RGBA32F texture (η, Dx, Dy, _) that
+  /// the visual material samples. Issued each frame after both IFFTs.
+  /// Two passes are needed because OgreNext's OpenGL compute path
+  /// can't bind a second texture sampler reliably.
+  int waves_ogre2_heightmap_combine_dispatch(
+      waves_heightmap_t handle,
+      const char *combine_eta_dx_shader_abs_path,
+      const char *combine_dy_shader_abs_path);
 
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);

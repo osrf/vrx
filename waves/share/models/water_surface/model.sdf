@@ -19,14 +19,26 @@
                  Stage 1 ships with a hello-world procedural pattern;
                  Stages 2-3 replace it with the real FFT pipeline. -->
             <gpu_compute>shaders/compute/hello_world.glsl</gpu_compute>
-            <!-- Stage 2 evolve shader: writes h(k, t) to a GPU texture
-                 each frame, reading h0 + omega uploaded once at init. -->
+            <!-- Stage 2 evolve shaders: write h(k, t) (packed with
+                 Dx(k, t)) and Dy(k, t) to GPU textures each frame,
+                 reading h0 uploaded once at init. ω is computed
+                 in-shader. -->
             <gpu_evolve>shaders/compute/evolve.glsl</gpu_evolve>
+            <gpu_evolve_dy>shaders/compute/evolve_dy.glsl</gpu_evolve_dy>
             <!-- Stage 3 GPU IFFT: bit-reversal permutation +
                  Cooley-Tukey butterfly. Together these run a 2D IFFT
-                 over h(k, t), producing the spatial η(x, y, t). -->
+                 over h(k, t), producing the spatial η(x, y, t). The
+                 butterfly carries two complex signals per RGBA texel,
+                 so a single pipeline handles (η, Dx); Dy uses a
+                 second instance of the same pipeline. -->
             <gpu_ifft_bitreverse>shaders/compute/fft_bitreverse.glsl</gpu_ifft_bitreverse>
             <gpu_ifft_butterfly>shaders/compute/fft_butterfly.glsl</gpu_ifft_butterfly>
+            <!-- Stage 4 combine: assemble the two IFFT outputs into the
+                 (η, Dx, Dy, _) layout the vertex shader expects. Two
+                 passes because OgreNext's OpenGL compute path can't
+                 bind two texture samplers reliably in one dispatch. -->
+            <gpu_combine_eta_dx>shaders/compute/combine_displacement.glsl</gpu_combine_eta_dx>
+            <gpu_combine_dy>shaders/compute/combine_displacement_dy.glsl</gpu_combine_dy>
             <!-- Diagnostic: naive O(N²) 2D IFFT reference
                  implementation. Enable with
                  GZ_WAVES_GPU_FFT_NAIVE=1 to bypass the radix-2

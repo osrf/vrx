@@ -8,6 +8,14 @@
 // frequency-space amplitude that Stage 3's IFFT will transform into the
 // spatial heightmap.
 //
+// Output packs two complex signals per RGBA32F texel:
+//   .rg = h(k, t)            for the height field η
+//   .ba = Dx(k, t)           for the Tessendorf x-chop displacement
+// Dx(k, t) = -i · (kx / |k|) · h(k, t). The y-chop Dy is computed by a
+// separate evolve_dy dispatch into its own hktTex so the radix-2
+// butterfly (which carries 2 complex per texel) only has to be invoked
+// twice per frame: once for the packed (η, Dx) and once for Dy.
+//
 // Resource bindings:
 //   UAV  slot 0 (image2D)    hktTex   RGBA32F  output
 //   Tex  slot 0 (sampler2D)  h0Tex    RGBA32F  read-only spectrum
@@ -89,5 +97,12 @@ void main()
   h_re *= ramp;
   h_im *= ramp;
 
-  imageStore(hktTex, texel, vec4(h_re, h_im, 0.0, 0.0));
+  // Dx(k, t) = -i · (kx / |k|) · h(k, t).
+  // -i · (a + i·b) = b - i·a, so Dx = (kxn·h_im, -kxn·h_re).
+  // At kmag = 0 the displacement vanishes (DC mode).
+  float kxn = (kmag > 0.0) ? (kx / kmag) : 0.0;
+  float dx_re =  kxn * h_im;
+  float dx_im = -kxn * h_re;
+
+  imageStore(hktTex, texel, vec4(h_re, h_im, dx_re, dx_im));
 }

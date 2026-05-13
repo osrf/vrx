@@ -100,13 +100,26 @@ namespace
     // evolve compute job that reads from them each frame.
     // ω(k) is computed in-shader from gridSize + tileSize, so no
     // omegaTex is needed.
-    Ogre::TextureGpu       *h0Tex{nullptr};     // RGBA32F (re, im, re, im)
-    Ogre::TextureGpu       *hktTex{nullptr};    // RGBA32F (h.re, h.im, _, _)
+    //
+    // Two evolve jobs run per frame:
+    //   - evolveJob writes hktTex = (η.re, η.im, Dx.re, Dx.im).
+    //     The radix-2 butterfly carries both complex signals so the
+    //     IFFT cost is one pipeline.
+    //   - evolveDyJob writes hktTexDy = (Dy.re, Dy.im, 0, 0). A third
+    //     complex signal won't fit in RGBA32F so Dy gets its own
+    //     pipeline.
+    Ogre::TextureGpu       *h0Tex{nullptr};        // RGBA32F (re, im, re, im)
+    Ogre::TextureGpu       *hktTex{nullptr};       // packed (η, Dx)
+    Ogre::TextureGpu       *hktTexDy{nullptr};     // Dy alone
     Ogre::HlmsComputeJob   *evolveJob{nullptr};
+    Ogre::HlmsComputeJob   *evolveDyJob{nullptr};
     Ogre::ConstBufferPacked *evolveParams{nullptr};
+    Ogre::ConstBufferPacked *evolveDyParams{nullptr};
     std::string             evolveShaderName;
+    std::string             evolveDyShaderName;
     std::string             h0TexName;
     std::string             hktTexName;
+    std::string             hktTexDyName;
 
     // Stage 3 (GPU IFFT): two ping-pong textures, one bitreverse job and
     // one butterfly job (both reused across all 2·(log2N+1) passes), plus
@@ -116,6 +129,14 @@ namespace
     // synchronisation to worry about.
     Ogre::TextureGpu       *ifftBufA{nullptr};
     Ogre::TextureGpu       *ifftBufB{nullptr};
+    // Dy IFFT pipeline mirrors the η+Dx one, with its own ping-pong
+    // textures and pass jobs.
+    Ogre::TextureGpu       *ifftDyBufA{nullptr};
+    Ogre::TextureGpu       *ifftDyBufB{nullptr};
+    Ogre::TextureGpu       *ifftDyFinalTex{nullptr};
+    std::vector<Ogre::HlmsComputeJob *> ifftDyPassJobs;
+    std::vector<std::pair<Ogre::TextureGpu *, Ogre::TextureGpu *>>
+        ifftDyPassSrcDst;
     /// One HlmsComputeJob per IFFT pass, with stable UAV+texture
     /// bindings at init time. Avoids the binding-cache and barrier
     /// quirks we observed when reusing one job across many dispatches.
@@ -138,12 +159,21 @@ namespace
     Ogre::TextureGpu       *ifftFinalTex{nullptr};
 
     // Stage 4: gz::rendering Material we're bound to, saved at create
-    // time so the first successful IFFT dispatch can swap its
-    // "heightMap" TextureUnitState from the CPU-uploaded `texture` to
-    // the GPU-IFFT-output `ifftFinalTex`. Cleared on null-material
-    // (HlmsPbs) creates.
+    // time so combine_dispatch can swap its "heightMap"
+    // TextureUnitState from the CPU-uploaded `texture` to the assembled
+    // `combinedTex`. Cleared on null-material (HlmsPbs) creates.
     Ogre::Material         *ogreMaterial{nullptr};
     bool                    ifftBoundToMaterial{false};
+
+    // Stage 4: combine pass assembles (η, Dx, Dy, _) from the two
+    // IFFT outputs into `combinedTex`, which is what the visual
+    // material samples once GPU FFT is fully wired up.
+    Ogre::TextureGpu       *combinedTex{nullptr};
+    Ogre::HlmsComputeJob   *combineEtaDxJob{nullptr};
+    Ogre::HlmsComputeJob   *combineDyJob{nullptr};
+    std::string             combinedTexName;
+    std::string             combineEtaDxShaderName;
+    std::string             combineDyShaderName;
 
     // Diagnostic: a single-pass compute job that overwrites
     // ifftFinalTex with a known sine pattern, bypassing the IFFT. Used
@@ -724,15 +754,19 @@ int waves_ogre2_heightmap_upload_spectrum(
     const std::string base =
         "WavesSpec_" +
         std::to_string(reinterpret_cast<std::uintptr_t>(hm));
-    hm->h0TexName  = base + "_h0";
-    hm->hktTexName = base + "_hkt";
+    hm->h0TexName    = base + "_h0";
+    hm->hktTexName   = base + "_hkt";
+    hm->hktTexDyName = base + "_hktDy";
 
-    hm->h0Tex  = MakeSpectrumTexture(hm->manager, hm->h0TexName,
-                                      hm->gridSize,
-                                      Ogre::PFG_RGBA32_FLOAT);
-    hm->hktTex = MakeSpectrumTexture(hm->manager, hm->hktTexName,
-                                      hm->gridSize,
-                                      Ogre::PFG_RGBA32_FLOAT);
+    hm->h0Tex    = MakeSpectrumTexture(hm->manager, hm->h0TexName,
+                                        hm->gridSize,
+                                        Ogre::PFG_RGBA32_FLOAT);
+    hm->hktTex   = MakeSpectrumTexture(hm->manager, hm->hktTexName,
+                                        hm->gridSize,
+                                        Ogre::PFG_RGBA32_FLOAT);
+    hm->hktTexDy = MakeSpectrumTexture(hm->manager, hm->hktTexDyName,
+                                        hm->gridSize,
+                                        Ogre::PFG_RGBA32_FLOAT);
 
     // Pack spectrum into RGBA32F via a staging texture.
     auto upload_rgba = [&](Ogre::TextureGpu *dst,
@@ -925,6 +959,128 @@ int waves_ogre2_heightmap_evolve_dispatch(
     {
       logged = true;
       gzerr << "[waves_ogre2_heightmap] evolve dispatch threw: "
+            << e.getDescription() << " (further failures suppressed)"
+            << std::endl;
+    }
+    return 0;
+  }
+  return 1;
+}
+
+int waves_ogre2_heightmap_evolve_dy_dispatch(
+    waves_heightmap_t _handle, const char *_shaderAbsPath,
+    float _simTimeS, float _tauS, float _tileSizeM)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->h0Tex || !hm->hktTexDy ||
+      !hm->sceneManager || !_shaderAbsPath)
+    return 0;
+
+  hm->h0Tex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+  hm->hktTexDy->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+
+  if (!hm->evolveDyJob)
+  {
+    try
+    {
+      auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
+      const std::filesystem::path absPath(_shaderAbsPath);
+      const std::string dir = absPath.parent_path().string();
+      hm->evolveDyShaderName = absPath.stem().string();
+      try
+      {
+        rgMgr.addResourceLocation(
+            dir, "FileSystem",
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            false);
+      }
+      catch (const Ogre::Exception &) { /* already added */ }
+
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      hm->hlmsCompute = hlmsManager->getComputeHlms();
+      if (!hm->hlmsCompute)
+        return 0;
+
+      const std::string jobName =
+          "WavesEvolveDy_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->evolveDyJob = hm->hlmsCompute->createComputeJob(
+          jobName, jobName, hm->evolveDyShaderName, Ogre::StringVector{});
+      if (!hm->evolveDyJob)
+        return 0;
+
+      hm->evolveDyJob->setThreadsPerGroup(16u, 16u, 1u);
+      const Ogre::uint32 groups =
+          static_cast<Ogre::uint32>((hm->gridSize + 15) / 16);
+      hm->evolveDyJob->setNumThreadGroups(groups, groups, 1u);
+      hm->evolveDyJob->setNumUavUnits(1u);
+      hm->evolveDyJob->setNumTexUnits(1u);
+
+      Ogre::DescriptorSetUav::TextureSlot uavSlot =
+          Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+      uavSlot.texture = hm->hktTexDy;
+      uavSlot.access  = Ogre::ResourceAccess::Write;
+      uavSlot.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+      hm->evolveDyJob->_setUavTexture(0u, uavSlot);
+
+      Ogre::DescriptorSetTexture2::TextureSlot texSlot =
+          Ogre::DescriptorSetTexture2::TextureSlot::makeEmpty();
+      texSlot.texture = hm->h0Tex;
+      hm->evolveDyJob->setTexture(0u, texSlot, &hm->samplerblock);
+
+      auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+      auto *vaoManager   = renderSystem->getVaoManager();
+      hm->evolveDyParams = vaoManager->createConstBuffer(
+          sizeof(EvolveParams),
+          Ogre::BT_DYNAMIC_PERSISTENT,
+          nullptr, false);
+      hm->evolveDyJob->setConstBuffer(0u, hm->evolveDyParams);
+
+      gzmsg << "[waves_ogre2_heightmap] evolve_dy pipeline initialised: "
+            << "shader=" << hm->evolveDyShaderName << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] evolve_dy setup threw: "
+            << e.getDescription() << std::endl;
+      hm->evolveDyJob = nullptr;
+      return 0;
+    }
+  }
+
+  if (!hm->evolveDyJob || !hm->evolveDyParams)
+    return 0;
+
+  try
+  {
+    auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+    auto &solver = renderSystem->getBarrierSolver();
+    auto &transitions = solver.getNewResourceTransitionsArrayTmp();
+    solver.resolveTransition(transitions, hm->h0Tex,
+        Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+        Ogre::c_computeStageMask);
+    solver.resolveTransition(transitions, hm->hktTexDy,
+        Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
+        Ogre::c_computeStageMask);
+    renderSystem->executeResourceTransition(transitions);
+
+    EvolveParams p{};
+    p.t        = _simTimeS;
+    p.tau      = _tauS;
+    p.gridSize = static_cast<int>(hm->gridSize);
+    p.tileSize = _tileSizeM;
+    hm->evolveDyParams->upload(&p, 0u, sizeof(p));
+    hm->hlmsCompute->dispatch(hm->evolveDyJob, hm->sceneManager, nullptr);
+    if (!hm->hktTexDy->isDataReady())
+      hm->hktTexDy->notifyDataIsReady();
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] evolve_dy dispatch threw: "
             << e.getDescription() << " (further failures suppressed)"
             << std::endl;
     }
@@ -1146,6 +1302,88 @@ int waves_ogre2_heightmap_ifft_dispatch(
             << " butter=" << hm->butterShaderName
             << " ifftFinalTex=" << hm->ifftFinalTex->getNameStr()
             << std::endl;
+
+      // Parallel Dy IFFT pipeline. Same shaders, same params (the
+      // butterfly's behaviour is independent of which RGBA32F texture
+      // it reads), but its own ping-pong textures and pass jobs.
+      // Only built when hktTexDy is present — i.e. the Dy chop path
+      // is enabled.
+      if (hm->hktTexDy)
+      {
+        const std::string dyBase = base + "_dy";
+        hm->ifftDyBufA = MakeSpectrumTexture(hm->manager, dyBase + "_A",
+                                              hm->gridSize,
+                                              Ogre::PFG_RGBA32_FLOAT);
+        hm->ifftDyBufB = MakeSpectrumTexture(hm->manager, dyBase + "_B",
+                                              hm->gridSize,
+                                              Ogre::PFG_RGBA32_FLOAT);
+
+        std::vector<PassDesc> dyPlan;
+        dyPlan.reserve(static_cast<std::size_t>(2 * (log2N + 1)));
+        dyPlan.push_back({true, 0u, hm->hktTexDy, hm->ifftDyBufA});
+        Ogre::TextureGpu *dCur  = hm->ifftDyBufA;
+        Ogre::TextureGpu *dNext = hm->ifftDyBufB;
+        for (int s = 0; s < log2N; ++s)
+        {
+          dyPlan.push_back({false,
+                            1u + static_cast<std::size_t>(s),
+                            dCur, dNext});
+          std::swap(dCur, dNext);
+        }
+        Ogre::TextureGpu *dOther =
+            (dCur == hm->ifftDyBufA) ? hm->ifftDyBufB : hm->ifftDyBufA;
+        dyPlan.push_back({true, perAxis, dCur, dOther});
+        dCur  = dOther;
+        dNext = (dCur == hm->ifftDyBufA) ? hm->ifftDyBufB : hm->ifftDyBufA;
+        for (int s = 0; s < log2N; ++s)
+        {
+          dyPlan.push_back({false,
+                            perAxis + 1u + static_cast<std::size_t>(s),
+                            dCur, dNext});
+          std::swap(dCur, dNext);
+        }
+        hm->ifftDyFinalTex = dyPlan.back().dst;
+
+        hm->ifftDyPassJobs.reserve(dyPlan.size());
+        hm->ifftDyPassSrcDst.reserve(dyPlan.size());
+        for (std::size_t i = 0; i < dyPlan.size(); ++i)
+        {
+          const PassDesc &p = dyPlan[i];
+          const std::string jobName =
+              dyBase + "_pass" + std::to_string(i);
+          Ogre::HlmsComputeJob *job = hm->hlmsCompute->createComputeJob(
+              jobName, jobName,
+              p.isBitrev ? hm->bitrevShaderName : hm->butterShaderName,
+              Ogre::StringVector{});
+          if (!job)
+            return 0;
+          job->setThreadsPerGroup(16u, 16u, 1u);
+          job->setNumThreadGroups(groups, groups, 1u);
+          job->setNumUavUnits(1u);
+          job->setNumTexUnits(1u);
+
+          Ogre::DescriptorSetUav::TextureSlot uavSlot =
+              Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+          uavSlot.texture     = p.dst;
+          uavSlot.access      = Ogre::ResourceAccess::Write;
+          uavSlot.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+          job->_setUavTexture(0u, uavSlot);
+
+          Ogre::DescriptorSetTexture2::TextureSlot texSlot =
+              Ogre::DescriptorSetTexture2::TextureSlot::makeEmpty();
+          texSlot.texture = p.src;
+          job->setTexture(0u, texSlot, &hm->samplerblock);
+
+          job->setConstBuffer(0u, hm->ifftParams[p.paramIdx]);
+          hm->ifftDyPassJobs.push_back(job);
+          hm->ifftDyPassSrcDst.emplace_back(p.src, p.dst);
+        }
+
+        gzmsg << "[waves_ogre2_heightmap] Dy IFFT pipeline initialised: "
+              << "passes=" << hm->ifftDyPassJobs.size()
+              << " ifftDyFinalTex="
+              << hm->ifftDyFinalTex->getNameStr() << std::endl;
+      }
     }
     catch (const Ogre::Exception &e)
     {
@@ -1153,6 +1391,8 @@ int waves_ogre2_heightmap_ifft_dispatch(
             << e.getDescription() << std::endl;
       hm->ifftPassJobs.clear();
       hm->ifftPassSrcDst.clear();
+      hm->ifftDyPassJobs.clear();
+      hm->ifftDyPassSrcDst.clear();
       return 0;
     }
   }
@@ -1186,38 +1426,46 @@ int waves_ogre2_heightmap_ifft_dispatch(
         reinterpret_cast<PFN_glMemoryBarrier>(
             dlsym(RTLD_DEFAULT, "glMemoryBarrier"));
 
-    for (std::size_t i = 0; i < hm->ifftPassJobs.size(); ++i)
+    auto runPipeline = [&](
+        const std::vector<Ogre::HlmsComputeJob *> &jobs,
+        const std::vector<std::pair<Ogre::TextureGpu *, Ogre::TextureGpu *>>
+            &srcDst)
     {
-      Ogre::TextureGpu *src = hm->ifftPassSrcDst[i].first;
-      Ogre::TextureGpu *dst = hm->ifftPassSrcDst[i].second;
-
-      auto &transitions = solver.getNewResourceTransitionsArrayTmp();
-      solver.resolveTransition(transitions, src,
-          Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
-          Ogre::c_computeStageMask);
-      solver.resolveTransition(transitions, dst,
-          Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
-          Ogre::c_computeStageMask);
-      renderSystem->executeResourceTransition(transitions);
-
-      hm->hlmsCompute->dispatch(hm->ifftPassJobs[i],
-                                hm->sceneManager, nullptr);
-
-      // Explicit GL memory barrier so subsequent dispatches see this
-      // pass's writes. No-op if glMemoryBarrier wasn't located.
-      if (glMemoryBarrierPtr)
+      for (std::size_t i = 0; i < jobs.size(); ++i)
       {
-        glMemoryBarrierPtr(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT_VAL |
-                           GL_TEXTURE_FETCH_BARRIER_BIT_VAL);
-      }
-    }
+        Ogre::TextureGpu *src = srcDst[i].first;
+        Ogre::TextureGpu *dst = srcDst[i].second;
 
-    Ogre::TextureGpu *cur = hm->ifftFinalTex;
+        auto &transitions = solver.getNewResourceTransitionsArrayTmp();
+        solver.resolveTransition(transitions, src,
+            Ogre::ResourceLayout::Texture, Ogre::ResourceAccess::Read,
+            Ogre::c_computeStageMask);
+        solver.resolveTransition(transitions, dst,
+            Ogre::ResourceLayout::Uav, Ogre::ResourceAccess::Write,
+            Ogre::c_computeStageMask);
+        renderSystem->executeResourceTransition(transitions);
+
+        hm->hlmsCompute->dispatch(jobs[i], hm->sceneManager, nullptr);
+
+        if (glMemoryBarrierPtr)
+        {
+          glMemoryBarrierPtr(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT_VAL |
+                             GL_TEXTURE_FETCH_BARRIER_BIT_VAL);
+        }
+      }
+    };
+
+    runPipeline(hm->ifftPassJobs, hm->ifftPassSrcDst);
+    if (!hm->ifftDyPassJobs.empty())
+      runPipeline(hm->ifftDyPassJobs, hm->ifftDyPassSrcDst);
+
     if (!hm->ifftFinalTex->isDataReady())
       hm->ifftFinalTex->notifyDataIsReady();
+    if (hm->ifftDyFinalTex && !hm->ifftDyFinalTex->isDataReady())
+      hm->ifftDyFinalTex->notifyDataIsReady();
 
-    // Transition the final IFFT output from Uav to Texture so the
-    // visual's vertex shader can sample it safely. On GL this emits
+    // Transition the final IFFT output(s) from Uav to Texture so the
+    // combine pass / visual can sample them. On GL this emits
     // glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT). Next frame's
     // first IFFT pass will transition it back to Uav.
     {
@@ -1226,14 +1474,22 @@ int waves_ogre2_heightmap_ifft_dispatch(
           Ogre::ResourceLayout::Texture,
           Ogre::ResourceAccess::Read,
           Ogre::c_allGraphicStagesMask);
+      if (hm->ifftDyFinalTex)
+      {
+        solver.resolveTransition(t2, hm->ifftDyFinalTex,
+            Ogre::ResourceLayout::Texture,
+            Ogre::ResourceAccess::Read,
+            Ogre::c_allGraphicStagesMask);
+      }
       renderSystem->executeResourceTransition(t2);
     }
 
-    // Stage 4: on the first successful dispatch, rebind the visual
-    // material's "heightMap" sampler from the CPU-uploaded `texture`
-    // to the GPU IFFT output. After this point the CPU `Upload(...)`
-    // path is dead weight; WaterVisual stops calling it.
-    if (!hm->ifftBoundToMaterial && hm->ogreMaterial && hm->ifftFinalTex)
+    // When the Dy pipeline is active, the combine pass owns the
+    // material binding (it writes into combinedTex). Otherwise bind
+    // ifftFinalTex directly — degraded mode without chop, but a
+    // useful fallback during bring-up.
+    if (!hm->ifftBoundToMaterial && hm->ogreMaterial && hm->ifftFinalTex
+        && !hm->hktTexDy)
     {
       auto *pass = hm->ogreMaterial->getTechnique(0u)->getPass(0u);
       Ogre::TextureUnitState *texUnit = nullptr;
@@ -1954,6 +2210,233 @@ int waves_ogre2_heightmap_view_hkt_dispatch(
   return 1;
 }
 
+int waves_ogre2_heightmap_combine_dispatch(
+    waves_heightmap_t _handle,
+    const char *_combineEtaDxShaderAbsPath,
+    const char *_combineDyShaderAbsPath)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->sceneManager || !hm->ifftFinalTex || !hm->ifftDyFinalTex
+      || !_combineEtaDxShaderAbsPath || !_combineDyShaderAbsPath)
+    return 0;
+
+  if (!hm->combinedTex)
+  {
+    try
+    {
+      hm->combinedTexName =
+          "WavesCombined_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->combinedTex = MakeSpectrumTexture(
+          hm->manager, hm->combinedTexName,
+          hm->gridSize, Ogre::PFG_RGBA32_FLOAT);
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] combinedTex alloc threw: "
+            << e.getDescription() << std::endl;
+      hm->combinedTex = nullptr;
+      return 0;
+    }
+  }
+
+  if (!hm->combineEtaDxJob || !hm->combineDyJob)
+  {
+    try
+    {
+      auto &rgMgr = Ogre::ResourceGroupManager::getSingleton();
+      const std::filesystem::path etaDxPath(_combineEtaDxShaderAbsPath);
+      const std::filesystem::path dyPath(_combineDyShaderAbsPath);
+      hm->combineEtaDxShaderName = etaDxPath.stem().string();
+      hm->combineDyShaderName    = dyPath.stem().string();
+      for (const auto &dir : {etaDxPath.parent_path().string(),
+                              dyPath.parent_path().string()})
+      {
+        try
+        {
+          rgMgr.addResourceLocation(
+              dir, "FileSystem",
+              Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+              false);
+        }
+        catch (const Ogre::Exception &) {}
+      }
+
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      hm->hlmsCompute = hlmsManager->getComputeHlms();
+      if (!hm->hlmsCompute)
+        return 0;
+
+      const Ogre::uint32 groups =
+          static_cast<Ogre::uint32>((hm->gridSize + 15) / 16);
+
+      auto makeCombineJob = [&](const std::string &shaderName,
+                                 const std::string &jobBaseName,
+                                 Ogre::TextureGpu *src,
+                                 Ogre::ResourceAccess::ResourceAccess uavAccess)
+          -> Ogre::HlmsComputeJob *
+      {
+        const std::string jobName =
+            jobBaseName + "_" +
+            std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+        Ogre::HlmsComputeJob *job = hm->hlmsCompute->createComputeJob(
+            jobName, jobName, shaderName, Ogre::StringVector{});
+        if (!job) return nullptr;
+        job->setThreadsPerGroup(16u, 16u, 1u);
+        job->setNumThreadGroups(groups, groups, 1u);
+        job->setNumUavUnits(1u);
+        job->setNumTexUnits(1u);
+        Ogre::DescriptorSetUav::TextureSlot uavSlot =
+            Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
+        uavSlot.texture     = hm->combinedTex;
+        uavSlot.access      = uavAccess;
+        uavSlot.pixelFormat = Ogre::PFG_RGBA32_FLOAT;
+        job->_setUavTexture(0u, uavSlot);
+        Ogre::DescriptorSetTexture2::TextureSlot texSlot =
+            Ogre::DescriptorSetTexture2::TextureSlot::makeEmpty();
+        texSlot.texture = src;
+        job->setTexture(0u, texSlot, &hm->samplerblock);
+        return job;
+      };
+
+      // First pass writes (η, Dx, 0, 0) — UAV writeonly.
+      hm->combineEtaDxJob = makeCombineJob(
+          hm->combineEtaDxShaderName, "WavesCombineEtaDx",
+          hm->ifftFinalTex, Ogre::ResourceAccess::Write);
+      // Second pass reads+writes combinedTex to add Dy.
+      hm->combineDyJob = makeCombineJob(
+          hm->combineDyShaderName, "WavesCombineDy",
+          hm->ifftDyFinalTex, Ogre::ResourceAccess::ReadWrite);
+
+      if (!hm->combineEtaDxJob || !hm->combineDyJob)
+      {
+        gzerr << "[waves_ogre2_heightmap] combine job creation failed"
+              << std::endl;
+        return 0;
+      }
+
+      gzmsg << "[waves_ogre2_heightmap] combine pipeline initialised "
+            << "(eta+Dx=" << hm->combineEtaDxShaderName
+            << ", Dy=" << hm->combineDyShaderName << ")" << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] combine setup threw: "
+            << e.getDescription() << std::endl;
+      return 0;
+    }
+  }
+
+  hm->combinedTex->scheduleTransitionTo(
+      Ogre::GpuResidency::Resident, nullptr);
+
+  try
+  {
+    auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+    auto &solver = renderSystem->getBarrierSolver();
+
+    static constexpr unsigned GL_SHADER_IMAGE_ACCESS_BARRIER_BIT_VAL =
+        0x00000020u;
+    static constexpr unsigned GL_TEXTURE_FETCH_BARRIER_BIT_VAL =
+        0x00000008u;
+    using PFN_glMemoryBarrier = void (*)(unsigned);
+    static auto glMemoryBarrierPtr =
+        reinterpret_cast<PFN_glMemoryBarrier>(
+            dlsym(RTLD_DEFAULT, "glMemoryBarrier"));
+
+    // Pass 1: read ifftFinalTex, write (η, Dx, 0, 0) to combinedTex.
+    {
+      auto &t = solver.getNewResourceTransitionsArrayTmp();
+      solver.resolveTransition(t, hm->ifftFinalTex,
+          Ogre::ResourceLayout::Texture,
+          Ogre::ResourceAccess::Read,
+          Ogre::c_computeStageMask);
+      solver.resolveTransition(t, hm->combinedTex,
+          Ogre::ResourceLayout::Uav,
+          Ogre::ResourceAccess::Write,
+          Ogre::c_computeStageMask);
+      renderSystem->executeResourceTransition(t);
+      hm->hlmsCompute->dispatch(hm->combineEtaDxJob,
+                                hm->sceneManager, nullptr);
+      if (glMemoryBarrierPtr)
+      {
+        glMemoryBarrierPtr(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT_VAL |
+                           GL_TEXTURE_FETCH_BARRIER_BIT_VAL);
+      }
+    }
+
+    // Pass 2: read ifftDyFinalTex + combinedTex (RMW), write Dy
+    // into combinedTex.b.
+    {
+      auto &t = solver.getNewResourceTransitionsArrayTmp();
+      solver.resolveTransition(t, hm->ifftDyFinalTex,
+          Ogre::ResourceLayout::Texture,
+          Ogre::ResourceAccess::Read,
+          Ogre::c_computeStageMask);
+      solver.resolveTransition(t, hm->combinedTex,
+          Ogre::ResourceLayout::Uav,
+          Ogre::ResourceAccess::ReadWrite,
+          Ogre::c_computeStageMask);
+      renderSystem->executeResourceTransition(t);
+      hm->hlmsCompute->dispatch(hm->combineDyJob,
+                                hm->sceneManager, nullptr);
+      if (glMemoryBarrierPtr)
+      {
+        glMemoryBarrierPtr(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT_VAL |
+                           GL_TEXTURE_FETCH_BARRIER_BIT_VAL);
+      }
+    }
+
+    if (!hm->combinedTex->isDataReady())
+      hm->combinedTex->notifyDataIsReady();
+
+    // Hand combinedTex back to the graphics pipeline as a sampler.
+    {
+      auto &t = solver.getNewResourceTransitionsArrayTmp();
+      solver.resolveTransition(t, hm->combinedTex,
+          Ogre::ResourceLayout::Texture,
+          Ogre::ResourceAccess::Read,
+          Ogre::c_allGraphicStagesMask);
+      renderSystem->executeResourceTransition(t);
+    }
+
+    // First successful combine: swap the material's heightMap sampler
+    // from the (now retired) CPU upload texture to combinedTex.
+    if (!hm->ifftBoundToMaterial && hm->ogreMaterial && hm->combinedTex)
+    {
+      auto *pass = hm->ogreMaterial->getTechnique(0u)->getPass(0u);
+      Ogre::TextureUnitState *texUnit = nullptr;
+      for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
+      {
+        auto *u = pass->getTextureUnitState(i);
+        if (u->getName() == "heightMap") { texUnit = u; break; }
+      }
+      if (texUnit)
+      {
+        texUnit->setTexture(hm->combinedTex);
+        texUnit->setSamplerblock(hm->samplerblock);
+        hm->ifftBoundToMaterial = true;
+        gzmsg << "[waves_ogre2_heightmap] heightMap sampler swapped to "
+              << "combinedTex (" << hm->combinedTex->getNameStr()
+              << "); GPU chop displacement online" << std::endl;
+      }
+    }
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] combine dispatch threw: "
+            << e.getDescription() << " (further failures suppressed)"
+            << std::endl;
+    }
+    return 0;
+  }
+  return 1;
+}
+
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
@@ -1989,25 +2472,32 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
   }
 
   // Stage 2 evolve job + spectrum textures cleanup.
-  if (hm->hlmsCompute && hm->evolveJob)
+  for (auto **job : {&hm->evolveJob, &hm->evolveDyJob,
+                      &hm->combineEtaDxJob, &hm->combineDyJob})
   {
-    try { hm->hlmsCompute->destroyComputeJob(hm->evolveJob->getName()); }
-    catch (const Ogre::Exception &) {}
-    hm->evolveJob = nullptr;
-  }
-  if (hm->evolveParams)
-  {
-    try
+    if (hm->hlmsCompute && *job)
     {
-      auto *renderSystem = Ogre::Root::getSingletonPtr() ?
-          Ogre::Root::getSingleton().getRenderSystem() : nullptr;
-      if (renderSystem && renderSystem->getVaoManager())
-        renderSystem->getVaoManager()->destroyConstBuffer(hm->evolveParams);
+      try { hm->hlmsCompute->destroyComputeJob((*job)->getName()); }
+      catch (const Ogre::Exception &) {}
+      *job = nullptr;
     }
-    catch (const Ogre::Exception &) {}
-    hm->evolveParams = nullptr;
   }
-  for (auto **tex : {&hm->h0Tex, &hm->hktTex})
+  {
+    auto *renderSystem = Ogre::Root::getSingletonPtr() ?
+        Ogre::Root::getSingleton().getRenderSystem() : nullptr;
+    auto *vaoManager = renderSystem ? renderSystem->getVaoManager() : nullptr;
+    for (auto **buf : {&hm->evolveParams, &hm->evolveDyParams})
+    {
+      if (*buf && vaoManager)
+      {
+        try { vaoManager->destroyConstBuffer(*buf); }
+        catch (const Ogre::Exception &) {}
+        *buf = nullptr;
+      }
+    }
+  }
+  for (auto **tex : {&hm->h0Tex, &hm->hktTex, &hm->hktTexDy,
+                      &hm->combinedTex})
   {
     if (*tex && hm->manager)
     {
@@ -2017,17 +2507,21 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
     }
   }
 
-  // Stage 3 IFFT pipeline teardown.
+  // Stage 3 IFFT pipeline teardown (both η+Dx and Dy pipelines).
   if (hm->hlmsCompute)
   {
-    for (auto *job : hm->ifftPassJobs)
+    for (auto *jobs : {&hm->ifftPassJobs, &hm->ifftDyPassJobs})
     {
-      if (!job) continue;
-      try { hm->hlmsCompute->destroyComputeJob(job->getName()); }
-      catch (const Ogre::Exception &) {}
+      for (auto *job : *jobs)
+      {
+        if (!job) continue;
+        try { hm->hlmsCompute->destroyComputeJob(job->getName()); }
+        catch (const Ogre::Exception &) {}
+      }
+      jobs->clear();
     }
-    hm->ifftPassJobs.clear();
     hm->ifftPassSrcDst.clear();
+    hm->ifftDyPassSrcDst.clear();
   }
   if (!hm->ifftParams.empty())
   {
@@ -2049,7 +2543,8 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
     catch (const Ogre::Exception &) {}
     hm->ifftParams.clear();
   }
-  for (auto **tex : {&hm->ifftBufA, &hm->ifftBufB})
+  for (auto **tex : {&hm->ifftBufA, &hm->ifftBufB,
+                      &hm->ifftDyBufA, &hm->ifftDyBufB})
   {
     if (*tex && hm->manager)
     {
@@ -2058,7 +2553,8 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
       *tex = nullptr;
     }
   }
-  hm->ifftFinalTex = nullptr;
+  hm->ifftFinalTex   = nullptr;
+  hm->ifftDyFinalTex = nullptr;
   if (hm->manager)
   {
     if (hm->staging)

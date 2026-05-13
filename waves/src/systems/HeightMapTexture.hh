@@ -98,10 +98,25 @@ namespace gz::sim::systems
                         int _gridSize);
 
     /// \brief Stage 2 dispatch: evolve the spectrum to `h(k, t)` on the
-    /// GPU. Must follow `UploadSpectrum`.
+    /// GPU. Must follow `UploadSpectrum`. Output packs (η_hat, Dx_hat).
     bool EvolveDispatch(const std::string &_shaderAbsPath,
                         float _simTimeS, float _tauS = 0.0f,
                         float _tileSizeM = 200.0f);
+
+    /// \brief Stage 2 dispatch (Dy chop): time-evolve the Dy
+    /// displacement spectrum into a dedicated `hktTexDy`.
+    bool EvolveDyDispatch(const std::string &_shaderAbsPath,
+                          float _simTimeS, float _tauS = 0.0f,
+                          float _tileSizeM = 200.0f);
+
+    /// \brief Stage 4 dispatch: combine the η+Dx IFFT output and the
+    /// Dy IFFT output into the final RGBA texture (η, Dx, Dy, _)
+    /// bound to the visual material. Two passes are needed because
+    /// OgreNext's OpenGL compute can only bind one texture sampler
+    /// reliably per dispatch. Idempotent; call once per frame after
+    /// `IfftDispatch`.
+    bool CombineDispatch(const std::string &_etaDxShaderAbsPath,
+                          const std::string &_dyShaderAbsPath);
 
     /// \brief Stage 3 dispatch: run the GPU IFFT (Cooley-Tukey radix-2)
     /// on the latest `h(k, t)` texture produced by EvolveDispatch. The
