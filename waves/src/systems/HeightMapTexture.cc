@@ -33,7 +33,7 @@ namespace
   using UploadSpectrumFn = int (*)(waves_heightmap_t,
                                     const double *, const double *,
                                     const double *, const double *,
-                                    const double *, int);
+                                    int);
   using EvolveFn = int (*)(waves_heightmap_t, const char *,
                             float, float, float);
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
@@ -46,7 +46,6 @@ namespace
   using ViewHktFn = int (*)(waves_heightmap_t, const char *, float);
   using ReadbackH0Fn = int (*)(waves_heightmap_t, int, int,
                                 float *, float *, float *, float *);
-  using ReadbackOmegaFn = int (*)(waves_heightmap_t, int, int, float *);
   using ReadbackIfftFn  = int (*)(waves_heightmap_t, int, int, float *);
   using ReadbackHktFn   = int (*)(waves_heightmap_t, int, int,
                                    float *, float *);
@@ -69,7 +68,6 @@ namespace
     DebugFn    debug{nullptr};
     ViewHktFn  viewHkt{nullptr};
     ReadbackH0Fn readbackH0{nullptr};
-    ReadbackOmegaFn readbackOmega{nullptr};
     ReadbackIfftFn  readbackIfft{nullptr};
     ReadbackHktFn   readbackHkt{nullptr};
     DestroyFn  destroy{nullptr};
@@ -122,8 +120,6 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_view_hkt_dispatch"));
       api.readbackH0 = reinterpret_cast<ReadbackH0Fn>(
           dlsym(api.handle, "waves_ogre2_heightmap_readback_h0"));
-      api.readbackOmega = reinterpret_cast<ReadbackOmegaFn>(
-          dlsym(api.handle, "waves_ogre2_heightmap_readback_omega"));
       api.readbackIfft = reinterpret_cast<ReadbackIfftFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_readback_ifft"));
       api.readbackHkt = reinterpret_cast<ReadbackHktFn>(
@@ -231,7 +227,7 @@ bool HeightMapTexture::CreatePbsVisual(double _planeSizeM,
 bool HeightMapTexture::UploadSpectrum(
     const double *_h0Re, const double *_h0Im,
     const double *_h0ConjRe, const double *_h0ConjIm,
-    const double *_omega, int _gridSize)
+    int _gridSize)
 {
   if (!this->impl_->handle)
     return false;
@@ -239,7 +235,7 @@ bool HeightMapTexture::UploadSpectrum(
   if (!api.loaded || !api.uploadSpectrum)
     return false;
   return api.uploadSpectrum(this->impl_->handle,
-                            _h0Re, _h0Im, _h0ConjRe, _h0ConjIm, _omega,
+                            _h0Re, _h0Im, _h0ConjRe, _h0ConjIm,
                             _gridSize) != 0;
 }
 
@@ -314,17 +310,6 @@ bool HeightMapTexture::ReadbackH0Cell(int _i, int _j,
   return api.readbackH0(this->impl_->handle, _i, _j,
                         _outRe, _outIm,
                         _outConjRe, _outConjIm) != 0;
-}
-
-bool HeightMapTexture::ReadbackOmegaCell(int _i, int _j,
-                                          float *_outOmega) const
-{
-  if (!this->impl_->handle)
-    return false;
-  const auto &api = LoadBridge();
-  if (!api.loaded || !api.readbackOmega)
-    return false;
-  return api.readbackOmega(this->impl_->handle, _i, _j, _outOmega) != 0;
 }
 
 bool HeightMapTexture::ReadbackIfftCell(int _i, int _j,

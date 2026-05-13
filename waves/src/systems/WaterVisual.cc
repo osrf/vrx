@@ -495,13 +495,11 @@ void WaterVisual::Implementation::OnSceneUpdate()
         // upload path with a shader-synthesised Phillips spectrum).
         const auto &h0 = this->fftSim->H0();
         const auto &hc = this->fftSim->H0Conj();
-        const auto &om = this->fftSim->OmegaGrid();
         const int N = static_cast<int>(this->fftSim->GridSize());
         std::vector<double> h0Re(static_cast<std::size_t>(N) * N);
         std::vector<double> h0Im(static_cast<std::size_t>(N) * N);
         std::vector<double> hcRe(static_cast<std::size_t>(N) * N);
         std::vector<double> hcIm(static_cast<std::size_t>(N) * N);
-        std::vector<double> omR (static_cast<std::size_t>(N) * N);
         for (int i = 0; i < N; ++i)
         {
           for (int j = 0; j < N; ++j)
@@ -512,14 +510,12 @@ void WaterVisual::Implementation::OnSceneUpdate()
             h0Im[idx] = h0(i, j).imag();
             hcRe[idx] = hc(i, j).real();
             hcIm[idx] = hc(i, j).imag();
-            omR[idx]  = om(i, j);
           }
         }
 
         if (this->heightMap->UploadSpectrum(
                 h0Re.data(), h0Im.data(),
-                hcRe.data(), hcIm.data(),
-                omR.data(), N))
+                hcRe.data(), hcIm.data(), N))
         {
           this->spectrumUploaded = true;
         }
@@ -552,8 +548,6 @@ void WaterVisual::Implementation::OnSceneUpdate()
                 << std::abs(h0(1, 0))
                 << " |h0|_max=" << maxAbsH0
                 << " @ (i=" << maxI << ", j=" << maxJ << ")"
-                << " omega(1,0)=" << om(1, 0)
-                << " omega(maxI,maxJ)=" << om(maxI, maxJ)
                 << std::endl;
           const auto dump = [&](int i, int j)
           {
@@ -587,25 +581,6 @@ void WaterVisual::Implementation::OnSceneUpdate()
           dump(N / 2, N / 2);
           dump(N - 1, 0);
           dump(N - 1, N - 1);
-
-          // Also readback omega for the dominant cell + a few
-          // others — we need to verify omegaTex content matches CPU.
-          auto dumpOmega = [&](int i, int j)
-          {
-            float gpuOmega = 0.0f;
-            const bool ok =
-                this->heightMap->ReadbackOmegaCell(i, j, &gpuOmega);
-            const double cpuOmega = om(i, j);
-            gzmsg << "[WaterVisual] omega(" << i << "," << j << ")  "
-                  << "CPU=" << cpuOmega << "  GPU=" << gpuOmega
-                  << "  diff=" << (gpuOmega - cpuOmega)
-                  << "  ok=" << ok << std::endl;
-          };
-          dumpOmega(0, 0);
-          dumpOmega(1, 0);
-          dumpOmega(maxI, maxJ);
-          dumpOmega(N / 2, N / 2);
-          dumpOmega(N - 1, N - 1);
         }
       }
       if (this->spectrumUploaded)

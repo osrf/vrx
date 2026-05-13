@@ -98,14 +98,14 @@ namespace
 
     // Stage 2 (Phillips on GPU): persistent spectrum textures and the
     // evolve compute job that reads from them each frame.
+    // ω(k) is computed in-shader from gridSize + tileSize, so no
+    // omegaTex is needed.
     Ogre::TextureGpu       *h0Tex{nullptr};     // RGBA32F (re, im, re, im)
-    Ogre::TextureGpu       *omegaTex{nullptr};  // R32F omega(k)
     Ogre::TextureGpu       *hktTex{nullptr};    // RGBA32F (h.re, h.im, _, _)
     Ogre::HlmsComputeJob   *evolveJob{nullptr};
     Ogre::ConstBufferPacked *evolveParams{nullptr};
     std::string             evolveShaderName;
     std::string             h0TexName;
-    std::string             omegaTexName;
     std::string             hktTexName;
 
     // Stage 3 (GPU IFFT): two ping-pong textures, one bitreverse job and
@@ -702,12 +702,12 @@ int waves_ogre2_heightmap_upload_spectrum(
     waves_heightmap_t _handle,
     const double *_h0Re, const double *_h0Im,
     const double *_h0ConjRe, const double *_h0ConjIm,
-    const double *_omega, int _gridSize)
+    int _gridSize)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
   if (!hm || !hm->manager || !hm->sceneManager || _gridSize <= 0)
     return 0;
-  if (!_h0Re || !_h0Im || !_h0ConjRe || !_h0ConjIm || !_omega)
+  if (!_h0Re || !_h0Im || !_h0ConjRe || !_h0ConjIm)
     return 0;
   if (static_cast<std::size_t>(_gridSize) != hm->gridSize)
   {
@@ -724,19 +724,15 @@ int waves_ogre2_heightmap_upload_spectrum(
     const std::string base =
         "WavesSpec_" +
         std::to_string(reinterpret_cast<std::uintptr_t>(hm));
-    hm->h0TexName    = base + "_h0";
-    hm->omegaTexName = base + "_omega";
-    hm->hktTexName   = base + "_hkt";
+    hm->h0TexName  = base + "_h0";
+    hm->hktTexName = base + "_hkt";
 
-    hm->h0Tex    = MakeSpectrumTexture(hm->manager, hm->h0TexName,
-                                        hm->gridSize,
-                                        Ogre::PFG_RGBA32_FLOAT);
-    hm->omegaTex = MakeSpectrumTexture(hm->manager, hm->omegaTexName,
-                                        hm->gridSize,
-                                        Ogre::PFG_R32_FLOAT);
-    hm->hktTex   = MakeSpectrumTexture(hm->manager, hm->hktTexName,
-                                        hm->gridSize,
-                                        Ogre::PFG_RGBA32_FLOAT);
+    hm->h0Tex  = MakeSpectrumTexture(hm->manager, hm->h0TexName,
+                                      hm->gridSize,
+                                      Ogre::PFG_RGBA32_FLOAT);
+    hm->hktTex = MakeSpectrumTexture(hm->manager, hm->hktTexName,
+                                      hm->gridSize,
+                                      Ogre::PFG_RGBA32_FLOAT);
 
     // Pack spectrum into RGBA32F via a staging texture.
     auto upload_rgba = [&](Ogre::TextureGpu *dst,
@@ -773,36 +769,9 @@ int waves_ogre2_heightmap_upload_spectrum(
         dst->notifyDataIsReady();
     };
 
-    auto upload_r32 = [&](Ogre::TextureGpu *dst, const double *src)
-    {
-      Ogre::StagingTexture *staging = hm->manager->getStagingTexture(
-          static_cast<Ogre::uint32>(hm->gridSize),
-          static_cast<Ogre::uint32>(hm->gridSize),
-          1u, 1u, Ogre::PFG_R32_FLOAT);
-      staging->startMapRegion();
-      Ogre::TextureBox box = staging->mapRegion(
-          static_cast<Ogre::uint32>(hm->gridSize),
-          static_cast<Ogre::uint32>(hm->gridSize),
-          1u, 1u, Ogre::PFG_R32_FLOAT);
-      const int N = static_cast<int>(hm->gridSize);
-      for (int row = 0; row < N; ++row)
-      {
-        auto *outRow = reinterpret_cast<float *>(box.at(0, row, 0));
-        const double *srcRow = src + static_cast<std::size_t>(row) * N;
-        for (int col = 0; col < N; ++col)
-          outRow[col] = static_cast<float>(srcRow[col]);
-      }
-      staging->stopMapRegion();
-      staging->upload(box, dst, 0u, nullptr, nullptr);
-      hm->manager->removeStagingTexture(staging);
-      if (!dst->isDataReady())
-        dst->notifyDataIsReady();
-    };
-
     upload_rgba(hm->h0Tex, _h0Re, _h0Im, _h0ConjRe, _h0ConjIm);
-    upload_r32(hm->omegaTex, _omega);
     gzmsg << "[waves_ogre2_heightmap] spectrum uploaded ("
-          << hm->gridSize << "×" << hm->gridSize << " h0+omega)"
+          << hm->gridSize << "×" << hm->gridSize << " h0)"
           << std::endl;
     return 1;
   }
@@ -819,14 +788,13 @@ int waves_ogre2_heightmap_evolve_dispatch(
     float _simTimeS, float _tauS, float _tileSizeM)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
-  if (!hm || !hm->h0Tex || !hm->omegaTex || !hm->hktTex ||
+  if (!hm || !hm->h0Tex || !hm->hktTex ||
       !hm->sceneManager || !_shaderAbsPath)
     return 0;
 
   // Make sure the spectrum textures are addressable each frame
   // (same defensive pattern as the compute_dispatch path).
   hm->h0Tex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
-  hm->omegaTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
   hm->hktTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
 
   // Lazy init of the evolve compute job (mirrors compute_dispatch).
@@ -873,15 +841,14 @@ int waves_ogre2_heightmap_evolve_dispatch(
           static_cast<Ogre::uint32>((hm->gridSize + 15) / 16);
       hm->evolveJob->setNumThreadGroups(groups, groups, 1u);
 
-      // 1 UAV slot (write target) + 2 texture slots (read inputs).
+      // 1 UAV slot (write target) + 1 texture slot (h0 read input).
       // In OgreNext's OpenGL compute path, UAVs at slot 1+ are
       // unreliable. The supported idiom is: writes via UAV, reads
       // via regular texture samplers (texelFetch in GLSL).
+      // ω(k) is computed in-shader, so no omegaTex is bound — slot-1
+      // texture samplers are also unreliable in OgreNext compute.
       hm->evolveJob->setNumUavUnits(1u);
-      hm->evolveJob->setNumTexUnits(1u);  // omegaTex no longer sampled
-      // GL: UAVs and textures share slot indices. Offset textures to
-      // start at GL slot 1 so they don't collide with the UAV at
-      // slot 0.
+      hm->evolveJob->setNumTexUnits(1u);
 
       Ogre::DescriptorSetUav::TextureSlot uavSlot =
           Ogre::DescriptorSetUav::TextureSlot::makeEmpty();
@@ -898,9 +865,6 @@ int waves_ogre2_heightmap_evolve_dispatch(
         hm->evolveJob->setTexture(slot, s, &hm->samplerblock);
       };
       bindTex(0u, hm->h0Tex);
-      // Note: omegaTex is intentionally NOT bound — evolve computes
-      // ω in-shader because slot-1 samplers don't work in OgreNext
-      // compute. The omegaGrid upload is kept for readback diagnostics.
 
       // Params const buffer.
       auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
@@ -931,8 +895,8 @@ int waves_ogre2_heightmap_evolve_dispatch(
   try
   {
     // Tell the BarrierSolver what the evolve pass is about to do.
-    // h0Tex/omegaTex are now bound as textures (not UAVs) so they
-    // transition to ResourceLayout::Texture.
+    // h0Tex is bound as a texture (not a UAV) so it transitions to
+    // ResourceLayout::Texture.
     auto *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
     auto &solver = renderSystem->getBarrierSolver();
     auto &transitions = solver.getNewResourceTransitionsArrayTmp();
@@ -1657,47 +1621,6 @@ int waves_ogre2_heightmap_readback_h0(
   }
 }
 
-int waves_ogre2_heightmap_readback_omega(
-    waves_heightmap_t _handle, int _i, int _j, float *_outOmega)
-{
-  auto *hm = static_cast<HeightMap *>(_handle);
-  if (!hm || !hm->omegaTex || !hm->manager || _outOmega == nullptr)
-    return 0;
-  const int N = static_cast<int>(hm->gridSize);
-  if (_i < 0 || _i >= N || _j < 0 || _j >= N)
-    return 0;
-  try
-  {
-    Ogre::AsyncTextureTicket *ticket =
-        hm->manager->createAsyncTextureTicket(
-            static_cast<Ogre::uint32>(N),
-            static_cast<Ogre::uint32>(N),
-            1u, Ogre::TextureTypes::Type2D,
-            Ogre::PFG_R32_FLOAT);
-    if (!ticket)
-      return 0;
-    ticket->download(hm->omegaTex, 0u, true, nullptr, true);
-    int spins = 0;
-    while (!ticket->queryIsTransferDone() && spins < 1000)
-      ++spins;
-    const Ogre::TextureBox box = ticket->map(0u);
-    const std::uint8_t *base = static_cast<const std::uint8_t *>(box.data);
-    const float *p = reinterpret_cast<const float *>(
-        base + static_cast<std::size_t>(_i) * box.bytesPerRow +
-        static_cast<std::size_t>(_j) * 4u);
-    *_outOmega = *p;
-    ticket->unmap();
-    hm->manager->destroyAsyncTextureTicket(ticket);
-    return 1;
-  }
-  catch (const Ogre::Exception &e)
-  {
-    gzerr << "[waves_ogre2_heightmap] omega readback threw: "
-          << e.getDescription() << std::endl;
-    return 0;
-  }
-}
-
 int waves_ogre2_heightmap_readback_ifft(
     waves_heightmap_t _handle, int _i, int _j, float *_outEta)
 {
@@ -2084,7 +2007,7 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
     catch (const Ogre::Exception &) {}
     hm->evolveParams = nullptr;
   }
-  for (auto **tex : {&hm->h0Tex, &hm->omegaTex, &hm->hktTex})
+  for (auto **tex : {&hm->h0Tex, &hm->hktTex})
   {
     if (*tex && hm->manager)
     {
