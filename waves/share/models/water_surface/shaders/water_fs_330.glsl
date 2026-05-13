@@ -19,6 +19,9 @@
 // Textures
 uniform sampler2D bumpMap;
 uniform samplerCube cubeMap;
+// FFT heightmap (only sampled when foamStrength > 0). Layout:
+//   .r = η      .g = Dx     .b = Dy     .a = (reserved)
+uniform sampler2D heightMap;
 
 // Colors
 uniform vec4 deepColor;
@@ -26,15 +29,61 @@ uniform vec4 shallowColor;
 uniform float fresnelPower;
 uniform float hdrMultiplier;
 
+// Tessendorf chop displacement scale (negative bunches particles
+// toward crests). Used to compute the Jacobian of the chop transform,
+// which drives the foam mask.
+uniform float chopFactor;
+// Physical extent of one heightmap tile in metres. Needed to convert
+// finite-difference texel deltas back to world-space derivatives.
+uniform float tileSize;
+// Foam controls. foamStrength = 0 disables foam entirely (and the
+// heightMap sampling that goes with it), so the gerstner path —
+// which doesn't bind a heightmap — leaves this at 0.
+uniform float foamStrength;
+uniform float foamThreshold;
+
 ////////// Input computed in vertex shader //////////
 in block
 {
   mat3 rotMatrix;
   vec3 eyeVec;
   vec2 bumpCoord;
+  vec2 heightUV;
 } inPs;
 
 out vec4 fragColor;
+
+// Tessendorf foam mask. Computes the 2D Jacobian of the chop
+// transform (x, y) → (x + c·Dx, y + c·Dy) at the surface point. Where
+// J drops below 1 the surface is compressing — that's where foam
+// forms in practice. Below `foamThreshold` we ramp foam in, smoothly
+// saturating to 1 just past J = 0.
+float ComputeFoamMask()
+{
+  if (foamStrength <= 0.0)
+    return 0.0;
+  ivec2 texSize = textureSize(heightMap, 0);
+  vec2 texel = 1.0 / vec2(texSize);
+  // World-space step across one texel.
+  float dStep = tileSize / float(texSize.x);
+
+  vec4 px = texture(heightMap, inPs.heightUV + vec2( texel.x, 0.0));
+  vec4 nx = texture(heightMap, inPs.heightUV + vec2(-texel.x, 0.0));
+  vec4 py = texture(heightMap, inPs.heightUV + vec2(0.0,  texel.y));
+  vec4 ny = texture(heightMap, inPs.heightUV + vec2(0.0, -texel.y));
+
+  float dDxdx = (px.g - nx.g) * 0.5 / dStep;
+  float dDydy = (py.b - ny.b) * 0.5 / dStep;
+  float dDxdy = (py.g - ny.g) * 0.5 / dStep;
+  float dDydx = (px.b - nx.b) * 0.5 / dStep;
+
+  float J = (1.0 + chopFactor * dDxdx) * (1.0 + chopFactor * dDydy)
+          - (chopFactor * chopFactor) * dDxdy * dDydx;
+
+  // Foam ramps from 0 at J = foamThreshold to 1 at J = 0 (full
+  // compression), with smoothstep to soften the transition.
+  return 1.0 - smoothstep(0.0, foamThreshold, J);
+}
 
 void main()
 {
@@ -48,10 +97,6 @@ void main()
 
   // negate z for use with the skybox texture that comes with gz-rendering
   R = vec3(R.x, R.y, -R.z);
-
-  // uncomment this line if using other textures that are Y up
-  // Gazebo requires rotated cube map lookup.
-  // R = vec3(R.x, R.z, R.y);
 
   // Get environment color of reflected ray:
   vec4 envColor = texture(cubeMap, R, 0.0);
@@ -68,6 +113,11 @@ void main()
 
   // Perform linear interpolation between reflection and refraction.
   vec4 color = mix(waterColor, envColor, waterEnvRatio);
+
+  // Foam overlay: blends a flat white toward crests/compression
+  // regions identified by the Tessendorf Jacobian.
+  float foam = ComputeFoamMask() * foamStrength;
+  color.rgb = mix(color.rgb, vec3(1.0), foam);
 
   fragColor = vec4(color.xyz, 0.9);
 }

@@ -87,6 +87,8 @@ class WaterVisual::Implementation
   public: gz::math::Vector2d bumpSpeed{0.01, 0.0};
   public: float hdrMultiplier{0.4f};
   public: float fresnelPower{5.0f};
+  public: float foamStrength{0.85f};    ///< Foam blend amount at J=0
+  public: float foamThreshold{0.7f};    ///< Foam ramps in below this J
   public: gz::math::Color shallowColor{0.0f, 0.1f, 0.2f, 1.0f};
   public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
   public: std::string visualName;
@@ -393,6 +395,25 @@ void WaterVisual::Implementation::UploadUniforms()
   // Fragment shader: colors + lighting params + textures.
   (*fsParams)["hdrMultiplier"] = this->hdrMultiplier;
   (*fsParams)["fresnelPower"] = this->fresnelPower;
+  // Foam mask uses the Tessendorf Jacobian, computed in the FS from
+  // finite differences of the heightmap. Only meaningful on the FFT
+  // path where the heightmap is bound and chop is non-zero.
+  if (this->useFft)
+  {
+    (*fsParams)["tileSize"]     = this->cachedTileSize;
+    (*fsParams)["chopFactor"]   = this->cachedChopFactor;
+    (*fsParams)["foamStrength"] = this->foamStrength;
+    (*fsParams)["foamThreshold"] = this->foamThreshold;
+  }
+  else
+  {
+    // Gerstner path: no heightmap bound, so the FS must skip the
+    // foam sampling entirely.
+    (*fsParams)["tileSize"]     = 1.0f;
+    (*fsParams)["chopFactor"]   = 0.0f;
+    (*fsParams)["foamStrength"] = 0.0f;
+    (*fsParams)["foamThreshold"] = 1.0f;
+  }
   {
     float v[4] = {this->shallowColor.R(), this->shallowColor.G(),
                   this->shallowColor.B(), this->shallowColor.A()};
@@ -1049,6 +1070,10 @@ void WaterVisual::Configure(
       this->dataPtr->hdrMultiplier = p->Get<float>("hdrMultiplier");
     if (p->HasElement("fresnelPower"))
       this->dataPtr->fresnelPower = p->Get<float>("fresnelPower");
+    if (p->HasElement("foamStrength"))
+      this->dataPtr->foamStrength = p->Get<float>("foamStrength");
+    if (p->HasElement("foamThreshold"))
+      this->dataPtr->foamThreshold = p->Get<float>("foamThreshold");
     if (p->HasElement("shallowColor"))
       this->dataPtr->shallowColor = p->Get<gz::math::Color>("shallowColor");
     if (p->HasElement("deepColor"))

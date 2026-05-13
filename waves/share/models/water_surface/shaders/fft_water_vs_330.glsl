@@ -47,6 +47,10 @@ out block
   mat3 rotMatrix;
   vec3 eyeVec;
   vec2 bumpCoord;
+  // Heightmap UV at the undisplaced vertex, passed through so the
+  // fragment shader can sample neighbours and compute the Tessendorf
+  // Jacobian for the foam mask. Wraps every `tileSize` metres.
+  vec2 heightUV;
 } outVs;
 
 out gl_PerVertex
@@ -100,5 +104,6 @@ void main()
   gl_Position = worldviewproj_matrix * P;
 
   outVs.bumpCoord = uv0.xy * bumpScale + t * bumpSpeed;
+  outVs.heightUV  = fract(vertex.xy / tileSize);
   outVs.eyeVec = P.xyz - camera_position_object_space;
 }
