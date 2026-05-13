@@ -26,8 +26,18 @@ uniform sampler2D heightMap;
 // Colors
 uniform vec4 deepColor;
 uniform vec4 shallowColor;
+// `fresnelPower` is kept for backward compatibility but is unused
+// when fresnelF0 > 0 — Schlick replaces the older pow(facing, k)
+// approximation. Set fresnelF0 = 0 to fall back to the old code path.
 uniform float fresnelPower;
 uniform float hdrMultiplier;
+// Schlick Fresnel reflectance at normal incidence. Water is ~0.02.
+// Higher values bias the surface toward more reflection everywhere.
+uniform float fresnelF0;
+// Reflection roughness in [0, 1]. Adds a LOD bias to the cubemap
+// sample so high roughness produces softer, blurrier reflections
+// instead of a sharp mirror of the skybox.
+uniform float roughness;
 
 // Tessendorf chop displacement scale (negative bunches particles
 // toward crests). Used to compute the Jacobian of the chop transform,
@@ -107,15 +117,29 @@ void main()
   // negate z for use with the skybox texture that comes with gz-rendering
   R = vec3(R.x, R.y, -R.z);
 
-  // Get environment color of reflected ray:
-  vec4 envColor = texture(cubeMap, R, 0.0);
+  // Get environment color of reflected ray. The LOD bias mimics
+  // pre-filtered roughness — high roughness reads from a higher
+  // mip level so the reflected sky is softer/blurrier instead of a
+  // sharp mirror. The factor `8.0` is roughly log2 of a typical 256
+  // cube face; tighter or coarser values trade detail for softness.
+  float lodBias = roughness * 8.0;
+  vec4 envColor = texture(cubeMap, R, lodBias);
 
   // Cheap hdr effect:
   envColor.rgb *= (envColor.r+envColor.g+envColor.b)*hdrMultiplier;
 
-  // Compute refraction ratio (Fresnel):
+  // Schlick's Fresnel approximation:
+  //   F = F0 + (1 - F0) · (1 - cos θ)^5
+  // For water (F0 ≈ 0.02) this gives a small reflection near
+  // straight-down view and ramps to ~1 at grazing angles, instead of
+  // the older `pow(1 - cos θ, fresnelPower)` heuristic that
+  // ballooned reflections uniformly.
   float facing = 1.0 - dot(-E, N);
-  float waterEnvRatio = clamp(pow(facing, fresnelPower), 0.05, 1.0);
+  float schlick = fresnelF0 + (1.0 - fresnelF0) * pow(facing, 5.0);
+  // Fall back to the legacy formula if fresnelF0 is zero (e.g. for
+  // existing scenes that haven't migrated to Schlick parameters yet).
+  float legacy = clamp(pow(facing, fresnelPower), 0.05, 1.0);
+  float waterEnvRatio = (fresnelF0 > 0.0) ? schlick : legacy;
 
   // Refracted ray only considers deep and shallow water colors:
   vec4 waterColor = mix(shallowColor, deepColor, facing);

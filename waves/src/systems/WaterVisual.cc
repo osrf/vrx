@@ -86,7 +86,9 @@ class WaterVisual::Implementation
   public: gz::math::Vector2d bumpScale{75.0, 75.0};
   public: gz::math::Vector2d bumpSpeed{0.01, 0.0};
   public: float hdrMultiplier{0.4f};
-  public: float fresnelPower{5.0f};
+  public: float fresnelPower{5.0f};     ///< Legacy Fresnel exponent
+  public: float fresnelF0{0.02f};       ///< Schlick F0 (water≈0.02)
+  public: float roughness{0.35f};       ///< Reflection roughness [0,1]
   public: float foamStrength{0.85f};    ///< Foam blend amount at J=0
   public: float foamThreshold{0.7f};    ///< Foam ramps in below this J
   public: gz::math::Color crestColor{0.45f, 0.75f, 0.9f, 1.0f};
@@ -398,6 +400,8 @@ void WaterVisual::Implementation::UploadUniforms()
   // Fragment shader: colors + lighting params + textures.
   (*fsParams)["hdrMultiplier"] = this->hdrMultiplier;
   (*fsParams)["fresnelPower"] = this->fresnelPower;
+  (*fsParams)["fresnelF0"]    = this->fresnelF0;
+  (*fsParams)["roughness"]    = this->roughness;
   // Foam mask uses the Tessendorf Jacobian, computed in the FS from
   // finite differences of the heightmap. Only meaningful on the FFT
   // path where the heightmap is bound and chop is non-zero.
@@ -1088,6 +1092,10 @@ void WaterVisual::Configure(
       this->dataPtr->hdrMultiplier = p->Get<float>("hdrMultiplier");
     if (p->HasElement("fresnelPower"))
       this->dataPtr->fresnelPower = p->Get<float>("fresnelPower");
+    if (p->HasElement("fresnelF0"))
+      this->dataPtr->fresnelF0 = p->Get<float>("fresnelF0");
+    if (p->HasElement("roughness"))
+      this->dataPtr->roughness = p->Get<float>("roughness");
     if (p->HasElement("foamStrength"))
       this->dataPtr->foamStrength = p->Get<float>("foamStrength");
     if (p->HasElement("foamThreshold"))

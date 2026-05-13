@@ -53,7 +53,7 @@
             <gpu_view_hkt>shaders/compute/debug_view_hkt.glsl</gpu_view_hkt>
             <parameters>
               <rescale>0.5</rescale>
-              <bumpScale>25 25</bumpScale>
+              <bumpScale>50 50</bumpScale>
               <bumpSpeed>0.01 0.01</bumpSpeed>
               <hdrMultiplier>0.4</hdrMultiplier>
               <fresnelPower>5.0</fresnelPower>
