@@ -44,8 +44,16 @@ void main()
   if (texel.x >= gridSize || texel.y >= gridSize)
     return;
 
-  vec4 h0Pack = texelFetch(h0Tex, texel, 0);   // (re_h0, im_h0, re_conj, im_conj)
-  float omega = texelFetch(omegaTex, texel, 0).r;
+  // h0Tex is uploaded so that pixel (col=j, row=i) holds h0(i, j).
+  // For thread (x, y) to process the spectrum at index (x, y) — at
+  // frequency (kx[x], ky[y]) — we must read pixel (col=y, row=x),
+  // i.e. texel.yx. Without this swap, the IFFT runs on a transposed
+  // spectrum: energy that Phillips places near kx-aligned cells
+  // (because of wind direction) lands at ky-aligned spatial
+  // frequencies instead — yielding short, fast-changing wavelets.
+  ivec2 specT = texel.yx;
+  vec4 h0Pack = texelFetch(h0Tex, specT, 0);   // (re_h0, im_h0, re_conj, im_conj)
+  float omega = texelFetch(omegaTex, specT, 0).r;
 
   float c = cos(omega * t);
   float s = sin(omega * t);
