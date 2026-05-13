@@ -486,20 +486,62 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // change; we're just exercising the compute pipeline.
       if (!this->spectrumUploaded)
       {
-        // Convert Eigen complex matrices (column-major) to row-major
-        // double buffers the bridge expects.
-        using RowMatrix =
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
-                           Eigen::RowMajor>;
+        // Convert Eigen complex matrices (column-major) to flat
+        // row-major double buffers the bridge expects. Build them
+        // with an explicit element-by-element loop — we previously
+        // used `RowMatrix x = mxcd.real()` and similar Eigen Block
+        // conversions, but the resulting GPU texture content
+        // mismatched CPU's spectrum (verified by replacing the
+        // upload path with a shader-synthesised Phillips spectrum).
         const auto &h0 = this->fftSim->H0();
         const auto &hc = this->fftSim->H0Conj();
         const auto &om = this->fftSim->OmegaGrid();
         const int N = static_cast<int>(this->fftSim->GridSize());
-        RowMatrix h0Re   = h0.real();
-        RowMatrix h0Im   = h0.imag();
-        RowMatrix hcRe   = hc.real();
-        RowMatrix hcIm   = hc.imag();
-        RowMatrix omR    = om;
+        std::vector<double> h0Re(static_cast<std::size_t>(N) * N);
+        std::vector<double> h0Im(static_cast<std::size_t>(N) * N);
+        std::vector<double> hcRe(static_cast<std::size_t>(N) * N);
+        std::vector<double> hcIm(static_cast<std::size_t>(N) * N);
+        std::vector<double> omR (static_cast<std::size_t>(N) * N);
+        for (int i = 0; i < N; ++i)
+        {
+          for (int j = 0; j < N; ++j)
+          {
+            const std::size_t idx =
+                static_cast<std::size_t>(i) * N + j;
+            h0Re[idx] = h0(i, j).real();
+            h0Im[idx] = h0(i, j).imag();
+            hcRe[idx] = hc(i, j).real();
+            hcIm[idx] = hc(i, j).imag();
+            omR[idx]  = om(i, j);
+          }
+        }
+
+        // One-shot log of magnitude statistics so we can spot
+        // upload-side scaling problems. Compute |h0(1, 0)| and the
+        // cell with the largest |h0| as ground-truth references.
+        double maxAbsH0 = 0.0;
+        int maxI = 0, maxJ = 0;
+        for (int i = 0; i < N; ++i)
+        {
+          for (int j = 0; j < N; ++j)
+          {
+            const double mag = std::abs(h0(i, j));
+            if (mag > maxAbsH0)
+            {
+              maxAbsH0 = mag;
+              maxI = i;
+              maxJ = j;
+            }
+          }
+        }
+        gzmsg << "[WaterVisual] spectrum stats: |h0(1,0)|="
+              << std::abs(h0(1, 0))
+              << " |h0|_max=" << maxAbsH0
+              << " @ (i=" << maxI << ", j=" << maxJ << ")"
+              << " omega(1,0)=" << om(1, 0)
+              << " omega(maxI,maxJ)=" << om(maxI, maxJ)
+              << std::endl;
+
         if (this->heightMap->UploadSpectrum(
                 h0Re.data(), h0Im.data(),
                 hcRe.data(), hcIm.data(),
