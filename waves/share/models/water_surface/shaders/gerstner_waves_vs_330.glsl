@@ -63,12 +63,6 @@ out block
   mat3 rotMatrix;
   vec3 eyeVec;
   vec2 bumpCoord;
-  // Undisplaced world XY — unused in the gerstner path (no heightmap
-  // is bound). Present only so the block layout matches the FS's
-  // input block. The fragment shader's foam path is gated by
-  // foamStrength, which the gerstner uniforms leave at zero, so this
-  // value is never sampled in practice.
-  vec2 baseXY;
 } outVs;
 
 // Compute linear combination of Gerstner waves as described in
@@ -147,8 +141,8 @@ void main()
   gl_Position = worldviewproj_matrix * P;
 
   // Compute texture coordinates for bump map
-  outVs.bumpCoord = uv0.xy*bumpScale + t*bumpSpeed;
-  outVs.baseXY    = vec2(0.0);
+  const float bumpResolution = 16.0;
+  outVs.bumpCoord = uv0.xy * bumpScale * bumpResolution + t * bumpSpeed;
 
   outVs.eyeVec = P.xyz - camera_position_object_space; // eye position in vertex space
 }

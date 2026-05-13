@@ -2544,6 +2544,46 @@ int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
   return (hm && hm->ready) ? 1 : 0;
 }
 
+int waves_ogre2_heightmap_set_tex_filtering(
+    waves_heightmap_t _handle, const char *_texUnitName)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->ogreMaterial || !_texUnitName)
+    return 0;
+  try
+  {
+    auto *pass = hm->ogreMaterial->getTechnique(0u)->getPass(0u);
+    Ogre::TextureUnitState *texUnit = nullptr;
+    for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
+    {
+      auto *u = pass->getTextureUnitState(i);
+      if (u->getName() == _texUnitName)
+      {
+        texUnit = u;
+        break;
+      }
+    }
+    if (!texUnit)
+      return 0;
+    Ogre::HlmsSamplerblock sb;
+    sb.setFiltering(Ogre::TFO_ANISOTROPIC);
+    sb.mMaxAnisotropy = 16.0f;
+    sb.mU = Ogre::TAM_WRAP;
+    sb.mV = Ogre::TAM_WRAP;
+    sb.mW = Ogre::TAM_WRAP;
+    texUnit->setSamplerblock(sb);
+    gzmsg << "[waves_ogre2_heightmap] tex unit '" << _texUnitName
+          << "' filtering set to anisotropic+trilinear" << std::endl;
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] set_tex_filtering threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
+}
+
 void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);

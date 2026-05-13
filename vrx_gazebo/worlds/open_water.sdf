@@ -100,29 +100,29 @@
       <wave>
         <model>PMS</model>
         <number>3</number>
-        <!-- For an FFT field of `tile_size` metres, the Phillips spectrum
-             peaks near wavelength = 2π·V²/g. Pick `period` so the peak
-             wavelength fits comfortably inside the tile (otherwise the
-             largest waves get aliased out). Empirically: 200 m tile ↔
-             period ≤ 9 s. The `gain` knob then sets amplitude (height
-             scales as √gain).
-             period=7 ≈ 10 m/s wind, peak λ ≈ 60 m; gain=0.3 keeps the
-             SWH near ~1 m which looks like a moderate coastal sea. -->
-        <period>7.0</period>
-        <gain>0.3</gain>
-        <direction>0.0</direction>
+        <!-- Tuned to mirror asv_wave_sim's reference config
+             (tile_size=100, cell_count=256, wind_speed=5 m/s,
+             wind_angle=135°, steepness=2). Our PMS schema doesn't take
+             wind_speed directly: peak λ = 2π·V²/g ≈ 16 m for 5 m/s,
+             corresponding to peak period ≈ 3.2 s. -->
+        <!-- period=5 → windSpeed = 0.879·g/(2π/period) ≈ 6.9 m/s.
+             Phillips SWH at 7 m/s ≈ 1 m, which matches the visible
+             wave amplitude in asv_wave_sim's screenshots (their
+             default is wind=5, but camera was very close to water). -->
+        <period>5.0</period>
+        <gain>1.0</gain>
+        <direction>2.356</direction>  <!-- 135° in radians -->
         <angle>0.4</angle>
         <scale>1.1</scale>
         <steepness>0.0</steepness>
         <tau>2.0</tau>
         <!-- FFT-only -->
-        <tile_size>200</tile_size>
-        <grid_size>128</grid_size>
+        <tile_size>100</tile_size>
+        <grid_size>256</grid_size>
         <seed>42</seed>
-        <!-- Tessendorf choppiness multiplier applied to the horizontal
-             displacement field. Negative values bunch particles toward
-             wave crests; canonical range is [-2, -1]. 0 disables chop. -->
-        <choppiness>-0.8</choppiness>
+        <!-- Match asv_wave_sim's <steepness>2</steepness> in our
+             sign convention. Sharply pinches wave crests. -->
+        <choppiness>-2.0</choppiness>
       </wave>
     </plugin>
 

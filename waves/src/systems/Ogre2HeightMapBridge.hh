@@ -175,6 +175,16 @@ extern "C"
       int *out_first_bad_j,
       float *out_first_bad_rgba);  // length 4
 
+  /// Patch the samplerblock of a named tex unit on the bound material
+  /// to use trilinear + anisotropic filtering. Used after the
+  /// gz::rendering ShaderParam path has set a texture (which only
+  /// installs default bilinear-without-mipmap filtering) — without
+  /// this, dense bumpmap tilings alias badly at distance. Returns 1
+  /// if the unit was found and patched.
+  int waves_ogre2_heightmap_set_tex_filtering(
+      waves_heightmap_t handle,
+      const char *tex_unit_name);
+
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);
 }

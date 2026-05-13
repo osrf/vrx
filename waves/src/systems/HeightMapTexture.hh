@@ -196,6 +196,11 @@ namespace gz::sim::systems
                               int *_outFirstBadI, int *_outFirstBadJ,
                               float *_outFirstBadRgba) const;
 
+    /// \brief Patch a named tex unit on the bound material to use
+    /// anisotropic trilinear filtering. Needed for dense bumpmaps so
+    /// they don't alias at distance.
+    bool SetTexFiltering(const std::string &_texUnitName);
+
     /// \brief True once the texture is GPU-resident and bound.
     bool Ready() const { return this->ready_; }
 

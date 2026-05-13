@@ -53,6 +53,7 @@ namespace
   using ReadbackCombinedScanFn = int (*)(waves_heightmap_t,
                                           int *, float *, float *,
                                           int *, int *, float *);
+  using SetTexFilteringFn = int (*)(waves_heightmap_t, const char *);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -77,6 +78,7 @@ namespace
     ReadbackIfftFn  readbackIfft{nullptr};
     ReadbackHktFn   readbackHkt{nullptr};
     ReadbackCombinedScanFn readbackCombinedScan{nullptr};
+    SetTexFilteringFn setTexFiltering{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -139,6 +141,8 @@ namespace
           reinterpret_cast<ReadbackCombinedScanFn>(dlsym(
               api.handle,
               "waves_ogre2_heightmap_readback_combined_scan"));
+      api.setTexFiltering = reinterpret_cast<SetTexFilteringFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_set_tex_filtering"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -376,6 +380,17 @@ bool HeightMapTexture::ReadbackHktCell(int _i, int _j,
     return false;
   return api.readbackHkt(this->impl_->handle, _i, _j,
                          _outRe, _outIm) != 0;
+}
+
+bool HeightMapTexture::SetTexFiltering(const std::string &_texUnitName)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.setTexFiltering)
+    return false;
+  return api.setTexFiltering(this->impl_->handle,
+                             _texUnitName.c_str()) != 0;
 }
 
 bool HeightMapTexture::ReadbackCombinedScan(

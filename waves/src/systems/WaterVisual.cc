@@ -83,17 +83,13 @@ class WaterVisual::Implementation
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
   public: float rescale{0.125f};
-  public: gz::math::Vector2d bumpScale{75.0, 75.0};
-  public: gz::math::Vector2d bumpSpeed{0.01, 0.0};
-  public: float hdrMultiplier{0.4f};
-  public: float fresnelPower{5.0f};     ///< Legacy Fresnel exponent
-  public: float fresnelF0{0.02f};       ///< Schlick F0 (water≈0.02)
-  public: float roughness{0.35f};       ///< Reflection roughness [0,1]
-  public: float foamStrength{0.85f};    ///< Foam blend amount at J=0
-  public: float foamThreshold{0.7f};    ///< Foam ramps in below this J
-  public: gz::math::Color crestColor{0.45f, 0.75f, 0.9f, 1.0f};
-  public: float crestStrength{0.25f};   ///< Max blend toward crestColor
-  public: float crestRefHeight{1.5f};   ///< η at which crestStrength is hit
+  // Baseline parameters — defaults aligned with asv_wave_sim's
+  // reference scene so a fresh setup gets the same visual neighbourhood.
+  // Each can still be overridden in the model.sdf <parameters> block.
+  public: gz::math::Vector2d bumpScale{64.0, 64.0};
+  public: gz::math::Vector2d bumpSpeed{0.01, 0.01};
+  public: float hdrMultiplier{0.1f};
+  public: float fresnelPower{8.0f};
   public: gz::math::Color shallowColor{0.0f, 0.1f, 0.2f, 1.0f};
   public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
   public: std::string visualName;
@@ -397,45 +393,9 @@ void WaterVisual::Implementation::UploadUniforms()
     (*vsParams)["dir2"].UpdateBuffer(d2);
   }
 
-  // Fragment shader: colors + lighting params + textures.
+  // Fragment shader: colours + lighting params + textures.
   (*fsParams)["hdrMultiplier"] = this->hdrMultiplier;
-  (*fsParams)["fresnelPower"] = this->fresnelPower;
-  (*fsParams)["fresnelF0"]    = this->fresnelF0;
-  (*fsParams)["roughness"]    = this->roughness;
-  // Foam mask uses the Tessendorf Jacobian, computed in the FS from
-  // finite differences of the heightmap. Only meaningful on the FFT
-  // path where the heightmap is bound and chop is non-zero.
-  if (this->useFft)
-  {
-    (*fsParams)["tileSize"]      = this->cachedTileSize;
-    (*fsParams)["chopFactor"]    = this->cachedChopFactor;
-    (*fsParams)["foamStrength"]  = this->foamStrength;
-    (*fsParams)["foamThreshold"] = this->foamThreshold;
-    (*fsParams)["crestStrength"]  = this->crestStrength;
-    (*fsParams)["crestRefHeight"] = this->crestRefHeight;
-    {
-      float v[3] = {this->crestColor.R(), this->crestColor.G(),
-                    this->crestColor.B()};
-      (*fsParams)["crestColor"].InitializeBuffer(3);
-      (*fsParams)["crestColor"].UpdateBuffer(v);
-    }
-  }
-  else
-  {
-    // Gerstner path: no heightmap bound, so the FS must skip the
-    // foam sampling AND the η-based crest colour blending.
-    (*fsParams)["tileSize"]      = 1.0f;
-    (*fsParams)["chopFactor"]    = 0.0f;
-    (*fsParams)["foamStrength"]  = 0.0f;
-    (*fsParams)["foamThreshold"] = 1.0f;
-    (*fsParams)["crestStrength"]  = 0.0f;
-    (*fsParams)["crestRefHeight"] = 1.0f;
-    {
-      float v[3] = {0.0f, 0.0f, 0.0f};
-      (*fsParams)["crestColor"].InitializeBuffer(3);
-      (*fsParams)["crestColor"].UpdateBuffer(v);
-    }
-  }
+  (*fsParams)["fresnelPower"]  = this->fresnelPower;
   {
     float v[4] = {this->shallowColor.R(), this->shallowColor.G(),
                   this->shallowColor.B(), this->shallowColor.A()};
@@ -459,6 +419,17 @@ void WaterVisual::Implementation::UploadUniforms()
     (*fsParams)["cubeMap"].SetTexture(
       this->cubeMapPath,
       gz::rendering::ShaderParam::ParamType::PARAM_TEXTURE_CUBE, 1u);
+  }
+  // Patch the bump/cube samplers to use anisotropic trilinear
+  // filtering. gz::rendering's ShaderParam binding installs default
+  // bilinear-without-mips, which aliases badly when the bumpmap is
+  // tiled densely (see fft_water_vs_330.glsl's bumpResolution).
+  if (this->heightMap)
+  {
+    if (!this->bumpMapPath.empty())
+      this->heightMap->SetTexFiltering("bumpMap");
+    if (!this->cubeMapPath.empty())
+      this->heightMap->SetTexFiltering("cubeMap");
   }
 
   this->lastUploadedGeneration = this->cachedGeneration;
@@ -1092,20 +1063,6 @@ void WaterVisual::Configure(
       this->dataPtr->hdrMultiplier = p->Get<float>("hdrMultiplier");
     if (p->HasElement("fresnelPower"))
       this->dataPtr->fresnelPower = p->Get<float>("fresnelPower");
-    if (p->HasElement("fresnelF0"))
-      this->dataPtr->fresnelF0 = p->Get<float>("fresnelF0");
-    if (p->HasElement("roughness"))
-      this->dataPtr->roughness = p->Get<float>("roughness");
-    if (p->HasElement("foamStrength"))
-      this->dataPtr->foamStrength = p->Get<float>("foamStrength");
-    if (p->HasElement("foamThreshold"))
-      this->dataPtr->foamThreshold = p->Get<float>("foamThreshold");
-    if (p->HasElement("crestColor"))
-      this->dataPtr->crestColor = p->Get<gz::math::Color>("crestColor");
-    if (p->HasElement("crestStrength"))
-      this->dataPtr->crestStrength = p->Get<float>("crestStrength");
-    if (p->HasElement("crestRefHeight"))
-      this->dataPtr->crestRefHeight = p->Get<float>("crestRefHeight");
     if (p->HasElement("shallowColor"))
       this->dataPtr->shallowColor = p->Get<gz::math::Color>("shallowColor");
     if (p->HasElement("deepColor"))

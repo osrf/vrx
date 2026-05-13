@@ -53,7 +53,10 @@
             <gpu_view_hkt>shaders/compute/debug_view_hkt.glsl</gpu_view_hkt>
             <parameters>
               <rescale>0.5</rescale>
-              <bumpScale>50 50</bumpScale>
+              <!-- Effective bumpmap tiling is bumpScale × 16 in the
+                   VS (see fft_water_vs_330.glsl). 64 × 16 = 1024
+                   bumpmap repeats per uv unit. -->
+              <bumpScale>64 64</bumpScale>
               <bumpSpeed>0.01 0.01</bumpSpeed>
               <hdrMultiplier>0.4</hdrMultiplier>
               <fresnelPower>5.0</fresnelPower>
