@@ -116,8 +116,11 @@
         <scale>1.1</scale>
         <steepness>0.0</steepness>
         <tau>2.0</tau>
-        <!-- FFT-only -->
-        <tile_size>100</tile_size>
+        <!-- FFT-only. tile_size=256 (matching asv_wave_sim's `waves`
+             scene) gives the wavefield room for long-wavelength
+             swells, producing the flatter, slow-moving look we want
+             rather than many small bubbly waves. -->
+        <tile_size>256</tile_size>
         <grid_size>256</grid_size>
         <seed>42</seed>
         <!-- Match asv_wave_sim's <steepness>2</steepness> in our

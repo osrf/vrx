@@ -63,6 +63,9 @@ out block
   mat3 rotMatrix;
   vec3 eyeVec;
   vec2 bumpCoord;
+  // Unused on the gerstner path (no heightmap is bound). Present so
+  // the block layout matches the FS input.
+  vec2 baseXY;
 } outVs;
 
 // Compute linear combination of Gerstner waves as described in
@@ -143,6 +146,7 @@ void main()
   // Compute texture coordinates for bump map
   const float bumpResolution = 16.0;
   outVs.bumpCoord = uv0.xy * bumpScale * bumpResolution + t * bumpSpeed;
+  outVs.baseXY    = vec2(0.0);
 
   outVs.eyeVec = P.xyz - camera_position_object_space; // eye position in vertex space
 }

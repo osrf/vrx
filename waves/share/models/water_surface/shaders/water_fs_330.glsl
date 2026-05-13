@@ -25,20 +25,68 @@
 
 uniform sampler2D bumpMap;
 uniform samplerCube cubeMap;
+// FFT heightmap. Only sampled when foamStrength > 0 (the gerstner
+// path leaves that uniform at zero so this sampler can be unbound).
+uniform sampler2D heightMap;
 
 uniform vec4 deepColor;
 uniform vec4 shallowColor;
 uniform float fresnelPower;
 uniform float hdrMultiplier;
 
+// Tessendorf chop factor (negative = bunch particles toward crests).
+// Used by the foam mask's Jacobian computation.
+uniform float chopFactor;
+// FFT tile extent in metres — needed to convert finite-difference
+// texel deltas back to world-space derivatives.
+uniform float tileSize;
+// Foam controls. foamStrength=0 disables the foam path entirely and
+// the heightmap sampler is never touched.
+uniform float foamStrength;
+uniform float foamThreshold;
+
 in block
 {
   mat3 rotMatrix;
   vec3 eyeVec;
   vec2 bumpCoord;
+  vec2 baseXY;
 } inPs;
 
 out vec4 fragColor;
+
+// Tessendorf foam mask. The 2D Jacobian of the chop transform
+//   (x, y) → (x + c·Dx, y + c·Dy)
+// drops below 1 in compression zones (where chop is bunching the
+// surface). Sustained low J is where foam forms in real ocean —
+// we ramp foam in below `foamThreshold` and saturate at full white
+// once the Jacobian crosses into negative (folding).
+float ComputeFoamMask()
+{
+  if (foamStrength <= 0.0)
+    return 0.0;
+  vec2 heightUV = fract(inPs.baseXY / tileSize);
+  ivec2 texSize = textureSize(heightMap, 0);
+  vec2 texel = 1.0 / vec2(texSize);
+  float dStep = tileSize / float(texSize.x);
+
+  vec4 px = texture(heightMap, heightUV + vec2( texel.x, 0.0));
+  vec4 nx = texture(heightMap, heightUV + vec2(-texel.x, 0.0));
+  vec4 py = texture(heightMap, heightUV + vec2(0.0,  texel.y));
+  vec4 ny = texture(heightMap, heightUV + vec2(0.0, -texel.y));
+
+  float dDxdx = (px.g - nx.g) * 0.5 / dStep;
+  float dDydy = (py.b - ny.b) * 0.5 / dStep;
+  float dDxdy = (py.g - ny.g) * 0.5 / dStep;
+  float dDydx = (px.b - nx.b) * 0.5 / dStep;
+
+  float J = (1.0 + chopFactor * dDxdx) * (1.0 + chopFactor * dDydy)
+          - (chopFactor * chopFactor) * dDxdy * dDydx;
+
+  // Symmetric smoothstep window centred around J = 0 widens the
+  // transition so foam edges don't cut hard.
+  return 1.0 - smoothstep(-foamThreshold, foamThreshold, J);
+}
 
 void main()
 {
@@ -57,6 +105,11 @@ void main()
 
   vec4 waterColor = mix(shallowColor, deepColor, facing);
   vec4 color = mix(waterColor, envColor, waterEnvRatio);
+
+  // Foam overlay: blend toward white where the Tessendorf Jacobian
+  // identifies a compression zone.
+  float foam = ComputeFoamMask() * foamStrength;
+  color.rgb = mix(color.rgb, vec3(1.0), foam);
 
   fragColor = vec4(color.xyz, 0.9);
 }

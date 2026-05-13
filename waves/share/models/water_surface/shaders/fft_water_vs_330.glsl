@@ -43,6 +43,11 @@ out block
   mat3 rotMatrix;
   vec3 eyeVec;
   vec2 bumpCoord;
+  // Undisplaced world XY at the vertex — the FS uses this to sample
+  // the heightmap per-fragment for the foam mask, applying fract()
+  // in the FS so triangle interpolation across a tile boundary
+  // doesn't sweep the UV backwards through the texture.
+  vec2 baseXY;
 } outVs;
 
 out gl_PerVertex
@@ -105,4 +110,10 @@ void main()
   // so the direction vector matches world space — which is what the
   // FS needs for cubemap sampling.
   outVs.eyeVec = P.xyz - camera_position_object_space;
+
+  // Forward the unfracted world XY so the FS can compute the
+  // heightmap UV per-fragment. We pass the undisplaced position
+  // (worldXY, before the chop offset) so neighbouring samples for
+  // the foam mask are taken in the source domain.
+  outVs.baseXY = worldXY;
 }

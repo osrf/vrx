@@ -94,6 +94,8 @@ class WaterVisual::Implementation
   public: gz::math::Vector2d bumpSpeed{0.01, 0.01};
   public: float hdrMultiplier{0.1f};
   public: float fresnelPower{8.0f};
+  public: float foamStrength{0.7f};     ///< Blend amount at J ≤ 0
+  public: float foamThreshold{0.25f};   ///< Foam ramps in below this J
   public: gz::math::Color shallowColor{0.0f, 0.1f, 0.2f, 1.0f};
   public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
   public: std::string visualName;
@@ -462,6 +464,23 @@ void WaterVisual::Implementation::UploadUniforms()
   // Fragment shader: colours + lighting params + textures.
   (*fsParams)["hdrMultiplier"] = this->hdrMultiplier;
   (*fsParams)["fresnelPower"]  = this->fresnelPower;
+  // Foam path. FFT mode reads the heightmap for the Tessendorf
+  // Jacobian; gerstner keeps foamStrength=0 so the FS short-circuits
+  // before sampling an unbound heightMap.
+  if (this->useFft)
+  {
+    (*fsParams)["chopFactor"]    = this->cachedChopFactor;
+    (*fsParams)["tileSize"]      = this->cachedTileSize;
+    (*fsParams)["foamStrength"]  = this->foamStrength;
+    (*fsParams)["foamThreshold"] = this->foamThreshold;
+  }
+  else
+  {
+    (*fsParams)["chopFactor"]    = 0.0f;
+    (*fsParams)["tileSize"]      = 1.0f;
+    (*fsParams)["foamStrength"]  = 0.0f;
+    (*fsParams)["foamThreshold"] = 1.0f;
+  }
   {
     float v[4] = {this->shallowColor.R(), this->shallowColor.G(),
                   this->shallowColor.B(), this->shallowColor.A()};
@@ -1140,6 +1159,10 @@ void WaterVisual::Configure(
       this->dataPtr->hdrMultiplier = p->Get<float>("hdrMultiplier");
     if (p->HasElement("fresnelPower"))
       this->dataPtr->fresnelPower = p->Get<float>("fresnelPower");
+    if (p->HasElement("foamStrength"))
+      this->dataPtr->foamStrength = p->Get<float>("foamStrength");
+    if (p->HasElement("foamThreshold"))
+      this->dataPtr->foamThreshold = p->Get<float>("foamThreshold");
     if (p->HasElement("shallowColor"))
       this->dataPtr->shallowColor = p->Get<gz::math::Color>("shallowColor");
     if (p->HasElement("deepColor"))
