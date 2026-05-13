@@ -25,6 +25,7 @@ in vec4 vertex;
 in vec4 uv0;
 
 uniform mat4 worldviewproj_matrix;
+uniform mat4 world_matrix;
 uniform vec3 camera_position_object_space;
 uniform float t;
 uniform float tau;
@@ -49,28 +50,38 @@ out gl_PerVertex
   vec4 gl_Position;
 };
 
-vec3 SampleDisplaced(vec2 xy)
+// Sample the heightmap at a WORLD-space XY position. Using world
+// coordinates (rather than model-space `vertex.xy`) is what lets us
+// instance the same mesh as multiple tiles without each tile
+// rendering the same wavefield patch — the FFT field is naturally
+// periodic across world space.
+vec3 SampleDisplaced(vec2 worldXY)
 {
-  vec2 uv = fract(xy / tileSize);
+  vec2 uv = fract(worldXY / tileSize);
   vec4 hd = texture(heightMap, uv);
   vec2 dxy = chopFactor * hd.gb;
-  return vec3(xy + dxy, hd.r);
+  return vec3(worldXY + dxy, hd.r);
 }
 
 void main()
 {
   vec4 P = vertex;
+  vec2 worldXY = (world_matrix * vec4(vertex.xy, 0.0, 1.0)).xy;
 
-  vec3 disp = SampleDisplaced(P.xy);
-  P.xy = disp.xy;
-  P.z += disp.z;
+  vec3 disp = SampleDisplaced(worldXY);
+  // Apply only the spatial displacement deltas (Dx, Dy, η) so the
+  // mesh's model-space position picks up the right local offset
+  // before the world transform turns it into world coordinates.
+  P.xy += disp.xy - worldXY;
+  P.z  += disp.z;
 
-  // Finite-difference normal across one texel of the heightmap.
+  // Finite-difference normal across one texel of the heightmap, in
+  // world space.
   float texel = tileSize / float(gridSize);
-  vec3 px = SampleDisplaced(vertex.xy + vec2( texel, 0.0));
-  vec3 nx = SampleDisplaced(vertex.xy + vec2(-texel, 0.0));
-  vec3 py = SampleDisplaced(vertex.xy + vec2(0.0,  texel));
-  vec3 ny = SampleDisplaced(vertex.xy + vec2(0.0, -texel));
+  vec3 px = SampleDisplaced(worldXY + vec2( texel, 0.0));
+  vec3 nx = SampleDisplaced(worldXY + vec2(-texel, 0.0));
+  vec3 py = SampleDisplaced(worldXY + vec2(0.0,  texel));
+  vec3 ny = SampleDisplaced(worldXY + vec2(0.0, -texel));
   vec3 dxv = (px - nx) * 0.5;
   vec3 dyv = (py - ny) * 0.5;
   vec3 N = normalize(cross(dxv, dyv));
@@ -90,5 +101,8 @@ void main()
   const float bumpResolution = 16.0;
   outVs.bumpCoord = uv0.xy * bumpScale * bumpResolution + t * bumpSpeed;
 
+  // Eye vector in object space. Tile transforms are pure translation
+  // so the direction vector matches world space — which is what the
+  // FS needs for cubemap sampling.
   outVs.eyeVec = P.xyz - camera_position_object_space;
 }

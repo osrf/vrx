@@ -27,7 +27,11 @@
 #include <gz/math/Color.hh>
 #include <gz/math/Vector2.hh>
 #include <gz/plugin/Register.hh>
+#include <filesystem>
+
 #include <gz/rendering/Material.hh>
+#include <gz/rendering/Mesh.hh>
+#include <gz/rendering/MeshDescriptor.hh>
 #include <gz/rendering/RenderingIface.hh>
 #include <gz/rendering/Scene.hh>
 #include <gz/rendering/ShaderParams.hh>
@@ -95,6 +99,15 @@ class WaterVisual::Implementation
   public: std::string visualName;
   public: Entity visualEntity{kNullEntity};
   public: std::string modelPath;
+
+  // Tile instancing. The procedural water mesh is 200m × 200m; to
+  // cover the visible horizon we render the same mesh at
+  // (2·radius+1)² offset positions, each sharing the central tile's
+  // material so they all sample the same heightmap and follow the
+  // continuous periodic wavefield. 0 disables instancing.
+  public: int tilesRadius{2};
+  public: double tileMeshSize{200.0};
+  public: std::vector<gz::rendering::VisualPtr> tileVisuals;
 
   // ---- Cross-thread cache, guarded by mutex_ ----
   // The cache is pre-sized to 3 components (matching the shader's vec3
@@ -293,6 +306,53 @@ bool WaterVisual::Implementation::ResolveVisual()
               << std::endl;
       }
     }
+
+    // Spawn tile copies. Each one shares the central material (so the
+    // dynamic heightmap binding applies to all of them) and the same
+    // mesh resource (Ogre caches the COLLADA load by URI). The FFT
+    // wavefield is periodic in world XY, so neighbour tiles continue
+    // the same wave pattern without seams.
+    if (this->useFft && this->tilesRadius > 0 && !this->modelPath.empty())
+    {
+      // modelPath is the path to the model.sdf itself; take its parent
+      // directory to anchor the mesh URI.
+      const std::string meshPath =
+          std::filesystem::path(this->modelPath).parent_path().string() +
+          "/meshes/water.dae";
+      const auto basePos = this->visual->WorldPosition();
+      const int r = this->tilesRadius;
+      gzmsg << "[WaterVisual] spawning tile instances: radius=" << r
+            << " mesh_size=" << this->tileMeshSize << "m → "
+            << ((2 * r + 1) * (2 * r + 1) - 1) << " extra tiles"
+            << std::endl;
+      for (int j = -r; j <= r; ++j)
+      {
+        for (int i = -r; i <= r; ++i)
+        {
+          if (i == 0 && j == 0) continue;  // center is the existing visual
+          const std::string tileName =
+              "water_tile_" + std::to_string(this->visualEntity) + "_" +
+              std::to_string(i) + "_" + std::to_string(j);
+          gz::rendering::VisualPtr tile = this->scene->CreateVisual(tileName);
+          if (!tile) continue;
+          gz::rendering::MeshDescriptor desc(meshPath);
+          gz::rendering::MeshPtr mesh = this->scene->CreateMesh(desc);
+          if (!mesh)
+          {
+            this->scene->DestroyVisual(tile);
+            continue;
+          }
+          tile->AddGeometry(mesh);
+          tile->SetMaterial(this->material, false);  // share, don't clone
+          tile->SetWorldPosition(
+              basePos.X() + i * this->tileMeshSize,
+              basePos.Y() + j * this->tileMeshSize,
+              basePos.Z());
+          this->scene->RootVisual()->AddChild(tile);
+          this->tileVisuals.push_back(tile);
+        }
+      }
+    }
   }
   return this->material != nullptr || useHlmsPbs;
 }
@@ -323,6 +383,12 @@ void WaterVisual::Implementation::UploadUniforms()
   // Engine-auto bindings (sentinel value = "auto from Ogre").
   (*vsParams)["worldviewproj_matrix"] = 1;
   (*vsParams)["camera_position_object_space"] = 1;
+  // FFT vertex shader uses world_matrix to compute world-space XY
+  // for the periodic heightmap sample, so tile instances at
+  // different world offsets each render their own piece of the
+  // continuous wavefield (rather than each tile showing the same
+  // patch in local model space).
+  (*vsParams)["world_matrix"] = 1;
 
   // Static scalars/vec2s shared by both shaders.
   (*vsParams)["rescale"] = this->rescale;
@@ -931,6 +997,17 @@ void WaterVisual::Implementation::OnRenderTeardown()
   // go away, so the bridge can still walk Ogre's TextureGpuManager to
   // release it. After teardown the next ResolveVisual will rebuild it.
   this->heightMap.reset();
+  // Drop our tile-instance handles. The scene owns the actual
+  // Visuals; resetting our shared pointers here lets it clean up.
+  if (this->scene)
+  {
+    for (auto &tile : this->tileVisuals)
+    {
+      if (tile)
+        this->scene->DestroyVisual(tile);
+    }
+  }
+  this->tileVisuals.clear();
   this->visual.reset();
   this->material.reset();
   this->scene.reset();
@@ -1077,6 +1154,13 @@ void WaterVisual::Configure(
     if (t->HasElement("cubeMap"))
       this->dataPtr->cubeMapPath = resolve(t->Get<std::string>("cubeMap"));
   }
+
+  // Tile instancing radius: render the water mesh at
+  // (2·radius+1)² offsets around the central visual. 0 disables.
+  if (sdf->HasElement("tiles_radius"))
+    this->dataPtr->tilesRadius = sdf->Get<int>("tiles_radius");
+  if (sdf->HasElement("tile_mesh_size"))
+    this->dataPtr->tileMeshSize = sdf->Get<double>("tile_mesh_size");
 
   // Connect to render-thread events.
   this->dataPtr->sceneUpdateConn =
