@@ -22,6 +22,10 @@
 #include <OgreHlmsComputeJob.h>
 #include <OgreHlmsManager.h>
 #include <OgreHlmsSamplerblock.h>
+#include <OgreItem.h>
+#include <OgreMesh2.h>
+#include <OgreMeshManager.h>
+#include <OgreMeshManager2.h>
 #include <OgrePass.h>
 #include <OgrePixelFormatGpu.h>
 #include <OgrePixelFormatGpuUtils.h>
@@ -29,11 +33,15 @@
 #include <OgreResourceGroupManager.h>
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 #include <OgreStagingTexture.h>
+#include <OgreSubItem.h>
 #include <OgreTechnique.h>
 #include <OgreTextureGpu.h>
 #include <OgreTextureGpuManager.h>
 #include <OgreTextureUnitState.h>
+#include <Hlms/Pbs/OgreHlmsPbs.h>
+#include <Hlms/Pbs/OgreHlmsPbsDatablock.h>
 #include <Vao/OgreConstBufferPacked.h>
 #include <Vao/OgreVaoManager.h>
 
@@ -72,6 +80,16 @@ namespace
     Ogre::HlmsComputeJob   *computeJob{nullptr};
     Ogre::ConstBufferPacked *paramsBuffer{nullptr};
     std::string             computeShaderName;  // basename, not full path
+
+    // Stage 6 procedural-Item state (HlmsPbs path).
+    Ogre::SceneNode        *pbsNode{nullptr};
+    Ogre::Item             *pbsItem{nullptr};
+    Ogre::MeshPtr           pbsMeshV2;
+    Ogre::v1::MeshPtr       pbsMeshV1;
+    Ogre::HlmsPbsDatablock *pbsDatablock{nullptr};
+    std::string             pbsMeshNameV1;
+    std::string             pbsMeshNameV2;
+    std::string             pbsDatablockName;
   };
 }
 
@@ -81,7 +99,11 @@ extern "C"
 waves_heightmap_t waves_ogre2_heightmap_create(
     void *_scene, void *_material, std::size_t _gridSize, const char *_name)
 {
-  if (!_scene || !_material || !_name || _gridSize == 0)
+  // `_material` is optional: on the Stage 6 HlmsPbs path the caller
+  // passes nullptr because the texture will be bound to an
+  // HlmsPbsDatablock slot (added in step 6.1) rather than to a v1
+  // material's TextureUnitState.
+  if (!_scene || !_name || _gridSize == 0)
     return nullptr;
 
   auto *scene = static_cast<gz::rendering::Scene *>(_scene);
@@ -147,46 +169,53 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   hm->samplerblock.mV = Ogre::TAM_WRAP;
   hm->samplerblock.mW = Ogre::TAM_WRAP;
 
-  auto *ogreMat = dynamic_cast<gz::rendering::Ogre2Material *>(material);
-  if (!ogreMat || !ogreMat->Material())
+  // Bind to a gz::rendering Material's v1 pass IFF a material was
+  // supplied. The Stage 6 HlmsPbs path passes nullptr because the
+  // heightmap texture will be slot-bound to an HlmsPbsDatablock later
+  // (step 6.1), not to a v1 TextureUnitState.
+  if (material)
   {
-    gzerr << "[waves_ogre2_heightmap] material is not an Ogre2Material"
-          << std::endl;
-    manager->destroyTexture(hm->texture);
-    delete hm;
-    return nullptr;
-  }
-  auto mat = ogreMat->Material();
-  auto *pass = mat->getTechnique(0u)->getPass(0u);
-  Ogre::TextureUnitState *texUnit = nullptr;
-  for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
-  {
-    auto *u = pass->getTextureUnitState(i);
-    if (u->getName() == "heightMap")
+    auto *ogreMat = dynamic_cast<gz::rendering::Ogre2Material *>(material);
+    if (!ogreMat || !ogreMat->Material())
     {
-      texUnit = u;
-      break;
+      gzerr << "[waves_ogre2_heightmap] material is not an Ogre2Material"
+            << std::endl;
+      manager->destroyTexture(hm->texture);
+      delete hm;
+      return nullptr;
     }
-  }
-  if (!texUnit)
-  {
-    texUnit = pass->createTextureUnitState();
-    texUnit->setName("heightMap");
-  }
-  texUnit->setTexture(hm->texture);
-  texUnit->setTextureCoordSet(0);
-  texUnit->setSamplerblock(hm->samplerblock);
+    auto mat = ogreMat->Material();
+    auto *pass = mat->getTechnique(0u)->getPass(0u);
+    Ogre::TextureUnitState *texUnit = nullptr;
+    for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
+    {
+      auto *u = pass->getTextureUnitState(i);
+      if (u->getName() == "heightMap")
+      {
+        texUnit = u;
+        break;
+      }
+    }
+    if (!texUnit)
+    {
+      texUnit = pass->createTextureUnitState();
+      texUnit->setName("heightMap");
+    }
+    texUnit->setTexture(hm->texture);
+    texUnit->setTextureCoordSet(0);
+    texUnit->setSamplerblock(hm->samplerblock);
 
-  // On OpenGL: explicitly bind the GLSL `sampler2D heightMap` uniform to
-  // the texture unit index. Without this, Ogre Next's HlmsLowLevel path
-  // can fall back to a slow program-introspection step on first render to
-  // figure out the binding. Mirrors asv_wave_sim's pattern.
-  const int texIndex =
-      static_cast<int>(pass->getTextureUnitStateIndex(texUnit));
-  auto ogreParams = pass->getVertexProgramParameters();
-  if (ogreParams)
-  {
-    ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
+    // On OpenGL: explicitly bind the GLSL `sampler2D heightMap` uniform
+    // to the texture unit index. Without this, Ogre Next's HlmsLowLevel
+    // path can fall back to a slow program-introspection step on first
+    // render to figure out the binding. Mirrors asv_wave_sim's pattern.
+    const int texIndex =
+        static_cast<int>(pass->getTextureUnitStateIndex(texUnit));
+    auto ogreParams = pass->getVertexProgramParameters();
+    if (ogreParams)
+    {
+      ogreParams->setNamedConstant("heightMap", &texIndex, 1, 1);
+    }
   }
   hm->ready = true;
 
@@ -407,6 +436,99 @@ int waves_ogre2_heightmap_compute_dispatch(
   return 1;
 }
 
+int waves_ogre2_heightmap_create_pbs_visual(
+    waves_heightmap_t _handle,
+    double _planeSizeM, int _planeSegments,
+    double _wx, double _wy, double _wz, const char *_name)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->sceneManager || !_name)
+    return 0;
+
+  try
+  {
+    // Build a v1 plane mesh, import to v2 (same pattern as Path 1).
+    hm->pbsMeshNameV1 = std::string(_name) + "_pbsPlaneV1";
+    hm->pbsMeshNameV2 = std::string(_name) + "_pbsPlaneV2";
+    const Ogre::Real size = static_cast<Ogre::Real>(_planeSizeM);
+    const int segs = std::clamp(_planeSegments, 1, 200);  // v1 cap
+
+    hm->pbsMeshV1 = Ogre::v1::MeshManager::getSingleton().createPlane(
+        hm->pbsMeshNameV1,
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+        Ogre::Plane(Ogre::Vector3::UNIT_Z, 0.0f),
+        size, size,
+        segs, segs,
+        true,                                       // generate normals
+        1u, 1.0f, 1.0f, Ogre::Vector3::UNIT_Y,
+        Ogre::v1::HardwareBuffer::HBU_STATIC,
+        Ogre::v1::HardwareBuffer::HBU_STATIC);
+
+    hm->pbsMeshV2 = Ogre::MeshManager::getSingleton().createByImportingV1(
+        hm->pbsMeshNameV2,
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+        hm->pbsMeshV1.get(),
+        true, true, true);
+
+    hm->pbsItem = hm->sceneManager->createItem(
+        hm->pbsMeshV2, Ogre::SceneMemoryMgrTypes::SCENE_DYNAMIC);
+
+    // Create an HlmsPbsDatablock with sensible "deep water" defaults.
+    // Step 6.0: no custom shader piece, no heightmap binding — we're
+    // checking whether HlmsPbs alone avoids the 2-minute load stall.
+    // Step 6.1 will add vertex displacement via a custom piece.
+    auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+    auto *hlmsPbs = static_cast<Ogre::HlmsPbs *>(
+        hlmsManager->getHlms(Ogre::HLMS_PBS));
+    if (!hlmsPbs)
+    {
+      gzerr << "[waves_ogre2_heightmap] HLMS_PBS unavailable; "
+            << "cannot create PBS datablock" << std::endl;
+      hm->sceneManager->destroyItem(hm->pbsItem);
+      hm->pbsItem = nullptr;
+      return 0;
+    }
+
+    hm->pbsDatablockName = std::string(_name) + "_pbsDb";
+    hm->pbsDatablock = static_cast<Ogre::HlmsPbsDatablock *>(
+        hlmsPbs->createDatablock(
+            hm->pbsDatablockName,
+            hm->pbsDatablockName,
+            Ogre::HlmsMacroblock{},
+            Ogre::HlmsBlendblock{},
+            Ogre::HlmsParamVec{}));
+    // Deep ocean blue, somewhat glossy. Tuned to roughly match the
+    // current fragment shader's deepColor; full PBS reflection control
+    // comes back in step 6.1+. Don't call setMetalness — it asserts in
+    // SpecularWorkflow (the default), and 0 is the implicit default
+    // anyway.
+    hm->pbsDatablock->setDiffuse(Ogre::Vector3(0.0f, 0.10f, 0.25f));
+    hm->pbsDatablock->setRoughness(0.10f);
+
+    hm->pbsItem->getSubItem(0u)->setDatablock(hm->pbsDatablock);
+    hm->pbsItem->setCastShadows(false);
+
+    hm->pbsNode = hm->sceneManager->getRootSceneNode(
+        Ogre::SceneMemoryMgrTypes::SCENE_DYNAMIC)->createChildSceneNode(
+            Ogre::SceneMemoryMgrTypes::SCENE_DYNAMIC);
+    hm->pbsNode->setPosition(static_cast<Ogre::Real>(_wx),
+                             static_cast<Ogre::Real>(_wy),
+                             static_cast<Ogre::Real>(_wz));
+    hm->pbsNode->attachObject(hm->pbsItem);
+
+    gzmsg << "[waves_ogre2_heightmap] PBS visual built: mesh="
+          << hm->pbsMeshNameV2 << " size=" << size << "m segs=" << segs
+          << " datablock=" << hm->pbsDatablockName << std::endl;
+    return 1;
+  }
+  catch (const Ogre::Exception &e)
+  {
+    gzerr << "[waves_ogre2_heightmap] PBS visual setup threw: "
+          << e.getDescription() << std::endl;
+    return 0;
+  }
+}
+
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
@@ -462,6 +584,53 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
       }
     }
   }
+
+  // Stage 6 procedural-Item + HlmsPbs datablock teardown.
+  if (hm->sceneManager)
+  {
+    try
+    {
+      if (hm->pbsItem && hm->pbsNode)
+        hm->pbsNode->detachObject(hm->pbsItem);
+      if (hm->pbsItem)
+      {
+        hm->sceneManager->destroyItem(hm->pbsItem);
+        hm->pbsItem = nullptr;
+      }
+      if (hm->pbsNode)
+      {
+        hm->sceneManager->destroySceneNode(hm->pbsNode);
+        hm->pbsNode = nullptr;
+      }
+    }
+    catch (const Ogre::Exception &) {}
+  }
+  if (hm->pbsDatablock)
+  {
+    try
+    {
+      auto *hlmsManager = Ogre::Root::getSingleton().getHlmsManager();
+      auto *hlmsPbs = static_cast<Ogre::HlmsPbs *>(
+          hlmsManager->getHlms(Ogre::HLMS_PBS));
+      if (hlmsPbs)
+        hlmsPbs->destroyDatablock(hm->pbsDatablockName);
+    }
+    catch (const Ogre::Exception &) {}
+    hm->pbsDatablock = nullptr;
+  }
+  if (hm->pbsMeshV2)
+  {
+    try { Ogre::MeshManager::getSingleton().remove(hm->pbsMeshNameV2); }
+    catch (const Ogre::Exception &) {}
+    hm->pbsMeshV2.reset();
+  }
+  if (hm->pbsMeshV1)
+  {
+    try { Ogre::v1::MeshManager::getSingleton().remove(hm->pbsMeshNameV1); }
+    catch (const Ogre::Exception &) {}
+    hm->pbsMeshV1.reset();
+  }
+
   delete hm;
 }
 

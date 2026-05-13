@@ -28,6 +28,8 @@ namespace
                             int, int);
   using ReadyFn  = int (*)(waves_heightmap_t);
   using ComputeFn = int (*)(waves_heightmap_t, const char *, float, float);
+  using PbsVisualFn = int (*)(waves_heightmap_t, double, int,
+                               double, double, double, const char *);
   using DestroyFn = void (*)(waves_heightmap_t);
 
   struct BridgeApi
@@ -37,6 +39,7 @@ namespace
     UploadFn   upload{nullptr};
     ReadyFn    ready{nullptr};
     ComputeFn  compute{nullptr};
+    PbsVisualFn pbsVisual{nullptr};
     DestroyFn  destroy{nullptr};
     bool       loaded{false};
   };
@@ -67,6 +70,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_ready"));
       api.compute = reinterpret_cast<ComputeFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_compute_dispatch"));
+      api.pbsVisual = reinterpret_cast<PbsVisualFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_create_pbs_visual"));
       api.destroy = reinterpret_cast<DestroyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_destroy"));
       api.loaded = api.create && api.upload && api.ready && api.destroy;
@@ -151,6 +156,20 @@ bool HeightMapTexture::Dispatch(const std::string &_shaderAbsPath,
     return false;
   return api.compute(this->impl_->handle, _shaderAbsPath.c_str(),
                      _simTimeS, _tileSizeM) != 0;
+}
+
+bool HeightMapTexture::CreatePbsVisual(double _planeSizeM,
+                                       int _planeSegments,
+                                       double _wx, double _wy, double _wz,
+                                       const std::string &_name)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.pbsVisual)
+    return false;
+  return api.pbsVisual(this->impl_->handle, _planeSizeM, _planeSegments,
+                       _wx, _wy, _wz, _name.c_str()) != 0;
 }
 
 }  // namespace gz::sim::systems

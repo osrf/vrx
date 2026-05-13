@@ -99,6 +99,10 @@ target_link_libraries(waves-ogre2-bridge
 )
 target_include_directories(waves-ogre2-bridge PRIVATE
   /opt/ros/rolling/opt/gz_ogre_next_vendor/include/OGRE-Next
+  # HlmsPbs headers transitively include Hlms/Common/OgreHlmsBufferManager.h
+  # by unqualified name — that subdirectory must also be on the path.
+  /opt/ros/rolling/opt/gz_ogre_next_vendor/include/OGRE-Next/Hlms/Common
+  /opt/ros/rolling/opt/gz_ogre_next_vendor/include/OGRE-Next/Hlms/Pbs
 )
 install(
   TARGETS waves-ogre2-bridge

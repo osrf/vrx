@@ -81,6 +81,30 @@ extern "C"
       float sim_time_s,
       float tile_size_m);
 
+  /// Stage 6 (HlmsPbs migration). Build a procedural plane Ogre::Item,
+  /// apply a fresh `HlmsPbsDatablock` to it via `SubItem::setDatablock`,
+  /// and parent it under the scene root. Bypasses
+  /// `gz::rendering::Visual::SetMaterial` AND `HlmsLowLevel` entirely —
+  /// step 6.0 is the load-time experiment to verify HlmsPbs avoids the
+  /// stall. Step 6.1 will hook a custom piece file to add vertex
+  /// displacement from the heightmap.
+  ///
+  /// \param handle  Heightmap handle (only used for unique naming + the
+  ///   eventual texture binding in step 6.1).
+  /// \param plane_size_m  Side length of the rendered plane [m].
+  /// \param plane_segments  Subdivision count per axis.
+  /// \param world_x,y,z  World anchor for the plane.
+  /// \param name  Unique base name for mesh/item/datablock/node.
+  /// \return 1 on success.
+  int waves_ogre2_heightmap_create_pbs_visual(
+      waves_heightmap_t handle,
+      double plane_size_m,
+      int plane_segments,
+      double world_x,
+      double world_y,
+      double world_z,
+      const char *name);
+
   /// Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);
 }

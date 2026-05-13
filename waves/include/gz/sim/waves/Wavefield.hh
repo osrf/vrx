@@ -14,7 +14,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <limits>
 #include <memory>
+#include <mutex>
 #include <ostream>
 #include <string>
 
@@ -130,8 +132,19 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
   return _os;
 }
 
-/// \brief Stream-in for ECM deserialization. Reads parameters and rebuilds
-/// the simulation via `CreateWaveSimulation`.
+/// \brief Stream-in for ECM deserialization. Reads parameters and
+/// (only when the wavefield generation actually changes) rebuilds the
+/// simulation via `CreateWaveSimulation`.
+///
+/// SceneBroadcaster replicates ECM components at the simulation rate
+/// (~60+ Hz), and the `Waves` system marks the wavefield as changed
+/// for the first 5 seconds of every run. Without caching, we'd
+/// reconstruct the simulation on every state message — for FFT this
+/// is a ~15 ms job per call (Phillips spectrum + 3 IFFTs at 128²),
+/// which over 2 minutes accumulates to ~100 s of pure init churn and
+/// is the dominant cost of FFT-mode GUI load. Cache the previously-
+/// built simulation per algorithm+generation and reuse it across
+/// deserializations.
 inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
 {
   _is >> _d.algorithm
@@ -151,7 +164,23 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.gridSize
       >> _d.params.seed
       >> _d.params.choppiness;
-  _d.simulation = CreateWaveSimulation(_d.algorithm, _d.params);
+  // Cache the constructed simulation across deserializations. The same
+  // component arrives ~60 Hz; without this dedupe we'd re-init FFT
+  // state thousands of times per minute.
+  static std::mutex cacheMutex;
+  static std::shared_ptr<IWaveSimulation> cachedSim;
+  static std::uint64_t cachedGen{std::numeric_limits<std::uint64_t>::max()};
+  static std::string cachedAlgo;
+  std::lock_guard<std::mutex> lock(cacheMutex);
+  if (!cachedSim ||
+      cachedGen != _d.generation ||
+      cachedAlgo != _d.algorithm)
+  {
+    cachedSim = CreateWaveSimulation(_d.algorithm, _d.params);
+    cachedGen = _d.generation;
+    cachedAlgo = _d.algorithm;
+  }
+  _d.simulation = cachedSim;
   return _is;
 }
 
