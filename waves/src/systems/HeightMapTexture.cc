@@ -38,6 +38,9 @@ namespace
   using IfftFn = int (*)(waves_heightmap_t, const char *, const char *);
   using IfftNaiveFn = int (*)(waves_heightmap_t, const char *);
   using IfftBoundFn = int (*)(waves_heightmap_t);
+  using CpuFeedFn = int (*)(waves_heightmap_t,
+                             const double *, const double *,
+                             const double *, int, int);
   using DebugFn = int (*)(waves_heightmap_t, const char *, float, float);
   using ViewHktFn = int (*)(waves_heightmap_t, const char *, float);
   using DestroyFn = void (*)(waves_heightmap_t);
@@ -55,6 +58,7 @@ namespace
     IfftFn     ifft{nullptr};
     IfftNaiveFn ifftNaive{nullptr};
     IfftBoundFn ifftBound{nullptr};
+    CpuFeedFn  cpuFeed{nullptr};
     DebugFn    debug{nullptr};
     ViewHktFn  viewHkt{nullptr};
     DestroyFn  destroy{nullptr};
@@ -99,6 +103,8 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_naive_dispatch"));
       api.ifftBound = reinterpret_cast<IfftBoundFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ifft_bound"));
+      api.cpuFeed = reinterpret_cast<CpuFeedFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_cpu_feed"));
       api.debug = reinterpret_cast<DebugFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_debug_dispatch"));
       api.viewHkt = reinterpret_cast<ViewHktFn>(
@@ -254,6 +260,25 @@ bool HeightMapTexture::IfftNaiveDispatch(
     return false;
   return api.ifftNaive(this->impl_->handle,
                        _naiveShaderAbsPath.c_str()) != 0;
+}
+
+bool HeightMapTexture::CpuFeed(const Eigen::MatrixXd &_eta,
+                                const Eigen::MatrixXd &_dispX,
+                                const Eigen::MatrixXd &_dispY)
+{
+  if (!this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.cpuFeed)
+    return false;
+  const int N = static_cast<int>(this->gridSize_);
+  using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+                                  Eigen::RowMajor>;
+  RowMatrix eta   = _eta;
+  RowMatrix dispX = _dispX;
+  RowMatrix dispY = _dispY;
+  return api.cpuFeed(this->impl_->handle,
+                     eta.data(), dispX.data(), dispY.data(), N, N) != 0;
 }
 
 bool HeightMapTexture::GpuOutputBound() const

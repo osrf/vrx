@@ -451,8 +451,32 @@ void WaterVisual::Implementation::OnSceneUpdate()
     const char *stage2Env = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
     const bool useStage2 = stage2Env && std::string(stage2Env) == "1" &&
                            !this->evolveShaderUri.empty();
+    const char *cpuFeedEnv = std::getenv("GZ_WAVES_GPU_FFT_CPU_FEED");
+    const bool useCpuFeed = cpuFeedEnv && std::string(cpuFeedEnv) == "1";
     bool ok = false;
-    if (useStage2)
+
+    // Diagnostic: feed CPU's IFFT output straight into the GPU
+    // visual texture, bypassing evolve+IFFT entirely. If this looks
+    // identical to the standard CPU path, the visual sampling layer
+    // is correct and the GPU compute chain is the bug. If it still
+    // looks "fast", the visual sampling layer itself is wrong.
+    if (useCpuFeed)
+    {
+      this->fftSim->Update(static_cast<double>(this->currentSimTime));
+      ok = this->heightMap->CpuFeed(this->fftSim->HeightGrid(),
+                                     this->fftSim->DispXGrid(),
+                                     this->fftSim->DispYGrid());
+      static bool loggedCpuFeed = false;
+      if (ok && !loggedCpuFeed)
+      {
+        loggedCpuFeed = true;
+        gzmsg << "[WaterVisual] CPU-feed diagnostic active — feeding "
+              << "the CPU FFT output into ifftFinalTex; evolve+IFFT "
+              << "bypassed. If this looks like CPU, the GPU compute "
+              << "chain is the bug." << std::endl;
+      }
+    }
+    else if (useStage2)
     {
       // Stage 2 of the GPU-FFT plan: dispatch the evolve compute
       // shader so h(k, t) is recomputed on the GPU each frame from

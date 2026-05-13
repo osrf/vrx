@@ -118,6 +118,15 @@ namespace gz::sim::systems
     /// by `GZ_WAVES_GPU_FFT_NAIVE=1`.
     bool IfftNaiveDispatch(const std::string &_naiveShaderAbsPath);
 
+    /// \brief Diagnostic: upload CPU's (eta, dx, dy) grids straight
+    /// into the IFFT output texture, bypassing evolve+IFFT. Used to
+    /// isolate "is our compute chain wrong" vs "is our visual sampling
+    /// wrong" — if the visual then matches CPU exactly, the compute
+    /// chain is what's wrong.
+    bool CpuFeed(const Eigen::MatrixXd &_eta,
+                 const Eigen::MatrixXd &_dispX,
+                 const Eigen::MatrixXd &_dispY);
+
     /// \brief Stage 4: true once the visual material's "heightMap"
     /// sampler has been swapped to the GPU IFFT output. Until then
     /// the CPU `Upload(...)` path must continue running so the

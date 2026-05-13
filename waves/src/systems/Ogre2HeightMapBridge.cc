@@ -1486,6 +1486,115 @@ int waves_ogre2_heightmap_ifft_naive_dispatch(
   return 1;
 }
 
+/// Diagnostic: upload CPU's (eta, dx, dy) grids directly into
+/// ifftFinalTex, bypassing the GPU evolve+IFFT pipeline entirely.
+/// Used to test whether the visual sampling path itself is correct
+/// (if the visual then looks identical to CPU, the compute chain is
+/// what's wrong; if it still looks "fast", the binding path is what's
+/// wrong). Allocates ifftBufB if the radix-2 path hasn't run yet.
+int waves_ogre2_heightmap_cpu_feed(
+    waves_heightmap_t _handle,
+    const double *_eta, const double *_dx, const double *_dy,
+    int _rows, int _cols)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->manager || !hm->sceneManager || !_eta || !_dx || !_dy)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  if (_rows != N || _cols != N)
+    return 0;
+
+  // Lazy-allocate ifftBufB / ifftFinalTex if the IFFT path didn't.
+  if (!hm->ifftBufB)
+  {
+    try
+    {
+      const std::string baseName =
+          "WavesIfft_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->ifftBufBName = baseName + "_B";
+      hm->ifftBufB = MakeSpectrumTexture(hm->manager, hm->ifftBufBName,
+                                          hm->gridSize,
+                                          Ogre::PFG_RGBA32_FLOAT);
+      hm->ifftFinalTex = hm->ifftBufB;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] cpu_feed: bufB alloc failed: "
+            << e.getDescription() << std::endl;
+      return 0;
+    }
+  }
+  if (!hm->ifftFinalTex)
+    hm->ifftFinalTex = hm->ifftBufB;
+
+  try
+  {
+    Ogre::StagingTexture *staging = hm->manager->getStagingTexture(
+        static_cast<Ogre::uint32>(hm->gridSize),
+        static_cast<Ogre::uint32>(hm->gridSize),
+        1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+    staging->startMapRegion();
+    Ogre::TextureBox box = staging->mapRegion(
+        static_cast<Ogre::uint32>(hm->gridSize),
+        static_cast<Ogre::uint32>(hm->gridSize),
+        1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+    for (int row = 0; row < N; ++row)
+    {
+      auto *outRow = reinterpret_cast<float *>(box.at(0, row, 0));
+      const double *eta = _eta + static_cast<std::size_t>(row) * N;
+      const double *dx  = _dx  + static_cast<std::size_t>(row) * N;
+      const double *dy  = _dy  + static_cast<std::size_t>(row) * N;
+      for (int col = 0; col < N; ++col)
+      {
+        outRow[col * 4 + 0] = static_cast<float>(eta[col]);
+        outRow[col * 4 + 1] = static_cast<float>(dx[col]);
+        outRow[col * 4 + 2] = static_cast<float>(dy[col]);
+        outRow[col * 4 + 3] = 0.0f;
+      }
+    }
+    staging->stopMapRegion();
+    staging->upload(box, hm->ifftFinalTex, 0u, nullptr, nullptr);
+    hm->manager->removeStagingTexture(staging);
+    if (!hm->ifftFinalTex->isDataReady())
+      hm->ifftFinalTex->notifyDataIsReady();
+
+    // Make sure Stage 4's swap pointed at this texture (or do it now).
+    if (!hm->ifftBoundToMaterial && hm->ogreMaterial)
+    {
+      auto *pass = hm->ogreMaterial->getTechnique(0u)->getPass(0u);
+      Ogre::TextureUnitState *texUnit = nullptr;
+      for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
+      {
+        auto *u = pass->getTextureUnitState(i);
+        if (u->getName() == "heightMap") { texUnit = u; break; }
+      }
+      if (texUnit)
+      {
+        texUnit->setTexture(hm->ifftFinalTex);
+        texUnit->setSamplerblock(hm->samplerblock);
+        hm->ifftBoundToMaterial = true;
+        gzmsg << "[waves_ogre2_heightmap] cpu_feed: heightMap sampler "
+              << "swapped to " << hm->ifftFinalTex->getNameStr()
+              << "; this is the CPU-feed diagnostic path."
+              << std::endl;
+      }
+    }
+  }
+  catch (const Ogre::Exception &e)
+  {
+    static bool logged = false;
+    if (!logged)
+    {
+      logged = true;
+      gzerr << "[waves_ogre2_heightmap] cpu_feed upload threw: "
+            << e.getDescription() << std::endl;
+    }
+    return 0;
+  }
+  return 1;
+}
+
 int waves_ogre2_heightmap_ifft_bound(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
