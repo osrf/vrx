@@ -1030,7 +1030,12 @@ void WaterVisual::Implementation::OnSceneUpdate()
     }
     else
     {
-      this->fftSim->Update(static_cast<double>(this->currentSimTime));
+      // Read the grids the server-side Waves::PreUpdate already filled
+      // this tick. The visual used to call fftSim->Update() here too,
+      // which recomputed the spectrum + IFFT a second time per render
+      // frame — at 60 fps render + 30 Hz server throttle the FFT was
+      // running ~3× more often than needed. Both ends share the same
+      // fftSim shared_ptr so the grid is already current.
       ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
                                    this->fftSim->DispXGrid(),
                                    this->fftSim->DispYGrid());
