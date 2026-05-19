@@ -71,13 +71,21 @@ float ComputeFoamMask()
     return 0.0;
   vec2 heightUV = fract(inPs.baseXY / tileSize);
   ivec2 texSize = textureSize(heightMap, 0);
-  vec2 texel = 1.0 / vec2(texSize);
-  float dStep = tileSize / float(texSize.x);
 
-  vec4 px = texture(heightMap, heightUV + vec2( texel.x, 0.0));
-  vec4 nx = texture(heightMap, heightUV + vec2(-texel.x, 0.0));
-  vec4 py = texture(heightMap, heightUV + vec2(0.0,  texel.y));
-  vec4 ny = texture(heightMap, heightUV + vec2(0.0, -texel.y));
+  // Sample the chop derivatives over a FIXED PHYSICAL stencil
+  // (~1 m), not one texel. A per-texel stencil makes the foam mask
+  // resolution-dependent: at grid_size=1024 / tile_size=256 the
+  // step would be 0.25 m, capturing aggressive high-frequency
+  // gradients that drive the Jacobian negative across the entire
+  // surface → 100% white foam. A fixed metric step keeps the
+  // visual identical across grid resolutions.
+  float dStep = max(1.0, tileSize / float(texSize.x));
+  vec2 stencil = vec2(dStep / tileSize);  // back into UV space
+
+  vec4 px = texture(heightMap, heightUV + vec2( stencil.x, 0.0));
+  vec4 nx = texture(heightMap, heightUV + vec2(-stencil.x, 0.0));
+  vec4 py = texture(heightMap, heightUV + vec2(0.0,  stencil.y));
+  vec4 ny = texture(heightMap, heightUV + vec2(0.0, -stencil.y));
 
   float dDxdx = (px.g - nx.g) * 0.5 / dStep;
   float dDydy = (py.b - ny.b) * 0.5 / dStep;
