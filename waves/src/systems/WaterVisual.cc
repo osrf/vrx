@@ -1030,12 +1030,12 @@ void WaterVisual::Implementation::OnSceneUpdate()
     }
     else
     {
-      // Read the grids the server-side Waves::PreUpdate already filled
-      // this tick. The visual used to call fftSim->Update() here too,
-      // which recomputed the spectrum + IFFT a second time per render
-      // frame — at 60 fps render + 30 Hz server throttle the FFT was
-      // running ~3× more often than needed. Both ends share the same
-      // fftSim shared_ptr so the grid is already current.
+      // Server and GUI run in separate processes (gz_server composable
+      // node vs gz-sim -g executable); the Wavefield component carries
+      // only the parameters, and each side instantiates its own
+      // FFTWaveSimulation from them. So the visual MUST drive its own
+      // Update each frame — there is no shared grid to read from.
+      this->fftSim->Update(static_cast<double>(this->currentSimTime));
       ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
                                    this->fftSim->DispXGrid(),
                                    this->fftSim->DispYGrid());
