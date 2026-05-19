@@ -99,39 +99,29 @@
       <algorithm>gerstner</algorithm>
       <update_rate>30</update_rate>
       <wave>
-        <!-- CWR = "custom wave reference": Gerstner reads <amplitude>
-             directly instead of deriving it from a Pierson-Moskowitz
-             spectrum. PMS-sampled across only 3 sines yields ~0.5 m
-             peaks (visually flat) because all the spectral energy is
-             actually in the *other* 65k modes the FFT path sees.
-             Both FFT backends ignore <model> and <amplitude>, so this
-             switch is Gerstner-only. -->
-        <model>CWR</model>
-        <amplitude>0.8</amplitude>
+        <model>PMS</model>
         <number>3</number>
-        <!-- Tuned to mirror asv_wave_sim's reference config
-             (tile_size=100, cell_count=256, wind_speed=5 m/s,
-             wind_angle=135°, steepness=2). Our PMS schema doesn't take
-             wind_speed directly: peak λ = 2π·V²/g ≈ 16 m for 5 m/s,
-             corresponding to peak period ≈ 3.2 s. -->
-        <!-- period=5 → windSpeed = 0.879·g/(2π/period) ≈ 6.9 m/s.
-             Phillips SWH at 7 m/s ≈ 1 m, which matches the visible
-             wave amplitude in asv_wave_sim's screenshots (their
-             default is wind=5, but camera was very close to water). -->
-        <!-- period=3.2 → wind ≈ 5.0 m/s (exact asv_wave_sim
-             reference: wind_speed=5). -->
-        <period>3.2</period>
-        <!-- gain/angle/scale/steepness tuned for the analytic Gerstner
-             path. The FFT path uses period→wind only; gain scales its
-             spectrum amplitudes. steepness is Gerstner-only (no effect
-             on FFT), choppiness below is FFT-only (no effect on
-             Gerstner). The values below give a comparable-looking sea
-             across both backends without being optimal for either. -->
-        <gain>1.5</gain>
+        <!-- Long-period swell (peak T = 12 s → wavelength ≈ 225 m at
+             deep-water dispersion). With 3 PMS-sampled sines this
+             gives per-wave amplitudes ~1.5 m and a naturally varied,
+             slow-moving sea on the Gerstner shader. The same period
+             on the FFT path implies wind ≈ 16 m/s — substantially
+             stormier than the short-period asv reference, but visually
+             still reasonable. Cross-backend parity is fundamentally
+             approximate: 3 sines vs. a 65k-mode spectrum. -->
+        <period>12.0</period>
+        <gain>2.0</gain>
         <direction>2.356</direction>  <!-- 135° in radians -->
-        <angle>0.6</angle>
-        <scale>1.5</scale>
-        <steepness>1.5</steepness>
+        <!-- angle/scale spread the 3 Gerstner sines across direction +
+             wavelength. Tighter spread (scale closer to 1, smaller
+             angle) keeps the dominant swell coherent; wider spread
+             breaks regularity. steepness=0 leaves the waves as pure
+             rolling sines — the long period already gives them a
+             natural look without horizontal pinch.
+             All four knobs are Gerstner-only (no effect on FFT). -->
+        <angle>0.4</angle>
+        <scale>1.1</scale>
+        <steepness>0.0</steepness>
         <tau>2.0</tau>
         <!-- FFT-only. tile_size=256 (matching asv_wave_sim's `waves`
              scene) gives the wavefield room for long-wavelength
