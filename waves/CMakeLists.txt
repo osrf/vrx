@@ -81,7 +81,46 @@ target_sources(gz-sim-water-visual-system
 )
 
 find_package(gz-rendering REQUIRED COMPONENTS ogre2)
-find_package(gz_ogre_next_vendor REQUIRED)
+
+# Discover Ogre Next headers. Different Gazebo installs sit on different
+# Ogre Next patch versions:
+#   - ROS Rolling/Jazzy/Kilted gz_ogre_next_vendor → 2.3.3 headers under
+#     /opt/ros/<distro>/opt/gz_ogre_next_vendor/include/OGRE-Next
+#   - Ubuntu Noble libogre-next-dev (and source builds linking to it) →
+#     2.3.1 headers under /usr/include/OGRE-2.3
+# Compiling against one set of headers but loading the other at runtime
+# silently swaps in slow Hlms / barrier-solver code paths (no crash, but
+# RTF tanks). Probe for OgreRoot.h in known locations so we pick the one
+# the *runtime* Gazebo actually links to.
+# Probe which Ogre Next the *resolved* gz-rendering-ogre2 actually links
+# against, and match our header path to that. Critical: Ogre Next 2.3.1
+# (Ubuntu libogre-next-dev) and 2.3.3 (gz_ogre_next_vendor) have small
+# internal differences that turn into slow Hlms/barrier code paths if
+# we compile against one but load the other.
+get_target_property(_gz_rend_ogre2_lib gz-rendering::ogre2 LOCATION)
+if(_gz_rend_ogre2_lib MATCHES "/opt/ros/([^/]+)/")
+  set(_ros_distro "${CMAKE_MATCH_1}")
+  set(OGRE_NEXT_INCLUDE_DIR
+    "/opt/ros/${_ros_distro}/opt/gz_ogre_next_vendor/include/OGRE-Next"
+    CACHE PATH "Ogre Next include dir matched to gz-rendering-ogre2 distro")
+else()
+  # Non-ROS-distro install (e.g. local jetty_ws build) → system Ogre Next.
+  set(OGRE_NEXT_INCLUDE_DIR "/usr/include/OGRE-2.3"
+    CACHE PATH "Ogre Next include dir from libogre-next-dev")
+endif()
+if(NOT EXISTS "${OGRE_NEXT_INCLUDE_DIR}/OgreRoot.h")
+  message(FATAL_ERROR
+    "OgreRoot.h not found under ${OGRE_NEXT_INCLUDE_DIR} "
+    "(probed from gz-rendering::ogre2 = ${_gz_rend_ogre2_lib}). "
+    "Install libogre-next-dev or gz_ogre_next_vendor as appropriate.")
+endif()
+message(STATUS "Ogre Next headers: ${OGRE_NEXT_INCLUDE_DIR}")
+if(NOT OGRE_NEXT_INCLUDE_DIR)
+  message(FATAL_ERROR
+    "Could not find OgreRoot.h. Install libogre-next-dev or "
+    "gz_ogre_next_vendor.")
+endif()
+message(STATUS "Ogre Next headers: ${OGRE_NEXT_INCLUDE_DIR}")
 
 # The Ogre Next dynamic heightmap-texture helper for the FFT visual path
 # lives in a SEPARATE shared library. Linking it directly into WaterVisual
@@ -103,11 +142,11 @@ target_link_libraries(waves-ogre2-bridge
     gz-common::gz-common
 )
 target_include_directories(waves-ogre2-bridge PRIVATE
-  /opt/ros/rolling/opt/gz_ogre_next_vendor/include/OGRE-Next
+  ${OGRE_NEXT_INCLUDE_DIR}
   # HlmsPbs headers transitively include Hlms/Common/OgreHlmsBufferManager.h
   # by unqualified name — that subdirectory must also be on the path.
-  /opt/ros/rolling/opt/gz_ogre_next_vendor/include/OGRE-Next/Hlms/Common
-  /opt/ros/rolling/opt/gz_ogre_next_vendor/include/OGRE-Next/Hlms/Pbs
+  ${OGRE_NEXT_INCLUDE_DIR}/Hlms/Common
+  ${OGRE_NEXT_INCLUDE_DIR}/Hlms/Pbs
 )
 install(
   TARGETS waves-ogre2-bridge
