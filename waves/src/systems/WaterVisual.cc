@@ -133,6 +133,15 @@ class WaterVisual::Implementation
   public: std::vector<gz::math::Vector2f> cachedDirections{
     {1.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 0.0f}};
   public: float cachedTau{2.0f};
+  /// \brief Last sim-time at which the visual ran fftSim->Update().
+  /// Used to throttle the per-frame visual Update down from render
+  /// rate (~60 Hz) to the server's wave update_rate (~30 Hz). Waves
+  /// at 60 Hz vs 30 Hz aren't visually distinguishable; the spare
+  /// CPU buys headroom for sensor cameras and physics.
+  public: double lastVisualUpdateTime{-1.0};
+  /// \brief Min sim-time between visual fftSim->Update() calls,
+  /// in seconds (1 / wave update_rate).
+  public: double visualUpdatePeriod{1.0 / 30.0};
   public: float currentSimTime{0.0f};
 
   // ---- FFT path state ----
@@ -1035,7 +1044,19 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // only the parameters, and each side instantiates its own
       // FFTWaveSimulation from them. So the visual MUST drive its own
       // Update each frame — there is no shared grid to read from.
-      this->fftSim->Update(static_cast<double>(this->currentSimTime));
+      //
+      // Throttle to the same rate the server-side Waves system uses
+      // (30 Hz default). Above that the FFT is recomputed faster than
+      // the human eye distinguishes; below it the water visibly stutters.
+      const double now = static_cast<double>(this->currentSimTime);
+      const bool dueForUpdate =
+          this->lastVisualUpdateTime < 0.0 ||
+          (now - this->lastVisualUpdateTime) >= this->visualUpdatePeriod;
+      if (dueForUpdate)
+      {
+        this->fftSim->Update(now);
+        this->lastVisualUpdateTime = now;
+      }
       ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
                                    this->fftSim->DispXGrid(),
                                    this->fftSim->DispYGrid());
@@ -1310,6 +1331,17 @@ void WaterVisual::PreUpdate(
     }
     this->dataPtr->useFft = true;
     this->dataPtr->fftSim = fft;
+    // Slope/chop-deriv grids are only consumed when the VS reads them
+    // (useSlopeMap=1). The GPU-FFT path and the Encino path both run
+    // with useSlopeMap=0 (finite-diff normals in the VS), so skipping
+    // the 5 derivative IFFTs cuts ~60% off each Update on Phillips.
+    // Encino's own Update branch already bypasses them — flag is a
+    // no-op there but harmless.
+    const char *gpuEnv = std::getenv("GZ_WAVES_GPU_FFT");
+    const char *stage2 = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
+    const bool gpuPath = (gpuEnv && std::string(gpuEnv) == "1") ||
+                         (stage2 && std::string(stage2) == "1");
+    fft->SetComputeDerivatives(!gpuPath && !fft->UseEncino());
     this->dataPtr->cachedTileSize = static_cast<float>(fft->TileSizeMeters());
     this->dataPtr->cachedGridSize = static_cast<int>(fft->GridSize());
     this->dataPtr->cachedTau = static_cast<float>(data.params.tau);

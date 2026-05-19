@@ -80,6 +80,17 @@ public:
   /// that need them should fall back to finite differences.
   bool UseEncino() const { return this->useEncino_; }
 
+  /// \brief Enable or disable computation of the 5 derivative grids
+  /// (∂η/∂x, ∂η/∂y, ∂Dx/∂x, ∂Dy/∂y, ∂Dx/∂y). Default true. When the
+  /// visual won't upload them (Encino path, GPU-FFT path with
+  /// useSlopeMap=0, or any consumer that finite-differences instead),
+  /// disable to skip 5 of the 8 IFFTs per Update — substantial CPU
+  /// savings on the Phillips path. Encino's Update branch already
+  /// short-circuits before these are touched, so the flag is a no-op
+  /// there.
+  void SetComputeDerivatives(bool _on) { this->computeDerivatives_ = _on; }
+  bool ComputeDerivatives() const { return this->computeDerivatives_; }
+
   const Eigen::MatrixXd &HeightGrid() const { return this->heightGrid_; }
   /// \brief Horizontal x-displacement field Dx(x, y, t), refreshed by Update().
   /// Multiplied by a "choppiness" factor in the visual shader to sharpen
@@ -167,6 +178,11 @@ private:
   bool useEncino_{false};
   struct EncinoState;
   std::unique_ptr<EncinoState> encino_;
+
+  // When true (default), Update() computes the 5 derivative grids in
+  // addition to η/Dx/Dy. Toggled off by consumers that don't read them
+  // (e.g. the GPU-FFT visual path that does finite-diff normals).
+  bool computeDerivatives_{true};
 };
 
 }  // namespace gz::sim::waves
