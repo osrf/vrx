@@ -133,15 +133,6 @@ class WaterVisual::Implementation
   public: std::vector<gz::math::Vector2f> cachedDirections{
     {1.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 0.0f}};
   public: float cachedTau{2.0f};
-  /// \brief Last sim-time at which the visual ran fftSim->Update().
-  /// Used to throttle the per-frame visual Update down from render
-  /// rate (~60 Hz) to the server's wave update_rate (~30 Hz). Waves
-  /// at 60 Hz vs 30 Hz aren't visually distinguishable; the spare
-  /// CPU buys headroom for sensor cameras and physics.
-  public: double lastVisualUpdateTime{-1.0};
-  /// \brief Min sim-time between visual fftSim->Update() calls,
-  /// in seconds (1 / wave update_rate).
-  public: double visualUpdatePeriod{1.0 / 30.0};
   public: float currentSimTime{0.0f};
 
   // ---- FFT path state ----
@@ -1045,18 +1036,11 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // FFTWaveSimulation from them. So the visual MUST drive its own
       // Update each frame — there is no shared grid to read from.
       //
-      // Throttle to the same rate the server-side Waves system uses
-      // (30 Hz default). Above that the FFT is recomputed faster than
-      // the human eye distinguishes; below it the water visibly stutters.
-      const double now = static_cast<double>(this->currentSimTime);
-      const bool dueForUpdate =
-          this->lastVisualUpdateTime < 0.0 ||
-          (now - this->lastVisualUpdateTime) >= this->visualUpdatePeriod;
-      if (dueForUpdate)
-      {
-        this->fftSim->Update(now);
-        this->lastVisualUpdateTime = now;
-      }
+      // Run at full render rate (60 Hz). A throttle here would only
+      // save CPU in the GUI process — which doesn't enter the server's
+      // RTF accounting — at the cost of a stale-grid stutter every
+      // time the render rate is faster than the throttle period.
+      this->fftSim->Update(static_cast<double>(this->currentSimTime));
       ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
                                    this->fftSim->DispXGrid(),
                                    this->fftSim->DispYGrid());
