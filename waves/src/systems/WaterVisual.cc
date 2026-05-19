@@ -390,12 +390,6 @@ void WaterVisual::Implementation::UploadUniforms()
   // Engine-auto bindings (sentinel value = "auto from Ogre").
   (*vsParams)["worldviewproj_matrix"] = 1;
   (*vsParams)["camera_position_object_space"] = 1;
-  // FFT vertex shader uses world_matrix to compute world-space XY
-  // for the periodic heightmap sample, so tile instances at
-  // different world offsets each render their own piece of the
-  // continuous wavefield (rather than each tile showing the same
-  // patch in local model space).
-  (*vsParams)["world_matrix"] = 1;
 
   // Static scalars/vec2s shared by both shaders.
   (*vsParams)["rescale"] = this->rescale;
@@ -415,6 +409,15 @@ void WaterVisual::Implementation::UploadUniforms()
 
   if (this->useFft)
   {
+    // FFT vertex shader uses world_matrix to compute world-space XY
+    // for the periodic heightmap sample, so tile instances at
+    // different world offsets each render their own piece of the
+    // continuous wavefield (rather than each tile showing the same
+    // patch in local model space). The Gerstner VS doesn't declare
+    // this uniform, so binding it unconditionally throws an
+    // ItemIdentityException there.
+    (*vsParams)["world_matrix"] = 1;
+
     // FFT shader: heightmap texture (bound separately by HeightMapTexture)
     // plus the geometry of the periodic tile and the choppiness factor.
     (*vsParams)["tileSize"]   = this->cachedTileSize;
