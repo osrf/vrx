@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-model
+  href="http://download.ros.org/schema/package_format3.xsd"
+  schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>encino_waves</name>
+  <version>0.1.0</version>
+  <description>
+    Vendored Apache-2.0 EncinoWaves ocean spectrum library (Christopher Jon
+    Horvath, 2015) with the FFTW backend replaced by an Eigen::FFT shim so
+    the library lifts cleanly into VRX's Apache-2.0 dependency envelope.
+
+    Implements the spectra and propagation pipeline from Horvath's 2015
+    DigiPro paper "Empirical directional wave spectra for computer
+    graphics" — TMA / JONSWAP / Pierson-Moskowitz spectra, Hasselmann
+    directional spread, capillary / deep / finite-depth dispersion, and
+    the Tessendorf chop-aware tangent/normal computation.
+  </description>
+
+  <maintainer email="cen.aguero@gmail.com">Carlos Aguero</maintainer>
+  <license>Apache-2.0</license>
+
+  <author>Christopher Jon Horvath (upstream)</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>eigen</depend>
+  <depend>libtbb-dev</depend>
+
+  <!-- Imath: BSD-3 utility math types from the OpenEXR project. Provides
+       Vec2/Vec3/Box/clamp/lerp that EncinoWaves uses throughout. The
+       Ubuntu package is `libimath-dev` (no separate rosdep key on jazzy
+       yet; users build with apt). -->
+  <depend>libimath-dev</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
