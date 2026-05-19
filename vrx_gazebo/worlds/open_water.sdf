@@ -5,7 +5,7 @@
     <!-- Physics -->
     <physics name="default_physics" type="dart">
       <max_step_size>0.004</max_step_size>
-      <real_time_factor>1</real_time_factor>
+      <real_time_factor>0</real_time_factor>
     </physics>
 
     <!-- Spherical coordinates for Portuguese Ledge, Monterey Bay.
@@ -95,30 +95,25 @@
             name="gz::sim::systems::Waves">
       <!-- Switch between "gerstner" (analytic, has shader path) and "fft"
            (stochastic; visual samples a CPU-generated heightmap each tick). -->
-      <!-- <algorithm>fft</algorithm> -->
-      <algorithm>gerstner</algorithm>
+      <algorithm>fft</algorithm>
       <update_rate>30</update_rate>
       <wave>
         <model>PMS</model>
         <number>3</number>
-        <!-- Long-period swell (peak T = 12 s → wavelength ≈ 225 m at
-             deep-water dispersion). With 3 PMS-sampled sines this
-             gives per-wave amplitudes ~1.5 m and a naturally varied,
-             slow-moving sea on the Gerstner shader. The same period
-             on the FFT path implies wind ≈ 16 m/s — substantially
-             stormier than the short-period asv reference, but visually
-             still reasonable. Cross-backend parity is fundamentally
-             approximate: 3 sines vs. a 65k-mode spectrum. -->
-        <period>12.0</period>
-        <gain>2.0</gain>
+        <!-- Tuned to mirror asv_wave_sim's reference config
+             (tile_size=100, cell_count=256, wind_speed=5 m/s,
+             wind_angle=135°, steepness=2). Our PMS schema doesn't take
+             wind_speed directly: peak λ = 2π·V²/g ≈ 16 m for 5 m/s,
+             corresponding to peak period ≈ 3.2 s. -->
+        <!-- period=5 → windSpeed = 0.879·g/(2π/period) ≈ 6.9 m/s.
+             Phillips SWH at 7 m/s ≈ 1 m, which matches the visible
+             wave amplitude in asv_wave_sim's screenshots (their
+             default is wind=5, but camera was very close to water). -->
+        <!-- period=3.2 → wind ≈ 5.0 m/s (exact asv_wave_sim
+             reference: wind_speed=5). -->
+        <period>3.2</period>
+        <gain>1.0</gain>
         <direction>2.356</direction>  <!-- 135° in radians -->
-        <!-- angle/scale spread the 3 Gerstner sines across direction +
-             wavelength. Tighter spread (scale closer to 1, smaller
-             angle) keeps the dominant swell coherent; wider spread
-             breaks regularity. steepness=0 leaves the waves as pure
-             rolling sines — the long period already gives them a
-             natural look without horizontal pinch.
-             All four knobs are Gerstner-only (no effect on FFT). -->
         <angle>0.4</angle>
         <scale>1.1</scale>
         <steepness>0.0</steepness>
@@ -128,7 +123,12 @@
              swells, producing the flatter, slow-moving look we want
              rather than many small bubbly waves. -->
         <tile_size>256</tile_size>
-        <grid_size>256</grid_size>
+        <!-- 1024² FFT cell = 256m/1024 = 0.25m. 16× the spectral
+             resolution of the 256² baseline → finer ripple detail
+             and longer-wavelength swells coexist on the same tile.
+             Cost scaling: Encino ~16× CPU FFT work (≈ 10–30 ms),
+             GPU Stage 3 grows but is still dispatch-bound. -->
+        <grid_size>1024</grid_size>
         <seed>42</seed>
         <!-- Match asv_wave_sim's <steepness>2</steepness> in our
              sign convention. Sharply pinches wave crests. -->
