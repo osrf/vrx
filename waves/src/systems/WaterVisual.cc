@@ -1036,10 +1036,9 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // FFTWaveSimulation from them. So the visual MUST drive its own
       // Update each frame — there is no shared grid to read from.
       //
-      // Run at full render rate (60 Hz). A throttle here would only
-      // save CPU in the GUI process — which doesn't enter the server's
-      // RTF accounting — at the cost of a stale-grid stutter every
-      // time the render rate is faster than the throttle period.
+      // Run at the render rate (60 Hz typical). The GUI process runs
+      // off the server's RTF accounting, so throttling here would
+      // only cost visual smoothness without buying any measured RTF.
       this->fftSim->Update(static_cast<double>(this->currentSimTime));
       ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
                                    this->fftSim->DispXGrid(),
