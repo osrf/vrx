@@ -19,6 +19,8 @@
 
 #include <unsupported/Eigen/FFT>
 
+#include <oneapi/tbb/global_control.h>
+
 #include "gz/sim/waves/Wavefield.hh"
 
 #include "EncinoWaves/All.h"
@@ -30,6 +32,29 @@ namespace
 {
 constexpr double kGravity = 9.80665;
 constexpr double k2Pi    = 6.28318530717958647692;
+
+/// \brief Process-wide cap on the TBB worker pool.
+///
+/// Encino's `propagate()` farms its per-cell spectrum work out via
+/// `tbb::parallel_for`. At 30 Hz with N=128 there's only ~5–10 ms of
+/// useful parallel work per call — far less than enough to keep the
+/// default pool (1× `hardware_concurrency()`) usefully busy. On a
+/// 24-core machine the extra 20+ workers idle-wait on
+/// `wait_bounded_queue_monitor`, which `perf` reports as ~60% of
+/// total server CPU. That wasted wall time directly limits RTF.
+///
+/// Cap the pool at 4 threads, which is enough to absorb Encino's
+/// inner parallelism without leaving an army of idle spinners.
+/// `tbb::global_control` stacks across instances with `min` semantics,
+/// so leaking this singleton just locks in the cap. (Process-wide is
+/// fine — other consumers in the simulation that use TBB will benefit
+/// from the same cap.)
+void EnsureTbbPoolCapped()
+{
+  static const tbb::global_control kPool(
+      tbb::global_control::max_allowed_parallelism, 4u);
+  (void)kPool;
+}
 
 /// Returns the integer log2 of n if n is a positive power of two; -1 otherwise.
 int Log2Pow2(std::size_t n)
@@ -74,6 +99,11 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
   , gain_(p.gain)
   , tau_(p.tau)
 {
+  // Cap TBB's worker pool before Encino starts spinning workers up.
+  // Idle workers parked on wait_bounded_queue_monitor were ~60% of
+  // server CPU before this.
+  EnsureTbbPoolCapped();
+
   // PMS relation: peak omega <-> wind speed at 19.5 m. We have period →
   // omegaP → V19. (deep-water dispersion places the spectral peak at
   // omegaP ≈ 0.879 * g / V19.)
