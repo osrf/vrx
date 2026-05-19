@@ -123,12 +123,7 @@
              swells, producing the flatter, slow-moving look we want
              rather than many small bubbly waves. -->
         <tile_size>256</tile_size>
-        <!-- 1024² FFT cell = 256m/1024 = 0.25m. 16× the spectral
-             resolution of the 256² baseline → finer ripple detail
-             and longer-wavelength swells coexist on the same tile.
-             Cost scaling: Encino ~16× CPU FFT work (≈ 10–30 ms),
-             GPU Stage 3 grows but is still dispatch-bound. -->
-        <grid_size>1024</grid_size>
+        <grid_size>256</grid_size>
         <seed>42</seed>
         <!-- Match asv_wave_sim's <steepness>2</steepness> in our
              sign convention. Sharply pinches wave crests. -->
