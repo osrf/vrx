@@ -14,6 +14,7 @@
 #include <complex>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include <Eigen/Dense>
 
@@ -51,7 +52,7 @@ public:
                     std::size_t _gridSize,
                     std::uint32_t _seed);
 
-  ~FFTWaveSimulation() override = default;
+  ~FFTWaveSimulation() override;
 
   // IWaveSimulation
   double Elevation(double x, double y, double t) const override;
@@ -70,6 +71,15 @@ public:
 
   std::size_t GridSize() const { return this->gridSize_; }
   double TileSizeMeters() const { return this->tileSize_; }
+
+  /// \brief True when the GZ_WAVES_USE_ENCINO=1 toggle is active and this
+  /// instance is driving Update(t) through the Apache-2.0 Horvath spectrum
+  /// library (TMA / JONSWAP + Hasselmann directional spread + chop-aware
+  /// foam Jacobian) instead of the in-tree Phillips path. Slope and
+  /// chop-derivative grids are NOT populated on the Encino path — visuals
+  /// that need them should fall back to finite differences.
+  bool UseEncino() const { return this->useEncino_; }
+
   const Eigen::MatrixXd &HeightGrid() const { return this->heightGrid_; }
   /// \brief Horizontal x-displacement field Dx(x, y, t), refreshed by Update().
   /// Multiplied by a "choppiness" factor in the visual shader to sharpen
@@ -150,6 +160,13 @@ private:
 
   // Per-update dispersion factor omega(k) (precomputed)
   Eigen::MatrixXd omegaGrid_;
+
+  // Optional EncinoWaves-backed Update path. The EncinoState type is
+  // defined entirely in FFTWaveSimulation.cc so the vendored EncinoWaves
+  // headers don't leak into the public include surface here.
+  bool useEncino_{false};
+  struct EncinoState;
+  std::unique_ptr<EncinoState> encino_;
 };
 
 }  // namespace gz::sim::waves

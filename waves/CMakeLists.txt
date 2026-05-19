@@ -21,6 +21,9 @@ find_package(gz_common_vendor REQUIRED)
 find_package(gz-common REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
+# Apache-2.0 Horvath spectrum library, used by FFTWaveSimulation when
+# GZ_WAVES_USE_ENCINO=1 at construction time.
+find_package(encino_waves REQUIRED)
 
 # --------------------------------------------------------------------------
 # Core wave-simulation library: backend interface, factory, Gerstner impl.
@@ -40,6 +43,8 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
     gz-sim::core
     gz-math::gz-math
+  PRIVATE
+    encino_waves::encino_waves
 )
 
 # --------------------------------------------------------------------------

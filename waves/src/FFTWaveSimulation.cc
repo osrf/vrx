@@ -12,11 +12,16 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <iostream>
 #include <random>
+#include <string>
 
 #include <unsupported/Eigen/FFT>
 
 #include "gz/sim/waves/Wavefield.hh"
+
+#include "EncinoWaves/All.h"
 
 namespace gz::sim::waves
 {
@@ -25,7 +30,40 @@ namespace
 {
 constexpr double kGravity = 9.80665;
 constexpr double k2Pi    = 6.28318530717958647692;
+
+/// Returns the integer log2 of n if n is a positive power of two; -1 otherwise.
+int Log2Pow2(std::size_t n)
+{
+  if (n == 0 || (n & (n - 1)) != 0) return -1;
+  int r = 0;
+  while ((static_cast<std::size_t>(1u) << r) < n) ++r;
+  return r;
+}
+
+/// True when GZ_WAVES_USE_ENCINO=1 is set at construction time. Read once
+/// per FFTWaveSimulation instance — toggling the env var mid-run won't
+/// take effect until the wave field gets rebuilt.
+bool EncinoEnabledByEnv()
+{
+  const char *v = std::getenv("GZ_WAVES_USE_ENCINO");
+  return v && std::string(v) == "1";
+}
 }  // namespace
+
+//-----------------------------------------------------------------------------
+// EncinoState — pimpl that holds the vendored Horvath-spectrum library's
+// per-instance state. Defined here (not in the header) so EncinoWaves headers
+// stay out of the public include surface.
+//-----------------------------------------------------------------------------
+struct FFTWaveSimulation::EncinoState
+{
+  EncinoWaves::Parametersf params;
+  std::unique_ptr<EncinoWaves::InitialStatef> initial;
+  std::unique_ptr<EncinoWaves::Propagationf>   propagation;
+  std::unique_ptr<EncinoWaves::PropagatedStatef> state;
+};
+
+FFTWaveSimulation::~FFTWaveSimulation() = default;
 
 FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
                                      double tile,
@@ -124,6 +162,52 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
   this->dispDxDxGrid_ = Eigen::MatrixXd::Zero(N, N);
   this->dispDyDyGrid_ = Eigen::MatrixXd::Zero(N, N);
   this->dispDxDyGrid_ = Eigen::MatrixXd::Zero(N, N);
+
+  // Optional: bring up the Apache-2.0 EncinoWaves spectrum library. The
+  // toggle is intentionally an env var rather than an SDF parameter for
+  // now — it's an experiment knob, not a stable interface. The Encino
+  // path leaves slope/chop-derivative grids zeroed; consumers must check
+  // UseEncino() and skip their slope/chop-deriv upload.
+  this->useEncino_ = EncinoEnabledByEnv();
+  if (this->useEncino_)
+  {
+    const int log2N = Log2Pow2(this->gridSize_);
+    if (log2N < 0)
+    {
+      std::cerr << "[FFTWaveSimulation] GZ_WAVES_USE_ENCINO=1 requested but "
+                << "gridSize=" << this->gridSize_ << " is not a power of two; "
+                << "falling back to Phillips path." << std::endl;
+      this->useEncino_ = false;
+    }
+    else
+    {
+      this->encino_ = std::make_unique<EncinoState>();
+      // Match upstream Horvath defaults except for the four knobs we
+      // share with the in-tree Phillips path. EncinoWaves's defaults pick
+      // TMA spectrum + Hasselmann directional spread + Capillary
+      // dispersion + Normal random distribution, which is the "good
+      // ocean" config the Horvath 2015 paper validates against.
+      auto &ep = this->encino_->params;
+      ep.resolutionPowerOfTwo = log2N;
+      ep.domain        = static_cast<float>(this->tileSize_);
+      ep.windSpeed     = static_cast<float>(this->windSpeed_);
+      ep.amplitudeGain = static_cast<float>(this->gain_);
+      ep.random.seed   = static_cast<int>(seed);
+
+      this->encino_->initial =
+          std::make_unique<EncinoWaves::InitialStatef>(ep);
+      this->encino_->propagation =
+          std::make_unique<EncinoWaves::Propagationf>(ep, /*nthreads=*/-1);
+      this->encino_->state =
+          std::make_unique<EncinoWaves::PropagatedStatef>(ep);
+
+      std::cout << "[FFTWaveSimulation] EncinoWaves spectrum library active "
+                << "(res=" << ep.resolution() << " domain=" << ep.domain
+                << "m wind=" << ep.windSpeed << "m/s seed=" << ep.random.seed
+                << ")" << std::endl;
+    }
+  }
+
   this->Update(0.0);
 }
 
@@ -190,6 +274,38 @@ namespace
 void FFTWaveSimulation::Update(double t)
 {
   const int N = static_cast<int>(this->gridSize_);
+
+  // ENCINO-BACKED PATH.
+  // Drive the heightGrid_/dispXGrid_/dispYGrid_ outputs through the
+  // vendored Horvath spectrum library instead of our Phillips path.
+  // Slope and chop-derivative grids stay zeroed — the visual layer
+  // checks UseEncino() and falls back to finite-diff normals.
+  if (this->useEncino_ && this->encino_ && this->encino_->propagation)
+  {
+    this->encino_->propagation->propagate(
+        this->encino_->params,
+        *this->encino_->initial,
+        *this->encino_->state,
+        static_cast<float>(t));
+
+    const float *h  = this->encino_->state->Height.cdata();
+    const float *dx = this->encino_->state->Dx.cdata();
+    const float *dy = this->encino_->state->Dy.cdata();
+
+    for (int i = 0; i < N; ++i)
+    {
+      for (int j = 0; j < N; ++j)
+      {
+        const std::size_t idx =
+            static_cast<std::size_t>(i) * N + j;
+        this->heightGrid_(i, j) = static_cast<double>(h[idx]);
+        this->dispXGrid_(i, j)  = static_cast<double>(dx[idx]);
+        this->dispYGrid_(i, j)  = static_cast<double>(dy[idx]);
+      }
+    }
+    return;
+  }
+
   const double ramp = this->Ramp(t);
 
   // Evolve the height spectrum:

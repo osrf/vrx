@@ -428,7 +428,8 @@ void WaterVisual::Implementation::UploadUniforms()
     const char *stage2 = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
     const bool gpuPath = (gpuEnv && std::string(gpuEnv) == "1") ||
                          (stage2 && std::string(stage2) == "1");
-    (*vsParams)["useSlopeMap"] = gpuPath ? 0 : 1;
+    const bool encinoPath = this->fftSim && this->fftSim->UseEncino();
+    (*vsParams)["useSlopeMap"] = (gpuPath || encinoPath) ? 0 : 1;
   }
   else
   {
@@ -1007,7 +1008,9 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // Upload the slope and chop-derivative grids so the VS can
       // build the full Tessendorf chop-aware tangent + normal per
       // vertex instead of finite-differencing the displaced surface.
-      if (ok)
+      // Skip on the Encino path — it only fills Height/Dx/Dy; the VS
+      // falls back to finite-diff normals (gated by useSlopeMap=0).
+      if (ok && !this->fftSim->UseEncino())
       {
         this->heightMap->UploadSlope(this->fftSim->SlopeXGrid(),
                                       this->fftSim->SlopeYGrid());
