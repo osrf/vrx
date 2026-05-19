@@ -4,7 +4,7 @@
 
     <!-- Physics -->
     <physics name="default_physics" type="dart">
-      <max_step_size>0.001</max_step_size>
+      <max_step_size>0.004</max_step_size>
       <real_time_factor>1</real_time_factor>
     </physics>
 
@@ -95,7 +95,8 @@
             name="gz::sim::systems::Waves">
       <!-- Switch between "gerstner" (analytic, has shader path) and "fft"
            (stochastic; visual samples a CPU-generated heightmap each tick). -->
-      <algorithm>fft</algorithm>
+      <!-- <algorithm>fft</algorithm> -->
+      <algorithm>gerstner</algorithm>
       <update_rate>30</update_rate>
       <wave>
         <model>PMS</model>
@@ -112,11 +113,17 @@
         <!-- period=3.2 → wind ≈ 5.0 m/s (exact asv_wave_sim
              reference: wind_speed=5). -->
         <period>3.2</period>
-        <gain>1.0</gain>
+        <!-- gain/angle/scale/steepness tuned for the analytic Gerstner
+             path. The FFT path uses period→wind only; gain scales its
+             spectrum amplitudes. steepness is Gerstner-only (no effect
+             on FFT), choppiness below is FFT-only (no effect on
+             Gerstner). The values below give a comparable-looking sea
+             across both backends without being optimal for either. -->
+        <gain>1.5</gain>
         <direction>2.356</direction>  <!-- 135° in radians -->
-        <angle>0.4</angle>
-        <scale>1.1</scale>
-        <steepness>0.0</steepness>
+        <angle>0.6</angle>
+        <scale>1.5</scale>
+        <steepness>1.5</steepness>
         <tau>2.0</tau>
         <!-- FFT-only. tile_size=256 (matching asv_wave_sim's `waves`
              scene) gives the wavefield room for long-wavelength
