@@ -77,6 +77,30 @@
 #include <Eigen/Core>
 #include <unsupported/Eigen/FFT>
 
+// FFTW plan-flag preprocessor macros. The upstream EncinoWaves passes these
+// to `plan_*` calls; in this shim they're ignored (Eigen::FFT has no plan
+// caching to tune), but the symbols must exist so call sites compile
+// without an `#include <fftw3.h>`. Values chosen to match FFTW's so a
+// future swap-back works unchanged.
+#ifndef FFTW_ESTIMATE
+#define FFTW_ESTIMATE (1U << 6)
+#endif
+#ifndef FFTW_DESTROY_INPUT
+#define FFTW_DESTROY_INPUT (1U << 0)
+#endif
+#ifndef FFTW_MEASURE
+#define FFTW_MEASURE 0U
+#endif
+#ifndef FFTW_PATIENT
+#define FFTW_PATIENT (1U << 5)
+#endif
+#ifndef FFTW_EXHAUSTIVE
+#define FFTW_EXHAUSTIVE (1U << 3)
+#endif
+#ifndef FFTW_PRESERVE_INPUT
+#define FFTW_PRESERVE_INPUT (1U << 4)
+#endif
+
 namespace EncinoWaves
 {
 
