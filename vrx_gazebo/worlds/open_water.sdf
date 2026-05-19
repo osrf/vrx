@@ -99,7 +99,15 @@
       <algorithm>gerstner</algorithm>
       <update_rate>30</update_rate>
       <wave>
-        <model>PMS</model>
+        <!-- CWR = "custom wave reference": Gerstner reads <amplitude>
+             directly instead of deriving it from a Pierson-Moskowitz
+             spectrum. PMS-sampled across only 3 sines yields ~0.5 m
+             peaks (visually flat) because all the spectral energy is
+             actually in the *other* 65k modes the FFT path sees.
+             Both FFT backends ignore <model> and <amplitude>, so this
+             switch is Gerstner-only. -->
+        <model>CWR</model>
+        <amplitude>0.8</amplitude>
         <number>3</number>
         <!-- Tuned to mirror asv_wave_sim's reference config
              (tile_size=100, cell_count=256, wind_speed=5 m/s,
