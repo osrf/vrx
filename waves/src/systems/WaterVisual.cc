@@ -92,11 +92,16 @@ class WaterVisual::Implementation
   // Each can still be overridden in the model.sdf <parameters> block.
   public: gz::math::Vector2d bumpScale{64.0, 64.0};
   public: gz::math::Vector2d bumpSpeed{0.01, 0.01};
-  public: float hdrMultiplier{0.1f};
-  public: float fresnelPower{8.0f};
+  // Strict asv_wave_sim defaults — match their literal values so a
+  // visual comparison reflects the simulation/normal-computation
+  // difference, not parameter divergence.
+  public: float hdrMultiplier{0.4f};
+  public: float fresnelPower{5.0f};
+  public: float roughness{0.0f};
   public: float foamStrength{0.7f};     ///< Blend amount at J ≤ 0
   public: float foamThreshold{0.25f};   ///< Foam ramps in below this J
-  public: gz::math::Color shallowColor{0.0f, 0.1f, 0.2f, 1.0f};
+  // asv_wave_sim's exact default colours.
+  public: gz::math::Color shallowColor{0.0f, 0.1f, 0.3f, 1.0f};
   public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
   public: std::string visualName;
   public: Entity visualEntity{kNullEntity};
@@ -415,6 +420,15 @@ void WaterVisual::Implementation::UploadUniforms()
     (*vsParams)["tileSize"]   = this->cachedTileSize;
     (*vsParams)["gridSize"]   = this->cachedGridSize;
     (*vsParams)["chopFactor"] = this->cachedChopFactor;
+    // CPU FFT uploads a slope map; GPU FFT doesn't (yet). The
+    // useGpu env var gates the GPU pipeline, so default the uniform
+    // accordingly. If the slope upload fails the VS still falls
+    // back to finite differences when this is 0.
+    const char *gpuEnv = std::getenv("GZ_WAVES_GPU_FFT");
+    const char *stage2 = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
+    const bool gpuPath = (gpuEnv && std::string(gpuEnv) == "1") ||
+                         (stage2 && std::string(stage2) == "1");
+    (*vsParams)["useSlopeMap"] = gpuPath ? 0 : 1;
   }
   else
   {
@@ -464,6 +478,7 @@ void WaterVisual::Implementation::UploadUniforms()
   // Fragment shader: colours + lighting params + textures.
   (*fsParams)["hdrMultiplier"] = this->hdrMultiplier;
   (*fsParams)["fresnelPower"]  = this->fresnelPower;
+  (*fsParams)["roughness"]     = this->roughness;
   // Foam path. FFT mode reads the heightmap for the Tessendorf
   // Jacobian; gerstner keeps foamStrength=0 so the FS short-circuits
   // before sampling an unbound heightMap.
@@ -989,6 +1004,18 @@ void WaterVisual::Implementation::OnSceneUpdate()
       ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
                                    this->fftSim->DispXGrid(),
                                    this->fftSim->DispYGrid());
+      // Upload the slope and chop-derivative grids so the VS can
+      // build the full Tessendorf chop-aware tangent + normal per
+      // vertex instead of finite-differencing the displaced surface.
+      if (ok)
+      {
+        this->heightMap->UploadSlope(this->fftSim->SlopeXGrid(),
+                                      this->fftSim->SlopeYGrid());
+        this->heightMap->UploadChopDerivatives(
+            this->fftSim->DispDxDxGrid(),
+            this->fftSim->DispDyDyGrid(),
+            this->fftSim->DispDxDyGrid());
+      }
     }
     // One-shot diagnostic on the very first successful CPU upload so we
     // can see the actual amplitudes the GPU is sampling. Helps
@@ -1159,6 +1186,8 @@ void WaterVisual::Configure(
       this->dataPtr->hdrMultiplier = p->Get<float>("hdrMultiplier");
     if (p->HasElement("fresnelPower"))
       this->dataPtr->fresnelPower = p->Get<float>("fresnelPower");
+    if (p->HasElement("roughness"))
+      this->dataPtr->roughness = p->Get<float>("roughness");
     if (p->HasElement("foamStrength"))
       this->dataPtr->foamStrength = p->Get<float>("foamStrength");
     if (p->HasElement("foamThreshold"))

@@ -65,6 +65,21 @@ namespace gz::sim::systems
                 const Eigen::MatrixXd &_dispX,
                 const Eigen::MatrixXd &_dispY);
 
+    /// \brief Upload the per-cell slope grid (∂η/∂x, ∂η/∂y) to a
+    /// dedicated `slopeMap` texture. Bound to the visual material on
+    /// first call. The VS reads N = normalize(-slope.x, -slope.y, 1)
+    /// per-vertex for spectrum-accurate surface normals.
+    bool UploadSlope(const Eigen::MatrixXd &_slopeX,
+                     const Eigen::MatrixXd &_slopeY);
+
+    /// \brief Upload the per-cell chop-derivative grids (∂Dx/∂x,
+    /// ∂Dy/∂y, ∂Dx/∂y) to a dedicated `chopDerivMap` texture. With
+    /// the slopeMap this completes the five derivative grids needed
+    /// for the full Tessendorf chop-aware tangent + normal.
+    bool UploadChopDerivatives(const Eigen::MatrixXd &_dDxDx,
+                                const Eigen::MatrixXd &_dDyDy,
+                                const Eigen::MatrixXd &_dDxDy);
+
     /// \brief GPU-FFT path: dispatch a compute shader that writes the
     /// heightmap texture directly on the GPU, replacing the CPU
     /// `Upload(...)` call. The bridge lazily sets up the

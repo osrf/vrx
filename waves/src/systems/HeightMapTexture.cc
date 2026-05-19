@@ -27,6 +27,12 @@ namespace
                             const double *, const double *, const double *,
                             int, int);
   using ReadyFn  = int (*)(waves_heightmap_t);
+  using UploadSlopeFn = int (*)(waves_heightmap_t,
+                                 const double *, const double *,
+                                 int, int);
+  using UploadChopDerivsFn = int (*)(waves_heightmap_t,
+                                      const double *, const double *,
+                                      const double *, int, int);
   using ComputeFn = int (*)(waves_heightmap_t, const char *, float, float);
   using PbsVisualFn = int (*)(waves_heightmap_t, double, int,
                                double, double, double, const char *);
@@ -61,6 +67,8 @@ namespace
     void      *handle{nullptr};
     CreateFn   create{nullptr};
     UploadFn   upload{nullptr};
+    UploadSlopeFn uploadSlope{nullptr};
+    UploadChopDerivsFn uploadChopDerivs{nullptr};
     ReadyFn    ready{nullptr};
     ComputeFn  compute{nullptr};
     PbsVisualFn pbsVisual{nullptr};
@@ -105,6 +113,11 @@ namespace
           dlsym(api.handle, "waves_ogre2_heightmap_create"));
       api.upload  = reinterpret_cast<UploadFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_upload"));
+      api.uploadSlope = reinterpret_cast<UploadSlopeFn>(
+          dlsym(api.handle, "waves_ogre2_heightmap_upload_slope"));
+      api.uploadChopDerivs = reinterpret_cast<UploadChopDerivsFn>(
+          dlsym(api.handle,
+                "waves_ogre2_heightmap_upload_chop_derivatives"));
       api.ready   = reinterpret_cast<ReadyFn>(
           dlsym(api.handle, "waves_ogre2_heightmap_ready"));
       api.compute = reinterpret_cast<ComputeFn>(
@@ -215,6 +228,51 @@ bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
   RowMatrix dispY = _dispY;
   return api.upload(this->impl_->handle,
                     eta.data(), dispX.data(), dispY.data(), N, N) != 0;
+}
+
+bool HeightMapTexture::UploadSlope(const Eigen::MatrixXd &_slopeX,
+                                    const Eigen::MatrixXd &_slopeY)
+{
+  if (!this->ready_ || !this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.uploadSlope)
+    return false;
+  const int N = static_cast<int>(this->gridSize_);
+  if (_slopeX.rows() != N || _slopeX.cols() != N ||
+      _slopeY.rows() != N || _slopeY.cols() != N)
+    return false;
+  using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+                                  Eigen::RowMajor>;
+  RowMatrix sx = _slopeX;
+  RowMatrix sy = _slopeY;
+  return api.uploadSlope(this->impl_->handle,
+                          sx.data(), sy.data(), N, N) != 0;
+}
+
+bool HeightMapTexture::UploadChopDerivatives(
+    const Eigen::MatrixXd &_dDxDx,
+    const Eigen::MatrixXd &_dDyDy,
+    const Eigen::MatrixXd &_dDxDy)
+{
+  if (!this->ready_ || !this->impl_->handle)
+    return false;
+  const auto &api = LoadBridge();
+  if (!api.loaded || !api.uploadChopDerivs)
+    return false;
+  const int N = static_cast<int>(this->gridSize_);
+  if (_dDxDx.rows() != N || _dDxDx.cols() != N ||
+      _dDyDy.rows() != N || _dDyDy.cols() != N ||
+      _dDxDy.rows() != N || _dDxDy.cols() != N)
+    return false;
+  using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+                                  Eigen::RowMajor>;
+  RowMatrix xx = _dDxDx;
+  RowMatrix yy = _dDyDy;
+  RowMatrix xy = _dDxDy;
+  return api.uploadChopDerivs(this->impl_->handle,
+                                xx.data(), yy.data(), xy.data(),
+                                N, N) != 0;
 }
 
 bool HeightMapTexture::Dispatch(const std::string &_shaderAbsPath,

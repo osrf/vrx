@@ -109,7 +109,9 @@
              Phillips SWH at 7 m/s ≈ 1 m, which matches the visible
              wave amplitude in asv_wave_sim's screenshots (their
              default is wind=5, but camera was very close to water). -->
-        <period>5.0</period>
+        <!-- period=3.2 → wind ≈ 5.0 m/s (exact asv_wave_sim
+             reference: wind_speed=5). -->
+        <period>3.2</period>
         <gain>1.0</gain>
         <direction>2.356</direction>  <!-- 135° in radians -->
         <angle>0.4</angle>
@@ -125,6 +127,8 @@
         <seed>42</seed>
         <!-- Match asv_wave_sim's <steepness>2</steepness> in our
              sign convention. Sharply pinches wave crests. -->
+        <!-- asv_wave_sim's literal steepness=2 (our sign convention
+             flips it). -->
         <choppiness>-2.0</choppiness>
       </wave>
     </plugin>
@@ -142,11 +146,10 @@
         <scene>scene</scene>
         <ambient_light>0.4 0.4 0.4</ambient_light>
         <background_color>0.0 0.7 0.8</background_color>
-        <!-- Sailor's-eye view: 15 m back from the buoy at 2 m above the
-             water, looking along +X toward the buoy with a slight downward
-             tilt. Wave displacements at this distance and angle look like
-             real ocean swells. -->
-        <camera_pose>-15 0 2 0 0.13 0</camera_pose>
+        <!-- Matches asv_wave_sim's reference camera_pose for fair
+             side-by-side visual comparison: 6m east of origin, 6m
+             above water, pitched ~29° down. -->
+        <camera_pose>-6 0 6 0 0.5 0</camera_pose>
         <camera_clip>
           <near>0.1</near>
           <far>50000</far>

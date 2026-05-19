@@ -77,6 +77,19 @@ public:
   const Eigen::MatrixXd &DispXGrid() const { return this->dispXGrid_; }
   /// \brief Horizontal y-displacement field Dy(x, y, t).
   const Eigen::MatrixXd &DispYGrid() const { return this->dispYGrid_; }
+  /// \brief Slope ∂η/∂x at each grid cell. Used by the visual to read
+  /// per-vertex surface normals from a texture instead of computing
+  /// them via finite differences (smoother and more accurate at the
+  /// short wavelengths the spectrum carries).
+  const Eigen::MatrixXd &SlopeXGrid() const { return this->slopeXGrid_; }
+  /// \brief Slope ∂η/∂y at each grid cell.
+  const Eigen::MatrixXd &SlopeYGrid() const { return this->slopeYGrid_; }
+  /// \brief Chop displacement derivative ∂Dx/∂x.
+  const Eigen::MatrixXd &DispDxDxGrid() const { return this->dispDxDxGrid_; }
+  /// \brief Chop displacement derivative ∂Dy/∂y.
+  const Eigen::MatrixXd &DispDyDyGrid() const { return this->dispDyDyGrid_; }
+  /// \brief Chop displacement cross derivative ∂Dx/∂y (= ∂Dy/∂x).
+  const Eigen::MatrixXd &DispDxDyGrid() const { return this->dispDxDyGrid_; }
 
   /// \brief Time-invariant Phillips spectrum amplitudes `h0(k)`. Used by
   /// the GPU-FFT path (`docs/waves_gpu_fft_plan.md`, Stage 2) to upload
@@ -120,6 +133,16 @@ private:
   // the visual shader to produce choppy, asymmetric wave crests.
   Eigen::MatrixXd dispXGrid_;
   Eigen::MatrixXd dispYGrid_;
+  // Per-update slope grids: ∂η/∂x and ∂η/∂y at each cell. Combined
+  // gives the surface normal as normalize(-∂η/∂x, -∂η/∂y, 1).
+  Eigen::MatrixXd slopeXGrid_;
+  Eigen::MatrixXd slopeYGrid_;
+  // Per-update chop-displacement derivative grids. Together with the
+  // slope grids they let the visual VS compute the full chop-aware
+  // Tessendorf tangent + normal at each vertex.
+  Eigen::MatrixXd dispDxDxGrid_;
+  Eigen::MatrixXd dispDyDyGrid_;
+  Eigen::MatrixXd dispDxDyGrid_;
 
   // Per-axis wavenumber arrays kx[i], ky[j] (precomputed)
   Eigen::VectorXd kxRow_;

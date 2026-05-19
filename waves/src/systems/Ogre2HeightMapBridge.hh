@@ -55,6 +55,31 @@ extern "C"
   /// 0 otherwise.
   int waves_ogre2_heightmap_ready(waves_heightmap_t handle);
 
+  /// Upload the per-cell slope grid (∂η/∂x in .r, ∂η/∂y in .g) to a
+  /// dedicated `slopeMap` texture bound to the material. Allocates
+  /// the texture on first call. The visual VS uses this for
+  /// spectrum-accurate surface normals; without it the VS falls back
+  /// to finite differences on the heightmap, which smears wave
+  /// crests.
+  int waves_ogre2_heightmap_upload_slope(
+      waves_heightmap_t handle,
+      const double *slope_x_grid,
+      const double *slope_y_grid,
+      int rows,
+      int cols);
+
+  /// Upload the per-cell chop-derivative grid (∂Dx/∂x in .r,
+  /// ∂Dy/∂y in .g, ∂Dx/∂y in .b) to a dedicated `chopDerivMap`
+  /// texture. Combined with the slopeMap, the visual VS can build
+  /// the full Tessendorf chop-aware tangent + normal at each vertex.
+  int waves_ogre2_heightmap_upload_chop_derivatives(
+      waves_heightmap_t handle,
+      const double *d_dx_dx_grid,
+      const double *d_dy_dy_grid,
+      const double *d_dx_dy_grid,
+      int rows,
+      int cols);
+
   /// GPU-FFT path. Dispatch a compute shader that writes the heightmap
   /// texture directly on the GPU. The bridge creates the
   /// `Ogre::HlmsComputeJob` on first call (loading `shader_abs_path` and

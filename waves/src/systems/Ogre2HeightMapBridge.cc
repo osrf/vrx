@@ -69,6 +69,17 @@ namespace
   struct HeightMap
   {
     Ogre::TextureGpu *texture{nullptr};
+    // CPU-FFT slope map: ∂η/∂x in .r, ∂η/∂y in .g. The visual VS
+    // reads N = normalize(-slope.x, -slope.y, 1) at each vertex
+    // (spectrum-accurate surface normals; no finite-diff smearing).
+    // Created lazily on first upload_slope call.
+    Ogre::TextureGpu *slopeTex{nullptr};
+    std::string slopeTexName;
+    // CPU-FFT chop-derivative map: (∂Dx/∂x, ∂Dy/∂y, ∂Dx/∂y, _).
+    // Together with slopeMap this gives the VS the five derivatives
+    // needed for a full Tessendorf chop-aware tangent + normal.
+    Ogre::TextureGpu *chopDerivTex{nullptr};
+    std::string chopDerivTexName;
     Ogre::TextureGpuManager *manager{nullptr};
     // Persistent staging texture, reused on every Upload(). Acquiring a
     // fresh one per frame from Ogre's pool was causing rapid pool growth
@@ -449,6 +460,196 @@ int waves_ogre2_heightmap_upload(
   // "awaiting data" state on the render thread.
   if (!hm->texture->isDataReady())
     hm->texture->notifyDataIsReady();
+  return 1;
+}
+
+int waves_ogre2_heightmap_upload_slope(
+    waves_heightmap_t _handle, const double *_slopeX, const double *_slopeY,
+    int _rows, int _cols)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->ready || !hm->manager || !hm->ogreMaterial ||
+      !_slopeX || !_slopeY)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  if (_rows != N || _cols != N)
+    return 0;
+  if (!hm->staging)
+    return 0;
+
+  // Lazy-allocate the slope texture + bind it to the material.
+  if (!hm->slopeTex)
+  {
+    try
+    {
+      hm->slopeTexName = "WavesSlope_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->slopeTex = hm->manager->createOrRetrieveTexture(
+          hm->slopeTexName,
+          Ogre::GpuPageOutStrategy::SaveToSystemRam,
+          Ogre::TextureFlags::ManualTexture,
+          Ogre::TextureTypes::Type2D);
+      hm->slopeTex->setResolution(
+          static_cast<Ogre::uint32>(N),
+          static_cast<Ogre::uint32>(N));
+      hm->slopeTex->setNumMipmaps(1u);
+      hm->slopeTex->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
+
+      auto *pass = hm->ogreMaterial->getTechnique(0u)->getPass(0u);
+      Ogre::TextureUnitState *tu = nullptr;
+      for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
+      {
+        auto *u = pass->getTextureUnitState(i);
+        if (u->getName() == "slopeMap")
+        {
+          tu = u;
+          break;
+        }
+      }
+      if (!tu)
+      {
+        tu = pass->createTextureUnitState();
+        tu->setName("slopeMap");
+      }
+      tu->setTexture(hm->slopeTex);
+      tu->setTextureCoordSet(0);
+      tu->setSamplerblock(hm->samplerblock);
+
+      const int texIndex =
+          static_cast<int>(pass->getTextureUnitStateIndex(tu));
+      auto ogreParams = pass->getVertexProgramParameters();
+      if (ogreParams)
+        ogreParams->setNamedConstant("slopeMap", &texIndex, 1, 1);
+
+      gzmsg << "[waves_ogre2_heightmap] slopeMap allocated (" << N
+            << "×" << N << " RGBA32F) at tex index " << texIndex
+            << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] slopeMap allocation failed: "
+            << e.getDescription() << std::endl;
+      hm->slopeTex = nullptr;
+      return 0;
+    }
+  }
+
+  hm->slopeTex->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
+
+  hm->staging->startMapRegion();
+  Ogre::TextureBox box =
+      hm->staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+  for (int row = 0; row < N; ++row)
+  {
+    auto *dst = reinterpret_cast<float *>(box.at(0, row, 0));
+    const double *sx = _slopeX + static_cast<std::size_t>(row) * N;
+    const double *sy = _slopeY + static_cast<std::size_t>(row) * N;
+    for (int col = 0; col < N; ++col)
+    {
+      dst[col * 4 + 0] = static_cast<float>(sx[col]);
+      dst[col * 4 + 1] = static_cast<float>(sy[col]);
+      dst[col * 4 + 2] = 0.0f;
+      dst[col * 4 + 3] = 0.0f;
+    }
+  }
+  hm->staging->stopMapRegion();
+  hm->staging->upload(box, hm->slopeTex, 0u, nullptr, nullptr);
+  if (!hm->slopeTex->isDataReady())
+    hm->slopeTex->notifyDataIsReady();
+  return 1;
+}
+
+int waves_ogre2_heightmap_upload_chop_derivatives(
+    waves_heightmap_t _handle,
+    const double *_dDxDx, const double *_dDyDy, const double *_dDxDy,
+    int _rows, int _cols)
+{
+  auto *hm = static_cast<HeightMap *>(_handle);
+  if (!hm || !hm->ready || !hm->manager || !hm->ogreMaterial ||
+      !_dDxDx || !_dDyDy || !_dDxDy)
+    return 0;
+  const int N = static_cast<int>(hm->gridSize);
+  if (_rows != N || _cols != N)
+    return 0;
+  if (!hm->staging)
+    return 0;
+
+  if (!hm->chopDerivTex)
+  {
+    try
+    {
+      hm->chopDerivTexName = "WavesChopDeriv_" +
+          std::to_string(reinterpret_cast<std::uintptr_t>(hm));
+      hm->chopDerivTex = hm->manager->createOrRetrieveTexture(
+          hm->chopDerivTexName,
+          Ogre::GpuPageOutStrategy::SaveToSystemRam,
+          Ogre::TextureFlags::ManualTexture,
+          Ogre::TextureTypes::Type2D);
+      hm->chopDerivTex->setResolution(
+          static_cast<Ogre::uint32>(N),
+          static_cast<Ogre::uint32>(N));
+      hm->chopDerivTex->setNumMipmaps(1u);
+      hm->chopDerivTex->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
+
+      auto *pass = hm->ogreMaterial->getTechnique(0u)->getPass(0u);
+      Ogre::TextureUnitState *tu = nullptr;
+      for (unsigned int i = 0; i < pass->getNumTextureUnitStates(); ++i)
+      {
+        auto *u = pass->getTextureUnitState(i);
+        if (u->getName() == "chopDerivMap") { tu = u; break; }
+      }
+      if (!tu)
+      {
+        tu = pass->createTextureUnitState();
+        tu->setName("chopDerivMap");
+      }
+      tu->setTexture(hm->chopDerivTex);
+      tu->setTextureCoordSet(0);
+      tu->setSamplerblock(hm->samplerblock);
+
+      const int texIndex =
+          static_cast<int>(pass->getTextureUnitStateIndex(tu));
+      auto ogreParams = pass->getVertexProgramParameters();
+      if (ogreParams)
+        ogreParams->setNamedConstant("chopDerivMap", &texIndex, 1, 1);
+
+      gzmsg << "[waves_ogre2_heightmap] chopDerivMap allocated (" << N
+            << "×" << N << " RGBA32F) at tex index " << texIndex
+            << std::endl;
+    }
+    catch (const Ogre::Exception &e)
+    {
+      gzerr << "[waves_ogre2_heightmap] chopDerivMap allocation failed: "
+            << e.getDescription() << std::endl;
+      hm->chopDerivTex = nullptr;
+      return 0;
+    }
+  }
+
+  hm->chopDerivTex->scheduleTransitionTo(
+      Ogre::GpuResidency::Resident, nullptr);
+
+  hm->staging->startMapRegion();
+  Ogre::TextureBox box =
+      hm->staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
+  for (int row = 0; row < N; ++row)
+  {
+    auto *dst = reinterpret_cast<float *>(box.at(0, row, 0));
+    const double *xx = _dDxDx + static_cast<std::size_t>(row) * N;
+    const double *yy = _dDyDy + static_cast<std::size_t>(row) * N;
+    const double *xy = _dDxDy + static_cast<std::size_t>(row) * N;
+    for (int col = 0; col < N; ++col)
+    {
+      dst[col * 4 + 0] = static_cast<float>(xx[col]);
+      dst[col * 4 + 1] = static_cast<float>(yy[col]);
+      dst[col * 4 + 2] = static_cast<float>(xy[col]);
+      dst[col * 4 + 3] = 0.0f;
+    }
+  }
+  hm->staging->stopMapRegion();
+  hm->staging->upload(box, hm->chopDerivTex, 0u, nullptr, nullptr);
+  if (!hm->chopDerivTex->isDataReady())
+    hm->chopDerivTex->notifyDataIsReady();
   return 1;
 }
 
@@ -2638,7 +2839,8 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
     }
   }
   for (auto **tex : {&hm->h0Tex, &hm->hktTex, &hm->hktTexDy,
-                      &hm->combinedTex})
+                      &hm->combinedTex, &hm->slopeTex,
+                      &hm->chopDerivTex})
   {
     if (*tex && hm->manager)
     {

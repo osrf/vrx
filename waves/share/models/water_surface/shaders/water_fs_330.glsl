@@ -33,6 +33,10 @@ uniform vec4 deepColor;
 uniform vec4 shallowColor;
 uniform float fresnelPower;
 uniform float hdrMultiplier;
+// Reflection roughness in [0, 1]. Adds a LOD bias to the cubemap
+// sample so the reflected sky reads as a soft diffuse colour rather
+// than a sharp mirror — closer to how real water reflects light.
+uniform float roughness;
 
 // Tessendorf chop factor (negative = bunch particles toward crests).
 // Used by the foam mask's Jacobian computation.
@@ -97,7 +101,11 @@ void main()
   vec3 R = reflect(E, N);
   R = vec3(R.x, R.y, -R.z);  // gz-rendering cubemap Z flip
 
-  vec4 envColor = texture(cubeMap, R, 0.0);
+  // Soft reflection: the LOD bias picks a coarser mip of the
+  // cubemap, blurring the sky into a diffuse tint instead of a
+  // sharp mirror of clouds.
+  float lodBias = roughness * 8.0;
+  vec4 envColor = texture(cubeMap, R, lodBias);
   envColor.rgb *= (envColor.r + envColor.g + envColor.b) * hdrMultiplier;
 
   float facing = 1.0 - dot(-E, N);

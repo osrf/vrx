@@ -119,6 +119,11 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
   this->heightGrid_ = Eigen::MatrixXd::Zero(N, N);
   this->dispXGrid_  = Eigen::MatrixXd::Zero(N, N);
   this->dispYGrid_  = Eigen::MatrixXd::Zero(N, N);
+  this->slopeXGrid_   = Eigen::MatrixXd::Zero(N, N);
+  this->slopeYGrid_   = Eigen::MatrixXd::Zero(N, N);
+  this->dispDxDxGrid_ = Eigen::MatrixXd::Zero(N, N);
+  this->dispDyDyGrid_ = Eigen::MatrixXd::Zero(N, N);
+  this->dispDxDyGrid_ = Eigen::MatrixXd::Zero(N, N);
   this->Update(0.0);
 }
 
@@ -197,7 +202,21 @@ void FFTWaveSimulation::Update(double t)
   Eigen::MatrixXcd hkt(N, N);
   Eigen::MatrixXcd dxkt(N, N);
   Eigen::MatrixXcd dykt(N, N);
+  // Slope spectra: ∂η/∂x = IFFT(i·kx·h(k, t)), similarly for y.
+  // Filled per-cell alongside the displacement spectra to avoid a
+  // second pass over the grid.
+  Eigen::MatrixXcd sxkt(N, N);
+  Eigen::MatrixXcd sykt(N, N);
+  // Chop derivative spectra needed for the full Tessendorf normal:
+  //   ∂Dx/∂x ↔ i·kx · Dx_hat = (kx² / |k|) · h_hat
+  //   ∂Dy/∂y ↔ (ky² / |k|) · h_hat
+  //   ∂Dx/∂y = ∂Dy/∂x ↔ (kx·ky / |k|) · h_hat
+  // Derived from the closed-form Dx_hat, Dy_hat formulas above.
+  Eigen::MatrixXcd dxdxkt(N, N);
+  Eigen::MatrixXcd dydykt(N, N);
+  Eigen::MatrixXcd dxdykt(N, N);
   const std::complex<double> kMinusI(0.0, -1.0);
+  const std::complex<double> kPlusI(0.0, 1.0);
   for (int i = 0; i < N; ++i)
   {
     for (int j = 0; j < N; ++j)
@@ -216,19 +235,35 @@ void FFTWaveSimulation::Update(double t)
       {
         dxkt(i, j) = 0.0;
         dykt(i, j) = 0.0;
+        dxdxkt(i, j) = 0.0;
+        dydykt(i, j) = 0.0;
+        dxdykt(i, j) = 0.0;
       }
       else
       {
         const std::complex<double> factor = kMinusI / kmag;
         dxkt(i, j) = factor * kx * h;
         dykt(i, j) = factor * ky * h;
+        // Chop derivative spectra (real-valued coefficient × h):
+        dxdxkt(i, j) = (kx * kx / kmag) * h;
+        dydykt(i, j) = (ky * ky / kmag) * h;
+        dxdykt(i, j) = (kx * ky / kmag) * h;
       }
+      // Slope spectrum: differentiation in spatial domain
+      // ↔ multiplication by i·k in frequency domain.
+      sxkt(i, j) = kPlusI * kx * h;
+      sykt(i, j) = kPlusI * ky * h;
     }
   }
 
-  this->heightGrid_ = Ifft2DReal(hkt, ramp);
-  this->dispXGrid_  = Ifft2DReal(dxkt, ramp);
-  this->dispYGrid_  = Ifft2DReal(dykt, ramp);
+  this->heightGrid_   = Ifft2DReal(hkt, ramp);
+  this->dispXGrid_    = Ifft2DReal(dxkt, ramp);
+  this->dispYGrid_    = Ifft2DReal(dykt, ramp);
+  this->slopeXGrid_   = Ifft2DReal(sxkt, ramp);
+  this->slopeYGrid_   = Ifft2DReal(sykt, ramp);
+  this->dispDxDxGrid_ = Ifft2DReal(dxdxkt, ramp);
+  this->dispDyDyGrid_ = Ifft2DReal(dydykt, ramp);
+  this->dispDxDyGrid_ = Ifft2DReal(dxdykt, ramp);
 }
 
 double FFTWaveSimulation::BilinearSample(const Eigen::MatrixXd &grid,
