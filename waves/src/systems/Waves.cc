@@ -110,6 +110,7 @@ void Waves::Configure(
     return;
   }
   this->dataPtr->data.generation = 1;
+  this->dataPtr->data.updateRate = this->dataPtr->updateRate;
 
   this->dataPtr->worldEnt = worldEntity(_ecm);
   if (this->dataPtr->worldEnt == kNullEntity)

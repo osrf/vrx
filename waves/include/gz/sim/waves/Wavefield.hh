@@ -105,6 +105,13 @@ struct WavefieldData
   /// rewritten. Consumers (visual upload, etc.) compare against their last
   /// seen value to cheaply detect changes.
   std::uint64_t generation{0};
+
+  /// \brief Server-side wave Update rate [Hz]. Mirrored from
+  /// `<update_rate>` so the GUI visual can throttle its own per-frame
+  /// Update to match the server's cadence — keeping them in step lets
+  /// the user retune a single SDF knob without the visual silently
+  /// drifting ahead.
+  double updateRate{30.0};
 };
 
 /// \brief Stream-out for ECM serialization. Writes the algorithm + the
@@ -128,7 +135,8 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.tileSize << ' '
       << _d.params.gridSize << ' '
       << _d.params.seed << ' '
-      << _d.params.choppiness << ' ';
+      << _d.params.choppiness << ' '
+      << _d.updateRate << ' ';
   return _os;
 }
 
@@ -163,7 +171,8 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.tileSize
       >> _d.params.gridSize
       >> _d.params.seed
-      >> _d.params.choppiness;
+      >> _d.params.choppiness
+      >> _d.updateRate;
   // Cache the constructed simulation across deserializations. The same
   // component arrives ~60 Hz; without this dedupe we'd re-init FFT
   // state thousands of times per minute.
