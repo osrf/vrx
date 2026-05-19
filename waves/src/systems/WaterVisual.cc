@@ -1331,12 +1331,13 @@ void WaterVisual::PreUpdate(
     }
     this->dataPtr->useFft = true;
     this->dataPtr->fftSim = fft;
-    // Sync the visual's per-frame Update throttle to the server's
-    // wave update_rate. Keeps the two cadences locked when the user
-    // tunes a single SDF knob — without this the visual silently
-    // runs at its default 30 Hz even if the server drops to 15.
-    if (data.updateRate > 0.0)
-      this->dataPtr->visualUpdatePeriod = 1.0 / data.updateRate;
+    // NOTE: the visual's update period is intentionally NOT synced to
+    // the server's <update_rate>. The two rates do different jobs:
+    // the server only needs Update for buoyancy queries (15 Hz is
+    // fine — water at sea evolves slowly), but the displayed surface
+    // needs ≥30 Hz refresh to avoid the stroboscopic stagger that
+    // the eye reads as "waves moving slower". An earlier attempt to
+    // sync them made waves visually drag at update_rate<30.
     // Slope/chop-deriv grids are only consumed when the VS reads them
     // (useSlopeMap=1). The GPU-FFT path and the Encino path both run
     // with useSlopeMap=0 (finite-diff normals in the VS), so skipping
