@@ -176,8 +176,16 @@ namespace detail
     std::vector<Complex> intermediate(
         static_cast<std::size_t>(slow) * halfFast);
 
+    // grainSize = 8: each TBB task handles 8 columns (~8 × N μs of
+    // FFT work). Without a grain hint, the auto-partitioner over a
+    // 65-iteration range slices into many sub-millisecond tasks,
+    // and the work-stealing / IPI overhead (~14% of the hot thread
+    // in profiling) dominates the actual transform. 8 is a good
+    // middle: enough tasks to keep all cores busy on the 24-core
+    // box while amortizing per-task setup over real work.
+    constexpr int kGrain = 8;
     tbb::parallel_for(
-        tbb::blocked_range<int>(0, halfFast),
+        tbb::blocked_range<int>(0, halfFast, kGrain),
         [&](const tbb::blocked_range<int> &r)
         {
           Eigen::FFT<T> fftC2C;
@@ -200,8 +208,11 @@ namespace detail
     // as the standard hermitian half-spectrum. With HalfSpectrum set,
     // Eigen::FFT::inv reads halfFast complex inputs and writes `fast`
     // real outputs.
+    // Same grainSize rationale as Pass 1. Row count is `slow` (=N),
+    // typically 128 — 16 tasks at grainSize=8 is a comfortable fit
+    // for the 24-core machine without over-splitting.
     tbb::parallel_for(
-        tbb::blocked_range<int>(0, slow),
+        tbb::blocked_range<int>(0, slow, kGrain),
         [&](const tbb::blocked_range<int> &r)
         {
           Eigen::FFT<T> fftC2R;
