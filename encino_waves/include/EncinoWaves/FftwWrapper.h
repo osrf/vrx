@@ -77,6 +77,9 @@
 #include <Eigen/Core>
 #include <unsupported/Eigen/FFT>
 
+#include <oneapi/tbb/blocked_range.h>
+#include <oneapi/tbb/parallel_for.h>
+
 // FFTW plan-flag preprocessor macros. The upstream EncinoWaves passes these
 // to `plan_*` calls; in this shim they're ignored (Eigen::FFT has no plan
 // caching to tune), but the symbols must exist so call sites compile
@@ -151,22 +154,19 @@ namespace detail
     if (slow <= 0 || fast <= 0 || halfFast <= 0 || in == nullptr || out == nullptr)
       return;
 
-    // Two FFT engines: the column pass is full-size complex-to-complex,
-    // the row pass is hermitian (half-spectrum) to real. Eigen::FFT's
-    // `HalfSpectrum` flag is what tells `inv()` that the complex input
-    // is N/2+1 hermitian-packed and to produce N real outputs; without
-    // it Eigen treats the input as full-size and resizes the destination
-    // to (N/2+1), which trips an internal assertion when we then try to
-    // read indices N/2+1..N-1.
+    // Each pass below is embarrassingly parallel — iteration `j` in
+    // Pass 1 only touches column `j` of the intermediate buffer, and
+    // iteration `i` in Pass 2 only touches row `i` of the output.
+    // Eigen::FFT objects carry per-engine state (KissFFT twiddle
+    // tables, scratch buffers) and are NOT thread-safe, so each TBB
+    // task constructs its own. The construction cost is small relative
+    // to the actual transform at N=128+.
     //
-    // Both engines set `Unscaled` to match FFTW's unnormalized inverse
-    // convention (no 1/N factor). Encino's Propagation.h was written
-    // against FFTW and would mis-scale otherwise.
-    Eigen::FFT<T> fftC2C;
-    fftC2C.SetFlag(Eigen::FFT<T>::Unscaled);
-    Eigen::FFT<T> fftC2R;
-    fftC2R.SetFlag(Eigen::FFT<T>::Unscaled);
-    fftC2R.SetFlag(Eigen::FFT<T>::HalfSpectrum);
+    // The HalfSpectrum + Unscaled flags reproduce FFTW's unnormalized
+    // c2r inverse convention that Encino's Propagation.h was written
+    // against. Without HalfSpectrum, Eigen treats the complex input as
+    // full-size and resizes the destination to (N/2+1), tripping an
+    // internal assertion when we then read indices N/2+1..N-1.
 
     // Pass 1: column pass along the slow dimension.
     // For each of the halfFast columns, gather `slow` complex values from
@@ -176,34 +176,50 @@ namespace detail
     std::vector<Complex> intermediate(
         static_cast<std::size_t>(slow) * halfFast);
 
-    VecC colIn(slow);
-    VecC colOut(slow);
-    for (int j = 0; j < halfFast; ++j)
-    {
-      for (int i = 0; i < slow; ++i)
-        colIn(i) = in[static_cast<std::size_t>(i) * halfFast + j];
-      fftC2C.inv(colOut, colIn);
-      for (int i = 0; i < slow; ++i)
-        intermediate[static_cast<std::size_t>(i) * halfFast + j] = colOut(i);
-    }
+    tbb::parallel_for(
+        tbb::blocked_range<int>(0, halfFast),
+        [&](const tbb::blocked_range<int> &r)
+        {
+          Eigen::FFT<T> fftC2C;
+          fftC2C.SetFlag(Eigen::FFT<T>::Unscaled);
+          VecC colIn(slow);
+          VecC colOut(slow);
+          for (int j = r.begin(); j < r.end(); ++j)
+          {
+            for (int i = 0; i < slow; ++i)
+              colIn(i) = in[static_cast<std::size_t>(i) * halfFast + j];
+            fftC2C.inv(colOut, colIn);
+            for (int i = 0; i < slow; ++i)
+              intermediate[static_cast<std::size_t>(i) * halfFast + j] =
+                  colOut(i);
+          }
+        });
 
     // Pass 2: row pass along the fast dimension.
     // Each row of the intermediate is `halfFast` complex values arranged
     // as the standard hermitian half-spectrum. With HalfSpectrum set,
     // Eigen::FFT::inv reads halfFast complex inputs and writes `fast`
     // real outputs.
-    VecC rowIn(halfFast);
-    VecR rowOut(fast);
-    for (int i = 0; i < slow; ++i)
-    {
-      for (int j = 0; j < halfFast; ++j)
-        rowIn(j) = intermediate[static_cast<std::size_t>(i) * halfFast + j];
-      fftC2R.inv(rowOut, rowIn);
-      // Scatter into the output, honouring the (possibly padded) row stride.
-      T *outRow = out + static_cast<std::size_t>(i) * outputRowStride;
-      for (int j = 0; j < fast; ++j)
-        outRow[j] = rowOut(j);
-    }
+    tbb::parallel_for(
+        tbb::blocked_range<int>(0, slow),
+        [&](const tbb::blocked_range<int> &r)
+        {
+          Eigen::FFT<T> fftC2R;
+          fftC2R.SetFlag(Eigen::FFT<T>::Unscaled);
+          fftC2R.SetFlag(Eigen::FFT<T>::HalfSpectrum);
+          VecC rowIn(halfFast);
+          VecR rowOut(fast);
+          for (int i = r.begin(); i < r.end(); ++i)
+          {
+            for (int j = 0; j < halfFast; ++j)
+              rowIn(j) = intermediate[
+                  static_cast<std::size_t>(i) * halfFast + j];
+            fftC2R.inv(rowOut, rowIn);
+            T *outRow = out + static_cast<std::size_t>(i) * outputRowStride;
+            for (int j = 0; j < fast; ++j)
+              outRow[j] = rowOut(j);
+          }
+        });
   }
 }  // namespace detail
 
