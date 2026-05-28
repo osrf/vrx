@@ -6,7 +6,7 @@
 #
 # Both launch the simulation headless, then confirm /clock is advancing AND the
 # observation camera is producing frames, reporting the achieved FPS. Run inside
-# a built workspace with ROS 2 Rolling + vendored Gazebo Jetty already sourced.
+# a built workspace with ROS 2 Lyrical + vendored Gazebo Jetty already sourced.
 #
 # Exit 0 on success, non-zero on any failure.
 set -uo pipefail

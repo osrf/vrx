@@ -9,7 +9,7 @@ on:
 
 jobs:
   smoke:
-    name: Smoke ${{ matrix.backend }} (Rolling + Jetty)
+    name: Smoke ${{ matrix.backend }} (Lyrical + Jetty)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -17,7 +17,7 @@ jobs:
       matrix:
         backend: [xvfb, egl]
     container:
-      image: ros:rolling-ros-base
+      image: ros:lyrical-ros-base
     env:
       DEBIAN_FRONTEND: noninteractive
     steps:
@@ -51,16 +51,16 @@ jobs:
         run: |
           apt-get update
           # ros-gz-sim / ros-gz-bridge pull the gz-*-vendor packages, i.e.
-          # Gazebo Jetty built for Rolling, from ros2-testing.
+          # Gazebo Jetty built for Lyrical, from ros2-testing.
           apt-get install -y --no-install-recommends \
-            ros-rolling-ros-gz-sim ros-rolling-ros-gz-bridge
+            ros-lyrical-ros-gz-sim ros-lyrical-ros-gz-bridge
           rosdep update
-          rosdep install --from-paths src --ignore-src -y --rosdistro rolling \
+          rosdep install --from-paths src --ignore-src -y --rosdistro lyrical \
             --skip-keys "ros_gz_sim ros_gz_bridge"
 
       - name: Build
         run: |
-          . /opt/ros/rolling/setup.sh
+          . /opt/ros/lyrical/setup.sh
           colcon build --merge-install
           # colcon exits 0 (and still writes install/setup.sh) even if it built
           # nothing, so assert the package we actually launch was installed.
@@ -69,6 +69,6 @@ jobs:
 
       - name: Headless smoke test + camera FPS (${{ matrix.backend }})
         run: |
-          . /opt/ros/rolling/setup.sh
+          . /opt/ros/lyrical/setup.sh
           . install/setup.sh
           bash src/vrx/tools/smoke_test.sh ${{ matrix.backend }}
