@@ -15,6 +15,11 @@
   <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>vrx_gazebo</exec_depend>
 
+  <!-- Used by tools/smoke_test.sh + tools/check_render.py in CI. -->
+  <test_depend>rclpy</test_depend>
+  <test_depend>rosgraph_msgs</test_depend>
+  <test_depend>sensor_msgs</test_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

@@ -1,0 +1,74 @@
+name: vrx4 CI
+
+on:
+  push:
+    branches: [jrivero/vrx4_ci]
+  pull_request:
+    branches: [vrx4]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Smoke ${{ matrix.backend }} (Rolling + Jetty)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [xvfb, egl]
+    container:
+      image: ros:rolling-ros-base
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Headless GL/EGL + checkout deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates git \
+            xvfb libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 libgbm1
+
+      - name: Add ros2-testing apt repository
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ros2-testing-apt-source
+
+      - uses: actions/checkout@v4
+        with:
+          path: src/vrx
+
+      # open_water.sdf pulls the Portuguese Ledge tile from Gazebo Fuel on first
+      # run; cache it so reruns are fast and less network-dependent.
+      - name: Cache Gazebo Fuel assets
+        uses: actions/cache@v4
+        with:
+          # The job runs in a container as root, so Gazebo writes to /root/.gz.
+          path: /root/.gz/fuel
+          key: gz-fuel-${{ hashFiles('src/vrx/vrx_gazebo/worlds/*.sdf') }}
+          restore-keys: gz-fuel-
+
+      - name: Install ros-gz (Gazebo Jetty) + workspace deps
+        run: |
+          apt-get update
+          # ros-gz-sim / ros-gz-bridge pull the gz-*-vendor packages, i.e.
+          # Gazebo Jetty built for Rolling, from ros2-testing.
+          apt-get install -y --no-install-recommends \
+            ros-rolling-ros-gz-sim ros-rolling-ros-gz-bridge
+          rosdep update
+          rosdep install --from-paths src --ignore-src -y --rosdistro rolling \
+            --skip-keys "ros_gz_sim ros_gz_bridge"
+
+      - name: Build
+        run: |
+          . /opt/ros/rolling/setup.sh
+          colcon build --merge-install
+          # colcon exits 0 (and still writes install/setup.sh) even if it built
+          # nothing, so assert the package we actually launch was installed.
+          test -d install/share/vrx_bringup \
+            || { echo "colcon did not build vrx_bringup" >&2; exit 1; }
+
+      - name: Headless smoke test + camera FPS (${{ matrix.backend }})
+        run: |
+          . /opt/ros/rolling/setup.sh
+          . install/setup.sh
+          bash src/vrx/tools/smoke_test.sh ${{ matrix.backend }}
