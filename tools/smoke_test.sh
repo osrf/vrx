@@ -26,16 +26,21 @@ LOG="$(mktemp -t vrx_smoke_launch.XXXXXX.log)" || { echo "mktemp failed" >&2; ex
 # both inherit this, so they still talk to each other.
 export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-$(( $$ % 100 + 1 ))}"
 
+# Both backends launch the SAME file (sim_smoke.launch.xml), differing only by
+# headless_rendering -> the gz `--headless-rendering` flag. Everything else
+# (process topology, render engine, -v1 verbosity, standalone bridge) is held
+# equal so the camera-FPS numbers are an apples-to-apples GLX-vs-EGL compare.
 declare -a WRAP LAUNCH
+declare -a RENDERER_INFO
 case "${BACKEND}" in
   xvfb)
-    # Fake X display + Mesa software GL (llvmpipe). Uses the project's real
-    # composable launch (GLX rendering path).
+    # Fake X display + Mesa software GL (llvmpipe), GLX rendering path.
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER="${GALLIUM_DRIVER:-llvmpipe}"
     WRAP=(xvfb-run -a)
-    LAUNCH=(ros2 launch vrx_bringup simulation.launch.xml
-            gazebo_gui:=false world:="${WORLD}")
+    RENDERER_INFO=(glxinfo -B)
+    LAUNCH=(ros2 launch vrx_bringup sim_smoke.launch.xml
+            world:="${WORLD}" headless_rendering:=false)
     ;;
   egl)
     # EGL headless rendering, no X server. gz selects an EGL device via
@@ -43,13 +48,27 @@ case "${BACKEND}" in
     # (llvmpipe) device. Do NOT set LIBGL_ALWAYS_SOFTWARE here: it conflicts with
     # explicit EGL device selection ("Not allowed to force software rendering").
     WRAP=()
-    LAUNCH=(ros2 launch vrx_bringup sim_egl.launch.xml world:="${WORLD}")
+    RENDERER_INFO=(eglinfo -B)
+    LAUNCH=(ros2 launch vrx_bringup sim_smoke.launch.xml
+            world:="${WORLD}" headless_rendering:=true)
     ;;
   *)
     echo "usage: smoke_test.sh <xvfb|egl>" >&2
     exit 2
     ;;
 esac
+
+# Record which GL renderer this backend actually bound (llvmpipe vs a silent
+# softpipe/swrast fallback), so the FPS number in the log has a renderer next to
+# it. Best-effort: never fail the smoke test just because the info tool is absent.
+echo "[smoke:${BACKEND}] GL renderer (${RENDERER_INFO[*]}):"
+if command -v "${RENDERER_INFO[0]}" >/dev/null 2>&1; then
+  "${WRAP[@]}" "${RENDERER_INFO[@]}" 2>&1 \
+    | grep -iE "vendor|renderer|version|device" | sed 's/^/  /' \
+    || echo "  (renderer query returned nothing)"
+else
+  echo "  (${RENDERER_INFO[0]} not installed; skipping)"
+fi
 
 LAUNCH_PID=""
 cleanup() {

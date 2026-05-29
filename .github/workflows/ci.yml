@@ -26,7 +26,8 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
             ca-certificates git \
-            xvfb libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 libgbm1
+            xvfb libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 libgbm1 \
+            mesa-utils
 
       - name: Add ros2-testing apt repository
         run: |
