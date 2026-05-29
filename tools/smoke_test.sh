@@ -58,6 +58,10 @@ case "${BACKEND}" in
     ;;
 esac
 
+# Record the llvmpipe thread setting so the FPS number has its threading context
+# in the log (LP_NUM_THREADS controls llvmpipe's rasterizer worker threads).
+echo "[smoke:${BACKEND}] LP_NUM_THREADS=${LP_NUM_THREADS:-<unset: llvmpipe auto>}"
+
 # Record which GL renderer this backend actually bound (llvmpipe vs a silent
 # softpipe/swrast fallback), so the FPS number in the log has a renderer next to
 # it. Best-effort: never fail the smoke test just because the info tool is absent.
