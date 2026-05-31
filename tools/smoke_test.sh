@@ -50,10 +50,20 @@ case "${BACKEND}" in
     WRAP=()
     RENDERER_INFO=(eglinfo -B)
     LAUNCH=(ros2 launch vrx_bringup sim_smoke.launch.xml
-            world:="${WORLD}" headless_rendering:=true)
+            world:="${WORLD}" headless_rendering:=true api_backend:=opengl)
+    ;;
+  vulkan)
+    # EXPERIMENT: Ogre2 Vulkan backend on Mesa's software Vulkan (lavapipe),
+    # fully headless (no X server, no EGL-GL surface). On a GPU-less host the
+    # only Vulkan ICD is lavapipe, so gz's Vulkan render backend runs on it.
+    # Requires the mesa-vulkan-drivers package (lavapipe ICD) + vulkan-tools.
+    WRAP=()
+    RENDERER_INFO=(vulkaninfo --summary)
+    LAUNCH=(ros2 launch vrx_bringup sim_smoke.launch.xml
+            world:="${WORLD}" headless_rendering:=true api_backend:=vulkan)
     ;;
   *)
-    echo "usage: smoke_test.sh <xvfb|egl>" >&2
+    echo "usage: smoke_test.sh <xvfb|egl|vulkan>" >&2
     exit 2
     ;;
 esac

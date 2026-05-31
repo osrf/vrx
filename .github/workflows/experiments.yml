@@ -1,0 +1,80 @@
+name: vrx4 rendering experiments
+
+# Non-blocking research harness comparing CPU rendering backends for the
+# headless camera-FPS smoke. Manual only (workflow_dispatch); never gates a PR.
+# Each backend renders the SAME controlled launch (sim_smoke.launch.xml) so the
+# camera-FPS numbers are comparable:
+#
+#   xvfb   GLX + llvmpipe under a virtual X server   (baseline / production path)
+#   egl    EGL headless + llvmpipe, no X server       (display-server-less GL)
+#   vulkan Ogre2 Vulkan backend on lavapipe, headless (software Vulkan, no X)
+#
+# Rationale and findings: docs/rendering_experiments.md.
+on:
+  workflow_dispatch:
+
+jobs:
+  compare:
+    name: Render ${{ matrix.backend }} (Lyrical + Jetty)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Experimental backends may legitimately fail (e.g. a software-Vulkan
+    # limitation); a failing cell must not fail the whole comparison.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [xvfb, egl, vulkan]
+    container:
+      image: ros:lyrical-ros-base
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Headless GL/EGL/Vulkan + checkout deps
+        run: |
+          apt-get update
+          # GLX (xvfb) + EGL (egl) + software Vulkan/lavapipe (vulkan) stacks, so
+          # every matrix cell finds its renderer. mesa-vulkan-drivers ships the
+          # lavapipe ICD; vulkan-tools provides vulkaninfo.
+          apt-get install -y --no-install-recommends \
+            ca-certificates git \
+            xvfb libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 libgbm1 \
+            mesa-utils mesa-vulkan-drivers vulkan-tools
+
+      - name: Add ros2-testing apt repository
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ros2-testing-apt-source
+
+      - uses: actions/checkout@v4
+        with:
+          path: src/vrx
+
+      - name: Cache Gazebo Fuel assets
+        uses: actions/cache@v4
+        with:
+          path: /root/.gz/fuel
+          key: gz-fuel-${{ hashFiles('src/vrx/vrx_gazebo/worlds/*.sdf') }}
+          restore-keys: gz-fuel-
+
+      - name: Install ros-gz (Gazebo Jetty) + workspace deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ros-lyrical-ros-gz-sim ros-lyrical-ros-gz-bridge
+          rosdep update
+          rosdep install --from-paths src --ignore-src -y --rosdistro lyrical \
+            --skip-keys "ros_gz_sim ros_gz_bridge"
+
+      - name: Build
+        run: |
+          . /opt/ros/lyrical/setup.sh
+          colcon build --merge-install
+          test -d install/share/vrx_bringup \
+            || { echo "colcon did not build vrx_bringup" >&2; exit 1; }
+
+      - name: Headless render + camera FPS (${{ matrix.backend }})
+        run: |
+          . /opt/ros/lyrical/setup.sh
+          . install/setup.sh
+          bash src/vrx/tools/smoke_test.sh ${{ matrix.backend }}

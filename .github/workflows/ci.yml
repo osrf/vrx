@@ -7,31 +7,24 @@ on:
     branches: [vrx4]
   workflow_dispatch:
 
+# Blocking sanity CI: a single xvfb (GLX + llvmpipe) smoke job. The EGL / Vulkan
+# rendering-backend comparison lives in the non-blocking experiments.yml workflow.
 jobs:
   smoke:
-    name: Smoke ${{ matrix.backend }} lp=${{ matrix.lp_threads }} (Lyrical + Jetty)
+    name: Smoke xvfb (Lyrical + Jetty)
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        backend: [xvfb, egl]
-        # llvmpipe rasterizer threads: 'auto' lets it pick (its default), '1'
-        # pins it to a single thread. Both backends run both so we can see whether
-        # freeing a core for the readback path narrows the EGL-vs-GLX gap on the
-        # 2-core runner (the thread-contention hypothesis).
-        lp_threads: [auto, "1"]
     container:
       image: ros:lyrical-ros-base
     env:
       DEBIAN_FRONTEND: noninteractive
     steps:
-      - name: Headless GL/EGL + checkout deps
+      - name: Headless GL + checkout deps
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
             ca-certificates git \
-            xvfb libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 libgbm1 \
+            xvfb libgl1-mesa-dri libglx-mesa0 \
             mesa-utils
 
       - name: Add ros2-testing apt repository
@@ -73,14 +66,8 @@ jobs:
           test -d install/share/vrx_bringup \
             || { echo "colcon did not build vrx_bringup" >&2; exit 1; }
 
-      - name: Headless smoke test + camera FPS (${{ matrix.backend }}, lp=${{ matrix.lp_threads }})
-        env:
-          LP_THREADS: ${{ matrix.lp_threads }}
+      - name: Headless smoke test + camera FPS (xvfb)
         run: |
           . /opt/ros/lyrical/setup.sh
           . install/setup.sh
-          # 'auto' => leave llvmpipe to choose; any number => pin LP_NUM_THREADS.
-          if [ "${LP_THREADS}" != "auto" ]; then
-            export LP_NUM_THREADS="${LP_THREADS}"
-          fi
-          bash src/vrx/tools/smoke_test.sh ${{ matrix.backend }}
+          bash src/vrx/tools/smoke_test.sh xvfb
