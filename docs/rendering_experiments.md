@@ -108,8 +108,10 @@ is exactly what `experiments.yml` is there to measure.
 
 ## 4. How to run
 
-Trigger the non-blocking comparison (xvfb / egl / vulkan, isolated jobs so the
-numbers are same-config and the leftover-`gz` collision can't happen):
+The non-blocking comparison (xvfb / egl / vulkan, isolated jobs so the numbers
+are same-config and the leftover-`gz` collision can't happen) runs automatically
+on every push to `jrivero/vrx4_ci`. Once `experiments.yml` exists on the default
+branch it can also be dispatched manually against any ref:
 
 ```
 gh workflow run experiments.yml --ref jrivero/vrx4_ci

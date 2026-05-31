@@ -1,7 +1,8 @@
 name: vrx4 rendering experiments
 
 # Non-blocking research harness comparing CPU rendering backends for the
-# headless camera-FPS smoke. Manual only (workflow_dispatch); never gates a PR.
+# headless camera-FPS smoke. Runs on push to the experiments branch and on
+# manual dispatch; it is a separate workflow from ci.yml and never gates a PR.
 # Each backend renders the SAME controlled launch (sim_smoke.launch.xml) so the
 # camera-FPS numbers are comparable:
 #
@@ -11,6 +12,8 @@ name: vrx4 rendering experiments
 #
 # Rationale and findings: docs/rendering_experiments.md.
 on:
+  push:
+    branches: [jrivero/vrx4_ci]
   workflow_dispatch:
 
 jobs:
