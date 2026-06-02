@@ -6,9 +6,9 @@ included yet — this is the starting point for a fresh rebuild.
 
 ## Requirements
 
-- ROS 2 Rolling
+- ROS 2 Lyrical
 - Gazebo Jetty
-- `ros_gz` (matching the Rolling / Jetty pairing)
+- `ros_gz` (matching the Lyrical / Jetty pairing)
 
 ## Packages
 
