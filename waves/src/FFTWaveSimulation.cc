@@ -48,6 +48,121 @@ bool EncinoEnabledByEnv()
   const char *v = std::getenv("GZ_WAVES_USE_ENCINO");
   return v && std::string(v) == "1";
 }
+
+// ---- Human-readable names for the EncinoWaves model enums (logging) --------
+const char *SpectrumName(EncinoWaves::SpectrumType t)
+{
+  switch (t)
+  {
+    case EncinoWaves::kPiersonMoskowitzSpectrum: return "pms";
+    case EncinoWaves::kJONSWAPSpectrum:          return "jonswap";
+    case EncinoWaves::kTMASpectrum:              return "tma";
+    default:                                     return "?";
+  }
+}
+
+const char *DispersionName(EncinoWaves::DispersionType t)
+{
+  switch (t)
+  {
+    case EncinoWaves::kDeepDispersion:        return "deep";
+    case EncinoWaves::kFiniteDepthDispersion: return "finite";
+    case EncinoWaves::kCapillaryDispersion:   return "capillary";
+    default:                                  return "?";
+  }
+}
+
+const char *SpreadingName(EncinoWaves::DirectionalSpreadingType t)
+{
+  switch (t)
+  {
+    case EncinoWaves::kPosCosThetaSqrDirectionalSpreading: return "poscos2";
+    case EncinoWaves::kMitsuyasuDirectionalSpreading:      return "mitsuyasu";
+    case EncinoWaves::kHasselmannDirectionalSpreading:     return "hasselmann";
+    case EncinoWaves::kDonelanBannerDirectionalSpreading:  return "donelanbanner";
+    default:                                               return "?";
+  }
+}
+
+/// Apply optional environment-variable overrides for EncinoWaves' distinctive
+/// controls onto `ep`. Like GZ_WAVES_USE_ENCINO itself, these are experiment
+/// knobs deliberately kept out of the stable SDF surface. They all feed the
+/// spectrum at construction (InitialState), so the field stays seamlessly
+/// periodic and identical between the server and GUI processes. Unrecognized
+/// values are ignored with a warning, leaving the Horvath default in place.
+void ApplyEncinoEnvOverrides(EncinoWaves::Parametersf &ep)
+{
+  if (const char *v = std::getenv("GZ_WAVES_ENCINO_SPECTRUM"))
+  {
+    const std::string s(v);
+    if (s == "pms" || s == "pm")
+      ep.spectrum.type = EncinoWaves::kPiersonMoskowitzSpectrum;
+    else if (s == "jonswap")
+      ep.spectrum.type = EncinoWaves::kJONSWAPSpectrum;
+    else if (s == "tma")
+      ep.spectrum.type = EncinoWaves::kTMASpectrum;
+    else
+      std::cerr << "[FFTWaveSimulation] ignoring unknown "
+                << "GZ_WAVES_ENCINO_SPECTRUM='" << s
+                << "' (want pms|jonswap|tma)" << std::endl;
+  }
+  if (const char *v = std::getenv("GZ_WAVES_ENCINO_DISPERSION"))
+  {
+    const std::string s(v);
+    if (s == "deep")
+      ep.dispersion.type = EncinoWaves::kDeepDispersion;
+    else if (s == "finite" || s == "finite_depth")
+      ep.dispersion.type = EncinoWaves::kFiniteDepthDispersion;
+    else if (s == "capillary")
+      ep.dispersion.type = EncinoWaves::kCapillaryDispersion;
+    else
+      std::cerr << "[FFTWaveSimulation] ignoring unknown "
+                << "GZ_WAVES_ENCINO_DISPERSION='" << s
+                << "' (want deep|finite|capillary)" << std::endl;
+  }
+  if (const char *v = std::getenv("GZ_WAVES_ENCINO_SPREADING"))
+  {
+    const std::string s(v);
+    if (s == "poscos2" || s == "poscossqr")
+      ep.directionalSpreading.type =
+        EncinoWaves::kPosCosThetaSqrDirectionalSpreading;
+    else if (s == "mitsuyasu")
+      ep.directionalSpreading.type =
+        EncinoWaves::kMitsuyasuDirectionalSpreading;
+    else if (s == "hasselmann")
+      ep.directionalSpreading.type =
+        EncinoWaves::kHasselmannDirectionalSpreading;
+    else if (s == "donelanbanner" || s == "donelan")
+      ep.directionalSpreading.type =
+        EncinoWaves::kDonelanBannerDirectionalSpreading;
+    else
+      std::cerr << "[FFTWaveSimulation] ignoring unknown "
+                << "GZ_WAVES_ENCINO_SPREADING='" << s
+                << "' (want poscos2|mitsuyasu|hasselmann|donelanbanner)"
+                << std::endl;
+  }
+
+  // Numeric overrides. Each only affects the Height/Dx/Dy fields VRX copies.
+  auto envFloat = [](const char *_name, float &_io)
+  {
+    if (const char *v = std::getenv(_name))
+    {
+      try
+      {
+        _io = std::stof(v);
+      }
+      catch (...)
+      {
+        std::cerr << "[FFTWaveSimulation] ignoring non-numeric " << _name
+                  << "='" << v << "'" << std::endl;
+      }
+    }
+  };
+  envFloat("GZ_WAVES_ENCINO_DEPTH",          ep.depth);
+  envFloat("GZ_WAVES_ENCINO_FETCH",          ep.fetch);
+  envFloat("GZ_WAVES_ENCINO_SWELL",          ep.directionalSpreading.swell);
+  envFloat("GZ_WAVES_ENCINO_TROUGH_DAMPING", ep.troughDamping);
+}
 }  // namespace
 
 //-----------------------------------------------------------------------------
@@ -157,6 +272,7 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
   this->heightGrid_ = Eigen::MatrixXd::Zero(N, N);
   this->dispXGrid_  = Eigen::MatrixXd::Zero(N, N);
   this->dispYGrid_  = Eigen::MatrixXd::Zero(N, N);
+  this->minEGrid_   = Eigen::MatrixXd::Constant(N, N, 1.0);  // 1 = no foam
   this->slopeXGrid_   = Eigen::MatrixXd::Zero(N, N);
   this->slopeYGrid_   = Eigen::MatrixXd::Zero(N, N);
   this->dispDxDxGrid_ = Eigen::MatrixXd::Zero(N, N);
@@ -194,6 +310,10 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
       ep.amplitudeGain = static_cast<float>(this->gain_);
       ep.random.seed   = static_cast<int>(seed);
 
+      // Optional experiment knobs to exercise Encino's distinctive spectra,
+      // dispersion and directional spreading without touching the SDF schema.
+      ApplyEncinoEnvOverrides(ep);
+
       this->encino_->initial =
           std::make_unique<EncinoWaves::InitialStatef>(ep);
       this->encino_->propagation =
@@ -201,10 +321,45 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
       this->encino_->state =
           std::make_unique<EncinoWaves::PropagatedStatef>(ep);
 
+      // --- Physics-based amplitude calibration -----------------------------
+      // EncinoWaves' amplitudeGain only feeds its (here unused) normal
+      // computation, not the height field, and its intrinsic variance does
+      // not correspond to a physical sea state at our wind speeds. Measure
+      // the intrinsic RMS once (one propagation past the ramp) and rescale so
+      // the significant wave height follows the standard fully-developed
+      // Pierson-Moskowitz relation Hs = 0.21 * V19.5^2 / g, i.e.
+      // sigma = Hs/4 = 0.21/(4 g) * V^2. The selected spectrum still sets the
+      // spectral *shape*; this only fixes the overall energy.
+      {
+        using RowMatF = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic,
+                                      Eigen::RowMajor>;
+        this->encino_->propagation->propagate(
+            this->encino_->params, *this->encino_->initial,
+            *this->encino_->state, 10.0f);
+        const int M = ep.resolution();
+        const double sigmaEncino = std::sqrt(
+            Eigen::Map<const RowMatF>(this->encino_->state->Height.cdata(),
+                                      M, M).cast<double>().array()
+                .square().mean());
+        const double sigmaTarget =
+            0.21 / (4.0 * kGravity) * this->windSpeed_ * this->windSpeed_;
+        this->encinoScale_ =
+            (sigmaEncino > 1e-9) ? (sigmaTarget / sigmaEncino) : 1.0;
+      }
+
       std::cout << "[FFTWaveSimulation] EncinoWaves spectrum library active "
                 << "(res=" << ep.resolution() << " domain=" << ep.domain
                 << "m wind=" << ep.windSpeed << "m/s seed=" << ep.random.seed
-                << ")" << std::endl;
+                << " spectrum=" << SpectrumName(ep.spectrum.type)
+                << " dispersion=" << DispersionName(ep.dispersion.type)
+                << " spreading=" << SpreadingName(ep.directionalSpreading.type)
+                << " depth=" << ep.depth << "m fetch=" << ep.fetch << "km"
+                << " swell=" << ep.directionalSpreading.swell
+                << " troughDamp=" << ep.troughDamping
+                << " ampCalib=" << this->encinoScale_
+                << " targetHs=" << (4.0 * 0.21 / (4.0 * kGravity) *
+                                    this->windSpeed_ * this->windSpeed_)
+                << "m)" << std::endl;
     }
   }
 
@@ -273,6 +428,14 @@ namespace
 
 void FFTWaveSimulation::Update(double t)
 {
+  // Idempotent: the field at time t is deterministic, so a repeat call for the
+  // same t is a no-op. Lets the Waves system and any number of WaveBuoyancy
+  // consumers that advance the same instance to the same tick share a single
+  // recompute instead of each paying for a full set of IFFTs.
+  if (t == this->lastUpdateT_)
+    return;
+  this->lastUpdateT_ = t;
+
   const int N = static_cast<int>(this->gridSize_);
 
   // ENCINO-BACKED PATH.
@@ -288,19 +451,39 @@ void FFTWaveSimulation::Update(double t)
         *this->encino_->state,
         static_cast<float>(t));
 
+    // Combined output scale per Update:
+    //  * ramp        — fade the field in over `tau`, matching the Phillips
+    //                  path so switching backends doesn't pop the surface;
+    //  * encinoScale_ — physics-based amplitude calibration to a PM sea state
+    //                  (Encino's amplitudeGain doesn't scale the height);
+    //  * gain_       — the SDF <gain> user multiplier (a no-op via Encino's
+    //                  amplitudeGain, so we apply it here to make it work).
+    const double scale = this->Ramp(t) * this->encinoScale_ * this->gain_;
+
     // Encino stores its spatial fields row-major in float; our grids
     // are column-major in double. The old scalar copy loop showed up
     // as ~7% of the server's hot-thread self-time (16k iterations
     // per grid × 3 grids per call). Map+cast assignment lets Eigen
-    // vectorize the conversion + layout swap.
+    // vectorize the conversion + layout swap; the scale folds into the
+    // same vectorized expression.
     using RowMatF = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic,
                                   Eigen::RowMajor>;
     this->heightGrid_ = Eigen::Map<const RowMatF>(
-        this->encino_->state->Height.cdata(), N, N).cast<double>();
+        this->encino_->state->Height.cdata(), N, N).cast<double>() * scale;
     this->dispXGrid_ = Eigen::Map<const RowMatF>(
-        this->encino_->state->Dx.cdata(), N, N).cast<double>();
+        this->encino_->state->Dx.cdata(), N, N).cast<double>() * scale;
     this->dispYGrid_ = Eigen::Map<const RowMatF>(
-        this->encino_->state->Dy.cdata(), N, N).cast<double>();
+        this->encino_->state->Dy.cdata(), N, N).cast<double>() * scale;
+
+    // Foam: Encino computes MinE = -(min eigenvalue of the displacement
+    // Jacobian) at its internal amplitude. The folding metric scales with the
+    // displacement, so at our calibrated amplitude the minimum eigenvalue is
+    // 1 - scale·(MinE + 1). Jacobian() bilinear-samples this; Eval::FoamMask
+    // turns values below its threshold into whitecap intensity. At t=0
+    // (scale=0) the surface is flat → eigenvalue 1 → no foam.
+    this->minEGrid_ = (1.0 - scale *
+        (Eigen::Map<const RowMatF>(this->encino_->state->MinE.cdata(), N, N)
+            .cast<double>().array() + 1.0)).matrix();
     return;
   }
 
@@ -458,10 +641,16 @@ gz::math::Vector3d FFTWaveSimulation::Normal(
   return n;
 }
 
-double FFTWaveSimulation::Jacobian(double /*x*/, double /*y*/, double /*t*/) const
+double FFTWaveSimulation::Jacobian(double x, double y, double /*t*/) const
 {
-  // Linear (Airy-style) FFT model has no horizontal displacement → Jacobian
-  // is identically 1. Foam mask therefore returns 0 by default.
+  // Encino path: bilinear-sample the per-cell minimum eigenvalue of the
+  // displacement Jacobian (1 = flat, < 1 → folding). Eval::FoamMask turns
+  // values below its threshold into whitecap intensity, so foam appears on the
+  // pinched crests. The in-tree Phillips path doesn't compute a CPU folding
+  // field (its foam is derived in the shader from the chop-derivative grids),
+  // so it stays identically 1 → no CPU foam.
+  if (this->useEncino_)
+    return this->BilinearSample(this->minEGrid_, x, y);
   return 1.0;
 }
 

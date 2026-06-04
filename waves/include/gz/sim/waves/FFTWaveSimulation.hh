@@ -98,6 +98,12 @@ public:
   const Eigen::MatrixXd &DispXGrid() const { return this->dispXGrid_; }
   /// \brief Horizontal y-displacement field Dy(x, y, t).
   const Eigen::MatrixXd &DispYGrid() const { return this->dispYGrid_; }
+  /// \brief Per-cell minimum eigenvalue of the displacement Jacobian (the
+  /// folding / whitecap metric), 1 = flat, < 1 → folding. Populated only on
+  /// the Encino path from its `MinE` output, rescaled to the calibrated
+  /// amplitude. `Jacobian()` samples this; the in-tree Phillips path leaves it
+  /// flat (1) — its foam is derived in the shader from the chop-deriv grids.
+  const Eigen::MatrixXd &MinEGrid() const { return this->minEGrid_; }
   /// \brief Slope ∂η/∂x at each grid cell. Used by the visual to read
   /// per-vertex surface normals from a texture instead of computing
   /// them via finite differences (smoother and more accurate at the
@@ -154,6 +160,9 @@ private:
   // the visual shader to produce choppy, asymmetric wave crests.
   Eigen::MatrixXd dispXGrid_;
   Eigen::MatrixXd dispYGrid_;
+  // Folding / whitecap metric (Encino path): per-cell minimum eigenvalue of
+  // the displacement Jacobian, 1 = flat. Sampled by Jacobian() → FoamMask().
+  Eigen::MatrixXd minEGrid_;
   // Per-update slope grids: ∂η/∂x and ∂η/∂y at each cell. Combined
   // gives the surface normal as normalize(-∂η/∂x, -∂η/∂y, 1).
   Eigen::MatrixXd slopeXGrid_;
@@ -179,10 +188,28 @@ private:
   struct EncinoState;
   std::unique_ptr<EncinoState> encino_;
 
+  // Physics-based amplitude calibration for the Encino path. EncinoWaves'
+  // `amplitudeGain` does not scale its height/displacement output, and its
+  // intrinsic field variance is far larger than a physical sea state at our
+  // wind speeds. We measure Encino's intrinsic RMS once at construction and
+  // store the factor that rescales the significant wave height to the
+  // standard fully-developed Pierson-Moskowitz wind-sea relation
+  // (Hs = 0.21 * V19.5^2 / g). Applied to η/Dx/Dy every Update. 1.0 on the
+  // Phillips path (unused).
+  double encinoScale_{1.0};
+
   // When true (default), Update() computes the 5 derivative grids in
   // addition to η/Dx/Dy. Toggled off by consumers that don't read them
   // (e.g. the GPU-FFT visual path that does finite-diff normals).
   bool computeDerivatives_{true};
+
+  // Time of the last Update(). The field at a given time is deterministic, so
+  // Update() short-circuits on a repeat call for the same time. This lets
+  // several consumers (the Waves system plus each WaveBuoyancy that advances
+  // the field instance it holds — see the cross-process note in WaveBuoyancy)
+  // converge on one FFT per tick instead of one per consumer. -1 = never
+  // updated (sim time is always >= 0).
+  double lastUpdateT_{-1.0};
 };
 
 }  // namespace gz::sim::waves

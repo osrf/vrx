@@ -5,6 +5,7 @@
  * you may not use this file except in compliance with the License.
  */
 
+#include <algorithm>
 #include <cmath>
 #include <random>
 
@@ -84,6 +85,56 @@ TEST(FFTWaveSimulation, RampUpFromZero)
   // Phillips amplitudes at 100 m tile / V≈8 m/s wind give an RMS height in
   // the low-cm range; bound generously to avoid spectrum-tuning regressions.
   EXPECT_GT(rmsLong, 1e-4);
+}
+
+// Encino's MinE folding metric is hooked through Jacobian() → Eval::FoamMask:
+// pinched crests report Jacobian < 1 and produce whitecaps. The in-tree
+// Phillips CPU path has no folding field, so it stays identically 1 (no foam).
+// This test runs under both `./fft_test` and `GZ_WAVES_USE_ENCINO=1 ./fft_test`
+// and branches on UseEncino().
+TEST(FFTWaveSimulation, FoamFromJacobian)
+{
+  gsw::WaveParameters p;
+  p.model = "PMS";
+  p.period = 3.2;
+  p.gain = 20.0;           // large amplitude so folding is unambiguous
+  p.tileSize = 100.0;
+  p.gridSize = 64;
+  p.seed = 7;
+  gsw::FFTWaveSimulation sim(p, 100.0, 64, 7);
+  const double L = sim.TileSizeMeters();
+
+  // Flat surface at t=0 (ramp 0): no folding → Jacobian 1, no foam, either way.
+  sim.Update(0.0);
+  for (int i = 0; i < 32; ++i)
+    for (int j = 0; j < 32; ++j)
+      EXPECT_NEAR(sim.Jacobian(i * L / 32.0, j * L / 32.0, 0.0), 1.0, 1e-9);
+
+  // Past the ramp: sample the folding metric and the derived foam.
+  sim.Update(20.0);
+  double minJac = 1e9, maxJac = -1e9, maxFoam = 0.0;
+  for (int i = 0; i < 32; ++i)
+    for (int j = 0; j < 32; ++j)
+    {
+      const double jac = sim.Jacobian(i * L / 32.0, j * L / 32.0, 20.0);
+      minJac = std::min(minJac, jac);
+      maxJac = std::max(maxJac, jac);
+      const double foam =
+        jac < 0.6 ? std::clamp(1.0 - jac / 0.6, 0.0, 1.0) : 0.0;
+      maxFoam = std::max(maxFoam, foam);
+    }
+
+  if (sim.UseEncino())
+  {
+    EXPECT_LT(minJac, 0.6) << "Encino crests should fold below the foam threshold";
+    EXPECT_GT(maxFoam, 0.0) << "Encino path should produce whitecaps";
+  }
+  else
+  {
+    EXPECT_NEAR(minJac, 1.0, 1e-9) << "Phillips CPU path has no folding field";
+    EXPECT_NEAR(maxJac, 1.0, 1e-9);
+    EXPECT_NEAR(maxFoam, 0.0, 1e-12);
+  }
 }
 
 TEST(FFTWaveSimulation, TimeEvolutionChangesField)
