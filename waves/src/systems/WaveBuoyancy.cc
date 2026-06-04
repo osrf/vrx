@@ -60,6 +60,12 @@ class WaveBuoyancy::Implementation
   public: gz::math::Vector3d gravity{0.0, 0.0, -9.80665};
   public: std::vector<gz::math::Vector3d> points;
 
+  /// \brief Last sim time at which we advanced the wave field. We advance the
+  /// instance we hold ourselves (see PreUpdate) rather than relying on the
+  /// Waves system, so buoyancy stays correct even when the component we read
+  /// is a replication round-trip copy. Throttled to the wavefield update rate.
+  public: double lastWaveUpdate{-1.0};
+
   public: void ParsePoints(const sdf::ElementPtr &_sdf);
 };
 
@@ -154,7 +160,7 @@ void WaveBuoyancy::PreUpdate(
     return;
 
   const Entity worldEnt = worldEntity(_ecm);
-  const auto *wfComp = (worldEnt != kNullEntity)
+  auto *wfComp = (worldEnt != kNullEntity)
     ? _ecm.Component<components::Wavefield>(worldEnt)
     : nullptr;
 
@@ -166,6 +172,26 @@ void WaveBuoyancy::PreUpdate(
     return;
   const auto &pose = *poseOpt;
   const double t = std::chrono::duration<double>(_info.simTime).count();
+
+  // Advance the wave field to the current time on the instance we actually
+  // hold, instead of assuming the Waves system advanced it. The Wavefield
+  // component serializes only the recipe (params + seed), so a copy obtained
+  // through a replication round-trip is a freshly-constructed simulation that
+  // has only run Update(0) — i.e. an identically flat field. Advancing it here
+  // makes the elevation query correct regardless of which instance we got.
+  // (Gerstner's Update() is a no-op, so this is free for it; FFT/Encino are
+  // grid-based and stateful.) Throttled to the wavefield's update rate, and
+  // idempotent in the simulation, so cost stays bounded across consumers.
+  if (wfComp && wfComp->Data().simulation)
+  {
+    const double rate = wfComp->Data().updateRate;
+    const double period = rate > 0.0 ? 1.0 / rate : 0.0;
+    if (t - this->dataPtr->lastWaveUpdate >= period)
+    {
+      wfComp->Data().simulation->Update(t);
+      this->dataPtr->lastWaveUpdate = t;
+    }
+  }
 
   const double r = this->dataPtr->hullRadius;
   const double maxImmersion = 2.0 * r;

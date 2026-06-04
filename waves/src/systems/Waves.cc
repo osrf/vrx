@@ -143,10 +143,15 @@ void Waves::PreUpdate(
     _info.simTime).count();
 
   // Throttle backend updates. Analytic Gerstner has a no-op Update(); FFT
-  // regenerates the height grid each call (~ms at 128²).
+  // regenerates the height grid each call (~ms at 128²). Skip entirely while
+  // paused — the field is frozen, so there's nothing to advance, and consumers
+  // (e.g. WaveBuoyancy) advance the field themselves, so correctness no longer
+  // depends on this call landing in any particular tick. The replication
+  // marking below still runs so the GUI can pick up the wavefield while paused.
   const double updatePeriod =
     this->dataPtr->updateRate > 0.0 ? 1.0 / this->dataPtr->updateRate : 0.0;
-  if (simTime - this->dataPtr->lastUpdateTime >= updatePeriod)
+  if (!_info.paused &&
+      simTime - this->dataPtr->lastUpdateTime >= updatePeriod)
   {
     this->dataPtr->data.simulation->Update(simTime);
     this->dataPtr->lastUpdateTime = simTime;
