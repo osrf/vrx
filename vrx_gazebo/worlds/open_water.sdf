@@ -5,7 +5,7 @@
     <!-- Physics -->
     <physics name="default_physics" type="dart">
       <max_step_size>0.004</max_step_size>
-      <real_time_factor>0</real_time_factor>
+      <!-- <real_time_factor>0</real_time_factor> -->
     </physics>
 
     <!-- Spherical coordinates for Portuguese Ledge, Monterey Bay.
@@ -79,6 +79,16 @@
       name="gz::sim::systems::Imu">
     </plugin>
 
+    <!-- NOTE: gz-sim's graded_buoyancy models a FLAT water plane at Z=0 and
+         does not couple to the wavefield. With no <enable> scoping it also acts
+         on test_buoy's collision, and its force (full submerged volume) far
+         exceeds WaveBuoyancy's point forces — so it pins the buoy to the still
+         surface and masks all wave excitation. test_buoy supplies its own
+         wave-coupled buoyancy via gz-sim-wave-buoyancy-system, so we disable the
+         static graded buoyancy here to let the buoy bob with the waves. If you
+         add vessels that rely on standard buoyancy, re-enable this and scope it
+         away from wave-buoyancy models with <enable>...</enable>. -->
+    <!--
     <plugin
       filename="gz-sim-buoyancy-system"
       name="gz::sim::systems::Buoyancy">
@@ -90,6 +100,7 @@
         </density_change>
       </graded_buoyancy>
     </plugin>
+    -->
 
     <plugin filename="gz-sim-waves-system"
             name="gz::sim::systems::Waves">
@@ -112,7 +123,17 @@
         <!-- period=3.2 → wind ≈ 5.0 m/s (exact asv_wave_sim
              reference: wind_speed=5). -->
         <period>3.2</period>
-        <gain>1.0</gain>
+        <!-- Visual amplitude boost. With the Encino path, <gain> is a linear
+             multiplier on top of the physics-based calibration (which targets
+             a realistic Hs for the wind speed). period=3.2 → wind ~4.4 m/s →
+             physical Hs ~0.41 m, which looks flat; gain=9.5 (~1/ampCalib)
+             restores the dramatic pre-calibration look (effective Hs ~3.9 m).
+             NOTE: this amplitude is intentionally unphysical for the wind, so
+             a wave-coupled buoy (WaveBuoyancy) will be over-driven; and on the
+             Phillips path (GZ_WAVES_USE_ENCINO unset) gain=9.5 yields very
+             large waves too. For a physically calm-but-bigger sea, raise
+             <period> instead and leave gain at 1.0. -->
+        <gain>9.5</gain>
         <direction>2.356</direction>  <!-- 135° in radians -->
         <angle>0.4</angle>
         <scale>1.1</scale>
@@ -123,7 +144,7 @@
              swells, producing the flatter, slow-moving look we want
              rather than many small bubbly waves. -->
         <tile_size>256</tile_size>
-        <grid_size>256</grid_size>
+        <grid_size>128</grid_size>
         <seed>42</seed>
         <!-- Match asv_wave_sim's <steepness>2</steepness> in our
              sign convention. Sharply pinches wave crests. -->
