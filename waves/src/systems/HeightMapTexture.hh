@@ -56,14 +56,17 @@ namespace gz::sim::systems
     ~HeightMapTexture();
 
     /// \brief Upload the supplied height + horizontal-displacement grids to
-    /// the GPU. All three matrices must be `gridSize × gridSize`. They are
-    /// packed into a single RGBA32F texture (η, Dx, Dy, 0) and consumed by
-    /// the FFT vertex shader.
+    /// the GPU. All matrices must be `gridSize × gridSize`. They are packed
+    /// into a single RGBA32F texture (η, Dx, Dy, foam) and consumed by the
+    /// FFT vertex/fragment shaders.
+    /// \param[in] _foam Optional per-cell folding / foam metric → the
+    ///   texture's alpha channel; null leaves alpha at zero.
     /// \return True on success, false if the upload couldn't proceed (e.g.
     ///   texture not yet resident, or unexpected grid size).
     bool Upload(const Eigen::MatrixXd &_eta,
                 const Eigen::MatrixXd &_dispX,
-                const Eigen::MatrixXd &_dispY);
+                const Eigen::MatrixXd &_dispY,
+                const Eigen::MatrixXd *_foam = nullptr);
 
     /// \brief Upload the per-cell slope grid (∂η/∂x, ∂η/∂y) to a
     /// dedicated `slopeMap` texture. Bound to the visual material on

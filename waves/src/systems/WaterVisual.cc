@@ -518,6 +518,13 @@ void WaterVisual::Implementation::UploadUniforms()
     (*fsParams)["tileSize"]      = this->cachedTileSize;
     (*fsParams)["foamStrength"]  = this->foamStrength;
     (*fsParams)["foamThreshold"] = this->foamThreshold;
+    // Encino packs an analytic folding metric into the heightmap's alpha
+    // channel; tell the FS to read it directly instead of finite-differencing
+    // the displacement (faster + resolution-independent). For the Encino path
+    // the metric is already a Jacobian-style value, so foamThreshold is the
+    // smoothstep half-width around J = 0.
+    (*fsParams)["useFoamMap"] =
+        (this->fftSim && this->fftSim->UseEncino()) ? 1 : 0;
   }
   else
   {
@@ -525,6 +532,7 @@ void WaterVisual::Implementation::UploadUniforms()
     (*fsParams)["tileSize"]      = 1.0f;
     (*fsParams)["foamStrength"]  = 0.0f;
     (*fsParams)["foamThreshold"] = 1.0f;
+    (*fsParams)["useFoamMap"]    = 0;
   }
   {
     float v[4] = {this->shallowColor.R(), this->shallowColor.G(),
@@ -1040,9 +1048,15 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // off the server's RTF accounting, so throttling here would
       // only cost visual smoothness without buying any measured RTF.
       this->fftSim->Update(static_cast<double>(this->currentSimTime));
+      // On the Encino path also pack the analytic folding metric into the
+      // heightmap's alpha channel, so the FS reads foam directly (one sample)
+      // instead of finite-differencing the displacement. Phillips passes null
+      // (alpha 0) and keeps its in-shader finite-diff foam.
       ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
                                    this->fftSim->DispXGrid(),
-                                   this->fftSim->DispYGrid());
+                                   this->fftSim->DispYGrid(),
+                                   this->fftSim->UseEncino()
+                                     ? &this->fftSim->MinEGrid() : nullptr);
       // Upload the slope and chop-derivative grids so the VS can
       // build the full Tessendorf chop-aware tangent + normal per
       // vertex instead of finite-differencing the displaced surface.

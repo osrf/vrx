@@ -38,16 +38,19 @@ extern "C"
       const char *name);
 
   /// Upload three `rows × cols` row-major double matrices (height,
-  /// horizontal x-displacement, horizontal y-displacement) into the
-  /// RGBA32F heightmap texture. The alpha channel is reserved for a future
-  /// foam/Jacobian mask and is currently written as zero. Each pointer
-  /// must reference at least `rows * cols` doubles in row-major order.
-  /// Returns 1 on success, 0 on failure (e.g. texture not yet resident).
+  /// horizontal x-displacement, horizontal y-displacement) into the RGB
+  /// channels of the RGBA32F heightmap texture. `foam_grid`, when non-null,
+  /// fills the alpha channel with a per-cell folding / foam metric (the
+  /// displacement Jacobian's minimum eigenvalue; 1 = flat, < 1 → folding);
+  /// pass null to leave alpha zero. Each non-null pointer must reference at
+  /// least `rows * cols` doubles in row-major order. Returns 1 on success,
+  /// 0 on failure (e.g. texture not yet resident).
   int waves_ogre2_heightmap_upload(
       waves_heightmap_t handle,
       const double *eta_grid,
       const double *disp_x_grid,
       const double *disp_y_grid,
+      const double *foam_grid,
       int rows,
       int cols);
 

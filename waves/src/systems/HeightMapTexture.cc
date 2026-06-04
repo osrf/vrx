@@ -25,7 +25,7 @@ namespace
                                           const char *);
   using UploadFn = int (*)(waves_heightmap_t,
                             const double *, const double *, const double *,
-                            int, int);
+                            const double *, int, int);
   using ReadyFn  = int (*)(waves_heightmap_t);
   using UploadSlopeFn = int (*)(waves_heightmap_t,
                                  const double *, const double *,
@@ -202,7 +202,8 @@ HeightMapTexture::~HeightMapTexture()
 
 bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
                               const Eigen::MatrixXd &_dispX,
-                              const Eigen::MatrixXd &_dispY)
+                              const Eigen::MatrixXd &_dispY,
+                              const Eigen::MatrixXd *_foam)
 {
   if (!this->ready_ || !this->impl_->handle)
     return false;
@@ -226,8 +227,17 @@ bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
   RowMatrix eta   = _eta;
   RowMatrix dispX = _dispX;
   RowMatrix dispY = _dispY;
+  // Optional folding / foam metric → the texture's alpha channel.
+  RowMatrix foam;
+  const double *foamData = nullptr;
+  if (_foam && _foam->rows() == N && _foam->cols() == N)
+  {
+    foam = *_foam;
+    foamData = foam.data();
+  }
   return api.upload(this->impl_->handle,
-                    eta.data(), dispX.data(), dispY.data(), N, N) != 0;
+                    eta.data(), dispX.data(), dispY.data(), foamData,
+                    N, N) != 0;
 }
 
 bool HeightMapTexture::UploadSlope(const Eigen::MatrixXd &_slopeX,

@@ -48,6 +48,11 @@ uniform float tileSize;
 // the heightmap sampler is never touched.
 uniform float foamStrength;
 uniform float foamThreshold;
+// When non-zero, the heightmap's alpha channel already holds an analytic
+// folding metric (the displacement Jacobian's minimum eigenvalue, 1 = flat,
+// < 1 → folding) computed on the CPU. The foam mask then reads it with a
+// single sample instead of finite-differencing the displacement.
+uniform int useFoamMap;
 
 in block
 {
@@ -70,6 +75,15 @@ float ComputeFoamMask()
   if (foamStrength <= 0.0)
     return 0.0;
   vec2 heightUV = fract(inPs.baseXY / tileSize);
+
+  // Precomputed analytic folding metric in alpha (Encino path): one sample,
+  // no finite differencing, resolution-independent. 1 = flat, < 1 → folding.
+  if (useFoamMap != 0)
+  {
+    float J = texture(heightMap, heightUV).a;
+    return 1.0 - smoothstep(-foamThreshold, foamThreshold, J);
+  }
+
   ivec2 texSize = textureSize(heightMap, 0);
 
   // Sample the chop derivatives over a FIXED PHYSICAL stencil
