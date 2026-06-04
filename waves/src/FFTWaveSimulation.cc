@@ -84,6 +84,16 @@ const char *SpreadingName(EncinoWaves::DirectionalSpreadingType t)
   }
 }
 
+const char *FilterName(EncinoWaves::FilterType t)
+{
+  switch (t)
+  {
+    case EncinoWaves::kNullFilter:                   return "none";
+    case EncinoWaves::kSmoothInvertibleBandPassFilter: return "bandpass";
+    default:                                         return "?";
+  }
+}
+
 /// Apply optional environment-variable overrides for EncinoWaves' distinctive
 /// controls onto `ep`. Like GZ_WAVES_USE_ENCINO itself, these are experiment
 /// knobs deliberately kept out of the stable SDF surface. They all feed the
@@ -162,6 +172,33 @@ void ApplyEncinoEnvOverrides(EncinoWaves::Parametersf &ep)
   envFloat("GZ_WAVES_ENCINO_FETCH",          ep.fetch);
   envFloat("GZ_WAVES_ENCINO_SWELL",          ep.directionalSpreading.swell);
   envFloat("GZ_WAVES_ENCINO_TROUGH_DAMPING", ep.troughDamping);
+
+  // Optional spectral band-pass over wavelength (Encino's
+  // SmoothInvertibleBandPassFilter). Setting either band edge enables it: the
+  // spectrum keeps wavelengths within [MIN_WL, MAX_WL] metres and rolls off
+  // outside over a soft transition (_SOFT). _MIN raises the suppression floor
+  // (0 = full cut); _INVERT turns the band into a notch. Useful to drop the
+  // small ripples that shimmer at grid resolution, isolate a swell band, or
+  // remove components near/above the tile size. Note: the amplitude
+  // calibration renormalises total energy, so the filter reshapes *which*
+  // wavelengths survive rather than the overall sea height.
+  if (std::getenv("GZ_WAVES_ENCINO_FILTER_MIN_WL") ||
+      std::getenv("GZ_WAVES_ENCINO_FILTER_MAX_WL"))
+  {
+    ep.filter.type = EncinoWaves::kSmoothInvertibleBandPassFilter;
+    envFloat("GZ_WAVES_ENCINO_FILTER_MIN_WL", ep.filter.smallWavelength);
+    envFloat("GZ_WAVES_ENCINO_FILTER_MAX_WL", ep.filter.bigWavelength);
+    envFloat("GZ_WAVES_ENCINO_FILTER_SOFT",   ep.filter.softWidth);
+    envFloat("GZ_WAVES_ENCINO_FILTER_MIN",    ep.filter.min);
+    if (const char *v = std::getenv("GZ_WAVES_ENCINO_FILTER_INVERT"))
+      ep.filter.invert = (std::string(v) == "1");
+    // The smoothstep band edges are [smallWL - soft, smallWL] and
+    // [bigWL, bigWL + soft]; a zero soft width collapses them and Encino's
+    // smoothstep divides by zero (NaN spectrum). Default a positive transition
+    // from the lower cutoff when the user didn't supply one.
+    if (ep.filter.softWidth <= 0.0f)
+      ep.filter.softWidth = std::max(0.25f * ep.filter.smallWavelength, 1.0f);
+  }
 }
 }  // namespace
 
@@ -356,6 +393,7 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
                 << " depth=" << ep.depth << "m fetch=" << ep.fetch << "km"
                 << " swell=" << ep.directionalSpreading.swell
                 << " troughDamp=" << ep.troughDamping
+                << " filter=" << FilterName(ep.filter.type)
                 << " ampCalib=" << this->encinoScale_
                 << " targetHs=" << (4.0 * 0.21 / (4.0 * kGravity) *
                                     this->windSpeed_ * this->windSpeed_)

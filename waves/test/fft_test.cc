@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <random>
 
 #include <gtest/gtest.h>
@@ -135,6 +136,42 @@ TEST(FFTWaveSimulation, FoamFromJacobian)
     EXPECT_NEAR(maxJac, 1.0, 1e-9);
     EXPECT_NEAR(maxFoam, 0.0, 1e-12);
   }
+}
+
+// The Encino band-pass filter (GZ_WAVES_ENCINO_FILTER_*) reshapes which
+// wavelengths survive in the spectrum. Same seed → without the filter the
+// field is one thing; with a narrow band it differs. (The amplitude
+// calibration renormalises total energy, so we compare the field shape, not
+// its RMS.) Only meaningful on the Encino backend; no-op early-out otherwise.
+TEST(FFTWaveSimulation, EncinoBandPassFilterReshapesField)
+{
+  gsw::WaveParameters p;
+  p.model = "PMS";
+  p.period = 3.2;
+  p.gain = 1.0;
+  p.tileSize = 200.0;
+  p.gridSize = 64;
+  p.seed = 11;
+
+  unsetenv("GZ_WAVES_ENCINO_FILTER_MIN_WL");
+  unsetenv("GZ_WAVES_ENCINO_FILTER_MAX_WL");
+  gsw::FFTWaveSimulation plain(p, 200.0, 64, 11);
+  if (!plain.UseEncino())
+    return;  // band-pass filter only applies to the Encino spectrum
+  plain.Update(20.0);
+  const Eigen::MatrixXd a = plain.HeightGrid();
+
+  // Keep only 30–100 m waves (suppresses the ~16 m peak and the ripples).
+  setenv("GZ_WAVES_ENCINO_FILTER_MIN_WL", "30", 1);
+  setenv("GZ_WAVES_ENCINO_FILTER_MAX_WL", "100", 1);
+  gsw::FFTWaveSimulation filtered(p, 200.0, 64, 11);
+  filtered.Update(20.0);
+  const Eigen::MatrixXd b = filtered.HeightGrid();
+  unsetenv("GZ_WAVES_ENCINO_FILTER_MIN_WL");
+  unsetenv("GZ_WAVES_ENCINO_FILTER_MAX_WL");
+
+  EXPECT_GT((a - b).cwiseAbs().maxCoeff(), 1e-3)
+    << "band-pass filter should reshape the Encino field";
 }
 
 TEST(FFTWaveSimulation, TimeEvolutionChangesField)
