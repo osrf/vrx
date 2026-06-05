@@ -23,7 +23,7 @@ namespace gz::sim::waves
 
 struct WaveParameters;
 
-/// \brief Spatial extent of a wave field. Returned by `IWaveSimulation::Bounds`.
+/// \brief Spatial extent of a wave field. Returned by `IWaveField::Bounds`.
 struct TileSize
 {
   double x{0.0};  ///< Tile extent along x in metres.
@@ -37,10 +37,10 @@ struct TileSize
 /// `FFTWaveSimulation` (grid-based, stochastic, requires `Update` each tick).
 /// Consumers use `Eval::*` free functions which delegate to the
 /// implementation; they don't need to know which one is active.
-class IWaveSimulation
+class IWaveField
 {
 public:
-  virtual ~IWaveSimulation() = default;
+  virtual ~IWaveField() = default;
 
   // ---- Point queries (mandatory) ------------------------------------------
 
@@ -81,7 +81,7 @@ public:
 
 /// \brief Factory: instantiate the backend matching `_algorithm` (currently
 /// "gerstner" or "fft"). Returns `nullptr` for unknown algorithms.
-std::shared_ptr<IWaveSimulation> CreateWaveSimulation(
+std::shared_ptr<IWaveField> CreateWaveSimulation(
   const std::string &_algorithm,
   const WaveParameters &_params);
 

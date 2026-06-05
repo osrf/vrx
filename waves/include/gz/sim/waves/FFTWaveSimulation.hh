@@ -34,7 +34,7 @@ struct WaveParameters;
 /// Queries outside the tile are wrapped via `fmod`. Each call to `Update`
 /// regenerates the grid for that time; per-point queries (`Elevation`,
 /// `ParticleVelocity`, ...) bilinear-sample the stored grid.
-class FFTWaveSimulation : public IWaveSimulation
+class FFTWaveSimulation : public IWaveField
 {
 public:
   /// \brief Construct from spectrum / wind parameters.
@@ -54,7 +54,7 @@ public:
 
   ~FFTWaveSimulation() override;
 
-  // IWaveSimulation
+  // IWaveField
   double Elevation(double x, double y, double t) const override;
   gz::math::Vector3d ParticleVelocity(
     double x, double y, double t) const override;

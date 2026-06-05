@@ -23,7 +23,7 @@ namespace gz::sim::waves
 
 /// \brief Analytic sum-of-Gerstners wave model. Closed-form for each of up
 /// to N component waves; deterministic; unbounded in space.
-class GerstnerWaveSimulation : public IWaveSimulation
+class GerstnerWaveSimulation : public IWaveField
 {
 public:
   /// \brief Construct and sample the spectrum from `_params`.
@@ -31,7 +31,7 @@ public:
 
   ~GerstnerWaveSimulation() override = default;
 
-  // IWaveSimulation
+  // IWaveField
   double Elevation(double x, double y, double t) const override;
   gz::math::Vector3d ParticleVelocity(
     double x, double y, double t) const override;
@@ -40,7 +40,7 @@ public:
   std::string_view Kind() const override { return "gerstner"; }
 
   // ---- Backend-specific accessors (used by WaterVisual to drive shader
-  //      uniforms; not part of the IWaveSimulation interface) ----
+  //      uniforms; not part of the IWaveField interface) ----
 
   const std::vector<double>            &Amplitudes()         const { return amplitudes_; }
   const std::vector<double>            &Wavenumbers()        const { return wavenumbers_; }

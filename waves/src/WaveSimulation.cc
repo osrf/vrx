@@ -19,7 +19,7 @@
 namespace gz::sim::waves
 {
 
-std::shared_ptr<IWaveSimulation> CreateWaveSimulation(
+std::shared_ptr<IWaveField> CreateWaveSimulation(
   const std::string &_algorithm,
   const WaveParameters &_params)
 {

@@ -84,7 +84,7 @@ struct WaveParameters
 };
 
 /// \brief State held by the `Wavefield` ECM component. Wraps a polymorphic
-/// `IWaveSimulation` (Gerstner today, FFT or others later). Consumers use
+/// `IWaveField` (Gerstner today, FFT or others later). Consumers use
 /// the free functions in `Eval.hh` to query the wave field; they don't see
 /// the backend directly.
 struct WavefieldData
@@ -99,7 +99,7 @@ struct WavefieldData
   /// \brief The polymorphic wave-field implementation. Constructed by the
   /// `Waves` system from `algorithm` + `params`. Consumers query via
   /// `Eval::*` free functions.
-  std::shared_ptr<IWaveSimulation> simulation;
+  std::shared_ptr<IWaveField> simulation;
 
   /// \brief Monotonically increasing counter, bumped whenever the data is
   /// rewritten. Consumers (visual upload, etc.) compare against their last
@@ -177,7 +177,7 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
   // component arrives ~60 Hz; without this dedupe we'd re-init FFT
   // state thousands of times per minute.
   static std::mutex cacheMutex;
-  static std::shared_ptr<IWaveSimulation> cachedSim;
+  static std::shared_ptr<IWaveField> cachedSim;
   static std::uint64_t cachedGen{std::numeric_limits<std::uint64_t>::max()};
   static std::string cachedAlgo;
   std::lock_guard<std::mutex> lock(cacheMutex);
