@@ -45,9 +45,16 @@ double PiersonMoskowitz(double omega, double omegaP)
 
 }  // namespace
 
+GerstnerWaveSimulation::GerstnerWaveSimulation() = default;
+
 GerstnerWaveSimulation::GerstnerWaveSimulation(const WaveParameters &p)
-  : tau_(p.tau)
 {
+  this->SetParameters(p);
+}
+
+void GerstnerWaveSimulation::SetParameters(const WaveParameters &p)
+{
+  this->tau_ = p.tau;
   const double omegaMean = 2.0 * M_PI / p.period;
   const std::size_t n = p.number;
 

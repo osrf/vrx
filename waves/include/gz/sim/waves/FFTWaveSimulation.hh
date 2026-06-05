@@ -47,6 +47,10 @@ public:
   ///   the FFT path; 64, 128, 256 typical).
   /// \param[in] _seed RNG seed for the Gaussian-distributed amplitudes; same
   ///   seed → same wave field bit-for-bit across runs.
+  /// \brief Default-construct an unconfigured field. Call `SetParameters`
+  /// before `Update`/sampling. Used by the gz-plugin provider loader.
+  FFTWaveSimulation();
+
   FFTWaveSimulation(const WaveParameters &_params,
                     double _tileSize,
                     std::size_t _gridSize,
@@ -55,6 +59,7 @@ public:
   ~FFTWaveSimulation() override;
 
   // IWaveField
+  void SetParameters(const WaveParameters &_params) override;
   double Elevation(double x, double y, double t) const override;
   gz::math::Vector3d ParticleVelocity(
     double x, double y, double t) const override;
@@ -141,14 +146,15 @@ private:
   /// \brief Startup ramp factor `(1 - exp(-t/tau))`, clamped to [0, 1].
   double Ramp(double t) const;
 
-  // Configuration
-  double        tileSize_;
-  std::size_t   gridSize_;
-  double        windSpeed_;
-  double        windDirX_;
-  double        windDirY_;
-  double        gain_;
-  double        tau_;
+  // Configuration. Default member-inits keep a default-constructed instance
+  // benign until SetParameters() runs (the gz-plugin loader path).
+  double        tileSize_{200.0};
+  std::size_t   gridSize_{128};
+  double        windSpeed_{0.0};
+  double        windDirX_{1.0};
+  double        windDirY_{0.0};
+  double        gain_{1.0};
+  double        tau_{2.0};
 
   // Base spectrum amplitudes h0(k), generated once
   Eigen::MatrixXcd h0_;

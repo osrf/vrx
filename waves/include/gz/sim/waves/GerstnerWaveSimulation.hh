@@ -26,12 +26,18 @@ namespace gz::sim::waves
 class GerstnerWaveSimulation : public IWaveField
 {
 public:
-  /// \brief Construct and sample the spectrum from `_params`.
+  /// \brief Default-construct an unconfigured field. Call `SetParameters`
+  /// before sampling. Used by the gz-plugin provider loader.
+  GerstnerWaveSimulation();
+
+  /// \brief Construct and sample the spectrum from `_params` (convenience;
+  /// equivalent to default-construct followed by `SetParameters`).
   explicit GerstnerWaveSimulation(const WaveParameters &_params);
 
   ~GerstnerWaveSimulation() override = default;
 
   // IWaveField
+  void SetParameters(const WaveParameters &_params) override;
   double Elevation(double x, double y, double t) const override;
   gz::math::Vector3d ParticleVelocity(
     double x, double y, double t) const override;

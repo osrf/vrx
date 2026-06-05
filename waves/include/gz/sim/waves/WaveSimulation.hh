@@ -60,6 +60,15 @@ public:
   /// (Tessendorf 2004).
   virtual double Jacobian(double x, double y, double t) const = 0;
 
+  // ---- Configuration ------------------------------------------------------
+
+  /// \brief (Re)configure the wave field from `_params`. The gz-plugin
+  /// provider loader default-constructs an implementation and then calls
+  /// this to set it up; it may also be invoked later to retune parameters
+  /// at runtime. Implementations fully (re)build their internal state from
+  /// `_params`.
+  virtual void SetParameters(const WaveParameters &_params) = 0;
+
   // ---- Lifecycle ----------------------------------------------------------
 
   /// \brief Advance any backend-internal time-dependent state. Analytic

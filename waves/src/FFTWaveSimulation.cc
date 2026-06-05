@@ -217,15 +217,31 @@ struct FFTWaveSimulation::EncinoState
 
 FFTWaveSimulation::~FFTWaveSimulation() = default;
 
+FFTWaveSimulation::FFTWaveSimulation() = default;
+
 FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
                                      double tile,
                                      std::size_t grid,
                                      std::uint32_t seed)
-  : tileSize_(tile)
-  , gridSize_(grid)
-  , gain_(p.gain)
-  , tau_(p.tau)
 {
+  // The constructor's tile/grid/seed arguments override whatever the params
+  // struct carries (callers and tests rely on this). Fold them into a params
+  // copy and route through the single SetParameters setup path.
+  WaveParameters q = p;
+  q.tileSize = tile;
+  q.gridSize = grid;
+  q.seed     = seed;
+  this->SetParameters(q);
+}
+
+void FFTWaveSimulation::SetParameters(const WaveParameters &p)
+{
+  this->tileSize_ = p.tileSize;
+  this->gridSize_ = p.gridSize;
+  this->gain_     = p.gain;
+  this->tau_      = p.tau;
+  const std::uint32_t seed = p.seed;
+
   // PMS relation: peak omega <-> wind speed at 19.5 m. We have period →
   // omegaP → V19. (deep-water dispersion places the spectral peak at
   // omegaP ≈ 0.879 * g / V19.)
