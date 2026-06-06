@@ -45,8 +45,7 @@
 #include <sdf/Element.hh>
 
 #include "gz/sim/components/Wavefield.hh"
-#include "gz/sim/waves/FFTWaveSimulation.hh"
-#include "gz/sim/waves/GerstnerWaveSimulation.hh"
+#include "gz/sim/waves/WaveSimulation.hh"
 #include "gz/sim/waves/Wavefield.hh"
 
 #include "HeightMapTexture.hh"
@@ -145,7 +144,7 @@ class WaterVisual::Implementation
   /// component arrives, building a Gerstner material that later
   /// receives FFT-only uniforms.
   public: bool materialIsFft{false};
-  public: std::shared_ptr<gz::sim::waves::FFTWaveSimulation> fftSim;
+  public: std::shared_ptr<gz::sim::waves::IWaveField> sim;
   public: std::unique_ptr<HeightMapTexture> heightMap;
   public: float cachedTileSize{200.0f};
   public: int   cachedGridSize{128};
@@ -453,12 +452,9 @@ void WaterVisual::Implementation::UploadUniforms()
     // useGpu env var gates the GPU pipeline, so default the uniform
     // accordingly. If the slope upload fails the VS still falls
     // back to finite differences when this is 0.
-    const char *gpuEnv = std::getenv("GZ_WAVES_GPU_FFT");
-    const char *stage2 = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
-    const bool gpuPath = (gpuEnv && std::string(gpuEnv) == "1") ||
-                         (stage2 && std::string(stage2) == "1");
-    const bool encinoPath = this->fftSim && this->fftSim->UseEncino();
-    (*vsParams)["useSlopeMap"] = (gpuPath || encinoPath) ? 0 : 1;
+    // The unified grid path uploads only η/Dx/Dy + foam (no slope map); the
+    // VS finite-diffs the height texture for normals.
+    (*vsParams)["useSlopeMap"] = 0;
   }
   else
   {
@@ -523,8 +519,7 @@ void WaterVisual::Implementation::UploadUniforms()
     // the displacement (faster + resolution-independent). For the Encino path
     // the metric is already a Jacobian-style value, so foamThreshold is the
     // smoothstep half-width around J = 0.
-    (*fsParams)["useFoamMap"] =
-        (this->fftSim && this->fftSim->UseEncino()) ? 1 : 0;
+    (*fsParams)["useFoamMap"] = 1;
   }
   else
   {
@@ -594,500 +589,40 @@ void WaterVisual::Implementation::OnSceneUpdate()
     (*vsParams)["t"] = this->currentSimTime;
   }
 
-  // FFT visual path: either dispatch the GPU compute shader (Stage 1+ of
-  // the GPU-FFT plan) when GZ_WAVES_GPU_FFT=1 and a compute shader URI
-  // was configured, or fall back to the CPU IFFT + upload.
-  if (this->useFft && this->fftSim && this->heightMap &&
-      this->heightMap->Ready())
+  // Drive the wave field's own Update each frame (the GUI process holds its
+  // own instance, rebuilt from the replicated parameters) and upload the
+  // resulting grid as the heightmap the surface shader samples. One path for
+  // every backend -- they all expose the same WaveField2D via Field().
+  if (this->sim && this->heightMap && this->heightMap->Ready())
   {
-    const char *gpuEnv = std::getenv("GZ_WAVES_GPU_FFT");
-    const bool useGpu = gpuEnv && std::string(gpuEnv) == "1" &&
-                        !this->computeShaderUri.empty();
-    const char *stage2Env = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
-    const bool useStage2 = stage2Env && std::string(stage2Env) == "1" &&
-                           !this->evolveShaderUri.empty();
-    const char *cpuFeedEnv = std::getenv("GZ_WAVES_GPU_FFT_CPU_FEED");
-    const bool useCpuFeed = cpuFeedEnv && std::string(cpuFeedEnv) == "1";
+    this->sim->Update(static_cast<double>(this->currentSimTime));
+    const auto *f = this->sim->Field();
     bool ok = false;
-
-    // Diagnostic: feed CPU's IFFT output straight into the GPU
-    // visual texture, bypassing evolve+IFFT entirely. If this looks
-    // identical to the standard CPU path, the visual sampling layer
-    // is correct and the GPU compute chain is the bug. If it still
-    // looks "fast", the visual sampling layer itself is wrong.
-    if (useCpuFeed)
+    if (f && f->n > 0 && f->dz)
     {
-      this->fftSim->Update(static_cast<double>(this->currentSimTime));
-      ok = this->heightMap->CpuFeed(this->fftSim->HeightGrid(),
-                                     this->fftSim->DispXGrid(),
-                                     this->fftSim->DispYGrid());
-      static bool loggedCpuFeed = false;
-      if (ok && !loggedCpuFeed)
+      const int N = static_cast<int>(f->n);
+      const Eigen::MatrixXd eta =
+          Eigen::Map<const Eigen::MatrixXd>(f->dz, N, N);
+      const Eigen::MatrixXd dx = f->dx
+          ? Eigen::MatrixXd(Eigen::Map<const Eigen::MatrixXd>(f->dx, N, N))
+          : Eigen::MatrixXd::Zero(N, N);
+      const Eigen::MatrixXd dy = f->dy
+          ? Eigen::MatrixXd(Eigen::Map<const Eigen::MatrixXd>(f->dy, N, N))
+          : Eigen::MatrixXd::Zero(N, N);
+      // Folding metric -> heightmap alpha (the FS reads it as foam when
+      // useFoamMap=1). Encino fills MinE; backends without foam pass null
+      // (alpha stays 0 = no whitecaps).
+      Eigen::MatrixXd foam;
+      if (f->foam)
+        foam = Eigen::Map<const Eigen::MatrixXd>(f->foam, N, N);
+      ok = this->heightMap->Upload(eta, dx, dy, f->foam ? &foam : nullptr);
+      static bool logged = false;
+      if (ok && !logged)
       {
-        loggedCpuFeed = true;
-        gzmsg << "[WaterVisual] CPU-feed diagnostic active — feeding "
-              << "the CPU FFT output into ifftFinalTex; evolve+IFFT "
-              << "bypassed. If this looks like CPU, the GPU compute "
-              << "chain is the bug." << std::endl;
+        logged = true;
+        gzmsg << "[WaterVisual] first Field upload: grid=" << f->n
+              << " tile=" << f->tile << " m" << std::endl;
       }
-    }
-    else if (useStage2)
-    {
-      // Stage 2 of the GPU-FFT plan: dispatch the evolve compute
-      // shader so h(k, t) is recomputed on the GPU each frame from
-      // the once-uploaded h0 / omega textures. No spatial output
-      // yet — Stage 3 (IFFT) is what produces the heightmap the
-      // visual samples. Until then this path produces no visual
-      // change; we're just exercising the compute pipeline.
-      if (!this->spectrumUploaded)
-      {
-        // Convert Eigen complex matrices (column-major) to flat
-        // row-major double buffers the bridge expects. Build them
-        // with an explicit element-by-element loop — we previously
-        // used `RowMatrix x = mxcd.real()` and similar Eigen Block
-        // conversions, but the resulting GPU texture content
-        // mismatched CPU's spectrum (verified by replacing the
-        // upload path with a shader-synthesised Phillips spectrum).
-        const auto &h0 = this->fftSim->H0();
-        const auto &hc = this->fftSim->H0Conj();
-        const int N = static_cast<int>(this->fftSim->GridSize());
-        std::vector<double> h0Re(static_cast<std::size_t>(N) * N);
-        std::vector<double> h0Im(static_cast<std::size_t>(N) * N);
-        std::vector<double> hcRe(static_cast<std::size_t>(N) * N);
-        std::vector<double> hcIm(static_cast<std::size_t>(N) * N);
-        for (int i = 0; i < N; ++i)
-        {
-          for (int j = 0; j < N; ++j)
-          {
-            const std::size_t idx =
-                static_cast<std::size_t>(i) * N + j;
-            h0Re[idx] = h0(i, j).real();
-            h0Im[idx] = h0(i, j).imag();
-            hcRe[idx] = hc(i, j).real();
-            hcIm[idx] = hc(i, j).imag();
-          }
-        }
-
-        if (this->heightMap->UploadSpectrum(
-                h0Re.data(), h0Im.data(),
-                hcRe.data(), hcIm.data(), N))
-        {
-          this->spectrumUploaded = true;
-        }
-
-        // GPU readback diagnostics (gated by GZ_WAVES_GPU_FFT_DEBUG=1).
-        const char *dbgEnv = std::getenv("GZ_WAVES_GPU_FFT_DEBUG");
-        const bool debugOn =
-            dbgEnv && std::string(dbgEnv) == "1";
-        if (debugOn && this->spectrumUploaded)
-        {
-          // Magnitude statistics so we can spot upload-side scaling
-          // problems. Compute |h0(1, 0)| and the cell with the
-          // largest |h0| as ground-truth references.
-          double maxAbsH0 = 0.0;
-          int maxI = 0, maxJ = 0;
-          for (int i = 0; i < N; ++i)
-          {
-            for (int j = 0; j < N; ++j)
-            {
-              const double mag = std::abs(h0(i, j));
-              if (mag > maxAbsH0)
-              {
-                maxAbsH0 = mag;
-                maxI = i;
-                maxJ = j;
-              }
-            }
-          }
-          gzmsg << "[WaterVisual] spectrum stats: |h0(1,0)|="
-                << std::abs(h0(1, 0))
-                << " |h0|_max=" << maxAbsH0
-                << " @ (i=" << maxI << ", j=" << maxJ << ")"
-                << std::endl;
-          const auto dump = [&](int i, int j)
-          {
-            float gpuRe = 0, gpuIm = 0, gpuConjRe = 0, gpuConjIm = 0;
-            const bool ok = this->heightMap->ReadbackH0Cell(
-                i, j, &gpuRe, &gpuIm, &gpuConjRe, &gpuConjIm);
-            const double cpuRe = h0(i, j).real();
-            const double cpuIm = h0(i, j).imag();
-            const double cpuMag = std::abs(h0(i, j));
-            const double gpuMag =
-                std::sqrt(static_cast<double>(gpuRe) * gpuRe +
-                           static_cast<double>(gpuIm) * gpuIm);
-            const double cpuConjRe = hc(i, j).real();
-            const double cpuConjIm = hc(i, j).imag();
-            gzmsg << "[WaterVisual] h0(" << i << "," << j << ")  "
-                  << "CPU:(re=" << cpuRe << " im=" << cpuIm
-                  << " |h0|=" << cpuMag << ")  "
-                  << "GPU:(re=" << gpuRe << " im=" << gpuIm
-                  << " |h0|=" << gpuMag << ")  "
-                  << "ok=" << ok << std::endl;
-            gzmsg << "[WaterVisual] h0Conj(" << i << "," << j << ") "
-                  << "CPU:(re=" << cpuConjRe << " im=" << cpuConjIm
-                  << ")  "
-                  << "GPU:(re=" << gpuConjRe << " im=" << gpuConjIm
-                  << ")" << std::endl;
-          };
-          dump(0, 0);
-          dump(1, 0);
-          dump(0, 1);
-          dump(maxI, maxJ);
-          dump(N / 2, N / 2);
-          dump(N - 1, 0);
-          dump(N - 1, N - 1);
-        }
-      }
-      if (this->spectrumUploaded)
-      {
-        ok = this->heightMap->EvolveDispatch(this->evolveShaderUri,
-                                             this->currentSimTime,
-                                             this->cachedTau,
-                                             this->cachedTileSize);
-        if (ok && !this->evolveDyShaderUri.empty())
-        {
-          this->heightMap->EvolveDyDispatch(this->evolveDyShaderUri,
-                                            this->currentSimTime,
-                                            this->cachedTau,
-                                            this->cachedTileSize);
-        }
-        static bool loggedStage2 = false;
-        if (ok && !loggedStage2)
-        {
-          loggedStage2 = true;
-          gzmsg << "[WaterVisual] GPU-FFT Stage 2 (evolve) online — "
-                << "h(k, t) computed on GPU. Visual is unchanged "
-                << "until Stage 3 (IFFT) lands." << std::endl;
-        }
-      }
-      // Stage 3: 2D IFFT over h(k, t) on the GPU. Produces the spatial
-      // η(x, y, t) in a ping-pong texture. Stage 3 still doesn't bind
-      // that texture to the visual material — Stage 4 will. For now
-      // this exercises the full Cooley-Tukey pipeline end-to-end.
-      const char *stage3Env = std::getenv("GZ_WAVES_GPU_FFT_STAGE3");
-      const bool useStage3 = stage3Env && std::string(stage3Env) == "1" &&
-                             !this->bitrevShaderUri.empty() &&
-                             !this->butterShaderUri.empty() &&
-                             this->spectrumUploaded;
-      if (useStage3)
-      {
-        const char *naiveEnv = std::getenv("GZ_WAVES_GPU_FFT_NAIVE");
-        const bool useNaive = naiveEnv && std::string(naiveEnv) == "1"
-                              && !this->naiveShaderUri.empty();
-        const bool ifftOk = useNaive
-            ? this->heightMap->IfftNaiveDispatch(this->naiveShaderUri)
-            : this->heightMap->IfftDispatch(this->bitrevShaderUri,
-                                            this->butterShaderUri);
-        static bool loggedStage3 = false;
-        if (ifftOk && !loggedStage3)
-        {
-          loggedStage3 = true;
-          gzmsg << "[WaterVisual] GPU-FFT Stage 3 (IFFT) online — "
-                << "η(x, t) computed on GPU. Visual stays on CPU "
-                << "upload path until Stage 4 binds the GPU output."
-                << std::endl;
-        }
-
-        // Stage 4: assemble (η, Dx, Dy, _) into the visual texture.
-        // Only runs when both the Dy evolve and the combine shaders
-        // are configured. Without combine, ifft_dispatch's fallback
-        // binds the packed η+Dx texture directly (degraded mode, no
-        // chop displacement).
-        if (ifftOk && !useNaive &&
-            !this->evolveDyShaderUri.empty() &&
-            !this->combineEtaDxShaderUri.empty() &&
-            !this->combineDyShaderUri.empty())
-        {
-          const bool combineOk = this->heightMap->CombineDispatch(
-              this->combineEtaDxShaderUri, this->combineDyShaderUri);
-          static bool loggedStage4 = false;
-          if (combineOk && !loggedStage4)
-          {
-            loggedStage4 = true;
-            gzmsg << "[WaterVisual] GPU-FFT Stage 4 (combine) online — "
-                  << "(η, Dx, Dy) bound to material; CPU upload path "
-                  << "retired." << std::endl;
-          }
-
-          // Diagnostic: scan combinedTex once for non-finite cells +
-          // per-channel ranges. Gated by GZ_WAVES_GPU_FFT_DEBUG=1.
-          const char *scanEnv = std::getenv("GZ_WAVES_GPU_FFT_DEBUG");
-          static int scanFrameCounter = 0;
-          static bool ranScan = false;
-          if (combineOk && scanEnv && std::string(scanEnv) == "1"
-              && !ranScan)
-          {
-            ++scanFrameCounter;
-            if (scanFrameCounter == 60)  // ~1s after combine online
-            {
-              ranScan = true;
-              int badCount = 0;
-              float mn[4] = {0, 0, 0, 0}, mx[4] = {0, 0, 0, 0};
-              int bi = -1, bj = -1;
-              float br[4] = {0, 0, 0, 0};
-              if (this->heightMap->ReadbackCombinedScan(
-                      &badCount, mn, mx, &bi, &bj, br))
-              {
-                gzmsg << "[WaterVisual] combinedTex scan: bad="
-                      << badCount
-                      << "  η[min,max]=[" << mn[0] << "," << mx[0]
-                      << "]  Dx[min,max]=[" << mn[1] << "," << mx[1]
-                      << "]  Dy[min,max]=[" << mn[2] << "," << mx[2]
-                      << "]  a[min,max]=[" << mn[3] << "," << mx[3]
-                      << "]" << std::endl;
-                if (badCount > 0)
-                {
-                  gzwarn << "[WaterVisual] first bad cell @ ("
-                         << bi << "," << bj << ") = ("
-                         << br[0] << "," << br[1] << ","
-                         << br[2] << "," << br[3] << ")"
-                         << std::endl;
-                }
-              }
-            }
-          }
-        }
-
-        // Diagnostic: ~5s after Stage 3 comes online, read back the
-        // GPU's ifftFinalTex and compare cell-by-cell to CPU's
-        // heightGrid_ at the same simTime. Gated by
-        // GZ_WAVES_GPU_FFT_DEBUG=1.
-        const char *ifftDbgEnv = std::getenv("GZ_WAVES_GPU_FFT_DEBUG");
-        const bool ifftDebugOn =
-            ifftDbgEnv && std::string(ifftDbgEnv) == "1";
-        static int diagFrameCounter = 0;
-        static bool ranIfftDiag = false;
-        if (ifftDebugOn && ifftOk && this->heightMap->GpuOutputBound())
-        {
-          ++diagFrameCounter;
-          if (!ranIfftDiag && diagFrameCounter == 300)
-          {
-            ranIfftDiag = true;
-            const float t = this->currentSimTime;
-            this->fftSim->Update(static_cast<double>(t));
-            const auto &eta = this->fftSim->HeightGrid();
-            // Also compute expected h(k, t) directly for comparison
-            // against GPU's hktTex readback at the same cells.
-            const auto &h0  = this->fftSim->H0();
-            const auto &hc  = this->fftSim->H0Conj();
-            const auto &om  = this->fftSim->OmegaGrid();
-            // Compute ramp at this t exactly like CPU does.
-            const double rampVal = (this->cachedTau > 0.0)
-                ? (1.0 - std::exp(-t / this->cachedTau)) : 1.0;
-            auto cpuHkt = [&](int i, int j) -> std::complex<double>
-            {
-              const double w = om(i, j);
-              const std::complex<double> e_plus(std::cos(w * t),
-                                                  std::sin(w * t));
-              const std::complex<double> e_minus = std::conj(e_plus);
-              const std::complex<double> h =
-                  h0(i, j) * e_plus + hc(i, j) * e_minus;
-              return h * rampVal;
-            };
-            gzmsg << "[WaterVisual] IFFT η comparison at t=" << t
-                  << " (300 frames after Stage 3 online)" << std::endl;
-            auto cmp = [&](int i, int j)
-            {
-              float gpuEta = 0.0f;
-              const bool ok =
-                  this->heightMap->ReadbackIfftCell(i, j, &gpuEta);
-              const double cpuEta = eta(i, j);
-              const double diff =
-                  static_cast<double>(gpuEta) - cpuEta;
-              const double ratio = (std::abs(cpuEta) > 1e-9)
-                  ? gpuEta / cpuEta : 0.0;
-              gzmsg << "[WaterVisual] η(" << i << "," << j << ")  "
-                    << "CPU=" << cpuEta << "  GPU=" << gpuEta
-                    << "  diff=" << diff
-                    << "  ratio=" << ratio
-                    << "  ok=" << ok << std::endl;
-            };
-            cmp(0, 0);
-            cmp(1, 1);
-            cmp(32, 32);
-            cmp(64, 0);
-            cmp(64, 64);
-            cmp(100, 50);
-            cmp(127, 0);
-            cmp(127, 127);
-
-            // Compare evolve's hktTex output to CPU's expected
-            // h(k, t) cell-by-cell.
-            auto cmpHkt = [&](int i, int j)
-            {
-              float gpuRe = 0.0f, gpuIm = 0.0f;
-              const bool ok =
-                  this->heightMap->ReadbackHktCell(i, j, &gpuRe, &gpuIm);
-              const std::complex<double> hh = cpuHkt(i, j);
-              gzmsg << "[WaterVisual] hkt(" << i << "," << j << ")  "
-                    << "CPU=(" << hh.real() << "," << hh.imag() << ")  "
-                    << "GPU=(" << gpuRe << "," << gpuIm << ")  "
-                    << "ok=" << ok << std::endl;
-            };
-            cmpHkt(0, 0);
-            cmpHkt(1, 0);
-            cmpHkt(126, 127);
-            cmpHkt(64, 64);
-            cmpHkt(127, 127);
-
-            // Magnitude statistics across the whole CPU heightGrid.
-            double cpuMin = 1e9, cpuMax = -1e9, cpuSumSq = 0.0;
-            for (int i = 0; i < eta.rows(); ++i)
-            {
-              for (int j = 0; j < eta.cols(); ++j)
-              {
-                const double v = eta(i, j);
-                if (v < cpuMin) cpuMin = v;
-                if (v > cpuMax) cpuMax = v;
-                cpuSumSq += v * v;
-              }
-            }
-            gzmsg << "[WaterVisual] CPU η stats: min=" << cpuMin
-                  << "  max=" << cpuMax
-                  << "  rms=" << std::sqrt(cpuSumSq /
-                                             (eta.rows() * eta.cols()))
-                  << std::endl;
-          }
-        }
-
-        // Diagnostic: after the IFFT, optionally view hktTex (Stage
-        // 2's output) directly. Distinguishes "evolve produces zero"
-        // from "IFFT loses evolve's output".
-        const char *vhEnv = std::getenv("GZ_WAVES_GPU_FFT_VIEW_HKT");
-        if (vhEnv && std::string(vhEnv) == "1" &&
-            !this->viewHktShaderUri.empty() &&
-            this->heightMap->GpuOutputBound())
-        {
-          const float scale = 0.01f;
-          const bool vhOk =
-              this->heightMap->ViewHktDispatch(
-                  this->viewHktShaderUri, scale);
-          static bool loggedVh = false;
-          if (vhOk && !loggedVh)
-          {
-            loggedVh = true;
-            gzmsg << "[WaterVisual] GPU-FFT view-hkt ENABLED — "
-                  << "ifftFinalTex overwritten with |h(k,t)| · "
-                  << scale << ". If patterns are visible, evolve "
-                  << "produced data and the IFFT is what's broken; "
-                  << "if still flat, evolve/upload is what's broken."
-                  << std::endl;
-          }
-        }
-
-        // Diagnostic: after the IFFT, optionally overwrite
-        // ifftFinalTex with a known sine pattern to isolate
-        // binding/sampling bugs from compute bugs. If waves appear
-        // with this flag set but not without, the compute pipeline
-        // is broken; if still flat, the binding path is broken.
-        const char *tpEnv =
-            std::getenv("GZ_WAVES_GPU_FFT_TEST_PATTERN");
-        if (tpEnv && std::string(tpEnv) == "1" &&
-            !this->testPatternShaderUri.empty() &&
-            this->heightMap->GpuOutputBound())
-        {
-          const float amplitude = 1.5f;
-          const bool tpOk = this->heightMap->TestPatternDispatch(
-              this->testPatternShaderUri,
-              this->currentSimTime, amplitude);
-          static bool loggedTp = false;
-          if (tpOk && !loggedTp)
-          {
-            loggedTp = true;
-            gzmsg << "[WaterVisual] GPU-FFT test pattern ENABLED — "
-                  << "ifftFinalTex overwritten with a moving sine "
-                  << "(amp=" << amplitude << " m). If waves are now "
-                  << "visible, the IFFT compute is at fault; if "
-                  << "still flat, the binding/sampling path is."
-                  << std::endl;
-          }
-        }
-      }
-      // Stage 2/3 don't update the spatial heightmap the visual reads
-      // from, so we still need *something* there; fall through to the
-      // standard CPU/Stage-1 path below.
-    }
-    if (useGpu)
-    {
-      ok = this->heightMap->Dispatch(this->computeShaderUri,
-                                     this->currentSimTime,
-                                     this->cachedTileSize);
-      static bool loggedGpu = false;
-      if (ok && !loggedGpu)
-      {
-        loggedGpu = true;
-        gzmsg << "[WaterVisual] GPU-FFT dispatch online — compute shader "
-              << this->computeShaderUri << std::endl;
-      }
-    }
-    else if (this->heightMap->GpuOutputBound())
-    {
-      // Stage 4: GPU IFFT output is bound to the visual material.
-      // CPU `fftSim->Update + Upload` is no longer needed on the
-      // render path. The CPU FFTWaveSimulation still runs server-side
-      // for buoyancy queries (Stage 5).
-      ok = true;
-      static bool loggedStage4 = false;
-      if (!loggedStage4)
-      {
-        loggedStage4 = true;
-        gzmsg << "[WaterVisual] GPU-FFT Stage 4 online — visual now "
-              << "samples the GPU IFFT output directly; CPU heightmap "
-              << "upload skipped on the render thread." << std::endl;
-      }
-    }
-    else
-    {
-      // Server and GUI run in separate processes (gz_server composable
-      // node vs gz-sim -g executable); the Wavefield component carries
-      // only the parameters, and each side instantiates its own
-      // FFTWaveSimulation from them. So the visual MUST drive its own
-      // Update each frame — there is no shared grid to read from.
-      //
-      // Run at the render rate (60 Hz typical). The GUI process runs
-      // off the server's RTF accounting, so throttling here would
-      // only cost visual smoothness without buying any measured RTF.
-      this->fftSim->Update(static_cast<double>(this->currentSimTime));
-      // On the Encino path also pack the analytic folding metric into the
-      // heightmap's alpha channel, so the FS reads foam directly (one sample)
-      // instead of finite-differencing the displacement. Phillips passes null
-      // (alpha 0) and keeps its in-shader finite-diff foam.
-      ok = this->heightMap->Upload(this->fftSim->HeightGrid(),
-                                   this->fftSim->DispXGrid(),
-                                   this->fftSim->DispYGrid(),
-                                   this->fftSim->UseEncino()
-                                     ? &this->fftSim->MinEGrid() : nullptr);
-      // Upload the slope and chop-derivative grids so the VS can
-      // build the full Tessendorf chop-aware tangent + normal per
-      // vertex instead of finite-differencing the displaced surface.
-      // Skip on the Encino path — it only fills Height/Dx/Dy; the VS
-      // falls back to finite-diff normals (gated by useSlopeMap=0).
-      if (ok && !this->fftSim->UseEncino())
-      {
-        this->heightMap->UploadSlope(this->fftSim->SlopeXGrid(),
-                                      this->fftSim->SlopeYGrid());
-        this->heightMap->UploadChopDerivatives(
-            this->fftSim->DispDxDxGrid(),
-            this->fftSim->DispDyDyGrid(),
-            this->fftSim->DispDxDyGrid());
-      }
-    }
-    // One-shot diagnostic on the very first successful CPU upload so we
-    // can see the actual amplitudes the GPU is sampling. Helps
-    // distinguish "upload silently failing" from "Phillips spectrum is
-    // tiny". (Skipped on the GPU-FFT path; that path has its own log.)
-    static bool logged = false;
-    if (ok && !useGpu && !logged)
-    {
-      logged = true;
-      const auto &eta = this->fftSim->HeightGrid();
-      const auto &dx  = this->fftSim->DispXGrid();
-      const auto &dy  = this->fftSim->DispYGrid();
-      gzmsg << "[WaterVisual] first FFT upload: η range=["
-            << eta.minCoeff() << ", " << eta.maxCoeff()
-            << "] m, |Dx|max=" << dx.cwiseAbs().maxCoeff()
-            << " m, |Dy|max=" << dy.cwiseAbs().maxCoeff()
-            << " m, chopFactor=" << this->cachedChopFactor << std::endl;
     }
   }
 }
@@ -1313,90 +848,31 @@ void WaterVisual::PreUpdate(
   }
   const auto &data = wfComp->Data();
 
-  // Dispatch on backend type. The FFT path samples a heightmap texture
-  // uploaded each frame; the Gerstner path uploads per-component vec3
-  // uniforms.
-  if (auto fft = std::dynamic_pointer_cast<waves::FFTWaveSimulation>(
-        data.simulation))
+  // One render path for every backend: store the field behind the interface
+  // and let OnSceneUpdate pull its grid via Field(). No backend-specific
+  // dispatch, so this plugin links no concrete provider.
+  if (!data.simulation)
   {
-    if (!this->dataPtr->haveWavefield)
-    {
-      gzmsg << "[WaterVisual] Wavefield component found (algorithm=fft, "
-            << "tile=" << fft->TileSizeMeters() << " m, "
-            << "grid=" << fft->GridSize() << ", generation="
-            << data.generation << ")" << std::endl;
-    }
-    this->dataPtr->useFft = true;
-    this->dataPtr->fftSim = fft;
-    // NOTE: the visual's update period is intentionally NOT synced to
-    // the server's <update_rate>. The two rates do different jobs:
-    // the server only needs Update for buoyancy queries (15 Hz is
-    // fine — water at sea evolves slowly), but the displayed surface
-    // needs ≥30 Hz refresh to avoid the stroboscopic stagger that
-    // the eye reads as "waves moving slower". An earlier attempt to
-    // sync them made waves visually drag at update_rate<30.
-    // Slope/chop-deriv grids are only consumed when the VS reads them
-    // (useSlopeMap=1). The GPU-FFT path and the Encino path both run
-    // with useSlopeMap=0 (finite-diff normals in the VS), so skipping
-    // the 5 derivative IFFTs cuts ~60% off each Update on Phillips.
-    // Encino's own Update branch already bypasses them — flag is a
-    // no-op there but harmless.
-    const char *gpuEnv = std::getenv("GZ_WAVES_GPU_FFT");
-    const char *stage2 = std::getenv("GZ_WAVES_GPU_FFT_STAGE2");
-    const bool gpuPath = (gpuEnv && std::string(gpuEnv) == "1") ||
-                         (stage2 && std::string(stage2) == "1");
-    fft->SetComputeDerivatives(!gpuPath && !fft->UseEncino());
-    this->dataPtr->cachedTileSize = static_cast<float>(fft->TileSizeMeters());
-    this->dataPtr->cachedGridSize = static_cast<int>(fft->GridSize());
-    this->dataPtr->cachedTau = static_cast<float>(data.params.tau);
-    this->dataPtr->cachedChopFactor =
-        static_cast<float>(data.params.choppiness);
-    this->dataPtr->haveWavefield = true;
-    this->dataPtr->cachedGeneration = data.generation;
-    return;
-  }
-
-  const auto *gerstner =
-    dynamic_cast<const waves::GerstnerWaveSimulation *>(data.simulation.get());
-  if (!gerstner)
-  {
-    if (this->dataPtr->haveWavefield)
-      gzwarn << "[WaterVisual] backend '" << data.algorithm
-             << "' has no shader path yet" << std::endl;
     this->dataPtr->haveWavefield = false;
     return;
   }
-
   if (!this->dataPtr->haveWavefield)
   {
     gzmsg << "[WaterVisual] Wavefield component found (algorithm="
-          << data.algorithm
-          << ", N=" << gerstner->Amplitudes().size()
-          << ", generation=" << data.generation << ")" << std::endl;
+          << data.algorithm << ", generation=" << data.generation << ")"
+          << std::endl;
   }
-  this->dataPtr->haveWavefield = true;
-  if (data.generation == this->dataPtr->cachedGeneration)
-    return;
-
-  this->dataPtr->cachedGeneration = data.generation;
-  this->dataPtr->cachedTau = static_cast<float>(gerstner->Tau());
-  this->dataPtr->cachedNwaves =
-    static_cast<int>(gerstner->Amplitudes().size());
-  this->dataPtr->cachedAmplitudes.assign(
-    gerstner->Amplitudes().begin(), gerstner->Amplitudes().end());
-  this->dataPtr->cachedWavenumbers.assign(
-    gerstner->Wavenumbers().begin(), gerstner->Wavenumbers().end());
-  this->dataPtr->cachedOmegas.assign(
-    gerstner->AngularFrequencies().begin(),
-    gerstner->AngularFrequencies().end());
-  this->dataPtr->cachedSteepnesses.assign(
-    gerstner->Steepnesses().begin(), gerstner->Steepnesses().end());
-  this->dataPtr->cachedDirections.clear();
-  for (const auto &d : gerstner->Directions())
+  this->dataPtr->sim = data.simulation;
+  this->dataPtr->useFft = true;
+  if (const auto *f = data.simulation->Field())
   {
-    this->dataPtr->cachedDirections.emplace_back(
-      static_cast<float>(d.X()), static_cast<float>(d.Y()));
+    this->dataPtr->cachedTileSize = static_cast<float>(f->tile);
+    this->dataPtr->cachedGridSize = static_cast<int>(f->n);
   }
+  this->dataPtr->cachedTau = static_cast<float>(data.params.tau);
+  this->dataPtr->cachedChopFactor = static_cast<float>(data.params.choppiness);
+  this->dataPtr->haveWavefield = true;
+  this->dataPtr->cachedGeneration = data.generation;
 }
 
 }  // namespace gz::sim::systems
