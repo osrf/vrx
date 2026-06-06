@@ -20,18 +20,20 @@ find_package(gz-rendering REQUIRED)
 find_package(gz_common_vendor REQUIRED)
 find_package(gz-common REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
-find_package(gz-plugin REQUIRED COMPONENTS register)
+find_package(gz-plugin REQUIRED COMPONENTS register loader)
 # Apache-2.0 Horvath spectrum library, used by FFTWaveSimulation when
 # GZ_WAVES_USE_ENCINO=1 at construction time.
 find_package(encino_waves REQUIRED)
 
 # --------------------------------------------------------------------------
-# Core wave-simulation library: backend interface, factory, Gerstner impl.
+# Core wave library: the IWaveField interface, the provider loader
+# (CreateWaveSimulation), and the Wavefield component. It links NO concrete
+# backend — providers are gz-plugin libraries discovered and loaded at runtime
+# — so the core stays backend-agnostic, which is what lets providers move into
+# separate packages later without the core depending on them.
 # --------------------------------------------------------------------------
 add_library(${PROJECT_NAME} SHARED
   src/WaveSimulation.cc
-  src/GerstnerWaveSimulation.cc
-  src/FFTWaveSimulation.cc
   src/components.cc
 )
 target_include_directories(${PROJECT_NAME}
@@ -44,7 +46,39 @@ target_link_libraries(${PROJECT_NAME}
     gz-sim::core
     gz-math::gz-math
   PRIVATE
-    encino_waves::encino_waves
+    gz-plugin::loader
+    gz-common::gz-common
+)
+
+# --------------------------------------------------------------------------
+# Wave-field providers. Each backend is a standalone gz-plugin library named
+# gz-waves-provider-<token>; the core loader (CreateWaveSimulation) discovers
+# them by that convention and instantiates them through IWaveField. They link
+# only the core headers (interface + params) plus their own math deps — never
+# the core library — so each is a self-contained, separately-packageable unit.
+# --------------------------------------------------------------------------
+add_library(gz-waves-provider-gerstner SHARED
+  src/GerstnerWaveSimulation.cc
+)
+target_include_directories(gz-waves-provider-gerstner
+  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_link_libraries(gz-waves-provider-gerstner
+  PUBLIC  gz-math::gz-math
+  PRIVATE gz-plugin::register)
+
+add_library(gz-waves-provider-fft SHARED
+  src/FFTWaveSimulation.cc
+)
+target_include_directories(gz-waves-provider-fft
+  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_link_libraries(gz-waves-provider-fft
+  PUBLIC  gz-math::gz-math
+  PRIVATE gz-plugin::register encino_waves::encino_waves)
+
+install(
+  TARGETS gz-waves-provider-gerstner gz-waves-provider-fft
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 # --------------------------------------------------------------------------
@@ -200,11 +234,15 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+  # Each test binary links exactly one provider (and exercises only that one
+  # through CreateWaveSimulation): a provider linked into a binary that also
+  # loads a *different* provider would shadow the shared GzPluginHook symbol
+  # and the other provider's LoadLib would come back empty.
   ament_add_gtest(eval_test test/eval_test.cc)
-  target_link_libraries(eval_test ${PROJECT_NAME})
+  target_link_libraries(eval_test ${PROJECT_NAME} gz-waves-provider-gerstner)
 
   ament_add_gtest(fft_test test/fft_test.cc)
-  target_link_libraries(fft_test ${PROJECT_NAME})
+  target_link_libraries(fft_test ${PROJECT_NAME} gz-waves-provider-fft)
 
   # Some Gazebo Jetty source builds ship a `libgz-transport.so` whose
   # DT_NEEDED libzenohc.so isn't accompanied by a DT_RUNPATH/RPATH. ld then

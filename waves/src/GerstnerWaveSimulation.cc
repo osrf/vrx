@@ -15,6 +15,7 @@
 #include <iostream>
 
 #include <gz/math/Helpers.hh>
+#include <gz/plugin/Register.hh>
 
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -298,3 +299,11 @@ const WaveField2D *GerstnerWaveSimulation::Field() const
 }
 
 }  // namespace gz::sim::waves
+
+// Register the analytic Gerstner backend as a gz-plugin wave-field provider.
+// The core (CreateWaveSimulation) discovers this library by the naming
+// convention "gz-waves-provider-<token>" and instantiates the class through
+// the IWaveField interface — no compile-time link from core to this backend.
+GZ_ADD_PLUGIN(
+  gz::sim::waves::GerstnerWaveSimulation,
+  gz::sim::waves::IWaveField)

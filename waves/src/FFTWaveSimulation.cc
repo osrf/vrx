@@ -19,6 +19,8 @@
 
 #include <unsupported/Eigen/FFT>
 
+#include <gz/plugin/Register.hh>
+
 #include "gz/sim/waves/Wavefield.hh"
 
 #include "EncinoWaves/All.h"
@@ -726,3 +728,10 @@ const WaveField2D *FFTWaveSimulation::Field() const
 }
 
 }  // namespace gz::sim::waves
+
+// Register the stochastic FFT backend (Phillips, or EncinoWaves spectra when
+// GZ_WAVES_USE_ENCINO=1) as a gz-plugin wave-field provider, discovered by the
+// core through the convention "gz-waves-provider-fft".
+GZ_ADD_PLUGIN(
+  gz::sim::waves::FFTWaveSimulation,
+  gz::sim::waves::IWaveField)

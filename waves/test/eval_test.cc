@@ -55,60 +55,10 @@ TEST(Factory, UnknownAlgorithmReturnsNullptr)
   EXPECT_EQ(sim, nullptr);
 }
 
-namespace
-{
-// Largest |elevation| over a few scattered sample points.
-double MaxAbsElevation(const gsw::WavefieldData &_d, double _t)
-{
-  double m = 0.0;
-  for (const auto &xy : {std::pair{10.0, 12.0}, std::pair{33.0, 47.0},
-                         std::pair{5.0, 80.0}, std::pair{61.0, 23.0}})
-    m = std::max(m, std::abs(gsw::SurfaceElevation(_d, xy.first, xy.second, _t)));
-  return m;
-}
-}  // namespace
-
-// Reproduces, at the unit level, the cross-process bug behind a "flat" FFT
-// wave field: the Wavefield component serializes only the *recipe*, so the
-// deserialization path mints a FRESH simulation that has only ever run
-// Update(0) (ramp=0 → identically zero). A consumer that reads the
-// deserialized instance therefore sees a flat field unless it advances the
-// instance it actually holds. (Gerstner is analytic/stateless and immune;
-// this only bites the FFT/Encino grid-based backend.)
-TEST(Wavefield, FftSimDecouplesAcrossSerialization)
-{
-  gsw::WavefieldData live;
-  live.algorithm = "fft";
-  live.generation = 918273;  // unique → fresh entry in operator>>'s static cache
-  live.params.model = "PMS";
-  live.params.period = 3.2;
-  live.params.gain = 1.0;
-  live.params.tileSize = 100.0;
-  live.params.gridSize = 64;
-  live.params.seed = 7;
-  live.simulation = gsw::CreateWaveSimulation(live.algorithm, live.params);
-  ASSERT_NE(live.simulation, nullptr);
-  live.simulation->Update(20.0);
-  EXPECT_GT(MaxAbsElevation(live, 20.0), 1e-3)
-    << "a live, time-advanced FFT field must be non-flat";
-
-  // Round-trip through the component serialization (what replication does).
-  std::stringstream ss;
-  ss << live;
-  gsw::WavefieldData round;
-  ss >> round;
-  ASSERT_NE(round.simulation, nullptr);
-
-  // BUG: the deserialized instance was only ever Update(0)'d → identically flat.
-  EXPECT_NEAR(MaxAbsElevation(round, 20.0), 0.0, 1e-9)
-    << "deserialized FFT sim is never advanced → flat (the reported symptom)";
-
-  // FIX: advancing the held instance on read recovers the field, regardless of
-  // which instance a consumer ended up with. Same seed → matches the live field.
-  round.simulation->Update(20.0);
-  EXPECT_GT(MaxAbsElevation(round, 20.0), 1e-3)
-    << "advancing the held sim makes the read correct";
-}
+// NOTE: the FFT serialization/decoupling test lives in fft_test.cc, which
+// links the fft provider. A test binary must not link one provider while
+// loading another through CreateWaveSimulation — the providers share the
+// single extern "C" GzPluginHook symbol, and a linked one shadows the loader.
 
 TEST(Gerstner, AccessorsArePopulated)
 {

@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <random>
+#include <sstream>
 
 #include <gtest/gtest.h>
 
@@ -43,6 +44,17 @@ double RmsHeight(const Eigen::MatrixXd &g)
 {
   return std::sqrt(g.squaredNorm() / static_cast<double>(g.size()));
 }
+
+// Largest |elevation| over a few scattered sample points.
+double MaxAbsElevation(const gsw::WavefieldData &_d, double _t)
+{
+  const double xs[] = {10.0, 33.0, 5.0, 61.0};
+  const double ys[] = {12.0, 47.0, 80.0, 23.0};
+  double m = 0.0;
+  for (int i = 0; i < 4; ++i)
+    m = std::max(m, std::abs(gsw::SurfaceElevation(_d, xs[i], ys[i], _t)));
+  return m;
+}
 }  // namespace
 
 TEST(FFTWaveSimulation, FactoryRoute)
@@ -52,6 +64,48 @@ TEST(FFTWaveSimulation, FactoryRoute)
   EXPECT_EQ(sim->Kind(), "fft");
   ASSERT_TRUE(sim->Bounds().has_value());
   EXPECT_GT(sim->Bounds()->x, 0.0);
+}
+
+// Reproduces, at the unit level, the cross-process bug behind a "flat" FFT
+// wave field: the Wavefield component serializes only the *recipe*, so the
+// deserialization path mints a FRESH simulation that has only ever run
+// Update(0) (ramp=0 → identically zero). A consumer that reads the
+// deserialized instance therefore sees a flat field unless it advances the
+// instance it actually holds. (Gerstner is analytic/stateless and immune;
+// this only bites the FFT/Encino grid-based backend.)
+TEST(Wavefield, FftSimDecouplesAcrossSerialization)
+{
+  gsw::WavefieldData live;
+  live.algorithm = "fft";
+  live.generation = 918273;  // unique → fresh entry in operator>>'s static cache
+  live.params.model = "PMS";
+  live.params.period = 3.2;
+  live.params.gain = 1.0;
+  live.params.tileSize = 100.0;
+  live.params.gridSize = 64;
+  live.params.seed = 7;
+  live.simulation = gsw::CreateWaveSimulation(live.algorithm, live.params);
+  ASSERT_NE(live.simulation, nullptr);
+  live.simulation->Update(20.0);
+  EXPECT_GT(MaxAbsElevation(live, 20.0), 1e-3)
+    << "a live, time-advanced FFT field must be non-flat";
+
+  // Round-trip through the component serialization (what replication does).
+  std::stringstream ss;
+  ss << live;
+  gsw::WavefieldData round;
+  ss >> round;
+  ASSERT_NE(round.simulation, nullptr);
+
+  // BUG: the deserialized instance was only ever Update(0)'d → identically flat.
+  EXPECT_NEAR(MaxAbsElevation(round, 20.0), 0.0, 1e-9)
+    << "deserialized FFT sim is never advanced → flat (the reported symptom)";
+
+  // FIX: advancing the held instance on read recovers the field, regardless of
+  // which instance a consumer ended up with. Same seed → matches the live field.
+  round.simulation->Update(20.0);
+  EXPECT_GT(MaxAbsElevation(round, 20.0), 1e-3)
+    << "advancing the held sim makes the read correct";
 }
 
 TEST(FFTWaveSimulation, HeightsAreFinite)

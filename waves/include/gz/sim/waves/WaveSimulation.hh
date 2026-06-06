@@ -123,8 +123,11 @@ public:
   virtual const WaveField2D *Field() const { return nullptr; }
 };
 
-/// \brief Factory: instantiate the backend matching `_algorithm` (currently
-/// "gerstner" or "fft"). Returns `nullptr` for unknown algorithms.
+/// \brief Load and configure the wave-field provider named by `_algorithm`
+/// ("gerstner" or "fft"). The provider is discovered as a gz-plugin library
+/// following the convention "gz-waves-provider-<algorithm>", instantiated
+/// through the `IWaveField` interface, and configured via `SetParameters`.
+/// Returns `nullptr` for an unknown provider or a load/instantiation failure.
 std::shared_ptr<IWaveField> CreateWaveSimulation(
   const std::string &_algorithm,
   const WaveParameters &_params);
