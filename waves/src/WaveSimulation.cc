@@ -73,8 +73,19 @@ std::shared_ptr<IWaveField> CreateWaveSimulation(
   // shared_ptr returned by QueryInterfaceSharedPtr keeps both the plugin
   // instance and its library alive, so this local Loader may safely go out of
   // scope when we return.
+  //
+  // The second arg is RTLD_NODELETE: keep the provider library mapped for the
+  // life of the process. Before the seam these backends were link-loaded into
+  // libwaves and never unloaded; now they are dlopen'd, so the LAST release of
+  // a WavefieldData::simulation — often a static-lifetime one like operator>>'s
+  // cache, destroyed during process teardown — would dlclose the library while
+  // it (and the TBB/FFTW global state the FFT provider pulls in) is still being
+  // torn down, segfaulting on shutdown/CTRL-C. NODELETE restores the old
+  // never-unloaded behaviour; the only cost is one library mapping not
+  // reclaimed before exit.
   gz::plugin::Loader loader;
-  const std::unordered_set<std::string> plugins = loader.LoadLib(pathToLib);
+  const std::unordered_set<std::string> plugins =
+      loader.LoadLib(pathToLib, /*_noDelete=*/true);
   if (plugins.count(className) == 0)
   {
     std::cerr << "[CreateWaveSimulation] provider class '" << className
