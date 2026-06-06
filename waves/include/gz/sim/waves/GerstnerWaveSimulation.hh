@@ -43,6 +43,8 @@ public:
     double x, double y, double t) const override;
   gz::math::Vector3d Normal(double x, double y, double t) const override;
   double Jacobian(double x, double y, double t) const override;
+  void Update(double _simTime) override;
+  const WaveField2D *Field() const override;
   std::string_view Kind() const override { return "gerstner"; }
 
   // ---- Backend-specific accessors (used by WaterVisual to drive shader
@@ -65,6 +67,19 @@ private:
   std::vector<double>             steepnesses_;
   std::vector<gz::math::Vector2d> directions_;
   double                          tau_{2.0};
+
+  // Render grid: the analytic field sampled onto an N×N tile each Update,
+  // exposed via Field() as the backend-agnostic rendering contract. Buffers
+  // are column-major; Update overwrites them in place, so field_'s data()
+  // pointers (bound in SetParameters) stay valid.
+  std::size_t         fieldN_{128};
+  double              fieldTile_{0.0};
+  double              currentTime_{-1.0};
+  std::vector<double> dzBuf_;
+  std::vector<double> dxBuf_;
+  std::vector<double> dyBuf_;
+  std::vector<double> foamBuf_;
+  WaveField2D         field_;
 };
 
 }  // namespace gz::sim::waves

@@ -233,3 +233,41 @@ TEST(Serialization, RoundTripRebuildsSimulation)
     gsw::SurfaceElevation(rebuilt, 10.0, 5.0, 7.0),
     1e-9);
 }
+
+// The analytic backend samples itself onto a grid for the unified rendering
+// contract. The sampled values must match the closed-form queries at the same
+// world points, so the renderer draws the same field the buoyancy sees.
+TEST(Gerstner, FieldSamplesAnalyticGrid)
+{
+  auto wf = MakePmsField();
+  auto *g = dynamic_cast<gsw::GerstnerWaveSimulation *>(wf.simulation.get());
+  ASSERT_NE(g, nullptr);
+  g->Update(3.0);
+  const auto *f = g->Field();
+  ASSERT_NE(f, nullptr);
+  EXPECT_GT(f->n, 0u);
+  EXPECT_GT(f->tile, 0.0);
+  ASSERT_NE(f->dz, nullptr);
+  ASSERT_NE(f->dx, nullptr);
+  ASSERT_NE(f->dy, nullptr);
+  ASSERT_NE(f->foam, nullptr);
+
+  const int N = static_cast<int>(f->n);
+  const double T = f->tile;
+  double maxAbs = 0.0;
+  for (int j = 0; j < N; j += N / 4)
+  {
+    for (int i = 0; i < N; i += N / 4)
+    {
+      const double x = static_cast<double>(i) * T / N;
+      const double y = static_cast<double>(j) * T / N;
+      EXPECT_NEAR(f->dz[i + j * N], g->Elevation(x, y, 3.0), 1e-9);
+      EXPECT_NEAR(f->foam[i + j * N], g->Jacobian(x, y, 3.0), 1e-9);
+      EXPECT_TRUE(std::isfinite(f->dx[i + j * N]));
+      EXPECT_TRUE(std::isfinite(f->dy[i + j * N]));
+      const double a = std::abs(f->dz[i + j * N]);
+      if (a > maxAbs) maxAbs = a;
+    }
+  }
+  EXPECT_GT(maxAbs, 0.0) << "sampled field is flat — Update didn't fill it";
+}
