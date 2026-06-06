@@ -23,7 +23,9 @@
 
 #include "gz/sim/waves/Wavefield.hh"
 
+#ifdef GZ_WAVES_WITH_ENCINO
 #include "EncinoWaves/All.h"
+#endif
 
 namespace gz::sim::waves
 {
@@ -42,6 +44,7 @@ int Log2Pow2(std::size_t n)
   return r;
 }
 
+#ifdef GZ_WAVES_WITH_ENCINO
 /// True when GZ_WAVES_USE_ENCINO=1 is set at construction time. Read once
 /// per FFTWaveSimulation instance — toggling the env var mid-run won't
 /// take effect until the wave field gets rebuilt.
@@ -202,6 +205,7 @@ void ApplyEncinoEnvOverrides(EncinoWaves::Parametersf &ep)
       ep.filter.softWidth = std::max(0.25f * ep.filter.smallWavelength, 1.0f);
   }
 }
+#endif  // GZ_WAVES_WITH_ENCINO
 }  // namespace
 
 //-----------------------------------------------------------------------------
@@ -209,6 +213,7 @@ void ApplyEncinoEnvOverrides(EncinoWaves::Parametersf &ep)
 // per-instance state. Defined here (not in the header) so EncinoWaves headers
 // stay out of the public include surface.
 //-----------------------------------------------------------------------------
+#ifdef GZ_WAVES_WITH_ENCINO
 struct FFTWaveSimulation::EncinoState
 {
   EncinoWaves::Parametersf params;
@@ -216,6 +221,13 @@ struct FFTWaveSimulation::EncinoState
   std::unique_ptr<EncinoWaves::Propagationf>   propagation;
   std::unique_ptr<EncinoWaves::PropagatedStatef> state;
 };
+#else
+// Empty when EncinoWaves isn't compiled in. The encino_ member stays present in
+// the header (so the class layout is identical with or without Encino — the
+// white-box tests rely on that); it is simply never constructed on this build,
+// and this complete (empty) type lets the unique_ptr destructor compile.
+struct FFTWaveSimulation::EncinoState {};
+#endif  // GZ_WAVES_WITH_ENCINO
 
 FFTWaveSimulation::~FFTWaveSimulation() = default;
 
@@ -339,6 +351,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &p)
   // now — it's an experiment knob, not a stable interface. The Encino
   // path leaves slope/chop-derivative grids zeroed; consumers must check
   // UseEncino() and skip their slope/chop-deriv upload.
+#ifdef GZ_WAVES_WITH_ENCINO
   this->useEncino_ = EncinoEnabledByEnv();
   if (this->useEncino_)
   {
@@ -418,6 +431,9 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &p)
                 << "m)" << std::endl;
     }
   }
+#else
+  this->useEncino_ = false;
+#endif  // GZ_WAVES_WITH_ENCINO
 
   this->Update(0.0);
 }
@@ -494,6 +510,7 @@ void FFTWaveSimulation::Update(double t)
 
   const int N = static_cast<int>(this->gridSize_);
 
+#ifdef GZ_WAVES_WITH_ENCINO
   // ENCINO-BACKED PATH.
   // Drive the heightGrid_/dispXGrid_/dispYGrid_ outputs through the
   // vendored Horvath spectrum library instead of our Phillips path.
@@ -542,6 +559,7 @@ void FFTWaveSimulation::Update(double t)
             .cast<double>().array() + 1.0)).matrix();
     return;
   }
+#endif  // GZ_WAVES_WITH_ENCINO
 
   const double ramp = this->Ramp(t);
 

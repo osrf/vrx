@@ -21,8 +21,16 @@ find_package(gz_math_vendor REQUIRED)
 find_package(gz-math REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
-# Apache-2.0 Horvath spectrum library; provides Eigen transitively.
-find_package(encinowaves_vendor REQUIRED)
+# FFTWaveSimulation's public header returns Eigen::MatrixXd grids and the
+# Phillips path uses Eigen's unsupported FFT, so Eigen is a direct dependency.
+# (It used to arrive transitively via encinowaves_vendor, which broke the
+# Phillips-only build when encino is absent.)
+find_package(Eigen3 REQUIRED)
+# Apache-2.0 Horvath spectrum library — OPTIONAL. Present: the fft provider
+# gains the EncinoWaves spectrum path (GZ_WAVES_USE_ENCINO=1). Absent: it builds
+# Phillips-only with no encino dependency at all, so the FFT backend still works
+# when encino isn't installed.
+find_package(encinowaves_vendor QUIET)
 
 # --------------------------------------------------------------------------
 # FFT wave-field provider: a standalone gz-plugin discovered by the gz_waves
@@ -38,7 +46,15 @@ target_include_directories(gz-waves-provider-fft PRIVATE
   ${gz_waves_INCLUDE_DIRS})
 target_link_libraries(gz-waves-provider-fft
   PUBLIC  gz-math::gz-math
-  PRIVATE gz-plugin::register encinowaves_vendor::encinowaves_vendor)
+  PRIVATE gz-plugin::register Eigen3::Eigen)
+if(encinowaves_vendor_FOUND)
+  target_compile_definitions(gz-waves-provider-fft PRIVATE GZ_WAVES_WITH_ENCINO)
+  target_link_libraries(gz-waves-provider-fft
+    PRIVATE encinowaves_vendor::encinowaves_vendor)
+  message(STATUS "gz_waves_provider_fft: EncinoWaves spectrum ENABLED")
+else()
+  message(STATUS "gz_waves_provider_fft: EncinoWaves not found -> Phillips-only")
+endif()
 
 install(
   TARGETS gz-waves-provider-fft
@@ -52,10 +68,6 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
-
-  # FFTWaveSimulation.hh exposes Eigen in its public interface (grid accessors
-  # return Eigen::MatrixXd), so the test needs Eigen directly.
-  find_package(Eigen3 REQUIRED)
 
   # Links exactly one provider (fft) and only ever loads that one through
   # CreateWaveSimulation, so the shared GzPluginHook is unambiguous.

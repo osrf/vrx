@@ -18,7 +18,10 @@
   <depend>gz_sim_vendor</depend>
   <depend>gz_math_vendor</depend>
   <depend>gz_plugin_vendor</depend>
-  <!-- Apache-2.0 Horvath ocean spectrum library (GZ_WAVES_USE_ENCINO=1). -->
+  <depend>eigen</depend>
+  <!-- Apache-2.0 Horvath ocean spectrum library (GZ_WAVES_USE_ENCINO=1).
+       OPTIONAL: if absent, the provider builds Phillips-only (no encino dep).
+       Kept here so colcon orders the encino build first when it IS present. -->
   <depend>encinowaves_vendor</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
