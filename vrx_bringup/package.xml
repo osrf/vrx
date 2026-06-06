@@ -14,7 +14,7 @@
   <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>vrx_gazebo</exec_depend>
-  <exec_depend>waves</exec_depend>
+  <exec_depend>gz_waves</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
