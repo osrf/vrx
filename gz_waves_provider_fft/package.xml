@@ -1,24 +1,27 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>gz_waves</name>
+  <name>gz_waves_provider_fft</name>
   <version>0.0.0</version>
   <description>
-    Wave field component, evaluators, and spectrum sampling for Gazebo.
-    Designed to be upstreamed into gz-sim; lives in the VRX repository
-    during the bridging period.
+    Stochastic FFT wave-field provider for gz_waves: a Tessendorf/Phillips
+    spectral ocean, or the Apache-2.0 EncinoWaves spectra (TMA/JONSWAP +
+    directional spreading) when GZ_WAVES_USE_ENCINO=1. A gz-plugin
+    implementation of IWaveField, loaded at runtime by the gz_waves core.
   </description>
   <maintainer email="cen.aguero@gmail.com">Carlos Agüero</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>gz_waves</depend>
   <depend>gz_sim_vendor</depend>
   <depend>gz_math_vendor</depend>
-  <depend>gz_common_vendor</depend>
   <depend>gz_plugin_vendor</depend>
-  <depend>gz_rendering_vendor</depend>
+  <!-- Apache-2.0 Horvath ocean spectrum library (GZ_WAVES_USE_ENCINO=1). -->
+  <depend>encino_waves</depend>
 
+  <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
