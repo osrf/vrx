@@ -69,20 +69,8 @@ class WaterVisual::Implementation
   public: void OnRenderTeardown();
 
   // ---- Configuration (set once at Configure) ----
-  public: std::string vertexShaderUri;        ///< Gerstner vertex shader
-  public: std::string fftVertexShaderUri;     ///< FFT vertex shader (optional)
-  public: std::string fragmentShaderUri;      ///< Shared fragment shader
-  public: std::string computeShaderUri;       ///< GPU-FFT compute shader (optional)
-  public: std::string evolveShaderUri;        ///< Stage 2 evolve shader (optional)
-  public: std::string evolveDyShaderUri;      ///< Stage 2 evolve Dy companion (optional)
-  public: bool         spectrumUploaded{false}; ///< Stage 2 one-shot init
-  public: std::string bitrevShaderUri;        ///< Stage 3 IFFT bit-reverse pass (optional)
-  public: std::string butterShaderUri;        ///< Stage 3 IFFT butterfly stage (optional)
-  public: std::string combineEtaDxShaderUri;  ///< Stage 4 combine η+Dx (optional)
-  public: std::string combineDyShaderUri;     ///< Stage 4 combine Dy (optional)
-  public: std::string naiveShaderUri;         ///< Diagnostic naive O(N²) IFFT reference
-  public: std::string testPatternShaderUri;   ///< Diagnostic test-pattern fill (optional)
-  public: std::string viewHktShaderUri;       ///< Diagnostic hktTex viewer (optional)
+  public: std::string fftVertexShaderUri;     ///< Grid/displacement vertex shader
+  public: std::string fragmentShaderUri;      ///< Water surface fragment shader
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
   public: float rescale{0.125f};
@@ -116,21 +104,10 @@ class WaterVisual::Implementation
   public: std::vector<gz::rendering::VisualPtr> tileVisuals;
 
   // ---- Cross-thread cache, guarded by mutex_ ----
-  // The cache is pre-sized to 3 components (matching the shader's vec3
-  // layout) and zero-initialized so UploadUniforms can run safely before
-  // PreUpdate has read the Wavefield component. PreUpdate later overwrites
-  // these with real values.
   public: std::mutex mutex_;
   public: bool haveWavefield{false};
   public: std::uint64_t cachedGeneration{0};
   public: std::uint64_t lastUploadedGeneration{0};
-  public: int cachedNwaves{3};
-  public: std::vector<float> cachedAmplitudes{0.0f, 0.0f, 0.0f};
-  public: std::vector<float> cachedWavenumbers{0.0f, 0.0f, 0.0f};
-  public: std::vector<float> cachedOmegas{0.0f, 0.0f, 0.0f};
-  public: std::vector<float> cachedSteepnesses{0.0f, 0.0f, 0.0f};
-  public: std::vector<gz::math::Vector2f> cachedDirections{
-    {1.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 0.0f}};
   public: float cachedTau{2.0f};
   public: float currentSimTime{0.0f};
 
@@ -232,12 +209,9 @@ bool WaterVisual::Implementation::ResolveVisual()
     if (!this->haveWavefield)
       return false;
 
-    const std::string &vsUri = this->useFft && !this->fftVertexShaderUri.empty()
-      ? this->fftVertexShaderUri
-      : this->vertexShaderUri;
-    gzmsg << "[WaterVisual] creating material with shaders ("
-          << (this->useFft ? "fft" : "gerstner")
-          << (useHlmsPbs ? ", HLMS_PBS path" : "") << ")" << std::endl;
+    const std::string &vsUri = this->fftVertexShaderUri;
+    gzmsg << "[WaterVisual] creating material with shaders"
+          << (useHlmsPbs ? " (HLMS_PBS path)" : "") << std::endl;
 
     if (useHlmsPbs)
     {
@@ -388,21 +362,9 @@ void WaterVisual::Implementation::UploadUniforms()
 {
   if (!this->material)
     return;
-  if (this->useFft)
-  {
-    gzmsg << "[WaterVisual] uploading uniforms (fft): tileSize="
-          << this->cachedTileSize << " gridSize=" << this->cachedGridSize
-          << " tau=" << this->cachedTau << std::endl;
-  }
-  else
-  {
-    gzmsg << "[WaterVisual] uploading uniforms (gerstner): Nwaves="
-          << std::min(this->cachedNwaves, 3)
-          << " a0=" << (this->cachedAmplitudes.size() > 0 ? this->cachedAmplitudes[0] : 0.0)
-          << " k0=" << (this->cachedWavenumbers.size() > 0 ? this->cachedWavenumbers[0] : 0.0)
-          << " w0=" << (this->cachedOmegas.size() > 0 ? this->cachedOmegas[0] : 0.0)
-          << " tau=" << this->cachedTau << std::endl;
-  }
+  gzmsg << "[WaterVisual] uploading uniforms: tileSize=" << this->cachedTileSize
+        << " gridSize=" << this->cachedGridSize << " tau=" << this->cachedTau
+        << std::endl;
 
   auto vsParams = this->material->VertexShaderParams();
   auto fsParams = this->material->FragmentShaderParams();
@@ -448,87 +410,24 @@ void WaterVisual::Implementation::UploadUniforms()
     (*vsParams)["tileSize"]   = this->cachedTileSize;
     (*vsParams)["gridSize"]   = this->cachedGridSize;
     (*vsParams)["chopFactor"] = this->cachedChopFactor;
-    // CPU FFT uploads a slope map; GPU FFT doesn't (yet). The
-    // useGpu env var gates the GPU pipeline, so default the uniform
-    // accordingly. If the slope upload fails the VS still falls
-    // back to finite differences when this is 0.
     // The unified grid path uploads only η/Dx/Dy + foam (no slope map); the
     // VS finite-diffs the height texture for normals.
     (*vsParams)["useSlopeMap"] = 0;
-  }
-  else
-  {
-    // Pack up to 3 components into vec3 / per-direction vec2 uniforms,
-    // matching the conservative GLSL layout that Ogre Next compiles
-    // reliably. Extra components beyond 3 are dropped on the visual side;
-    // physics consumers can still see them via the component arrays.
-    float amp[3]   = {0.0f, 0.0f, 0.0f};
-    float knum[3]  = {0.0f, 0.0f, 0.0f};
-    float om[3]    = {0.0f, 0.0f, 0.0f};
-    float steep[3] = {0.0f, 0.0f, 0.0f};
-    float d0[2]    = {1.0f, 0.0f};
-    float d1[2]    = {1.0f, 0.0f};
-    float d2[2]    = {1.0f, 0.0f};
-    const int n = std::min(this->cachedNwaves, 3);
-    for (int i = 0; i < n; ++i)
-    {
-      amp[i]   = this->cachedAmplitudes[i];
-      knum[i]  = this->cachedWavenumbers[i];
-      om[i]    = this->cachedOmegas[i];
-      steep[i] = this->cachedSteepnesses[i];
-    }
-    if (n > 0) { d0[0] = this->cachedDirections[0].X();
-                 d0[1] = this->cachedDirections[0].Y(); }
-    if (n > 1) { d1[0] = this->cachedDirections[1].X();
-                 d1[1] = this->cachedDirections[1].Y(); }
-    if (n > 2) { d2[0] = this->cachedDirections[2].X();
-                 d2[1] = this->cachedDirections[2].Y(); }
-
-    (*vsParams)["Nwaves"] = n;
-    (*vsParams)["amplitude"].InitializeBuffer(3);
-    (*vsParams)["amplitude"].UpdateBuffer(amp);
-    (*vsParams)["wavenumber"].InitializeBuffer(3);
-    (*vsParams)["wavenumber"].UpdateBuffer(knum);
-    (*vsParams)["omega"].InitializeBuffer(3);
-    (*vsParams)["omega"].UpdateBuffer(om);
-    (*vsParams)["steepness"].InitializeBuffer(3);
-    (*vsParams)["steepness"].UpdateBuffer(steep);
-    (*vsParams)["dir0"].InitializeBuffer(2);
-    (*vsParams)["dir0"].UpdateBuffer(d0);
-    (*vsParams)["dir1"].InitializeBuffer(2);
-    (*vsParams)["dir1"].UpdateBuffer(d1);
-    (*vsParams)["dir2"].InitializeBuffer(2);
-    (*vsParams)["dir2"].UpdateBuffer(d2);
   }
 
   // Fragment shader: colours + lighting params + textures.
   (*fsParams)["hdrMultiplier"] = this->hdrMultiplier;
   (*fsParams)["fresnelPower"]  = this->fresnelPower;
   (*fsParams)["roughness"]     = this->roughness;
-  // Foam path. FFT mode reads the heightmap for the Tessendorf
-  // Jacobian; gerstner keeps foamStrength=0 so the FS short-circuits
-  // before sampling an unbound heightMap.
-  if (this->useFft)
-  {
-    (*fsParams)["chopFactor"]    = this->cachedChopFactor;
-    (*fsParams)["tileSize"]      = this->cachedTileSize;
-    (*fsParams)["foamStrength"]  = this->foamStrength;
-    (*fsParams)["foamThreshold"] = this->foamThreshold;
-    // Encino packs an analytic folding metric into the heightmap's alpha
-    // channel; tell the FS to read it directly instead of finite-differencing
-    // the displacement (faster + resolution-independent). For the Encino path
-    // the metric is already a Jacobian-style value, so foamThreshold is the
-    // smoothstep half-width around J = 0.
-    (*fsParams)["useFoamMap"] = 1;
-  }
-  else
-  {
-    (*fsParams)["chopFactor"]    = 0.0f;
-    (*fsParams)["tileSize"]      = 1.0f;
-    (*fsParams)["foamStrength"]  = 0.0f;
-    (*fsParams)["foamThreshold"] = 1.0f;
-    (*fsParams)["useFoamMap"]    = 0;
-  }
+  // Foam: the grid path packs a folding metric into the heightmap's alpha
+  // channel, so the FS reads it directly (one sample) instead of
+  // finite-differencing the displacement. foamThreshold is the smoothstep
+  // half-width around J = 0 (Encino's MinE; the Phillips path leaves it ≈1).
+  (*fsParams)["chopFactor"]    = this->cachedChopFactor;
+  (*fsParams)["tileSize"]      = this->cachedTileSize;
+  (*fsParams)["foamStrength"]  = this->foamStrength;
+  (*fsParams)["foamThreshold"] = this->foamThreshold;
+  (*fsParams)["useFoamMap"]    = 1;
   {
     float v[4] = {this->shallowColor.R(), this->shallowColor.G(),
                   this->shallowColor.B(), this->shallowColor.A()};
@@ -703,65 +602,10 @@ void WaterVisual::Configure(
   };
 
   auto shader = sdf->GetElement("shader");
-  this->dataPtr->vertexShaderUri =
-    resolve(shader->GetElement("vertex")->Get<std::string>());
   this->dataPtr->fragmentShaderUri =
     resolve(shader->GetElement("fragment")->Get<std::string>());
-  if (shader->HasElement("fft_vertex"))
-  {
-    this->dataPtr->fftVertexShaderUri =
-      resolve(shader->GetElement("fft_vertex")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_compute"))
-  {
-    this->dataPtr->computeShaderUri =
-      resolve(shader->GetElement("gpu_compute")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_ifft_bitreverse"))
-  {
-    this->dataPtr->bitrevShaderUri =
-      resolve(shader->GetElement("gpu_ifft_bitreverse")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_ifft_butterfly"))
-  {
-    this->dataPtr->butterShaderUri =
-      resolve(shader->GetElement("gpu_ifft_butterfly")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_ifft_naive"))
-  {
-    this->dataPtr->naiveShaderUri =
-      resolve(shader->GetElement("gpu_ifft_naive")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_test_pattern"))
-  {
-    this->dataPtr->testPatternShaderUri =
-      resolve(shader->GetElement("gpu_test_pattern")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_view_hkt"))
-  {
-    this->dataPtr->viewHktShaderUri =
-      resolve(shader->GetElement("gpu_view_hkt")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_evolve"))
-  {
-    this->dataPtr->evolveShaderUri =
-      resolve(shader->GetElement("gpu_evolve")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_evolve_dy"))
-  {
-    this->dataPtr->evolveDyShaderUri =
-      resolve(shader->GetElement("gpu_evolve_dy")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_combine_eta_dx"))
-  {
-    this->dataPtr->combineEtaDxShaderUri = resolve(
-        shader->GetElement("gpu_combine_eta_dx")->Get<std::string>());
-  }
-  if (shader->HasElement("gpu_combine_dy"))
-  {
-    this->dataPtr->combineDyShaderUri =
-      resolve(shader->GetElement("gpu_combine_dy")->Get<std::string>());
-  }
+  this->dataPtr->fftVertexShaderUri =
+    resolve(shader->GetElement("fft_vertex")->Get<std::string>());
 
   if (shader->HasElement("parameters"))
   {
