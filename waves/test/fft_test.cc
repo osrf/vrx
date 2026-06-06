@@ -184,6 +184,38 @@ TEST(FFTWaveSimulation, TimeEvolutionChangesField)
   EXPECT_GT((snapshotB - snapshotA).cwiseAbs().maxCoeff(), 1e-3);
 }
 
+// The Field() rendering view must alias the backend grids with the documented
+// column-major layout (element (i,j) at i + j*N), so the renderer can upload
+// it without knowing the concrete backend.
+TEST(FFTWaveSimulation, FieldExposesGridViews)
+{
+  auto sim = MakeSim();
+  sim.Update(8.0);
+  const auto *f = sim.Field();
+  ASSERT_NE(f, nullptr);
+  EXPECT_EQ(f->n, sim.GridSize());
+  EXPECT_NEAR(f->tile, sim.TileSizeMeters(), 1e-12);
+  ASSERT_NE(f->dz, nullptr);
+  ASSERT_NE(f->dx, nullptr);
+  ASSERT_NE(f->dy, nullptr);
+  ASSERT_NE(f->foam, nullptr);
+
+  const int N = static_cast<int>(f->n);
+  const auto &eta = sim.HeightGrid();
+  const auto &dxG = sim.DispXGrid();
+  const auto &dyG = sim.DispYGrid();
+  for (int j = 0; j < N; j += N / 4)
+  {
+    for (int i = 0; i < N; i += N / 4)
+    {
+      EXPECT_DOUBLE_EQ(f->dz[i + j * N], eta(i, j)) << "i=" << i << " j=" << j;
+      EXPECT_DOUBLE_EQ(f->dx[i + j * N], dxG(i, j));
+      EXPECT_DOUBLE_EQ(f->dy[i + j * N], dyG(i, j));
+      EXPECT_TRUE(std::isfinite(f->foam[i + j * N]));
+    }
+  }
+}
+
 TEST(FFTWaveSimulation, DeterministicAcrossRunsWithSameSeed)
 {
   auto a = MakeSim(/*seed=*/42);

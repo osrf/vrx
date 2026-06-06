@@ -708,4 +708,21 @@ double FFTWaveSimulation::Jacobian(double x, double y, double /*t*/) const
   return 1.0;
 }
 
+const WaveField2D *FFTWaveSimulation::Field() const
+{
+  // Repopulate the view from the current grids each call: Update may
+  // reallocate them (the Phillips path reassigns heightGrid_), so cached
+  // data() pointers would dangle. Eigen is column-major, matching
+  // WaveField2D's documented (i + j*N) layout. The renderer finite-diffs η
+  // for normals (slopeX/slopeY left null). foam is the folding metric — the
+  // Encino MinE grid; the Phillips path leaves it at 1 (flat = no whitecaps).
+  this->field_.n    = this->gridSize_;
+  this->field_.tile = this->tileSize_;
+  this->field_.dz   = this->heightGrid_.data();
+  this->field_.dx   = this->dispXGrid_.data();
+  this->field_.dy   = this->dispYGrid_.data();
+  this->field_.foam = this->minEGrid_.data();
+  return &this->field_;
+}
+
 }  // namespace gz::sim::waves

@@ -71,6 +71,7 @@ public:
   {
     return TileSize{this->tileSize_, this->tileSize_};
   }
+  const WaveField2D *Field() const override;
 
   // ---- Accessors for unit tests + visual heightmap upload ----------------
 
@@ -179,6 +180,13 @@ private:
   Eigen::MatrixXd dispDxDxGrid_;
   Eigen::MatrixXd dispDyDyGrid_;
   Eigen::MatrixXd dispDxDyGrid_;
+
+  // Column-major view into the grids above, returned by Field() as the
+  // backend-agnostic rendering contract. Repopulated on each call from the
+  // current grid data() — Update may reallocate the grids (the Phillips path
+  // reassigns heightGrid_), so a cached pointer would dangle. Mutable because
+  // Field() is const.
+  mutable WaveField2D field_;
 
   // Per-axis wavenumber arrays kx[i], ky[j] (precomputed)
   Eigen::VectorXd kxRow_;

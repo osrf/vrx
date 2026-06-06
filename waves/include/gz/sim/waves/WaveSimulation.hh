@@ -11,6 +11,7 @@
 #ifndef GZ_SIM_WAVES_WAVESIMULATION_HH_
 #define GZ_SIM_WAVES_WAVESIMULATION_HH_
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
@@ -32,11 +33,36 @@ struct TileSize
                   ///< (-y/2, +y/2) are interpreted modulo the tile size.
 };
 
+/// \brief A wave field sampled on a regular N×N grid over one tile — the
+/// uniform rendering contract every backend exposes via `IWaveField::Field`.
+/// Grid backends (FFT) fill it from their IFFT output; analytic backends
+/// (Gerstner) sample themselves into it. The renderer uploads it to a
+/// displacement texture and draws one backend-agnostic surface, so it never
+/// needs to know which backend is active.
+///
+/// All arrays are column-major N×N — element (i, j) is at index `i + j*N`,
+/// matching Eigen's default storage — and periodic over the tile. The pointers
+/// are owned by the wave-field implementation and remain valid until the next
+/// `SetParameters`; the values they reference are refreshed by `Update`.
+struct WaveField2D
+{
+  std::size_t   n{0};            ///< Grid resolution per axis (N).
+  double        tile{0.0};       ///< Tile extent [m]; cell spacing is tile/N.
+  const double *dz{nullptr};     ///< Vertical displacement η [m] (required).
+  const double *dx{nullptr};     ///< Horizontal chop x [m]; null ⇒ treat as 0.
+  const double *dy{nullptr};     ///< Horizontal chop y [m]; null ⇒ treat as 0.
+  const double *foam{nullptr};   ///< Folding metric: 1 = flat, < 1 → folding
+                                 ///< (whitecaps); null ⇒ backend has no foam.
+  const double *slopeX{nullptr}; ///< ∂η/∂x; null ⇒ renderer finite-diffs η.
+  const double *slopeY{nullptr}; ///< ∂η/∂y; null ⇒ renderer finite-diffs η.
+};
+
 /// \brief Polymorphic backend for a wave field. Concrete implementations
 /// include `GerstnerWaveSimulation` (analytic, closed-form) and
 /// `FFTWaveSimulation` (grid-based, stochastic, requires `Update` each tick).
 /// Consumers use `Eval::*` free functions which delegate to the
-/// implementation; they don't need to know which one is active.
+/// implementation; they don't need to know which one is active. The renderer
+/// consumes the field uniformly through `Field`.
 class IWaveField
 {
 public:
@@ -86,6 +112,15 @@ public:
   /// defined everywhere (analytic backends). Grid backends return their
   /// tile size; consumers must wrap queries outside the tile.
   virtual std::optional<TileSize> Bounds() const { return std::nullopt; }
+
+  // ---- Rendering ----------------------------------------------------------
+
+  /// \brief A view of the current wave field sampled on a grid, for the
+  /// renderer to upload as a displacement texture (see `WaveField2D`). The
+  /// returned pointer references implementation-owned storage refreshed by
+  /// `Update`; it stays valid until the next `SetParameters`. Returns
+  /// `nullptr` if the backend exposes no renderable grid.
+  virtual const WaveField2D *Field() const { return nullptr; }
 };
 
 /// \brief Factory: instantiate the backend matching `_algorithm` (currently
