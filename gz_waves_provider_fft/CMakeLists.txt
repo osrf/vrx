@@ -22,7 +22,7 @@ find_package(gz-math REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
 # Apache-2.0 Horvath spectrum library; provides Eigen transitively.
-find_package(encino_waves REQUIRED)
+find_package(encinowaves_vendor REQUIRED)
 
 # --------------------------------------------------------------------------
 # FFT wave-field provider: a standalone gz-plugin discovered by the gz_waves
@@ -38,7 +38,7 @@ target_include_directories(gz-waves-provider-fft PRIVATE
   ${gz_waves_INCLUDE_DIRS})
 target_link_libraries(gz-waves-provider-fft
   PUBLIC  gz-math::gz-math
-  PRIVATE gz-plugin::register encino_waves::encino_waves)
+  PRIVATE gz-plugin::register encinowaves_vendor::encinowaves_vendor)
 
 install(
   TARGETS gz-waves-provider-fft

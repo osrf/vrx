@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(encino_waves)
+project(encinowaves_vendor)
 
 # ----------------------------------------------------------------------------
 # C++ standard
