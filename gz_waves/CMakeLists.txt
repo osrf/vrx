@@ -57,15 +57,6 @@ target_link_libraries(${PROJECT_NAME}
 # only the core headers (interface + params) plus their own math deps — never
 # the core library — so each is a self-contained, separately-packageable unit.
 # --------------------------------------------------------------------------
-add_library(gz-waves-provider-gerstner SHARED
-  src/GerstnerWaveSimulation.cc
-)
-target_include_directories(gz-waves-provider-gerstner
-  PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_link_libraries(gz-waves-provider-gerstner
-  PUBLIC  gz-math::gz-math
-  PRIVATE gz-plugin::register)
-
 add_library(gz-waves-provider-fft SHARED
   src/FFTWaveSimulation.cc
 )
@@ -76,7 +67,7 @@ target_link_libraries(gz-waves-provider-fft
   PRIVATE gz-plugin::register encino_waves::encino_waves)
 
 install(
-  TARGETS gz-waves-provider-gerstner gz-waves-provider-fft
+  TARGETS gz-waves-provider-fft
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
@@ -222,6 +213,7 @@ ament_environment_hooks("hooks/hook.dsv.in")
 ament_environment_hooks("hooks/hook.sh.in")
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_include_directories(include)
 ament_export_dependencies(gz_sim_vendor gz_math_vendor)
 
 if(BUILD_TESTING)
@@ -238,9 +230,6 @@ if(BUILD_TESTING)
   # through CreateWaveSimulation): a provider linked into a binary that also
   # loads a *different* provider would shadow the shared GzPluginHook symbol
   # and the other provider's LoadLib would come back empty.
-  ament_add_gtest(eval_test test/eval_test.cc)
-  target_link_libraries(eval_test ${PROJECT_NAME} gz-waves-provider-gerstner)
-
   ament_add_gtest(fft_test test/fft_test.cc)
   target_link_libraries(fft_test ${PROJECT_NAME} gz-waves-provider-fft)
 
@@ -250,7 +239,7 @@ if(BUILD_TESTING)
   # while linking our tests, even though libzenohc.so sits in /usr/lib and
   # resolves cleanly at runtime. Tolerate that here so the tests build
   # against custom Gazebo workspaces without further env setup.
-  foreach(_t IN ITEMS eval_test fft_test)
+  foreach(_t IN ITEMS fft_test)
     target_link_options(${_t} PRIVATE
       "LINKER:--unresolved-symbols=ignore-in-shared-libs")
   endforeach()
