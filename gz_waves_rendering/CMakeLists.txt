@@ -22,6 +22,11 @@ find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
 find_package(gz_rendering_vendor REQUIRED)
 find_package(gz-rendering REQUIRED COMPONENTS ogre2)
+# The wave engines (plain IWaveField libraries). The water visual links both so
+# it can register their factories for the GUI-side CreateWaveSimulation path
+# (see src/RegisterEngines.cc).
+find_package(gz_waves_provider_fft REQUIRED)
+find_package(gz_waves_provider_gerstner REQUIRED)
 
 # Discover Ogre Next headers. Different Gazebo installs sit on different Ogre
 # Next patch versions (ROS gz_ogre_next_vendor 2.3.3 vs Ubuntu libogre-next-dev
@@ -83,6 +88,7 @@ install(
 add_library(gz-sim-water-visual-system SHARED
   src/systems/WaterVisual.cc
   src/systems/HeightMapTexture.cc
+  src/RegisterEngines.cc
 )
 target_include_directories(gz-sim-water-visual-system PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/systems>
@@ -90,6 +96,10 @@ target_include_directories(gz-sim-water-visual-system PRIVATE
 target_link_libraries(gz-sim-water-visual-system
   PRIVATE
     gz_waves::gz_waves        # IWaveField + Field() + Wavefield component
+    # Both wave engines, linked directly so the GUI registry (RegisterEngines.cc)
+    # can rebuild whichever the server selected — no runtime engine loader.
+    gz_waves_provider_fft::gz-waves-provider-fft
+    gz_waves_provider_gerstner::gz-waves-provider-gerstner
     gz-sim::core
     gz-math::gz-math
     gz-plugin::register

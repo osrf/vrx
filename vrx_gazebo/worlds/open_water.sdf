@@ -102,11 +102,12 @@
     </plugin>
     -->
 
-    <plugin filename="gz-sim-waves-system"
-            name="gz::sim::systems::Waves">
-      <!-- Switch between "gerstner" (analytic, has shader path) and "fft"
-           (stochastic; visual samples a CPU-generated heightmap each tick). -->
-      <algorithm>fft</algorithm>
+    <plugin filename="gz-sim-waves-fft-system"
+            name="gz::sim::systems::FftWaves">
+      <!-- The wave engine is the plugin's identity: gz-sim-waves-fft-system
+           (stochastic FFT — Phillips, or Encino with GZ_WAVES_USE_ENCINO=1) or
+           gz-sim-waves-gerstner-system (analytic). The visual samples a
+           CPU-generated heightmap each tick. -->
       <update_rate>30</update_rate>
       <wave>
         <model>PMS</model>

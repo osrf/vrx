@@ -15,6 +15,11 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>gz_waves</depend>
+  <!-- Wave engines, linked to register their factories for the GUI-side
+       CreateWaveSimulation path (the visual reconstructs the engine the
+       server selected). -->
+  <depend>gz_waves_provider_fft</depend>
+  <depend>gz_waves_provider_gerstner</depend>
   <depend>gz_sim_vendor</depend>
   <depend>gz_math_vendor</depend>
   <depend>gz_common_vendor</depend>
