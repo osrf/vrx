@@ -12,6 +12,8 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <map>
+#include <mutex>
 #include <string>
 #include <unordered_set>
 
@@ -25,9 +27,29 @@ namespace gz::sim::waves
 
 namespace
 {
-/// \brief Map a wave-field provider token to its plugin library base name and
-/// registered class name, following the convention
-/// "gz-waves-provider-<token>". Returns false for an unknown token.
+/// \brief The process-wide token → engine-factory registry, plus its guard.
+/// Function-local statics so there's no static-init-order dependency between
+/// this translation unit and whoever calls RegisterWaveEngineFactory.
+std::map<std::string, WaveEngineFactory> &Registry()
+{
+  static std::map<std::string, WaveEngineFactory> registry;
+  return registry;
+}
+
+std::mutex &RegistryMutex()
+{
+  static std::mutex m;
+  return m;
+}
+
+// ---------------------------------------------------------------------------
+// TEMPORARY dlopen fallback (transition only).
+//
+// Used when a token isn't in the registry yet — e.g. during the migration to
+// per-engine system plugins, before every consumer registers its engine. This
+// whole block (and the gz-plugin / SystemPaths dependency) is removed once the
+// registry is populated everywhere; see the provider-refactor plan.
+// ---------------------------------------------------------------------------
 bool ProviderForToken(const std::string &_token,
                       std::string &_libName,
                       std::string &_className)
@@ -46,72 +68,84 @@ bool ProviderForToken(const std::string &_token,
   }
   return false;
 }
-}  // namespace
 
-std::shared_ptr<IWaveField> CreateWaveSimulation(
-  const std::string &_algorithm,
-  const WaveParameters &_params)
+std::shared_ptr<IWaveField> TryLegacyDlopen(const std::string &_algorithm,
+                                            const WaveParameters &_params)
 {
   std::string libName, className;
   if (!ProviderForToken(_algorithm, libName, className))
-  {
-    std::cerr << "[CreateWaveSimulation] unknown provider '" << _algorithm
-              << "'; supported: 'gerstner', 'fft'" << std::endl;
     return nullptr;
-  }
 
-  // Resolve the provider library on the plugin / shared-library search paths.
   gz::common::SystemPaths systemPaths;
   systemPaths.SetPluginPathEnv("GZ_SIM_SYSTEM_PLUGIN_PATH");
   if (const char *ldPath = std::getenv("LD_LIBRARY_PATH"))
     systemPaths.AddPluginPaths(ldPath);
   std::string pathToLib = systemPaths.FindSharedLibrary(libName);
   if (pathToLib.empty())
-    pathToLib = libName;  // fall back to the bare soname (loader/dlopen search)
+    pathToLib = libName;
 
-  // Load the provider library and instantiate the registered class. The
-  // shared_ptr returned by QueryInterfaceSharedPtr keeps both the plugin
-  // instance and its library alive, so this local Loader may safely go out of
-  // scope when we return.
-  //
-  // The second arg is RTLD_NODELETE: keep the provider library mapped for the
-  // life of the process. Before the seam these backends were link-loaded into
-  // libwaves and never unloaded; now they are dlopen'd, so the LAST release of
-  // a WavefieldData::simulation — often a static-lifetime one like operator>>'s
-  // cache, destroyed during process teardown — would dlclose the library while
-  // it (and the TBB/FFTW global state the FFT provider pulls in) is still being
-  // torn down, segfaulting on shutdown/CTRL-C. NODELETE restores the old
-  // never-unloaded behaviour; the only cost is one library mapping not
-  // reclaimed before exit.
   gz::plugin::Loader loader;
   const std::unordered_set<std::string> plugins =
       loader.LoadLib(pathToLib, /*_noDelete=*/true);
   if (plugins.count(className) == 0)
-  {
-    std::cerr << "[CreateWaveSimulation] provider class '" << className
-              << "' not found in '" << pathToLib << "' (provider '"
-              << _algorithm << "')" << std::endl;
     return nullptr;
-  }
 
   auto plugin = loader.Instantiate(className);
   if (!plugin)
-  {
-    std::cerr << "[CreateWaveSimulation] failed to instantiate '" << className
-              << "'" << std::endl;
     return nullptr;
-  }
 
   auto field = plugin->QueryInterfaceSharedPtr<IWaveField>();
   if (!field)
-  {
-    std::cerr << "[CreateWaveSimulation] '" << className
-              << "' does not provide the IWaveField interface" << std::endl;
     return nullptr;
-  }
 
   field->SetParameters(_params);
   return field;
+}
+}  // namespace
+
+void RegisterWaveEngineFactory(const std::string &_token,
+                               WaveEngineFactory _factory)
+{
+  std::lock_guard<std::mutex> lock(RegistryMutex());
+  Registry()[_token] = std::move(_factory);
+}
+
+std::shared_ptr<IWaveField> CreateWaveSimulation(
+  const std::string &_algorithm,
+  const WaveParameters &_params)
+{
+  // Copy the factory out under the lock, then build/configure unlocked so a
+  // factory can't deadlock against the registry (and a slow build doesn't
+  // serialize other registrations).
+  WaveEngineFactory factory;
+  {
+    std::lock_guard<std::mutex> lock(RegistryMutex());
+    auto it = Registry().find(_algorithm);
+    if (it != Registry().end())
+      factory = it->second;
+  }
+
+  if (factory)
+  {
+    auto field = factory();
+    if (!field)
+    {
+      std::cerr << "[CreateWaveSimulation] factory for '" << _algorithm
+                << "' returned null" << std::endl;
+      return nullptr;
+    }
+    field->SetParameters(_params);
+    return field;
+  }
+
+  // Not registered (yet) — fall back to the legacy dlopen loader.
+  if (auto field = TryLegacyDlopen(_algorithm, _params))
+    return field;
+
+  std::cerr << "[CreateWaveSimulation] no engine registered for '"
+            << _algorithm << "' and no provider library found; supported "
+            << "tokens: 'gerstner', 'fft'" << std::endl;
+  return nullptr;
 }
 
 }  // namespace gz::sim::waves

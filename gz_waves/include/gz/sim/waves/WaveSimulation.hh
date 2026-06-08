@@ -12,6 +12,7 @@
 #define GZ_SIM_WAVES_WAVESIMULATION_HH_
 
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -123,11 +124,28 @@ public:
   virtual const WaveField2D *Field() const { return nullptr; }
 };
 
-/// \brief Load and configure the wave-field provider named by `_algorithm`
-/// ("gerstner" or "fft"). The provider is discovered as a gz-plugin library
-/// following the convention "gz-waves-provider-<algorithm>", instantiated
-/// through the `IWaveField` interface, and configured via `SetParameters`.
-/// Returns `nullptr` for an unknown provider or a load/instantiation failure.
+/// \brief Builds a default-constructed wave-field engine for a token. The
+/// returned engine has NOT yet had `SetParameters` called on it — that is the
+/// caller's job (see `CreateWaveSimulation`, which does both). Returning a bare
+/// engine keeps the factory free of the `WaveParameters` definition.
+using WaveEngineFactory =
+  std::function<std::shared_ptr<IWaveField>()>;
+
+/// \brief Register `_factory` under `_token` ("gerstner", "fft", …) in the
+/// process-wide engine registry that `CreateWaveSimulation` consults.
+///
+/// This is how a concrete engine library is made reachable by token without
+/// the core linking it (which would be a dependency cycle): the package that
+/// links an engine — a system plugin on the server, the water visual on the
+/// GUI — registers it here. Re-registering a token replaces the prior factory.
+/// Thread-safe.
+void RegisterWaveEngineFactory(const std::string &_token,
+                               WaveEngineFactory _factory);
+
+/// \brief Construct and configure the wave-field engine named by `_algorithm`
+/// ("gerstner" or "fft"): look the token up in the registry populated by
+/// `RegisterWaveEngineFactory`, build an engine, and apply `_params` via
+/// `SetParameters`. Returns `nullptr` for an unregistered token.
 std::shared_ptr<IWaveField> CreateWaveSimulation(
   const std::string &_algorithm,
   const WaveParameters &_params);
