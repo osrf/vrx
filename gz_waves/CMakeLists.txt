@@ -30,6 +30,7 @@ find_package(gz-plugin REQUIRED COMPONENTS register loader)
 add_library(${PROJECT_NAME} SHARED
   src/WaveSimulation.cc
   src/components.cc
+  src/systems/WavesSystemBase.cc
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC
