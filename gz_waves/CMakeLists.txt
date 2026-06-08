@@ -18,14 +18,14 @@ find_package(gz-math REQUIRED)
 find_package(gz_common_vendor REQUIRED)
 find_package(gz-common REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
-find_package(gz-plugin REQUIRED COMPONENTS register loader)
+find_package(gz-plugin REQUIRED COMPONENTS register)
 
 # --------------------------------------------------------------------------
-# Core wave library: the IWaveField interface, the provider loader
-# (CreateWaveSimulation), and the Wavefield component. It links NO concrete
-# backend — providers are gz-plugin libraries discovered and loaded at runtime
-# — so the core stays backend-agnostic, which is what lets providers move into
-# separate packages later without the core depending on them.
+# Core wave library: the IWaveField interface, the WavesSystemBase plumbing, the
+# token -> factory registry (CreateWaveSimulation / RegisterWaveEngineFactory),
+# and the Wavefield component. It links NO concrete engine — engines are plain
+# libraries in their own packages, linked by the per-engine system plugins and
+# the water visual — so the core stays backend-agnostic.
 # --------------------------------------------------------------------------
 add_library(${PROJECT_NAME} SHARED
   src/WaveSimulation.cc
@@ -42,17 +42,16 @@ target_link_libraries(${PROJECT_NAME}
     gz-sim::core
     gz-math::gz-math
   PRIVATE
-    gz-plugin::loader
     gz-common::gz-common
 )
 
-# Wave-field providers (gerstner, fft) live in their own packages —
-# gz_waves_provider_<token> — discovered at runtime by CreateWaveSimulation.
-# The core links no concrete backend.
+# Wave engines (gerstner, fft) live in their own packages as plain libraries,
+# each paired with a system plugin (gz-sim-waves-<engine>-system) that links it
+# directly. The core links no concrete engine.
 
 # --------------------------------------------------------------------------
-# Gazebo systems. Each is a separate loadable plugin so SDF references them
-# by filename (libgz-sim-waves-system, etc.) — matches upstream naming.
+# Wave buoyancy system: a loadable plugin referenced by SDF filename. (The wave
+# *source* systems moved to the provider packages, each linking its engine.)
 # --------------------------------------------------------------------------
 function(add_waves_system NAME SOURCE)
   add_library(${NAME} SHARED ${SOURCE})
@@ -74,7 +73,6 @@ function(add_waves_system NAME SOURCE)
   )
 endfunction()
 
-add_waves_system(gz-sim-waves-system        src/systems/Waves.cc)
 add_waves_system(gz-sim-wave-buoyancy-system src/systems/WaveBuoyancy.cc)
 
 # --------------------------------------------------------------------------
@@ -111,10 +109,10 @@ if(BUILD_TESTING)
   set(ament_cmake_uncrustify_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
-  # The interface / loader / Eval / Wavefield component are exercised by the
-  # provider packages' tests (gz_waves_provider_*), which can link a provider.
-  # The core cannot depend on a provider without a dependency cycle, so it has
-  # no gtest of its own — only the lint checks above.
+  # The interface / factory registry / Eval / Wavefield component are exercised
+  # by the provider packages' tests (gz_waves_provider_*), which link an engine
+  # and register it. The core can't link an engine without a dependency cycle,
+  # so it has no gtest of its own — only the lint checks above.
 endif()
 
 ament_package()
