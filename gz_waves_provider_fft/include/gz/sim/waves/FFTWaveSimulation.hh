@@ -226,6 +226,12 @@ private:
   double lastUpdateT_{-1.0};
 };
 
+/// \brief Factory: a default-constructed FFT wave-field engine (apply
+/// `SetParameters` before use). Registered under the "fft" token so
+/// `CreateWaveSimulation` can rebuild the engine from a serialized `Wavefield`
+/// component on the GUI side.
+std::shared_ptr<IWaveField> MakeFFTWaveField();
+
 }  // namespace gz::sim::waves
 
 #endif  // GZ_SIM_WAVES_FFTWAVESIMULATION_HH_

@@ -19,8 +19,6 @@
 
 #include <unsupported/Eigen/FFT>
 
-#include <gz/plugin/Register.hh>
-
 #include "gz/sim/waves/Wavefield.hh"
 
 #ifdef GZ_WAVES_WITH_ENCINO
@@ -745,11 +743,12 @@ const WaveField2D *FFTWaveSimulation::Field() const
   return &this->field_;
 }
 
-}  // namespace gz::sim::waves
+/// \brief Factory used to register the FFT engine under the "fft" token (see
+/// RegisterWaveEngineFactory). Returns a default-constructed engine; the caller
+/// applies SetParameters.
+std::shared_ptr<IWaveField> MakeFFTWaveField()
+{
+  return std::make_shared<FFTWaveSimulation>();
+}
 
-// Register the stochastic FFT backend (Phillips, or EncinoWaves spectra when
-// GZ_WAVES_USE_ENCINO=1) as a gz-plugin wave-field provider, discovered by the
-// core through the convention "gz-waves-provider-fft".
-GZ_ADD_PLUGIN(
-  gz::sim::waves::FFTWaveSimulation,
-  gz::sim::waves::IWaveField)
+}  // namespace gz::sim::waves

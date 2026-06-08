@@ -22,6 +22,13 @@ namespace gsw = gz::sim::waves;
 
 namespace
 {
+// The fft engine is no longer a dlopen'd gz-plugin; this binary links it
+// directly, so register its factory for the CreateWaveSimulation tests.
+const bool kFftRegistered = [] {
+  gsw::RegisterWaveEngineFactory("fft", &gsw::MakeFFTWaveField);
+  return true;
+}();
+
 gsw::WaveParameters DefaultParams()
 {
   gsw::WaveParameters p;
