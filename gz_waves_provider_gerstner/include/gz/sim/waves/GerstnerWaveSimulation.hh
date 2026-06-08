@@ -11,6 +11,7 @@
 #ifndef GZ_SIM_WAVES_GERSTNERWAVESIMULATION_HH_
 #define GZ_SIM_WAVES_GERSTNERWAVESIMULATION_HH_
 
+#include <memory>
 #include <vector>
 
 #include <gz/math/Vector2.hh>
@@ -81,6 +82,12 @@ private:
   std::vector<double> foamBuf_;
   WaveField2D         field_;
 };
+
+/// \brief Factory: a default-constructed Gerstner wave-field engine (apply
+/// `SetParameters` before use). Registered under the "gerstner" token so
+/// `CreateWaveSimulation` can rebuild the engine from a serialized `Wavefield`
+/// component on the GUI side.
+std::shared_ptr<IWaveField> MakeGerstnerWaveField();
 
 }  // namespace gz::sim::waves
 

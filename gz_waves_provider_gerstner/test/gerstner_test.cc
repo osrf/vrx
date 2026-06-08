@@ -23,6 +23,13 @@ namespace gsw = gz::sim::waves;
 
 namespace
 {
+// The gerstner engine is no longer a dlopen'd gz-plugin; this binary links it
+// directly, so register its factory for the CreateWaveSimulation tests.
+const bool kGerstnerRegistered = [] {
+  gsw::RegisterWaveEngineFactory("gerstner", &gsw::MakeGerstnerWaveField);
+  return true;
+}();
+
 gsw::WavefieldData MakePmsField()
 {
   gsw::WavefieldData data;
@@ -56,9 +63,9 @@ TEST(Factory, UnknownAlgorithmReturnsNullptr)
 }
 
 // NOTE: the FFT serialization/decoupling test lives in fft_test.cc, which
-// links the fft provider. A test binary must not link one provider while
-// loading another through CreateWaveSimulation — the providers share the
-// single extern "C" GzPluginHook symbol, and a linked one shadows the loader.
+// links the fft engine and registers its factory. Engines are plain libraries
+// now (no GzPluginHook), so a binary links + registers whichever engine it
+// exercises; this one covers gerstner.
 
 TEST(Gerstner, AccessorsArePopulated)
 {
