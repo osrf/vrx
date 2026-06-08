@@ -102,58 +102,81 @@
     </plugin>
     -->
 
+    <!-- ==================================================================
+         WAVE SOURCE — the engine is the plugin's identity. Keep exactly ONE of
+         the two <plugin> blocks below active and comment the other out. Both
+         blocks are deliberately comment-free so either can be wrapped in an XML
+         comment cleanly (XML comments cannot nest). Per-parameter notes live in
+         the comment directly above each block.
+         ================================================================== -->
+
+    <!-- FFT engine (gz-sim-waves-fft-system): stochastic spectral ocean —
+         EncinoWaves spectra (TMA + Hasselmann + capillary) by default, in-tree
+         Phillips when not built with encino. Parameters:
+           period     sea state; the engine derives wind speed (3.2 → ~5 m/s).
+           gain       visual amplitude multiplier on top of Encino's Hs
+                      calibration. 9.5 (~1/ampCalib) gives the dramatic look and
+                      is intentionally unphysical; for a calmer sea raise period
+                      and drop gain toward 1.0.
+           direction  wind heading [rad] (2.356 = 135°). Used by the Phillips
+                      fallback; the default Encino path does NOT yet read it.
+           tau        startup ramp time constant [s].
+           tile_size  periodic tile extent [m]; larger leaves room for swells.
+           grid_size  FFT/IFFT resolution (power of two).
+           seed       spectrum RNG seed.
+           choppiness Tessendorf horizontal crest displacement (visual layer);
+                      negative pinches crests (asv_wave_sim steepness 2 = -2).
+    -->
     <plugin filename="gz-sim-waves-fft-system"
             name="gz::sim::systems::FftWaves">
-      <!-- The wave engine is the plugin's identity: gz-sim-waves-fft-system
-           (stochastic FFT — EncinoWaves spectra by default, Phillips when not
-           built with encino) or gz-sim-waves-gerstner-system (analytic). The
-           visual samples a CPU-generated heightmap each tick. -->
+      <update_rate>30</update_rate>
+      <wave>
+        <period>3.2</period>
+        <gain>9.5</gain>
+        <direction>2.356</direction>
+        <tau>2.0</tau>
+        <tile_size>256</tile_size>
+        <grid_size>128</grid_size>
+        <seed>42</seed>
+        <choppiness>-2.0</choppiness>
+      </wave>
+    </plugin>
+
+    <!-- Gerstner engine (gz-sim-waves-gerstner-system): analytic sum of
+         component waves. To use it, comment the FFT <plugin> above out and
+         remove the comment wrapper around the <plugin> below. Parameters:
+           model      PMS (wind-derived) or CWR (constant amplitude; then also
+                      add an <amplitude> element).
+           number     count of component waves summed.
+           period     mean wave period [s].
+           direction  mean wave heading [rad].
+           angle      angular spread of the components about direction [rad].
+           scale      amplitude/length ratio between mean and extreme waves.
+           steepness  crest sharpness in [0,1]; 0 is round swell, 1 is pinched.
+           gain       amplitude multiplier.
+           tau        startup ramp time constant [s].
+           grid_size  resolution it samples itself onto for the visual.
+         It ignores the FFT-only knobs (tile_size, seed, choppiness). Values
+         below are a starting point; tune gain and steepness to taste.
+    -->
+    <!--
+    <plugin filename="gz-sim-waves-gerstner-system"
+            name="gz::sim::systems::GerstnerWaves">
       <update_rate>30</update_rate>
       <wave>
         <model>PMS</model>
         <number>3</number>
-        <!-- Tuned to mirror asv_wave_sim's reference config
-             (tile_size=100, cell_count=256, wind_speed=5 m/s,
-             wind_angle=135°, steepness=2). Our PMS schema doesn't take
-             wind_speed directly: peak λ = 2π·V²/g ≈ 16 m for 5 m/s,
-             corresponding to peak period ≈ 3.2 s. -->
-        <!-- period=5 → windSpeed = 0.879·g/(2π/period) ≈ 6.9 m/s.
-             Phillips SWH at 7 m/s ≈ 1 m, which matches the visible
-             wave amplitude in asv_wave_sim's screenshots (their
-             default is wind=5, but camera was very close to water). -->
-        <!-- period=3.2 → wind ≈ 5.0 m/s (exact asv_wave_sim
-             reference: wind_speed=5). -->
         <period>3.2</period>
-        <!-- Visual amplitude boost. With the Encino path, <gain> is a linear
-             multiplier on top of the physics-based calibration (which targets
-             a realistic Hs for the wind speed). period=3.2 → wind ~4.4 m/s →
-             physical Hs ~0.41 m, which looks flat; gain=9.5 (~1/ampCalib)
-             restores the dramatic pre-calibration look (effective Hs ~3.9 m).
-             NOTE: this amplitude is intentionally unphysical for the wind, so
-             a wave-coupled buoy (WaveBuoyancy) will be over-driven; and on the
-             Phillips fallback path gain=9.5 yields very large waves too. For a
-             physically calm-but-bigger sea, raise
-             <period> instead and leave gain at 1.0. -->
-        <gain>9.5</gain>
-        <direction>2.356</direction>  <!-- 135° in radians -->
+        <direction>2.356</direction>
         <angle>0.4</angle>
         <scale>1.1</scale>
-        <steepness>0.0</steepness>
+        <steepness>0.5</steepness>
+        <gain>1.0</gain>
         <tau>2.0</tau>
-        <!-- FFT-only. tile_size=256 (matching asv_wave_sim's `waves`
-             scene) gives the wavefield room for long-wavelength
-             swells, producing the flatter, slow-moving look we want
-             rather than many small bubbly waves. -->
-        <tile_size>256</tile_size>
         <grid_size>128</grid_size>
-        <seed>42</seed>
-        <!-- Match asv_wave_sim's <steepness>2</steepness> in our
-             sign convention. Sharply pinches wave crests. -->
-        <!-- asv_wave_sim's literal steepness=2 (our sign convention
-             flips it). -->
-        <choppiness>-2.0</choppiness>
       </wave>
     </plugin>
+    -->
 
     <!-- GUI -->
     <gui fullscreen="0">
