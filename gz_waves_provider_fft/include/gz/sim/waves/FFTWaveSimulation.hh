@@ -78,11 +78,12 @@ public:
   std::size_t GridSize() const { return this->gridSize_; }
   double TileSizeMeters() const { return this->tileSize_; }
 
-  /// \brief True when the GZ_WAVES_USE_ENCINO=1 toggle is active and this
-  /// instance is driving Update(t) through the Apache-2.0 Horvath spectrum
-  /// library (TMA / JONSWAP + Hasselmann directional spread + chop-aware
-  /// foam Jacobian) instead of the in-tree Phillips path. Slope and
-  /// chop-derivative grids are NOT populated on the Encino path — visuals
+  /// \brief True when this instance is driving Update(t) through the Apache-2.0
+  /// Horvath spectrum library (TMA / JONSWAP + Hasselmann directional spread +
+  /// chop-aware foam Jacobian) instead of the in-tree Phillips path. This is
+  /// the default when the engine is built with EncinoWaves; Phillips is used
+  /// only when encino isn't compiled in or the grid isn't a power of two. Slope
+  /// and chop-derivative grids are NOT populated on the Encino path — visuals
   /// that need them should fall back to finite differences.
   bool UseEncino() const { return this->useEncino_; }
 

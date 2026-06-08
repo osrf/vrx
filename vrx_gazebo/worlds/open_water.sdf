@@ -105,9 +105,9 @@
     <plugin filename="gz-sim-waves-fft-system"
             name="gz::sim::systems::FftWaves">
       <!-- The wave engine is the plugin's identity: gz-sim-waves-fft-system
-           (stochastic FFT — Phillips, or Encino with GZ_WAVES_USE_ENCINO=1) or
-           gz-sim-waves-gerstner-system (analytic). The visual samples a
-           CPU-generated heightmap each tick. -->
+           (stochastic FFT — EncinoWaves spectra by default, Phillips when not
+           built with encino) or gz-sim-waves-gerstner-system (analytic). The
+           visual samples a CPU-generated heightmap each tick. -->
       <update_rate>30</update_rate>
       <wave>
         <model>PMS</model>
@@ -131,8 +131,8 @@
              restores the dramatic pre-calibration look (effective Hs ~3.9 m).
              NOTE: this amplitude is intentionally unphysical for the wind, so
              a wave-coupled buoy (WaveBuoyancy) will be over-driven; and on the
-             Phillips path (GZ_WAVES_USE_ENCINO unset) gain=9.5 yields very
-             large waves too. For a physically calm-but-bigger sea, raise
+             Phillips fallback path gain=9.5 yields very large waves too. For a
+             physically calm-but-bigger sea, raise
              <period> instead and leave gain at 1.0. -->
         <gain>9.5</gain>
         <direction>2.356</direction>  <!-- 135° in radians -->

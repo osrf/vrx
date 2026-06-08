@@ -43,15 +43,6 @@ int Log2Pow2(std::size_t n)
 }
 
 #ifdef GZ_WAVES_WITH_ENCINO
-/// True when GZ_WAVES_USE_ENCINO=1 is set at construction time. Read once
-/// per FFTWaveSimulation instance — toggling the env var mid-run won't
-/// take effect until the wave field gets rebuilt.
-bool EncinoEnabledByEnv()
-{
-  const char *v = std::getenv("GZ_WAVES_USE_ENCINO");
-  return v && std::string(v) == "1";
-}
-
 // ---- Human-readable names for the EncinoWaves model enums (logging) --------
 const char *SpectrumName(EncinoWaves::SpectrumType t)
 {
@@ -98,8 +89,8 @@ const char *FilterName(EncinoWaves::FilterType t)
 }
 
 /// Apply optional environment-variable overrides for EncinoWaves' distinctive
-/// controls onto `ep`. Like GZ_WAVES_USE_ENCINO itself, these are experiment
-/// knobs deliberately kept out of the stable SDF surface. They all feed the
+/// controls onto `ep`. These are experiment knobs deliberately kept out of the
+/// stable SDF surface. They all feed the
 /// spectrum at construction (InitialState), so the field stays seamlessly
 /// periodic and identical between the server and GUI processes. Unrecognized
 /// values are ignored with a warning, leaving the Horvath default in place.
@@ -344,21 +335,22 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &p)
   this->dispDyDyGrid_ = Eigen::MatrixXd::Zero(N, N);
   this->dispDxDyGrid_ = Eigen::MatrixXd::Zero(N, N);
 
-  // Optional: bring up the Apache-2.0 EncinoWaves spectrum library. The
-  // toggle is intentionally an env var rather than an SDF parameter for
-  // now — it's an experiment knob, not a stable interface. The Encino
+  // Drive the wave field through the Apache-2.0 EncinoWaves spectrum library.
+  // When the engine is built with encino this is the DEFAULT spectrum (TMA +
+  // Hasselmann spreading + capillary dispersion) — it's what the fft system is
+  // "provided by". The in-tree Phillips path is used only when encino isn't
+  // compiled in, or when the grid size rules Encino out (below). The Encino
   // path leaves slope/chop-derivative grids zeroed; consumers must check
   // UseEncino() and skip their slope/chop-deriv upload.
 #ifdef GZ_WAVES_WITH_ENCINO
-  this->useEncino_ = EncinoEnabledByEnv();
-  if (this->useEncino_)
+  this->useEncino_ = true;
   {
     const int log2N = Log2Pow2(this->gridSize_);
     if (log2N < 0)
     {
-      std::cerr << "[FFTWaveSimulation] GZ_WAVES_USE_ENCINO=1 requested but "
-                << "gridSize=" << this->gridSize_ << " is not a power of two; "
-                << "falling back to Phillips path." << std::endl;
+      std::cerr << "[FFTWaveSimulation] EncinoWaves needs a power-of-two grid, "
+                << "but gridSize=" << this->gridSize_ << "; falling back to the "
+                << "Phillips path." << std::endl;
       this->useEncino_ = false;
     }
     else

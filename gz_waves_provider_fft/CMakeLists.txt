@@ -24,14 +24,15 @@ find_package(gz-plugin REQUIRED COMPONENTS register)
 # FFTWaveSimulation's public header returns Eigen::MatrixXd grids and the
 # Phillips path uses Eigen's unsupported FFT, so Eigen is a direct dependency.
 find_package(Eigen3 REQUIRED)
-# Apache-2.0 Horvath spectrum library — OPTIONAL. Present: the fft engine gains
-# the EncinoWaves spectrum path (GZ_WAVES_USE_ENCINO=1). Absent: Phillips-only,
-# with no encino dependency at all.
+# Apache-2.0 Horvath spectrum library — OPTIONAL. Present: the fft engine uses
+# the EncinoWaves spectra by DEFAULT. Absent: Phillips-only, with no encino
+# dependency at all.
 find_package(encinowaves_vendor QUIET)
 
 # --------------------------------------------------------------------------
 # FFT wave-field engine (libgz-waves-provider-fft): a plain IWaveField
-# implementation — Phillips, or EncinoWaves spectra when GZ_WAVES_USE_ENCINO=1.
+# implementation — the EncinoWaves spectra by default, Phillips when not built
+# with encino.
 # It is LINKED directly by the fft system plugin (server) and the water visual
 # (GUI), not discovered by a runtime loader, so it carries no GZ_ADD_PLUGIN and
 # is exported as a normal library target. MakeFFTWaveField() is the factory the

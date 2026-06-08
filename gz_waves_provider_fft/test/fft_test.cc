@@ -152,8 +152,9 @@ TEST(FFTWaveSimulation, RampUpFromZero)
 // Encino's MinE folding metric is hooked through Jacobian() → Eval::FoamMask:
 // pinched crests report Jacobian < 1 and produce whitecaps. The in-tree
 // Phillips CPU path has no folding field, so it stays identically 1 (no foam).
-// This test runs under both `./fft_test` and `GZ_WAVES_USE_ENCINO=1 ./fft_test`
-// and branches on UseEncino().
+// The test binary picks up whatever the build provides — Encino when compiled
+// with EncinoWaves (the default), Phillips otherwise — and branches on
+// UseEncino().
 TEST(FFTWaveSimulation, FoamFromJacobian)
 {
   gsw::WaveParameters p;

@@ -19,10 +19,11 @@
 
 namespace gz::sim::systems
 {
-/// \brief Wave source system backed by the stochastic FFT engine — Phillips by
-/// default, or the EncinoWaves spectra when built with encino and run with
-/// GZ_WAVES_USE_ENCINO=1. Loaded by SDF as `gz-sim-waves-fft-system`; all the
-/// ECM/source plumbing lives in WavesSystemBase, so this only names the engine.
+/// \brief Wave source system backed by the stochastic FFT engine — the
+/// EncinoWaves spectra (TMA + Hasselmann + capillary) when built with encino,
+/// otherwise the in-tree Phillips path. Loaded by SDF as
+/// `gz-sim-waves-fft-system`; all the ECM/source plumbing lives in
+/// WavesSystemBase, so this only names the engine.
 class FftWaves : public WavesSystemBase
 {
   protected: std::string EngineToken() const override { return "fft"; }
