@@ -67,50 +67,73 @@ class WaterVisual::Implementation
   /// resources so the next OnSceneUpdate rebuilds them from scratch.
   public: void OnRenderTeardown();
 
-  // ---- Configuration (set once at Configure) ----
-  public: std::string fftVertexShaderUri;     ///< Grid/displacement vertex shader
-  public: std::string fragmentShaderUri;      ///< Water surface fragment shader
+  // Fields are ordered by descending alignment (8-byte handles/strings,
+  // then 4-byte scalars, then 1-byte flags) to minimise struct padding
+  // (clang-tidy optin.performance.Padding). Logical grouping is preserved
+  // within each alignment band, and the cross-thread cache fields — written
+  // on the render thread and read back under mutex_ — are tagged inline.
+
+  // ---- 8-byte-aligned: configuration, handles, sync ----
+  // Configuration (set once at Configure).
+  public: std::string fftVertexShaderUri;   ///< Grid/displacement vertex shader
+  public: std::string fragmentShaderUri;    ///< Water surface fragment shader
   public: std::string bumpMapPath;
   public: std::string cubeMapPath;
-  public: float rescale{0.125f};
-  // Baseline parameters — defaults aligned with asv_wave_sim's
-  // reference scene so a fresh setup gets the same visual neighbourhood.
-  // Each can still be overridden in the model.sdf <parameters> block.
+  public: std::string visualName;
+  public: std::string modelPath;
+  // Baseline parameters — defaults aligned with asv_wave_sim's reference
+  // scene so a fresh setup gets the same visual neighbourhood. Each can
+  // still be overridden in the model.sdf <parameters> block.
   public: gz::math::Vector2d bumpScale{64.0, 64.0};
   public: gz::math::Vector2d bumpSpeed{0.01, 0.01};
-  // Strict asv_wave_sim defaults — match their literal values so a
-  // visual comparison reflects the simulation/normal-computation
-  // difference, not parameter divergence.
-  public: float hdrMultiplier{0.4f};
-  public: float fresnelPower{5.0f};
-  public: float roughness{0.0f};
-  public: float foamStrength{0.7f};     ///< Blend amount at J ≤ 0
-  public: float foamThreshold{0.25f};   ///< Foam ramps in below this J
-  // asv_wave_sim's exact default colours.
-  public: gz::math::Color shallowColor{0.0f, 0.1f, 0.3f, 1.0f};
-  public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
-  public: std::string visualName;
   public: Entity visualEntity{kNullEntity};
-  public: std::string modelPath;
 
-  // Tile instancing. The procedural water mesh is 200m × 200m; to
-  // cover the visible horizon we render the same mesh at
-  // (2·radius+1)² offset positions, each sharing the central tile's
-  // material so they all sample the same heightmap and follow the
-  // continuous periodic wavefield. 0 disables instancing.
-  public: int tilesRadius{2};
+  // Tile instancing. The procedural water mesh is 200m × 200m; to cover the
+  // visible horizon we render the same mesh at (2·radius+1)² offset positions
+  // (see tilesRadius below), each sharing the central tile's material so they
+  // all sample the same heightmap and follow the continuous periodic wavefield.
   public: double tileMeshSize{200.0};
   public: std::vector<gz::rendering::VisualPtr> tileVisuals;
 
-  // ---- Cross-thread cache, guarded by mutex_ ----
+  // Cross-thread cache. mutex_ guards every member tagged "guarded by mutex_"
+  // here and in the 4-/1-byte bands below.
   public: std::mutex mutex_;
-  public: bool haveWavefield{false};
-  public: std::uint64_t cachedGeneration{0};
-  public: std::uint64_t lastUploadedGeneration{0};
-  public: float cachedTau{2.0f};
-  public: float currentSimTime{0.0f};
+  public: std::uint64_t cachedGeneration{0};        ///< guarded by mutex_
+  public: std::uint64_t lastUploadedGeneration{0};  ///< guarded by mutex_
 
-  // ---- FFT path state ----
+  // FFT path state (engine + heightmap; its scalar cache is in the 4-byte band).
+  public: std::shared_ptr<gz::sim::waves::IWaveField> sim;
+  public: std::unique_ptr<HeightMapTexture> heightMap;
+
+  // Render-thread state.
+  public: gz::rendering::ScenePtr scene;
+  public: gz::rendering::VisualPtr visual;
+  public: gz::rendering::MaterialPtr material;
+  public: gz::common::ConnectionPtr sceneUpdateConn;
+  public: gz::common::ConnectionPtr teardownConn;
+
+  // ---- 4-byte-aligned: scalar parameters + scalar cache ----
+  public: float rescale{0.125f};
+  // Strict asv_wave_sim defaults — match their literal values so a visual
+  // comparison reflects the simulation/normal-computation difference, not
+  // parameter divergence.
+  public: float hdrMultiplier{0.4f};
+  public: float fresnelPower{5.0f};
+  public: float roughness{0.0f};
+  public: float foamStrength{0.7f};       ///< Blend amount at J ≤ 0
+  public: float foamThreshold{0.25f};     ///< Foam ramps in below this J
+  public: float cachedTau{2.0f};          ///< guarded by mutex_
+  public: float currentSimTime{0.0f};     ///< guarded by mutex_
+  public: float cachedTileSize{200.0f};   ///< FFT cache, guarded by mutex_
+  public: float cachedChopFactor{-1.0f};  ///< FFT cache, guarded by mutex_
+  public: int tilesRadius{2};             ///< (2·r+1)² tiles; 0 disables
+  public: int cachedGridSize{128};        ///< FFT cache, guarded by mutex_
+  // asv_wave_sim's exact default colours.
+  public: gz::math::Color shallowColor{0.0f, 0.1f, 0.3f, 1.0f};
+  public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
+
+  // ---- 1-byte-aligned: flags ----
+  public: bool haveWavefield{false};  ///< guarded by mutex_
   public: bool useFft{false};
   /// \brief True iff the currently-bound material was created with the
   /// FFT vertex shader. Set when `ResolveVisual` builds the material;
@@ -120,19 +143,6 @@ class WaterVisual::Implementation
   /// component arrives, building a Gerstner material that later
   /// receives FFT-only uniforms.
   public: bool materialIsFft{false};
-  public: std::shared_ptr<gz::sim::waves::IWaveField> sim;
-  public: std::unique_ptr<HeightMapTexture> heightMap;
-  public: float cachedTileSize{200.0f};
-  public: int   cachedGridSize{128};
-  public: float cachedChopFactor{-1.0f};
-
-  // ---- Render-thread state ----
-  public: gz::rendering::ScenePtr scene;
-  public: gz::rendering::VisualPtr visual;
-  public: gz::rendering::MaterialPtr material;
-  public: gz::common::ConnectionPtr sceneUpdateConn;
-  public: gz::common::ConnectionPtr teardownConn;
-
   /// \brief gz-sim's `GuiRunner` loads this system *twice* for the same
   /// entity (once via the model SDF, once via the visual SDF — known
   /// upstream issue mentioned in asv_wave_sim#177). The two instances
