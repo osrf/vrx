@@ -692,23 +692,37 @@ void WaterVisual::PreUpdate(
   }
   const auto &data = wfComp->Data();
 
-  // One render path for every backend: store the field behind the interface
-  // and let OnSceneUpdate pull its grid via Field(). No backend-specific
-  // dispatch, so this plugin links no concrete provider.
-  if (!data.simulation)
-  {
-    this->dataPtr->haveWavefield = false;
-    return;
-  }
   if (!this->dataPtr->haveWavefield)
   {
     gzmsg << "[WaterVisual] Wavefield component found (algorithm="
           << data.algorithm << ", generation=" << data.generation << ")"
           << std::endl;
   }
-  this->dataPtr->sim = data.simulation;
+
+  // Build and OWN a private engine instance from the replicated parameters,
+  // rebuilt only when the wavefield generation changes. We deliberately do NOT
+  // alias data.simulation: that is a process-global engine shared by every
+  // consumer (gz-sim's GuiRunner loads this system twice, and the deserialize
+  // path drives the same instance on another thread). The per-instance mutex_
+  // below cannot serialise a shared instance, so sharing it races
+  // OnSceneUpdate's Update()/Field() on the render thread against this thread —
+  // the cause of the intermittent PreUpdate segfault. A private instance is
+  // touched only by PreUpdate + OnSceneUpdate, both under mutex_, so it is
+  // fully serialised. One render path for every backend: OnSceneUpdate pulls
+  // the grid via Field().
+  if (!this->dataPtr->sim ||
+      this->dataPtr->cachedGeneration != data.generation)
+  {
+    this->dataPtr->sim =
+        gz::sim::waves::CreateWaveSimulation(data.algorithm, data.params);
+  }
+  if (!this->dataPtr->sim)
+  {
+    this->dataPtr->haveWavefield = false;
+    return;
+  }
   this->dataPtr->useFft = true;
-  if (const auto *f = data.simulation->Field())
+  if (const auto *f = this->dataPtr->sim->Field())
   {
     this->dataPtr->cachedTileSize = static_cast<float>(f->tile);
     this->dataPtr->cachedGridSize = static_cast<int>(f->n);
