@@ -8,12 +8,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Quiet two upstream-Encino warnings (macro redefinition, unused statics
-# in templates that the consumer instantiates only partially). They are
-# stylistic in the upstream code and not actionable on our side.
-if(NOT CMAKE_CXX_FLAGS MATCHES "-Wno-macro-redefined")
-  add_compile_options(-Wno-unused-function)
-endif()
+# Vendored EncinoWaves instantiates templates only partially, leaving some
+# static helpers unused; silence that (upstream code, not ours). The
+# macro-redefinition warnings (Util/ vs EncinoWaves/ EWAV_* macros) are fixed
+# at the source with explicit #undefs in include/EncinoWaves/Exception.h.
+add_compile_options(-Wno-unused-function)
 
 # ----------------------------------------------------------------------------
 # ament_cmake + dependencies

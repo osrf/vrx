@@ -69,13 +69,18 @@ target_link_libraries(waves-ogre2-bridge
     gz-rendering::ogre2
     gz-common::gz-common
 )
-target_include_directories(waves-ogre2-bridge PRIVATE
+# SYSTEM so Ogre Next's own headers (extra ';', unused params, etc.) don't
+# drown our -Wall -Wextra -Wpedantic output — they are upstream Ogre, not ours.
+target_include_directories(waves-ogre2-bridge SYSTEM PRIVATE
   ${OGRE_NEXT_INCLUDE_DIR}
   # HlmsPbs headers transitively include Hlms/Common/OgreHlmsBufferManager.h
   # by unqualified name — that subdirectory must also be on the path.
   ${OGRE_NEXT_INCLUDE_DIR}/Hlms/Common
   ${OGRE_NEXT_INCLUDE_DIR}/Hlms/Pbs
 )
+# Ogre can't infer debug/release from our flags and emits a #pragma message in
+# every TU; silence it (RelWithDebInfo is not an Ogre debug build).
+target_compile_definitions(waves-ogre2-bridge PRIVATE OGRE_IGNORE_UNKNOWN_DEBUG)
 install(
   TARGETS waves-ogre2-bridge
   LIBRARY DESTINATION lib

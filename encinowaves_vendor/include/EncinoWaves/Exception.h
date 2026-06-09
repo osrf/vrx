@@ -95,6 +95,15 @@ public:
 
 extern void __EWAV_DEBUG_ASSERT_FAIL(const char *msg) throw();
 
+// EncinoWaves defines its own EWAV_* macros (namespaced to
+// EncinoWaves::Exception). Foundation.h transitively pulls in Util/Exception.h,
+// which defines the same names; undef them here so the definitions below
+// override cleanly instead of warning about redefinition.
+#undef EWAV_FAIL
+#undef EWAV_THROW
+#undef EWAV_ASSERT
+#undef EWAV_DEBUG_ASSERT
+
 //-*****************************************************************************
 // This macro will cause an abort.
 #define EWAV_FAIL(TEXT)                                       \
@@ -146,6 +155,8 @@ extern void __EWAV_DEBUG_ASSERT_FAIL(const char *msg) throw();
   } while (0)
 
 //-*****************************************************************************
+// Replace the base EWAV_ASSERT above with the debug / release variant.
+#undef EWAV_ASSERT
 #ifdef DEBUG
 
 #define EWAV_ASSERT(COND, TEXT) \
