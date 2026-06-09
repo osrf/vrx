@@ -5,9 +5,8 @@ to choose a backend, every configuration knob, and how the in-progress **Encino*
 spectrum engine differs from the default path.
 
 This is a *reference*. For the design rationale and upstreaming roadmap see
-[`waves_integration_plan.md`](waves_integration_plan.md) and
-[`waves_gpu_fft_plan.md`](waves_gpu_fft_plan.md); for the known FFT first-frame
-load issue see [`../waves/README.md`](../waves/README.md).
+[`waves_integration_plan.md`](waves_integration_plan.md); for the known FFT
+first-frame load issue see [`../waves/README.md`](../waves/README.md).
 
 ---
 
@@ -322,4 +321,3 @@ GZ_WAVES_USE_ENCINO=1 gz sim open_water.sdf
   first-frame load limitation
 - [`waves_integration_plan.md`](waves_integration_plan.md) — design rationale &
   upstreaming plan
-- [`waves_gpu_fft_plan.md`](waves_gpu_fft_plan.md) — GPU-FFT visual roadmap
