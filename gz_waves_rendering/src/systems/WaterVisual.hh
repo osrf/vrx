@@ -28,6 +28,28 @@ namespace gz::sim::systems
   /// sim-time uniform is pushed every frame.
   ///
   /// ## SDF parameters
+  ///
+  /// `<shader>` (required) names the GLSL files and tunes the surface look;
+  /// `<textures>` supplies the bump/cube maps; the two tile tags control
+  /// instanced tiling of the periodic FFT field.
+  ///
+  ///   - `<shader>/<fft_vertex>` (path, required): vertex shader.
+  ///   - `<shader>/<fragment>` (path, required): fragment shader.
+  ///   - `<shader>/<parameters>/<rescale>` (float, 0.125): displacement/tangent scale.
+  ///   - `<shader>/<parameters>/<bumpScale>` (vec2, 64 64): bumpmap tiling (x16 in the VS).
+  ///   - `<shader>/<parameters>/<bumpSpeed>` (vec2, 0.01 0.01): bumpmap scroll [uv/s].
+  ///   - `<shader>/<parameters>/<hdrMultiplier>` (float, 0.4): reflected-sky brightness.
+  ///   - `<shader>/<parameters>/<fresnelPower>` (float, 5.0): Fresnel exponent.
+  ///   - `<shader>/<parameters>/<roughness>` (float, 0.0): micro-surface roughness.
+  ///   - `<shader>/<parameters>/<foamStrength>` (float, 0.7): foam blend at Jacobian <= 0.
+  ///   - `<shader>/<parameters>/<foamThreshold>` (float, 0.25): Jacobian below which foam ramps in.
+  ///   - `<shader>/<parameters>/<shallowColor>` (rgba, 0 0.1 0.3 1): shallow-water tint.
+  ///   - `<shader>/<parameters>/<deepColor>` (rgba, 0 0.05 0.2 1): deep-water tint.
+  ///   - `<textures>/<bumpMap>` (path): normal-perturbation texture.
+  ///   - `<textures>/<cubeMap>` (path): reflection cubemap.
+  ///   - `<tiles_radius>` (int, 2): render the tile at (2r+1)^2 offsets; 0 disables.
+  ///   - `<tile_mesh_size>` (double [m], 200.0): per-tile mesh extent.
+  ///
   /// \verbatim
   /// <plugin filename="gz-sim-water-visual-system"
   ///         name="gz::sim::systems::WaterVisual">
@@ -35,12 +57,12 @@ namespace gz::sim::systems
   ///     <fft_vertex>shaders/fft_water_vs_330.glsl</fft_vertex>
   ///     <fragment>shaders/water_fs_330.glsl</fragment>
   ///     <parameters>
-  ///       <rescale>0.125</rescale>
-  ///       <bumpScale>75 75</bumpScale>
-  ///       <bumpSpeed>0.01 0.0</bumpSpeed>
+  ///       <rescale>0.5</rescale>
+  ///       <bumpScale>64 64</bumpScale>
+  ///       <bumpSpeed>0.01 0.01</bumpSpeed>
   ///       <hdrMultiplier>0.4</hdrMultiplier>
   ///       <fresnelPower>5.0</fresnelPower>
-  ///       <shallowColor>0 0.1 0.2 1.0</shallowColor>
+  ///       <shallowColor>0 0.1 0.3 1.0</shallowColor>
   ///       <deepColor>0 0.05 0.2 1.0</deepColor>
   ///     </parameters>
   ///   </shader>
@@ -48,6 +70,8 @@ namespace gz::sim::systems
   ///     <bumpMap>textures/wave_normals.dds</bumpMap>
   ///     <cubeMap>textures/skybox_lowres.dds</cubeMap>
   ///   </textures>
+  ///   <tiles_radius>2</tiles_radius>
+  ///   <tile_mesh_size>200</tile_mesh_size>
   /// </plugin>
   /// \endverbatim
   class WaterVisual : public System,

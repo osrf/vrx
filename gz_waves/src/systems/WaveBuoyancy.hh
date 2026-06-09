@@ -32,6 +32,16 @@ namespace gz::sim::systems
   ///      per-plugin Wavefield copy, no topic subscription, no mutex.
   ///
   /// ## SDF parameters
+  ///
+  ///   - `<link_name>` (string, required): link the buoyant forces act on.
+  ///   - `<hull_length>` (double [m], 4.9): cylinder length the points span.
+  ///   - `<hull_radius>` (double [m], 0.213): cylinder radius — sets each
+  ///     point's submerged area and the [0, 2*radius] depth clamp.
+  ///   - `<fluid_level>` (double [m], 0.0): still-water surface Z.
+  ///   - `<fluid_density>` (double [kg/m^3], 1000.0): water density.
+  ///   - `<points>`/`<point>` (vec3 [m], required): hull sample points in the
+  ///     link frame; the hull length is divided evenly among them.
+  ///
   /// \verbatim
   /// <plugin filename="gz-sim-wave-buoyancy-system"
   ///         name="gz::sim::systems::WaveBuoyancy">

@@ -43,6 +43,15 @@ namespace gz::sim::systems
   /// it until the GUI process has registered the component type (the GUI loads
   /// our plugin libraries lazily, and a one-time replication at world load
   /// tends to arrive before our type is registered there).
+  ///
+  /// SDF is parsed in `ParseSdf`: `<update_rate>` at plugin level and a
+  /// `<wave>` block of parameters (backed by `waves::WaveParameters` in
+  /// `gz_waves/include/gz/sim/waves/Wavefield.hh`). The base parses every known
+  /// tag, but **each concrete engine system documents — and uses — its own
+  /// parameter surface**: see FftWaves (`gz-sim-waves-fft-system`) and
+  /// GerstnerWaves (`gz-sim-waves-gerstner-system`). The same tag names are also
+  /// accepted by the `/world/<name>/wave/set_parameters` service
+  /// (`gz.msgs.Param`) for live changes.
   class WavesSystemBase : public System,
                           public ISystemConfigure,
                           public ISystemPreUpdate
