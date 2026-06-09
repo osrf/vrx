@@ -113,6 +113,10 @@
     <!-- FFT engine (gz-sim-waves-fft-system): stochastic spectral ocean —
          EncinoWaves spectra (TMA + Hasselmann + capillary) by default, in-tree
          Phillips when not built with encino. Parameters:
+           sea_state  optional WMO sea state code (0-9). When set it overrides
+                      period and gain to reproduce that sea's significant wave
+                      height + peak period (WMO code table 3700;
+                      en.wikipedia.org/wiki/Sea_state). e.g. 3 slight, 5 rough.
            period     sea state; the engine derives wind speed (3.2 → ~5 m/s).
            gain       visual amplitude multiplier on top of Encino's Hs
                       calibration. 9.5 (~1/ampCalib) gives the dramatic look and
@@ -145,6 +149,8 @@
     <!-- Gerstner engine (gz-sim-waves-gerstner-system): analytic sum of
          component waves. To use it, comment the FFT <plugin> above out and
          remove the comment wrapper around the <plugin> below. Parameters:
+           sea_state  optional WMO sea state code (0-9); overrides period+gain
+                      to that sea's wave height (see the FFT block above).
            model      PMS (wind-derived) or CWR (constant amplitude; then also
                       add an <amplitude> element).
            number     count of component waves summed.
