@@ -253,7 +253,7 @@ int waves_ogre2_heightmap_upload(
 //////////////////////////////////////////////////
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
 {
-  auto *hm = static_cast<HeightMap *>(_handle);
+  const auto *hm = static_cast<const HeightMap *>(_handle);
   return (hm && hm->ready) ? 1 : 0;
 }
 
