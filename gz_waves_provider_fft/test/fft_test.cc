@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
 #include <random>
 #include <sstream>
 
@@ -186,12 +185,11 @@ TEST(FFTWaveSimulation, FoamFromJacobian)
   EXPECT_GT(maxFoam, 0.0) << "Encino path should produce whitecaps";
 }
 
-// The Encino band-pass filter (GZ_WAVES_ENCINO_FILTER_*) reshapes which
-// wavelengths survive in the spectrum. Same seed → without the filter the
-// field is one thing; with a narrow band it differs. (The amplitude
-// calibration renormalises total energy, so we compare the field shape, not
-// its RMS.) Only meaningful on the Encino backend; no-op early-out otherwise.
-TEST(FFTWaveSimulation, EncinoBandPassFilterReshapesField)
+// The <filter_*> band-pass reshapes which wavelengths survive in the spectrum.
+// Same seed → without the filter the field is one thing; with a narrow band it
+// differs. (The amplitude calibration renormalises total energy, so we compare
+// the field shape, not its RMS.)
+TEST(FFTWaveSimulation, BandPassFilterReshapesField)
 {
   gsw::WaveParameters p;
   p.model = "PMS";
@@ -201,23 +199,19 @@ TEST(FFTWaveSimulation, EncinoBandPassFilterReshapesField)
   p.gridSize = 64;
   p.seed = 11;
 
-  unsetenv("GZ_WAVES_ENCINO_FILTER_MIN_WL");
-  unsetenv("GZ_WAVES_ENCINO_FILTER_MAX_WL");
   gsw::FFTWaveSimulation plain(p, 200.0, 64, 11);
   plain.Update(20.0);
   const Eigen::MatrixXd a = plain.HeightGrid();
 
   // Keep only 30–100 m waves (suppresses the ~16 m peak and the ripples).
-  setenv("GZ_WAVES_ENCINO_FILTER_MIN_WL", "30", 1);
-  setenv("GZ_WAVES_ENCINO_FILTER_MAX_WL", "100", 1);
+  p.filterMinWavelength = 30.0;
+  p.filterMaxWavelength = 100.0;
   gsw::FFTWaveSimulation filtered(p, 200.0, 64, 11);
   filtered.Update(20.0);
   const Eigen::MatrixXd b = filtered.HeightGrid();
-  unsetenv("GZ_WAVES_ENCINO_FILTER_MIN_WL");
-  unsetenv("GZ_WAVES_ENCINO_FILTER_MAX_WL");
 
   EXPECT_GT((a - b).cwiseAbs().maxCoeff(), 1e-3)
-    << "band-pass filter should reshape the Encino field";
+    << "band-pass filter should reshape the field";
 }
 
 // The <spectrum>/<spreading>/<dispersion> SDF selectors feed EncinoWaves. Two

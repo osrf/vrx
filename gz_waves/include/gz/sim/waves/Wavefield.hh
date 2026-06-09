@@ -94,6 +94,34 @@ struct WaveParameters
   /// "capillary".
   std::string dispersion{"capillary"};
 
+  /// \brief FFT water depth [m] (EncinoWaves dispersion input).
+  double depth{100.0};
+
+  /// \brief FFT wind fetch [km] (EncinoWaves spectrum input).
+  double fetch{300.0};
+
+  /// \brief FFT swell elongation (EncinoWaves directional spreading); 0 = none.
+  double swell{0.0};
+
+  /// \brief FFT breaking-wave trough damping in [0, 1] (EncinoWaves); 0 = none.
+  double troughDamping{0.0};
+
+  /// \brief FFT band-pass filter lower edge [m]. > 0 enables the band-pass,
+  /// keeping wavelengths within [filterMinWavelength, filterMaxWavelength].
+  double filterMinWavelength{0.0};
+
+  /// \brief FFT band-pass filter upper edge [m] (0 = no upper bound).
+  double filterMaxWavelength{0.0};
+
+  /// \brief FFT band-pass transition width [m] (0 = auto from the lower edge).
+  double filterSoftWidth{0.0};
+
+  /// \brief FFT band-pass suppression floor in [0, 1] (0 = full cut outside).
+  double filterMin{0.0};
+
+  /// \brief FFT band-pass invert: band-stop (notch) instead of band-pass.
+  bool filterInvert{false};
+
   /// \brief WMO sea state code (0-9). A convenience that, when set, makes the
   /// engine reproduce that sea state's significant wave height and peak period
   /// (see WithSeaState / SeaStateFromCode). -1 (default) means "unset": use the
@@ -218,6 +246,15 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.spectrum << ' '
       << _d.params.spreading << ' '
       << _d.params.dispersion << ' '
+      << _d.params.depth << ' '
+      << _d.params.fetch << ' '
+      << _d.params.swell << ' '
+      << _d.params.troughDamping << ' '
+      << _d.params.filterMinWavelength << ' '
+      << _d.params.filterMaxWavelength << ' '
+      << _d.params.filterSoftWidth << ' '
+      << _d.params.filterMin << ' '
+      << _d.params.filterInvert << ' '
       << _d.params.seaState << ' '
       << _d.updateRate << ' ';
   return _os;
@@ -258,6 +295,15 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.spectrum
       >> _d.params.spreading
       >> _d.params.dispersion
+      >> _d.params.depth
+      >> _d.params.fetch
+      >> _d.params.swell
+      >> _d.params.troughDamping
+      >> _d.params.filterMinWavelength
+      >> _d.params.filterMaxWavelength
+      >> _d.params.filterSoftWidth
+      >> _d.params.filterMin
+      >> _d.params.filterInvert
       >> _d.params.seaState
       >> _d.updateRate;
   // Cache the constructed simulation across deserializations. The same

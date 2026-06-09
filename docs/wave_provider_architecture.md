@@ -19,7 +19,7 @@ instance you hold" determinism rule — but realized them differently:
 | Providers discovered **by name via `gz-plugin`** (`GZ_ADD_PLUGIN(IWaveField)`) and loaded by a core loader | **Per-engine gz-sim *system* plugins** (`gz-sim-waves-fft-system`, `gz-sim-waves-gerstner-system`), each a thin `WavesSystemBase` subclass. Engines are plain libs registered in an **in-process token→factory registry** (`RegisterWaveEngineFactory`/`CreateWaveSimulation`). No dlopen engine loader. |
 | `SetParameters(seed, targetHs, config)` — two universal knobs + an **opaque provider config string** | A **shared `WaveParameters` struct** was kept: `SetParameters(const WaveParameters&)`, serialized whole in the component. |
 | `WaveParameters` dropped; each provider parses its own SDF sub-tree | `WaveParameters` retained (model/period/grid_size/seed/choppiness/sea_state/…); both engines read the same struct. |
-| Encino knobs become the FFT provider's **own SDF tags** in `config` | Encino tuning is still exposed as **`GZ_WAVES_ENCINO_*` environment variables**. |
+| Encino knobs become the FFT provider's **own SDF tags** in `config` | Encino tuning (`depth`/`fetch`/`swell`/`trough_damping`/`filter_*`) **is now SDF** — but as flat tags in `<wave>` parsed by the shared `ParseSdf`, not a provider-owned opaque config blob. |
 | Sea state stored as `targetHs` [m] (a universal field) | Sea state is an SDF **`<sea_state>` integer (WMO 0–9)** in `WaveParameters`, resolved to Hs to override `<period>`/`<gain>`. |
 | Rich FFT/Encino provider lives in a separate **`vrx_waves`** package | It lives in **`gz_waves_provider_fft`** (Gerstner in `gz_waves_provider_gerstner`); `encinowaves_vendor` is vendored. |
 | `Capabilities`/`Caps()`, `Grid()`, `Foam()`, `Velocity()` on the socket | The shipped `IWaveField` exposes `Elevation`/`ParticleVelocity`/`Normal`/`Jacobian`/`SetParameters`/`Kind` (pure) + `Update`/`Bounds`/`Field` (defaulted); no `Capabilities`. Foam is the `Field()` grid's foam channel. |
@@ -175,8 +175,10 @@ struct holding every provider's knobs would be a **fat union** — most fields a
 meaningless to any one provider (a grid size means nothing to an analytic
 Gerstner sea) — and, living in the upstream core, **adding a knob for a
 downstream provider** (say an Encino `fetch`) would force an **upstream change**.
-That's exactly why our current Encino knobs are bolted on as `GZ_WAVES_ENCINO_*`
-**environment variables**: `WaveParameters` had nowhere to put them.
+That's exactly why our Encino knobs were initially bolted on as
+`GZ_WAVES_ENCINO_*` **environment variables**: `WaveParameters` had nowhere to
+put them. (They have since been promoted to flat `<wave>` SDF tags — added to
+the shared `WaveParameters` rather than a provider-owned config blob.)
 
 Instead, **each provider owns its parameter surface** — its own SDF sub-tree,
 parsed by the provider itself. The recipe carries that as a **serialized string**
@@ -350,7 +352,7 @@ one architectural change (plugin discovery), not new algorithms:
 | `CreateWaveSimulation()` if/else factory | **gz-plugin** discovery (load provider by name) |
 | `WavefieldData` carrying a live `shared_ptr<IWaveSimulation>` | recipe-only `WavefieldData` (no shared sim) + `revision` |
 | `WaveParameters` (fat union of all backends' fields) | dropped — each provider parses its own SDF `config`; only `seed` is promoted to a universal field |
-| Encino `GZ_WAVES_ENCINO_*` env vars | the FFT/Encino provider's own SDF tags (in `config`) |
+| Encino `GZ_WAVES_ENCINO_*` env vars | **done** — now flat `<wave>` SDF tags (`depth`/`fetch`/`swell`/`trough_damping`/`filter_*`) |
 | `GerstnerWaveSimulation` | the simple **Gerstner provider** (already self-contained) |
 | `FFTWaveSimulation` + Encino + Ogre2 bridge | the **VRX FFT/Encino provider** + the rendering bridge |
 | `Eval::*` free functions | thin helpers over `IWaveField` |

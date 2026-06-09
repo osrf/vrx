@@ -146,6 +146,15 @@ Defaults live in `WaveParameters` (`gz_waves/include/gz/sim/waves/Wavefield.hh`)
 | `<spectrum>` | string | `tma` | EncinoWaves spectrum: `pms`, `jonswap`, or `tma` (§6) |
 | `<spreading>` | string | `hasselmann` | Directional spreading: `poscos2`, `mitsuyasu`, `hasselmann`, `donelanbanner` |
 | `<dispersion>` | string | `capillary` | Dispersion relation: `deep`, `finite`, or `capillary` |
+| `<depth>` | double [m] | `100` | Water depth (EncinoWaves dispersion input) |
+| `<fetch>` | double [km] | `300` | Wind fetch (EncinoWaves spectrum input) |
+| `<swell>` | double | `0` | Swell elongation (directional spreading); 0 = none |
+| `<trough_damping>` | double [0,1] | `0` | Breaking-wave trough damping; 0 = none |
+| `<filter_min_wl>` | double [m] | `0` | Band-pass lower edge; > 0 enables the band-pass |
+| `<filter_max_wl>` | double [m] | `0` | Band-pass upper edge (0 = no upper bound) |
+| `<filter_soft>` | double [m] | `0` | Band-pass transition width (0 = auto) |
+| `<filter_min>` | double [0,1] | `0` | Band-pass suppression floor (0 = full cut outside) |
+| `<filter_invert>` | bool | `false` | Band-stop (notch) instead of band-pass |
 
 ### 5.3 Vessel buoyancy
 
@@ -254,7 +263,7 @@ default used when the SDF selector is omitted:
 | **Spectra** | `<spectrum>` | `pms`, `jonswap`, **`tma`** |
 | **DirectionalSpreading** | `<spreading>` | `poscos2`, `mitsuyasu`, **`hasselmann`**, `donelanbanner` |
 | **Dispersion** | `<dispersion>` | `deep`, `finite`, **`capillary`** |
-| **Filter** | *(env)* | `Null` (default) or smooth invertible band-pass on wavelength |
+| **Filter** | `<filter_*>` | `Null` (default) or smooth invertible band-pass on wavelength |
 | **Random** | — | `Normal` amplitude draws, per-wavenumber seeded by `<seed>` |
 | **InitialState** | — | Runs the cascade once → `h₀(k)`, `conj(h₀(−k))`, `ω(k)` |
 | **Propagation** | — | Per frame: `h(k,t)=h₀e^{iωt}+h₀*e^{−iωt}` → IFFT → `Height`, `Dx`, `Dy`, `MinE` (Jacobian foam) |
@@ -285,17 +294,13 @@ physics-based amplitude calibration, and the `<gain>` multiplier, then copies
 > selected spectrum still sets the spectral *shape*. `<gain>` is applied as a user
 > multiplier on top. The factor and target Hs are echoed in the startup log.
 
-**Advanced tuning (env vars).** Beyond the SDF selectors, Encino's numeric knobs
-and the band-pass filter stay as experiment-only environment variables (read once
-at field build, echoed in the `EncinoWaves spectrum library active (...)` log):
-
-| Env var | Values | Default |
-|---|---|---|
-| `GZ_WAVES_ENCINO_DEPTH` | metres | `100` |
-| `GZ_WAVES_ENCINO_FETCH` | kilometres | `300` |
-| `GZ_WAVES_ENCINO_SWELL` | swell elongation | `0` |
-| `GZ_WAVES_ENCINO_TROUGH_DAMPING` | breaking-wave damping `[0,1]` | `0` |
-| `GZ_WAVES_ENCINO_FILTER_*` | `MIN`, `MIN_WL`, `MAX_WL`, `SOFT`, `INVERT` — band-pass on wavelength | off |
+**Advanced tuning (SDF).** Beyond the selectors, Encino's numeric knobs
+(`<depth>`, `<fetch>`, `<swell>`, `<trough_damping>`) and the band-pass filter
+(`<filter_min_wl>`, `<filter_max_wl>`, `<filter_soft>`, `<filter_min>`,
+`<filter_invert>`) are SDF parameters too (§5.2), defaulting to Encino's own
+defaults so an unset world reproduces the stock Horvath config. The active
+values are echoed in the `EncinoWaves spectrum library active (...)` startup log.
+There are **no environment variables** in the wave system anymore.
 
 ### 6.4 Limitations
 

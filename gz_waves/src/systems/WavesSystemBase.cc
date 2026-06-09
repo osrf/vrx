@@ -79,7 +79,13 @@ waves::WaveParameters ApplyParam(waves::WaveParameters _p,
     {"scale", &_p.scale},       {"steepness", &_p.steepness},
     {"phase", &_p.phase},       {"tau", &_p.tau},
     {"gain", &_p.gain},         {"tile_size", &_p.tileSize},
-    {"choppiness", &_p.choppiness}};
+    {"choppiness", &_p.choppiness},
+    {"depth", &_p.depth},       {"fetch", &_p.fetch},
+    {"swell", &_p.swell},       {"trough_damping", &_p.troughDamping},
+    {"filter_min_wl", &_p.filterMinWavelength},
+    {"filter_max_wl", &_p.filterMaxWavelength},
+    {"filter_soft", &_p.filterSoftWidth},
+    {"filter_min", &_p.filterMin}};
 
   // String-valued tags (key -> destination field).
   const std::unordered_map<std::string, std::string *> strings{
@@ -109,6 +115,8 @@ waves::WaveParameters ApplyParam(waves::WaveParameters _p,
       { *sit->second = v.string_value(); _matched = true; }
       else warnType(k);
     }
+    else if (k == "filter_invert")
+    { if (ReadDouble(v, d)) { _p.filterInvert = (d != 0.0); _matched = true; } else warnType(k); }
     else if (k == "number")
     { if (ReadInt(v, i)) { _p.number = static_cast<std::size_t>(i); _matched = true; } else warnType(k); }
     else if (k == "grid_size")
@@ -204,6 +212,17 @@ void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
   p.spectrum   = wave->Get<std::string>("spectrum",   p.spectrum  ).first;
   p.spreading  = wave->Get<std::string>("spreading",  p.spreading ).first;
   p.dispersion = wave->Get<std::string>("dispersion", p.dispersion).first;
+  p.depth         = wave->Get<double>("depth",          p.depth        ).first;
+  p.fetch         = wave->Get<double>("fetch",          p.fetch        ).first;
+  p.swell         = wave->Get<double>("swell",          p.swell        ).first;
+  p.troughDamping = wave->Get<double>("trough_damping", p.troughDamping).first;
+  p.filterMinWavelength =
+    wave->Get<double>("filter_min_wl", p.filterMinWavelength).first;
+  p.filterMaxWavelength =
+    wave->Get<double>("filter_max_wl", p.filterMaxWavelength).first;
+  p.filterSoftWidth = wave->Get<double>("filter_soft", p.filterSoftWidth).first;
+  p.filterMin       = wave->Get<double>("filter_min",  p.filterMin).first;
+  p.filterInvert    = wave->Get<bool>("filter_invert", p.filterInvert).first;
 
   // High-level convenience: a WMO sea state code (0-9) that each engine turns
   // into a matching significant wave height + peak period (see WithSeaState).

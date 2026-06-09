@@ -45,6 +45,15 @@ namespace gz::sim::systems
 /// | `<spectrum>` | string | tma | EncinoWaves spectrum: `pms`, `jonswap`, `tma` |
 /// | `<spreading>` | string | hasselmann | Directional spreading: `poscos2`, `mitsuyasu`, `hasselmann`, `donelanbanner` |
 /// | `<dispersion>` | string | capillary | Dispersion relation: `deep`, `finite`, `capillary` |
+/// | `<depth>` | double [m] | 100 | Water depth (EncinoWaves dispersion input) |
+/// | `<fetch>` | double [km] | 300 | Wind fetch (EncinoWaves spectrum input) |
+/// | `<swell>` | double | 0 | Swell elongation (directional spreading) |
+/// | `<trough_damping>` | double [0,1] | 0 | Breaking-wave trough damping |
+/// | `<filter_min_wl>` | double [m] | 0 | Band-pass lower edge; >0 enables the filter |
+/// | `<filter_max_wl>` | double [m] | 0 | Band-pass upper edge (0 = no upper bound) |
+/// | `<filter_soft>` | double [m] | 0 | Band-pass transition width (0 = auto) |
+/// | `<filter_min>` | double [0,1] | 0 | Band-pass suppression floor |
+/// | `<filter_invert>` | bool | false | Band-stop (notch) instead of band-pass |
 ///
 /// `<direction>` is parsed but not applied — EncinoWaves assumes wind along +X.
 ///

@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
 #include <iostream>
 #include <string>
 
@@ -128,9 +127,11 @@ bool SpreadingFromString(const std::string &s,
   return true;
 }
 
-// Map the <spectrum>/<dispersion>/<spreading> SDF selectors onto `ep`. Unknown
-// values warn and leave the Horvath default in place.
-void ApplyWaveSpectrum(EncinoWaves::Parametersf &ep, const WaveParameters &p)
+// Map the SDF spectrum selectors and numeric knobs onto `ep`. Unknown selector
+// values warn and leave the Encino default in place. The numeric knobs default
+// (via WaveParameters) to Encino's own defaults, so an SDF that sets none of
+// them reproduces the stock Horvath "good ocean" config.
+void ApplyEncinoParams(EncinoWaves::Parametersf &ep, const WaveParameters &p)
 {
   if (!SpectrumFromString(p.spectrum, ep.spectrum.type))
     std::cerr << "[FFTWaveSimulation] ignoring unknown <spectrum>='"
@@ -143,65 +144,34 @@ void ApplyWaveSpectrum(EncinoWaves::Parametersf &ep, const WaveParameters &p)
               << p.spreading
               << "' (want poscos2|mitsuyasu|hasselmann|donelanbanner)"
               << std::endl;
-}
 
-/// Apply optional environment-variable overrides for EncinoWaves' remaining
-/// numeric knobs (depth, fetch, swell, trough damping) and the band-pass
-/// filter onto `ep`. The spectrum/spreading/dispersion *selectors* come from
-/// SDF now (ApplyWaveSpectrum); these stay env-only experiment knobs feeding
-/// the spectrum at construction (InitialState), so the field stays seamlessly
-/// periodic and identical between the server and GUI processes.
-void ApplyEncinoEnvOverrides(EncinoWaves::Parametersf &ep)
-{
+  ep.depth         = static_cast<float>(p.depth);
+  ep.fetch         = static_cast<float>(p.fetch);
+  ep.directionalSpreading.swell = static_cast<float>(p.swell);
+  ep.troughDamping = static_cast<float>(p.troughDamping);
 
-  // Numeric overrides. Each only affects the Height/Dx/Dy fields VRX copies.
-  auto envFloat = [](const char *_name, float &_io)
-  {
-    if (const char *v = std::getenv(_name))
-    {
-      try
-      {
-        _io = std::stof(v);
-      }
-      catch (...)
-      {
-        std::cerr << "[FFTWaveSimulation] ignoring non-numeric " << _name
-                  << "='" << v << "'" << std::endl;
-      }
-    }
-  };
-  envFloat("GZ_WAVES_ENCINO_DEPTH",          ep.depth);
-  envFloat("GZ_WAVES_ENCINO_FETCH",          ep.fetch);
-  envFloat("GZ_WAVES_ENCINO_SWELL",          ep.directionalSpreading.swell);
-  envFloat("GZ_WAVES_ENCINO_TROUGH_DAMPING", ep.troughDamping);
-
-  // Optional spectral band-pass over wavelength (Encino's
-  // SmoothInvertibleBandPassFilter). Setting either band edge enables it: the
-  // spectrum keeps wavelengths within [MIN_WL, MAX_WL] metres and rolls off
-  // outside over a soft transition (_SOFT). _MIN raises the suppression floor
-  // (0 = full cut); _INVERT turns the band into a notch. Useful to drop the
-  // small ripples that shimmer at grid resolution, isolate a swell band, or
-  // remove components near/above the tile size. Note: the amplitude
+  // Optional spectral band-pass over wavelength: keep wavelengths within
+  // [filter_min_wl, filter_max_wl] m and roll off outside over filter_soft.
+  // filter_min raises the suppression floor (0 = full cut); filter_invert turns
+  // the band into a notch. Enabled when a band edge is given. The amplitude
   // calibration renormalises total energy, so the filter reshapes *which*
   // wavelengths survive rather than the overall sea height.
-  if (std::getenv("GZ_WAVES_ENCINO_FILTER_MIN_WL") ||
-      std::getenv("GZ_WAVES_ENCINO_FILTER_MAX_WL"))
+  if (p.filterMinWavelength > 0.0 || p.filterMaxWavelength > 0.0)
   {
     ep.filter.type = EncinoWaves::kSmoothInvertibleBandPassFilter;
-    envFloat("GZ_WAVES_ENCINO_FILTER_MIN_WL", ep.filter.smallWavelength);
-    envFloat("GZ_WAVES_ENCINO_FILTER_MAX_WL", ep.filter.bigWavelength);
-    envFloat("GZ_WAVES_ENCINO_FILTER_SOFT",   ep.filter.softWidth);
-    envFloat("GZ_WAVES_ENCINO_FILTER_MIN",    ep.filter.min);
-    if (const char *v = std::getenv("GZ_WAVES_ENCINO_FILTER_INVERT"))
-      ep.filter.invert = (std::string(v) == "1");
-    // The smoothstep band edges are [smallWL - soft, smallWL] and
-    // [bigWL, bigWL + soft]; a zero soft width collapses them and Encino's
-    // smoothstep divides by zero (NaN spectrum). Default a positive transition
-    // from the lower cutoff when the user didn't supply one.
-    if (ep.filter.softWidth <= 0.0f)
-      ep.filter.softWidth = std::max(0.25f * ep.filter.smallWavelength, 1.0f);
+    ep.filter.smallWavelength = static_cast<float>(p.filterMinWavelength);
+    if (p.filterMaxWavelength > 0.0)
+      ep.filter.bigWavelength = static_cast<float>(p.filterMaxWavelength);
+    ep.filter.min    = static_cast<float>(p.filterMin);
+    ep.filter.invert = p.filterInvert;
+    // A zero soft width collapses the smoothstep edges (NaN spectrum); default
+    // a positive transition from the lower cutoff when none was supplied.
+    ep.filter.softWidth = (p.filterSoftWidth > 0.0)
+        ? static_cast<float>(p.filterSoftWidth)
+        : std::max(0.25f * ep.filter.smallWavelength, 1.0f);
   }
 }
+
 }  // namespace
 
 //-----------------------------------------------------------------------------
@@ -278,9 +248,8 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   ep.amplitudeGain = static_cast<float>(this->gain_);
   ep.random.seed   = static_cast<int>(seed);
 
-  // SDF spectrum selectors, then the remaining env-only experiment knobs.
-  ApplyWaveSpectrum(ep, p);
-  ApplyEncinoEnvOverrides(ep);
+  // Map the SDF spectrum selectors + numeric/filter knobs onto Encino.
+  ApplyEncinoParams(ep, p);
 
   this->encino_->initial =
       std::make_unique<EncinoWaves::InitialStatef>(ep);
