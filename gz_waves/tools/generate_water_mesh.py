@@ -3,7 +3,8 @@
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 
-"""Generate a dense procedural water-surface mesh as a COLLADA file.
+"""
+Generate a dense procedural water-surface mesh as a COLLADA file.
 
 The original `water.dae` shipped with VRX is an LOD-style mesh whose finest
 vertex spacing is ~18.75m. With the FFT wavefield producing detail down to
@@ -23,13 +24,13 @@ from __future__ import annotations
 
 import argparse
 import datetime
-import sys
 from pathlib import Path
+import sys
 
 
 def generate_collada(size: float, segments: int) -> str:
-    """Build a COLLADA 1.4.1 document string for a uniformly-tessellated XY
-    plane centred at the origin.
+    """
+    Build a COLLADA 1.4.1 document for a uniformly-tessellated XY plane.
 
     The mesh lives in the +X/+Y/+Z = up convention so it drops straight
     into the existing `<up_axis>Z_UP</up_axis>` water surface model.
@@ -72,11 +73,11 @@ def generate_collada(size: float, segments: int) -> str:
     uv_count = len(uvs)
     tri_count = len(triangles) // 9
 
-    now = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now = datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%dT%H:%M:%SZ')
 
-    pos_text = " ".join(f"{v:.6f}" for v in positions)
-    uv_text = " ".join(f"{v:.6f}" for v in uvs)
-    tri_text = " ".join(str(i) for i in triangles)
+    pos_text = ' '.join(f'{v:.6f}' for v in positions)
+    uv_text = ' '.join(f'{v:.6f}' for v in uvs)
+    tri_text = ' '.join(str(i) for i in triangles)
 
     return f"""<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
@@ -104,7 +105,8 @@ def generate_collada(size: float, segments: int) -> str:
           </technique_common>
         </source>
         <source id="WaterPlane-Normal0">
-          <float_array id="WaterPlane-Normal0-array" count="3">0.000000 0.000000 1.000000</float_array>
+          <float_array id="WaterPlane-Normal0-array" count="3">
+            0.000000 0.000000 1.000000</float_array>
           <technique_common>
             <accessor source="#WaterPlane-Normal0-array" count="1" stride="3">
               <param name="X" type="float"/>
@@ -149,27 +151,27 @@ def generate_collada(size: float, segments: int) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--size", type=float, default=200.0,
-                        help="Side length of the plane in metres (default: 200)")
-    parser.add_argument("--segments", type=int, default=400,
-                        help="Subdivisions per axis (default: 400 → 0.5m spacing)")
-    parser.add_argument("--out", type=Path, default=Path("water.dae"),
-                        help="Output path (default: ./water.dae)")
+    parser = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
+    parser.add_argument('--size', type=float, default=200.0,
+                        help='Side length of the plane in metres (default: 200)')
+    parser.add_argument('--segments', type=int, default=400,
+                        help='Subdivisions per axis (default: 400 → 0.5m spacing)')
+    parser.add_argument('--out', type=Path, default=Path('water.dae'),
+                        help='Output path (default: ./water.dae)')
     args = parser.parse_args()
 
     if args.segments < 1:
-        print("--segments must be >= 1", file=sys.stderr)
+        print('--segments must be >= 1', file=sys.stderr)
         return 2
 
     text = generate_collada(args.size, args.segments)
-    args.out.write_text(text, encoding="utf-8")
+    args.out.write_text(text, encoding='utf-8')
     n_verts = (args.segments + 1) ** 2
     n_tris = 2 * args.segments * args.segments
-    print(f"Wrote {args.out} ({n_verts} verts, {n_tris} tris, "
-          f"{args.size}m × {args.size}m at {args.size/args.segments:.3f}m spacing)")
+    print(f'Wrote {args.out} ({n_verts} verts, {n_tris} tris, '
+          f'{args.size}m × {args.size}m at {args.size / args.segments:.3f}m spacing)')
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     raise SystemExit(main())
