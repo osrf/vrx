@@ -58,56 +58,6 @@ extern "C"
   /// 0 otherwise.
   int waves_ogre2_heightmap_ready(waves_heightmap_t handle);
 
-  /// Upload the per-cell slope grid (∂η/∂x in .r, ∂η/∂y in .g) to a
-  /// dedicated `slopeMap` texture bound to the material. Allocates
-  /// the texture on first call. The visual VS uses this for
-  /// spectrum-accurate surface normals; without it the VS falls back
-  /// to finite differences on the heightmap, which smears wave
-  /// crests.
-  int waves_ogre2_heightmap_upload_slope(
-      waves_heightmap_t handle,
-      const double *slope_x_grid,
-      const double *slope_y_grid,
-      int rows,
-      int cols);
-
-  /// Upload the per-cell chop-derivative grid (∂Dx/∂x in .r,
-  /// ∂Dy/∂y in .g, ∂Dx/∂y in .b) to a dedicated `chopDerivMap`
-  /// texture. Combined with the slopeMap, the visual VS can build
-  /// the full Tessendorf chop-aware tangent + normal at each vertex.
-  int waves_ogre2_heightmap_upload_chop_derivatives(
-      waves_heightmap_t handle,
-      const double *d_dx_dx_grid,
-      const double *d_dy_dy_grid,
-      const double *d_dx_dy_grid,
-      int rows,
-      int cols);
-
-  /// GPU-FFT path. Dispatch a compute shader that writes the heightmap
-  /// texture directly on the GPU. The bridge creates the
-  /// `Ogre::HlmsComputeJob` on first call (loading `shader_abs_path` and
-  /// registering its parent directory as a resource location), and
-  /// reuses it on subsequent calls. Each invocation refreshes the
-  /// `(t, tileSize, gridSize)` const buffer and dispatches.
-  ///
-  /// Stage 1 of `docs/waves_gpu_fft_plan.md`. Replaces the CPU
-  /// `*_upload` path once the GPU pipeline is producing real wave data
-  /// (Stages 2-3).
-  ///
-  /// \param handle  Heightmap handle returned by `_create`.
-  /// \param shader_abs_path  Absolute path to a `.glsl` compute shader.
-  ///   Its directory is registered as a "General" resource location on
-  ///   first call.
-  /// \param sim_time_s  Current simulation time [s]; uploaded as the `t`
-  ///   uniform.
-  /// \param tile_size_m  Physical tile extent passed to the shader.
-  /// \return 1 on success, 0 on any failure (texture not resident,
-  ///   shader compile failure, etc.).
-  int waves_ogre2_heightmap_compute_dispatch(
-      waves_heightmap_t handle,
-      const char *shader_abs_path,
-      float sim_time_s,
-      float tile_size_m);
 
   /// Stage 6 (HlmsPbs migration). Build a procedural plane Ogre::Item,
   /// apply a fresh `HlmsPbsDatablock` to it via `SubItem::setDatablock`,
@@ -133,75 +83,6 @@ extern "C"
       double world_z,
       const char *name);
 
-  /// Stage 2 (Phillips spectrum on GPU). One-shot upload of the
-  /// time-invariant Phillips spectrum (`h0`, `h0conj`) to a persistent
-  /// GPU texture. Called once after the heightmap is created;
-  /// subsequent `evolve_dispatch` calls read from this texture and
-  /// compute ω(k)=sqrt(g·|k|) in-shader.
-  /// \param handle Heightmap handle.
-  /// \param h0_re,h0_im  N²-element row-major arrays of the
-  ///   Phillips-spectrum amplitudes `h0(k)`.
-  /// \param h0conj_re,h0conj_im  N²-element arrays of `conj(h0(-k))`.
-  /// \param grid_size Side length N (must match the heightmap's).
-  /// \return 1 on success, 0 on failure.
-  int waves_ogre2_heightmap_upload_spectrum(
-      waves_heightmap_t handle,
-      const double *h0_re,
-      const double *h0_im,
-      const double *h0conj_re,
-      const double *h0conj_im,
-      int grid_size);
-
-  /// Stage 2 dispatch: run the evolve compute shader to write the
-  /// time-evolved spectrum h(k, t) into the bridge's `hktTex`. Lazily
-  /// creates the HlmsComputeJob on first call, similar to
-  /// `_compute_dispatch`. Output texture packs (h.re, h.im, Dx.re,
-  /// Dx.im) per texel so the radix-2 butterfly can run both signals
-  /// for the cost of one dispatch.
-  /// \param handle  Heightmap handle.
-  /// \param shader_abs_path  Absolute path to `evolve.glsl`.
-  /// \param sim_time_s  Current simulation time [s].
-  /// \return 1 on success.
-  int waves_ogre2_heightmap_evolve_dispatch(
-      waves_heightmap_t handle,
-      const char *shader_abs_path,
-      float sim_time_s,
-      float tau_s,
-      float tile_size_m);
-
-  /// Stage 2 dispatch (Dy companion). Writes the Tessendorf y-chop
-  /// displacement spectrum Dy(k, t) into a dedicated `hktTexDy` so it
-  /// can be IFFT'd alongside the packed (η, Dx) signal.
-  int waves_ogre2_heightmap_evolve_dy_dispatch(
-      waves_heightmap_t handle,
-      const char *shader_abs_path,
-      float sim_time_s,
-      float tau_s,
-      float tile_size_m);
-
-  /// Stage 4 dispatch: combine the η+Dx packed IFFT output and the Dy
-  /// IFFT output into the final RGBA32F texture (η, Dx, Dy, _) that
-  /// the visual material samples. Issued each frame after both IFFTs.
-  /// Two passes are needed because OgreNext's OpenGL compute path
-  /// can't bind a second texture sampler reliably.
-  int waves_ogre2_heightmap_combine_dispatch(
-      waves_heightmap_t handle,
-      const char *combine_eta_dx_shader_abs_path,
-      const char *combine_dy_shader_abs_path);
-
-  /// Diagnostic: scan all `combinedTex` cells and report per-channel
-  /// min/max plus the number of cells where any channel is not
-  /// finite. If `out_first_bad_*` are non-null and at least one bad
-  /// cell exists, the (i, j) and (r, g, b, a) of the first such cell
-  /// are written. Returns 1 on success, 0 on failure.
-  int waves_ogre2_heightmap_readback_combined_scan(
-      waves_heightmap_t handle,
-      int *out_bad_count,
-      float *out_min_rgba,    // length 4
-      float *out_max_rgba,    // length 4
-      int *out_first_bad_i,
-      int *out_first_bad_j,
-      float *out_first_bad_rgba);  // length 4
 
   /// Patch the samplerblock of a named tex unit on the bound material
   /// to use trilinear + anisotropic filtering. Used after the
