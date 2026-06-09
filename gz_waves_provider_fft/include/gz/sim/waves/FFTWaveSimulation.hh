@@ -87,17 +87,6 @@ public:
   /// that need them should fall back to finite differences.
   bool UseEncino() const { return this->useEncino_; }
 
-  /// \brief Enable or disable computation of the 5 derivative grids
-  /// (∂η/∂x, ∂η/∂y, ∂Dx/∂x, ∂Dy/∂y, ∂Dx/∂y). Default true. When the
-  /// visual won't upload them (Encino path, GPU-FFT path with
-  /// useSlopeMap=0, or any consumer that finite-differences instead),
-  /// disable to skip 5 of the 8 IFFTs per Update — substantial CPU
-  /// savings on the Phillips path. Encino's Update branch already
-  /// short-circuits before these are touched, so the flag is a no-op
-  /// there.
-  void SetComputeDerivatives(bool _on) { this->computeDerivatives_ = _on; }
-  bool ComputeDerivatives() const { return this->computeDerivatives_; }
-
   const Eigen::MatrixXd &HeightGrid() const { return this->heightGrid_; }
   /// \brief Horizontal x-displacement field Dx(x, y, t), refreshed by Update().
   /// Multiplied by a "choppiness" factor in the visual shader to sharpen
@@ -147,16 +136,6 @@ private:
   // Folding / whitecap metric (Encino path): per-cell minimum eigenvalue of
   // the displacement Jacobian, 1 = flat. Sampled by Jacobian() → FoamMask().
   Eigen::MatrixXd minEGrid_;
-  // Per-update slope grids: ∂η/∂x and ∂η/∂y at each cell. Combined
-  // gives the surface normal as normalize(-∂η/∂x, -∂η/∂y, 1).
-  Eigen::MatrixXd slopeXGrid_;
-  Eigen::MatrixXd slopeYGrid_;
-  // Per-update chop-displacement derivative grids. Together with the
-  // slope grids they let the visual VS compute the full chop-aware
-  // Tessendorf tangent + normal at each vertex.
-  Eigen::MatrixXd dispDxDxGrid_;
-  Eigen::MatrixXd dispDyDyGrid_;
-  Eigen::MatrixXd dispDxDyGrid_;
 
   // Column-major view into the grids above, returned by Field() as the
   // backend-agnostic rendering contract. Repopulated on each call from the
@@ -188,11 +167,6 @@ private:
   // (Hs = 0.21 * V19.5^2 / g). Applied to η/Dx/Dy every Update. 1.0 on the
   // Phillips path (unused).
   double encinoScale_{1.0};
-
-  // When true (default), Update() computes the 5 derivative grids in
-  // addition to η/Dx/Dy. Toggled off by consumers that don't read them
-  // (e.g. the GPU-FFT visual path that does finite-diff normals).
-  bool computeDerivatives_{true};
 
   // Time of the last Update(). The field at a given time is deterministic, so
   // Update() short-circuits on a repeat call for the same time. This lets

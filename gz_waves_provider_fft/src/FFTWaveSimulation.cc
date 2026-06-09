@@ -331,11 +331,6 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   this->dispXGrid_  = Eigen::MatrixXd::Zero(N, N);
   this->dispYGrid_  = Eigen::MatrixXd::Zero(N, N);
   this->minEGrid_   = Eigen::MatrixXd::Constant(N, N, 1.0);  // 1 = no foam
-  this->slopeXGrid_   = Eigen::MatrixXd::Zero(N, N);
-  this->slopeYGrid_   = Eigen::MatrixXd::Zero(N, N);
-  this->dispDxDxGrid_ = Eigen::MatrixXd::Zero(N, N);
-  this->dispDyDyGrid_ = Eigen::MatrixXd::Zero(N, N);
-  this->dispDxDyGrid_ = Eigen::MatrixXd::Zero(N, N);
 
   // Drive the wave field through the Apache-2.0 EncinoWaves spectrum library.
   // When the engine is built with encino this is the DEFAULT spectrum (TMA +
@@ -565,22 +560,7 @@ void FFTWaveSimulation::Update(double t)
   Eigen::MatrixXcd hkt(N, N);
   Eigen::MatrixXcd dxkt(N, N);
   Eigen::MatrixXcd dykt(N, N);
-  // Slope / chop-derivative spectra are only filled when a downstream
-  // consumer asks for them (visual VS with useSlopeMap=1). Five IFFTs
-  // worth of work that's wasted on the GPU-FFT visual path and on
-  // anything that finite-differences for normals.
-  const bool derivs = this->computeDerivatives_;
-  Eigen::MatrixXcd sxkt, sykt, dxdxkt, dydykt, dxdykt;
-  if (derivs)
-  {
-    sxkt.resize(N, N);
-    sykt.resize(N, N);
-    dxdxkt.resize(N, N);
-    dydykt.resize(N, N);
-    dxdykt.resize(N, N);
-  }
   const std::complex<double> kMinusI(0.0, -1.0);
-  const std::complex<double> kPlusI(0.0, 1.0);
   for (int i = 0; i < N; ++i)
   {
     for (int j = 0; j < N; ++j)
@@ -599,29 +579,12 @@ void FFTWaveSimulation::Update(double t)
       {
         dxkt(i, j) = 0.0;
         dykt(i, j) = 0.0;
-        if (derivs)
-        {
-          dxdxkt(i, j) = 0.0;
-          dydykt(i, j) = 0.0;
-          dxdykt(i, j) = 0.0;
-        }
       }
       else
       {
         const std::complex<double> factor = kMinusI / kmag;
         dxkt(i, j) = factor * kx * h;
         dykt(i, j) = factor * ky * h;
-        if (derivs)
-        {
-          dxdxkt(i, j) = (kx * kx / kmag) * h;
-          dydykt(i, j) = (ky * ky / kmag) * h;
-          dxdykt(i, j) = (kx * ky / kmag) * h;
-        }
-      }
-      if (derivs)
-      {
-        sxkt(i, j) = kPlusI * kx * h;
-        sykt(i, j) = kPlusI * ky * h;
       }
     }
   }
@@ -629,14 +592,6 @@ void FFTWaveSimulation::Update(double t)
   this->heightGrid_   = Ifft2DReal(hkt, ramp);
   this->dispXGrid_    = Ifft2DReal(dxkt, ramp);
   this->dispYGrid_    = Ifft2DReal(dykt, ramp);
-  if (derivs)
-  {
-    this->slopeXGrid_   = Ifft2DReal(sxkt, ramp);
-    this->slopeYGrid_   = Ifft2DReal(sykt, ramp);
-    this->dispDxDxGrid_ = Ifft2DReal(dxdxkt, ramp);
-    this->dispDyDyGrid_ = Ifft2DReal(dydykt, ramp);
-    this->dispDxDyGrid_ = Ifft2DReal(dxdykt, ramp);
-  }
 }
 
 double FFTWaveSimulation::BilinearSample(const Eigen::MatrixXd &grid,
