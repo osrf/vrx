@@ -14,7 +14,6 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
-#include <cstdlib>
 #include <list>
 #include <mutex>
 #include <set>
@@ -190,14 +189,6 @@ bool WaterVisual::Implementation::ResolveVisual()
   if (!this->visual)
     return false;
 
-  // Stage 6 step 6.0: when GZ_WAVES_HLMS_PBS=1 and the FFT path is
-  // active, hide the SDF visual and build a procedural HlmsPbs Item via
-  // the bridge instead. The aim is to verify whether moving off
-  // HlmsLowLevel alone fixes the 2-min first-frame stall.
-  const char *pbsEnv = std::getenv("GZ_WAVES_HLMS_PBS");
-  const bool useHlmsPbs = pbsEnv && std::string(pbsEnv) == "1" &&
-                          this->useFft;
-
   if (!this->material)
   {
     // Defer material creation until the wavefield component has been
@@ -210,45 +201,7 @@ bool WaterVisual::Implementation::ResolveVisual()
       return false;
 
     const std::string &vsUri = this->fftVertexShaderUri;
-    gzmsg << "[WaterVisual] creating material with shaders"
-          << (useHlmsPbs ? " (HLMS_PBS path)" : "") << std::endl;
-
-    if (useHlmsPbs)
-    {
-      // Hide the SDF visual (it would otherwise render with its default
-      // material on top of our procedural Item).
-      this->visual->SetVisible(false);
-
-      this->heightMap.reset();
-      static std::atomic<std::uint64_t> seq{0};
-      this->heightMap = std::make_unique<HeightMapTexture>(
-          this->scene, gz::rendering::MaterialPtr{},
-          static_cast<std::size_t>(this->cachedGridSize),
-          "wavefield_heightmap_pbs_" +
-              std::to_string(this->visualEntity) + "_" +
-              std::to_string(seq.fetch_add(1)));
-
-      const double planeSize = this->cachedTileSize;
-      const int planeSegments =
-          std::min(this->cachedGridSize, 200);
-      const auto wpos = this->visual->WorldPosition();
-      const bool ok = this->heightMap->CreatePbsVisual(
-          planeSize, planeSegments,
-          wpos.X(), wpos.Y(), wpos.Z(),
-          "waves_pbs_" + std::to_string(this->visualEntity));
-      if (!ok)
-      {
-        gzerr << "[WaterVisual] CreatePbsVisual failed; falling back to "
-              << "HlmsLowLevel path" << std::endl;
-        this->visual->SetVisible(true);
-        // Fall through to the normal SetMaterial path below.
-      }
-      else
-      {
-        this->material = nullptr;
-        return true;
-      }
-    }
+    gzmsg << "[WaterVisual] creating material with shaders" << std::endl;
 
     auto mat = this->scene->CreateMaterial();
     mat->SetVertexShader(vsUri);
@@ -355,7 +308,7 @@ bool WaterVisual::Implementation::ResolveVisual()
       }
     }
   }
-  return this->material != nullptr || useHlmsPbs;
+  return this->material != nullptr;
 }
 
 void WaterVisual::Implementation::UploadUniforms()

@@ -68,17 +68,6 @@ namespace gz::sim::systems
                 const Eigen::MatrixXd &_dispY,
                 const Eigen::MatrixXd *_foam = nullptr);
 
-    /// \brief Stage 6: replace the gz::rendering Visual material with a
-    /// procedurally-built `Ogre::Item` rendered through an
-    /// `HlmsPbsDatablock`. Bypasses `Visual::SetMaterial` AND
-    /// `HlmsLowLevel`, which are together the source of the 2-min
-    /// first-frame stall on Jetty + NVIDIA Blackwell. Step 6.0 produces
-    /// a plain colored plane; step 6.1+ adds the custom-piece hook for
-    /// heightmap-driven vertex displacement.
-    bool CreatePbsVisual(double _planeSizeM, int _planeSegments,
-                         double _wx, double _wy, double _wz,
-                         const std::string &_name);
-
     /// \brief Patch a named tex unit on the bound material to use
     /// anisotropic trilinear filtering. Needed for dense bumpmaps so
     /// they don't alias at distance.
