@@ -1,8 +1,8 @@
 # VRX Wave Design Reference
 
 A single place to understand how VRX simulates ocean waves: the architecture, how
-to choose a backend, every configuration knob, and how the **Encino** spectrum
-(the default FFT spectrum) differs from the in-tree Phillips fallback.
+to choose a backend, every configuration knob, and how the FFT engine's
+**EncinoWaves** spectra are selected via `<spectrum>`/`<spreading>`/`<dispersion>`.
 
 This is a *reference* for the **current implementation**. For the conceptual
 "wave socket" design and the upstreaming roadmap see
@@ -61,7 +61,7 @@ load**:
 | Plugin `filename` (class) | Engine | Trade-off |
 |---|---|---|
 | `gz-sim-waves-gerstner-system` (`GerstnerWaves`) | Analytic Gerstner / trochoidal sum-of-sines (Tessendorf 2001). Stateless, unbounded in space, vertex-shader displacement. | Loads in ~5 s, lower visual fidelity. |
-| `gz-sim-waves-fft-system` (`FftWaves`) | Stochastic spectral FFT. EncinoWaves spectra by default (Phillips fallback), CPU IFFT each tick uploaded to a GPU heightmap. Periodic tile (queries wrap). | Higher fidelity, but a **~2 min first-frame stall** on the FFT visual — see [`../gz_waves/README.md`](../gz_waves/README.md). |
+| `gz-sim-waves-fft-system` (`FftWaves`) | Stochastic spectral FFT (EncinoWaves: TMA/JONSWAP/PM spectra), CPU IFFT each tick uploaded to a GPU heightmap. Periodic tile (queries wrap). | Higher fidelity, but a **~2 min first-frame stall** on the FFT visual — see [`../gz_waves/README.md`](../gz_waves/README.md). |
 
 Load exactly one source plugin. The `name=` attribute must match the class
 (`gz::sim::systems::FftWaves` or `gz::sim::systems::GerstnerWaves`).
@@ -140,9 +140,12 @@ Defaults live in `WaveParameters` (`gz_waves/include/gz/sim/waves/Wavefield.hh`)
 | Tag | Type | Default | Meaning |
 |---|---|---|---|
 | `<tile_size>` | double [m] | `200.0` | Physical extent of the periodic tile per axis |
-| `<grid_size>` | uint (pow-2) | `128` | Grid samples per axis (64/128/256); must be a power of two |
-| `<seed>` | uint | `0` | RNG seed for the Phillips amplitudes; same seed → identical field |
+| `<grid_size>` | uint (pow-2) | `128` | Grid samples per axis (64/128/256); rounded up to a power of two |
+| `<seed>` | uint | `0` | RNG seed for the spectrum amplitudes; same seed → identical field |
 | `<choppiness>` | double | `-1.0` | Tessendorf horizontal-displacement multiplier (range ~[−2, 0]; 0 disables) |
+| `<spectrum>` | string | `tma` | EncinoWaves spectrum: `pms`, `jonswap`, or `tma` (§6) |
+| `<spreading>` | string | `hasselmann` | Directional spreading: `poscos2`, `mitsuyasu`, `hasselmann`, `donelanbanner` |
+| `<dispersion>` | string | `capillary` | Dispersion relation: `deep`, `finite`, or `capillary` |
 
 ### 5.3 Vessel buoyancy
 
@@ -222,19 +225,14 @@ full spectrum rebuild.
 
 ---
 
-## 6. The FFT engine: Encino (default) vs. Phillips (fallback)
+## 6. The FFT spectrum (EncinoWaves)
 
-The `fft` engine (`gz_waves_provider_fft`) runs one of two spectra, chosen **at
-build time**:
-
-- **EncinoWaves** — used when the package is built with the optional
-  `encinowaves_vendor` (compile flag `GZ_WAVES_WITH_ENCINO`). **This is the
-  default.**
-- **In-tree Phillips** (Tessendorf 2001) — the fallback when built without encino.
-
-There is **no `GZ_WAVES_USE_ENCINO` environment variable** (removed); the spectrum
-is decided purely by whether encino is present at build time. The build prints
-`gz_waves_provider_fft: EncinoWaves spectrum ENABLED` or `… → Phillips-only`.
+The `fft` engine (`gz_waves_provider_fft`) is the **EncinoWaves** spectral
+synthesizer — a required dependency (`encinowaves_vendor`). There is no in-tree
+Phillips fallback and no build flag; the engine is always EncinoWaves. The
+spectral models are chosen from SDF via `<spectrum>`/`<spreading>`/`<dispersion>`
+(§5.2), and can also be changed at runtime through the `set_parameters` service
+(§5.5).
 
 ### 6.1 What EncinoWaves is
 
@@ -246,38 +244,38 @@ a single hand-tuned spectrum. Header-only templates (`float`/`double`) plus a fe
 `.cpp` files; its `FftwWrapper` runs the 2D c2r IFFT on **Eigen::FFT** (no GPL
 FFTW), **TBB-parallelized**.
 
-### 6.2 Components (the pipeline)
+### 6.2 The pipeline
 
-Each stage is pluggable via `Parameters` enums
-(`encino_waves/include/EncinoWaves/`):
+Each stage is pluggable (`encino_waves/include/EncinoWaves/`); **bold** is the
+default used when the SDF selector is omitted:
 
-| Component | Provides |
-|---|---|
-| **Spectra** | `PiersonMoskowitz`, `JONSWAP`, **`TMA`** (default) |
-| **DirectionalSpreading** | **`Hasselmann`** (default), `Mitsuyasu`, `Donelan-Banner`, `Pos-Cos²` + swell |
-| **Dispersion** | `Deep`, `FiniteDepth`, **`Capillary`** (default) |
-| **Filter** | `Null` (default) or smooth invertible band-pass on wavelength |
-| **Random** | `Normal` / `LogNormal` amplitude draws, per-wavenumber seeded |
-| **InitialState** | Runs the cascade once → `h₀(k)`, `conj(h₀(−k))`, `ω(k)` |
-| **Propagation** | Per frame: `h(k,t)=h₀e^{iωt}+h₀*e^{−iωt}` → IFFT → `Height`, `Dx`, `Dy`, plus `MinE` (Jacobian foam) |
+| Component | SDF tag | Options (default **bold**) |
+|---|---|---|
+| **Spectra** | `<spectrum>` | `pms`, `jonswap`, **`tma`** |
+| **DirectionalSpreading** | `<spreading>` | `poscos2`, `mitsuyasu`, **`hasselmann`**, `donelanbanner` |
+| **Dispersion** | `<dispersion>` | `deep`, `finite`, **`capillary`** |
+| **Filter** | *(env)* | `Null` (default) or smooth invertible band-pass on wavelength |
+| **Random** | — | `Normal` amplitude draws, per-wavenumber seeded by `<seed>` |
+| **InitialState** | — | Runs the cascade once → `h₀(k)`, `conj(h₀(−k))`, `ω(k)` |
+| **Propagation** | — | Per frame: `h(k,t)=h₀e^{iωt}+h₀*e^{−iωt}` → IFFT → `Height`, `Dx`, `Dy`, `MinE` (Jacobian foam) |
 
 ### 6.3 How VRX wires it in
 
-The integration (`FFTWaveSimulation.cc`) maps **five** VRX SDF parameters into
-Encino and accepts Horvath's defaults (TMA + Hasselmann + Capillary + Normal) for
-the rest:
+`FFTWaveSimulation::SetParameters` maps VRX parameters onto Encino:
 
-| VRX param | → Encino param |
+| VRX param | → Encino |
 |---|---|
 | `grid_size` | `resolutionPowerOfTwo` (= log2) |
 | `tile_size` | `domain` |
 | `period` | `windSpeed` (via `0.879·g/ω_peak`) |
 | `gain` | `amplitudeGain` |
 | `seed` | `random.seed` |
+| `spectrum` / `spreading` / `dispersion` | `spectrum.type` / `directionalSpreading.type` / `dispersion.type` |
 
 Each tick it propagates the spectrum, applies the `<tau>` startup ramp, a
 physics-based amplitude calibration, and the `<gain>` multiplier, then copies
-`Height`, `Dx`, `Dy` (and `MinE` → foam) into VRX's grids.
+`Height`, `Dx`, `Dy` (and `MinE` → foam) into VRX's grids. `Update` runs 3 IFFTs
+(height + Dx + Dy); normals are finite-differenced in the fragment shader.
 
 > **Amplitude calibration.** EncinoWaves' `amplitudeGain` does not scale its
 > height field, and its intrinsic variance is ~10× a physical sea state at low
@@ -287,49 +285,19 @@ physics-based amplitude calibration, and the `<gain>` multiplier, then copies
 > selected spectrum still sets the spectral *shape*. `<gain>` is applied as a user
 > multiplier on top. The factor and target Hs are echoed in the startup log.
 
-**Tuning knobs (env vars).** Encino's distinctive controls are overridable at
-launch without touching the SDF schema. They are read once at field build,
-validated (unknown values warn and are ignored), and echoed in the `EncinoWaves
-spectrum library active (...)` log line:
+**Advanced tuning (env vars).** Beyond the SDF selectors, Encino's numeric knobs
+and the band-pass filter stay as experiment-only environment variables (read once
+at field build, echoed in the `EncinoWaves spectrum library active (...)` log):
 
 | Env var | Values | Default |
 |---|---|---|
-| `GZ_WAVES_ENCINO_SPECTRUM` | `pms` \| `jonswap` \| `tma` | `tma` |
-| `GZ_WAVES_ENCINO_DISPERSION` | `deep` \| `finite` \| `capillary` | `capillary` |
-| `GZ_WAVES_ENCINO_SPREADING` | `poscos2` \| `mitsuyasu` \| `hasselmann` \| `donelanbanner` | `hasselmann` |
 | `GZ_WAVES_ENCINO_DEPTH` | metres | `100` |
 | `GZ_WAVES_ENCINO_FETCH` | kilometres | `300` |
 | `GZ_WAVES_ENCINO_SWELL` | swell elongation | `0` |
 | `GZ_WAVES_ENCINO_TROUGH_DAMPING` | breaking-wave damping `[0,1]` | `0` |
 | `GZ_WAVES_ENCINO_FILTER_*` | `MIN`, `MIN_WL`, `MAX_WL`, `SOFT`, `INVERT` — band-pass on wavelength | off |
 
-### 6.4 Comparison
-
-The non-Encino path is the in-tree Phillips spectrum (Tessendorf 2001) in
-`FFTWaveSimulation.cc`.
-
-| Aspect | Phillips (in-tree fallback) | Encino (default) |
-|---|---|---|
-| Spectrum | Single Phillips form, deep-water only | TMA (default), or JONSWAP / Pierson-Moskowitz |
-| Directional spreading | Baked-in `\|k̂·ŵ\|²` cosine weight | 4 empirical models (Hasselmann default) + swell |
-| Dispersion | `ω=√(g·k)` deep-water only | Capillary (default), finite-depth, or deep |
-| Choppiness | Tessendorf `Dx,Dy=−i·k̂·h`; `<choppiness>` applied in shader | Same — `<choppiness>` in shader on Encino's `Dx`/`Dy` |
-| Output grids | `Height`, `Dx`, `Dy` (3 IFFTs) | `Height`, `Dx`, `Dy`, `MinE` |
-| Normals | Finite differences of the heightmap in the shader | Same (shader finite differences) |
-| Foam | None — leaves the foam channel flat | From Encino's `MinE` (Jacobian → foam channel) |
-| FFT threading | Single-threaded `Ifft2DReal` (Eigen) | TBB-parallel c2r + parallel propagation |
-| Startup ramp | `(1−exp(−t/τ))` | `(1−exp(−t/τ))` (matches Phillips) |
-| Amplitude | Phillips spectrum w/ calibrated `specScale` | Calibrated to PM `Hs=0.21·V²/g`; `<gain>` on top (§6.3) |
-| Maturity | Fallback only | Default |
-| License | Apache-2.0 | Apache-2.0 (Eigen::FFT, no GPL FFTW) |
-
-> **Note.** Earlier revisions uploaded per-vertex slope and chop-derivative grids
-> (5 extra IFFTs) to drive spectrum-accurate normals via a GPU slope-map. That
-> path — together with the experimental GPU-compute IFFT — was removed; the FFT
-> `Update` now runs 3 IFFTs (height + Dx + Dy) and normals are finite-differenced
-> in the fragment shader for both spectra.
-
-### 6.5 Current integration limitations
+### 6.4 Limitations
 
 - Wave **`direction`** is **not** applied to Encino. Encino assumes wind along +X
   and expects the whole field to be externally transformed; rotating a single
@@ -337,6 +305,10 @@ The non-Encino path is the in-tree Phillips spectrum (Tessendorf 2001) in
   `<direction>` requires the heading baked into Encino's spectrum generation (not
   yet exposed). Encino waves travel along the tile's +X axis regardless of
   `<direction>`.
+- Earlier revisions had an in-tree Phillips fallback, per-vertex slope/chop-
+  derivative grids (5 extra IFFTs) for a GPU slope-map, and an experimental
+  GPU-compute IFFT. All were removed; the engine is now EncinoWaves only, 3 IFFTs
+  per `Update`, with finite-difference normals in the shader.
 
 ---
 

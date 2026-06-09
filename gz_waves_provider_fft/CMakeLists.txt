@@ -21,18 +21,17 @@ find_package(gz_math_vendor REQUIRED)
 find_package(gz-math REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
-# FFTWaveSimulation's public header returns Eigen::MatrixXd grids and the
-# Phillips path uses Eigen's unsupported FFT, so Eigen is a direct dependency.
+# FFTWaveSimulation's public header returns Eigen::MatrixXd grids, so Eigen is
+# a direct dependency.
 find_package(Eigen3 REQUIRED)
-# Apache-2.0 Horvath spectrum library — OPTIONAL. Present: the fft engine uses
-# the EncinoWaves spectra by DEFAULT. Absent: Phillips-only, with no encino
-# dependency at all.
-find_package(encinowaves_vendor QUIET)
+# Apache-2.0 Horvath spectrum library — REQUIRED. The fft engine is the
+# EncinoWaves spectral synthesizer (TMA/JONSWAP/PM spectra + directional
+# spreading + dispersion), selected via <spectrum>/<spreading>/<dispersion>.
+find_package(encinowaves_vendor REQUIRED)
 
 # --------------------------------------------------------------------------
 # FFT wave-field engine (libgz-waves-provider-fft): a plain IWaveField
-# implementation — the EncinoWaves spectra by default, Phillips when not built
-# with encino.
+# implementation backed by the EncinoWaves spectral library.
 # It is LINKED directly by the fft system plugin (server) and the water visual
 # (GUI), not discovered by a runtime loader, so it carries no GZ_ADD_PLUGIN and
 # is exported as a normal library target. MakeFFTWaveField() is the factory the
@@ -49,15 +48,8 @@ target_include_directories(gz-waves-provider-fft PRIVATE
 # Eigen is PUBLIC: the engine's public header returns Eigen::MatrixXd grids, so
 # anything that includes it (the system plugin, the water visual) needs Eigen.
 target_link_libraries(gz-waves-provider-fft
-  PUBLIC  gz-math::gz-math Eigen3::Eigen)
-if(encinowaves_vendor_FOUND)
-  target_compile_definitions(gz-waves-provider-fft PRIVATE GZ_WAVES_WITH_ENCINO)
-  target_link_libraries(gz-waves-provider-fft
-    PRIVATE encinowaves_vendor::encinowaves_vendor)
-  message(STATUS "gz_waves_provider_fft: EncinoWaves spectrum ENABLED")
-else()
-  message(STATUS "gz_waves_provider_fft: EncinoWaves not found -> Phillips-only")
-endif()
+  PUBLIC  gz-math::gz-math Eigen3::Eigen
+  PRIVATE encinowaves_vendor::encinowaves_vendor)
 
 # --------------------------------------------------------------------------
 # FFT wave source system (gz-sim-waves-fft-system): a WavesSystemBase subclass

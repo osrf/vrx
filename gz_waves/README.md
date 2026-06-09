@@ -8,9 +8,9 @@ plugin you load *is* the backend):
   analytic Gerstner (Tessendorf 2001) sum-of-sines, vertex-shader
   displacement. Fast to load, lower visual fidelity.
 - **`gz-sim-waves-fft-system`** (`gz::sim::systems::FftWaves`) — stochastic FFT
-  (EncinoWaves spectra by default, in-tree Phillips + Tessendorf choppy
-  displacement otherwise), CPU IFFT each tick, GPU heightmap sampled in a
-  custom vertex shader. Higher visual fidelity.
+  via the Apache-2.0 EncinoWaves spectral library (TMA/JONSWAP/PM spectra,
+  selected with `<spectrum>`/`<spreading>`/`<dispersion>`), CPU IFFT each tick,
+  GPU heightmap sampled in a custom vertex shader. Higher visual fidelity.
 
 Both backends share the same Apache-2 codebase intended for upstreaming to
 `gz-sim`. All Ogre Next access goes through a small dlopen'd bridge

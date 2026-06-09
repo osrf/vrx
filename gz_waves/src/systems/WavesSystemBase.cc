@@ -81,6 +81,11 @@ waves::WaveParameters ApplyParam(waves::WaveParameters _p,
     {"gain", &_p.gain},         {"tile_size", &_p.tileSize},
     {"choppiness", &_p.choppiness}};
 
+  // String-valued tags (key -> destination field).
+  const std::unordered_map<std::string, std::string *> strings{
+    {"model", &_p.model},         {"spectrum", &_p.spectrum},
+    {"spreading", &_p.spreading}, {"dispersion", &_p.dispersion}};
+
   auto warnType = [](const std::string &_k)
   {
     gzwarn << "[Waves] set_parameters: key '" << _k
@@ -98,10 +103,10 @@ waves::WaveParameters ApplyParam(waves::WaveParameters _p,
       if (ReadDouble(v, d)) { *it->second = d; _matched = true; }
       else warnType(k);
     }
-    else if (k == "model")
+    else if (auto sit = strings.find(k); sit != strings.end())
     {
       if (v.type() == gz::msgs::Any::STRING)
-      { _p.model = v.string_value(); _matched = true; }
+      { *sit->second = v.string_value(); _matched = true; }
       else warnType(k);
     }
     else if (k == "number")
@@ -194,6 +199,11 @@ void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
   p.gridSize   = wave->Get<unsigned int>("grid_size", p.gridSize  ).first;
   p.seed       = wave->Get<unsigned int>("seed",      p.seed      ).first;
   p.choppiness = wave->Get<double>("choppiness",      p.choppiness).first;
+
+  // FFT spectrum selectors (EncinoWaves); ignored by the Gerstner engine.
+  p.spectrum   = wave->Get<std::string>("spectrum",   p.spectrum  ).first;
+  p.spreading  = wave->Get<std::string>("spreading",  p.spreading ).first;
+  p.dispersion = wave->Get<std::string>("dispersion", p.dispersion).first;
 
   // High-level convenience: a WMO sea state code (0-9) that each engine turns
   // into a matching significant wave height + peak period (see WithSeaState).

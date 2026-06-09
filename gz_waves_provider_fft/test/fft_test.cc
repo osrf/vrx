@@ -150,11 +150,7 @@ TEST(FFTWaveSimulation, RampUpFromZero)
 }
 
 // Encino's MinE folding metric is hooked through Jacobian() → Eval::FoamMask:
-// pinched crests report Jacobian < 1 and produce whitecaps. The in-tree
-// Phillips CPU path has no folding field, so it stays identically 1 (no foam).
-// The test binary picks up whatever the build provides — Encino when compiled
-// with EncinoWaves (the default), Phillips otherwise — and branches on
-// UseEncino().
+// pinched crests report Jacobian < 1 and produce whitecaps.
 TEST(FFTWaveSimulation, FoamFromJacobian)
 {
   gsw::WaveParameters p;
@@ -175,29 +171,19 @@ TEST(FFTWaveSimulation, FoamFromJacobian)
 
   // Past the ramp: sample the folding metric and the derived foam.
   sim.Update(20.0);
-  double minJac = 1e9, maxJac = -1e9, maxFoam = 0.0;
+  double minJac = 1e9, maxFoam = 0.0;
   for (int i = 0; i < 32; ++i)
     for (int j = 0; j < 32; ++j)
     {
       const double jac = sim.Jacobian(i * L / 32.0, j * L / 32.0, 20.0);
       minJac = std::min(minJac, jac);
-      maxJac = std::max(maxJac, jac);
       const double foam =
         jac < 0.6 ? std::clamp(1.0 - jac / 0.6, 0.0, 1.0) : 0.0;
       maxFoam = std::max(maxFoam, foam);
     }
 
-  if (sim.UseEncino())
-  {
-    EXPECT_LT(minJac, 0.6) << "Encino crests should fold below the foam threshold";
-    EXPECT_GT(maxFoam, 0.0) << "Encino path should produce whitecaps";
-  }
-  else
-  {
-    EXPECT_NEAR(minJac, 1.0, 1e-9) << "Phillips CPU path has no folding field";
-    EXPECT_NEAR(maxJac, 1.0, 1e-9);
-    EXPECT_NEAR(maxFoam, 0.0, 1e-12);
-  }
+  EXPECT_LT(minJac, 0.6) << "Encino crests should fold below the foam threshold";
+  EXPECT_GT(maxFoam, 0.0) << "Encino path should produce whitecaps";
 }
 
 // The Encino band-pass filter (GZ_WAVES_ENCINO_FILTER_*) reshapes which
@@ -218,8 +204,6 @@ TEST(FFTWaveSimulation, EncinoBandPassFilterReshapesField)
   unsetenv("GZ_WAVES_ENCINO_FILTER_MIN_WL");
   unsetenv("GZ_WAVES_ENCINO_FILTER_MAX_WL");
   gsw::FFTWaveSimulation plain(p, 200.0, 64, 11);
-  if (!plain.UseEncino())
-    return;  // band-pass filter only applies to the Encino spectrum
   plain.Update(20.0);
   const Eigen::MatrixXd a = plain.HeightGrid();
 
@@ -234,6 +218,33 @@ TEST(FFTWaveSimulation, EncinoBandPassFilterReshapesField)
 
   EXPECT_GT((a - b).cwiseAbs().maxCoeff(), 1e-3)
     << "band-pass filter should reshape the Encino field";
+}
+
+// The <spectrum>/<spreading>/<dispersion> SDF selectors feed EncinoWaves. Two
+// different spectra with the same seed produce different fields.
+TEST(FFTWaveSimulation, SpectrumSelectorChangesField)
+{
+  gsw::WaveParameters p;
+  p.model = "PMS";
+  p.period = 3.2;
+  p.tileSize = 200.0;
+  p.gridSize = 64;
+  p.seed = 11;
+
+  p.spectrum = "tma";
+  gsw::FFTWaveSimulation tma;
+  tma.SetParameters(p);
+  tma.Update(20.0);
+  const Eigen::MatrixXd a = tma.HeightGrid();
+
+  p.spectrum = "pms";
+  gsw::FFTWaveSimulation pms;
+  pms.SetParameters(p);
+  pms.Update(20.0);
+  const Eigen::MatrixXd b = pms.HeightGrid();
+
+  EXPECT_GT((a - b).cwiseAbs().maxCoeff(), 1e-3)
+    << "different <spectrum> selectors should produce different fields";
 }
 
 TEST(FFTWaveSimulation, TimeEvolutionChangesField)
@@ -356,8 +367,8 @@ TEST(FFTWaveSimulation, NormalIsUnitAndPointsUp)
 
 TEST(FFTWaveSimulation, WindDirectionBiasesAmplitude)
 {
-  // Spectra peak amplitude along the wind direction (Phillips/Tessendorf).
-  // We expect a higher RMS along the wind axis than perpendicular when
+  // Encino's directional spreading concentrates energy along the wind axis
+  // (assumed +x). We expect a higher RMS along x than perpendicular when
   // sampled over a long enough strip.
   gsw::WaveParameters p = DefaultParams();
   p.direction = 0.0;  // wind along +x
@@ -408,16 +419,12 @@ TEST(FFTWaveSimulation, SeaStateSetsSignificantWaveHeight)
   sim.SetParameters(p);
   sim.Update(50.0);  // past the startup ramp
 
-  // Hs = 4 * RMS(eta). The Encino path calibrates to the PM Hs derived from the
-  // sea-state wind/period, so it should land near the canonical value; the
-  // Phillips fallback drives the same period but doesn't calibrate Hs exactly.
+  // Hs = 4 * RMS(eta). Encino calibrates to the PM Hs derived from the
+  // sea-state wind/period, so it should land near the canonical value.
   const double hs = 4.0 * RmsHeight(sim.HeightGrid());
   gsw::SeaStateSpec s;
   ASSERT_TRUE(gsw::SeaStateFromCode(5, s));
-  if (sim.UseEncino())
-    EXPECT_NEAR(hs, s.significantWaveHeight, 0.30 * s.significantWaveHeight)
-      << "sea state 5 should give Hs ~= " << s.significantWaveHeight
-      << " m, got " << hs;
-  else
-    EXPECT_GT(hs, 0.0);
+  EXPECT_NEAR(hs, s.significantWaveHeight, 0.30 * s.significantWaveHeight)
+    << "sea state 5 should give Hs ~= " << s.significantWaveHeight
+    << " m, got " << hs;
 }

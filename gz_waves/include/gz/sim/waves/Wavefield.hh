@@ -83,6 +83,17 @@ struct WaveParameters
   /// [-2, 0]; 0 disables choppy displacement.
   double choppiness{-1.0};
 
+  /// \brief FFT spectrum model (EncinoWaves): "pms", "jonswap", or "tma".
+  std::string spectrum{"tma"};
+
+  /// \brief FFT directional spreading (EncinoWaves): "poscos2", "mitsuyasu",
+  /// "hasselmann", or "donelanbanner".
+  std::string spreading{"hasselmann"};
+
+  /// \brief FFT dispersion relation (EncinoWaves): "deep", "finite", or
+  /// "capillary".
+  std::string dispersion{"capillary"};
+
   /// \brief WMO sea state code (0-9). A convenience that, when set, makes the
   /// engine reproduce that sea state's significant wave height and peak period
   /// (see WithSeaState / SeaStateFromCode). -1 (default) means "unset": use the
@@ -204,6 +215,9 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.gridSize << ' '
       << _d.params.seed << ' '
       << _d.params.choppiness << ' '
+      << _d.params.spectrum << ' '
+      << _d.params.spreading << ' '
+      << _d.params.dispersion << ' '
       << _d.params.seaState << ' '
       << _d.updateRate << ' ';
   return _os;
@@ -241,6 +255,9 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.gridSize
       >> _d.params.seed
       >> _d.params.choppiness
+      >> _d.params.spectrum
+      >> _d.params.spreading
+      >> _d.params.dispersion
       >> _d.params.seaState
       >> _d.updateRate;
   // Cache the constructed simulation across deserializations. The same

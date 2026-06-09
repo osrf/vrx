@@ -4,10 +4,11 @@
   <name>gz_waves_provider_fft</name>
   <version>0.0.0</version>
   <description>
-    Stochastic FFT wave-field engine for gz_waves: the Apache-2.0 EncinoWaves
-    spectra (TMA/JONSWAP + directional spreading) by default, or an in-tree
-    Tessendorf/Phillips spectral ocean when not built with encino. Provides the
-    IWaveField engine library and the gz-sim-waves-fft-system plugin.
+    Stochastic FFT wave-field engine for gz_waves, backed by the Apache-2.0
+    EncinoWaves spectral library: TMA/JONSWAP/Pierson-Moskowitz spectra with
+    directional spreading and dispersion, selected via the spectrum, spreading
+    and dispersion SDF parameters. Provides the IWaveField engine library and
+    the gz-sim-waves-fft-system plugin.
   </description>
   <maintainer email="cen.aguero@gmail.com">Carlos Agüero</maintainer>
   <license>Apache-2.0</license>
@@ -19,9 +20,8 @@
   <depend>gz_math_vendor</depend>
   <depend>gz_plugin_vendor</depend>
   <depend>eigen</depend>
-  <!-- Apache-2.0 Horvath ocean spectrum library — the default FFT spectrum.
-       OPTIONAL: if absent, the engine builds Phillips-only (no encino dep).
-       Kept here so colcon orders the encino build first when it IS present. -->
+  <!-- The Apache-2.0 EncinoWaves spectral library — a required dependency
+       (the FFT engine is built on it). -->
   <depend>encinowaves_vendor</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
