@@ -1,10 +1,38 @@
 # Wave Provider Architecture (design)
 
-**Status:** target design, not yet implemented. The plan is to **build it in VRX
-first** behind these boundaries, get it right by testing, then lift the
-Gazebo-bound pieces upstream. This is the companion to
-[`wave_design_reference.md`](wave_design_reference.md), which documents the
-*current* (pre-redesign) implementation.
+**Status:** design exploration — *partially* realized. The provider refactor
+adopted this document's **ideas** but chose a simpler **mechanism** than the
+gz-plugin provider-discovery design sketched below (see **What actually shipped**
+next). For the system as it exists today, see
+[`wave_design_reference.md`](wave_design_reference.md).
+
+---
+
+## What actually shipped (and where it diverged)
+
+The implementation kept the core ideas here — a single `IWaveField` "socket",
+recipe-style server↔GUI replication, a sea-state front door, and the "advance the
+instance you hold" determinism rule — but realized them differently:
+
+| This design (vision) | What shipped |
+|---|---|
+| Providers discovered **by name via `gz-plugin`** (`GZ_ADD_PLUGIN(IWaveField)`) and loaded by a core loader | **Per-engine gz-sim *system* plugins** (`gz-sim-waves-fft-system`, `gz-sim-waves-gerstner-system`), each a thin `WavesSystemBase` subclass. Engines are plain libs registered in an **in-process token→factory registry** (`RegisterWaveEngineFactory`/`CreateWaveSimulation`). No dlopen engine loader. |
+| `SetParameters(seed, targetHs, config)` — two universal knobs + an **opaque provider config string** | A **shared `WaveParameters` struct** was kept: `SetParameters(const WaveParameters&)`, serialized whole in the component. |
+| `WaveParameters` dropped; each provider parses its own SDF sub-tree | `WaveParameters` retained (model/period/grid_size/seed/choppiness/sea_state/…); both engines read the same struct. |
+| Encino knobs become the FFT provider's **own SDF tags** in `config` | Encino tuning is still exposed as **`GZ_WAVES_ENCINO_*` environment variables**. |
+| Sea state stored as `targetHs` [m] (a universal field) | Sea state is an SDF **`<sea_state>` integer (WMO 0–9)** in `WaveParameters`, resolved to Hs to override `<period>`/`<gain>`. |
+| Rich FFT/Encino provider lives in a separate **`vrx_waves`** package | It lives in **`gz_waves_provider_fft`** (Gerstner in `gz_waves_provider_gerstner`); `encino_waves` is vendored. |
+| `Capabilities`/`Caps()`, `Grid()`, `Foam()`, `Velocity()` on the socket | The shipped `IWaveField` exposes `Elevation`/`ParticleVelocity`/`Normal`/`Jacobian`/`SetParameters`/`Kind` (pure) + `Update`/`Bounds`/`Field` (defaulted); no `Capabilities`. Foam is the `Field()` grid's foam channel. |
+
+What **did** carry over intact: the component is a *recipe, not pixels* — each
+process rebuilds its own engine from the serialized parameters + token, so server
+and GUI agree without streaming grids; and the determinism rule (**a consumer
+advances the instance it holds, never assuming another system did**) is enforced
+— e.g. `WaterVisual` builds and owns its own engine rather than sharing the
+server's.
+
+The remainder of this document is the original design exploration, preserved for
+its rationale. Read it as *the reasoning*, not the current API.
 
 ---
 

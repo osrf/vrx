@@ -8,6 +8,17 @@ first consumer but the work is not VRX-specific.
 The plan is the synthesis of a design discussion. Decisions marked **open**
 have an explicit trade-off that needs a call before code lands.
 
+> **Status update.** The **wave-field** layer described here is now implemented in
+> VRX — see [`wave_design_reference.md`](wave_design_reference.md) (the current
+> system) and [`wave_provider_architecture.md`](wave_provider_architecture.md)
+> (provider design + where it diverged). Several "open" decisions below are
+> resolved: the wave abstraction is the virtual `IWaveField` interface (virtual
+> dispatch, **not** the concrete-struct Option A in §4); the visual vertex shader
+> shipped as `fft_water_vs_330.glsl`; and the code is split into `gz_waves` (core)
+> + `gz_waves_provider_{fft,gerstner}` (engines) + `gz_waves_rendering` (visual).
+> The **wind** and **current** field layers remain future work, so this plan is
+> kept as the forward-looking roadmap for those.
+
 ---
 
 ## 1. Goals
@@ -66,7 +77,7 @@ gz-sim/
     ├── water_visual/           (new — rendering system)
     │   ├── WaterVisual.{cc,hh}
     │   ├── shaders/
-    │   │   ├── gerstner_waves_vs_330.glsl
+    │   │   ├── fft_water_vs_330.glsl
     │   │   └── water_fs_330.glsl
     │   └── CMakeLists.txt
     ├── buoyancy/               (existing — extended to read Wavefield)
