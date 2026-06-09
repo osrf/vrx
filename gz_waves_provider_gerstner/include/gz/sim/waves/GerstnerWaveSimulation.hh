@@ -35,6 +35,7 @@ public:
   /// equivalent to default-construct followed by `SetParameters`).
   explicit GerstnerWaveSimulation(const WaveParameters &_params);
 
+  /// \brief Destructor.
   ~GerstnerWaveSimulation() override = default;
 
   // IWaveField
@@ -51,11 +52,17 @@ public:
   // ---- Backend-specific accessors (used by WaterVisual to drive shader
   //      uniforms; not part of the IWaveField interface) ----
 
+  /// \brief Per-component wave amplitudes [m].
   const std::vector<double>            &Amplitudes()         const { return amplitudes_; }
+  /// \brief Per-component wavenumbers |k| [rad/m].
   const std::vector<double>            &Wavenumbers()        const { return wavenumbers_; }
+  /// \brief Per-component angular frequencies ω [rad/s].
   const std::vector<double>            &AngularFrequencies() const { return angularFrequencies_; }
+  /// \brief Per-component Gerstner steepness in [0, 1].
   const std::vector<double>            &Steepnesses()        const { return steepnesses_; }
+  /// \brief Per-component unit propagation directions.
   const std::vector<gz::math::Vector2d> &Directions()        const { return directions_; }
+  /// \brief Startup-ramp time constant τ [s].
   double Tau() const { return tau_; }
 
 private:

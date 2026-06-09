@@ -37,6 +37,10 @@ struct WaveParameters;
 class FFTWaveSimulation : public IWaveField
 {
 public:
+  /// \brief Default-construct an unconfigured field. Call `SetParameters`
+  /// before `Update`/sampling. Used by the engine factory (`MakeFFTWaveField`).
+  FFTWaveSimulation();
+
   /// \brief Construct from spectrum / wind parameters.
   /// \param[in] _params Wave parameters; uses `direction` as the wind heading
   ///   and derives wind speed from `period` (deep-water PMS relation:
@@ -47,15 +51,12 @@ public:
   ///   the FFT path; 64, 128, 256 typical).
   /// \param[in] _seed RNG seed for the Gaussian-distributed amplitudes; same
   ///   seed → same wave field bit-for-bit across runs.
-  /// \brief Default-construct an unconfigured field. Call `SetParameters`
-  /// before `Update`/sampling. Used by the engine factory (`MakeFFTWaveField`).
-  FFTWaveSimulation();
-
   FFTWaveSimulation(const WaveParameters &_params,
                     double _tileSize,
                     std::size_t _gridSize,
                     std::uint32_t _seed);
 
+  /// \brief Destructor (out-of-line so the EncinoState pimpl stays in the .cc).
   ~FFTWaveSimulation() override;
 
   // IWaveField
@@ -75,9 +76,12 @@ public:
 
   // ---- Accessors for unit tests + visual heightmap upload ----------------
 
+  /// \brief Grid resolution per axis (power of two).
   std::size_t GridSize() const { return this->gridSize_; }
+  /// \brief Physical tile extent per axis [m]; the field is periodic with it.
   double TileSizeMeters() const { return this->tileSize_; }
 
+  /// \brief Surface elevation field η(x, y, t), refreshed by Update().
   const Eigen::MatrixXd &HeightGrid() const { return this->heightGrid_; }
   /// \brief Horizontal x-displacement field Dx(x, y, t), refreshed by Update().
   /// Multiplied by a "choppiness" factor in the visual shader to sharpen

@@ -62,7 +62,9 @@ namespace gz::sim::systems
                       public ISystemConfigure,
                       public ISystemPreUpdate
   {
+    /// \brief Constructor.
     public: WaveBuoyancy();
+    /// \brief Destructor.
     public: ~WaveBuoyancy() override;
 
     public: void Configure(

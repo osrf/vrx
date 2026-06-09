@@ -22,10 +22,10 @@
 
 extern "C"
 {
-  /// Opaque handle to a per-material heightmap instance.
+  /// \brief Opaque handle to a per-material heightmap instance.
   typedef void *waves_heightmap_t;
 
-  /// Create a heightmap and bind it to the material as a "heightMap"
+  /// \brief Create a heightmap and bind it to the material as a "heightMap"
   /// texture unit. Returns NULL on failure.
   /// \param scene  Raw pointer to a `gz::rendering::Scene` (must be Ogre2).
   /// \param material  Raw pointer to a `gz::rendering::Material`.
@@ -37,7 +37,7 @@ extern "C"
       std::size_t grid_size,
       const char *name);
 
-  /// Upload three `rows × cols` row-major double matrices (height,
+  /// \brief Upload three `rows × cols` row-major double matrices (height,
   /// horizontal x-displacement, horizontal y-displacement) into the RGB
   /// channels of the RGBA32F heightmap texture. `foam_grid`, when non-null,
   /// fills the alpha channel with a per-cell folding / foam metric (the
@@ -54,12 +54,12 @@ extern "C"
       int rows,
       int cols);
 
-  /// 1 if the GPU texture is GPU-resident and the material has been bound,
+  /// \brief 1 if the GPU texture is GPU-resident and the material has been bound,
   /// 0 otherwise.
   int waves_ogre2_heightmap_ready(waves_heightmap_t handle);
 
 
-  /// Patch the samplerblock of a named tex unit on the bound material
+  /// \brief Patch the samplerblock of a named tex unit on the bound material
   /// to use trilinear + anisotropic filtering. Used after the
   /// gz::rendering ShaderParam path has set a texture (which only
   /// installs default bilinear-without-mipmap filtering) — without
@@ -69,7 +69,7 @@ extern "C"
       waves_heightmap_t handle,
       const char *tex_unit_name);
 
-  /// Release the heightmap. Safe on NULL.
+  /// \brief Release the heightmap. Safe on NULL.
   void waves_ogre2_heightmap_destroy(waves_heightmap_t handle);
 }
 

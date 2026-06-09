@@ -56,7 +56,9 @@ namespace gz::sim::systems
                           public ISystemConfigure,
                           public ISystemPreUpdate
   {
+    /// \brief Constructor.
     public: WavesSystemBase();
+    /// \brief Destructor.
     public: ~WavesSystemBase() override;
 
     public: void Configure(

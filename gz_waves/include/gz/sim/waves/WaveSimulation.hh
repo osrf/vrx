@@ -67,6 +67,7 @@ struct WaveField2D
 class IWaveField
 {
 public:
+  /// \brief Virtual destructor.
   virtual ~IWaveField() = default;
 
   // ---- Point queries (mandatory) ------------------------------------------

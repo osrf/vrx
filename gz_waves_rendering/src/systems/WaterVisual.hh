@@ -78,7 +78,9 @@ namespace gz::sim::systems
                       public ISystemConfigure,
                       public ISystemPreUpdate
   {
+    /// \brief Constructor.
     public: WaterVisual();
+    /// \brief Destructor.
     public: ~WaterVisual() override;
 
     public: void Configure(
