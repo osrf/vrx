@@ -84,6 +84,11 @@ void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
   p.gridSize   = wave->Get<unsigned int>("grid_size", p.gridSize  ).first;
   p.seed       = wave->Get<unsigned int>("seed",      p.seed      ).first;
   p.choppiness = wave->Get<double>("choppiness",      p.choppiness).first;
+
+  // High-level convenience: a WMO sea state code (0-9) that each engine turns
+  // into a matching significant wave height + peak period (see WithSeaState).
+  // When set, it overrides <period> and <gain>.
+  p.seaState   = wave->Get<int>("sea_state",          p.seaState  ).first;
 }
 
 WavesSystemBase::WavesSystemBase()
@@ -130,6 +135,7 @@ void WavesSystemBase::Configure(
         << this->dataPtr->worldEnt
         << " (algorithm=" << this->dataPtr->data.algorithm
         << ", spectrum=" << this->dataPtr->data.params.model
+        << ", seaState=" << this->dataPtr->data.params.seaState
         << ", generation=" << this->dataPtr->data.generation << ")"
         << std::endl;
 }

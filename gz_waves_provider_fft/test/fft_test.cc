@@ -373,3 +373,51 @@ TEST(FFTWaveSimulation, WindDirectionBiasesAmplitude)
   }
   EXPECT_GT(sxx / cxx, syy / cyy);
 }
+
+// WMO sea state code -> representative wave parameters (the canonical table).
+TEST(SeaState, CodeMapsToCanonicalHeights)
+{
+  gsw::SeaStateSpec prev{};
+  for (int c = 1; c <= 9; ++c)
+  {
+    gsw::SeaStateSpec s;
+    ASSERT_TRUE(gsw::SeaStateFromCode(c, s));
+    EXPECT_GT(s.significantWaveHeight, prev.significantWaveHeight);  // increasing
+    EXPECT_GT(s.peakPeriod, 0.0);
+    EXPECT_GT(s.windSpeed, 0.0);
+    prev = s;
+  }
+  gsw::SeaStateSpec dummy;
+  EXPECT_FALSE(gsw::SeaStateFromCode(-1, dummy));
+  EXPECT_FALSE(gsw::SeaStateFromCode(10, dummy));
+  gsw::SeaStateSpec calm;
+  ASSERT_TRUE(gsw::SeaStateFromCode(0, calm));
+  EXPECT_NEAR(calm.significantWaveHeight, 0.0, 1e-9);  // sea state 0 = flat
+}
+
+// <sea_state> drives the field to that WMO sea state's significant wave height.
+TEST(FFTWaveSimulation, SeaStateSetsSignificantWaveHeight)
+{
+  gsw::WaveParameters p;
+  p.model = "PMS";
+  p.gridSize = 64;
+  p.tileSize = 256.0;
+  p.seed = 11;
+  p.seaState = 5;  // "rough", representative Hs ~3.25 m
+  gsw::FFTWaveSimulation sim;
+  sim.SetParameters(p);
+  sim.Update(50.0);  // past the startup ramp
+
+  // Hs = 4 * RMS(eta). The Encino path calibrates to the PM Hs derived from the
+  // sea-state wind/period, so it should land near the canonical value; the
+  // Phillips fallback drives the same period but doesn't calibrate Hs exactly.
+  const double hs = 4.0 * RmsHeight(sim.HeightGrid());
+  gsw::SeaStateSpec s;
+  ASSERT_TRUE(gsw::SeaStateFromCode(5, s));
+  if (sim.UseEncino())
+    EXPECT_NEAR(hs, s.significantWaveHeight, 0.30 * s.significantWaveHeight)
+      << "sea state 5 should give Hs ~= " << s.significantWaveHeight
+      << " m, got " << hs;
+  else
+    EXPECT_GT(hs, 0.0);
+}

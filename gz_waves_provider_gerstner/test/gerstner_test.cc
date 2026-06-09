@@ -228,3 +228,23 @@ TEST(Gerstner, FieldSamplesAnalyticGrid)
   }
   EXPECT_GT(maxAbs, 0.0) << "sampled field is flat — Update didn't fill it";
 }
+
+// <sea_state> scales the Gerstner field: a rougher sea -> bigger waves.
+TEST(Gerstner, SeaStateScalesWaveHeight)
+{
+  auto sigma = [](int code)
+  {
+    gsw::WaveParameters p;
+    p.model = "PMS";
+    p.number = 3;
+    p.seaState = code;
+    gsw::GerstnerWaveSimulation sim;
+    sim.SetParameters(p);
+    double s2 = 0.0;
+    for (double a : sim.Amplitudes())
+      s2 += a * a;
+    return std::sqrt(0.5 * s2);  // surface RMS = sqrt(sum a_i^2 / 2)
+  };
+  EXPECT_GT(sigma(2), 0.0);
+  EXPECT_GT(sigma(6), sigma(2)) << "rougher sea state should produce bigger waves";
+}

@@ -52,8 +52,10 @@ GerstnerWaveSimulation::GerstnerWaveSimulation(const WaveParameters &p)
   this->SetParameters(p);
 }
 
-void GerstnerWaveSimulation::SetParameters(const WaveParameters &p)
+void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
 {
+  // Resolve <sea_state> (if set) into period/gain before configuring.
+  const WaveParameters p = WithSeaState(_params);
   this->tau_ = p.tau;
   const double omegaMean = 2.0 * M_PI / p.period;
   const std::size_t n = p.number;

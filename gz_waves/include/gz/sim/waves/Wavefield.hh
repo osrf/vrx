@@ -11,6 +11,7 @@
 #ifndef GZ_SIM_WAVES_WAVEFIELD_HH_
 #define GZ_SIM_WAVES_WAVEFIELD_HH_
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <istream>
@@ -81,7 +82,74 @@ struct WaveParameters
   /// particles toward wave crests (the canonical choice). Typical range
   /// [-2, 0]; 0 disables choppy displacement.
   double choppiness{-1.0};
+
+  /// \brief WMO sea state code (0-9). A convenience that, when set, makes the
+  /// engine reproduce that sea state's significant wave height and peak period
+  /// (see WithSeaState / SeaStateFromCode). -1 (default) means "unset": use the
+  /// explicit period/gain above instead.
+  int seaState{-1};
 };
+
+/// \brief Canonical sea-state descriptor: significant wave height, peak period,
+/// and the fully-developed wind speed that produces them.
+struct SeaStateSpec
+{
+  double significantWaveHeight{0.0};  ///< Hs [m].
+  double peakPeriod{0.0};             ///< Tp [s].
+  double windSpeed{0.0};              ///< 19.5 m wind speed [m/s].
+};
+
+/// \brief Map a WMO Sea State code (0-9) to representative wave parameters.
+///
+/// The code's defining quantity is the significant-wave-height band; we take
+/// the band midpoint as the representative Hs, then derive the wind speed and
+/// peak period for a fully-developed Pierson-Moskowitz sea:
+///   Hs = 0.21 * V19.5^2 / g,  omega_p = 0.879 * g / V19.5,  Tp = 2*pi/omega_p
+///
+/// Canonical source: WMO Sea State code (code table 3700), WMO Manual on Codes
+/// (WMO-No. 306). Accessible table: https://en.wikipedia.org/wiki/Sea_state
+///
+/// \return false (leaving _out untouched) for an out-of-range code.
+inline bool SeaStateFromCode(int _code, SeaStateSpec &_out)
+{
+  // Representative Hs [m] per WMO code: 0 calm/glassy, 1 calm/rippled,
+  // 2 smooth, 3 slight, 4 moderate, 5 rough, 6 very rough, 7 high,
+  // 8 very high, 9 phenomenal (band midpoints; 9 is open-ended).
+  static constexpr double kHs[10] =
+      {0.0, 0.05, 0.3, 0.875, 1.875, 3.25, 5.0, 7.5, 11.5, 16.0};
+  if (_code < 0 || _code > 9)
+    return false;
+  constexpr double g = 9.81;
+  const double hs = kHs[_code];
+  const double v  = std::sqrt(hs * g / 0.21);
+  const double tp = (v > 0.0) ? (2.0 * M_PI * v / (0.879 * g)) : 0.0;
+  _out = SeaStateSpec{hs, tp, v};
+  return true;
+}
+
+/// \brief Return a copy of _p with the sea state (if set) applied: the peak
+/// period drives <period>, <gain> is normalised to 1 so the field shows the
+/// physical significant wave height (code 0 -> gain 0, i.e. flat), and for the
+/// CWR model the regular-wave <amplitude> is set to Hs/2. An unset (-1) or
+/// out-of-range seaState returns _p unchanged. Each provider calls this at the
+/// top of SetParameters, so <sea_state> works for every backend.
+inline WaveParameters WithSeaState(const WaveParameters &_p)
+{
+  WaveParameters p = _p;
+  SeaStateSpec s;
+  if (p.seaState < 0 || !SeaStateFromCode(p.seaState, s))
+    return p;
+  if (s.significantWaveHeight <= 0.0)
+  {
+    p.gain = 0.0;            // sea state 0: calm / glassy -> flat
+    return p;
+  }
+  p.period = s.peakPeriod;
+  p.gain   = 1.0;            // physical Hs (no artistic boost)
+  if (p.model == "CWR")
+    p.amplitude = 0.5 * s.significantWaveHeight;
+  return p;
+}
 
 /// \brief State held by the `Wavefield` ECM component. Wraps a polymorphic
 /// `IWaveField` (Gerstner today, FFT or others later). Consumers use
@@ -136,6 +204,7 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.gridSize << ' '
       << _d.params.seed << ' '
       << _d.params.choppiness << ' '
+      << _d.params.seaState << ' '
       << _d.updateRate << ' ';
   return _os;
 }
@@ -172,6 +241,7 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.gridSize
       >> _d.params.seed
       >> _d.params.choppiness
+      >> _d.params.seaState
       >> _d.updateRate;
   // Cache the constructed simulation across deserializations. The same
   // component arrives ~60 Hz; without this dedupe we'd re-init FFT

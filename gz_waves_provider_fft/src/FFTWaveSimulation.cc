@@ -237,8 +237,10 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
   this->SetParameters(q);
 }
 
-void FFTWaveSimulation::SetParameters(const WaveParameters &p)
+void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
 {
+  // Resolve <sea_state> (if set) into period/gain before configuring.
+  const WaveParameters p = WithSeaState(_params);
   this->tileSize_ = p.tileSize;
   this->gridSize_ = p.gridSize;
   this->gain_     = p.gain;
