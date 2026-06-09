@@ -111,30 +111,6 @@ public:
   /// amplitude. `Jacobian()` samples this; the in-tree Phillips path leaves it
   /// flat (1) — its foam is derived in the shader from the chop-deriv grids.
   const Eigen::MatrixXd &MinEGrid() const { return this->minEGrid_; }
-  /// \brief Slope ∂η/∂x at each grid cell. Used by the visual to read
-  /// per-vertex surface normals from a texture instead of computing
-  /// them via finite differences (smoother and more accurate at the
-  /// short wavelengths the spectrum carries).
-  const Eigen::MatrixXd &SlopeXGrid() const { return this->slopeXGrid_; }
-  /// \brief Slope ∂η/∂y at each grid cell.
-  const Eigen::MatrixXd &SlopeYGrid() const { return this->slopeYGrid_; }
-  /// \brief Chop displacement derivative ∂Dx/∂x.
-  const Eigen::MatrixXd &DispDxDxGrid() const { return this->dispDxDxGrid_; }
-  /// \brief Chop displacement derivative ∂Dy/∂y.
-  const Eigen::MatrixXd &DispDyDyGrid() const { return this->dispDyDyGrid_; }
-  /// \brief Chop displacement cross derivative ∂Dx/∂y (= ∂Dy/∂x).
-  const Eigen::MatrixXd &DispDxDyGrid() const { return this->dispDxDyGrid_; }
-
-  /// \brief Time-invariant Phillips spectrum amplitudes `h0(k)`. Used by
-  /// the GPU-FFT path (`docs/waves_gpu_fft_plan.md`, Stage 2) to upload
-  /// the spectrum to a GPU texture once at init; the GPU evolve compute
-  /// shader then computes `h(k, t)` each frame without re-running the
-  /// random sampling and Phillips evaluation.
-  const Eigen::MatrixXcd &H0() const     { return this->h0_; }
-  /// \brief Conjugate spectrum amplitudes `conj(h0(-k))`.
-  const Eigen::MatrixXcd &H0Conj() const { return this->h0Conj_; }
-  /// \brief Cached dispersion frequencies `omega(k) = sqrt(g·|k|)`.
-  const Eigen::MatrixXd &OmegaGrid() const { return this->omegaGrid_; }
 
 private:
   /// \brief Phillips spectrum P_h(k) (Tessendorf 2001, eq. 23).
