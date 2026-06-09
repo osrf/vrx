@@ -15,9 +15,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
-#include <limits>
 #include <memory>
-#include <mutex>
 #include <ostream>
 #include <string>
 
@@ -260,19 +258,11 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
   return _os;
 }
 
-/// \brief Stream-in for ECM deserialization. Reads parameters and
-/// (only when the wavefield generation actually changes) rebuilds the
-/// simulation via `CreateWaveSimulation`.
-///
-/// SceneBroadcaster replicates ECM components at the simulation rate
-/// (~60+ Hz), and the `Waves` system marks the wavefield as changed
-/// for the first 5 seconds of every run. Without caching, we'd
-/// reconstruct the simulation on every state message — for FFT this
-/// is a ~15 ms job per call (Phillips spectrum + 3 IFFTs at 128²),
-/// which over 2 minutes accumulates to ~100 s of pure init churn and
-/// is the dominant cost of FFT-mode GUI load. Cache the previously-
-/// built simulation per algorithm+generation and reuse it across
-/// deserializations.
+/// \brief Stream-in for ECM deserialization. Reads the *recipe* (algorithm +
+/// parameters) only; `simulation` is left null. Consumers that need a live wave
+/// field build their own engine from the deserialized params via
+/// `CreateWaveSimulation` (e.g. WaterVisual) — so each consumer owns a private
+/// instance and there is no shared, process-global engine.
 inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
 {
   _is >> _d.algorithm
@@ -306,23 +296,9 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.filterInvert
       >> _d.params.seaState
       >> _d.updateRate;
-  // Cache the constructed simulation across deserializations. The same
-  // component arrives ~60 Hz; without this dedupe we'd re-init FFT
-  // state thousands of times per minute.
-  static std::mutex cacheMutex;
-  static std::shared_ptr<IWaveField> cachedSim;
-  static std::uint64_t cachedGen{std::numeric_limits<std::uint64_t>::max()};
-  static std::string cachedAlgo;
-  std::lock_guard<std::mutex> lock(cacheMutex);
-  if (!cachedSim ||
-      cachedGen != _d.generation ||
-      cachedAlgo != _d.algorithm)
-  {
-    cachedSim = CreateWaveSimulation(_d.algorithm, _d.params);
-    cachedGen = _d.generation;
-    cachedAlgo = _d.algorithm;
-  }
-  _d.simulation = cachedSim;
+  // The recipe is restored; build no engine. `simulation` stays null so no two
+  // consumers ever share a process-global instance.
+  _d.simulation.reset();
   return _is;
 }
 

@@ -176,15 +176,24 @@ TEST(FoamMask, ZeroAtZeroSteepness)
   EXPECT_EQ(gsw::FoamMask(wf, 0.0, 0.0, 10.0), 0.0);
 }
 
-TEST(Serialization, RoundTripRebuildsSimulation)
+// The component serializes only the recipe; operator>> restores the params and
+// leaves `simulation` null. A consumer rebuilds its own engine from the recipe.
+TEST(Serialization, RoundTripPreservesRecipe)
 {
   auto wf = MakePmsField();
   std::stringstream ss;
   ss << wf;
   gsw::WavefieldData rebuilt;
   ss >> rebuilt;
-  EXPECT_NE(rebuilt.simulation, nullptr);
+
+  EXPECT_EQ(rebuilt.simulation, nullptr)
+    << "operator>> must not build a (process-global) engine";
   EXPECT_EQ(rebuilt.algorithm, "gerstner");
+
+  // Rebuild from the recipe; same params → same analytic field.
+  rebuilt.simulation =
+    gsw::CreateWaveSimulation(rebuilt.algorithm, rebuilt.params);
+  ASSERT_NE(rebuilt.simulation, nullptr);
   EXPECT_NEAR(
     gsw::SurfaceElevation(wf, 10.0, 5.0, 7.0),
     gsw::SurfaceElevation(rebuilt, 10.0, 5.0, 7.0),

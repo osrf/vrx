@@ -72,18 +72,16 @@ TEST(FFTWaveSimulation, FactoryRoute)
   EXPECT_GT(sim->Bounds()->x, 0.0);
 }
 
-// Reproduces, at the unit level, the cross-process bug behind a "flat" FFT
-// wave field: the Wavefield component serializes only the *recipe*, so the
-// deserialization path mints a FRESH simulation that has only ever run
-// Update(0) (ramp=0 → identically zero). A consumer that reads the
-// deserialized instance therefore sees a flat field unless it advances the
-// instance it actually holds. (Gerstner is analytic/stateless and immune;
-// this only bites the FFT/Encino grid-based backend.)
-TEST(Wavefield, FftSimDecouplesAcrossSerialization)
+// The Wavefield component serializes only the *recipe* (algorithm + params),
+// not a live engine: operator>> restores the params and leaves `simulation`
+// null. A consumer rebuilds its own engine from the recipe (what WaterVisual
+// does), so each consumer owns a private field instance — no shared
+// process-global engine. Same seed → the rebuilt field matches the original.
+TEST(Wavefield, FftComponentSerializesRecipeNotEngine)
 {
   gsw::WavefieldData live;
   live.algorithm = "fft";
-  live.generation = 918273;  // unique → fresh entry in operator>>'s static cache
+  live.generation = 918273;
   live.params.model = "PMS";
   live.params.period = 3.2;
   live.params.gain = 1.0;
@@ -101,17 +99,21 @@ TEST(Wavefield, FftSimDecouplesAcrossSerialization)
   ss << live;
   gsw::WavefieldData round;
   ss >> round;
+
+  // Deserialization restores the recipe but builds no engine.
+  EXPECT_EQ(round.simulation, nullptr)
+    << "operator>> must not build a (process-global) engine";
+  EXPECT_EQ(round.algorithm, "fft");
+  EXPECT_EQ(round.generation, 918273u);
+  EXPECT_EQ(round.params.seed, 7u);
+  EXPECT_NEAR(round.params.period, 3.2, 1e-9);
+
+  // A consumer rebuilds its own engine from the recipe; same seed → same field.
+  round.simulation = gsw::CreateWaveSimulation(round.algorithm, round.params);
   ASSERT_NE(round.simulation, nullptr);
-
-  // BUG: the deserialized instance was only ever Update(0)'d → identically flat.
-  EXPECT_NEAR(MaxAbsElevation(round, 20.0), 0.0, 1e-9)
-    << "deserialized FFT sim is never advanced → flat (the reported symptom)";
-
-  // FIX: advancing the held instance on read recovers the field, regardless of
-  // which instance a consumer ended up with. Same seed → matches the live field.
   round.simulation->Update(20.0);
-  EXPECT_GT(MaxAbsElevation(round, 20.0), 1e-3)
-    << "advancing the held sim makes the read correct";
+  EXPECT_NEAR(MaxAbsElevation(round, 20.0), MaxAbsElevation(live, 20.0), 1e-9)
+    << "a privately rebuilt field matches the original (deterministic by seed)";
 }
 
 TEST(FFTWaveSimulation, HeightsAreFinite)
