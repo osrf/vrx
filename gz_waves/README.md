@@ -1,12 +1,16 @@
-# waves
+# gz_waves
 
-Wave simulation for VRX with two backends:
+Wave simulation for VRX with two backends, each a gz-sim system plugin you
+select by filename in the world SDF (there is no `<algorithm>` tag — the
+plugin you load *is* the backend):
 
-- **`<algorithm>gerstner</algorithm>`** — analytic Gerstner (Tessendorf 2001)
-  sum-of-sines, vertex-shader displacement. Fast to load, lower visual fidelity.
-- **`<algorithm>fft</algorithm>`** — stochastic FFT (Phillips spectrum + Tessendorf
-  choppy displacement), CPU IFFT each tick, GPU heightmap sampled in a custom
-  vertex shader. Higher visual fidelity.
+- **`gz-sim-waves-gerstner-system`** (`gz::sim::systems::GerstnerWaves`) —
+  analytic Gerstner (Tessendorf 2001) sum-of-sines, vertex-shader
+  displacement. Fast to load, lower visual fidelity.
+- **`gz-sim-waves-fft-system`** (`gz::sim::systems::FftWaves`) — stochastic FFT
+  (EncinoWaves spectra by default, in-tree Phillips + Tessendorf choppy
+  displacement otherwise), CPU IFFT each tick, GPU heightmap sampled in a
+  custom vertex shader. Higher visual fidelity.
 
 Both backends share the same Apache-2 codebase intended for upstreaming to
 `gz-sim`. All Ogre Next access goes through a small dlopen'd bridge
@@ -58,6 +62,6 @@ Upstream references documenting the same class of issue:
 - [`asv_wave_sim#182`](https://github.com/srmainwaring/asv_wave_sim/issues/182)
   — maintainer's note on the architectural fix being a GPU FFT visual
 
-Until the architectural port lands, users wanting fast load should use
-`<algorithm>gerstner</algorithm>`; FFT is enabled when the visual quality
-justifies the first-launch wait.
+Until the architectural port lands, users wanting fast load should use the
+`gz-sim-waves-gerstner-system` plugin; the FFT system is worth the
+first-launch wait when the visual quality justifies it.

@@ -19,10 +19,11 @@
 namespace gz::sim::systems
 {
   /// \brief A rendering system that drives a water-surface visual with the
-  /// Gerstner shader, fed by the world's `Wavefield` component.
+  /// FFT water vertex/fragment shaders, fed by the world's `Wavefield`
+  /// component.
   ///
   /// Attach to a `<visual>` element. The plugin finds its visual, attaches a
-  /// material with the Gerstner vertex shader, and uploads parameters from
+  /// material with the water vertex shader, and uploads parameters from
   /// the wavefield component whenever its generation counter changes. The
   /// sim-time uniform is pushed every frame.
   ///
@@ -31,7 +32,7 @@ namespace gz::sim::systems
   /// <plugin filename="gz-sim-water-visual-system"
   ///         name="gz::sim::systems::WaterVisual">
   ///   <shader>
-  ///     <vertex>shaders/gerstner_waves_vs_330.glsl</vertex>
+  ///     <fft_vertex>shaders/fft_water_vs_330.glsl</fft_vertex>
   ///     <fragment>shaders/water_fs_330.glsl</fragment>
   ///     <parameters>
   ///       <rescale>0.125</rescale>

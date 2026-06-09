@@ -48,7 +48,7 @@ public:
   /// \param[in] _seed RNG seed for the Gaussian-distributed amplitudes; same
   ///   seed → same wave field bit-for-bit across runs.
   /// \brief Default-construct an unconfigured field. Call `SetParameters`
-  /// before `Update`/sampling. Used by the gz-plugin provider loader.
+  /// before `Update`/sampling. Used by the engine factory (`MakeFFTWaveField`).
   FFTWaveSimulation();
 
   FFTWaveSimulation(const WaveParameters &_params,
@@ -114,7 +114,7 @@ private:
   double Ramp(double t) const;
 
   // Configuration. Default member-inits keep a default-constructed instance
-  // benign until SetParameters() runs (the gz-plugin loader path).
+  // benign until SetParameters() runs (the factory path).
   double        tileSize_{200.0};
   std::size_t   gridSize_{128};
   double        windSpeed_{0.0};

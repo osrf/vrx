@@ -89,8 +89,8 @@ public:
 
   // ---- Configuration ------------------------------------------------------
 
-  /// \brief (Re)configure the wave field from `_params`. The gz-plugin
-  /// provider loader default-constructs an implementation and then calls
+  /// \brief (Re)configure the wave field from `_params`. The engine factory
+  /// default-constructs an implementation and then calls
   /// this to set it up; it may also be invoked later to retune parameters
   /// at runtime. Implementations fully (re)build their internal state from
   /// `_params`.

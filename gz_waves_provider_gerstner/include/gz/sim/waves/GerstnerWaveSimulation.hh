@@ -28,7 +28,7 @@ class GerstnerWaveSimulation : public IWaveField
 {
 public:
   /// \brief Default-construct an unconfigured field. Call `SetParameters`
-  /// before sampling. Used by the gz-plugin provider loader.
+  /// before sampling. Used by the engine factory (`MakeGerstnerWaveField`).
   GerstnerWaveSimulation();
 
   /// \brief Construct and sample the spectrum from `_params` (convenience;

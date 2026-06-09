@@ -655,11 +655,6 @@ void WaterVisual::Configure(
   this->dataPtr->teardownConn =
     _eventMgr.Connect<events::RenderTeardown>(
       std::bind(&Implementation::OnRenderTeardown, this->dataPtr.get()));
-
-  // Subscribe to the wavefield topic. SceneBroadcaster doesn't replicate
-  // the Wavefield ECM component to the GUI process, so the GUI-side plugin
-  // gets parameters via this topic instead. The Waves system publishes on
-  // it from Configure.
 }
 
 void WaterVisual::PreUpdate(
@@ -685,9 +680,9 @@ void WaterVisual::PreUpdate(
   this->dataPtr->currentSimTime = t;
   if (!wfComp)
   {
-    // ECM component is absent on the GUI side (SceneBroadcaster doesn't
-    // replicate it). The OnWavefieldMsg topic callback is the backup
-    // channel; don't touch haveWavefield here.
+    // The Wavefield component reaches the GUI by component serialization
+    // (operator<</>>), which can lag the first frames. Until it arrives,
+    // wait — don't clear haveWavefield.
     return;
   }
   const auto &data = wfComp->Data();

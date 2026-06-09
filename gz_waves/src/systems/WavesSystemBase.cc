@@ -134,7 +134,7 @@ void WavesSystemBase::Configure(
   gzmsg << "[Waves] wavefield component created on world entity "
         << this->dataPtr->worldEnt
         << " (algorithm=" << this->dataPtr->data.algorithm
-        << ", spectrum=" << this->dataPtr->data.params.model
+        << ", model=" << this->dataPtr->data.params.model
         << ", seaState=" << this->dataPtr->data.params.seaState
         << ", generation=" << this->dataPtr->data.generation << ")"
         << std::endl;

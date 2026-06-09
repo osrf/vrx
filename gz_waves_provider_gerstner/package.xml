@@ -4,10 +4,10 @@
   <name>gz_waves_provider_gerstner</name>
   <version>0.0.0</version>
   <description>
-    Analytic Gerstner (sum-of-sines) wave-field provider for gz_waves. A
-    gz-plugin reference implementation of IWaveField, discovered and loaded at
-    runtime by the gz_waves core — and the simplest template for writing your
-    own provider package.
+    Analytic Gerstner (sum-of-sines) wave-field engine for gz_waves. A plain
+    IWaveField implementation registered in the in-process engine registry and
+    linked by the gz-sim-waves-gerstner-system plugin — and the simplest
+    template for writing your own provider package.
   </description>
   <maintainer email="cen.aguero@gmail.com">Carlos Agüero</maintainer>
   <license>Apache-2.0</license>
