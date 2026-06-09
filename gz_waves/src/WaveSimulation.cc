@@ -23,6 +23,7 @@ namespace gz::sim::waves
 
 namespace
 {
+//////////////////////////////////////////////////
 /// \brief The process-wide token → engine-factory registry, plus its guard.
 /// Function-local statics so there's no static-init-order dependency between
 /// this translation unit and whoever calls RegisterWaveEngineFactory.
@@ -32,6 +33,7 @@ std::map<std::string, WaveEngineFactory> &Registry()
   return registry;
 }
 
+//////////////////////////////////////////////////
 std::mutex &RegistryMutex()
 {
   static std::mutex m;
@@ -39,6 +41,7 @@ std::mutex &RegistryMutex()
 }
 }  // namespace
 
+//////////////////////////////////////////////////
 void RegisterWaveEngineFactory(const std::string &_token,
                                WaveEngineFactory _factory)
 {
@@ -46,6 +49,7 @@ void RegisterWaveEngineFactory(const std::string &_token,
   Registry()[_token] = std::move(_factory);
 }
 
+//////////////////////////////////////////////////
 std::shared_ptr<IWaveField> CreateWaveSimulation(
   const std::string &_algorithm,
   const WaveParameters &_params)

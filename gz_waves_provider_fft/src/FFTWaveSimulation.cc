@@ -27,6 +27,7 @@ namespace
 constexpr double kGravity = 9.80665;
 constexpr double k2Pi    = 6.28318530717958647692;
 
+//////////////////////////////////////////////////
 /// Returns the integer log2 of n if n is a positive power of two; -1 otherwise.
 int Log2Pow2(std::size_t n)
 {
@@ -36,6 +37,7 @@ int Log2Pow2(std::size_t n)
   return r;
 }
 
+//////////////////////////////////////////////////
 /// Smallest power of two >= n (>= 1).
 std::size_t CeilPow2(std::size_t n)
 {
@@ -44,6 +46,7 @@ std::size_t CeilPow2(std::size_t n)
   return p;
 }
 
+//////////////////////////////////////////////////
 // ---- Human-readable names for the EncinoWaves model enums (logging) --------
 const char *SpectrumName(EncinoWaves::SpectrumType t)
 {
@@ -56,6 +59,7 @@ const char *SpectrumName(EncinoWaves::SpectrumType t)
   }
 }
 
+//////////////////////////////////////////////////
 const char *DispersionName(EncinoWaves::DispersionType t)
 {
   switch (t)
@@ -67,6 +71,7 @@ const char *DispersionName(EncinoWaves::DispersionType t)
   }
 }
 
+//////////////////////////////////////////////////
 const char *SpreadingName(EncinoWaves::DirectionalSpreadingType t)
 {
   switch (t)
@@ -79,6 +84,7 @@ const char *SpreadingName(EncinoWaves::DirectionalSpreadingType t)
   }
 }
 
+//////////////////////////////////////////////////
 const char *FilterName(EncinoWaves::FilterType t)
 {
   switch (t)
@@ -89,6 +95,7 @@ const char *FilterName(EncinoWaves::FilterType t)
   }
 }
 
+//////////////////////////////////////////////////
 // ---- <spectrum>/<spreading>/<dispersion> SDF strings -> EncinoWaves enums ---
 // Names match the *Name() helpers above and the SDF tag values. Return false on
 // an unrecognised value so the caller can warn and keep the Encino default.
@@ -101,6 +108,7 @@ bool SpectrumFromString(const std::string &s, EncinoWaves::SpectrumType &out)
   return true;
 }
 
+//////////////////////////////////////////////////
 bool DispersionFromString(const std::string &s,
                           EncinoWaves::DispersionType &out)
 {
@@ -112,6 +120,7 @@ bool DispersionFromString(const std::string &s,
   return true;
 }
 
+//////////////////////////////////////////////////
 bool SpreadingFromString(const std::string &s,
                          EncinoWaves::DirectionalSpreadingType &out)
 {
@@ -127,6 +136,7 @@ bool SpreadingFromString(const std::string &s,
   return true;
 }
 
+//////////////////////////////////////////////////
 // Map the SDF spectrum selectors and numeric knobs onto `ep`. Unknown selector
 // values warn and leave the Encino default in place. The numeric knobs default
 // (via WaveParameters) to Encino's own defaults, so an SDF that sets none of
@@ -191,6 +201,7 @@ FFTWaveSimulation::~FFTWaveSimulation() = default;
 
 FFTWaveSimulation::FFTWaveSimulation() = default;
 
+//////////////////////////////////////////////////
 FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
                                      double tile,
                                      std::size_t grid,
@@ -206,6 +217,7 @@ FFTWaveSimulation::FFTWaveSimulation(const WaveParameters &p,
   this->SetParameters(q);
 }
 
+//////////////////////////////////////////////////
 void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
 {
   // Resolve <sea_state> (if set) into period/gain before configuring.
@@ -301,6 +313,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   this->Update(0.0);
 }
 
+//////////////////////////////////////////////////
 double FFTWaveSimulation::Ramp(double t) const
 {
   if (this->tau_ <= 0.0)
@@ -308,6 +321,7 @@ double FFTWaveSimulation::Ramp(double t) const
   return 1.0 - std::exp(-t / this->tau_);
 }
 
+//////////////////////////////////////////////////
 void FFTWaveSimulation::Update(double t)
 {
   // Idempotent: the field at time t is deterministic, so a repeat call for the
@@ -359,6 +373,7 @@ void FFTWaveSimulation::Update(double t)
           .cast<double>().array() + 1.0)).matrix();
 }
 
+//////////////////////////////////////////////////
 double FFTWaveSimulation::BilinearSample(const Eigen::MatrixXd &grid,
                                          double x, double y) const
 {
@@ -393,6 +408,7 @@ double FFTWaveSimulation::BilinearSample(const Eigen::MatrixXd &grid,
        + grid(i1, j1) * fx       * fy;
 }
 
+//////////////////////////////////////////////////
 double FFTWaveSimulation::Elevation(double x, double y, double /*t*/) const
 {
   // Caller is expected to have called Update(t) ≤ this tick (the Waves
@@ -400,6 +416,7 @@ double FFTWaveSimulation::Elevation(double x, double y, double /*t*/) const
   return this->BilinearSample(this->heightGrid_, x, y);
 }
 
+//////////////////////////////////////////////////
 gz::math::Vector3d FFTWaveSimulation::ParticleVelocity(
   double /*x*/, double /*y*/, double /*t*/) const
 {
@@ -409,6 +426,7 @@ gz::math::Vector3d FFTWaveSimulation::ParticleVelocity(
   return gz::math::Vector3d::Zero;
 }
 
+//////////////////////////////////////////////////
 gz::math::Vector3d FFTWaveSimulation::Normal(
   double x, double y, double /*t*/) const
 {
@@ -427,6 +445,7 @@ gz::math::Vector3d FFTWaveSimulation::Normal(
   return n;
 }
 
+//////////////////////////////////////////////////
 double FFTWaveSimulation::Jacobian(double x, double y, double /*t*/) const
 {
   // Bilinear-sample the per-cell minimum eigenvalue of the displacement
@@ -435,6 +454,7 @@ double FFTWaveSimulation::Jacobian(double x, double y, double /*t*/) const
   return this->BilinearSample(this->minEGrid_, x, y);
 }
 
+//////////////////////////////////////////////////
 const WaveField2D *FFTWaveSimulation::Field() const
 {
   // Repopulate the view from the current grids each call: Update reallocates
@@ -450,6 +470,7 @@ const WaveField2D *FFTWaveSimulation::Field() const
   return &this->field_;
 }
 
+//////////////////////////////////////////////////
 /// \brief Factory used to register the FFT engine under the "fft" token (see
 /// RegisterWaveEngineFactory). Returns a default-constructed engine; the caller
 /// applies SetParameters.

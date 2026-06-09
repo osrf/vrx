@@ -25,16 +25,19 @@ namespace
 {
 constexpr double kGravity = 9.80665;
 
+//////////////////////////////////////////////////
 double DispersionOmega(double k)
 {
   return std::sqrt(kGravity * k);
 }
 
+//////////////////////////////////////////////////
 double DispersionWavenumber(double omega)
 {
   return omega * omega / kGravity;
 }
 
+//////////////////////////////////////////////////
 double PiersonMoskowitz(double omega, double omegaP)
 {
   constexpr double kAlpha = 0.0081;
@@ -47,11 +50,13 @@ double PiersonMoskowitz(double omega, double omegaP)
 
 GerstnerWaveSimulation::GerstnerWaveSimulation() = default;
 
+//////////////////////////////////////////////////
 GerstnerWaveSimulation::GerstnerWaveSimulation(const WaveParameters &p)
 {
   this->SetParameters(p);
 }
 
+//////////////////////////////////////////////////
 void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
 {
   // Resolve <sea_state> (if set) into period/gain before configuring.
@@ -160,6 +165,7 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
   this->Update(0.0);
 }
 
+//////////////////////////////////////////////////
 double GerstnerWaveSimulation::Ramp(double t) const
 {
   if (tau_ <= 0.0)
@@ -167,6 +173,7 @@ double GerstnerWaveSimulation::Ramp(double t) const
   return 1.0 - std::exp(-t / tau_);
 }
 
+//////////////////////////////////////////////////
 double GerstnerWaveSimulation::Elevation(double x, double y, double t) const
 {
   double eta = 0.0;
@@ -181,6 +188,7 @@ double GerstnerWaveSimulation::Elevation(double x, double y, double t) const
   return eta * Ramp(t);
 }
 
+//////////////////////////////////////////////////
 gz::math::Vector3d GerstnerWaveSimulation::ParticleVelocity(
   double x, double y, double t) const
 {
@@ -202,6 +210,7 @@ gz::math::Vector3d GerstnerWaveSimulation::ParticleVelocity(
   return {vx * r, vy * r, vz * r};
 }
 
+//////////////////////////////////////////////////
 gz::math::Vector3d GerstnerWaveSimulation::Normal(
   double x, double y, double t) const
 {
@@ -225,6 +234,7 @@ gz::math::Vector3d GerstnerWaveSimulation::Normal(
   return nvec;
 }
 
+//////////////////////////////////////////////////
 double GerstnerWaveSimulation::Jacobian(double x, double y, double t) const
 {
   double dsxdx = 0.0, dsydy = 0.0, dsxdy = 0.0;
@@ -247,6 +257,7 @@ double GerstnerWaveSimulation::Jacobian(double x, double y, double t) const
   return (1.0 + dsxdx) * (1.0 + dsydy) - dsxdy * dsxdy;
 }
 
+//////////////////////////////////////////////////
 void GerstnerWaveSimulation::Update(double t)
 {
   // Analytic backend: the point queries (Elevation/Normal/...) stay
@@ -294,11 +305,13 @@ void GerstnerWaveSimulation::Update(double t)
   }
 }
 
+//////////////////////////////////////////////////
 const WaveField2D *GerstnerWaveSimulation::Field() const
 {
   return &this->field_;
 }
 
+//////////////////////////////////////////////////
 /// \brief Factory used to register the Gerstner engine under the "gerstner"
 /// token (see RegisterWaveEngineFactory). Returns a default-constructed engine;
 /// the caller applies SetParameters.

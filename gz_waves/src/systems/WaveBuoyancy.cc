@@ -37,6 +37,7 @@ namespace gz::sim::systems
 namespace
 {
 
+//////////////////////////////////////////////////
 /// \brief Area of a circular segment in a circle of radius r, where h is the
 /// chord height measured from the bottom of the circle. Valid for h in [0, 2r].
 ///   A(0)   = 0
@@ -69,6 +70,7 @@ class WaveBuoyancy::Implementation
   public: void ParsePoints(const sdf::ElementPtr &_sdf);
 };
 
+//////////////////////////////////////////////////
 void WaveBuoyancy::Implementation::ParsePoints(const sdf::ElementPtr &_sdf)
 {
   if (!_sdf->HasElement("points"))
@@ -88,6 +90,7 @@ void WaveBuoyancy::Implementation::ParsePoints(const sdf::ElementPtr &_sdf)
   }
 }
 
+//////////////////////////////////////////////////
 WaveBuoyancy::WaveBuoyancy()
   : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
@@ -95,6 +98,7 @@ WaveBuoyancy::WaveBuoyancy()
 
 WaveBuoyancy::~WaveBuoyancy() = default;
 
+//////////////////////////////////////////////////
 void WaveBuoyancy::Configure(
   const Entity &_entity,
   const std::shared_ptr<const sdf::Element> &_sdf,
@@ -146,6 +150,7 @@ void WaveBuoyancy::Configure(
         << this->dataPtr->hullRadius << " m" << std::endl;
 }
 
+//////////////////////////////////////////////////
 void WaveBuoyancy::PreUpdate(
   const UpdateInfo &_info,
   EntityComponentManager &_ecm)

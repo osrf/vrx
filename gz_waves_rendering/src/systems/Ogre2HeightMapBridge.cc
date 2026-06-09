@@ -58,6 +58,7 @@ namespace
 extern "C"
 {
 
+//////////////////////////////////////////////////
 waves_heightmap_t waves_ogre2_heightmap_create(
     void *_scene, void *_material, std::size_t _gridSize, const char *_name)
 {
@@ -190,6 +191,7 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   return hm;
 }
 
+//////////////////////////////////////////////////
 int waves_ogre2_heightmap_upload(
     waves_heightmap_t _handle, const double *_eta, const double *_dx,
     const double *_dy, const double *_foam, int _rows, int _cols)
@@ -248,12 +250,14 @@ int waves_ogre2_heightmap_upload(
   return 1;
 }
 
+//////////////////////////////////////////////////
 int waves_ogre2_heightmap_ready(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
   return (hm && hm->ready) ? 1 : 0;
 }
 
+//////////////////////////////////////////////////
 int waves_ogre2_heightmap_set_tex_filtering(
     waves_heightmap_t _handle, const char *_texUnitName)
 {
@@ -294,6 +298,7 @@ int waves_ogre2_heightmap_set_tex_filtering(
   }
 }
 
+//////////////////////////////////////////////////
 void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
 {
   auto *hm = static_cast<HeightMap *>(_handle);

@@ -86,6 +86,7 @@ public:
   waves_heightmap_t handle{nullptr};
 };
 
+//////////////////////////////////////////////////
 HeightMapTexture::HeightMapTexture(gz::rendering::ScenePtr _scene,
                                    gz::rendering::MaterialPtr _material,
                                    std::size_t _gridSize,
@@ -102,6 +103,7 @@ HeightMapTexture::HeightMapTexture(gz::rendering::ScenePtr _scene,
                  (api.ready(this->impl_->handle) != 0);
 }
 
+//////////////////////////////////////////////////
 HeightMapTexture::~HeightMapTexture()
 {
   if (!this->impl_ || !this->impl_->handle)
@@ -111,6 +113,7 @@ HeightMapTexture::~HeightMapTexture()
     api.destroy(this->impl_->handle);
 }
 
+//////////////////////////////////////////////////
 bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
                               const Eigen::MatrixXd &_dispX,
                               const Eigen::MatrixXd &_dispY,
@@ -151,6 +154,7 @@ bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
                     N, N) != 0;
 }
 
+//////////////////////////////////////////////////
 bool HeightMapTexture::SetTexFiltering(const std::string &_texUnitName)
 {
   if (!this->impl_->handle)

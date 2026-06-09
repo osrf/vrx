@@ -40,6 +40,7 @@ namespace
 // re-sending it until the GUI side is ready to deserialize.
 constexpr double kInitialReplicationSeconds = 5.0;
 
+//////////////////////////////////////////////////
 // --- set_parameters service: gz.msgs.Any -> scalar -------------------------
 // Read a numeric Any (DOUBLE / INT32 / BOOLEAN) as a double; false on a
 // non-numeric value so the caller can warn and skip rather than corrupt a field.
@@ -54,6 +55,7 @@ bool ReadDouble(const gz::msgs::Any &_v, double &_out)
   }
 }
 
+//////////////////////////////////////////////////
 // Read an integer Any (INT32, or a DOUBLE truncated) as an int.
 bool ReadInt(const gz::msgs::Any &_v, int &_out)
 {
@@ -65,6 +67,7 @@ bool ReadInt(const gz::msgs::Any &_v, int &_out)
   }
 }
 
+//////////////////////////////////////////////////
 // Merge the recognised keys in `_req` onto a copy of `_base` (partial update:
 // absent keys keep their current value). Keys mirror the <wave> SDF tags parsed
 // in ParseSdf — keep the two lists in sync. Sets `_matched` if at least one
@@ -175,6 +178,7 @@ class WavesSystemBase::Implementation
   public: std::optional<waves::WaveParameters> pendingParams;
 };
 
+//////////////////////////////////////////////////
 void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
 {
   // Note: the engine is fixed by the concrete system (its plugin identity), so
@@ -230,6 +234,7 @@ void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
   p.seaState   = wave->Get<int>("sea_state",          p.seaState  ).first;
 }
 
+//////////////////////////////////////////////////
 WavesSystemBase::WavesSystemBase()
   : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
@@ -237,6 +242,7 @@ WavesSystemBase::WavesSystemBase()
 
 WavesSystemBase::~WavesSystemBase() = default;
 
+//////////////////////////////////////////////////
 void WavesSystemBase::Configure(
   const Entity &/*_entity*/,
   const std::shared_ptr<const sdf::Element> &_sdf,
@@ -301,6 +307,7 @@ void WavesSystemBase::Configure(
         << std::endl;
 }
 
+//////////////////////////////////////////////////
 void WavesSystemBase::PreUpdate(
   const UpdateInfo &_info,
   EntityComponentManager &_ecm)
@@ -356,6 +363,7 @@ void WavesSystemBase::PreUpdate(
   }
 }
 
+//////////////////////////////////////////////////
 void WavesSystemBase::Implementation::ApplyPendingParams(
   EntityComponentManager &_ecm)
 {
@@ -390,6 +398,7 @@ void WavesSystemBase::Implementation::ApplyPendingParams(
         << ", seaState=" << params.seaState << ")" << std::endl;
 }
 
+//////////////////////////////////////////////////
 bool WavesSystemBase::Implementation::OnSetParameters(
   const gz::msgs::Param &_req, gz::msgs::Boolean &_rep)
 {

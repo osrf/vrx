@@ -156,6 +156,7 @@ namespace
   }
 }
 
+//////////////////////////////////////////////////
 bool WaterVisual::Implementation::ResolveVisual()
 {
   if (this->visual)
@@ -311,6 +312,7 @@ bool WaterVisual::Implementation::ResolveVisual()
   return this->material != nullptr;
 }
 
+//////////////////////////////////////////////////
 void WaterVisual::Implementation::UploadUniforms()
 {
   if (!this->material)
@@ -420,6 +422,7 @@ void WaterVisual::Implementation::UploadUniforms()
   this->lastUploadedGeneration = this->cachedGeneration;
 }
 
+//////////////////////////////////////////////////
 void WaterVisual::Implementation::OnSceneUpdate()
 {
   if (!this->active)
@@ -479,6 +482,7 @@ void WaterVisual::Implementation::OnSceneUpdate()
   }
 }
 
+//////////////////////////////////////////////////
 void WaterVisual::Implementation::OnRenderTeardown()
 {
   // Destroy the FFT heightmap texture BEFORE the scene/material handles
@@ -504,6 +508,7 @@ void WaterVisual::Implementation::OnRenderTeardown()
   this->lastUploadedGeneration = 0;
 }
 
+//////////////////////////////////////////////////
 WaterVisual::WaterVisual()
   : dataPtr(gz::utils::MakeUniqueImpl<Implementation>())
 {
@@ -511,6 +516,7 @@ WaterVisual::WaterVisual()
 
 WaterVisual::~WaterVisual() = default;
 
+//////////////////////////////////////////////////
 void WaterVisual::Configure(
   const Entity &_entity,
   const std::shared_ptr<const sdf::Element> &_sdf,
@@ -610,6 +616,7 @@ void WaterVisual::Configure(
       std::bind(&Implementation::OnRenderTeardown, this->dataPtr.get()));
 }
 
+//////////////////////////////////////////////////
 void WaterVisual::PreUpdate(
   const UpdateInfo &_info,
   EntityComponentManager &_ecm)
