@@ -98,7 +98,7 @@ waves::WaveParameters ApplyParam(waves::WaveParameters _p,
   auto warnType = [](const std::string &_k)
   {
     gzwarn << "[Waves] set_parameters: key '" << _k
-           << "' has a non-numeric value; ignored" << std::endl;
+           << "' has a non-numeric value; ignored" << '\n';
   };
 
   for (const auto &kv : _req.params())
@@ -131,7 +131,7 @@ waves::WaveParameters ApplyParam(waves::WaveParameters _p,
     else
     {
       gzwarn << "[Waves] set_parameters: unknown key '" << k << "' ignored"
-             << std::endl;
+             << '\n';
     }
   }
   return _p;
@@ -188,7 +188,7 @@ void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
 
   if (!_sdf->HasElement("wave"))
   {
-    gzwarn << "[Waves] no <wave> element found; using defaults" << std::endl;
+    gzwarn << "[Waves] no <wave> element found; using defaults" << '\n';
     return;
   }
 
@@ -258,7 +258,7 @@ void WavesSystemBase::Configure(
   if (!this->dataPtr->data.simulation)
   {
     gzerr << "[Waves] failed to create '" << this->dataPtr->data.algorithm
-          << "' engine; aborting" << std::endl;
+          << "' engine; aborting" << '\n';
     return;
   }
   this->dataPtr->data.generation = 1;
@@ -268,7 +268,7 @@ void WavesSystemBase::Configure(
   this->dataPtr->worldEnt = worldEntity(_ecm);
   if (this->dataPtr->worldEnt == kNullEntity)
   {
-    gzerr << "[Waves] no world entity found; aborting" << std::endl;
+    gzerr << "[Waves] no world entity found; aborting" << '\n';
     return;
   }
 
@@ -291,11 +291,11 @@ void WavesSystemBase::Configure(
         &Implementation::OnSetParameters, this->dataPtr.get()))
   {
     gzmsg << "[Waves] runtime parameter service: " << service
-          << " (gz.msgs.Param -> gz.msgs.Boolean)" << std::endl;
+          << " (gz.msgs.Param -> gz.msgs.Boolean)" << '\n';
   }
   else
   {
-    gzwarn << "[Waves] failed to advertise '" << service << "'" << std::endl;
+    gzwarn << "[Waves] failed to advertise '" << service << "'" << '\n';
   }
 
   gzmsg << "[Waves] wavefield component created on world entity "
@@ -304,7 +304,7 @@ void WavesSystemBase::Configure(
         << ", model=" << this->dataPtr->data.params.model
         << ", seaState=" << this->dataPtr->data.params.seaState
         << ", generation=" << this->dataPtr->data.generation << ")"
-        << std::endl;
+        << '\n';
 }
 
 //////////////////////////////////////////////////
@@ -369,7 +369,7 @@ void WavesSystemBase::Implementation::ApplyPendingParams(
 {
   waves::WaveParameters params;
   {
-    std::lock_guard<std::mutex> lock(this->paramMutex);
+    const std::lock_guard<std::mutex> lock(this->paramMutex);
     if (!this->pendingParams)
       return;
     params = *this->pendingParams;
@@ -395,7 +395,7 @@ void WavesSystemBase::Implementation::ApplyPendingParams(
 
   gzmsg << "[Waves] runtime parameters applied (generation="
         << this->data.generation << ", model=" << params.model
-        << ", seaState=" << params.seaState << ")" << std::endl;
+        << ", seaState=" << params.seaState << ")" << '\n';
 }
 
 //////////////////////////////////////////////////
@@ -404,7 +404,7 @@ bool WavesSystemBase::Implementation::OnSetParameters(
 {
   bool matched = false;
   {
-    std::lock_guard<std::mutex> lock(this->paramMutex);
+    const std::lock_guard<std::mutex> lock(this->paramMutex);
     const waves::WaveParameters base =
       this->pendingParams ? *this->pendingParams : this->currentParams;
     const waves::WaveParameters updated = ApplyParam(base, _req, matched);
@@ -413,7 +413,7 @@ bool WavesSystemBase::Implementation::OnSetParameters(
   }
   if (!matched)
     gzwarn << "[Waves] set_parameters: no recognised wave parameter keys"
-           << std::endl;
+           << '\n';
   _rep.set_data(matched);
   return true;
 }

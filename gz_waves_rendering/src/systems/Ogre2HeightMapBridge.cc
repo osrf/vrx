@@ -74,13 +74,13 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   auto *ogreScene = dynamic_cast<gz::rendering::Ogre2Scene *>(scene);
   if (!ogreScene)
   {
-    gzerr << "[waves_ogre2_heightmap] scene is not an Ogre2Scene" << std::endl;
+    gzerr << "[waves_ogre2_heightmap] scene is not an Ogre2Scene" << '\n';
     return nullptr;
   }
   auto *sceneManager = ogreScene->OgreSceneManager();
   if (!sceneManager)
   {
-    gzerr << "[waves_ogre2_heightmap] no Ogre scene manager" << std::endl;
+    gzerr << "[waves_ogre2_heightmap] no Ogre scene manager" << '\n';
     return nullptr;
   }
 
@@ -88,7 +88,7 @@ waves_heightmap_t waves_ogre2_heightmap_create(
       sceneManager->getDestinationRenderSystem()->getTextureGpuManager();
   if (!manager)
   {
-    gzerr << "[waves_ogre2_heightmap] no Ogre TextureGpuManager" << std::endl;
+    gzerr << "[waves_ogre2_heightmap] no Ogre TextureGpuManager" << '\n';
     return nullptr;
   }
 
@@ -97,7 +97,7 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   // "Texture memory budget exceeded. Stalling GPU." early in scene load.
   // Default in 2.3.x is conservative for a scene with several streaming
   // textures.
-  manager->setStagingTextureMaxBudgetBytes(256u * 1024u * 1024u);  // 256 MB
+  manager->setStagingTextureMaxBudgetBytes(std::size_t{256} * 1024 * 1024);  // 256 MB
 
   auto *hm = new HeightMap();
   hm->gridSize = _gridSize;
@@ -140,7 +140,7 @@ waves_heightmap_t waves_ogre2_heightmap_create(
     if (!ogreMat || !ogreMat->Material())
     {
       gzerr << "[waves_ogre2_heightmap] material is not an Ogre2Material"
-            << std::endl;
+            << '\n';
       manager->destroyTexture(hm->texture);
       delete hm;
       return nullptr;
@@ -204,7 +204,7 @@ int waves_ogre2_heightmap_upload(
   if (_rows != N || _cols != N)
   {
     gzerr << "[waves_ogre2_heightmap] grid size mismatch (" << _rows << "x"
-          << _cols << ", expected " << N << "x" << N << ")" << std::endl;
+          << _cols << ", expected " << N << "x" << N << ")" << '\n';
     return 0;
   }
   if (!hm->staging)
@@ -217,7 +217,7 @@ int waves_ogre2_heightmap_upload(
   hm->texture->scheduleTransitionTo(Ogre::GpuResidency::Resident, nullptr);
 
   hm->staging->startMapRegion();
-  Ogre::TextureBox box =
+  const Ogre::TextureBox box =
       hm->staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
 
   // Pack one RGBA32F texel per (row, col): (η, Dx, Dy, foam). `foam` carries
@@ -287,13 +287,13 @@ int waves_ogre2_heightmap_set_tex_filtering(
     sb.mW = Ogre::TAM_WRAP;
     texUnit->setSamplerblock(sb);
     gzmsg << "[waves_ogre2_heightmap] tex unit '" << _texUnitName
-          << "' filtering set to anisotropic+trilinear" << std::endl;
+          << "' filtering set to anisotropic+trilinear" << '\n';
     return 1;
   }
   catch (const Ogre::Exception &e)
   {
     gzerr << "[waves_ogre2_heightmap] set_tex_filtering threw: "
-          << e.getDescription() << std::endl;
+          << e.getDescription() << '\n';
     return 0;
   }
 }
@@ -312,8 +312,16 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
   {
     if (hm->staging)
     {
-      try { hm->manager->removeStagingTexture(hm->staging); }
-      catch (const Ogre::Exception &) { /* engine already torn down */ }
+      try
+      {
+        hm->manager->removeStagingTexture(hm->staging);
+      }
+      catch (const Ogre::Exception &e)
+      {
+        gzdbg << "[waves_ogre2_heightmap] removeStagingTexture threw during "
+              << "shutdown (likely already destroyed): "
+              << e.getDescription() << '\n';
+      }
       hm->staging = nullptr;
     }
     if (hm->texture)
@@ -326,7 +334,7 @@ void waves_ogre2_heightmap_destroy(waves_heightmap_t _handle)
       {
         gzdbg << "[waves_ogre2_heightmap] destroyTexture threw during "
               << "shutdown (likely already destroyed): "
-              << e.getDescription() << std::endl;
+              << e.getDescription() << '\n';
       }
     }
   }

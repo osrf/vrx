@@ -78,7 +78,7 @@ void WaveBuoyancy::Implementation::ParsePoints(const sdf::ElementPtr &_sdf)
   auto sdfPoints = _sdf->GetElement("points");
   if (!sdfPoints->HasElement("point"))
   {
-    gzerr << "[WaveBuoyancy] <points> has no <point> children" << std::endl;
+    gzerr << "[WaveBuoyancy] <points> has no <point> children" << '\n';
     return;
   }
   for (auto p = sdfPoints->GetElement("point"); p;
@@ -109,15 +109,15 @@ void WaveBuoyancy::Configure(
 
   if (!sdf->HasElement("link_name"))
   {
-    gzerr << "[WaveBuoyancy] <link_name> is required" << std::endl;
+    gzerr << "[WaveBuoyancy] <link_name> is required" << '\n';
     return;
   }
   const auto linkName = sdf->Get<std::string>("link_name");
-  Model model(_entity);
+  const Model model(_entity);
   this->dataPtr->link = Link(model.LinkByName(_ecm, linkName));
   if (!this->dataPtr->link.Valid(_ecm))
   {
-    gzerr << "[WaveBuoyancy] link '" << linkName << "' not found" << std::endl;
+    gzerr << "[WaveBuoyancy] link '" << linkName << "' not found" << '\n';
     return;
   }
 
@@ -134,7 +134,7 @@ void WaveBuoyancy::Configure(
   if (this->dataPtr->points.empty())
   {
     gzerr << "[WaveBuoyancy] no buoyancy <points> defined for link '"
-          << linkName << "'" << std::endl;
+          << linkName << "'" << '\n';
     return;
   }
 
@@ -147,7 +147,7 @@ void WaveBuoyancy::Configure(
   gzmsg << "[WaveBuoyancy] configured on link '" << linkName << "': "
         << this->dataPtr->points.size() << " sample points, "
         << "hull " << this->dataPtr->hullLength << "x"
-        << this->dataPtr->hullRadius << " m" << std::endl;
+        << this->dataPtr->hullRadius << " m" << '\n';
 }
 
 //////////////////////////////////////////////////

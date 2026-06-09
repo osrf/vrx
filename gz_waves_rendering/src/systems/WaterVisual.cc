@@ -202,7 +202,7 @@ bool WaterVisual::Implementation::ResolveVisual()
       return false;
 
     const std::string &vsUri = this->fftVertexShaderUri;
-    gzmsg << "[WaterVisual] creating material with shaders" << std::endl;
+    gzmsg << "[WaterVisual] creating material with shaders" << '\n';
 
     auto mat = this->scene->CreateMaterial();
     mat->SetVertexShader(vsUri);
@@ -224,7 +224,7 @@ bool WaterVisual::Implementation::ResolveVisual()
     this->material = this->visual->Material();
     if (!this->material)
     {
-      gzerr << "[WaterVisual] failed to attach material to visual" << std::endl;
+      gzerr << "[WaterVisual] failed to attach material to visual" << '\n';
       return false;
     }
     // Latch which shader the material was actually created with — see
@@ -258,7 +258,7 @@ bool WaterVisual::Implementation::ResolveVisual()
       if (!this->heightMap->Ready())
       {
         gzerr << "[WaterVisual] heightmap texture failed to initialize"
-              << std::endl;
+              << '\n';
       }
     }
 
@@ -279,7 +279,7 @@ bool WaterVisual::Implementation::ResolveVisual()
       gzmsg << "[WaterVisual] spawning tile instances: radius=" << r
             << " mesh_size=" << this->tileMeshSize << "m → "
             << ((2 * r + 1) * (2 * r + 1) - 1) << " extra tiles"
-            << std::endl;
+            << '\n';
       for (int j = -r; j <= r; ++j)
       {
         for (int i = -r; i <= r; ++i)
@@ -288,10 +288,10 @@ bool WaterVisual::Implementation::ResolveVisual()
           const std::string tileName =
               "water_tile_" + std::to_string(this->visualEntity) + "_" +
               std::to_string(i) + "_" + std::to_string(j);
-          gz::rendering::VisualPtr tile = this->scene->CreateVisual(tileName);
+          const gz::rendering::VisualPtr tile = this->scene->CreateVisual(tileName);
           if (!tile) continue;
-          gz::rendering::MeshDescriptor desc(meshPath);
-          gz::rendering::MeshPtr mesh = this->scene->CreateMesh(desc);
+          const gz::rendering::MeshDescriptor desc(meshPath);
+          const gz::rendering::MeshPtr mesh = this->scene->CreateMesh(desc);
           if (!mesh)
           {
             this->scene->DestroyVisual(tile);
@@ -319,7 +319,7 @@ void WaterVisual::Implementation::UploadUniforms()
     return;
   gzmsg << "[WaterVisual] uploading uniforms: tileSize=" << this->cachedTileSize
         << " gridSize=" << this->cachedGridSize << " tau=" << this->cachedTau
-        << std::endl;
+        << '\n';
 
   auto vsParams = this->material->VertexShaderParams();
   auto fsParams = this->material->FragmentShaderParams();
@@ -432,7 +432,7 @@ void WaterVisual::Implementation::OnSceneUpdate()
   if (!this->ResolveVisual())
     return;
 
-  std::lock_guard<std::mutex> lock(this->mutex_);
+  const std::lock_guard<std::mutex> lock(this->mutex_);
   if (this->haveWavefield &&
       this->cachedGeneration != this->lastUploadedGeneration)
   {
@@ -476,7 +476,7 @@ void WaterVisual::Implementation::OnSceneUpdate()
       {
         logged = true;
         gzmsg << "[WaterVisual] first Field upload: grid=" << f->n
-              << " tile=" << f->tile << " m" << std::endl;
+              << " tile=" << f->tile << " m" << '\n';
       }
     }
   }
@@ -504,7 +504,7 @@ void WaterVisual::Implementation::OnRenderTeardown()
   this->material.reset();
   this->scene.reset();
   // Force re-upload after the scene rebuilds.
-  std::lock_guard<std::mutex> lock(this->mutex_);
+  const std::lock_guard<std::mutex> lock(this->mutex_);
   this->lastUploadedGeneration = 0;
 }
 
@@ -528,7 +528,7 @@ void WaterVisual::Configure(
 
   if (!sdf->HasElement("shader"))
   {
-    gzerr << "[WaterVisual] <shader> element is required" << std::endl;
+    gzerr << "[WaterVisual] <shader> element is required" << '\n';
     return;
   }
 
@@ -538,13 +538,13 @@ void WaterVisual::Configure(
 
   // Dedupe: only the first instance for this entity does real work.
   {
-    std::lock_guard<std::mutex> lock(VisualClaimMutex());
+    const std::lock_guard<std::mutex> lock(VisualClaimMutex());
     auto &claims = VisualClaimSet();
     if (claims.count(_entity))
     {
       gzmsg << "[WaterVisual] entity " << _entity
             << " already claimed by another WaterVisual instance — "
-            << "this one will be inactive" << std::endl;
+            << "this one will be inactive" << '\n';
       this->dataPtr->active = false;
       return;
     }
@@ -636,7 +636,7 @@ void WaterVisual::PreUpdate(
       : nullptr;
 
 
-  std::lock_guard<std::mutex> lock(this->dataPtr->mutex_);
+  const std::lock_guard<std::mutex> lock(this->dataPtr->mutex_);
   this->dataPtr->currentSimTime = t;
   if (!wfComp)
   {
@@ -651,7 +651,7 @@ void WaterVisual::PreUpdate(
   {
     gzmsg << "[WaterVisual] Wavefield component found (algorithm="
           << data.algorithm << ", generation=" << data.generation << ")"
-          << std::endl;
+          << '\n';
   }
 
   // Build and OWN a private engine instance from the replicated parameters,

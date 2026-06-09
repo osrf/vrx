@@ -24,7 +24,7 @@ namespace gz::sim::waves
 
 /// \brief Analytic sum-of-Gerstners wave model. Closed-form for each of up
 /// to N component waves; deterministic; unbounded in space.
-class GerstnerWaveSimulation : public IWaveField
+class GerstnerWaveSimulation final : public IWaveField
 {
 public:
   /// \brief Default-construct an unconfigured field. Call `SetParameters`

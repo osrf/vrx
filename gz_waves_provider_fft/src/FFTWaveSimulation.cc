@@ -145,15 +145,15 @@ void ApplyEncinoParams(EncinoWaves::Parametersf &ep, const WaveParameters &p)
 {
   if (!SpectrumFromString(p.spectrum, ep.spectrum.type))
     std::cerr << "[FFTWaveSimulation] ignoring unknown <spectrum>='"
-              << p.spectrum << "' (want pms|jonswap|tma)" << std::endl;
+              << p.spectrum << "' (want pms|jonswap|tma)" << '\n';
   if (!DispersionFromString(p.dispersion, ep.dispersion.type))
     std::cerr << "[FFTWaveSimulation] ignoring unknown <dispersion>='"
-              << p.dispersion << "' (want deep|finite|capillary)" << std::endl;
+              << p.dispersion << "' (want deep|finite|capillary)" << '\n';
   if (!SpreadingFromString(p.spreading, ep.directionalSpreading.type))
     std::cerr << "[FFTWaveSimulation] ignoring unknown <spreading>='"
               << p.spreading
               << "' (want poscos2|mitsuyasu|hasselmann|donelanbanner)"
-              << std::endl;
+              << '\n';
 
   ep.depth         = static_cast<float>(p.depth);
   ep.fetch         = static_cast<float>(p.fetch);
@@ -235,7 +235,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
     const std::size_t adjusted = CeilPow2(this->gridSize_);
     std::cerr << "[FFTWaveSimulation] grid_size=" << this->gridSize_
               << " is not a power of two (required by the FFT spectrum); using "
-              << adjusted << std::endl;
+              << adjusted << '\n';
     this->gridSize_ = adjusted;
   }
 
@@ -308,7 +308,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
             << " ampCalib=" << this->encinoScale_
             << " targetHs=" << (4.0 * 0.21 / (4.0 * kGravity) *
                                 this->windSpeed_ * this->windSpeed_)
-            << "m)" << std::endl;
+            << "m)" << '\n';
 
   this->Update(0.0);
 }

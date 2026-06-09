@@ -116,7 +116,7 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
     else
     {
       std::cerr << "[GerstnerWaveSimulation] unknown spectrum model '"
-                << p.model << "'; expected 'PMS' or 'CWR'." << std::endl;
+                << p.model << "'; expected 'PMS' or 'CWR'." << '\n';
       amplitudes_.clear();
       wavenumbers_.clear();
       angularFrequencies_.clear();

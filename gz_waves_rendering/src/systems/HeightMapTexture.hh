@@ -47,8 +47,8 @@ namespace gz::sim::systems
     ///   `uniform sampler2D heightMap`.
     /// \param[in] _gridSize Resolution per axis (power of two).
     /// \param[in] _textureName Unique name for the GPU texture.
-    HeightMapTexture(gz::rendering::ScenePtr _scene,
-                     gz::rendering::MaterialPtr _material,
+    HeightMapTexture(const gz::rendering::ScenePtr &_scene,
+                     const gz::rendering::MaterialPtr &_material,
                      std::size_t _gridSize,
                      const std::string &_textureName);
 

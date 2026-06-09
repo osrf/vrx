@@ -34,7 +34,7 @@ struct WaveParameters;
 /// Queries outside the tile are wrapped via `fmod`. Each call to `Update`
 /// regenerates the grid for that time; per-point queries (`Elevation`,
 /// `ParticleVelocity`, ...) bilinear-sample the stored grid.
-class FFTWaveSimulation : public IWaveField
+class FFTWaveSimulation final : public IWaveField
 {
 public:
   /// \brief Default-construct an unconfigured field. Call `SetParameters`

@@ -56,7 +56,7 @@ namespace
       {
         gzerr << "[HeightMapTexture] failed to dlopen "
               << "libwaves-ogre2-bridge.so: "
-              << (dlerror() ? dlerror() : "unknown") << std::endl;
+              << (dlerror() ? dlerror() : "unknown") << '\n';
         return;
       }
       api.create  = reinterpret_cast<CreateFn>(
@@ -73,7 +73,7 @@ namespace
       if (!api.loaded)
       {
         gzerr << "[HeightMapTexture] bridge is missing one or more C-ABI "
-              << "symbols" << std::endl;
+              << "symbols" << '\n';
       }
     });
     return api;
@@ -87,8 +87,8 @@ public:
 };
 
 //////////////////////////////////////////////////
-HeightMapTexture::HeightMapTexture(gz::rendering::ScenePtr _scene,
-                                   gz::rendering::MaterialPtr _material,
+HeightMapTexture::HeightMapTexture(const gz::rendering::ScenePtr &_scene,
+                                   const gz::rendering::MaterialPtr &_material,
                                    std::size_t _gridSize,
                                    const std::string &_textureName)
   : impl_(std::make_unique<Impl>())
@@ -130,7 +130,7 @@ bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
       _dispY.rows() != N || _dispY.cols() != N)
   {
     gzerr << "[HeightMapTexture] grid size mismatch (expected "
-          << N << "x" << N << ")" << std::endl;
+          << N << "x" << N << ")" << '\n';
     return false;
   }
   // Eigen defaults to column-major storage. The bridge expects row-major

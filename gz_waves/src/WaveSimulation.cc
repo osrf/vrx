@@ -45,7 +45,7 @@ std::mutex &RegistryMutex()
 void RegisterWaveEngineFactory(const std::string &_token,
                                WaveEngineFactory _factory)
 {
-  std::lock_guard<std::mutex> lock(RegistryMutex());
+  const std::lock_guard<std::mutex> lock(RegistryMutex());
   Registry()[_token] = std::move(_factory);
 }
 
@@ -59,7 +59,7 @@ std::shared_ptr<IWaveField> CreateWaveSimulation(
   // serialize other registrations).
   WaveEngineFactory factory;
   {
-    std::lock_guard<std::mutex> lock(RegistryMutex());
+    const std::lock_guard<std::mutex> lock(RegistryMutex());
     auto it = Registry().find(_algorithm);
     if (it != Registry().end())
       factory = it->second;
@@ -70,7 +70,7 @@ std::shared_ptr<IWaveField> CreateWaveSimulation(
     std::cerr << "[CreateWaveSimulation] no engine registered for '"
               << _algorithm << "'. A consumer that links the engine must call "
               << "RegisterWaveEngineFactory first — the system plugins do this "
-              << "on the server, the water visual on the GUI." << std::endl;
+              << "on the server, the water visual on the GUI." << '\n';
     return nullptr;
   }
 
@@ -78,7 +78,7 @@ std::shared_ptr<IWaveField> CreateWaveSimulation(
   if (!field)
   {
     std::cerr << "[CreateWaveSimulation] factory for '" << _algorithm
-              << "' returned null" << std::endl;
+              << "' returned null" << '\n';
     return nullptr;
   }
   field->SetParameters(_params);
