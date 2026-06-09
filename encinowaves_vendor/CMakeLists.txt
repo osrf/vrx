@@ -4,9 +4,11 @@ project(encinowaves_vendor)
 # ----------------------------------------------------------------------------
 # C++ standard
 # ----------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
 
 # Vendored EncinoWaves instantiates templates only partially, leaving some
 # static helpers unused; silence that (upstream code, not ours). The
