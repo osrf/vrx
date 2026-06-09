@@ -236,7 +236,7 @@ spectral models are chosen from SDF via `<spectrum>`/`<spreading>`/`<dispersion>
 
 ### 6.1 What EncinoWaves is
 
-`encino_waves/` is a vendored, Apache-2.0 C++ library implementing Christopher
+`encinowaves_vendor/` is a vendored, Apache-2.0 C++ library implementing Christopher
 Horvath's 2015 paper *"Empirical Directional Wave Spectra for Computer
 Graphics."* It is a Tessendorf-style spectral FFT ocean built around
 oceanographically-validated spectra and directional-spreading models rather than
@@ -246,7 +246,7 @@ FFTW), **TBB-parallelized**.
 
 ### 6.2 The pipeline
 
-Each stage is pluggable (`encino_waves/include/EncinoWaves/`); **bold** is the
+Each stage is pluggable (`encinowaves_vendor/include/EncinoWaves/`); **bold** is the
 default used when the SDF selector is omitted:
 
 | Component | SDF tag | Options (default **bold**) |

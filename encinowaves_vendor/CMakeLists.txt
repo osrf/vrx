@@ -34,7 +34,7 @@ find_package(TBB REQUIRED)
 find_package(Imath REQUIRED)
 
 # ----------------------------------------------------------------------------
-# Library: encino_waves
+# Library: encinowaves_vendor
 # ----------------------------------------------------------------------------
 # Most of EncinoWaves is header-only templates instantiated by the
 # consumer. The .cpp files just carry a handful of static-singleton
@@ -100,7 +100,7 @@ if(BUILD_TESTING)
 endif()
 
 # ----------------------------------------------------------------------------
-# Ament export — let downstream packages `find_package(encino_waves)`
+# Ament export — let downstream packages `find_package(encinowaves_vendor)`
 # and pick up the include dirs, library target, and transitive deps.
 # ----------------------------------------------------------------------------
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)

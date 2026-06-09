@@ -21,7 +21,7 @@ instance you hold" determinism rule — but realized them differently:
 | `WaveParameters` dropped; each provider parses its own SDF sub-tree | `WaveParameters` retained (model/period/grid_size/seed/choppiness/sea_state/…); both engines read the same struct. |
 | Encino knobs become the FFT provider's **own SDF tags** in `config` | Encino tuning is still exposed as **`GZ_WAVES_ENCINO_*` environment variables**. |
 | Sea state stored as `targetHs` [m] (a universal field) | Sea state is an SDF **`<sea_state>` integer (WMO 0–9)** in `WaveParameters`, resolved to Hs to override `<period>`/`<gain>`. |
-| Rich FFT/Encino provider lives in a separate **`vrx_waves`** package | It lives in **`gz_waves_provider_fft`** (Gerstner in `gz_waves_provider_gerstner`); `encino_waves` is vendored. |
+| Rich FFT/Encino provider lives in a separate **`vrx_waves`** package | It lives in **`gz_waves_provider_fft`** (Gerstner in `gz_waves_provider_gerstner`); `encinowaves_vendor` is vendored. |
 | `Capabilities`/`Caps()`, `Grid()`, `Foam()`, `Velocity()` on the socket | The shipped `IWaveField` exposes `Elevation`/`ParticleVelocity`/`Normal`/`Jacobian`/`SetParameters`/`Kind` (pure) + `Update`/`Bounds`/`Field` (defaulted); no `Capabilities`. Foam is the `Field()` grid's foam channel. |
 
 What **did** carry over intact: the component is a *recipe, not pixels* — each
@@ -331,7 +331,7 @@ half-updated field.
 | `gz_waves` (core) | `IWaveField`, `WaveGrid`, `Capabilities`, the `Wavefield` component (recipe: provider + seed + targetHs + config blob), query helpers, the `Waves` system, provider **discovery via gz-plugin**, consumer systems (`WaveBuoyancy`, hydro), **+ the simple Gerstner provider** | → gz-sim upstream |
 | `gz_waves_rendering` | `WaterVisual` + the engine-specific heightmap→GPU bridge; consumes a `WaveGrid`, provider-agnostic | → gz-sim/rendering upstream |
 | `vrx_waves` | the rich **FFT/Encino** provider (a gz-plugin) | stays in VRX |
-| `encino_waves` | vendored Horvath library | dependency of `vrx_waves` only |
+| `encinowaves_vendor` | vendored Horvath library | dependency of `vrx_waves` only |
 
 **Discipline that makes upstreaming a lift-and-shift:** the core package must
 compile with nothing gz-sim doesn't already have — **no Encino, no Ogre, no
