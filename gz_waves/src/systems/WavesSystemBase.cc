@@ -11,12 +11,20 @@
 #include "gz/sim/systems/WavesSystemBase.hh"
 
 #include <chrono>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <unordered_map>
 
 #include <gz/common/Console.hh>
+#include <gz/msgs/boolean.pb.h>
+#include <gz/msgs/param.pb.h>
 #include <gz/sim/Util.hh>
+#include <gz/transport/Node.hh>
 
 #include <sdf/Element.hh>
 
+#include "gz/sim/components/Name.hh"
 #include "gz/sim/components/Wavefield.hh"
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -31,6 +39,87 @@ namespace
 // Repeatedly marking the component as changed lets SceneBroadcaster keep
 // re-sending it until the GUI side is ready to deserialize.
 constexpr double kInitialReplicationSeconds = 5.0;
+
+// --- set_parameters service: gz.msgs.Any -> scalar -------------------------
+// Read a numeric Any (DOUBLE / INT32 / BOOLEAN) as a double; false on a
+// non-numeric value so the caller can warn and skip rather than corrupt a field.
+bool ReadDouble(const gz::msgs::Any &_v, double &_out)
+{
+  switch (_v.type())
+  {
+    case gz::msgs::Any::DOUBLE:  _out = _v.double_value();           return true;
+    case gz::msgs::Any::INT32:   _out = _v.int_value();              return true;
+    case gz::msgs::Any::BOOLEAN: _out = _v.bool_value() ? 1.0 : 0.0; return true;
+    default: return false;
+  }
+}
+
+// Read an integer Any (INT32, or a DOUBLE truncated) as an int.
+bool ReadInt(const gz::msgs::Any &_v, int &_out)
+{
+  switch (_v.type())
+  {
+    case gz::msgs::Any::INT32:  _out = _v.int_value();                      return true;
+    case gz::msgs::Any::DOUBLE: _out = static_cast<int>(_v.double_value()); return true;
+    default: return false;
+  }
+}
+
+// Merge the recognised keys in `_req` onto a copy of `_base` (partial update:
+// absent keys keep their current value). Keys mirror the <wave> SDF tags parsed
+// in ParseSdf — keep the two lists in sync. Sets `_matched` if at least one
+// wave parameter was recognised.
+waves::WaveParameters ApplyParam(waves::WaveParameters _p,
+    const gz::msgs::Param &_req, bool &_matched)
+{
+  // Double-valued tags (key -> destination field in the copy `_p`).
+  const std::unordered_map<std::string, double *> doubles{
+    {"period", &_p.period},     {"amplitude", &_p.amplitude},
+    {"direction", &_p.direction}, {"angle", &_p.angle},
+    {"scale", &_p.scale},       {"steepness", &_p.steepness},
+    {"phase", &_p.phase},       {"tau", &_p.tau},
+    {"gain", &_p.gain},         {"tile_size", &_p.tileSize},
+    {"choppiness", &_p.choppiness}};
+
+  auto warnType = [](const std::string &_k)
+  {
+    gzwarn << "[Waves] set_parameters: key '" << _k
+           << "' has a non-numeric value; ignored" << std::endl;
+  };
+
+  for (const auto &kv : _req.params())
+  {
+    const std::string &k = kv.first;
+    const gz::msgs::Any &v = kv.second;
+    double d = 0.0;
+    int i = 0;
+    if (auto it = doubles.find(k); it != doubles.end())
+    {
+      if (ReadDouble(v, d)) { *it->second = d; _matched = true; }
+      else warnType(k);
+    }
+    else if (k == "model")
+    {
+      if (v.type() == gz::msgs::Any::STRING)
+      { _p.model = v.string_value(); _matched = true; }
+      else warnType(k);
+    }
+    else if (k == "number")
+    { if (ReadInt(v, i)) { _p.number = static_cast<std::size_t>(i); _matched = true; } else warnType(k); }
+    else if (k == "grid_size")
+    { if (ReadInt(v, i)) { _p.gridSize = static_cast<std::size_t>(i); _matched = true; } else warnType(k); }
+    else if (k == "seed")
+    { if (ReadInt(v, i)) { _p.seed = static_cast<std::uint32_t>(i); _matched = true; } else warnType(k); }
+    else if (k == "sea_state")
+    { if (ReadInt(v, i)) { _p.seaState = i; _matched = true; } else warnType(k); }
+    else
+    {
+      gzwarn << "[Waves] set_parameters: unknown key '" << k << "' ignored"
+             << std::endl;
+    }
+  }
+  return _p;
+}
 }
 
 class WavesSystemBase::Implementation
@@ -50,6 +139,27 @@ class WavesSystemBase::Implementation
 
   /// \brief Last sim time at which `simulation->Update` was called.
   public: double lastUpdateTime{-1.0};
+
+  /// \brief Drain a queued runtime parameter update (from the set_parameters
+  /// service) on the ECM thread: reconfigure the engine, bump the generation,
+  /// and re-broadcast the Wavefield component. No-op when nothing is queued.
+  public: void ApplyPendingParams(EntityComponentManager &_ecm);
+
+  /// \brief set_parameters service handler. Runs on a gz-transport thread, so
+  /// it only validates + queues the new parameters; PreUpdate applies them.
+  public: bool OnSetParameters(
+    const gz::msgs::Param &_req, gz::msgs::Boolean &_rep);
+
+  /// \brief Transport node owning the set_parameters service.
+  public: gz::transport::Node node;
+  /// \brief Guards `currentParams` + `pendingParams` across the transport and
+  /// ECM threads.
+  public: std::mutex paramMutex;
+  /// \brief Latest applied wave parameters — the base a partial service update
+  /// is merged onto. Mutex-protected (the transport thread reads it).
+  public: waves::WaveParameters currentParams;
+  /// \brief Parameters queued by the service, applied in the next PreUpdate.
+  public: std::optional<waves::WaveParameters> pendingParams;
 };
 
 void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
@@ -118,6 +228,7 @@ void WavesSystemBase::Configure(
   }
   this->dataPtr->data.generation = 1;
   this->dataPtr->data.updateRate = this->dataPtr->updateRate;
+  this->dataPtr->currentParams = this->dataPtr->data.params;
 
   this->dataPtr->worldEnt = worldEntity(_ecm);
   if (this->dataPtr->worldEnt == kNullEntity)
@@ -130,6 +241,27 @@ void WavesSystemBase::Configure(
     components::Wavefield(this->dataPtr->data));
   this->dataPtr->componentType = components::Wavefield::typeId;
   this->dataPtr->componentReady = true;
+
+  // Advertise a runtime parameter-update service. Callers send a gz.msgs.Param
+  // map of <wave> tag names -> values (partial: omitted keys keep their current
+  // value) and get a gz.msgs.Boolean ack. The change is queued here and applied
+  // on the ECM thread in PreUpdate.
+  std::string worldName;
+  if (auto *nameComp =
+        _ecm.Component<components::Name>(this->dataPtr->worldEnt))
+    worldName = nameComp->Data();
+  const std::string service =
+    "/world/" + worldName + "/wave/set_parameters";
+  if (this->dataPtr->node.Advertise(service,
+        &Implementation::OnSetParameters, this->dataPtr.get()))
+  {
+    gzmsg << "[Waves] runtime parameter service: " << service
+          << " (gz.msgs.Param -> gz.msgs.Boolean)" << std::endl;
+  }
+  else
+  {
+    gzwarn << "[Waves] failed to advertise '" << service << "'" << std::endl;
+  }
 
   gzmsg << "[Waves] wavefield component created on world entity "
         << this->dataPtr->worldEnt
@@ -146,6 +278,9 @@ void WavesSystemBase::PreUpdate(
 {
   if (!this->dataPtr->data.simulation)
     return;
+
+  // Drain any runtime parameter update queued by the set_parameters service.
+  this->dataPtr->ApplyPendingParams(_ecm);
 
   const double simTime = std::chrono::duration<double>(
     _info.simTime).count();
@@ -190,6 +325,59 @@ void WavesSystemBase::PreUpdate(
                       ComponentState::OneTimeChange);
     }
   }
+}
+
+void WavesSystemBase::Implementation::ApplyPendingParams(
+  EntityComponentManager &_ecm)
+{
+  waves::WaveParameters params;
+  {
+    std::lock_guard<std::mutex> lock(this->paramMutex);
+    if (!this->pendingParams)
+      return;
+    params = *this->pendingParams;
+    this->pendingParams.reset();
+    this->currentParams = params;
+  }
+
+  // Reconfigure the server-side engine in place. WaveBuoyancy reads this same
+  // instance out of the component each tick, so it picks up the change with no
+  // extra signalling; WaterVisual (GUI) rebuilds its own engine off the bumped
+  // generation below. `data` is touched only on this (ECM) thread.
+  this->data.params = params;
+  this->data.simulation->SetParameters(params);
+  this->data.generation += 1;
+  this->lastUpdateTime = -1.0;  // advance the field next tick, unthrottled
+
+  if (auto *comp = _ecm.Component<components::Wavefield>(this->worldEnt))
+  {
+    comp->Data() = this->data;
+    _ecm.SetChanged(this->worldEnt, this->componentType,
+                    ComponentState::OneTimeChange);
+  }
+
+  gzmsg << "[Waves] runtime parameters applied (generation="
+        << this->data.generation << ", model=" << params.model
+        << ", seaState=" << params.seaState << ")" << std::endl;
+}
+
+bool WavesSystemBase::Implementation::OnSetParameters(
+  const gz::msgs::Param &_req, gz::msgs::Boolean &_rep)
+{
+  bool matched = false;
+  {
+    std::lock_guard<std::mutex> lock(this->paramMutex);
+    const waves::WaveParameters base =
+      this->pendingParams ? *this->pendingParams : this->currentParams;
+    const waves::WaveParameters updated = ApplyParam(base, _req, matched);
+    if (matched)
+      this->pendingParams = updated;
+  }
+  if (!matched)
+    gzwarn << "[Waves] set_parameters: no recognised wave parameter keys"
+           << std::endl;
+  _rep.set_data(matched);
+  return true;
 }
 
 }  // namespace gz::sim::systems

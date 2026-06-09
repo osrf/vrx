@@ -31,6 +31,12 @@ advances the instance it holds, never assuming another system did**) is enforced
 — e.g. `WaterVisual` builds and owns its own engine rather than sharing the
 server's.
 
+**Runtime parameter updates** (the *Runtime parameters* section below) are also
+implemented: the source advertises `…/wave/set_parameters` — a `gz.msgs.Param`
+key→value map (partial update) rather than the opaque `config` string sketched
+here — which mutates the `Wavefield` component and bumps `generation` exactly as
+designed, so consumers re-read it with no extra wiring.
+
 The remainder of this document is the original design exploration, preserved for
 its rationale. Read it as *the reasoning*, not the current API.
 

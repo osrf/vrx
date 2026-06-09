@@ -189,6 +189,37 @@ wires the GLSL files; `<textures>` wires the bump/cube maps. Shipped values:
 > tile-instancing tags (`<tiles_radius>`, `<tile_mesh_size>`) have defaults inside
 > `WaterVisual` but are not present in the shipped `model.sdf`.
 
+### 5.5 Runtime parameter updates (service)
+
+The wave source advertises a service to change `<wave>` parameters live, without
+restarting:
+
+```
+/world/<world_name>/wave/set_parameters   (gz.msgs.Param -> gz.msgs.Boolean)
+```
+
+The request is a `gz.msgs.Param` map keyed by the `<wave>` tag names in §5.2
+(`period`, `gain`, `direction`, `sea_state`, `grid_size`, …). It is a **partial
+update**: omitted keys keep their current value. The reply `data` is `true` when
+at least one key was recognised. Example — raise the sea state and double the
+gain:
+
+```
+gz service -s /world/<world>/wave/set_parameters \
+  --reqtype gz.msgs.Param --reptype gz.msgs.Boolean --timeout 3000 \
+  --req 'params { key: "sea_state" value { type: INT32  int_value: 6 } }
+         params { key: "gain"      value { type: DOUBLE double_value: 2.0 } }'
+```
+
+The call is handled on a transport thread (it only validates and queues) and
+applied on the next server update: the source re-runs `SetParameters` on its
+engine and bumps the `Wavefield` component's `generation`. Consumers pick it up
+automatically — `WaveBuoyancy` reads the same engine from the component each
+tick, and the GUI `WaterVisual` rebuilds its own engine when the generation
+changes, so server and GUI stay in sync through the replicated component.
+Changing structural FFT parameters (`grid_size`, `tile_size`, `seed`) triggers a
+full spectrum rebuild.
+
 ---
 
 ## 6. The FFT engine: Encino (default) vs. Phillips (fallback)
