@@ -146,10 +146,10 @@ TEST(ParticleVelocity, FiniteOnPmsField)
   for (double t = 5.0; t < 20.0; t += 1.0)
   {
     const auto v = gsw::ParticleVelocity(wf, 0.0, 0.0, t);
-    EXPECT_TRUE(std::isfinite(v.X()));
-    EXPECT_TRUE(std::isfinite(v.Y()));
-    EXPECT_TRUE(std::isfinite(v.Z()));
-    EXPECT_LT(v.Length(), 10.0);
+    EXPECT_TRUE(std::isfinite(v.x()));
+    EXPECT_TRUE(std::isfinite(v.y()));
+    EXPECT_TRUE(std::isfinite(v.z()));
+    EXPECT_LT(v.norm(), 10.0);
   }
 }
 
@@ -159,8 +159,8 @@ TEST(Normal, IsUnitVector)
   for (double t = 5.0; t < 20.0; t += 1.0)
   {
     const auto n = gsw::Normal(wf, 1.0, 2.0, t);
-    EXPECT_NEAR(n.Length(), 1.0, 1e-9);
-    EXPECT_GT(n.Z(), 0.0);
+    EXPECT_NEAR(n.norm(), 1.0, 1e-9);
+    EXPECT_GT(n.z(), 0.0);
   }
 }
 

@@ -13,7 +13,7 @@
 
 #include <algorithm>
 
-#include <gz/math/Vector3.hh>
+#include <Eigen/Core>
 
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -28,19 +28,19 @@ inline double SurfaceElevation(const WavefieldData &wf,
 }
 
 /// \brief Water particle velocity at the surface point (x, y) [m/s].
-inline gz::math::Vector3d ParticleVelocity(const WavefieldData &wf,
+inline Eigen::Vector3d ParticleVelocity(const WavefieldData &wf,
                                            double x, double y, double t)
 {
   return wf.simulation ? wf.simulation->ParticleVelocity(x, y, t)
-                       : gz::math::Vector3d::Zero;
+                       : Eigen::Vector3d::Zero();
 }
 
 /// \brief Outward-pointing unit surface normal at (x, y, t).
-inline gz::math::Vector3d Normal(const WavefieldData &wf,
+inline Eigen::Vector3d Normal(const WavefieldData &wf,
                                  double x, double y, double t)
 {
   return wf.simulation ? wf.simulation->Normal(x, y, t)
-                       : gz::math::Vector3d::UnitZ;
+                       : Eigen::Vector3d::UnitZ();
 }
 
 /// \brief Jacobian determinant of the horizontal displacement field.

@@ -61,9 +61,9 @@ public:
   // IWaveField
   void SetParameters(const WaveParameters &_params) override;
   double Elevation(double x, double y, double t) const override;
-  gz::math::Vector3d ParticleVelocity(
+  Eigen::Vector3d ParticleVelocity(
     double x, double y, double t) const override;
-  gz::math::Vector3d Normal(double x, double y, double t) const override;
+  Eigen::Vector3d Normal(double x, double y, double t) const override;
   double Jacobian(double x, double y, double t) const override;
   void Update(double simTime) override;
   std::string_view Kind() const override { return "fft"; }

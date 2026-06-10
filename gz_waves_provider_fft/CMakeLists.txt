@@ -18,8 +18,6 @@ find_package(ament_cmake REQUIRED)
 find_package(gz_sim_vendor REQUIRED)
 find_package(gz-sim REQUIRED)
 find_package(gz_waves REQUIRED)          # IWaveField + WaveParameters + base
-find_package(gz_math_vendor REQUIRED)
-find_package(gz-math REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
 # FFTWaveSimulation's public header returns Eigen::MatrixXd grids, so Eigen is
@@ -49,7 +47,7 @@ target_include_directories(gz-waves-provider-fft PRIVATE
 # Eigen is PUBLIC: the engine's public header returns Eigen::MatrixXd grids, so
 # anything that includes it (the system plugin, the water visual) needs Eigen.
 target_link_libraries(gz-waves-provider-fft
-  PUBLIC  gz-math::gz-math Eigen3::Eigen
+  PUBLIC  Eigen3::Eigen
   PRIVATE encinowaves_vendor::encinowaves_vendor)
 
 # --------------------------------------------------------------------------
@@ -68,7 +66,6 @@ target_link_libraries(gz-sim-waves-fft-system
     gz_waves::gz_waves
     gz-waves-provider-fft
     gz-sim::core
-    gz-math::gz-math
     gz-plugin::register)
 
 install(
@@ -87,7 +84,7 @@ install(DIRECTORY include/ DESTINATION include)
 
 ament_export_targets(export_gz_waves_provider_fft HAS_LIBRARY_TARGET)
 ament_export_include_directories(include)
-ament_export_dependencies(gz_math_vendor)
+ament_export_dependencies(Eigen3)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

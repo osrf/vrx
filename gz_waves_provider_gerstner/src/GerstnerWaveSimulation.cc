@@ -14,7 +14,6 @@
 #include <cmath>
 #include <iostream>
 
-#include <gz/math/Helpers.hh>
 
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -126,7 +125,7 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
     }
 
     double q = 0.0;
-    if (!gz::math::equal(a, 0.0))
+    if (std::abs(a) > 1e-9)
     {
       q = std::min(1.0, p.steepness / (a * k * static_cast<double>(n)));
     }
@@ -137,7 +136,7 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
     steepnesses_[i]        = q;
 
     const double theta = nIdx * p.angle + p.direction;
-    directions_[i] = gz::math::Vector2d(std::cos(theta), std::sin(theta));
+    directions_[i] = Eigen::Vector2d(std::cos(theta), std::sin(theta));
   }
 
   // Render grid: sample the analytic field onto a tile sized to the longest
@@ -174,7 +173,7 @@ double GerstnerWaveSimulation::Elevation(double x, double y, double t) const
   {
     const auto &d = directions_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      wavenumbers_[i] * (d.x() * x + d.y() * y) - angularFrequencies_[i] * t +
       phase_;
     eta += amplitudes_[i] * std::cos(theta);
   }
@@ -182,7 +181,7 @@ double GerstnerWaveSimulation::Elevation(double x, double y, double t) const
 }
 
 //////////////////////////////////////////////////
-gz::math::Vector3d GerstnerWaveSimulation::ParticleVelocity(
+Eigen::Vector3d GerstnerWaveSimulation::ParticleVelocity(
   double x, double y, double t) const
 {
   double vx = 0.0, vy = 0.0, vz = 0.0;
@@ -193,19 +192,19 @@ gz::math::Vector3d GerstnerWaveSimulation::ParticleVelocity(
     const auto &d = directions_[i];
     const double aw = amplitudes_[i] * angularFrequencies_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      wavenumbers_[i] * (d.x() * x + d.y() * y) - angularFrequencies_[i] * t +
       phase_;
     const double s = std::sin(theta);
     const double c = std::cos(theta);
-    vx += aw * d.X() * s;
-    vy += aw * d.Y() * s;
+    vx += aw * d.x() * s;
+    vy += aw * d.y() * s;
     vz += aw * c;
   }
-  return {vx * r, vy * r, vz * r};
+  return Eigen::Vector3d(vx * r, vy * r, vz * r);
 }
 
 //////////////////////////////////////////////////
-gz::math::Vector3d GerstnerWaveSimulation::Normal(
+Eigen::Vector3d GerstnerWaveSimulation::Normal(
   double x, double y, double t) const
 {
   double dhdx = 0.0, dhdy = 0.0;
@@ -216,16 +215,16 @@ gz::math::Vector3d GerstnerWaveSimulation::Normal(
     const auto &d = directions_[i];
     const double ak = amplitudes_[i] * wavenumbers_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      wavenumbers_[i] * (d.x() * x + d.y() * y) - angularFrequencies_[i] * t +
       phase_;
     const double s = std::sin(theta);
-    dhdx += -ak * d.X() * s;
-    dhdy += -ak * d.Y() * s;
+    dhdx += -ak * d.x() * s;
+    dhdy += -ak * d.y() * s;
   }
   dhdx *= r;
   dhdy *= r;
-  gz::math::Vector3d nvec{-dhdx, -dhdy, 1.0};
-  nvec.Normalize();
+  Eigen::Vector3d nvec(-dhdx, -dhdy, 1.0);
+  nvec.normalize();
   return nvec;
 }
 
@@ -240,12 +239,12 @@ double GerstnerWaveSimulation::Jacobian(double x, double y, double t) const
     const auto &d = directions_[i];
     const double qak = steepnesses_[i] * amplitudes_[i] * wavenumbers_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      wavenumbers_[i] * (d.x() * x + d.y() * y) - angularFrequencies_[i] * t +
       phase_;
     const double c = std::cos(theta);
-    dsxdx += -qak * d.X() * d.X() * c;
-    dsydy += -qak * d.Y() * d.Y() * c;
-    dsxdy += -qak * d.X() * d.Y() * c;
+    dsxdx += -qak * d.x() * d.x() * c;
+    dsydy += -qak * d.y() * d.y() * c;
+    dsxdy += -qak * d.x() * d.y() * c;
   }
   dsxdx *= r;
   dsydy *= r;
@@ -281,21 +280,21 @@ void GerstnerWaveSimulation::Update(double t)
       {
         const auto &d = this->directions_[c];
         const double theta =
-          this->wavenumbers_[c] * (d.X() * x + d.Y() * y) -
+          this->wavenumbers_[c] * (d.x() * x + d.y() * y) -
           this->angularFrequencies_[c] * t + this->phase_;
         const double s  = std::sin(theta);
         const double co = std::cos(theta);
         dz += this->amplitudes_[c] * co;
         // Gerstner horizontal displacement (chop): -q·a·dir·sin(θ).
         const double qa = this->steepnesses_[c] * this->amplitudes_[c];
-        dx -= qa * d.X() * s;
-        dy -= qa * d.Y() * s;
+        dx -= qa * d.x() * s;
+        dy -= qa * d.y() * s;
         // Folding/foam terms reuse co — equivalent to Jacobian(x, y, t) but
         // without a second pass over the components.
         const double qak = qa * this->wavenumbers_[c];
-        dsxdx -= qak * d.X() * d.X() * co;
-        dsydy -= qak * d.Y() * d.Y() * co;
-        dsxdy -= qak * d.X() * d.Y() * co;
+        dsxdx -= qak * d.x() * d.x() * co;
+        dsydy -= qak * d.y() * d.y() * co;
+        dsxdy -= qak * d.x() * d.y() * co;
       }
       const std::size_t idx = static_cast<std::size_t>(i) +
                               static_cast<std::size_t>(j) *

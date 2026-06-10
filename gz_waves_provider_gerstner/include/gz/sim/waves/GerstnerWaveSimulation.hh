@@ -14,7 +14,7 @@
 #include <memory>
 #include <vector>
 
-#include <gz/math/Vector2.hh>
+#include <Eigen/Core>
 
 #include "gz/sim/waves/WaveSimulation.hh"
 #include "gz/sim/waves/Wavefield.hh"
@@ -41,9 +41,9 @@ public:
   // IWaveField
   void SetParameters(const WaveParameters &_params) override;
   double Elevation(double x, double y, double t) const override;
-  gz::math::Vector3d ParticleVelocity(
+  Eigen::Vector3d ParticleVelocity(
     double x, double y, double t) const override;
-  gz::math::Vector3d Normal(double x, double y, double t) const override;
+  Eigen::Vector3d Normal(double x, double y, double t) const override;
   double Jacobian(double x, double y, double t) const override;
   void Update(double _simTime) override;
   const WaveField2D *Field() const override;
@@ -62,14 +62,14 @@ public:
   /// \brief Per-component Gerstner steepness in [0, 1].
   const std::vector<double>            &Steepnesses()        const { return steepnesses_; }
   /// \brief Per-component unit propagation directions.
-  const std::vector<gz::math::Vector2d> &Directions()        const { return directions_; }
+  const std::vector<Eigen::Vector2d> &Directions()        const { return directions_; }
 
 private:
   std::vector<double>             amplitudes_;
   std::vector<double>             wavenumbers_;
   std::vector<double>             angularFrequencies_;
   std::vector<double>             steepnesses_;
-  std::vector<gz::math::Vector2d> directions_;
+  std::vector<Eigen::Vector2d>    directions_;
   double                          tau_{2.0};
   double                          phase_{0.0};  ///< Common phase offset φ [rad].
 

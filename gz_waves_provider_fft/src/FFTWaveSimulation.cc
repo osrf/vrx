@@ -410,17 +410,17 @@ double FFTWaveSimulation::Elevation(double x, double y, double /*t*/) const
 }
 
 //////////////////////////////////////////////////
-gz::math::Vector3d FFTWaveSimulation::ParticleVelocity(
+Eigen::Vector3d FFTWaveSimulation::ParticleVelocity(
   double /*x*/, double /*y*/, double /*t*/) const
 {
   // Stage 2: stub. Stage 4+ will compute via additional FFTs of i·k·h(k,t)
   // for the horizontal components and ∂η/∂t for the vertical. Returning
   // zero here means drag against still water — not physically accurate yet.
-  return gz::math::Vector3d::Zero;
+  return Eigen::Vector3d::Zero();
 }
 
 //////////////////////////////////////////////////
-gz::math::Vector3d FFTWaveSimulation::Normal(
+Eigen::Vector3d FFTWaveSimulation::Normal(
   double x, double y, double /*t*/) const
 {
   // Finite-difference normal from the height grid. Good enough for unit
@@ -433,8 +433,8 @@ gz::math::Vector3d FFTWaveSimulation::Normal(
   const double dy =
     (this->BilinearSample(this->heightGrid_, x, y + h) -
      this->BilinearSample(this->heightGrid_, x, y - h)) / (2.0 * h);
-  gz::math::Vector3d n{-dx, -dy, 1.0};
-  n.Normalize();
+  Eigen::Vector3d n(-dx, -dy, 1.0);
+  n.normalize();
   return n;
 }
 

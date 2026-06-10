@@ -20,6 +20,7 @@ find_package(gz_common_vendor REQUIRED)
 find_package(gz-common REQUIRED)
 find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
+find_package(Eigen3 REQUIRED)
 
 # --------------------------------------------------------------------------
 # Core wave library: the IWaveField interface, the WavesSystemBase plumbing, the
@@ -41,7 +42,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     gz-sim::core
-    gz-math::gz-math
+    Eigen3::Eigen
   PRIVATE
     gz-common::gz-common
 )
@@ -99,7 +100,7 @@ ament_environment_hooks("hooks/hook.sh.in")
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_include_directories(include)
-ament_export_dependencies(gz_sim_vendor gz_math_vendor)
+ament_export_dependencies(gz_sim_vendor gz_math_vendor Eigen3)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

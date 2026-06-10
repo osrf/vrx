@@ -18,7 +18,7 @@
 #include <string>
 #include <string_view>
 
-#include <gz/math/Vector3.hh>
+#include <Eigen/Core>
 
 namespace gz::sim::waves
 {
@@ -75,11 +75,11 @@ public:
 
   /// \brief Water particle velocity at the surface point (x, y) [m/s].
   /// Used by drag terms for relative-velocity hydrodynamics.
-  virtual gz::math::Vector3d ParticleVelocity(
+  virtual Eigen::Vector3d ParticleVelocity(
     double x, double y, double t) const = 0;
 
   /// \brief Outward-pointing unit surface normal at (x, y, t).
-  virtual gz::math::Vector3d Normal(double x, double y, double t) const = 0;
+  virtual Eigen::Vector3d Normal(double x, double y, double t) const = 0;
 
   /// \brief Jacobian determinant of the horizontal displacement field at
   /// (x, y, t). Values below ~0.6 indicate wave folding / whitecap formation

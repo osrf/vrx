@@ -356,8 +356,8 @@ TEST(FFTWaveSimulation, NormalIsUnitAndPointsUp)
   for (double t = 1.0; t < 5.0; t += 0.7)
   {
     const auto n = sim.Normal(3.0 * t, 1.0 * t, 8.0);
-    EXPECT_NEAR(n.Length(), 1.0, 1e-9);
-    EXPECT_GT(n.Z(), 0.0);
+    EXPECT_NEAR(n.norm(), 1.0, 1e-9);
+    EXPECT_GT(n.z(), 0.0);
   }
 }
 
