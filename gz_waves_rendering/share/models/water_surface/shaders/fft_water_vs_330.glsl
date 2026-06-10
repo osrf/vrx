@@ -37,16 +37,6 @@ uniform float tileSize;
 uniform int   gridSize;
 uniform float chopFactor;
 uniform sampler2D heightMap;
-// Spectrum-accurate slope (∂η/∂x, ∂η/∂y) per cell.
-uniform sampler2D slopeMap;
-// Chop derivatives (∂Dx/∂x, ∂Dy/∂y, ∂Dx/∂y, _) per cell. With
-// slopeMap this is the full set of 5 derivatives needed for the
-// chop-aware Tessendorf tangent + normal.
-uniform sampler2D chopDerivMap;
-// Use the spectrum-derived normals when CPU FFT has uploaded them
-// (this uniform is set to 1 in that case). 0 falls back to finite
-// differences on the heightmap so the GPU FFT path still renders.
-uniform int useSlopeMap;
 
 out block
 {
@@ -90,46 +80,20 @@ void main()
   P.xy += disp.xy - worldXY;
   P.z  += disp.z;
 
-  // Surface normal: prefer the spectrum-accurate slope map when it's
-  // bound; otherwise fall back to finite differences on neighbouring
-  // displaced samples. The fallback is needed for the GPU-FFT path,
-  // which doesn't upload slopes yet.
-  vec3 N;
-  vec3 T;
-  if (useSlopeMap != 0)
-  {
-    vec2 uv = fract(worldXY / tileSize);
-    vec2 slope = texture(slopeMap, uv).rg;            // ∂η/∂x, ∂η/∂y
-    vec3 chopD = texture(chopDerivMap, uv).rgb;       // ∂Dx/∂x, ∂Dy/∂y, ∂Dx/∂y
-    // Chop-aware Tessendorf tangent + bitangent. Surface position
-    // is P(x,y) = (x + c·Dx, y + c·Dy, η), so:
-    //   ∂P/∂x = (1 + c·∂Dx/∂x, c·∂Dy/∂x, ∂η/∂x)
-    //   ∂P/∂y = (c·∂Dx/∂y, 1 + c·∂Dy/∂y, ∂η/∂y)
-    // Note ∂Dy/∂x = ∂Dx/∂y (spectrum symmetry).
-    vec3 Tu = vec3(1.0 + chopFactor * chopD.r,
-                   chopFactor * chopD.b,
-                   slope.x);
-    vec3 Tv = vec3(chopFactor * chopD.b,
-                   1.0 + chopFactor * chopD.g,
-                   slope.y);
-    N = normalize(cross(Tu, Tv));
-    if (N.z < 0.0) N = -N;
-    T = normalize(Tu);
-  }
-  else
-  {
-    float texel = tileSize / float(gridSize);
-    vec3 px = SampleDisplaced(worldXY + vec2( texel, 0.0));
-    vec3 nx = SampleDisplaced(worldXY + vec2(-texel, 0.0));
-    vec3 py = SampleDisplaced(worldXY + vec2(0.0,  texel));
-    vec3 ny = SampleDisplaced(worldXY + vec2(0.0, -texel));
-    vec3 dxv = (px - nx) * 0.5;
-    vec3 dyv = (py - ny) * 0.5;
-    N = normalize(cross(dxv, dyv));
-    if (N.z < 0.0) N = -N;
-    T = normalize(dxv - dot(dxv, N) * N);
-    if (length(T) < 1e-4) T = vec3(1.0, 0.0, 0.0);
-  }
+  // Surface normal via central differences on neighbouring displaced
+  // samples of the heightmap (the only path; analytic slope maps were
+  // never wired up on the CPU side).
+  float texel = tileSize / float(gridSize);
+  vec3 px = SampleDisplaced(worldXY + vec2( texel, 0.0));
+  vec3 nx = SampleDisplaced(worldXY + vec2(-texel, 0.0));
+  vec3 py = SampleDisplaced(worldXY + vec2(0.0,  texel));
+  vec3 ny = SampleDisplaced(worldXY + vec2(0.0, -texel));
+  vec3 dxv = (px - nx) * 0.5;
+  vec3 dyv = (py - ny) * 0.5;
+  vec3 N = normalize(cross(dxv, dyv));
+  if (N.z < 0.0) N = -N;
+  vec3 T = normalize(dxv - dot(dxv, N) * N);
+  if (length(T) < 1e-4) T = vec3(1.0, 0.0, 0.0);
   vec3 B = cross(N, T);
   outVs.rotMatrix = mat3(B * rescale, T * rescale, N);
 

@@ -373,9 +373,6 @@ void WaterVisual::Implementation::UploadUniforms()
     (*vsParams)["tileSize"]   = this->cachedTileSize;
     (*vsParams)["gridSize"]   = this->cachedGridSize;
     (*vsParams)["chopFactor"] = this->cachedChopFactor;
-    // The unified grid path uploads only η/Dx/Dy + foam (no slope map); the
-    // VS finite-diffs the height texture for normals.
-    (*vsParams)["useSlopeMap"] = 0;
   }
 
   // Fragment shader: colours + lighting params + textures.
