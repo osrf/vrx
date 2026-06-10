@@ -145,15 +145,11 @@ This makes determinism a hard contract on engines:
 Within a process there is exactly **one** engine, owned and advanced by one
 system; a consumer must never assume some *other* process advanced it:
 
-- **GUI / rendering:** there is no server engine to borrow, so `WaterVisual`
-  builds and owns a private engine and advances it on the render clock. (An
-  earlier design shared a live engine *pointer* through the component; after a
-  replication round-trip the GUI could hold a fresh, never-advanced copy and see
-  flat water, or race the server's engine on the render thread — hence: own it.)
-  `WaterVisual` is attached to the water-surface model, so it also loads on the
-  server; it builds its engine only once a live render scene exists, so a
-  non-rendering process (any headless `gz sim -s`) stays inert and never pays for
-  a second engine.
+- **GUI:** there is no server engine to borrow, so `WaterVisual` builds and owns
+  a private engine and advances it on the render clock. (An earlier design shared
+  a live engine *pointer* through the component; after a replication round-trip
+  the GUI could hold a fresh, never-advanced copy and see flat water, or race the
+  server's engine on the render thread — hence: own it.)
 - **Server:** the source system (`WavesSystemBase`) owns the authoritative engine
   and advances it each tick; same-thread consumers (`WaveBuoyancy`) read it out of
   the component. The component serializes recipe-only, so every ECM deserialize
