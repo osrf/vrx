@@ -121,18 +121,20 @@ and GUI agree without streaming any height grids — the component is tiny.
 
 ### 4. The consumers — "the things that use water"
 
-Buoyancy, the renderer, sensors, scoring. Each **holds its own engine** and asks
-it questions through the socket (or the `Eval::*` free-function helpers over
-`WavefieldData`). `WaveBuoyancy` uses `SurfaceElevation`; `WaterVisual` consumes
-the `Field()` grid. Because they only speak "socket," they work with any engine
-unchanged.
+Buoyancy, the renderer, sensors, scoring. Each asks the socket through the
+`Eval::*` free-function helpers over `WavefieldData` (`WaveBuoyancy` uses
+`SurfaceElevation`) or the `Field()` grid (`WaterVisual`). Where the engine
+*comes from* differs by process (see Determinism): a **GUI** consumer builds and
+owns a private engine; a **server** consumer reads the source system's
+authoritative engine out of the component. Because they only speak "socket,"
+they work with any engine unchanged.
 
-## Determinism — "advance the instance you hold"
+## Determinism — one engine per process, advanced by its owner
 
 Gazebo runs as two programs — the physics **server** and the graphics **GUI** —
 and both need the waves. Instead of streaming a grid between them, **each process
-reads the recipe and builds its own engine**; because the recipe is identical
-(*including the seed*), they produce the same waves independently. The server's
+builds its engine from the recipe**; because the recipe is identical (*including
+the seed*), the two processes produce the same waves independently. The server's
 buoy and the GUI's rendered crest line up for free.
 
 This makes determinism a hard contract on engines:
@@ -140,13 +142,20 @@ This makes determinism a hard contract on engines:
 > Given the same `params` (seed included) and `simTime`, `Update()` + the queries
 > must produce the same field in every process.
 
-It also bans the anti-pattern that caused an intermittent crash during
-development: **a consumer must advance the engine instance it holds — never
-assume another system did.** An earlier design shared a live engine *pointer*
-through the component; after a replication round-trip a consumer could hold a
-fresh, never-advanced copy and see flat water (or race the server's engine on the
-render thread). The recipe-only component removes the shared pointer entirely —
-`WaterVisual` builds and owns its own engine.
+Within a process there is exactly **one** engine, owned and advanced by one
+system; a consumer must never assume some *other* process advanced it:
+
+- **GUI:** there is no server engine to borrow, so `WaterVisual` builds and owns
+  a private engine and advances it on the render clock. (An earlier design shared
+  a live engine *pointer* through the component; after a replication round-trip
+  the GUI could hold a fresh, never-advanced copy and see flat water, or race the
+  server's engine on the render thread — hence: own it.)
+- **Server:** the source system (`WavesSystemBase`) owns the authoritative engine
+  and advances it each tick; same-thread consumers (`WaveBuoyancy`) read it out of
+  the component. The component serializes recipe-only, so every ECM deserialize
+  (a **reset** restore, a replication round-trip) nulls that live pointer — the
+  source system re-points the component at its engine whenever the ECM has cleared
+  it, otherwise buoyancy silently reverts to flat water after a reset.
 
 ## Runtime parameters
 
