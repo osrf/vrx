@@ -49,8 +49,9 @@ public:
   const WaveField2D *Field() const override;
   std::string_view Kind() const override { return "gerstner"; }
 
-  // ---- Backend-specific accessors (used by WaterVisual to drive shader
-  //      uniforms; not part of the IWaveField interface) ----
+  // ---- Backend-specific introspection accessors (exercised by the unit
+  //      tests; not part of the IWaveField interface — WaterVisual consumes
+  //      Field() instead) ----
 
   /// \brief Per-component wave amplitudes [m].
   const std::vector<double>            &Amplitudes()         const { return amplitudes_; }
@@ -62,8 +63,6 @@ public:
   const std::vector<double>            &Steepnesses()        const { return steepnesses_; }
   /// \brief Per-component unit propagation directions.
   const std::vector<gz::math::Vector2d> &Directions()        const { return directions_; }
-  /// \brief Startup-ramp time constant τ [s].
-  double Tau() const { return tau_; }
 
 private:
   /// \brief Startup ramp factor `(1 - exp(-t/tau))`, clamped to [0, 1].

@@ -11,7 +11,6 @@
 #ifndef GZ_SIM_WAVES_FFTWAVESIMULATION_HH_
 #define GZ_SIM_WAVES_FFTWAVESIMULATION_HH_
 
-#include <complex>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -89,11 +88,6 @@ public:
   const Eigen::MatrixXd &DispXGrid() const { return this->dispXGrid_; }
   /// \brief Horizontal y-displacement field Dy(x, y, t).
   const Eigen::MatrixXd &DispYGrid() const { return this->dispYGrid_; }
-  /// \brief Per-cell minimum eigenvalue of the displacement Jacobian (the
-  /// folding / whitecap metric), 1 = flat, < 1 → folding. Populated from
-  /// EncinoWaves' `MinE` output, rescaled to the calibrated amplitude.
-  /// `Jacobian()` samples this.
-  const Eigen::MatrixXd &MinEGrid() const { return this->minEGrid_; }
 
 private:
   /// \brief Bilinear sample of `grid` at the given world (x, y), wrapping

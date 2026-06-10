@@ -10,7 +10,6 @@
 
 #include "WaterVisual.hh"
 
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -21,7 +20,6 @@
 #include <vector>
 
 #include <gz/common/Console.hh>
-#include <gz/common/Filesystem.hh>
 #include <gz/common/Profiler.hh>
 #include <gz/math/Color.hh>
 #include <gz/math/Vector2.hh>
@@ -644,7 +642,6 @@ void WaterVisual::PreUpdate(
     (worldEnt != kNullEntity)
       ? _ecm.Component<components::Wavefield>(worldEnt)
       : nullptr;
-
 
   const std::lock_guard<std::mutex> lock(this->dataPtr->mutex_);
   this->dataPtr->currentSimTime = t;

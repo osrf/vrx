@@ -7,9 +7,6 @@
 
 #include "Ogre2HeightMapBridge.hh"
 
-#include <cmath>
-#include <cstring>
-#include <limits>
 
 #include <gz/common/Console.hh>
 
@@ -23,7 +20,6 @@
 #include <OgrePass.h>
 #include <OgrePixelFormatGpu.h>
 #include <OgreRenderSystem.h>
-#include <OgreRoot.h>
 #include <OgreSceneManager.h>
 #include <OgreStagingTexture.h>
 #include <OgreTechnique.h>
