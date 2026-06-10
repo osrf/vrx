@@ -314,14 +314,6 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
 }
 
 //////////////////////////////////////////////////
-double FFTWaveSimulation::Ramp(double t) const
-{
-  if (this->tau_ <= 0.0)
-    return 1.0;
-  return 1.0 - std::exp(-t / this->tau_);
-}
-
-//////////////////////////////////////////////////
 void FFTWaveSimulation::Update(double t)
 {
   // Idempotent: the field at time t is deterministic, so a repeat call for the
@@ -349,7 +341,8 @@ void FFTWaveSimulation::Update(double t)
   //                   (Encino's amplitudeGain doesn't scale the height);
   //  * gain_        — the SDF <gain> user multiplier (a no-op via Encino's
   //                   amplitudeGain, so we apply it here to make it work).
-  const double scale = this->Ramp(t) * this->encinoScale_ * this->gain_;
+  const double scale =
+      StartupRamp(t, this->tau_) * this->encinoScale_ * this->gain_;
 
   // Encino stores its spatial fields row-major in float; our grids are
   // column-major in double. Map+cast assignment lets Eigen vectorize the

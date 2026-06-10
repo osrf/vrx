@@ -65,9 +65,6 @@ public:
   const std::vector<gz::math::Vector2d> &Directions()        const { return directions_; }
 
 private:
-  /// \brief Startup ramp factor `(1 - exp(-t/tau))`, clamped to [0, 1].
-  double Ramp(double t) const;
-
   std::vector<double>             amplitudes_;
   std::vector<double>             wavenumbers_;
   std::vector<double>             angularFrequencies_;

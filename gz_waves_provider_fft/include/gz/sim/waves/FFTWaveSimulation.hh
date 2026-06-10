@@ -95,9 +95,6 @@ private:
   double BilinearSample(const Eigen::MatrixXd &grid,
                         double x, double y) const;
 
-  /// \brief Startup ramp factor `(1 - exp(-t/tau))`, clamped to [0, 1].
-  double Ramp(double t) const;
-
   // Configuration. Default member-inits keep a default-constructed instance
   // benign until SetParameters() runs (the factory path).
   double        tileSize_{200.0};

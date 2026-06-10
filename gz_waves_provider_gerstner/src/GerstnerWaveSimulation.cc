@@ -166,14 +166,6 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
 }
 
 //////////////////////////////////////////////////
-double GerstnerWaveSimulation::Ramp(double t) const
-{
-  if (tau_ <= 0.0)
-    return 1.0;
-  return 1.0 - std::exp(-t / tau_);
-}
-
-//////////////////////////////////////////////////
 double GerstnerWaveSimulation::Elevation(double x, double y, double t) const
 {
   double eta = 0.0;
@@ -186,7 +178,7 @@ double GerstnerWaveSimulation::Elevation(double x, double y, double t) const
       phase_;
     eta += amplitudes_[i] * std::cos(theta);
   }
-  return eta * Ramp(t);
+  return eta * StartupRamp(t, this->tau_);
 }
 
 //////////////////////////////////////////////////
@@ -194,7 +186,7 @@ gz::math::Vector3d GerstnerWaveSimulation::ParticleVelocity(
   double x, double y, double t) const
 {
   double vx = 0.0, vy = 0.0, vz = 0.0;
-  const double r = Ramp(t);
+  const double r = StartupRamp(t, this->tau_);
   const std::size_t n = amplitudes_.size();
   for (std::size_t i = 0; i < n; ++i)
   {
@@ -217,7 +209,7 @@ gz::math::Vector3d GerstnerWaveSimulation::Normal(
   double x, double y, double t) const
 {
   double dhdx = 0.0, dhdy = 0.0;
-  const double r = Ramp(t);
+  const double r = StartupRamp(t, this->tau_);
   const std::size_t n = amplitudes_.size();
   for (std::size_t i = 0; i < n; ++i)
   {
@@ -241,7 +233,7 @@ gz::math::Vector3d GerstnerWaveSimulation::Normal(
 double GerstnerWaveSimulation::Jacobian(double x, double y, double t) const
 {
   double dsxdx = 0.0, dsydy = 0.0, dsxdy = 0.0;
-  const double r = Ramp(t);
+  const double r = StartupRamp(t, this->tau_);
   const std::size_t n = amplitudes_.size();
   for (std::size_t i = 0; i < n; ++i)
   {
@@ -275,7 +267,7 @@ void GerstnerWaveSimulation::Update(double t)
   if (N <= 0 || this->dzBuf_.empty())
     return;
   const double T = this->fieldTile_;
-  const double r = this->Ramp(t);
+  const double r = StartupRamp(t, this->tau_);
   const std::size_t nc = this->amplitudes_.size();
   for (int j = 0; j < N; ++j)
   {

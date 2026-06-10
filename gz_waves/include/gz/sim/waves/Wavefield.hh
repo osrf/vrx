@@ -196,6 +196,16 @@ inline WaveParameters WithSeaState(const WaveParameters &_p)
   return p;
 }
 
+/// \brief Soft-start ramp factor `1 - exp(-t/tau)` in [0, 1] (`tau <= 0`
+/// disables it, returning 1). Shared by the wave engines so the startup
+/// transient is identical across backends.
+inline double StartupRamp(double _t, double _tau)
+{
+  if (_tau <= 0.0)
+    return 1.0;
+  return 1.0 - std::exp(-_t / _tau);
+}
+
 /// \brief State held by the `Wavefield` ECM component. Wraps a polymorphic
 /// `IWaveField` (Gerstner today, FFT or others later). Consumers use
 /// the free functions in `Eval.hh` to query the wave field; they don't see
