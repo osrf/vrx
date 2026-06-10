@@ -54,7 +54,8 @@ namespace gz::sim::systems
   /// (`gz.msgs.Param`) for live changes.
   class WavesSystemBase : public System,
                           public ISystemConfigure,
-                          public ISystemPreUpdate
+                          public ISystemPreUpdate,
+                          public ISystemReset
   {
     /// \brief Constructor.
     public: WavesSystemBase();
@@ -68,6 +69,14 @@ namespace gz::sim::systems
       EventManager &_eventMgr) override;
 
     public: void PreUpdate(
+      const UpdateInfo &_info,
+      EntityComponentManager &_ecm) override;
+
+    /// \brief On reset, rewind the update throttle so the wave field advances
+    /// from t = 0 again. Sim time rewinds on a reset but the cached timestamps
+    /// would not, which keeps the throttle false until time catches back up —
+    /// freezing the field (and anything riding it).
+    public: void Reset(
       const UpdateInfo &_info,
       EntityComponentManager &_ecm) override;
 

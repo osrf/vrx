@@ -370,6 +370,20 @@ void WavesSystemBase::PreUpdate(
 }
 
 //////////////////////////////////////////////////
+void WavesSystemBase::Reset(
+  const UpdateInfo & /*_info*/, EntityComponentManager & /*_ecm*/)
+{
+  // A reset rewinds sim time to 0. PreUpdate's throttle gates on
+  // (simTime - lastUpdateTime >= period); with a stale lastUpdateTime it stays
+  // false until sim time catches back up, so the engine never advances and the
+  // field freezes. Rewind the throttle and restart the GUI re-replication
+  // window so the field advances from t = 0 again.
+  this->dataPtr->lastUpdateTime = -1.0;
+  this->dataPtr->configureSimTime = std::chrono::steady_clock::duration{0};
+  this->dataPtr->componentReady = true;
+}
+
+//////////////////////////////////////////////////
 void WavesSystemBase::Implementation::ApplyPendingParams(
   EntityComponentManager &_ecm)
 {

@@ -60,7 +60,8 @@ namespace gz::sim::systems
   /// \endverbatim
   class WaveBuoyancy : public System,
                       public ISystemConfigure,
-                      public ISystemPreUpdate
+                      public ISystemPreUpdate,
+                      public ISystemReset
   {
     /// \brief Constructor.
     public: WaveBuoyancy();
@@ -74,6 +75,12 @@ namespace gz::sim::systems
       EventManager &_eventMgr) override;
 
     public: void PreUpdate(
+      const UpdateInfo &_info,
+      EntityComponentManager &_ecm) override;
+
+    /// \brief On reset, rewind the wave-update throttle so the field advances
+    /// from t = 0 again (otherwise the body stops bobbing after a reset).
+    public: void Reset(
       const UpdateInfo &_info,
       EntityComponentManager &_ecm) override;
 

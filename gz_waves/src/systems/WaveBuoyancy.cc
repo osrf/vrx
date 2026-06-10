@@ -230,12 +230,23 @@ void WaveBuoyancy::PreUpdate(
   }
 }
 
+//////////////////////////////////////////////////
+void WaveBuoyancy::Reset(
+  const UpdateInfo & /*_info*/, EntityComponentManager & /*_ecm*/)
+{
+  // A reset rewinds sim time; rewind our wave-update throttle so the field is
+  // advanced from t = 0 again (otherwise it stays frozen and the body stops
+  // bobbing after a reset).
+  this->dataPtr->lastWaveUpdate = -1.0;
+}
+
 }  // namespace gz::sim::systems
 
 GZ_ADD_PLUGIN(gz::sim::systems::WaveBuoyancy,
               gz::sim::System,
               gz::sim::systems::WaveBuoyancy::ISystemConfigure,
-              gz::sim::systems::WaveBuoyancy::ISystemPreUpdate)
+              gz::sim::systems::WaveBuoyancy::ISystemPreUpdate,
+              gz::sim::systems::WaveBuoyancy::ISystemReset)
 
 GZ_ADD_PLUGIN_ALIAS(gz::sim::systems::WaveBuoyancy,
                     "gz::sim::systems::WaveBuoyancy")

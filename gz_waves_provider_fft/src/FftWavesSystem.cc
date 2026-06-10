@@ -92,6 +92,7 @@ class FftWaves : public WavesSystemBase
 GZ_ADD_PLUGIN(gz::sim::systems::FftWaves,
               gz::sim::System,
               gz::sim::systems::FftWaves::ISystemConfigure,
-              gz::sim::systems::FftWaves::ISystemPreUpdate)
+              gz::sim::systems::FftWaves::ISystemPreUpdate,
+              gz::sim::systems::FftWaves::ISystemReset)
 
 GZ_ADD_PLUGIN_ALIAS(gz::sim::systems::FftWaves, "gz::sim::systems::FftWaves")

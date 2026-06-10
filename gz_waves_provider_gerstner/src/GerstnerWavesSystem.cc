@@ -82,7 +82,8 @@ class GerstnerWaves : public WavesSystemBase
 GZ_ADD_PLUGIN(gz::sim::systems::GerstnerWaves,
               gz::sim::System,
               gz::sim::systems::GerstnerWaves::ISystemConfigure,
-              gz::sim::systems::GerstnerWaves::ISystemPreUpdate)
+              gz::sim::systems::GerstnerWaves::ISystemPreUpdate,
+              gz::sim::systems::GerstnerWaves::ISystemReset)
 
 GZ_ADD_PLUGIN_ALIAS(gz::sim::systems::GerstnerWaves,
                     "gz::sim::systems::GerstnerWaves")
