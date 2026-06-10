@@ -381,6 +381,7 @@ void WavesSystemBase::Reset(
   this->dataPtr->lastUpdateTime = -1.0;
   this->dataPtr->configureSimTime = std::chrono::steady_clock::duration{0};
   this->dataPtr->componentReady = true;
+  gzmsg << "[Waves] reset: re-advancing the wave field from t=0" << '\n';
 }
 
 //////////////////////////////////////////////////
