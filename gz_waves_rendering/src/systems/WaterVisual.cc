@@ -139,6 +139,14 @@ class WaterVisual::Implementation
   /// first `Configure` for an entity claims it; the second becomes a
   /// no-op so the render thread only does one round of material setup.
   public: bool active{true};
+
+  /// \brief Set true by OnSceneUpdate once a live rendering scene is resolved.
+  /// PreUpdate gates the private-engine build on it: on a non-rendering process
+  /// (a headless physics server, any `gz sim -s`) there is no scene, so we never
+  /// build — and per-frame advance — a second wave engine the renderer would
+  /// never read. Guarded by mutex_ (written on the render thread, read on the
+  /// ECM thread).
+  public: bool renderReady{false};
 };
 
 namespace
@@ -416,6 +424,8 @@ void WaterVisual::Implementation::OnSceneUpdate()
     return;
 
   const std::lock_guard<std::mutex> lock(this->mutex_);
+  // A live scene is resolved; PreUpdate may now build the private wave engine.
+  this->renderReady = true;
   if (this->haveWavefield &&
       this->cachedGeneration != this->lastUploadedGeneration)
   {
@@ -620,6 +630,16 @@ void WaterVisual::PreUpdate(
 
   const std::lock_guard<std::mutex> lock(this->dataPtr->mutex_);
   this->dataPtr->currentSimTime = t;
+
+  // Do nothing until the render side has a live scene (OnSceneUpdate sets
+  // renderReady). On a non-rendering process — a headless physics server, any
+  // `gz sim -s` — there is no scene to draw into, so building and per-frame
+  // advancing a second wave engine here is pure waste: the source system
+  // already owns the authoritative one. currentSimTime is still snapshotted
+  // above so the field is at the right time the moment rendering does start.
+  if (!this->dataPtr->renderReady)
+    return;
+
   if (!wfComp)
   {
     // The Wavefield component reaches the GUI by component serialization
