@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <list>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -34,6 +35,10 @@
 #include <gz/rendering/ShaderParams.hh>
 #include <gz/rendering/Visual.hh>
 
+#include <gz/msgs/serialized_map.pb.h>
+#include <gz/transport/Node.hh>
+
+#include <gz/sim/EntityComponentManager.hh>
 #include <gz/sim/components/Name.hh>
 #include <gz/sim/components/SourceFilePath.hh>
 #include <gz/sim/rendering/Events.hh>
@@ -64,6 +69,12 @@ class WaterVisual::Implementation
   /// \brief Render-thread entry point (RenderTeardown event). Resets render
   /// resources so the next OnSceneUpdate rebuilds them from scratch.
   public: void OnRenderTeardown();
+
+  /// \brief Async handler for the world `state` service pull (runs on a
+  /// transport thread). Deserialises the snapshot in a throwaway ECM and caches
+  /// the Wavefield recipe so PreUpdate can seed a GUI that joined at any time.
+  public: void OnStateResponse(
+      const gz::msgs::SerializedStepMap &_reply, bool _result);
 
   // Fields are ordered by descending alignment (8-byte handles/strings,
   // then 4-byte scalars, then 1-byte flags) to minimise struct padding
@@ -110,6 +121,13 @@ class WaterVisual::Implementation
   public: gz::common::ConnectionPtr sceneUpdateConn;
   public: gz::common::ConnectionPtr teardownConn;
 
+  /// \brief Transport node for the one-time on-demand `state` pull-on-ready.
+  public: gz::transport::Node node;
+
+  /// \brief Recipe lifted from a `state` snapshot, used to seed a GUI that
+  /// joined after the server's startup re-broadcast window. Guarded by mutex_.
+  public: std::optional<gz::sim::waves::WavefieldData> pulled;
+
   // ---- 4-byte-aligned: scalar parameters + scalar cache ----
   public: float rescale{0.125f};
   // Strict asv_wave_sim defaults — match their literal values so a visual
@@ -139,6 +157,9 @@ class WaterVisual::Implementation
   /// first `Configure` for an entity claims it; the second becomes a
   /// no-op so the render thread only does one round of material setup.
   public: bool active{true};
+
+  /// \brief Whether the one-time `state` pull has been kicked off (GUI thread).
+  public: bool triedPull{false};
 };
 
 namespace
@@ -618,22 +639,44 @@ void WaterVisual::PreUpdate(
       ? _ecm.Component<components::Wavefield>(worldEnt)
       : nullptr;
 
+  // Pull-on-ready: the first tick we run without the replicated component,
+  // request the current world state once and seed the recipe from it. The
+  // server's startup re-broadcast only blankets its first seconds, so a GUI
+  // joining later would otherwise never get the recipe; an on-demand pull
+  // covers any join time. Strictly fallback-forward: if the pull yields nothing
+  // we still just wait for the component to replicate, exactly as before. Fired
+  // outside the lock — the request is non-blocking.
+  if (!wfComp && worldEnt != kNullEntity && !this->dataPtr->triedPull)
+  {
+    this->dataPtr->triedPull = true;
+    std::string worldName;
+    if (const auto *nameComp = _ecm.Component<components::Name>(worldEnt))
+      worldName = nameComp->Data();
+    if (!worldName.empty())
+    {
+      this->dataPtr->node.Request("/world/" + worldName + "/state",
+          &Implementation::OnStateResponse, this->dataPtr.get());
+    }
+  }
+
   const std::lock_guard<std::mutex> lock(this->dataPtr->mutex_);
   this->dataPtr->currentSimTime = t;
-  if (!wfComp)
-  {
-    // The Wavefield component reaches the GUI by component serialization
-    // (operator<</>>), which can lag the first frames. Until it arrives,
-    // wait — don't clear haveWavefield.
-    return;
-  }
-  const auto &data = wfComp->Data();
+
+  // Prefer the replicated component — it carries the live generation bumps from
+  // runtime set_parameters. Fall back to the pulled snapshot until the
+  // component reaches our ECM; the generation counter reconciles the two (once
+  // the component shows up with an equal-or-newer generation it takes over).
+  const gz::sim::waves::WavefieldData *data =
+      wfComp ? &wfComp->Data()
+             : (this->dataPtr->pulled ? &*this->dataPtr->pulled : nullptr);
+  if (!data)
+    return;   // neither replicated nor pulled yet — try again next tick
 
   if (!this->dataPtr->haveWavefield)
   {
-    gzmsg << "[WaterVisual] Wavefield component found (algorithm="
-          << data.algorithm << ", generation=" << data.generation << ")"
-          << '\n';
+    gzmsg << "[WaterVisual] wavefield recipe acquired (algorithm="
+          << data->algorithm << ", generation=" << data->generation
+          << (wfComp ? ", via component" : ", via state pull") << ")" << '\n';
   }
 
   // Build and OWN a private engine instance from the replicated parameters,
@@ -648,10 +691,10 @@ void WaterVisual::PreUpdate(
   // fully serialised. One render path for every backend: OnSceneUpdate pulls
   // the grid via Field().
   if (!this->dataPtr->sim ||
-      this->dataPtr->cachedGeneration != data.generation)
+      this->dataPtr->cachedGeneration != data->generation)
   {
     this->dataPtr->sim =
-        gz::sim::waves::CreateWaveSimulation(data.algorithm, data.params);
+        gz::sim::waves::CreateWaveSimulation(data->algorithm, data->params);
   }
   if (!this->dataPtr->sim)
   {
@@ -663,10 +706,31 @@ void WaterVisual::PreUpdate(
     this->dataPtr->cachedTileSize = static_cast<float>(f->tile);
     this->dataPtr->cachedGridSize = static_cast<int>(f->n);
   }
-  this->dataPtr->cachedTau = static_cast<float>(data.params.tau);
-  this->dataPtr->cachedChopFactor = static_cast<float>(data.params.choppiness);
+  this->dataPtr->cachedTau = static_cast<float>(data->params.tau);
+  this->dataPtr->cachedChopFactor =
+      static_cast<float>(data->params.choppiness);
   this->dataPtr->haveWavefield = true;
-  this->dataPtr->cachedGeneration = data.generation;
+  this->dataPtr->cachedGeneration = data->generation;
+}
+
+//////////////////////////////////////////////////
+void WaterVisual::Implementation::OnStateResponse(
+    const gz::msgs::SerializedStepMap &_reply, bool _result)
+{
+  if (!_result)
+    return;
+  // Deserialise the snapshot into a throwaway ECM — our component type is
+  // registered in this process now, so it parses cleanly — and lift out just
+  // the Wavefield recipe, without touching the live GUI ECM.
+  gz::sim::EntityComponentManager ecm;
+  ecm.SetState(_reply.state());
+  ecm.Each<components::Wavefield>(
+      [this](const Entity &, const components::Wavefield *_wf)
+      {
+        const std::lock_guard<std::mutex> lock(this->mutex_);
+        this->pulled = _wf->Data();
+        return false;   // the recipe lives on the single world entity
+      });
 }
 
 }  // namespace gz::sim::systems
