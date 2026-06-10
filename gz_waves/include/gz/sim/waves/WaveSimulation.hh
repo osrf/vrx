@@ -54,8 +54,6 @@ struct WaveField2D
   const double *dy{nullptr};     ///< Horizontal chop y [m]; null ⇒ treat as 0.
   const double *foam{nullptr};   ///< Folding metric: 1 = flat, < 1 → folding
                                  ///< (whitecaps); null ⇒ backend has no foam.
-  const double *slopeX{nullptr}; ///< ∂η/∂x; null ⇒ renderer finite-diffs η.
-  const double *slopeY{nullptr}; ///< ∂η/∂y; null ⇒ renderer finite-diffs η.
 };
 
 /// \brief Polymorphic backend for a wave field. Concrete implementations
