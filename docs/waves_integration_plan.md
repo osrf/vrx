@@ -11,9 +11,9 @@ have an explicit trade-off that needs a call before code lands.
 > **Status update.** The **wave-field** layer described here is now implemented in
 > VRX — see [`wave_design_reference.md`](wave_design_reference.md) (the current
 > system) and [`wave_provider_architecture.md`](wave_provider_architecture.md)
-> (provider design + where it diverged). Several "open" decisions below are
+> (the architecture, as built). Several "open" decisions below are
 > resolved: the wave abstraction is the virtual `IWaveField` interface (virtual
-> dispatch, **not** the concrete-struct Option A in §4); the visual vertex shader
+> dispatch, **not** a concrete-struct representation — see §4); the visual vertex shader
 > shipped as `fft_water_vs_330.glsl`; and the code is split into `gz_waves` (core)
 > + `gz_waves_provider_{fft,gerstner}` (engines) + `gz_waves_rendering` (visual).
 > The **wind** and **current** field layers remain future work, so this plan is
@@ -89,83 +89,21 @@ lifecycle category (anything implementing `ISystemConfigure`/`PreUpdate`),
 not a domain category. Precedents: `sensors/`, `scene_broadcaster/`,
 `particle_emitter/` all live there.
 
-## 4. Wave model abstraction (**open design decision**)
+## 4. Wave model abstraction (resolved)
 
-The wave evaluation interface presented to consumers needs to support multiple
-backends (Gerstner today, FFT later). Two options on the table:
+The wave interface supports multiple backends (Gerstner analytic, FFT spectral).
+It shipped as a **virtual `IWaveField`** — concrete backends implement it and the
+`Eval::*` free functions are one-line delegators. This was chosen over a concrete
+`WavefieldData` struct (array-of-components, header-inlined `Eval`) because a
+virtual interface is **ABI-safe**: a new backend is a new class, with no struct
+layout change and no wait for a major-version bump. The ~5% per-call vtable cost
+is negligible (sub-microsecond per sample), and the `Eval::*` signatures are the
+same either way, so consumers are unaffected by the representation. (A
+`std::variant` of backends, or a pimpl with public accessors, were rejected —
+both ABI-break when a backend is added and preclude separate-library backends.)
 
-### Option A — Concrete `WavefieldData` struct, no virtual dispatch
-
-```cpp
-struct WavefieldData {
-  WaveParameters params;
-  std::vector<double> amplitudes;
-  std::vector<double> wavenumbers;
-  std::vector<double> angularFrequencies;
-  std::vector<double> steepnesses;
-  std::vector<gz::math::Vector2d> directions;
-  double tau;
-  uint64_t generation;
-};
-```
-
-`Eval::SurfaceElevation(wf, x, y, t)` is a header-inlinable free function that
-loops over the arrays. No abstraction, no vtable, full inlining into
-consumer hot loops.
-
-- **Pro:** simplest, fastest, no `shared_ptr`, no plugin lifetime.
-- **Con:** adding FFT requires extending the struct. **Breaks ABI within a
-  major gz-sim release.** FFT would have to wait for a major version bump.
-
-### Option C — Virtual `IWaveSimulation` interface
-
-```cpp
-class IWaveSimulation {
-public:
-  virtual double Elevation(double x, double y, double t) const = 0;
-  virtual gz::math::Vector3d ParticleVelocity(double x, double y, double t) const = 0;
-  virtual void Update(double simTime) {}   // default no-op for analytic
-  virtual std::optional<TileSize> Bounds() const { return {}; }
-  virtual std::optional<HeightmapHandle> Heightmap() const { return {}; }
-  virtual std::string_view Kind() const = 0;
-  // ...
-};
-
-struct WavefieldData {
-  std::shared_ptr<IWaveSimulation> simulation;
-  WaveParameters params;
-  uint64_t generation;
-};
-```
-
-`Eval::*` are one-line delegators. Backends are concrete classes implementing
-the interface.
-
-- **Pro:** adding FFT (or any backend) is ABI-safe. New backend = new class,
-  no struct layout change. Plugin loading is feasible (via `gz-plugin`).
-- **Con:** ~5–10 cycles per call for virtual dispatch (~5% of a wave eval).
-  Loses inlining into consumer loops.
-
-### Decision criterion
-
-The choice depends on the FFT timeline:
-
-- **If FFT can wait for the next `gz-sim` major release:** ship Option A. Simpler,
-  faster, no premature abstraction.
-- **If FFT might land mid-major-cycle:** ship Option C. The vtable cost is
-  small in absolute terms (~5% of wave eval; sub-microsecond per sample) and
-  the ABI safety is real.
-
-The `Eval::*` free-function *signatures* stay identical between options, so
-consumer code (Buoyancy, Hydrodynamics, WaterVisual) doesn't change if we
-swap the backing representation later.
-
-### What's rejected
-
-- `std::variant` of concrete backends. Also ABI-breaks when a backend is added
-  (variant type changes); plugin loading impossible.
-- Pimpl with public accessors. Loses inlining without gaining what Option C
-  gains.
+See [`wave_provider_architecture.md`](wave_provider_architecture.md) for the
+shipped interface.
 
 ## 5. Components
 
@@ -202,8 +140,8 @@ direction follow wind).
 namespace gz::sim::waves {
 
 double          SurfaceElevation(const WavefieldData &wf, double x, double y, double t);
-gz::math::Vector3d ParticleVelocity(const WavefieldData &wf, double x, double y, double t);
-gz::math::Vector3d Normal(const WavefieldData &wf, double x, double y, double t);
+Eigen::Vector3d ParticleVelocity(const WavefieldData &wf, double x, double y, double t);
+Eigen::Vector3d Normal(const WavefieldData &wf, double x, double y, double t);
 double          Jacobian(const WavefieldData &wf, double x, double y, double t);
 
 // Foam intensity derived from Jacobian; useful for visual and (rarely) physics.
@@ -212,8 +150,8 @@ double          FoamMask(const WavefieldData &wf, double x, double y, double t);
 }  // namespace gz::sim::waves
 ```
 
-For Option A, these are header-inlinable loops. For Option C, they delegate
-to `IWaveSimulation`.
+These are null-safe one-line delegators to the backing `IWaveField`
+(`wf.simulation`); `WaveBuoyancy` consumes `SurfaceElevation`.
 
 ## 7. Buoyancy and Hydrodynamics upgrades
 
@@ -244,7 +182,7 @@ captures wave slope across the body, which neither old plugin did.
 ### `Hydrodynamics`
 
 ```cpp
-gz::math::Vector3d vWater;  // default zero — still water
+Eigen::Vector3d vWater;  // default zero — still water
 auto *wfComp = ecm.Component<components::Wavefield>(worldEnt);
 auto *curComp = ecm.Component<components::Current>(worldEnt);
 if (wfComp)  vWater += waves::ParticleVelocity(wfComp->Data(), x, y, t);
@@ -418,22 +356,16 @@ waves/        currents/        wind/        dynamics/
 
 These shrink to nothing as upstream PRs land.
 
-## 15. Bugs and oddities to fix in passing
+## 15. Bugs fixed during implementation
 
-Carried over from analysis of current VRX wave code:
-
-- **Vertex shader y-displacement bug** (`GerstnerWaves_vs_330.glsl`): uses
-  `dx` where Tessendorf wants `dy`. Silent at steepness=0; broken above.
-- **50% buoyancy saturation in `Surface`**: `deltaZ` clamp at `hullRadius`
-  caps buoyancy at half-Archimedean. Use full diameter.
-- **Hardcoded `N=3` across shader/C++ boundary**: make `Nwaves` actually
-  drive the loop and the upload count.
-- **`paramsSet` not reset on render teardown** (`WaveVisual.cc`): after
-  scene reload, uniforms aren't re-uploaded. Use a generation counter
-  instead.
-- **Hardcoded texture paths**: `wave_normals.dds`, `skybox_lowres.dds`
-  should be SDF parameters.
-- **Dead `ComputeDepthDirectly`**: either wire it up or delete it.
+Issues flagged in the initial analysis of the old VRX wave code, all addressed
+in the current system: half-Archimedean buoyancy saturation (the submerged-depth
+clamp now spans the full diameter, `[0, 2·radius]`); the render-teardown
+re-upload gap (the visual keys uploads off a generation counter and resets on
+`OnRenderTeardown`); and hardcoded texture paths (now `<textures>` SDF tags). The
+legacy Gerstner vertex-shader y-displacement bug is moot — that shader is gone;
+the visual renders every backend from the unified `Field()` height grid with
+finite-difference normals.
 
 ## 16. Coordination
 
@@ -455,21 +387,16 @@ Carried over from analysis of current VRX wave code:
    them; soliciting feedback before locking in interfaces avoids breaking
    changes later.
 
-## 17. Open decisions before PR 1
+## 17. Open decisions
 
-These need answers before the public API locks in PR 1:
+Resolved during the wave-field implementation: the backend abstraction is the
+virtual `IWaveField` (§4); the component lives directly on the **world entity**;
+and spatial extent is a backend property via `Bounds()` (`nullopt` for unbounded
+Gerstner, a tile size for FFT — consumers wrap queries outside the tile). Still
+open for upstreaming:
 
-1. **Option A vs Option C** for the wave backend abstraction (see §4).
-   Hinges on whether FFT can wait for the next `gz-sim` major release.
-2. **`asv_wave_sim` relationship**. Depend on it during VRX bridging,
-   or duplicate the parts we need?
-3. **Component placement** — world entity directly, or child entity of a
-   "waves" model? World entity is simpler; child entity matches
-   `asv_wave_sim`. Recommend world entity.
-4. **Spatial extent semantics** — does the wave field cover the whole
-   world (Gerstner) or a tile (FFT)? The `Bounds()` API exposes this;
-   consumers (especially Buoyancy) need a documented policy for queries
-   outside the tile.
+1. **`asv_wave_sim` relationship** — depend on it during bridging, or duplicate
+   the parts we need? (See §16.)
 
 ## 18. Sequencing recap
 

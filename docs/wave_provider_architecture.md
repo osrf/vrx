@@ -1,398 +1,178 @@
-# Wave Provider Architecture (design)
+# Wave Provider Architecture
 
-**Status:** design exploration — *partially* realized. The provider refactor
-adopted this document's **ideas** but chose a simpler **mechanism** than the
-gz-plugin provider-discovery design sketched below (see **What actually shipped**
-next). For the system as it exists today, see
-[`wave_design_reference.md`](wave_design_reference.md).
-
----
-
-## What actually shipped (and where it diverged)
-
-The implementation kept the core ideas here — a single `IWaveField` "socket",
-recipe-style server↔GUI replication, a sea-state front door, and the "advance the
-instance you hold" determinism rule — but realized them differently:
-
-| This design (vision) | What shipped |
-|---|---|
-| Providers discovered **by name via `gz-plugin`** (`GZ_ADD_PLUGIN(IWaveField)`) and loaded by a core loader | **Per-engine gz-sim *system* plugins** (`gz-sim-waves-fft-system`, `gz-sim-waves-gerstner-system`), each a thin `WavesSystemBase` subclass. Engines are plain libs registered in an **in-process token→factory registry** (`RegisterWaveEngineFactory`/`CreateWaveSimulation`). No dlopen engine loader. |
-| `SetParameters(seed, targetHs, config)` — two universal knobs + an **opaque provider config string** | A **shared `WaveParameters` struct** was kept: `SetParameters(const WaveParameters&)`, serialized whole in the component. |
-| `WaveParameters` dropped; each provider parses its own SDF sub-tree | `WaveParameters` retained (model/period/grid_size/seed/choppiness/sea_state/…); both engines read the same struct. |
-| Encino knobs become the FFT provider's **own SDF tags** in `config` | Encino tuning (`depth`/`fetch`/`swell`/`trough_damping`/`filter_*`) **is now SDF** — but as flat tags in `<wave>` parsed by the shared `ParseSdf`, not a provider-owned opaque config blob. |
-| Sea state stored as `targetHs` [m] (a universal field) | Sea state is an SDF **`<sea_state>` integer (WMO 0–9)** in `WaveParameters`, resolved to Hs to override `<period>`/`<gain>`. |
-| Rich FFT/Encino provider lives in a separate **`vrx_waves`** package | It lives in **`gz_waves_provider_fft`** (Gerstner in `gz_waves_provider_gerstner`); `encinowaves_vendor` is vendored. |
-| `Capabilities`/`Caps()`, `Grid()`, `Foam()`, `Velocity()` on the socket | The shipped `IWaveField` exposes `Elevation`/`ParticleVelocity`/`Normal`/`Jacobian`/`SetParameters`/`Kind` (pure) + `Update`/`Bounds`/`Field` (defaulted); no `Capabilities`. Foam is the `Field()` grid's foam channel. |
-
-What **did** carry over intact: the component is a *recipe, not pixels* — each
-process rebuilds its own engine from the serialized parameters + token, so server
-and GUI agree without streaming grids; and the determinism rule (**a consumer
-advances the instance it holds, never assuming another system did**) is enforced
-— e.g. `WaterVisual` builds and owns its own engine rather than sharing the
-server's.
-
-**Runtime parameter updates** (the *Runtime parameters* section below) are also
-implemented: the source advertises `…/wave/set_parameters` — a `gz.msgs.Param`
-key→value map (partial update) rather than the opaque `config` string sketched
-here — which mutates the `Wavefield` component and bumps `generation` exactly as
-designed, so consumers re-read it with no extra wiring.
-
-The remainder of this document is the original design exploration, preserved for
-its rationale. Read it as *the reasoning*, not the current API.
-
----
+How the VRX wave system is structured: one wave-field interface ("the socket"),
+interchangeable engines behind it, and a recipe-style ECM component that keeps
+the physics **server** and the render **GUI** in sync. This describes the system
+as built. For the user-facing SDF knobs see
+[`wave_design_reference.md`](wave_design_reference.md); for the broader
+upstreaming roadmap (wind, currents, hydrodynamics) see
+[`waves_integration_plan.md`](waves_integration_plan.md).
 
 ## The big idea (plain English)
 
-Gazebo defines a standard **"wave socket"** — a fixed set of questions anyone can
-ask about the water. Different wave implementations **plug into that socket**.
+There is a standard **"wave socket"** — a fixed set of questions anyone can ask
+about the water. Different wave implementations **plug into that socket**.
 Everything that needs waves (buoyancy, the renderer, sensors) talks to the
-*socket*, never to a specific implementation — so you can swap the wave engine
-underneath and nothing else changes.
-
-Same idea as **printer drivers**: apps just press "Print"; you install whatever
-printer's driver you own; the apps never know the brand.
+*socket*, never to a specific implementation — so the wave engine can be swapped
+underneath and nothing else changes. Same idea as printer drivers: apps press
+"Print"; the app never knows the brand.
 
 ```
-            ┌──────────── the "wave socket" (the interface) ────────────┐
-   ask it:  "water height / slope / velocity / foam at (x,y) right now?"
-            └────────────────────────────────────────────────────────────┘
+            ┌──────────── the "wave socket" — IWaveField ────────────┐
+   ask it:  "water height / normal / particle velocity / fold at (x,y,t)?"
+            │                  "give me the height grid"               │
+            └──────────────────────────────────────────────────────────┘
                     ▲                      ▲                       ▲
        plugs in     │                      │                       │
    ┌────────────────┴───┐    ┌─────────────┴──────┐    ┌───────────┴────────┐
-   │ Gerstner provider  │    │ FFT/Encino provider │    │ (future provider)  │
-   │ simple, w/ Gazebo  │    │ rich, ships w/ VRX  │    │                    │
+   │ Gerstner engine    │    │ FFT / Encino engine │    │ (future engine)    │
+   │ analytic, light    │    │ spectral, rich      │    │                    │
    └────────────────────┘    └─────────────────────┘    └────────────────────┘
 
    who asks the socket:   buoyancy  ·  the water renderer  ·  sensors / scoring
-   (none of them know or care which provider is plugged in)
+   (none of them know or care which engine is plugged in)
 ```
 
-In one line: *the water is asked questions through a standard socket;
-interchangeable engines answer; buoyancy and rendering just ask and don't care
-who answered; and because everyone works from the same little recipe (seed
-included), the separate physics and graphics programs always agree.*
-
----
+Because every consumer works from the same little **recipe** (seed included), the
+separate physics and graphics processes always agree on the waves.
 
 ## The pieces
 
-### 1. The interface — "the socket / the contract"
+### 1. The interface — `IWaveField` (the socket)
 
-A short list of questions every wave implementation must answer, plus "advance
-yourself to time T." Strawman:
+The contract every engine implements; consumers only see this
+(`gz_waves/include/gz/sim/waves/WaveSimulation.hh`):
 
 ```cpp
-namespace gz::sim::waves
+class IWaveField
 {
-  /// What a provider can answer, so consumers degrade gracefully.
-  struct Capabilities
-  {
-    bool queryable = true;   ///< CPU point queries (buoyancy needs this)
-    bool grid      = false;  ///< produces a WaveGrid for the renderer
-    bool velocity  = false;  ///< real particle velocity (else returns 0)
-    bool foam      = false;  ///< real foam (else returns 0)
-  };
+public:
+  virtual ~IWaveField() = default;
 
-  /// The "socket". Every wave engine implements this; consumers only see this.
-  class IWaveField
-  {
-  public:
-    virtual ~IWaveField() = default;
+  // --- point queries (physics / logic / sensors) ---
+  virtual double          Elevation(double x, double y, double t) const = 0;
+  virtual Eigen::Vector3d ParticleVelocity(double x, double y, double t) const = 0;
+  virtual Eigen::Vector3d Normal(double x, double y, double t) const = 0;
+  virtual double          Jacobian(double x, double y, double t) const = 0;
 
-    // --- lifecycle ---
-    /// (Re)configure from the recipe: the two universal knobs — the RNG `seed`
-    /// and the target significant wave height `targetHs` (the sea state, in
-    /// metres) — plus the provider's OWN `config` (its serialized SDF sub-tree).
-    /// The provider realizes `targetHs` in its own terms, parses `config` itself
-    /// (the core never interprets it), and decides whether to mutate or rebuild.
-    /// Beyond the two universal knobs there is deliberately NO shared parameter
-    /// struct; see "Parameters: provider-owned" and "Common config: sea state".
-    virtual void SetParameters(std::uint32_t seed, double targetHs,
-                               const std::string &config) = 0;
-    /// Advance state to sim time t. CONTRACT: deterministic — same seed+targetHs
-    /// +config+t must yield the same field in every process (see determinism).
-    virtual void Update(double simTime) = 0;
-    virtual Capabilities Caps() const = 0;
+  // --- configuration / lifecycle ---
+  virtual void SetParameters(const WaveParameters &) = 0;
+  virtual void Update(double simTime) {}                  // no-op for analytic engines
 
-    // --- point queries (physics / logic / sensors) ---
-    virtual double         Elevation(double x, double y) const = 0;
-    virtual math::Vector3d Normal(double x, double y) const = 0;
-    virtual math::Vector3d Velocity(double x, double y) const = 0;  // 0 if !Caps().velocity
-    virtual double         Foam(double x, double y) const = 0;      // 0..1; 0 if !Caps().foam
-
-    // --- grid (rendering) ---
-    /// Null when !Caps().grid. Provider owns the memory; valid until next Update.
-    virtual const WaveGrid *Grid() const = 0;
-  };
-}
+  // --- identity / rendering ---
+  virtual std::string_view        Kind() const = 0;       // "gerstner" | "fft"
+  virtual std::optional<TileSize> Bounds() const { return std::nullopt; }
+  virtual const WaveField2D      *Field() const { return nullptr; }
+};
 ```
 
-### 2. The providers — "the plug-in engines"
+- **Vectors are `Eigen`, not `gz::math`.** The engine layer (this interface plus
+  both engines) carries **no Gazebo dependency** — only Eigen — so it can be
+  reused outside a simulator (see the extraction note in
+  [`waves_integration_plan.md`](waves_integration_plan.md)).
+- **No `Capabilities` flags.** Optional features degrade via defaults: analytic
+  engines no-op `Update` and return `nullopt` from `Bounds`; foam is the
+  `Field()` grid's foam channel; the renderer finite-diffs the normal when an
+  engine exposes no slope.
+- **One shared `WaveParameters` recipe.** Both engines read the same struct
+  (model / period / grid_size / seed / `sea_state` / `<spectrum>`/`<spreading>`/
+  `<dispersion>` / the band-pass filter / …). Gravity is **not** an SDF knob —
+  it is read from the world's `<gravity>` so the waves stay consistent with
+  buoyancy and rigid-body dynamics.
 
-Actual wave implementations, each in its **own package**, loaded **by name** with
-`gz-plugin` (the same mechanism Gazebo already uses for systems/sensors):
+### 2. The engines + the registry — "the plug-in engines"
+
+Each engine (Gerstner = analytic sum-of-Gerstners; FFT = Encino spectral ocean)
+is a **plain `IWaveField` library** with no `GZ_ADD_PLUGIN`. Engines are made
+reachable by a token through an **in-process registry** — no dlopen engine
+loader:
 
 ```cpp
-// in a provider package, e.g. gz_waves_gerstner:
-class GerstnerProvider : public gz::sim::waves::IWaveField { /* ... */ };
-GZ_ADD_PLUGIN(GerstnerProvider, gz::sim::waves::IWaveField)
+RegisterWaveEngineFactory("gerstner", MakeGerstnerWaveField);   // engine self-registers
+auto field = CreateWaveSimulation("fft", params);               // build + SetParameters
 ```
 
-- a **simple** provider (Gerstner — a few sine waves) ships **with Gazebo**, so a
-  plain install has working water out of the box;
-- a **rich** provider (FFT + Encino spectral ocean) ships **with VRX**.
-
-More can be added later; they only have to fit the socket.
+On the **server**, a per-engine gz-sim **system plugin**
+(`gz-sim-waves-fft-system`, `gz-sim-waves-gerstner-system`) — a thin
+`WavesSystemBase` subclass that overrides `EngineToken()` + `MakeEngine()` —
+links its engine and registers it. The world selects the engine simply by the
+plugin **filename** (no `<algorithm>` tag). On the **GUI**, the water visual
+links and registers both engines and builds its own from the component.
 
 ### 3. The component — "the recipe card on the world"
 
-A small note attached to the world entity: which provider + its settings. It is
-the **recipe**, *not* the water. Critically, it carries **no live simulation
-object** — only data:
+A small note attached to the world entity: which engine + its settings. It is
+the **recipe, not the water**:
 
 ```cpp
 struct WavefieldData
 {
-  std::string   provider;   ///< "gerstner" | "fft" | "vrx_encino" | ...
-  std::uint32_t seed;       ///< universal: determinism (identical fields per process)
-  double        targetHs;   ///< universal: significant wave height [m] (the sea
-                            ///< state); the provider realizes it (see Sea state)
-  std::string   config;     ///< the provider's SDF sub-tree, serialized; parsed
-                            ///< by the provider itself — opaque to the core
-  std::uint64_t revision;   ///< bumped on any change; consumers re-apply
+  std::string                  algorithm;   // "gerstner" | "fft"
+  WaveParameters               params;      // the full recipe (incl. world gravity)
+  std::shared_ptr<IWaveField>  simulation;  // server-side live engine — NOT serialized
+  std::uint64_t                generation;  // bumped on any change; consumers re-read
 };
-using Wavefield = components::Component<WavefieldData, class WavefieldTag>;
 ```
 
-This is replicated server→GUI like any ECM component (it's tiny — a couple of
-strings and two integers).
-
-#### Parameters: provider-owned, not a shared struct
-
-There is deliberately **no shared `WaveParameters` struct** in the API. A single
-struct holding every provider's knobs would be a **fat union** — most fields are
-meaningless to any one provider (a grid size means nothing to an analytic
-Gerstner sea) — and, living in the upstream core, **adding a knob for a
-downstream provider** (say an Encino `fetch`) would force an **upstream change**.
-That's exactly why our Encino knobs were initially bolted on as
-`GZ_WAVES_ENCINO_*` **environment variables**: `WaveParameters` had nowhere to
-put them. (They have since been promoted to flat `<wave>` SDF tags — added to
-the shared `WaveParameters` rather than a provider-owned config blob.)
-
-Instead, **each provider owns its parameter surface** — its own SDF sub-tree,
-parsed by the provider itself. The recipe carries that as a **serialized string**
-(`config`) so it travels through the ECM and **both processes parse the identical
-text**, preserving determinism. The core never looks inside it. There are only
-**two** truly universal knobs — the **`seed`** (determinism) and a **sea-state
-target** (how rough the sea is; next section). Almost nothing else is universal
-(not every sea even has a single direction or period), so only those two are
-promoted out of the opaque config.
-
-Concretely, the Encino env vars become the FFT/Encino provider's own SDF, e.g.:
-
-```xml
-<provider>fft</provider>
-<spectrum>jonswap</spectrum>   <depth>8</depth>   <swell>0.7</swell>
-```
-
-— parsed by `vrx_waves`, invisible to `gz_waves`.
-
-#### Common config: sea state
-
-The second universal knob is a **sea state** — how rough the sea is — because
-every provider, whatever its math, can produce a sea of a given roughness. It's
-the friendly front door: a user or a VRX task says "sea state 4" without learning
-any provider's spectrum/fetch/dispersion knobs.
-
-The input is the standard **WMO sea-state code** (0–9); the core resolves it to a
-**significant wave height** `targetHs` [m] — the universal physical quantity
-stored in the recipe and passed to providers:
-
-| N | name | Hs |
-|---|---|---|
-| 0–1 | calm | 0–0.1 m |
-| 2 | smooth | 0.1–0.5 m |
-| 3 | slight | 0.5–1.25 m |
-| 4 | moderate | 1.25–2.5 m |
-| 5 | rough | 2.5–4 m |
-| 6 | very rough | 4–6 m |
-| 7–9 | high → phenomenal | 6 m → 14 m+ |
-
-So the SDF accepts either the friendly integer or the precise height:
-
-```xml
-<sea_state>4</sea_state>                       <!-- resolves to targetHs ≈ 1.9 m -->
-<!-- or, for precision the 0–9 buckets can't express: -->
-<significant_wave_height>1.7</significant_wave_height>
-```
-
-**The core owns the table** (a WMO standard, one source of truth) and hands
-`targetHs` to the provider via `SetParameters`. Each provider realizes it in its
-own terms — Gerstner picks amplitude/period; FFT/Encino derives the wind and lets
-its **amplitude calibration** (which already targets `Hs = 0.21·V²/g`) land on
-it. So sea state simply becomes the target the calibration aims at.
-
-This makes the recipe **two-tier**:
-
-```
-recipe = {
-  provider,                  // who
-  seed,                      // universal: determinism
-  targetHs,                  // universal: sea state (how rough)
-  config (opaque SDF),       // provider-specific: the power-user knobs
-  revision
-}
-```
-
-- **Beginner / VRX task:** `provider=fft`, `sea_state=3` — done.
-- **Power user:** also supplies `config` to fine-tune spectrum/fetch/dispersion;
-  `targetHs` sets the baseline energy, the SDF bends its character.
-
-**Caveat:** sea-state → Hs is standardized for a *fully-developed, deep-water*
-sea. If the provider config overrides `depth`/`fetch`, the realized Hs can drift
-from the table — so `sea_state` is a baseline target the config refines, not a
-hard guarantee. (Especially nice for VRX: tasks are often specified as sea
-conditions, and this knob behaves the same across providers.)
+The stream operators serialize **only the recipe** (`algorithm` + `params` +
+`generation`); `simulation` is reset to null on deserialize. Each process
+rebuilds its own engine from the recipe via `CreateWaveSimulation`, so the server
+and GUI agree without streaming any height grids — the component is tiny.
 
 ### 4. The consumers — "the things that use water"
 
-Buoyancy, hydrodynamics, the renderer, sensors, scoring. Each **holds its own
-provider** (built from the recipe) and asks it questions through the socket.
-Because they only speak "socket," they work with *any* provider unchanged.
+Buoyancy, the renderer, sensors, scoring. Each **holds its own engine** and asks
+it questions through the socket (or the `Eval::*` free-function helpers over
+`WavefieldData`). `WaveBuoyancy` uses `SurfaceElevation`; `WaterVisual` consumes
+the `Field()` grid. Because they only speak "socket," they work with any engine
+unchanged.
 
----
+## Determinism — "advance the instance you hold"
 
-## How buoyancy interacts (concrete)
+Gazebo runs as two programs — the physics **server** and the graphics **GUI** —
+and both need the waves. Instead of streaming a grid between them, **each process
+reads the recipe and builds its own engine**; because the recipe is identical
+(*including the seed*), they produce the same waves independently. The server's
+buoy and the GUI's rendered crest line up for free.
 
-Buoyancy is just a consumer. Each physics step it advances its provider and asks,
-per hull point:
+This makes determinism a hard contract on engines:
 
-```cpp
-field->Update(simTime);                 // advance the instance I hold
-double h = field->Elevation(px, py);    // water height under this point
-// ... compare to the point's Z, apply buoyant force where submerged ...
-```
+> Given the same `params` (seed included) and `simTime`, `Update()` + the queries
+> must produce the same field in every process.
 
-It never knows whether the answer came from Gerstner or Encino — only "the water
-is *this* high here." Swap the engine and the buoy behaves the same, riding
-different-looking waves. (It can also use `Velocity()`/`Foam()` when the
-provider's `Caps()` advertise them — e.g. wave-induced drift, or foam-aware
-drag.)
-
----
-
-## The two-process model & the determinism contract
-
-Gazebo runs as **two programs**: the physics **server** and the graphics **GUI**.
-Both need the waves. Instead of streaming a grid of water heights between them,
-**each program reads the recipe and builds its own provider**. Because the recipe
-is identical — *including the seed* — they produce the **same waves**
-independently. The server's buoy and the GUI's rendered crest line up for free,
-with almost no network traffic.
-
-This makes determinism a **hard contract on providers**:
-
-> Given the same `seed`, `targetHs`, `config`, and `simTime`, `Update()` + the
-> queries must produce the same field in every process.
-
-It also bans the anti-pattern we hit during development: **a consumer must
-advance the provider instance it holds — never assume another system did.** (The
-old design shared a live simulation *pointer* through the component; after a
-replication round-trip a consumer could end up holding a fresh, never-advanced
-copy and see flat water. This design removes the shared pointer entirely.)
-
----
+It also bans the anti-pattern that caused an intermittent crash during
+development: **a consumer must advance the engine instance it holds — never
+assume another system did.** An earlier design shared a live engine *pointer*
+through the component; after a replication round-trip a consumer could hold a
+fresh, never-advanced copy and see flat water (or race the server's engine on the
+render thread). The recipe-only component removes the shared pointer entirely —
+`WaterVisual` builds and owns its own engine.
 
 ## Runtime parameters
 
-Because the recipe is a small note on the world, a control surface can edit it
-live:
+The recipe is a small note on the world, so a control surface can edit it live.
+The source system advertises:
 
 ```
-service/topic  /world/<w>/wave/set_parameters
-      │
-      ▼  write the new config into the Wavefield component, bump `revision`
-      │     (SceneBroadcaster replicates it as usual)
-      ▼
- each process's wave system sees the new revision → field->SetParameters(seed, targetHs, config)
-      │     (provider decides: cheap mutate, or internal rebuild)
-      ▼
- next Update() reflects the change; server + GUI stay in lockstep via the seed
+/world/<world>/wave/set_parameters     (gz.msgs.Param → gz.msgs.Boolean)
 ```
 
-The provider should apply changes by **atomic swap** so a query never sees a
-half-updated field.
+A caller sends a key→value map of `<wave>` tag names (a **partial** update —
+omitted keys keep their value). The change is queued on the transport thread and
+applied on the ECM thread: it re-runs `SetParameters`, bumps `generation`, and
+re-marks the component changed, so every consumer re-reads with no extra wiring.
 
----
+## Where it lives (packages)
 
-## Where it lives (package split)
-
-| Package | Contains | Future home |
+| Package | Contains | Gazebo dep? |
 |---|---|---|
-| `gz_waves` (core) | `IWaveField`, `WaveGrid`, `Capabilities`, the `Wavefield` component (recipe: provider + seed + targetHs + config blob), query helpers, the `Waves` system, provider **discovery via gz-plugin**, consumer systems (`WaveBuoyancy`, hydro), **+ the simple Gerstner provider** | → gz-sim upstream |
-| `gz_waves_rendering` | `WaterVisual` + the engine-specific heightmap→GPU bridge; consumes a `WaveGrid`, provider-agnostic | → gz-sim/rendering upstream |
-| `vrx_waves` | the rich **FFT/Encino** provider (a gz-plugin) | stays in VRX |
-| `encinowaves_vendor` | vendored Horvath library | dependency of `vrx_waves` only |
+| `gz_waves` | `IWaveField` + registry + `WaveParameters` + `Eval` (gz-free); the `Wavefield` ECM component + `WavesSystemBase` + `WaveBuoyancy` (gz-sim) | mixed |
+| `gz_waves_provider_gerstner` | Gerstner engine (gz-free) + its system plugin | mixed |
+| `gz_waves_provider_fft` | FFT/Encino engine (gz-free) + its system plugin | mixed |
+| `gz_waves_rendering` | `WaterVisual` + the Ogre2 heightmap C-ABI bridge | gz-sim/Ogre |
+| `encinowaves_vendor` | vendored Horvath spectrum library | none (Eigen/TBB/Imath) |
 
-**Discipline that makes upstreaming a lift-and-shift:** the core package must
-compile with nothing gz-sim doesn't already have — **no Encino, no Ogre, no
-VRX-isms** leak into it.
-
----
-
-## Mapping to today's code
-
-The current code is ~80% of this already; the redesign is mostly repackaging +
-one architectural change (plugin discovery), not new algorithms:
-
-| Today | Becomes |
-|---|---|
-| `IWaveSimulation` (`WaveSimulation.hh`) | `IWaveField` (+ `SetParameters`, `Caps`, `Grid`, `Foam`) |
-| `CreateWaveSimulation()` if/else factory | **gz-plugin** discovery (load provider by name) |
-| `WavefieldData` carrying a live `shared_ptr<IWaveSimulation>` | recipe-only `WavefieldData` (no shared sim) + `revision` |
-| `WaveParameters` (fat union of all backends' fields) | dropped — each provider parses its own SDF `config`; only `seed` is promoted to a universal field |
-| Encino `GZ_WAVES_ENCINO_*` env vars | **done** — now flat `<wave>` SDF tags (`depth`/`fetch`/`swell`/`trough_damping`/`filter_*`) |
-| `GerstnerWaveSimulation` | the simple **Gerstner provider** (already self-contained) |
-| `FFTWaveSimulation` + Encino + Ogre2 bridge | the **VRX FFT/Encino provider** + the rendering bridge |
-| `Eval::*` free functions | thin helpers over `IWaveField` |
-| `WaveBuoyancy` (already provider-agnostic) | upstream consumer system |
-
----
-
-## Migration plan (staging)
-
-Build in VRX, behind the boundaries above, then upstream the stable core. Each
-PR keeps a working system:
-
-1. **Carve `gz_waves`** — move interface/component/`Eval`/`Waves`/`WaveBuoyancy`;
-   generalise `IWaveSimulation → IWaveField`.
-2. **Introduce the gz-plugin seam** — wrap Gerstner and FFT as provider plugins;
-   replace the hardcoded factory with name-based loading. (Everything still
-   works, just loaded differently.)
-3. **Split `gz_waves_rendering`** out of the monolith.
-4. **Move FFT/Encino into `vrx_waves`** as the rich provider.
-5. **Wire runtime params** (service + `revision` + `SetParameters`).
-6. **Add a conformance test suite** every provider must pass (point-query
-   sanity, determinism, grid bounds) — pays off once there are ≥2 providers.
-
-**First upstream PR (Path B):** the **Gerstner-only** slice on this architecture
-— the simple provider + the core + the rendering, with FFT and Encino landing as
-clean *additive* provider PRs afterward (no refactor of the merged core).
-
----
-
-## Open decisions
-
-- **Replicate recipe, not pixels** (decided): the component carries the recipe
-  (provider + seed + opaque config blob), never a height grid; determinism via
-  shared seed + identical config keeps processes in sync cheaply. A
-  future GPU-only provider that can't answer CPU point queries would advertise
-  `Caps().queryable = false` and need a readback path for physics.
-- **Rendering boundary is engine-specific:** standardise the CPU `WaveGrid`
-  upstream; keep the GPU upload (Ogre2) behind the existing dlopen isolation so
-  Ogre never leaks into the interface.
-- **Capability matrix vs simplicity:** keep `Caps()` to a few flags with
-  documented fallbacks (finite-diff normals, zero velocity/foam).
-- **Runtime-update concurrency:** `SetParameters` builds new state and swaps
-  atomically so the render thread never reads a half-updated field.
+The **engine layer** (the interface, the registry, and both engines) depends only
+on Eigen — no gz-sim, no gz-math — so it is extractable as a standalone,
+simulator-agnostic library. The gz-sim integration (the component, the system
+plugins, buoyancy, rendering) is the only part that needs Gazebo.

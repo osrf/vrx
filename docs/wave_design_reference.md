@@ -156,6 +156,11 @@ Defaults live in `WaveParameters` (`gz_waves/include/gz/sim/waves/Wavefield.hh`)
 | `<filter_min>` | double [0,1] | `0` | Band-pass suppression floor (0 = full cut outside) |
 | `<filter_invert>` | bool | `false` | Band-stop (notch) instead of band-pass |
 
+> **Gravity.** The wave physics (dispersion, spectrum, and the sea-state period)
+> uses the world's configured `<gravity>`, read at load, so the waves stay
+> consistent with buoyancy and rigid-body dynamics. It is **not** a wave SDF
+> knob — set it on the world (gz-sim default `9.8 m/s²`).
+
 ### 5.3 Vessel buoyancy
 
 Parsed in `gz_waves/src/systems/WaveBuoyancy.cc`. A cylindrical circular-segment
