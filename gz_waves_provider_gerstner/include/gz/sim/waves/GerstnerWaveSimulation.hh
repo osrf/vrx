@@ -74,6 +74,7 @@ private:
   std::vector<double>             steepnesses_;
   std::vector<gz::math::Vector2d> directions_;
   double                          tau_{2.0};
+  double                          phase_{0.0};  ///< Common phase offset φ [rad].
 
   // Render grid: the analytic field sampled onto an N×N tile each Update,
   // exposed via Field() as the backend-agnostic rendering contract. Buffers

@@ -61,6 +61,7 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
   // Resolve <sea_state> (if set) into period/gain before configuring.
   const WaveParameters p = WithSeaState(_params);
   this->tau_ = p.tau;
+  this->phase_ = p.phase;
   const double omegaMean = 2.0 * M_PI / p.period;
   const std::size_t n = p.number;
 
@@ -181,7 +182,8 @@ double GerstnerWaveSimulation::Elevation(double x, double y, double t) const
   {
     const auto &d = directions_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t;
+      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      phase_;
     eta += amplitudes_[i] * std::cos(theta);
   }
   return eta * Ramp(t);
@@ -199,7 +201,8 @@ gz::math::Vector3d GerstnerWaveSimulation::ParticleVelocity(
     const auto &d = directions_[i];
     const double aw = amplitudes_[i] * angularFrequencies_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t;
+      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      phase_;
     const double s = std::sin(theta);
     const double c = std::cos(theta);
     vx += aw * d.X() * s;
@@ -221,7 +224,8 @@ gz::math::Vector3d GerstnerWaveSimulation::Normal(
     const auto &d = directions_[i];
     const double ak = amplitudes_[i] * wavenumbers_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t;
+      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      phase_;
     const double s = std::sin(theta);
     dhdx += -ak * d.X() * s;
     dhdy += -ak * d.Y() * s;
@@ -244,7 +248,8 @@ double GerstnerWaveSimulation::Jacobian(double x, double y, double t) const
     const auto &d = directions_[i];
     const double qak = steepnesses_[i] * amplitudes_[i] * wavenumbers_[i];
     const double theta =
-      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t;
+      wavenumbers_[i] * (d.X() * x + d.Y() * y) - angularFrequencies_[i] * t +
+      phase_;
     const double c = std::cos(theta);
     dsxdx += -qak * d.X() * d.X() * c;
     dsydy += -qak * d.Y() * d.Y() * c;
@@ -279,12 +284,13 @@ void GerstnerWaveSimulation::Update(double t)
     {
       const double x = static_cast<double>(i) * T / static_cast<double>(N);
       double dz = 0.0, dx = 0.0, dy = 0.0;
+      double dsxdx = 0.0, dsydy = 0.0, dsxdy = 0.0;
       for (std::size_t c = 0; c < nc; ++c)
       {
         const auto &d = this->directions_[c];
         const double theta =
           this->wavenumbers_[c] * (d.X() * x + d.Y() * y) -
-          this->angularFrequencies_[c] * t;
+          this->angularFrequencies_[c] * t + this->phase_;
         const double s  = std::sin(theta);
         const double co = std::cos(theta);
         dz += this->amplitudes_[c] * co;
@@ -292,6 +298,12 @@ void GerstnerWaveSimulation::Update(double t)
         const double qa = this->steepnesses_[c] * this->amplitudes_[c];
         dx -= qa * d.X() * s;
         dy -= qa * d.Y() * s;
+        // Folding/foam terms reuse co — equivalent to Jacobian(x, y, t) but
+        // without a second pass over the components.
+        const double qak = qa * this->wavenumbers_[c];
+        dsxdx -= qak * d.X() * d.X() * co;
+        dsydy -= qak * d.Y() * d.Y() * co;
+        dsxdy -= qak * d.X() * d.Y() * co;
       }
       const std::size_t idx = static_cast<std::size_t>(i) +
                               static_cast<std::size_t>(j) *
@@ -299,7 +311,8 @@ void GerstnerWaveSimulation::Update(double t)
       this->dzBuf_[idx]   = dz * r;
       this->dxBuf_[idx]   = dx * r;
       this->dyBuf_[idx]   = dy * r;
-      this->foamBuf_[idx] = this->Jacobian(x, y, t);
+      const double jxx = dsxdx * r, jyy = dsydy * r, jxy = dsxdy * r;
+      this->foamBuf_[idx] = (1.0 + jxx) * (1.0 + jyy) - jxy * jxy;
     }
   }
 }
