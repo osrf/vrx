@@ -327,6 +327,21 @@ void WavesSystemBase::PreUpdate(
   const double simTime = std::chrono::duration<double>(
     _info.simTime).count();
 
+  // The Wavefield component serializes recipe-only, so any ECM deserialize —
+  // a reset's state restore or a SceneBroadcaster replication round-trip —
+  // clears the component's live engine pointer (operator>>). Server-side
+  // consumers (e.g. WaveBuoyancy) read the engine straight out of the
+  // component, so re-point it at our authoritative, always-advanced instance
+  // whenever the ECM has cleared it. Without this the buoy samples flat water
+  // and stops responding to the waves after a reset. (World systems run before
+  // model systems, so the buoy sees the restored pointer the same tick.)
+  if (auto *comp =
+        _ecm.Component<components::Wavefield>(this->dataPtr->worldEnt);
+      comp && !comp->Data().simulation)
+  {
+    comp->Data().simulation = this->dataPtr->data.simulation;
+  }
+
   // Throttle backend updates. Analytic Gerstner has a no-op Update(); FFT
   // regenerates the height grid each call (~ms at 128²). Skip entirely while
   // paused — the field is frozen, so there's nothing to advance, and consumers
