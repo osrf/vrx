@@ -24,7 +24,6 @@ namespace gz::sim::waves
 
 namespace
 {
-constexpr double kGravity = 9.80665;
 constexpr double k2Pi    = 6.28318530717958647692;
 
 //////////////////////////////////////////////////
@@ -155,6 +154,7 @@ void ApplyEncinoParams(EncinoWaves::Parametersf &ep, const WaveParameters &p)
               << "' (want poscos2|mitsuyasu|hasselmann|donelanbanner)"
               << '\n';
 
+  ep.gravity       = static_cast<float>(p.gravity);
   ep.depth         = static_cast<float>(p.depth);
   ep.fetch         = static_cast<float>(p.fetch);
   ep.directionalSpreading.swell = static_cast<float>(p.swell);
@@ -241,7 +241,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
 
   // PMS relation: peak omega <-> wind speed at 19.5 m. period -> omegaP -> V19.
   const double omegaP = k2Pi / p.period;
-  this->windSpeed_ = 0.879 * kGravity / omegaP;
+  this->windSpeed_ = 0.879 * p.gravity / omegaP;
 
   const int N = static_cast<int>(this->gridSize_);
   this->heightGrid_ = Eigen::MatrixXd::Zero(N, N);
@@ -290,7 +290,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
                                   M, M).cast<double>().array()
             .square().mean());
     const double sigmaTarget =
-        0.21 / (4.0 * kGravity) * this->windSpeed_ * this->windSpeed_;
+        0.21 / (4.0 * p.gravity) * this->windSpeed_ * this->windSpeed_;
     this->encinoScale_ =
         (sigmaEncino > 1e-9) ? (sigmaTarget / sigmaEncino) : 1.0;
   }
@@ -306,7 +306,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
             << " troughDamp=" << ep.troughDamping
             << " filter=" << FilterName(ep.filter.type)
             << " ampCalib=" << this->encinoScale_
-            << " targetHs=" << (4.0 * 0.21 / (4.0 * kGravity) *
+            << " targetHs=" << (4.0 * 0.21 / (4.0 * p.gravity) *
                                 this->windSpeed_ * this->windSpeed_)
             << "m)" << '\n';
 

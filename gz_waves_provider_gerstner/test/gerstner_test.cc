@@ -90,7 +90,8 @@ TEST(Gerstner, DispersionRelationHolds)
   {
     const double omega = g->AngularFrequencies()[i];
     const double k = g->Wavenumbers()[i];
-    EXPECT_NEAR(omega * omega, 9.80665 * k, 1e-6 * omega * omega);
+    EXPECT_NEAR(omega * omega, gsw::WaveParameters{}.gravity * k,
+                1e-6 * omega * omega);
   }
 }
 

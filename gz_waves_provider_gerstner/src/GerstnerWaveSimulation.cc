@@ -23,26 +23,25 @@ namespace gz::sim::waves
 
 namespace
 {
-constexpr double kGravity = 9.80665;
 
 //////////////////////////////////////////////////
-double DispersionOmega(double k)
+double DispersionOmega(double k, double g)
 {
-  return std::sqrt(kGravity * k);
+  return std::sqrt(g * k);
 }
 
 //////////////////////////////////////////////////
-double DispersionWavenumber(double omega)
+double DispersionWavenumber(double omega, double g)
 {
-  return omega * omega / kGravity;
+  return omega * omega / g;
 }
 
 //////////////////////////////////////////////////
-double PiersonMoskowitz(double omega, double omegaP)
+double PiersonMoskowitz(double omega, double omegaP, double g)
 {
   constexpr double kAlpha = 0.0081;
   const double ratio = omegaP / omega;
-  return kAlpha * kGravity * kGravity / std::pow(omega, 5.0) *
+  return kAlpha * g * g / std::pow(omega, 5.0) *
          std::exp(-1.25 * std::pow(ratio, 4.0));
 }
 
@@ -103,15 +102,15 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
     if (p.model == "PMS")
     {
       omega = omegaMean * scaleFactor;
-      const double pms = PiersonMoskowitz(omega, omegaMean);
+      const double pms = PiersonMoskowitz(omega, omegaMean, p.gravity);
       a = p.gain * std::sqrt(2.0 * pms * dOmega[i]);
-      k = DispersionWavenumber(omega);
+      k = DispersionWavenumber(omega, p.gravity);
     }
     else if (p.model == "CWR")
     {
       a = scaleFactor * p.amplitude;
-      k = DispersionWavenumber(omegaMean) / scaleFactor;
-      omega = DispersionOmega(k);
+      k = DispersionWavenumber(omegaMean, p.gravity) / scaleFactor;
+      omega = DispersionOmega(k, p.gravity);
     }
     else
     {

@@ -125,6 +125,13 @@ struct WaveParameters
   /// (see WithSeaState / SeaStateFromCode). -1 (default) means "unset": use the
   /// explicit period/gain above instead.
   int seaState{-1};
+
+  /// \brief Gravitational acceleration magnitude [m/s²] driving the wave
+  /// physics (dispersion, spectrum, sea-state period). Populated from the
+  /// world's `<gravity>` in `WavesSystemBase::Configure` so the waves stay
+  /// consistent with buoyancy and rigid-body dynamics; defaults to gz-sim's
+  /// world default (9.8) when no world gravity is available.
+  double gravity{9.8};
 };
 
 /// \brief Canonical sea-state descriptor: significant wave height, peak period,
@@ -146,8 +153,9 @@ struct SeaStateSpec
 /// Canonical source: WMO Sea State code (code table 3700), WMO Manual on Codes
 /// (WMO-No. 306). Accessible table: https://en.wikipedia.org/wiki/Sea_state
 ///
+/// \param[in] _g Gravity magnitude [m/s²] used in the PM relations above.
 /// \return false (leaving _out untouched) for an out-of-range code.
-inline bool SeaStateFromCode(int _code, SeaStateSpec &_out)
+inline bool SeaStateFromCode(int _code, SeaStateSpec &_out, double _g = 9.8)
 {
   // Representative Hs [m] per WMO code: 0 calm/glassy, 1 calm/rippled,
   // 2 smooth, 3 slight, 4 moderate, 5 rough, 6 very rough, 7 high,
@@ -156,7 +164,7 @@ inline bool SeaStateFromCode(int _code, SeaStateSpec &_out)
       {0.0, 0.05, 0.3, 0.875, 1.875, 3.25, 5.0, 7.5, 11.5, 16.0};
   if (_code < 0 || _code > 9)
     return false;
-  constexpr double g = 9.81;
+  const double g = _g;
   const double hs = kHs[_code];
   const double v  = std::sqrt(hs * g / 0.21);
   const double tp = (v > 0.0) ? (2.0 * M_PI * v / (0.879 * g)) : 0.0;
@@ -174,7 +182,7 @@ inline WaveParameters WithSeaState(const WaveParameters &_p)
 {
   WaveParameters p = _p;
   SeaStateSpec s;
-  if (p.seaState < 0 || !SeaStateFromCode(p.seaState, s))
+  if (p.seaState < 0 || !SeaStateFromCode(p.seaState, s, p.gravity))
     return p;
   if (s.significantWaveHeight <= 0.0)
   {
@@ -254,6 +262,7 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.filterMin << ' '
       << _d.params.filterInvert << ' '
       << _d.params.seaState << ' '
+      << _d.params.gravity << ' '
       << _d.updateRate << ' ';
   return _os;
 }
@@ -295,6 +304,7 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.filterMin
       >> _d.params.filterInvert
       >> _d.params.seaState
+      >> _d.params.gravity
       >> _d.updateRate;
   // The recipe is restored; build no engine. `simulation` stays null so no two
   // consumers ever share a process-global instance.

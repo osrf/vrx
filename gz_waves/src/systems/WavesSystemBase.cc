@@ -20,6 +20,7 @@
 #include <gz/msgs/boolean.pb.h>
 #include <gz/msgs/param.pb.h>
 #include <gz/sim/Util.hh>
+#include <gz/sim/World.hh>
 #include <gz/transport/Node.hh>
 
 #include <sdf/Element.hh>
@@ -252,6 +253,18 @@ void WavesSystemBase::Configure(
   this->dataPtr->ParseSdf(
     std::const_pointer_cast<sdf::Element>(_sdf));
 
+  this->dataPtr->worldEnt = worldEntity(_ecm);
+  if (this->dataPtr->worldEnt == kNullEntity)
+  {
+    gzerr << "[Waves] no world entity found; aborting" << '\n';
+    return;
+  }
+
+  // Drive the wave physics with the world's configured gravity so dispersion,
+  // spectrum and sea-state period stay consistent with buoyancy and dynamics.
+  if (auto gravOpt = World(this->dataPtr->worldEnt).Gravity(_ecm); gravOpt)
+    this->dataPtr->data.params.gravity = gravOpt->Length();
+
   // The engine is determined by this concrete system, not by SDF.
   this->dataPtr->data.algorithm = this->EngineToken();
   this->dataPtr->data.simulation = this->MakeEngine(this->dataPtr->data.params);
@@ -264,13 +277,6 @@ void WavesSystemBase::Configure(
   this->dataPtr->data.generation = 1;
   this->dataPtr->data.updateRate = this->dataPtr->updateRate;
   this->dataPtr->currentParams = this->dataPtr->data.params;
-
-  this->dataPtr->worldEnt = worldEntity(_ecm);
-  if (this->dataPtr->worldEnt == kNullEntity)
-  {
-    gzerr << "[Waves] no world entity found; aborting" << '\n';
-    return;
-  }
 
   _ecm.CreateComponent(this->dataPtr->worldEnt,
     components::Wavefield(this->dataPtr->data));
