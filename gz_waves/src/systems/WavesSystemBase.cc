@@ -34,13 +34,6 @@ namespace gz::sim::systems
 
 namespace
 {
-// Re-mark the Wavefield component as changed for this long after Configure.
-// The GUI process loads our plugin libraries (and therefore registers the
-// component type) lazily, often after the initial scene state has arrived.
-// Repeatedly marking the component as changed lets SceneBroadcaster keep
-// re-sending it until the GUI side is ready to deserialize.
-constexpr double kInitialReplicationSeconds = 5.0;
-
 //////////////////////////////////////////////////
 // --- set_parameters service: gz.msgs.Any -> scalar -------------------------
 // Read a numeric Any (DOUBLE / INT32 / BOOLEAN) as a double; false on a
@@ -146,8 +139,6 @@ class WavesSystemBase::Implementation
   public: waves::WavefieldData data;
   public: Entity worldEnt{kNullEntity};
   public: ComponentTypeId componentType{0};
-  public: bool componentReady{false};
-  public: std::chrono::steady_clock::duration configureSimTime{0};
 
   /// \brief Throttle backend updates to at most this rate [Hz]. Default 30 Hz
   /// matches asv_wave_sim; cheap for analytic Gerstner, sets a sensible
@@ -281,7 +272,6 @@ void WavesSystemBase::Configure(
   _ecm.CreateComponent(this->dataPtr->worldEnt,
     components::Wavefield(this->dataPtr->data));
   this->dataPtr->componentType = components::Wavefield::typeId;
-  this->dataPtr->componentReady = true;
 
   // Advertise a runtime parameter-update service. Callers send a gz.msgs.Param
   // map of <wave> tag names -> values (partial: omitted keys keep their current
@@ -346,8 +336,7 @@ void WavesSystemBase::PreUpdate(
   // regenerates the height grid each call (~ms at 128²). Skip entirely while
   // paused — the field is frozen, so there's nothing to advance, and consumers
   // (e.g. WaveBuoyancy) advance the field themselves, so correctness no longer
-  // depends on this call landing in any particular tick. The replication
-  // marking below still runs so the GUI can pick up the wavefield while paused.
+  // depends on this call landing in any particular tick.
   const double updatePeriod =
     this->dataPtr->updateRate > 0.0 ? 1.0 / this->dataPtr->updateRate : 0.0;
   if (!_info.paused &&
@@ -355,32 +344,6 @@ void WavesSystemBase::PreUpdate(
   {
     this->dataPtr->data.simulation->Update(simTime);
     this->dataPtr->lastUpdateTime = simTime;
-  }
-
-  // SceneBroadcaster replication. Custom components don't reliably reach
-  // the GUI on the initial scene state (it arrives before the GUI's plugin
-  // libraries have registered our type). Re-marking the component as
-  // changed for the first few seconds lets us catch the GUI when it's
-  // ready.
-  if (this->dataPtr->componentReady)
-  {
-    if (this->dataPtr->configureSimTime ==
-        std::chrono::steady_clock::duration{0})
-    {
-      this->dataPtr->configureSimTime = _info.simTime;
-    }
-    const double elapsed = std::chrono::duration<double>(
-      _info.simTime - this->dataPtr->configureSimTime).count();
-    if (elapsed > kInitialReplicationSeconds)
-    {
-      this->dataPtr->componentReady = false;
-    }
-    else
-    {
-      _ecm.SetChanged(this->dataPtr->worldEnt,
-                      this->dataPtr->componentType,
-                      ComponentState::OneTimeChange);
-    }
   }
 }
 
@@ -391,11 +354,8 @@ void WavesSystemBase::Reset(
   // A reset rewinds sim time to 0. PreUpdate's throttle gates on
   // (simTime - lastUpdateTime >= period); with a stale lastUpdateTime it stays
   // false until sim time catches back up, so the engine never advances and the
-  // field freezes. Rewind the throttle and restart the GUI re-replication
-  // window so the field advances from t = 0 again.
+  // field freezes. Rewind the throttle so the field advances from t = 0 again.
   this->dataPtr->lastUpdateTime = -1.0;
-  this->dataPtr->configureSimTime = std::chrono::steady_clock::duration{0};
-  this->dataPtr->componentReady = true;
   gzmsg << "[Waves] reset: re-advancing the wave field from t=0" << '\n';
 }
 
