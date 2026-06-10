@@ -132,15 +132,6 @@ class WaterVisual::Implementation
 
   // ---- 1-byte-aligned: flags ----
   public: bool haveWavefield{false};  ///< guarded by mutex_
-  public: bool useFft{false};
-  /// \brief True iff the currently-bound material was created with the
-  /// FFT vertex shader. Set when `ResolveVisual` builds the material;
-  /// `UploadUniforms` keys off this (not `useFft`) when deciding
-  /// whether to bind FFT-only uniforms like `world_matrix`. Prevents
-  /// a startup race where the visual resolves before the wavefield
-  /// component arrives, building a Gerstner material that later
-  /// receives FFT-only uniforms.
-  public: bool materialIsFft{false};
   /// \brief gz-sim's `GuiRunner` loads this system *twice* for the same
   /// entity (once via the model SDF, once via the visual SDF — known
   /// upstream issue mentioned in asv_wave_sim#177). The two instances
@@ -201,11 +192,8 @@ bool WaterVisual::Implementation::ResolveVisual()
   if (!this->material)
   {
     // Defer material creation until the wavefield component has been
-    // parsed and `useFft` has settled. Otherwise we'd build a Gerstner
-    // material now, and a later UploadUniforms() (with useFft now
-    // true) would try to bind FFT-only uniforms like `world_matrix`
-    // and throw Ogre::ItemIdentityException. The visual just stays
-    // unrendered for a few ticks at startup, which is harmless.
+    // parsed (haveWavefield). The visual just stays unrendered for a
+    // few ticks at startup, which is harmless.
     if (!this->haveWavefield)
       return false;
 
@@ -235,18 +223,12 @@ bool WaterVisual::Implementation::ResolveVisual()
       gzerr << "[WaterVisual] failed to attach material to visual" << '\n';
       return false;
     }
-    // Latch which shader the material was actually created with — see
-    // the `materialIsFft` doc comment for why we don't just trust
-    // `useFft` later.
-    this->materialIsFft = this->useFft;
-
     // Critical: upload all uniforms NOW, in the same render-thread call as
     // material creation. Ogre Next compiles/caches the material the first
     // time it's used; uniforms must be present at that point.
     this->UploadUniforms();
 
-    // FFT path also needs a dynamic heightmap texture bound to the material.
-    if (this->useFft)
+    // The material needs a dynamic heightmap texture bound to it.
     {
       // Destroy any previous instance first so its GPU texture frees up
       // before we ask Ogre Next to create the new one. Otherwise the new
@@ -275,7 +257,7 @@ bool WaterVisual::Implementation::ResolveVisual()
     // mesh resource (Ogre caches the COLLADA load by URI). The FFT
     // wavefield is periodic in world XY, so neighbour tiles continue
     // the same wave pattern without seams.
-    if (this->useFft && this->tilesRadius > 0 && !this->modelPath.empty())
+    if (this->tilesRadius > 0 && !this->modelPath.empty())
     {
       // modelPath is the path to the model.sdf itself; take its parent
       // directory to anchor the mesh URI.
@@ -352,12 +334,8 @@ void WaterVisual::Implementation::UploadUniforms()
   }
   (*vsParams)["tau"] = this->cachedTau;
 
-  // Gate FFT-only uniforms on the material's actual shader, not the
-  // current `useFft` flag — if the visual resolved before the
-  // wavefield component arrived, the material was built with the
-  // Gerstner VS and any FFT-only binding (world_matrix, tileSize,
-  // ...) would throw Ogre::ItemIdentityException.
-  if (this->materialIsFft)
+  // FFT-only uniforms. The material always uses the FFT vertex shader,
+  // so these bindings are always valid.
   {
     // FFT vertex shader uses world_matrix to compute world-space XY
     // for the periodic heightmap sample, so tile instances at
@@ -680,7 +658,6 @@ void WaterVisual::PreUpdate(
     this->dataPtr->haveWavefield = false;
     return;
   }
-  this->dataPtr->useFft = true;
   if (const auto *f = this->dataPtr->sim->Field())
   {
     this->dataPtr->cachedTileSize = static_cast<float>(f->tile);
