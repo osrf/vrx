@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<sdf version="1.10">
+  <model name="water_surface">
+    <static>true</static>
+    <link name="link">
+      <visual name="water">
+        <geometry>
+          <mesh>
+            <uri>meshes/water.dae</uri>
+          </mesh>
+        </geometry>
+        <plugin filename="gz-sim-water-visual-system"
+                name="gz::sim::systems::WaterVisual">
+          <shader>
+            <!-- Active shader pair. The visual uploads a CPU-generated
+                 heightmap; these displace and shade the surface. The
+                 vertex shader is engine-agnostic — FFT and Gerstner
+                 both feed the same grid. -->
+            <fft_vertex>shaders/fft_water_vs_330.glsl</fft_vertex>
+            <fragment>shaders/water_fs_330.glsl</fragment>
+            <parameters>
+              <rescale>0.5</rescale>
+              <!-- Effective bumpmap tiling is bumpScale × 16 in the
+                   VS (see fft_water_vs_330.glsl). 64 × 16 = 1024
+                   bumpmap repeats per uv unit. -->
+              <bumpScale>64 64</bumpScale>
+              <bumpSpeed>0.01 0.01</bumpSpeed>
+              <hdrMultiplier>0.4</hdrMultiplier>
+              <fresnelPower>5.0</fresnelPower>
+              <shallowColor>0 0.1 0.3 1.0</shallowColor>
+              <deepColor>0 0.05 0.2 1.0</deepColor>
+            </parameters>
+          </shader>
+          <textures>
+            <bumpMap>textures/wave_normals.dds</bumpMap>
+            <cubeMap>textures/skybox_lowres.dds</cubeMap>
+          </textures>
+        </plugin>
+
+        <!-- Per-engine GUI registrars. They must sit in the same <visual> as
+             WaterVisual: that is where the GUI's GuiRunner loads systems —
+             model/link-level system plugins never reach the GUI process. Each
+             registers its factory at library load so WaterVisual can rebuild a
+             private engine from the replicated recipe via CreateWaveSimulation.
+             They carry no ISystem interface and parse no SDF (registration is a
+             static initializer that runs when the GUI dlopens the library), so
+             order is irrelevant and they add no plugin warnings. One registrar
+             per available engine; gz_waves_rendering itself depends on no engine,
+             so these plugins carry that dependency. The FFT registrar
+             (gz-sim-waves-fft-gui) is added alongside when the FFT backend lands. -->
+        <plugin filename="gz-sim-waves-gerstner-gui"
+                name="gz::sim::systems::GerstnerWavesGui"/>
+      </visual>
+    </link>
+  </model>
+</sdf>
