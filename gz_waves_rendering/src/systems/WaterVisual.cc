@@ -462,22 +462,12 @@ void WaterVisual::Implementation::OnSceneUpdate()
     bool ok = false;
     if (f && f->n > 0 && f->dz)
     {
-      const int N = static_cast<int>(f->n);
-      const Eigen::MatrixXd eta =
-          Eigen::Map<const Eigen::MatrixXd>(f->dz, N, N);
-      const Eigen::MatrixXd dx = f->dx
-          ? Eigen::MatrixXd(Eigen::Map<const Eigen::MatrixXd>(f->dx, N, N))
-          : Eigen::MatrixXd::Zero(N, N);
-      const Eigen::MatrixXd dy = f->dy
-          ? Eigen::MatrixXd(Eigen::Map<const Eigen::MatrixXd>(f->dy, N, N))
-          : Eigen::MatrixXd::Zero(N, N);
-      // Folding metric -> heightmap alpha (the FS reads it as foam when
-      // useFoamMap=1). Encino fills MinE; backends without foam pass null
-      // (alpha stays 0 = no whitecaps).
-      Eigen::MatrixXd foam;
-      if (f->foam)
-        foam = Eigen::Map<const Eigen::MatrixXd>(f->foam, N, N);
-      ok = this->heightMap->Upload(eta, dx, dy, f->foam ? &foam : nullptr);
+      // Hand the raw WaveField2D grids straight to the heightmap, which
+      // transposes column- to row-major internally. Null displacement
+      // channels (dx/dy) upload as zeros; a null folding metric leaves the
+      // alpha channel at 0. The FS reads alpha as foam when useFoamMap=1 —
+      // the FFT backend fills it, the analytic ones don't.
+      ok = this->heightMap->Upload(f->dz, f->dx, f->dy, f->foam, f->n);
       static bool logged = false;
       if (ok && !logged)
       {

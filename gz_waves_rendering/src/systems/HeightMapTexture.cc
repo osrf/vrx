@@ -10,6 +10,7 @@
 #include <dlfcn.h>
 
 #include <mutex>
+#include <vector>
 
 #include <gz/common/Console.hh>
 
@@ -87,6 +88,25 @@ namespace
     });
     return api;
   }
+
+  /// \brief Reflow a column-major `_n × _n` grid (the WaveField2D layout,
+  /// element (i, j) at `i + j*_n`) into a row-major copy (element (i, j) at
+  /// `i*_n + j`), which is what the bridge's C-ABI expects. A null input
+  /// yields an all-zero grid (used for absent displacement/foam channels).
+  /// \param[in] _col Source column-major buffer, or null for zeros.
+  /// \param[in] _n   Grid resolution per axis.
+  /// \return The row-major copy.
+  std::vector<double> ToRowMajor(const double *_col, std::size_t _n)
+  {
+    std::vector<double> row(_n * _n, 0.0);
+    if (_col)
+    {
+      for (std::size_t j = 0; j < _n; ++j)
+        for (std::size_t i = 0; i < _n; ++i)
+          row[i * _n + j] = _col[i + j * _n];
+    }
+    return row;
+  }
 }
 
 /// \brief Pimpl for HeightMapTexture: owns the bridge handle and forwards the
@@ -103,65 +123,64 @@ HeightMapTexture::HeightMapTexture(const gz::rendering::ScenePtr &_scene,
                                    const gz::rendering::MaterialPtr &_material,
                                    std::size_t _gridSize,
                                    const std::string &_textureName)
-  : impl_(std::make_unique<Impl>())
-  , gridSize_(_gridSize)
+  : impl(std::make_unique<Impl>())
+  , gridSize(_gridSize)
 {
   const auto &api = LoadBridge();
   if (!api.loaded)
     return;
-  this->impl_->handle = api.create(
+  this->impl->handle = api.create(
       _scene.get(), _material.get(), _gridSize, _textureName.c_str());
-  this->ready_ = (this->impl_->handle != nullptr) &&
-                 (api.ready(this->impl_->handle) != 0);
+  this->ready = (this->impl->handle != nullptr) &&
+                 (api.ready(this->impl->handle) != 0);
 }
 
 //////////////////////////////////////////////////
 HeightMapTexture::~HeightMapTexture()
 {
-  if (!this->impl_ || !this->impl_->handle)
+  if (!this->impl || !this->impl->handle)
     return;
   const auto &api = LoadBridge();
   if (api.loaded)
-    api.destroy(this->impl_->handle);
+    api.destroy(this->impl->handle);
 }
 
 //////////////////////////////////////////////////
-bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
-                              const Eigen::MatrixXd &_dispX,
-                              const Eigen::MatrixXd &_dispY,
-                              const Eigen::MatrixXd *_foam)
+bool HeightMapTexture::Upload(const double *_eta, const double *_dispX,
+                              const double *_dispY, const double *_foam,
+                              std::size_t _n)
 {
-  if (!this->ready_ || !this->impl_->handle)
+  if (!this->ready || !this->impl->handle)
     return false;
   const auto &api = LoadBridge();
   if (!api.loaded)
     return false;
-  const int N = static_cast<int>(this->gridSize_);
-  if (_eta.rows() != N || _eta.cols() != N ||
-      _dispX.rows() != N || _dispX.cols() != N ||
-      _dispY.rows() != N || _dispY.cols() != N)
+  if (_n != this->gridSize)
   {
     gzerr << "[HeightMapTexture] grid size mismatch (expected "
-          << N << "x" << N << ")" << '\n';
+          << this->gridSize << ", got " << _n << ")" << '\n';
     return false;
   }
-  // Eigen defaults to column-major storage. The bridge expects row-major
-  // views (rows contiguous in memory), so reflow each matrix once into a
-  // local row-major copy before forwarding.
-  using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
-                                  Eigen::RowMajor>;
-  RowMatrix eta   = _eta;
-  RowMatrix dispX = _dispX;
-  RowMatrix dispY = _dispY;
-  // Optional folding / foam metric → the texture's alpha channel.
-  RowMatrix foam;
-  const double *foamData = nullptr;
-  if (_foam && _foam->rows() == N && _foam->cols() == N)
+  if (!_eta)
   {
-    foam = *_foam;
+    gzerr << "[HeightMapTexture] null elevation grid" << '\n';
+    return false;
+  }
+  // Transpose each column-major grid into a local row-major copy (the bridge
+  // expects rows contiguous). Absent displacement channels reflow to zeros.
+  const std::vector<double> eta   = ToRowMajor(_eta, _n);
+  const std::vector<double> dispX = ToRowMajor(_dispX, _n);
+  const std::vector<double> dispY = ToRowMajor(_dispY, _n);
+  // Optional folding / foam metric → the texture's alpha channel.
+  std::vector<double> foam;
+  const double *foamData = nullptr;
+  if (_foam)
+  {
+    foam = ToRowMajor(_foam, _n);
     foamData = foam.data();
   }
-  return api.upload(this->impl_->handle,
+  const int N = static_cast<int>(_n);
+  return api.upload(this->impl->handle,
                     eta.data(), dispX.data(), dispY.data(), foamData,
                     N, N) != 0;
 }
@@ -169,12 +188,12 @@ bool HeightMapTexture::Upload(const Eigen::MatrixXd &_eta,
 //////////////////////////////////////////////////
 bool HeightMapTexture::SetTexFiltering(const std::string &_texUnitName)
 {
-  if (!this->impl_->handle)
+  if (!this->impl->handle)
     return false;
   const auto &api = LoadBridge();
   if (!api.loaded || !api.setTexFiltering)
     return false;
-  return api.setTexFiltering(this->impl_->handle,
+  return api.setTexFiltering(this->impl->handle,
                              _texUnitName.c_str()) != 0;
 }
 
