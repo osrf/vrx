@@ -14,10 +14,14 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <iomanip>
 #include <istream>
+#include <limits>
 #include <memory>
 #include <ostream>
 #include <string>
+
+#include <gz/math/Helpers.hh>  // GZ_PI
 
 namespace gz::sim::waves
 {
@@ -133,10 +137,11 @@ struct WaveParameters
   int seaState{-1};
 
   /// \brief Gravitational acceleration magnitude [m/s²] driving the wave
-  /// physics (dispersion, spectrum, sea-state period). Populated from the
-  /// world's `<gravity>` in `WavesSystemBase::Configure` so the waves stay
-  /// consistent with buoyancy and rigid-body dynamics; defaults to gz-sim's
-  /// world default (9.8) when no world gravity is available.
+  /// physics (dispersion, spectrum, sea-state period). Read from the world via
+  /// the `gz::sim::World::Gravity` API in `WavesSystemBase::Configure` (not
+  /// parsed from the plugin SDF) so the waves stay consistent with buoyancy and
+  /// rigid-body dynamics; defaults to gz-sim's world default (9.8) when the
+  /// world exposes no gravity.
   double gravity{9.8};
 };
 
@@ -181,7 +186,7 @@ inline bool SeaStateFromCode(int _code, SeaStateSpec &_out, double _g = 9.8)
   const double g = _g;
   const double hs = kHs[_code];
   const double v  = std::sqrt(hs * g / 0.21);
-  const double tp = (v > 0.0) ? (2.0 * M_PI * v / (0.879 * g)) : 0.0;
+  const double tp = (v > 0.0) ? (2.0 * GZ_PI * v / (0.879 * g)) : 0.0;
   _out = SeaStateSpec{hs, tp, v};
   return true;
 }
@@ -263,9 +268,17 @@ struct WavefieldData
 /// \return The output stream `_os`.
 inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
 {
-  _os << _d.algorithm << ' '
+  // Emit doubles at full round-trip precision so the replicated copy rebuilds a
+  // bit-for-bit identical engine (the seed-reproducibility contract relies on
+  // this). Restore the caller's precision afterwards.
+  const auto oldPrecision =
+    _os.precision(std::numeric_limits<double>::max_digits10);
+  // Strings go through std::quoted so an empty value or one containing spaces
+  // (e.g. set via the runtime service) can't desync the positional field
+  // stream on read-back.
+  _os << std::quoted(_d.algorithm) << ' '
       << _d.generation << ' '
-      << _d.params.model << ' '
+      << std::quoted(_d.params.model) << ' '
       << _d.params.number << ' '
       << _d.params.period << ' '
       << _d.params.amplitude << ' '
@@ -280,9 +293,9 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.gridSize << ' '
       << _d.params.seed << ' '
       << _d.params.choppiness << ' '
-      << _d.params.spectrum << ' '
-      << _d.params.spreading << ' '
-      << _d.params.dispersion << ' '
+      << std::quoted(_d.params.spectrum) << ' '
+      << std::quoted(_d.params.spreading) << ' '
+      << std::quoted(_d.params.dispersion) << ' '
       << _d.params.depth << ' '
       << _d.params.fetch << ' '
       << _d.params.swell << ' '
@@ -295,6 +308,7 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
       << _d.params.seaState << ' '
       << _d.params.gravity << ' '
       << _d.updateRate << ' ';
+  _os.precision(oldPrecision);
   return _os;
 }
 
@@ -308,9 +322,9 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
 /// \return The input stream `_is`.
 inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
 {
-  _is >> _d.algorithm
+  _is >> std::quoted(_d.algorithm)
       >> _d.generation
-      >> _d.params.model
+      >> std::quoted(_d.params.model)
       >> _d.params.number
       >> _d.params.period
       >> _d.params.amplitude
@@ -325,9 +339,9 @@ inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
       >> _d.params.gridSize
       >> _d.params.seed
       >> _d.params.choppiness
-      >> _d.params.spectrum
-      >> _d.params.spreading
-      >> _d.params.dispersion
+      >> std::quoted(_d.params.spectrum)
+      >> std::quoted(_d.params.spreading)
+      >> std::quoted(_d.params.dispersion)
       >> _d.params.depth
       >> _d.params.fetch
       >> _d.params.swell

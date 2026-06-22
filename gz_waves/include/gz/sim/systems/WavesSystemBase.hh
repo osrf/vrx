@@ -28,9 +28,9 @@ namespace gz::sim::systems
   /// \brief Shared base for the per-engine wave systems
   /// (`gz-sim-waves-fft-system`, `gz-sim-waves-gerstner-system`). It owns all
   /// the ECM / source plumbing — parsing the `<wave>` block, building the
-  /// engine, writing the `Wavefield` component on the world entity, throttling
-  /// `Update`, and re-marking the component for GUI replication — and defers
-  /// only the *choice* of engine to the concrete subclass.
+  /// engine, writing the `Wavefield` component on the world entity, and
+  /// throttling `Update` — and defers only the *choice* of engine to the
+  /// concrete subclass.
   ///
   /// A subclass is a complete loadable System: it inherits the Configure /
   /// PreUpdate behaviour and supplies just two things — the engine's token (for
@@ -38,11 +38,11 @@ namespace gz::sim::systems
   /// configures that backend. Because the subclass links its engine directly,
   /// no runtime plugin loader is involved on the server side.
   ///
-  /// In `PreUpdate` the component is periodically re-marked as changed for the
-  /// first few seconds of simulation so SceneBroadcaster keeps re-broadcasting
-  /// it until the GUI process has registered the component type (the GUI loads
-  /// our plugin libraries lazily, and a one-time replication at world load
-  /// tends to arrive before our type is registered there).
+  /// The `Wavefield` component is written once in `Configure` and re-marked as
+  /// changed only when its recipe actually changes (a `set_parameters` service
+  /// call). A late-joining GUI process does not rely on a re-broadcast window;
+  /// it pulls the current recipe on demand once its component type is
+  /// registered.
   ///
   /// SDF is parsed in `ParseSdf`: `<update_rate>` at plugin level and a
   /// `<wave>` block of parameters (backed by `waves::WaveParameters` in
@@ -77,7 +77,9 @@ namespace gz::sim::systems
     /// \brief On reset, rewind the update throttle so the wave field advances
     /// from t = 0 again. Sim time rewinds on a reset but the cached timestamps
     /// would not, which keeps the throttle false until time catches back up —
-    /// freezing the field (and anything riding it).
+    /// freezing the field (and anything riding it). Reset rewinds *time* only:
+    /// any parameters changed at runtime via `set_parameters` are intentionally
+    /// retained (a reset does not restore the original SDF recipe).
     public: void Reset(
       const UpdateInfo &_info,
       EntityComponentManager &_ecm) override;

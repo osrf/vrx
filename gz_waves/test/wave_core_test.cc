@@ -221,19 +221,45 @@ TEST(Registry, NullFactoryReturnsNull)
 // Wavefield serialization — operator<< / operator>> (Wavefield.hh)
 // ===========================================================================
 //////////////////////////////////////////////////
-TEST(Serialization, RoundTripsRecipeAndDropsEngine)
+TEST(Serialization, RoundTripsEveryFieldAndDropsEngine)
 {
+  // Set every field to a distinct non-default value, with doubles chosen to
+  // need full precision, so a field forgotten in operator<< / operator>> (or a
+  // precision-losing serializer) is caught. Keep this in sync with the struct.
   gsw::WavefieldData in;
   in.algorithm = "stub";
   in.generation = 9;
-  in.params.model = "CWR";
-  in.params.period = 3.5;
-  in.params.gain = 0.8;
-  in.params.spectrum = "jonswap";
-  in.params.dispersion = "finite";
-  in.params.gridSize = 256;
-  in.params.seaState = 4;
-  in.params.filterInvert = true;
+  in.updateRate = 17.5;
+  auto &p = in.params;
+  p.model = "CWR";
+  p.number = 7;
+  p.period = 3.141592653589793;
+  p.amplitude = 0.123456789012345;
+  p.direction = 1.234567890123456;
+  p.angle = 0.456789012345678;
+  p.scale = 1.098765432109876;
+  p.steepness = 0.246802468024680;
+  p.phase = 2.718281828459045;
+  p.tau = 1.414213562373095;
+  p.gain = 0.876543210987654;
+  p.tileSize = 222.222222222222;
+  p.gridSize = 256;
+  p.seed = 4242424242u;
+  p.choppiness = -1.732050807568877;
+  p.spectrum = "jonswap";
+  p.spreading = "mitsuyasu";
+  p.dispersion = "finite";
+  p.depth = 88.8888888888888;
+  p.fetch = 321.987654321098;
+  p.swell = 0.314159265358979;
+  p.troughDamping = 0.271828182845904;
+  p.filterMinWavelength = 12.3456789012345;
+  p.filterMaxWavelength = 98.7654321098765;
+  p.filterSoftWidth = 3.33333333333333;
+  p.filterMin = 0.135792468013579;
+  p.filterInvert = true;
+  p.seaState = 6;
+  p.gravity = 9.806649999999999;
   in.simulation = std::make_shared<StubWaveField>();  // must NOT serialize
 
   std::stringstream ss;
@@ -241,17 +267,69 @@ TEST(Serialization, RoundTripsRecipeAndDropsEngine)
   gsw::WavefieldData out;
   ss >> out;
 
-  EXPECT_EQ(out.algorithm, "stub");
-  EXPECT_EQ(out.generation, 9u);
-  EXPECT_EQ(out.params.model, "CWR");
-  EXPECT_DOUBLE_EQ(out.params.period, 3.5);
-  EXPECT_DOUBLE_EQ(out.params.gain, 0.8);
-  EXPECT_EQ(out.params.spectrum, "jonswap");
-  EXPECT_EQ(out.params.dispersion, "finite");
-  EXPECT_EQ(out.params.gridSize, 256u);
-  EXPECT_EQ(out.params.seaState, 4);
-  EXPECT_TRUE(out.params.filterInvert);
+  EXPECT_EQ(out.algorithm, in.algorithm);
+  EXPECT_EQ(out.generation, in.generation);
+  EXPECT_DOUBLE_EQ(out.updateRate, in.updateRate);
+  const auto &q = out.params;
+  EXPECT_EQ(q.model, p.model);
+  EXPECT_EQ(q.number, p.number);
+  EXPECT_DOUBLE_EQ(q.period, p.period);
+  EXPECT_DOUBLE_EQ(q.amplitude, p.amplitude);
+  EXPECT_DOUBLE_EQ(q.direction, p.direction);
+  EXPECT_DOUBLE_EQ(q.angle, p.angle);
+  EXPECT_DOUBLE_EQ(q.scale, p.scale);
+  EXPECT_DOUBLE_EQ(q.steepness, p.steepness);
+  EXPECT_DOUBLE_EQ(q.phase, p.phase);
+  EXPECT_DOUBLE_EQ(q.tau, p.tau);
+  EXPECT_DOUBLE_EQ(q.gain, p.gain);
+  EXPECT_DOUBLE_EQ(q.tileSize, p.tileSize);
+  EXPECT_EQ(q.gridSize, p.gridSize);
+  EXPECT_EQ(q.seed, p.seed);
+  EXPECT_DOUBLE_EQ(q.choppiness, p.choppiness);
+  EXPECT_EQ(q.spectrum, p.spectrum);
+  EXPECT_EQ(q.spreading, p.spreading);
+  EXPECT_EQ(q.dispersion, p.dispersion);
+  EXPECT_DOUBLE_EQ(q.depth, p.depth);
+  EXPECT_DOUBLE_EQ(q.fetch, p.fetch);
+  EXPECT_DOUBLE_EQ(q.swell, p.swell);
+  EXPECT_DOUBLE_EQ(q.troughDamping, p.troughDamping);
+  EXPECT_DOUBLE_EQ(q.filterMinWavelength, p.filterMinWavelength);
+  EXPECT_DOUBLE_EQ(q.filterMaxWavelength, p.filterMaxWavelength);
+  EXPECT_DOUBLE_EQ(q.filterSoftWidth, p.filterSoftWidth);
+  EXPECT_DOUBLE_EQ(q.filterMin, p.filterMin);
+  EXPECT_TRUE(q.filterInvert);
+  EXPECT_EQ(q.seaState, p.seaState);
+  EXPECT_DOUBLE_EQ(q.gravity, p.gravity);
   EXPECT_EQ(out.simulation, nullptr);  // recipe-only: engine is rebuilt later
+}
+
+//////////////////////////////////////////////////
+// String fields go through std::quoted, so an empty value or one containing a
+// space (both reachable via the set_parameters service) round-trips without
+// desyncing the positional field stream and corrupting later fields.
+TEST(Serialization, QuotedStringsSurviveSpacesAndEmpty)
+{
+  gsw::WavefieldData in;
+  in.algorithm = "stub";
+  in.params.model = "";                 // empty
+  in.params.spectrum = "two words";     // embedded space
+  in.params.spreading = "";             // empty
+  in.params.dispersion = "a b c";       // embedded spaces
+  in.params.seaState = 5;               // a field *after* the strings
+  in.params.gravity = 9.81;
+
+  std::stringstream ss;
+  ss << in;
+  gsw::WavefieldData out;
+  ss >> out;
+
+  EXPECT_EQ(out.params.model, "");
+  EXPECT_EQ(out.params.spectrum, "two words");
+  EXPECT_EQ(out.params.spreading, "");
+  EXPECT_EQ(out.params.dispersion, "a b c");
+  // The trailing fields are still aligned despite the awkward strings.
+  EXPECT_EQ(out.params.seaState, 5);
+  EXPECT_DOUBLE_EQ(out.params.gravity, 9.81);
 }
 
 // ===========================================================================

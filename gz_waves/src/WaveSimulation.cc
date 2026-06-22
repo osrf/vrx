@@ -10,11 +10,12 @@
 
 #include "gz/sim/waves/WaveSimulation.hh"
 
-#include <iostream>
 #include <map>
 #include <mutex>
 #include <string>
 #include <utility>
+
+#include <gz/common/Console.hh>
 
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -67,18 +68,18 @@ std::shared_ptr<IWaveField> CreateWaveSimulation(
 
   if (!factory)
   {
-    std::cerr << "[CreateWaveSimulation] no engine registered for '"
-              << _algorithm << "'. A consumer that links the engine must call "
-              << "RegisterWaveEngineFactory first — the system plugins do this "
-              << "on the server, the water visual on the GUI." << '\n';
+    gzerr << "[CreateWaveSimulation] no engine registered for '"
+          << _algorithm << "'. A consumer that links the engine must call "
+          << "RegisterWaveEngineFactory first — the system plugins do this "
+          << "on the server, the water visual on the GUI." << '\n';
     return nullptr;
   }
 
   auto field = factory();
   if (!field)
   {
-    std::cerr << "[CreateWaveSimulation] factory for '" << _algorithm
-              << "' returned null" << '\n';
+    gzerr << "[CreateWaveSimulation] factory for '" << _algorithm
+          << "' returned null" << '\n';
     return nullptr;
   }
   field->SetParameters(_params);

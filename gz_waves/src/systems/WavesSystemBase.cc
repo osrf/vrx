@@ -27,6 +27,7 @@
 
 #include "gz/sim/components/Name.hh"
 #include "gz/sim/components/Wavefield.hh"
+#include "gz/sim/waves/Eval.hh"  // Advance(): the field-query facade
 #include "gz/sim/waves/Wavefield.hh"
 #include "gz/sim/waves/WaveSimulation.hh"  // drives the engine (producer side)
 
@@ -262,6 +263,8 @@ void WavesSystemBase::Configure(
   EntityComponentManager &_ecm,
   EventManager &/*_eventMgr*/)
 {
+  // ParseSdf only reads _sdf; the const_cast is solely to satisfy
+  // sdf::Element::Get/GetElement, whose signatures are non-const.
   this->dataPtr->ParseSdf(
     std::const_pointer_cast<sdf::Element>(_sdf));
 
@@ -363,7 +366,7 @@ void WavesSystemBase::PreUpdate(
   if (!_info.paused &&
       simTime - this->dataPtr->lastUpdateTime >= updatePeriod)
   {
-    this->dataPtr->data.simulation->Update(simTime);
+    waves::Advance(this->dataPtr->data, simTime);
     this->dataPtr->lastUpdateTime = simTime;
   }
 }
