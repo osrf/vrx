@@ -14,7 +14,6 @@
 #include <mutex>
 #include <optional>
 #include <string>
-#include <unordered_map>
 
 #include <gz/common/Console.hh>
 #include <gz/msgs/boolean.pb.h>
@@ -71,8 +70,9 @@ bool ReadInt(const gz::msgs::Any &_v, int &_out)
 
 //////////////////////////////////////////////////
 /// \brief Merge the recognised keys in `_req` onto a copy of `_p` (partial
-/// update: absent keys keep their current value). Keys mirror the <wave> SDF
-/// tags parsed in ParseSdf — keep the two lists in sync.
+/// update: absent keys keep their current value). The recognised keys and their
+/// types come from GZ_WAVES_PARAM_TABLE — the same source `operator<<`/`>>` and
+/// ParseSdf use — so there is no separate list to keep in sync.
 /// \param[in]  _p       The base parameters to merge the update onto.
 /// \param[in]  _req     The requested key → value updates.
 /// \param[out] _matched Set true if at least one wave parameter was recognised.
@@ -80,26 +80,6 @@ bool ReadInt(const gz::msgs::Any &_v, int &_out)
 waves::WaveParameters ApplyParam(waves::WaveParameters _p,
     const gz::msgs::Param &_req, bool &_matched)
 {
-  // Double-valued tags (key -> destination field in the copy `_p`).
-  const std::unordered_map<std::string, double *> doubles{
-    {"period", &_p.period},     {"amplitude", &_p.amplitude},
-    {"direction", &_p.direction}, {"angle", &_p.angle},
-    {"scale", &_p.scale},       {"steepness", &_p.steepness},
-    {"phase", &_p.phase},       {"tau", &_p.tau},
-    {"gain", &_p.gain},         {"tile_size", &_p.tileSize},
-    {"choppiness", &_p.choppiness},
-    {"depth", &_p.depth},       {"fetch", &_p.fetch},
-    {"swell", &_p.swell},       {"trough_damping", &_p.troughDamping},
-    {"filter_min_wl", &_p.filterMinWavelength},
-    {"filter_max_wl", &_p.filterMaxWavelength},
-    {"filter_soft", &_p.filterSoftWidth},
-    {"filter_min", &_p.filterMin}};
-
-  // String-valued tags (key -> destination field).
-  const std::unordered_map<std::string, std::string *> strings{
-    {"model", &_p.model},         {"spectrum", &_p.spectrum},
-    {"spreading", &_p.spreading}, {"dispersion", &_p.dispersion}};
-
   auto warnType = [](const std::string &_k)
   {
     gzwarn << "[Waves] set_parameters: key '" << _k
@@ -112,28 +92,34 @@ waves::WaveParameters ApplyParam(waves::WaveParameters _p,
     const gz::msgs::Any &v = kv.second;
     double d = 0.0;
     int i = 0;
-    if (auto it = doubles.find(k); it != doubles.end())
-    {
-      if (ReadDouble(v, d)) { *it->second = d; _matched = true; }
-      else warnType(k);
-    }
-    else if (auto sit = strings.find(k); sit != strings.end())
-    {
-      if (v.type() == gz::msgs::Any::STRING)
-      { *sit->second = v.string_value(); _matched = true; }
-      else warnType(k);
-    }
-    else if (k == "filter_invert")
-    { if (ReadDouble(v, d)) { _p.filterInvert = (d != 0.0); _matched = true; } else warnType(k); }
-    else if (k == "number")
-    { if (ReadInt(v, i)) { _p.number = static_cast<std::size_t>(i); _matched = true; } else warnType(k); }
-    else if (k == "grid_size")
-    { if (ReadInt(v, i)) { _p.gridSize = static_cast<std::size_t>(i); _matched = true; } else warnType(k); }
-    else if (k == "seed")
-    { if (ReadInt(v, i)) { _p.seed = static_cast<std::uint32_t>(i); _matched = true; } else warnType(k); }
-    else if (k == "sea_state")
-    { if (ReadInt(v, i)) { _p.seaState = i; _matched = true; } else warnType(k); }
-    else
+    bool handled = false;
+#define GZ_WAVES_AP_DBL(m) \
+    { if (ReadDouble(v, d)) { _p.m = d; _matched = true; } else warnType(k); }
+#define GZ_WAVES_AP_SIZE(m) \
+    { if (ReadInt(v, i)) { _p.m = static_cast<std::size_t>(i); _matched = true; }\
+      else warnType(k); }
+#define GZ_WAVES_AP_U32(m) \
+    { if (ReadInt(v, i)) { _p.m = static_cast<std::uint32_t>(i); _matched = true;}\
+      else warnType(k); }
+#define GZ_WAVES_AP_INT(m) \
+    { if (ReadInt(v, i)) { _p.m = i; _matched = true; } else warnType(k); }
+#define GZ_WAVES_AP_STR(m) \
+    { if (v.type() == gz::msgs::Any::STRING) { _p.m = v.string_value(); \
+        _matched = true; } else warnType(k); }
+#define GZ_WAVES_AP_BOOL(m) \
+    { if (ReadDouble(v, d)) { _p.m = (d != 0.0); _matched = true; } \
+      else warnType(k); }
+#define GZ_WAVES_AP(member, name, kind) \
+    if (!handled && k == name) { handled = true; GZ_WAVES_AP_##kind(member) }
+    GZ_WAVES_PARAM_TABLE(GZ_WAVES_AP)
+#undef GZ_WAVES_AP
+#undef GZ_WAVES_AP_DBL
+#undef GZ_WAVES_AP_SIZE
+#undef GZ_WAVES_AP_U32
+#undef GZ_WAVES_AP_INT
+#undef GZ_WAVES_AP_STR
+#undef GZ_WAVES_AP_BOOL
+    if (!handled)
     {
       gzwarn << "[Waves] set_parameters: unknown key '" << k << "' ignored"
              << '\n';
@@ -208,44 +194,27 @@ void WavesSystemBase::Implementation::ParseSdf(const sdf::ElementPtr &_sdf)
 
   const auto wave = _sdf->GetElement("wave");
   auto &p = this->data.params;
-  p.model     = wave->Get<std::string>("model",     p.model    ).first;
-  p.number    = wave->Get<unsigned int>("number",   p.number   ).first;
-  p.period    = wave->Get<double>("period",         p.period   ).first;
-  p.amplitude = wave->Get<double>("amplitude",      p.amplitude).first;
-  p.direction = wave->Get<double>("direction",      p.direction).first;
-  p.angle     = wave->Get<double>("angle",          p.angle    ).first;
-  p.scale     = wave->Get<double>("scale",          p.scale    ).first;
-  p.steepness = wave->Get<double>("steepness",      p.steepness).first;
-  p.phase     = wave->Get<double>("phase",          p.phase    ).first;
-  p.tau       = wave->Get<double>("tau",            p.tau      ).first;
-  p.gain      = wave->Get<double>("gain",           p.gain     ).first;
-
-  // FFT-only parameters; ignored by Gerstner. Kept in <wave> for locality.
-  p.tileSize   = wave->Get<double>("tile_size",       p.tileSize  ).first;
-  p.gridSize   = wave->Get<unsigned int>("grid_size", p.gridSize  ).first;
-  p.seed       = wave->Get<unsigned int>("seed",      p.seed      ).first;
-  p.choppiness = wave->Get<double>("choppiness",      p.choppiness).first;
-
-  // FFT spectrum selectors (EncinoWaves); ignored by the Gerstner engine.
-  p.spectrum   = wave->Get<std::string>("spectrum",   p.spectrum  ).first;
-  p.spreading  = wave->Get<std::string>("spreading",  p.spreading ).first;
-  p.dispersion = wave->Get<std::string>("dispersion", p.dispersion).first;
-  p.depth         = wave->Get<double>("depth",          p.depth        ).first;
-  p.fetch         = wave->Get<double>("fetch",          p.fetch        ).first;
-  p.swell         = wave->Get<double>("swell",          p.swell        ).first;
-  p.troughDamping = wave->Get<double>("trough_damping", p.troughDamping).first;
-  p.filterMinWavelength =
-    wave->Get<double>("filter_min_wl", p.filterMinWavelength).first;
-  p.filterMaxWavelength =
-    wave->Get<double>("filter_max_wl", p.filterMaxWavelength).first;
-  p.filterSoftWidth = wave->Get<double>("filter_soft", p.filterSoftWidth).first;
-  p.filterMin       = wave->Get<double>("filter_min",  p.filterMin).first;
-  p.filterInvert    = wave->Get<bool>("filter_invert", p.filterInvert).first;
-
-  // High-level convenience: a WMO sea state code (0-9) that each engine turns
-  // into a matching significant wave height + peak period (see WithSeaState).
-  // When set, it overrides <period> and <gain>.
-  p.seaState   = wave->Get<int>("sea_state",          p.seaState  ).first;
+  // Every <wave> tag and its type comes from GZ_WAVES_PARAM_TABLE — the same
+  // source serialization and the set_parameters service use. (Tags not relevant
+  // to a given engine — e.g. the FFT/EncinoWaves selectors for Gerstner — are
+  // simply ignored by that backend; parsing them here is harmless.)
+#define GZ_WAVES_SDF_DBL(m, name)  p.m = wave->Get<double>(name, p.m).first;
+#define GZ_WAVES_SDF_SIZE(m, name) \
+    p.m = wave->Get<unsigned int>(name, static_cast<unsigned int>(p.m)).first;
+#define GZ_WAVES_SDF_U32(m, name) \
+    p.m = wave->Get<unsigned int>(name, static_cast<unsigned int>(p.m)).first;
+#define GZ_WAVES_SDF_INT(m, name)  p.m = wave->Get<int>(name, p.m).first;
+#define GZ_WAVES_SDF_STR(m, name)  p.m = wave->Get<std::string>(name, p.m).first;
+#define GZ_WAVES_SDF_BOOL(m, name) p.m = wave->Get<bool>(name, p.m).first;
+#define GZ_WAVES_SDF(member, name, kind) GZ_WAVES_SDF_##kind(member, name)
+  GZ_WAVES_PARAM_TABLE(GZ_WAVES_SDF)
+#undef GZ_WAVES_SDF
+#undef GZ_WAVES_SDF_DBL
+#undef GZ_WAVES_SDF_SIZE
+#undef GZ_WAVES_SDF_U32
+#undef GZ_WAVES_SDF_INT
+#undef GZ_WAVES_SDF_STR
+#undef GZ_WAVES_SDF_BOOL
 }
 
 //////////////////////////////////////////////////

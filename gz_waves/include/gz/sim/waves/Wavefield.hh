@@ -145,6 +145,45 @@ struct WaveParameters
   double gravity{9.8};
 };
 
+/// \brief Single source of truth for the `WaveParameters` fields shared by
+/// serialization, SDF parsing (`<wave>` tags), and the `set_parameters`
+/// service. Each row is `X(member, "name", KIND)` where KIND is one of:
+///   DBL  → double          SIZE → std::size_t     U32 → std::uint32_t
+///   INT  → int             STR  → std::string     BOOL → bool
+/// Listed in struct-declaration order so `operator<<` / `operator>>` stream the
+/// fields in this exact order. `gravity` is intentionally absent: it is sourced
+/// from the world (not SDF or the service) and is streamed explicitly by the
+/// operators. Add a parameter once here and it is picked up by all four sites.
+#define GZ_WAVES_PARAM_TABLE(X)                  \
+  X(model,               "model",          STR)  \
+  X(number,              "number",         SIZE) \
+  X(period,              "period",         DBL)  \
+  X(amplitude,           "amplitude",      DBL)  \
+  X(direction,           "direction",      DBL)  \
+  X(angle,               "angle",          DBL)  \
+  X(scale,               "scale",          DBL)  \
+  X(steepness,           "steepness",      DBL)  \
+  X(phase,               "phase",          DBL)  \
+  X(tau,                 "tau",            DBL)  \
+  X(gain,                "gain",           DBL)  \
+  X(tileSize,            "tile_size",      DBL)  \
+  X(gridSize,            "grid_size",      SIZE) \
+  X(seed,                "seed",           U32)  \
+  X(choppiness,          "choppiness",     DBL)  \
+  X(spectrum,            "spectrum",       STR)  \
+  X(spreading,           "spreading",      STR)  \
+  X(dispersion,          "dispersion",     STR)  \
+  X(depth,               "depth",          DBL)  \
+  X(fetch,               "fetch",          DBL)  \
+  X(swell,               "swell",          DBL)  \
+  X(troughDamping,       "trough_damping", DBL)  \
+  X(filterMinWavelength, "filter_min_wl",  DBL)  \
+  X(filterMaxWavelength, "filter_max_wl",  DBL)  \
+  X(filterSoftWidth,     "filter_soft",    DBL)  \
+  X(filterMin,           "filter_min",     DBL)  \
+  X(filterInvert,        "filter_invert",  BOOL) \
+  X(seaState,            "sea_state",      INT)
+
 /// \brief Canonical sea-state descriptor: significant wave height, peak period,
 /// and the fully-developed wind speed that produces them.
 struct SeaStateSpec
@@ -275,39 +314,24 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
     _os.precision(std::numeric_limits<double>::max_digits10);
   // Strings go through std::quoted so an empty value or one containing spaces
   // (e.g. set via the runtime service) can't desync the positional field
-  // stream on read-back.
-  _os << std::quoted(_d.algorithm) << ' '
-      << _d.generation << ' '
-      << std::quoted(_d.params.model) << ' '
-      << _d.params.number << ' '
-      << _d.params.period << ' '
-      << _d.params.amplitude << ' '
-      << _d.params.direction << ' '
-      << _d.params.angle << ' '
-      << _d.params.scale << ' '
-      << _d.params.steepness << ' '
-      << _d.params.phase << ' '
-      << _d.params.tau << ' '
-      << _d.params.gain << ' '
-      << _d.params.tileSize << ' '
-      << _d.params.gridSize << ' '
-      << _d.params.seed << ' '
-      << _d.params.choppiness << ' '
-      << std::quoted(_d.params.spectrum) << ' '
-      << std::quoted(_d.params.spreading) << ' '
-      << std::quoted(_d.params.dispersion) << ' '
-      << _d.params.depth << ' '
-      << _d.params.fetch << ' '
-      << _d.params.swell << ' '
-      << _d.params.troughDamping << ' '
-      << _d.params.filterMinWavelength << ' '
-      << _d.params.filterMaxWavelength << ' '
-      << _d.params.filterSoftWidth << ' '
-      << _d.params.filterMin << ' '
-      << _d.params.filterInvert << ' '
-      << _d.params.seaState << ' '
-      << _d.params.gravity << ' '
-      << _d.updateRate << ' ';
+  // stream on read-back. Field order/coverage comes from GZ_WAVES_PARAM_TABLE.
+#define GZ_WAVES_WR_STR(m)  _os << std::quoted(_d.params.m) << ' ';
+#define GZ_WAVES_WR_DBL(m)  _os << _d.params.m << ' ';
+#define GZ_WAVES_WR_SIZE(m) _os << _d.params.m << ' ';
+#define GZ_WAVES_WR_U32(m)  _os << _d.params.m << ' ';
+#define GZ_WAVES_WR_INT(m)  _os << _d.params.m << ' ';
+#define GZ_WAVES_WR_BOOL(m) _os << _d.params.m << ' ';
+#define GZ_WAVES_WR(member, name, kind) GZ_WAVES_WR_##kind(member)
+  _os << std::quoted(_d.algorithm) << ' ' << _d.generation << ' ';
+  GZ_WAVES_PARAM_TABLE(GZ_WAVES_WR)
+  _os << _d.params.gravity << ' ' << _d.updateRate << ' ';
+#undef GZ_WAVES_WR
+#undef GZ_WAVES_WR_STR
+#undef GZ_WAVES_WR_DBL
+#undef GZ_WAVES_WR_SIZE
+#undef GZ_WAVES_WR_U32
+#undef GZ_WAVES_WR_INT
+#undef GZ_WAVES_WR_BOOL
   _os.precision(oldPrecision);
   return _os;
 }
@@ -322,38 +346,24 @@ inline std::ostream &operator<<(std::ostream &_os, const WavefieldData &_d)
 /// \return The input stream `_is`.
 inline std::istream &operator>>(std::istream &_is, WavefieldData &_d)
 {
-  _is >> std::quoted(_d.algorithm)
-      >> _d.generation
-      >> std::quoted(_d.params.model)
-      >> _d.params.number
-      >> _d.params.period
-      >> _d.params.amplitude
-      >> _d.params.direction
-      >> _d.params.angle
-      >> _d.params.scale
-      >> _d.params.steepness
-      >> _d.params.phase
-      >> _d.params.tau
-      >> _d.params.gain
-      >> _d.params.tileSize
-      >> _d.params.gridSize
-      >> _d.params.seed
-      >> _d.params.choppiness
-      >> std::quoted(_d.params.spectrum)
-      >> std::quoted(_d.params.spreading)
-      >> std::quoted(_d.params.dispersion)
-      >> _d.params.depth
-      >> _d.params.fetch
-      >> _d.params.swell
-      >> _d.params.troughDamping
-      >> _d.params.filterMinWavelength
-      >> _d.params.filterMaxWavelength
-      >> _d.params.filterSoftWidth
-      >> _d.params.filterMin
-      >> _d.params.filterInvert
-      >> _d.params.seaState
-      >> _d.params.gravity
-      >> _d.updateRate;
+  // Field order/coverage mirrors operator<< via GZ_WAVES_PARAM_TABLE.
+#define GZ_WAVES_RD_STR(m)  _is >> std::quoted(_d.params.m);
+#define GZ_WAVES_RD_DBL(m)  _is >> _d.params.m;
+#define GZ_WAVES_RD_SIZE(m) _is >> _d.params.m;
+#define GZ_WAVES_RD_U32(m)  _is >> _d.params.m;
+#define GZ_WAVES_RD_INT(m)  _is >> _d.params.m;
+#define GZ_WAVES_RD_BOOL(m) _is >> _d.params.m;
+#define GZ_WAVES_RD(member, name, kind) GZ_WAVES_RD_##kind(member)
+  _is >> std::quoted(_d.algorithm) >> _d.generation;
+  GZ_WAVES_PARAM_TABLE(GZ_WAVES_RD)
+  _is >> _d.params.gravity >> _d.updateRate;
+#undef GZ_WAVES_RD
+#undef GZ_WAVES_RD_STR
+#undef GZ_WAVES_RD_DBL
+#undef GZ_WAVES_RD_SIZE
+#undef GZ_WAVES_RD_U32
+#undef GZ_WAVES_RD_INT
+#undef GZ_WAVES_RD_BOOL
   // The recipe is restored; build no engine. `simulation` stays null so no two
   // consumers ever share a process-global instance.
   _d.simulation.reset();
