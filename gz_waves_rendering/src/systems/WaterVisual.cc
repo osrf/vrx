@@ -387,7 +387,13 @@ void WaterVisual::Implementation::UploadUniforms()
   // half-width around J = 0 (Encino's MinE; the Phillips path leaves it ≈1).
   (*fsParams)["chopFactor"]    = this->cachedChopFactor;
   (*fsParams)["tileSize"]      = this->cachedTileSize;
-  (*fsParams)["foamStrength"]  = this->foamStrength;
+  // Foam is backend-specific. The analytic Gerstner engine's Jacobian
+  // determinant barely leaves 1.0, so it carries no usable folding signal and
+  // foam is unsupported for it (foamStrength=0 makes the FS skip the whole foam
+  // path). The FFT/Encino engine writes a real min-eigenvalue metric and keeps
+  // foam. (`sim` is this visual's private, render-thread engine.)
+  const bool gerstner = this->sim && this->sim->Kind() == "gerstner";
+  (*fsParams)["foamStrength"]  = gerstner ? 0.0f : this->foamStrength;
   (*fsParams)["foamThreshold"] = this->foamThreshold;
   (*fsParams)["useFoamMap"]    = 1;
   {
