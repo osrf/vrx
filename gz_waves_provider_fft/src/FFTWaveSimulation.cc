@@ -12,8 +12,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 #include <string>
+
+#include <gz/common/Console.hh>
 
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -143,16 +144,16 @@ bool SpreadingFromString(const std::string &_s,
 void ApplyEncinoParams(EncinoWaves::Parametersf &_ep, const WaveParameters &_p)
 {
   if (!SpectrumFromString(_p.spectrum, _ep.spectrum.type))
-    std::cerr << "[FFTWaveSimulation] ignoring unknown <spectrum>='"
-              << _p.spectrum << "' (want pms|jonswap|tma)" << '\n';
+    gzerr << "[FFTWaveSimulation] ignoring unknown <spectrum>='"
+          << _p.spectrum << "' (want pms|jonswap|tma)" << '\n';
   if (!DispersionFromString(_p.dispersion, _ep.dispersion.type))
-    std::cerr << "[FFTWaveSimulation] ignoring unknown <dispersion>='"
-              << _p.dispersion << "' (want deep|finite|capillary)" << '\n';
+    gzerr << "[FFTWaveSimulation] ignoring unknown <dispersion>='"
+          << _p.dispersion << "' (want deep|finite|capillary)" << '\n';
   if (!SpreadingFromString(_p.spreading, _ep.directionalSpreading.type))
-    std::cerr << "[FFTWaveSimulation] ignoring unknown <spreading>='"
-              << _p.spreading
-              << "' (want poscos2|mitsuyasu|hasselmann|donelanbanner)"
-              << '\n';
+    gzerr << "[FFTWaveSimulation] ignoring unknown <spreading>='"
+          << _p.spreading
+          << "' (want poscos2|mitsuyasu|hasselmann|donelanbanner)"
+          << '\n';
 
   _ep.gravity       = static_cast<float>(_p.gravity);
   _ep.depth         = static_cast<float>(_p.depth);
@@ -222,52 +223,52 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
 {
   // Resolve <sea_state> (if set) into period/gain before configuring.
   const WaveParameters p = WithSeaState(_params);
-  this->tileSize_ = p.tileSize;
-  this->gridSize_ = p.gridSize;
-  this->gain_     = p.gain;
-  this->tau_      = p.tau;
+  this->tileSize = p.tileSize;
+  this->gridSize = p.gridSize;
+  this->gain     = p.gain;
+  this->tau      = p.tau;
   const std::uint32_t seed = p.seed;
 
   // EncinoWaves requires a power-of-two grid; round up if the SDF asks for
   // something else.
-  if (Log2Pow2(this->gridSize_) < 0)
+  if (Log2Pow2(this->gridSize) < 0)
   {
-    const std::size_t adjusted = CeilPow2(this->gridSize_);
-    std::cerr << "[FFTWaveSimulation] grid_size=" << this->gridSize_
-              << " is not a power of two (required by the FFT spectrum); using "
-              << adjusted << '\n';
-    this->gridSize_ = adjusted;
+    const std::size_t adjusted = CeilPow2(this->gridSize);
+    gzerr << "[FFTWaveSimulation] grid_size=" << this->gridSize
+          << " is not a power of two (required by the FFT spectrum); using "
+          << adjusted << '\n';
+    this->gridSize = adjusted;
   }
 
   // PMS relation: peak omega <-> wind speed at 19.5 m. period -> omegaP -> V19.
   const double omegaP = k2Pi / p.period;
-  this->windSpeed_ = 0.879 * p.gravity / omegaP;
+  this->windSpeed = 0.879 * p.gravity / omegaP;
 
-  const int N = static_cast<int>(this->gridSize_);
-  this->heightGrid_ = Eigen::MatrixXd::Zero(N, N);
-  this->dispXGrid_  = Eigen::MatrixXd::Zero(N, N);
-  this->dispYGrid_  = Eigen::MatrixXd::Zero(N, N);
-  this->minEGrid_   = Eigen::MatrixXd::Constant(N, N, 1.0);  // 1 = no foam
+  const int N = static_cast<int>(this->gridSize);
+  this->heightGrid = Eigen::MatrixXd::Zero(N, N);
+  this->dispXGrid  = Eigen::MatrixXd::Zero(N, N);
+  this->dispYGrid  = Eigen::MatrixXd::Zero(N, N);
+  this->minEGrid   = Eigen::MatrixXd::Constant(N, N, 1.0);  // 1 = no foam
 
   // Build the EncinoWaves spectral state -- the spectral engine the fft system
   // is built on. The <spectrum>/<spreading>/<dispersion> SDF selectors choose
   // the spectral models (default TMA + Hasselmann + capillary).
-  this->encino_ = std::make_unique<EncinoState>();
-  auto &ep = this->encino_->params;
-  ep.resolutionPowerOfTwo = Log2Pow2(this->gridSize_);
-  ep.domain        = static_cast<float>(this->tileSize_);
-  ep.windSpeed     = static_cast<float>(this->windSpeed_);
-  ep.amplitudeGain = static_cast<float>(this->gain_);
+  this->encino = std::make_unique<EncinoState>();
+  auto &ep = this->encino->params;
+  ep.resolutionPowerOfTwo = Log2Pow2(this->gridSize);
+  ep.domain        = static_cast<float>(this->tileSize);
+  ep.windSpeed     = static_cast<float>(this->windSpeed);
+  ep.amplitudeGain = static_cast<float>(this->gain);
   ep.random.seed   = static_cast<int>(seed);
 
   // Map the SDF spectrum selectors + numeric/filter knobs onto Encino.
   ApplyEncinoParams(ep, p);
 
-  this->encino_->initial =
+  this->encino->initial =
       std::make_unique<EncinoWaves::InitialStatef>(ep);
-  this->encino_->propagation =
+  this->encino->propagation =
       std::make_unique<EncinoWaves::Propagationf>(ep, /*nthreads=*/-1);
-  this->encino_->state =
+  this->encino->state =
       std::make_unique<EncinoWaves::PropagatedStatef>(ep);
 
   // --- Physics-based amplitude calibration -------------------------------
@@ -281,34 +282,34 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   {
     using RowMatF = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic,
                                   Eigen::RowMajor>;
-    this->encino_->propagation->propagate(
-        this->encino_->params, *this->encino_->initial,
-        *this->encino_->state, 10.0f);
+    this->encino->propagation->propagate(
+        this->encino->params, *this->encino->initial,
+        *this->encino->state, 10.0f);
     const int M = ep.resolution();
     const double sigmaEncino = std::sqrt(
-        Eigen::Map<const RowMatF>(this->encino_->state->Height.cdata(),
+        Eigen::Map<const RowMatF>(this->encino->state->Height.cdata(),
                                   M, M).cast<double>().array()
             .square().mean());
     const double sigmaTarget =
-        0.21 / (4.0 * p.gravity) * this->windSpeed_ * this->windSpeed_;
-    this->encinoScale_ =
+        0.21 / (4.0 * p.gravity) * this->windSpeed * this->windSpeed;
+    this->encinoScale =
         (sigmaEncino > 1e-9) ? (sigmaTarget / sigmaEncino) : 1.0;
   }
 
-  std::cout << "[FFTWaveSimulation] EncinoWaves spectrum library active "
-            << "(res=" << ep.resolution() << " domain=" << ep.domain
-            << "m wind=" << ep.windSpeed << "m/s seed=" << ep.random.seed
-            << " spectrum=" << SpectrumName(ep.spectrum.type)
-            << " dispersion=" << DispersionName(ep.dispersion.type)
-            << " spreading=" << SpreadingName(ep.directionalSpreading.type)
-            << " depth=" << ep.depth << "m fetch=" << ep.fetch << "km"
-            << " swell=" << ep.directionalSpreading.swell
-            << " troughDamp=" << ep.troughDamping
-            << " filter=" << FilterName(ep.filter.type)
-            << " ampCalib=" << this->encinoScale_
-            << " targetHs=" << (4.0 * 0.21 / (4.0 * p.gravity) *
-                                this->windSpeed_ * this->windSpeed_)
-            << "m)" << '\n';
+  gzmsg << "[FFTWaveSimulation] EncinoWaves spectrum library active "
+        << "(res=" << ep.resolution() << " domain=" << ep.domain
+        << "m wind=" << ep.windSpeed << "m/s seed=" << ep.random.seed
+        << " spectrum=" << SpectrumName(ep.spectrum.type)
+        << " dispersion=" << DispersionName(ep.dispersion.type)
+        << " spreading=" << SpreadingName(ep.directionalSpreading.type)
+        << " depth=" << ep.depth << "m fetch=" << ep.fetch << "km"
+        << " swell=" << ep.directionalSpreading.swell
+        << " troughDamp=" << ep.troughDamping
+        << " filter=" << FilterName(ep.filter.type)
+        << " ampCalib=" << this->encinoScale
+        << " targetHs=" << (4.0 * 0.21 / (4.0 * p.gravity) *
+                            this->windSpeed * this->windSpeed)
+        << "m)" << '\n';
 
   this->Update(0.0);
 }
@@ -320,49 +321,49 @@ void FFTWaveSimulation::Update(double _simTime)
   // for the same time is a no-op. Lets the source system and any number of
   // WaveBuoyancy consumers that advance the same instance to the same tick
   // share a single recompute instead of each paying for a full propagation.
-  if (_simTime == this->lastUpdateT_)
+  if (_simTime == this->lastUpdateT)
     return;
-  this->lastUpdateT_ = _simTime;
+  this->lastUpdateT = _simTime;
 
-  if (!this->encino_ || !this->encino_->propagation)
+  if (!this->encino || !this->encino->propagation)
     return;  // default-constructed, not yet configured
 
-  const int N = static_cast<int>(this->gridSize_);
+  const int N = static_cast<int>(this->gridSize);
 
-  this->encino_->propagation->propagate(
-      this->encino_->params,
-      *this->encino_->initial,
-      *this->encino_->state,
+  this->encino->propagation->propagate(
+      this->encino->params,
+      *this->encino->initial,
+      *this->encino->state,
       static_cast<float>(_simTime));
 
   // Combined output scale per Update:
   //  * ramp         — fade the field in over `tau`;
-  //  * encinoScale_ — physics-based amplitude calibration to a PM sea state
+  //  * this->encinoScale — physics-based amplitude calibration to a PM sea state
   //                   (Encino's amplitudeGain doesn't scale the height);
-  //  * gain_        — the SDF <gain> user multiplier (a no-op via Encino's
+  //  * this->gain        — the SDF <gain> user multiplier (a no-op via Encino's
   //                   amplitudeGain, so we apply it here to make it work).
   const double scale =
-      StartupRamp(_simTime, this->tau_) * this->encinoScale_ * this->gain_;
+      StartupRamp(_simTime, this->tau) * this->encinoScale * this->gain;
 
   // Encino stores its spatial fields row-major in float; our grids are
   // column-major in double. Map+cast assignment lets Eigen vectorize the
   // conversion + layout swap; the scale folds into the same expression.
   using RowMatF = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic,
                                 Eigen::RowMajor>;
-  this->heightGrid_ = Eigen::Map<const RowMatF>(
-      this->encino_->state->Height.cdata(), N, N).cast<double>() * scale;
-  this->dispXGrid_ = Eigen::Map<const RowMatF>(
-      this->encino_->state->Dx.cdata(), N, N).cast<double>() * scale;
-  this->dispYGrid_ = Eigen::Map<const RowMatF>(
-      this->encino_->state->Dy.cdata(), N, N).cast<double>() * scale;
+  this->heightGrid = Eigen::Map<const RowMatF>(
+      this->encino->state->Height.cdata(), N, N).cast<double>() * scale;
+  this->dispXGrid = Eigen::Map<const RowMatF>(
+      this->encino->state->Dx.cdata(), N, N).cast<double>() * scale;
+  this->dispYGrid = Eigen::Map<const RowMatF>(
+      this->encino->state->Dy.cdata(), N, N).cast<double>() * scale;
 
   // Foam: Encino computes MinE = -(min eigenvalue of the displacement
   // Jacobian) at its internal amplitude. At our calibrated amplitude the
   // minimum eigenvalue is 1 - scale*(MinE + 1). Jacobian() bilinear-samples
   // this; Eval::FoamMask turns values below its threshold into whitecaps. At
   // t=0 (scale=0) the surface is flat -> eigenvalue 1 -> no foam.
-  this->minEGrid_ = (1.0 - scale *
-      (Eigen::Map<const RowMatF>(this->encino_->state->MinE.cdata(), N, N)
+  this->minEGrid = (1.0 - scale *
+      (Eigen::Map<const RowMatF>(this->encino->state->MinE.cdata(), N, N)
           .cast<double>().array() + 1.0)).matrix();
 }
 
@@ -370,8 +371,8 @@ void FFTWaveSimulation::Update(double _simTime)
 double FFTWaveSimulation::BilinearSample(const Eigen::MatrixXd &_grid,
                                          double _x, double _y) const
 {
-  const int N = static_cast<int>(this->gridSize_);
-  const double L = this->tileSize_;
+  const int N = static_cast<int>(this->gridSize);
+  const double L = this->tileSize;
 
   // Wrap query into [0, L). Grid cell (i, j) corresponds to world position
   // (i·L/N, j·L/N) — the IFFT output's natural layout, no centring shift.
@@ -406,35 +407,36 @@ double FFTWaveSimulation::Elevation(double _x, double _y, double /*_t*/) const
 {
   // Caller is expected to have called Update(t) ≤ this tick (the source
   // system does this in PreUpdate). The bilinear sample is time-free.
-  return this->BilinearSample(this->heightGrid_, _x, _y);
+  return this->BilinearSample(this->heightGrid, _x, _y);
 }
 
 //////////////////////////////////////////////////
-Eigen::Vector3d FFTWaveSimulation::ParticleVelocity(
+gz::math::Vector3d FFTWaveSimulation::ParticleVelocity(
   double /*_x*/, double /*_y*/, double /*_t*/) const
 {
-  // Stage 2: stub. Stage 4+ will compute via additional FFTs of i·k·h(k,t)
-  // for the horizontal components and ∂η/∂t for the vertical. Returning
-  // zero here means drag against still water — not physically accurate yet.
-  return Eigen::Vector3d::Zero();
+  // Not yet implemented: a full solution computes additional FFTs of i·k·h(k,t)
+  // for the horizontal components and ∂η/∂t for the vertical. Returning zero
+  // means drag against still water — relative-velocity hydrodynamics under the
+  // FFT backend is therefore not physically accurate yet.
+  return gz::math::Vector3d::Zero;
 }
 
 //////////////////////////////////////////////////
-Eigen::Vector3d FFTWaveSimulation::Normal(
+gz::math::Vector3d FFTWaveSimulation::Normal(
   double _x, double _y, double /*_t*/) const
 {
-  // Finite-difference normal from the height grid. Good enough for unit
-  // testing; Stage 4 will produce derivative grids via FFT.
-  const double L = this->tileSize_;
-  const double h = L / static_cast<double>(this->gridSize_);
+  // Finite-difference normal from the height grid (a derivative-grid path via
+  // FFT would be more accurate but is not yet wired up).
+  const double L = this->tileSize;
+  const double h = L / static_cast<double>(this->gridSize);
   const double dx =
-    (this->BilinearSample(this->heightGrid_, _x + h, _y) -
-     this->BilinearSample(this->heightGrid_, _x - h, _y)) / (2.0 * h);
+    (this->BilinearSample(this->heightGrid, _x + h, _y) -
+     this->BilinearSample(this->heightGrid, _x - h, _y)) / (2.0 * h);
   const double dy =
-    (this->BilinearSample(this->heightGrid_, _x, _y + h) -
-     this->BilinearSample(this->heightGrid_, _x, _y - h)) / (2.0 * h);
-  Eigen::Vector3d n(-dx, -dy, 1.0);
-  n.normalize();
+    (this->BilinearSample(this->heightGrid, _x, _y + h) -
+     this->BilinearSample(this->heightGrid, _x, _y - h)) / (2.0 * h);
+  gz::math::Vector3d n(-dx, -dy, 1.0);
+  n.Normalize();
   return n;
 }
 
@@ -444,7 +446,7 @@ double FFTWaveSimulation::Jacobian(double _x, double _y, double /*_t*/) const
   // Bilinear-sample the per-cell minimum eigenvalue of the displacement
   // Jacobian (1 = flat, < 1 → folding). Eval::FoamMask turns values below its
   // threshold into whitecap intensity, so foam appears on the pinched crests.
-  return this->BilinearSample(this->minEGrid_, _x, _y);
+  return this->BilinearSample(this->minEGrid, _x, _y);
 }
 
 //////////////////////////////////////////////////
@@ -454,13 +456,13 @@ const WaveField2D *FFTWaveSimulation::Field() const
   // them, so cached data() pointers would dangle. Eigen is column-major,
   // matching WaveField2D's documented (i + j*N) layout. The renderer
   // finite-diffs η for normals; foam is the Encino MinE folding metric.
-  this->field_.n    = this->gridSize_;
-  this->field_.tile = this->tileSize_;
-  this->field_.dz   = this->heightGrid_.data();
-  this->field_.dx   = this->dispXGrid_.data();
-  this->field_.dy   = this->dispYGrid_.data();
-  this->field_.foam = this->minEGrid_.data();
-  return &this->field_;
+  this->field.n    = this->gridSize;
+  this->field.tile = this->tileSize;
+  this->field.dz   = this->heightGrid.data();
+  this->field.dx   = this->dispXGrid.data();
+  this->field.dy   = this->dispYGrid.data();
+  this->field.foam = this->minEGrid.data();
+  return &this->field;
 }
 
 //////////////////////////////////////////////////

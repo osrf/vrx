@@ -18,6 +18,7 @@
   <depend>gz_waves</depend>
   <depend>gz_sim_vendor</depend>
   <depend>gz_math_vendor</depend>
+  <depend>gz_common_vendor</depend>
   <depend>gz_plugin_vendor</depend>
   <depend>eigen</depend>
   <!-- The Apache-2.0 EncinoWaves spectral library is a required dependency the
