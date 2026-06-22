@@ -140,6 +140,16 @@ class FFTWaveSimulation final : public IWaveField
   /// of the displacement Jacobian, 1 = flat. Sampled by Jacobian() → FoamMask().
   private: Eigen::MatrixXd minEGrid;
 
+  /// \brief Water-particle velocity grids [m/s] — the Eulerian time derivative
+  /// of the displacement field (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t), computed each Update by
+  /// finite-differencing a scratch propagation at t+dt. Sampled by
+  /// ParticleVelocity().
+  private: Eigen::MatrixXd velXGrid;
+  /// \brief Water-particle velocity grid, y component [m/s].
+  private: Eigen::MatrixXd velYGrid;
+  /// \brief Water-particle velocity grid, z (vertical) component [m/s].
+  private: Eigen::MatrixXd velZGrid;
+
   /// \brief Column-major view into the grids above, returned by Field() as the
   /// backend-agnostic rendering contract. Repopulated on each call from the
   /// current grid data() — Update reassigns the grids, so a cached pointer

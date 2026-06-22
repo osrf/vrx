@@ -196,6 +196,8 @@ struct FFTWaveSimulation::EncinoState
   std::unique_ptr<EncinoWaves::InitialStatef> initial;
   std::unique_ptr<EncinoWaves::Propagationf>   propagation;
   std::unique_ptr<EncinoWaves::PropagatedStatef> state;
+  /// Scratch state propagated at t+dt to finite-difference particle velocity.
+  std::unique_ptr<EncinoWaves::PropagatedStatef> scratch;
 };
 
 FFTWaveSimulation::~FFTWaveSimulation() = default;
@@ -249,6 +251,9 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   this->dispXGrid  = Eigen::MatrixXd::Zero(N, N);
   this->dispYGrid  = Eigen::MatrixXd::Zero(N, N);
   this->minEGrid   = Eigen::MatrixXd::Constant(N, N, 1.0);  // 1 = no foam
+  this->velXGrid   = Eigen::MatrixXd::Zero(N, N);
+  this->velYGrid   = Eigen::MatrixXd::Zero(N, N);
+  this->velZGrid   = Eigen::MatrixXd::Zero(N, N);
 
   // Build the EncinoWaves spectral state -- the spectral engine the fft system
   // is built on. The <spectrum>/<spreading>/<dispersion> SDF selectors choose
@@ -269,6 +274,8 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   this->encino->propagation =
       std::make_unique<EncinoWaves::Propagationf>(ep, /*nthreads=*/-1);
   this->encino->state =
+      std::make_unique<EncinoWaves::PropagatedStatef>(ep);
+  this->encino->scratch =
       std::make_unique<EncinoWaves::PropagatedStatef>(ep);
 
   // --- Physics-based amplitude calibration -------------------------------
@@ -365,6 +372,32 @@ void FFTWaveSimulation::Update(double _simTime)
   this->minEGrid = (1.0 - scale *
       (Eigen::Map<const RowMatF>(this->encino->state->MinE.cdata(), N, N)
           .cast<double>().array() + 1.0)).matrix();
+
+  // Particle velocity = Eulerian time derivative of the displacement field
+  // (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t). EncinoWaves exposes no velocity field and no
+  // public spectral coefficients, so finite-difference a scratch propagation a
+  // small step ahead. The same amplitude `scale` is applied to both samples, so
+  // it factors out as the wave motion's velocity (the startup ramp's own
+  // d/dt is intentionally excluded — it's a transient, not water motion).
+  constexpr double kVelDt = 0.05;  // [s] forward-difference step
+  this->encino->propagation->propagate(
+      this->encino->params,
+      *this->encino->initial,
+      *this->encino->scratch,
+      static_cast<float>(_simTime + kVelDt));
+  const double velK = scale / kVelDt;
+  this->velZGrid = velK *
+      (Eigen::Map<const RowMatF>(this->encino->scratch->Height.cdata(), N, N)
+         - Eigen::Map<const RowMatF>(this->encino->state->Height.cdata(), N, N))
+      .cast<double>();
+  this->velXGrid = velK *
+      (Eigen::Map<const RowMatF>(this->encino->scratch->Dx.cdata(), N, N)
+         - Eigen::Map<const RowMatF>(this->encino->state->Dx.cdata(), N, N))
+      .cast<double>();
+  this->velYGrid = velK *
+      (Eigen::Map<const RowMatF>(this->encino->scratch->Dy.cdata(), N, N)
+         - Eigen::Map<const RowMatF>(this->encino->state->Dy.cdata(), N, N))
+      .cast<double>();
 }
 
 //////////////////////////////////////////////////
@@ -412,13 +445,14 @@ double FFTWaveSimulation::Elevation(double _x, double _y, double /*_t*/) const
 
 //////////////////////////////////////////////////
 gz::math::Vector3d FFTWaveSimulation::ParticleVelocity(
-  double /*_x*/, double /*_y*/, double /*_t*/) const
+  double _x, double _y, double /*_t*/) const
 {
-  // Not yet implemented: a full solution computes additional FFTs of i·k·h(k,t)
-  // for the horizontal components and ∂η/∂t for the vertical. Returning zero
-  // means drag against still water — relative-velocity hydrodynamics under the
-  // FFT backend is therefore not physically accurate yet.
-  return gz::math::Vector3d::Zero;
+  // Bilinear-sample the velocity grids that Update() finite-differenced from the
+  // displacement field. Caller is expected to have called Update(t) ≤ this tick.
+  return gz::math::Vector3d(
+      this->BilinearSample(this->velXGrid, _x, _y),
+      this->BilinearSample(this->velYGrid, _x, _y),
+      this->BilinearSample(this->velZGrid, _x, _y));
 }
 
 //////////////////////////////////////////////////

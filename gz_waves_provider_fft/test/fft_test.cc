@@ -388,6 +388,38 @@ TEST(FFTWaveSimulation, NormalIsUnitAndPointsUp)
 }
 
 //////////////////////////////////////////////////
+// ParticleVelocity is the time-derivative of the displacement field. On a
+// moving sea it must be finite, physically bounded, and non-zero somewhere.
+TEST(FFTWaveSimulation, ParticleVelocityIsFiniteBoundedAndNonzero)
+{
+  auto sim = MakeSim();
+  sim.Update(8.0);
+  double maxSpeed = 0.0;
+  for (double x = 0.0; x < 100.0; x += 9.0)
+  {
+    for (double y = 0.0; y < 100.0; y += 9.0)
+    {
+      const auto v = sim.ParticleVelocity(x, y, 8.0);
+      ASSERT_TRUE(std::isfinite(v.X()) && std::isfinite(v.Y()) &&
+                  std::isfinite(v.Z()));
+      maxSpeed = std::max(maxSpeed, v.Length());
+    }
+  }
+  EXPECT_GT(maxSpeed, 1e-3) << "velocity should be non-zero on a moving sea";
+  EXPECT_LT(maxSpeed, 25.0) << "velocity should be physically bounded";
+}
+
+//////////////////////////////////////////////////
+// At t = 0 the startup ramp is zero, so the field is flat and still.
+TEST(FFTWaveSimulation, ParticleVelocityZeroAtRest)
+{
+  auto sim = MakeSim();
+  sim.Update(0.0);
+  const auto v = sim.ParticleVelocity(12.0, 34.0, 0.0);
+  EXPECT_NEAR(v.Length(), 0.0, 1e-9);
+}
+
+//////////////////////////////////////////////////
 TEST(FFTWaveSimulation, WindDirectionBiasesAmplitude)
 {
   // Encino's directional spreading concentrates energy along the wind axis
