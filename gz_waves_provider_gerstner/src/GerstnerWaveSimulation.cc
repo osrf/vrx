@@ -12,8 +12,8 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
+#include <gz/common/Console.hh>
 #include <gz/math/Helpers.hh>  // GZ_PI
 
 #include "gz/sim/waves/Wavefield.hh"
@@ -61,6 +61,22 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
 {
   // Resolve <sea_state> (if set) into period/gain before configuring.
   const WaveParameters p = WithSeaState(_params);
+
+  // A non-positive period makes omegaMean (2*pi/period) infinite/garbage and
+  // the Pierson-Moskowitz spectrum (∝ 1/omega^5) blow up. Reject it and leave
+  // the field flat rather than emit NaNs into elevation/normals downstream.
+  if (!(p.period > 0.0))
+  {
+    gzerr << "[GerstnerWaveSimulation] non-positive <period> (" << p.period
+          << "); leaving the wave field flat." << '\n';
+    this->amplitudes.clear();
+    this->wavenumbers.clear();
+    this->angularFrequencies.clear();
+    this->steepnesses.clear();
+    this->directions.clear();
+    return;
+  }
+
   this->tau = p.tau;
   this->phase = p.phase;
   const double omegaMean = 2.0 * GZ_PI / p.period;
@@ -116,8 +132,8 @@ void GerstnerWaveSimulation::SetParameters(const WaveParameters &_params)
     }
     else
     {
-      std::cerr << "[GerstnerWaveSimulation] unknown spectrum model '"
-                << p.model << "'; expected 'PMS' or 'CWR'." << '\n';
+      gzerr << "[GerstnerWaveSimulation] unknown spectrum model '"
+            << p.model << "'; expected 'PMS' or 'CWR'." << '\n';
       this->amplitudes.clear();
       this->wavenumbers.clear();
       this->angularFrequencies.clear();

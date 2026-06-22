@@ -22,6 +22,8 @@ find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
 find_package(gz_math_vendor REQUIRED)
 find_package(gz-math REQUIRED)           # gz::math vectors + GZ_PI
+find_package(gz_common_vendor REQUIRED)
+find_package(gz-common REQUIRED)         # gzerr/gzwarn console
 
 # --------------------------------------------------------------------------
 # Gerstner wave-field engine (libgz-waves-provider-gerstner): a plain analytic
@@ -39,7 +41,8 @@ target_include_directories(gz-waves-provider-gerstner PUBLIC
 target_include_directories(gz-waves-provider-gerstner PRIVATE
   ${gz_waves_INCLUDE_DIRS})
 target_link_libraries(gz-waves-provider-gerstner
-  PUBLIC gz-math::gz-math)
+  PUBLIC gz-math::gz-math
+  PRIVATE gz-common::gz-common)
 
 # --------------------------------------------------------------------------
 # Gerstner wave source system (gz-sim-waves-gerstner-system): a WavesSystemBase

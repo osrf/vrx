@@ -290,3 +290,24 @@ TEST(Gerstner, SeaStateScalesWaveHeight)
   EXPECT_GT(sigma(2), 0.0);
   EXPECT_GT(sigma(6), sigma(2)) << "rougher sea state should produce bigger waves";
 }
+
+// A non-positive <period> would make omega = 2*pi/period infinite and the PMS
+// spectrum (∝ 1/omega^5) blow up. SetParameters must reject it and leave the
+// field flat rather than emit NaNs into elevation/normals.
+//////////////////////////////////////////////////
+TEST(Gerstner, NonPositivePeriodLeavesFieldFlat)
+{
+  for (double badPeriod : {0.0, -1.0})
+  {
+    gsw::WaveParameters p;
+    p.model = "PMS";
+    p.number = 3;
+    p.period = badPeriod;
+    gsw::GerstnerWaveSimulation sim;
+    sim.SetParameters(p);  // must not crash
+    EXPECT_EQ(sim.Amplitudes().size(), 0u) << "period=" << badPeriod;
+    const double eta = sim.Elevation(1.0, 2.0, 3.0);
+    EXPECT_TRUE(std::isfinite(eta)) << "period=" << badPeriod;
+    EXPECT_DOUBLE_EQ(eta, 0.0) << "period=" << badPeriod;
+  }
+}
