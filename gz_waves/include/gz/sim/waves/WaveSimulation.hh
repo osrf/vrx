@@ -18,7 +18,7 @@
 #include <string>
 #include <string_view>
 
-#include <Eigen/Core>
+#include <gz/math/Vector3.hh>
 
 namespace gz::sim::waves
 {
@@ -44,10 +44,10 @@ struct TileSize
 /// draws one backend-agnostic surface, so it never needs to know which backend
 /// is active.
 ///
-/// All arrays are column-major N×N — element (i, j) is at index `i + j*N`,
-/// matching Eigen's default storage — and periodic over the tile. The pointers
-/// are owned by the wave-field implementation and remain valid until the next
-/// `SetParameters`; the values they reference are refreshed by `Update`.
+/// All arrays are column-major N×N — element (i, j) is at index `i + j*N` —
+/// and periodic over the tile. The pointers are owned by the wave-field
+/// implementation and remain valid until the next `SetParameters`; the values
+/// they reference are refreshed by `Update`.
 struct WaveField2D
 {
   /// \brief Grid resolution per axis (N).
@@ -96,7 +96,7 @@ class IWaveField
   /// \param[in] _y World-frame y coordinate [m].
   /// \param[in] _t Simulation time [s].
   /// \return Water particle velocity at the surface point [m/s].
-  public: virtual Eigen::Vector3d ParticleVelocity(
+  public: virtual gz::math::Vector3d ParticleVelocity(
     double _x, double _y, double _t) const = 0;
 
   /// \brief Outward-pointing unit surface normal at (x, y, t).
@@ -104,7 +104,7 @@ class IWaveField
   /// \param[in] _y World-frame y coordinate [m].
   /// \param[in] _t Simulation time [s].
   /// \return Outward-pointing unit surface normal (dimensionless).
-  public: virtual Eigen::Vector3d Normal(
+  public: virtual gz::math::Vector3d Normal(
     double _x, double _y, double _t) const = 0;
 
   /// \brief Jacobian determinant of the horizontal displacement field at

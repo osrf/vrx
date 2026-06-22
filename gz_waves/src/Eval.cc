@@ -32,19 +32,19 @@ double SurfaceElevation(const WavefieldData &_wf,
 }
 
 //////////////////////////////////////////////////
-Eigen::Vector3d ParticleVelocity(const WavefieldData &_wf,
-                                 double _x, double _y, double _t)
+gz::math::Vector3d ParticleVelocity(const WavefieldData &_wf,
+                                    double _x, double _y, double _t)
 {
   return _wf.simulation ? _wf.simulation->ParticleVelocity(_x, _y, _t)
-                        : Eigen::Vector3d::Zero();
+                        : gz::math::Vector3d::Zero;
 }
 
 //////////////////////////////////////////////////
-Eigen::Vector3d Normal(const WavefieldData &_wf,
-                       double _x, double _y, double _t)
+gz::math::Vector3d Normal(const WavefieldData &_wf,
+                          double _x, double _y, double _t)
 {
   return _wf.simulation ? _wf.simulation->Normal(_x, _y, _t)
-                        : Eigen::Vector3d::UnitZ();
+                        : gz::math::Vector3d::UnitZ;
 }
 
 //////////////////////////////////////////////////

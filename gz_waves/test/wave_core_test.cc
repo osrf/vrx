@@ -58,16 +58,16 @@ class StubWaveField : public gsw::IWaveField
     return _x + _y + _t;
   }
   /// \brief Particle velocity = (x, y, t).
-  public: Eigen::Vector3d ParticleVelocity(
+  public: gz::math::Vector3d ParticleVelocity(
     double _x, double _y, double _t) const override
   {
     return {_x, _y, _t};
   }
   /// \brief A fixed +Z unit normal.
-  public: Eigen::Vector3d Normal(
+  public: gz::math::Vector3d Normal(
     double /*_x*/, double /*_y*/, double /*_t*/) const override
   {
-    return Eigen::Vector3d(0.0, 0.0, 2.0).normalized();
+    return gz::math::Vector3d(0.0, 0.0, 2.0).Normalized();
   }
   /// \brief Returns the settable `jac` test value.
   public: double Jacobian(
@@ -141,10 +141,10 @@ TEST(Eval, ForwardsToEngine)
 
   EXPECT_DOUBLE_EQ(gsw::SurfaceElevation(wf, 1.0, 2.0, 3.0), 6.0);
   const auto v = gsw::ParticleVelocity(wf, 1.0, 2.0, 3.0);
-  EXPECT_DOUBLE_EQ(v.x(), 1.0);
-  EXPECT_DOUBLE_EQ(v.z(), 3.0);
+  EXPECT_DOUBLE_EQ(v.X(), 1.0);
+  EXPECT_DOUBLE_EQ(v.Z(), 3.0);
   const auto n = gsw::Normal(wf, 0.0, 0.0, 0.0);
-  EXPECT_NEAR(n.norm(), 1.0, 1e-12);
+  EXPECT_NEAR(n.Length(), 1.0, 1e-12);
   EXPECT_DOUBLE_EQ(gsw::Jacobian(wf, 0.0, 0.0, 0.0), 1.0);
 
   gsw::Advance(wf, 7.5);
@@ -161,8 +161,8 @@ TEST(Eval, NullEngineFallsBackToStillWater)
   ASSERT_EQ(wf.simulation, nullptr);
 
   EXPECT_DOUBLE_EQ(gsw::SurfaceElevation(wf, 1.0, 2.0, 3.0), 0.0);
-  EXPECT_EQ(gsw::ParticleVelocity(wf, 1.0, 2.0, 3.0), Eigen::Vector3d::Zero());
-  EXPECT_EQ(gsw::Normal(wf, 1.0, 2.0, 3.0), Eigen::Vector3d::UnitZ());
+  EXPECT_EQ(gsw::ParticleVelocity(wf, 1.0, 2.0, 3.0), gz::math::Vector3d::Zero);
+  EXPECT_EQ(gsw::Normal(wf, 1.0, 2.0, 3.0), gz::math::Vector3d::UnitZ);
   EXPECT_DOUBLE_EQ(gsw::Jacobian(wf, 1.0, 2.0, 3.0), 1.0);
   EXPECT_DOUBLE_EQ(gsw::FoamMask(wf, 1.0, 2.0, 3.0), 0.0);
   gsw::Advance(wf, 1.0);  // no-op, must not crash

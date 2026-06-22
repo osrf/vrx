@@ -11,7 +11,7 @@
 #ifndef GZ_SIM_WAVES_EVAL_HH_
 #define GZ_SIM_WAVES_EVAL_HH_
 
-#include <Eigen/Core>
+#include <gz/math/Vector3.hh>
 
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -48,7 +48,7 @@ double SurfaceElevation(const WavefieldData &_wf,
 /// \param[in] _y  World-frame y coordinate [m].
 /// \param[in] _t  Simulation time [s].
 /// \return Particle velocity [m/s]; zero if `_wf` holds no engine.
-Eigen::Vector3d ParticleVelocity(const WavefieldData &_wf,
+gz::math::Vector3d ParticleVelocity(const WavefieldData &_wf,
                                  double _x, double _y, double _t);
 
 /// \brief Outward-pointing unit surface normal at (x, y, t).
@@ -57,7 +57,7 @@ Eigen::Vector3d ParticleVelocity(const WavefieldData &_wf,
 /// \param[in] _y  World-frame y coordinate [m].
 /// \param[in] _t  Simulation time [s].
 /// \return Unit surface normal; +Z if `_wf` holds no engine.
-Eigen::Vector3d Normal(const WavefieldData &_wf,
+gz::math::Vector3d Normal(const WavefieldData &_wf,
                        double _x, double _y, double _t);
 
 /// \brief Jacobian determinant of the horizontal displacement field.
