@@ -19,8 +19,9 @@
 namespace gz::sim::systems
 {
   /// \brief A rendering system that drives a water-surface visual with the
-  /// FFT water vertex/fragment shaders, fed by the world's `Wavefield`
-  /// component.
+  /// grid/displacement water vertex/fragment shaders, fed by the world's
+  /// `Wavefield` component. The same grid path serves every backend (analytic
+  /// Gerstner and FFT alike) via the shared `WaveField2D` heightmap.
   ///
   /// Attach to a `<visual>` element. The plugin finds its visual, attaches a
   /// material with the water vertex shader, and uploads parameters from
@@ -31,7 +32,7 @@ namespace gz::sim::systems
   ///
   /// `<shader>` (required) names the GLSL files and tunes the surface look;
   /// `<textures>` supplies the bump/cube maps; the two tile tags control
-  /// instanced tiling of the periodic FFT field.
+  /// instanced tiling of the periodic wave field.
   ///
   ///   - `<shader>/<fft_vertex>` (path, required): vertex shader.
   ///   - `<shader>/<fragment>` (path, required): fragment shader.
@@ -41,8 +42,8 @@ namespace gz::sim::systems
   ///   - `<shader>/<parameters>/<hdrMultiplier>` (float, 0.4): reflected-sky brightness.
   ///   - `<shader>/<parameters>/<fresnelPower>` (float, 5.0): Fresnel exponent.
   ///   - `<shader>/<parameters>/<roughness>` (float, 0.0): micro-surface roughness.
-  ///   - `<shader>/<parameters>/<foamStrength>` (float, 0.7): foam blend at Jacobian <= 0.
-  ///   - `<shader>/<parameters>/<foamThreshold>` (float, 0.25): Jacobian below which foam ramps in.
+  ///   - `<shader>/<parameters>/<foamStrength>` (float, 0.7): whitecap blend amount (grid foam; off for the Gerstner backend).
+  ///   - `<shader>/<parameters>/<foamThreshold>` (float, 0.25): half-width of the foam ramp in folding-metric space.
   ///   - `<shader>/<parameters>/<shallowColor>` (rgba, 0 0.1 0.3 1): shallow-water tint.
   ///   - `<shader>/<parameters>/<deepColor>` (rgba, 0 0.05 0.2 1): deep-water tint.
   ///   - `<textures>/<bumpMap>` (path): normal-perturbation texture.

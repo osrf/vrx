@@ -60,6 +60,9 @@ namespace gz::sim::systems
 /// per-frame uploads.
 class WaterVisual::Implementation
 {
+  /// \brief Destructor — releases this entity's dedup claim (see `active`).
+  public: ~Implementation();
+
   /// \brief Re-resolve the visual pointer; runs on the render thread.
   public: bool ResolveVisual();
 
@@ -113,8 +116,10 @@ class WaterVisual::Implementation
   public: std::uint64_t cachedGeneration{0};        ///< guarded by mutex_
   public: std::uint64_t lastUploadedGeneration{0};  ///< guarded by mutex_
 
-  // FFT path state (engine + heightmap; its scalar cache is in the 4-byte band).
-  public: std::shared_ptr<gz::sim::waves::IWaveField> sim;
+  // Grid/displacement path state (engine + heightmap; its scalar cache is in
+  // the 4-byte band). The engine is this visual's private instance, written by
+  // PreUpdate and read by OnSceneUpdate — both under mutex_.
+  public: std::shared_ptr<gz::sim::waves::IWaveField> sim;  ///< guarded by mutex_
   public: std::unique_ptr<HeightMapTexture> heightMap;
 
   // Render-thread state.
@@ -139,14 +144,14 @@ class WaterVisual::Implementation
   public: float hdrMultiplier{0.4f};
   public: float fresnelPower{5.0f};
   public: float roughness{0.0f};
-  public: float foamStrength{0.7f};       ///< Blend amount at J ≤ 0
-  public: float foamThreshold{0.25f};     ///< Foam ramps in below this J
+  public: float foamStrength{0.7f};       ///< Foam blend toward white (grid foam)
+  public: float foamThreshold{0.25f};     ///< Foam ramp half-width (grid foam)
   public: float cachedTau{2.0f};          ///< guarded by mutex_
   public: float currentSimTime{0.0f};     ///< guarded by mutex_
-  public: float cachedTileSize{200.0f};   ///< FFT cache, guarded by mutex_
-  public: float cachedChopFactor{-1.0f};  ///< FFT cache, guarded by mutex_
+  public: float cachedTileSize{200.0f};   ///< grid cache, guarded by mutex_
+  public: float cachedChopFactor{-1.0f};  ///< grid cache, guarded by mutex_
   public: int tilesRadius{2};             ///< (2·r+1)² tiles; 0 disables
-  public: int cachedGridSize{128};        ///< FFT cache, guarded by mutex_
+  public: int cachedGridSize{128};        ///< grid cache, guarded by mutex_
   // asv_wave_sim's exact default colours.
   public: gz::math::Color shallowColor{0.0f, 0.1f, 0.3f, 1.0f};
   public: gz::math::Color deepColor{0.0f, 0.05f, 0.2f, 1.0f};
@@ -163,6 +168,10 @@ class WaterVisual::Implementation
 
   /// \brief Whether the one-time `state` pull has been kicked off (GUI thread).
   public: bool triedPull{false};
+
+  /// \brief Whether the one-shot "first Field upload" message was logged.
+  /// Guarded by mutex_ (only touched in OnSceneUpdate).
+  public: bool firstUploadLogged{false};
 };
 
 namespace
@@ -176,6 +185,20 @@ namespace
   {
     static std::set<gz::sim::Entity> s;
     return s;
+  }
+}
+
+//////////////////////////////////////////////////
+WaterVisual::Implementation::~Implementation()
+{
+  // Release the dedup claim so a later WaterVisual for the same entity (e.g.
+  // after a model reload) can become active again. Only the instance that
+  // actually claimed the entity (active) erases it; the deduped no-op instance
+  // leaves the live claim alone.
+  if (this->active && this->visualEntity != kNullEntity)
+  {
+    const std::lock_guard<std::mutex> lock(VisualClaimMutex());
+    VisualClaimSet().erase(this->visualEntity);
   }
 }
 
@@ -278,7 +301,7 @@ bool WaterVisual::Implementation::ResolveVisual()
 
     // Spawn tile copies. Each one shares the central material (so the
     // dynamic heightmap binding applies to all of them) and the same
-    // mesh resource (Ogre caches the COLLADA load by URI). The FFT
+    // mesh resource (Ogre caches the COLLADA load by URI). The
     // wavefield is periodic in world XY, so neighbour tiles continue
     // the same wave pattern without seams.
     if (this->tilesRadius > 0 && !this->modelPath.empty())
@@ -358,10 +381,10 @@ void WaterVisual::Implementation::UploadUniforms()
   }
   (*vsParams)["tau"] = this->cachedTau;
 
-  // FFT-only uniforms. The material always uses the FFT vertex shader,
+  // Grid-path uniforms. The material always uses the grid vertex shader,
   // so these bindings are always valid.
   {
-    // FFT vertex shader uses world_matrix to compute world-space XY
+    // The grid vertex shader uses world_matrix to compute world-space XY
     // for the periodic heightmap sample, so tile instances at
     // different world offsets each render their own piece of the
     // continuous wavefield (rather than each tile showing the same
@@ -370,7 +393,7 @@ void WaterVisual::Implementation::UploadUniforms()
     // ItemIdentityException there.
     (*vsParams)["world_matrix"] = 1;
 
-    // FFT shader: heightmap texture (bound separately by HeightMapTexture)
+    // Grid shader: heightmap texture (bound separately by HeightMapTexture)
     // plus the geometry of the periodic tile and the choppiness factor.
     (*vsParams)["tileSize"]   = this->cachedTileSize;
     (*vsParams)["gridSize"]   = this->cachedGridSize;
@@ -442,10 +465,17 @@ void WaterVisual::Implementation::OnSceneUpdate()
     return;
   if (this->visualName.empty())
     return;
+
+  // Hold the cache mutex across ResolveVisual too: its first-pass material
+  // setup calls UploadUniforms and reads the cross-thread cache (haveWavefield,
+  // cachedGridSize, …) that PreUpdate writes on the ECM thread. Locking only
+  // afterwards left that first upload racing PreUpdate. The lock can't move
+  // inside UploadUniforms (it's also called below under this same lock, and
+  // std::mutex isn't recursive), so it lives here.
+  const std::lock_guard<std::mutex> lock(this->mutex_);
   if (!this->ResolveVisual())
     return;
 
-  const std::lock_guard<std::mutex> lock(this->mutex_);
   if (this->haveWavefield &&
       this->cachedGeneration != this->lastUploadedGeneration)
   {
@@ -461,6 +491,9 @@ void WaterVisual::Implementation::OnSceneUpdate()
   // own instance, rebuilt from the replicated parameters) and upload the
   // resulting grid as the heightmap the surface shader samples. One path for
   // every backend -- they all expose the same WaveField2D via Field().
+  // This runs under mutex_ on purpose: `sim` is shared with PreUpdate, so the
+  // Update()/Field() pair (an IFFT + readback for grid backends) and the GPU
+  // upload must be serialised against the ECM thread rebuilding the engine.
   if (this->sim && this->heightMap && this->heightMap->Ready())
   {
     this->sim->Update(static_cast<double>(this->currentSimTime));
@@ -472,12 +505,11 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // transposes column- to row-major internally. Null displacement
       // channels (dx/dy) upload as zeros; a null folding metric leaves the
       // alpha channel at 0. The FS reads alpha as foam when useFoamMap=1 —
-      // the FFT backend fills it, the analytic ones don't.
+      // the grid backends that compute folding fill it, the analytic ones don't.
       ok = this->heightMap->Upload(f->dz, f->dx, f->dy, f->foam, f->n);
-      static bool logged = false;
-      if (ok && !logged)
+      if (ok && !this->firstUploadLogged)
       {
-        logged = true;
+        this->firstUploadLogged = true;
         gzmsg << "[WaterVisual] first Field upload: grid=" << f->n
               << " tile=" << f->tile << " m" << '\n';
       }
@@ -488,7 +520,7 @@ void WaterVisual::Implementation::OnSceneUpdate()
 //////////////////////////////////////////////////
 void WaterVisual::Implementation::OnRenderTeardown()
 {
-  // Destroy the FFT heightmap texture BEFORE the scene/material handles
+  // Destroy the heightmap texture BEFORE the scene/material handles
   // go away, so the bridge can still walk Ogre's TextureGpuManager to
   // release it. After teardown the next ResolveVisual will rebuild it.
   this->heightMap.reset();
@@ -527,6 +559,8 @@ void WaterVisual::Configure(
   EventManager &_eventMgr)
 {
   GZ_PROFILE("WaterVisual::Configure");
+  // const_cast only to satisfy sdf::Element::Get/GetElement (non-const); the
+  // SDF is read, never mutated.
   auto sdf = std::const_pointer_cast<sdf::Element>(_sdf);
 
   if (!sdf->HasElement("shader"))
