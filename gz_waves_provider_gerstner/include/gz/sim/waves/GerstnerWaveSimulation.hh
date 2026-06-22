@@ -14,7 +14,8 @@
 #include <memory>
 #include <vector>
 
-#include <Eigen/Core>
+#include <gz/math/Vector2.hh>
+#include <gz/math/Vector3.hh>
 
 #include "gz/sim/waves/WaveSimulation.hh"
 #include "gz/sim/waves/Wavefield.hh"
@@ -43,10 +44,10 @@ class GerstnerWaveSimulation final : public IWaveField
   // Documentation inherited
   public: double Elevation(double _x, double _y, double _t) const override;
   // Documentation inherited
-  public: Eigen::Vector3d ParticleVelocity(
+  public: gz::math::Vector3d ParticleVelocity(
     double _x, double _y, double _t) const override;
   // Documentation inherited
-  public: Eigen::Vector3d Normal(
+  public: gz::math::Vector3d Normal(
     double _x, double _y, double _t) const override;
   // Documentation inherited
   public: double Jacobian(double _x, double _y, double _t) const override;
@@ -64,65 +65,76 @@ class GerstnerWaveSimulation final : public IWaveField
   /// \brief Per-component wave amplitudes [m].
   public: const std::vector<double> &Amplitudes() const
   {
-    return this->amplitudes_;
+    return this->amplitudes;
   }
   /// \brief Per-component wavenumbers |k| [rad/m].
   public: const std::vector<double> &Wavenumbers() const
   {
-    return this->wavenumbers_;
+    return this->wavenumbers;
   }
   /// \brief Per-component angular frequencies ω [rad/s].
   public: const std::vector<double> &AngularFrequencies() const
   {
-    return this->angularFrequencies_;
+    return this->angularFrequencies;
   }
   /// \brief Per-component Gerstner steepness in [0, 1].
   public: const std::vector<double> &Steepnesses() const
   {
-    return this->steepnesses_;
+    return this->steepnesses;
   }
   /// \brief Per-component unit propagation directions.
-  public: const std::vector<Eigen::Vector2d> &Directions() const
+  public: const std::vector<gz::math::Vector2d> &Directions() const
   {
-    return this->directions_;
+    return this->directions;
   }
 
+  /// \brief Phase θ_i(x, y, t) = k_i·(d_i·(x, y)) − ω_i·t + φ of component `_i`
+  /// at world point (x, y) and time t. Shared by every per-component sum
+  /// (Elevation / ParticleVelocity / Normal / Jacobian / the render grid) so
+  /// the phase is computed one way only.
+  /// \param[in] _i Component index (< number of components).
+  /// \param[in] _x World-frame x coordinate [m].
+  /// \param[in] _y World-frame y coordinate [m].
+  /// \param[in] _t Simulation time [s].
+  /// \return The component's phase [rad].
+  private: double Phase(std::size_t _i, double _x, double _y, double _t) const;
+
   /// \brief Per-component wave amplitudes [m].
-  private: std::vector<double> amplitudes_;
+  private: std::vector<double> amplitudes;
   /// \brief Per-component wavenumbers |k| [rad/m].
-  private: std::vector<double> wavenumbers_;
+  private: std::vector<double> wavenumbers;
   /// \brief Per-component angular frequencies ω [rad/s].
-  private: std::vector<double> angularFrequencies_;
+  private: std::vector<double> angularFrequencies;
   /// \brief Per-component Gerstner steepness in [0, 1].
-  private: std::vector<double> steepnesses_;
+  private: std::vector<double> steepnesses;
   /// \brief Per-component unit propagation directions.
-  private: std::vector<Eigen::Vector2d> directions_;
+  private: std::vector<gz::math::Vector2d> directions;
   /// \brief Startup-ramp time constant τ [s].
-  private: double tau_{2.0};
+  private: double tau{2.0};
   /// \brief Common phase offset φ [rad].
-  private: double phase_{0.0};
+  private: double phase{0.0};
 
   // Render grid: the analytic field sampled onto an N×N tile each Update,
   // exposed via Field() as the backend-agnostic rendering contract. Buffers
-  // are column-major; Update overwrites them in place, so field_'s data()
+  // are column-major; Update overwrites them in place, so field's data()
   // pointers (bound in SetParameters) stay valid.
 
   /// \brief Render-grid resolution per axis (N).
-  private: std::size_t fieldN_{128};
+  private: std::size_t fieldN{128};
   /// \brief Render-grid tile extent [m].
-  private: double fieldTile_{0.0};
+  private: double fieldTile{0.0};
   /// \brief Sim time the render grid was last sampled at.
-  private: double currentTime_{-1.0};
-  /// \brief Column-major vertical-displacement buffer for `field_.dz`.
-  private: std::vector<double> dzBuf_;
-  /// \brief Column-major x-chop buffer for `field_.dx`.
-  private: std::vector<double> dxBuf_;
-  /// \brief Column-major y-chop buffer for `field_.dy`.
-  private: std::vector<double> dyBuf_;
-  /// \brief Column-major folding/foam buffer for `field_.foam`.
-  private: std::vector<double> foamBuf_;
+  private: double currentTime{-1.0};
+  /// \brief Column-major vertical-displacement buffer for `field.dz`.
+  private: std::vector<double> dzBuf;
+  /// \brief Column-major x-chop buffer for `field.dx`.
+  private: std::vector<double> dxBuf;
+  /// \brief Column-major y-chop buffer for `field.dy`.
+  private: std::vector<double> dyBuf;
+  /// \brief Column-major folding/foam buffer for `field.foam`.
+  private: std::vector<double> foamBuf;
   /// \brief The rendering contract returned by Field().
-  private: WaveField2D field_;
+  private: WaveField2D field;
 };
 
 /// \brief Factory: a default-constructed Gerstner wave-field engine (apply

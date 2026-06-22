@@ -20,7 +20,8 @@ find_package(gz-sim REQUIRED)
 find_package(gz_waves REQUIRED)          # IWaveField + WaveParameters + base
 find_package(gz_plugin_vendor REQUIRED)
 find_package(gz-plugin REQUIRED COMPONENTS register)
-find_package(Eigen3 REQUIRED)
+find_package(gz_math_vendor REQUIRED)
+find_package(gz-math REQUIRED)           # gz::math vectors + GZ_PI
 
 # --------------------------------------------------------------------------
 # Gerstner wave-field engine (libgz-waves-provider-gerstner): a plain analytic
@@ -38,7 +39,7 @@ target_include_directories(gz-waves-provider-gerstner PUBLIC
 target_include_directories(gz-waves-provider-gerstner PRIVATE
   ${gz_waves_INCLUDE_DIRS})
 target_link_libraries(gz-waves-provider-gerstner
-  PUBLIC Eigen3::Eigen)
+  PUBLIC gz-math::gz-math)
 
 # --------------------------------------------------------------------------
 # Gerstner wave source system (gz-sim-waves-gerstner-system): a WavesSystemBase
@@ -95,7 +96,7 @@ install(DIRECTORY include/ DESTINATION include)
 
 ament_export_targets(export_gz_waves_provider_gerstner HAS_LIBRARY_TARGET)
 ament_export_include_directories(include)
-ament_export_dependencies(Eigen3)
+ament_export_dependencies(gz_math_vendor)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
