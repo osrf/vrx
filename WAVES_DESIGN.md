@@ -1,22 +1,68 @@
 # VRX Wave Simulation — Design & Contributor Reference
 
-This document is the single reference for the VRX wave-simulation stack. It
-captures the **requirements**, the **architecture and design decisions**, the
-**per-package implementation details**, and a step-by-step **guide to
-contributing a new wave engine** (a new "wave rendering model").
+This document is the single reference for the VRX wave simulation packages
+(`gz_waves*`): the layer that connects a pluggable wave field engine to Gazebo
+physics and rendering. It captures the **requirements**, the **architecture and
+design decisions**, the **per-package implementation details**, and a
+step-by-step **guide to contributing a new wave field engine**.
 
-The stack is made of these packages:
+## Terminology
+
+The wave literature, and our own earlier notes, use several near-synonyms
+loosely ("backend", "wave model", "wave rendering model", "generator"). This
+document fixes the following vocabulary and uses it consistently:
+
+| Term | Meaning |
+|------|---------|
+| **wave field** | The *output*: the water-surface state (elevation η, particle velocity, surface normal, and the folding/Jacobian metric) over space and time. It is what consumers read; it is **not** the thing that produces it. |
+| **wave field engine (WFE)** | A concrete `IWaveField` implementation that *produces* a wave field (e.g. the analytic Gerstner engine, the spectral FFT engine). Supersedes the looser "backend" and "wave (rendering) model"; "rendering model" especially misleads, since an engine drives physics too, not just the visual. |
+| **provider** | The package that ships a WFE plus its server/GUI plumbing (`gz_waves_provider_*`). |
+| **consumer** | Anything that *reads* the wave field through the core API (vessel buoyancy/hydrodynamics, the renderer, future sensors). `WaveBuoyancy` is the illustrative consumer used throughout. |
+
+**What defines a WFE.** A wave field engine synthesizes the surface as a sum of
+components, η(x, t) = Σ aₙ cos(kₙ·x − ωₙ t + φₙ). Per the VRX waves roadmap
+(`vrx4_waves_roadmap.md`), the method is defined by **five independent choices**,
+three of them statistical:
+
+| Choice | Determines | Options |
+|--------|------------|---------|
+| **Inverse transform** | how the spectrum becomes the field | direct summation (sum of cosines) vs. FFT / IFFT |
+| **Wave kinematics** | the shape of each component | linear / Airy (vertical only) vs. Gerstner / trochoidal (adds horizontal chop) |
+| **Amplitude sampling** *(statistical)* | the amplitudes aₙ | deterministic vs. random (Rayleigh / Gaussian) |
+| **Frequency sampling** *(statistical)* | the frequencies ωₙ | deterministic (evenly spaced) vs. random (drawn within bands) |
+| **Phase sampling** *(statistical)* | the phases φₙ | deterministic vs. random (uniform) |
+
+The choices are independent, though the roadmap notes only a handful of
+combinations are physically sensible (e.g. the fully deterministic legacy sea, or
+the random amplitude Gaussian sea that EncinoWaves draws). The engines shipped
+today are two points in this space, and their package names are a **pragmatic
+shorthand for each engine's dominant distinguishing choice**, not a claim that the
+choices are coupled:
+
+- `gz_waves_provider_gerstner`: direct summation, Gerstner kinematics, fully
+  deterministic amplitude, frequency, and phase. Implemented in this repository.
+- `gz_waves_provider_fft`: IFFT, Gerstner chop, random amplitude, evenly spaced
+  frequency, random phase (the Gaussian sea). The transform, spectra, sampling,
+  and kinematics all live in the **external EncinoWaves library**; the VRX package
+  is a thin wrapper (§6).
+
+The `IWaveField` contract itself is **agnostic** to all five choices: a new engine
+(in this repo or wrapping an external library) may implement any sensible
+combination. (Whether the package *names* should move from this shorthand toward
+the roadmap's design-choice vocabulary is an open design question.)
+
+## Packages
+
+All `gz_waves*` packages live in **this repository** (vrx). **EncinoWaves is the
+one external dependency**: its own repository, installed separately, **not**
+vendored.
 
 | Package | Role |
 |---------|------|
 | `gz_waves` | Engine-agnostic **core**: the `IWaveField` contract, the engine registry, the `Wavefield` ECM component, the `Eval` query facade, and `WavesSystemBase` (the source-plugin base). |
-| `gz_waves_provider_gerstner` | Analytic **Gerstner** engine + source system + GUI registrar. |
-| `gz_waves_provider_fft` | **FFT** spectral engine (EncinoWaves) + source system + GUI registrar. |
-| `gz_waves_rendering` | Provider-agnostic **WaterVisual** renderer + the Ogre2 C-ABI bridge + the `water_surface` model; wires a runnable demo world. |
-
-These are the packages this document covers. The wave field is designed to drive
-any number of **consumers** (vessel buoyancy/hydrodynamics, the renderer, future
-sensors); `WaveBuoyancy` is used throughout as the illustrative consumer.
+| `gz_waves_provider_gerstner` | Analytic **Gerstner** WFE + source system + GUI registrar. |
+| `gz_waves_provider_fft` | Spectral **FFT** WFE (wraps EncinoWaves) + source system + GUI registrar. |
+| `gz_waves_rendering` | Engine-agnostic **WaterVisual** renderer + the Ogre2 C-ABI bridge + the `water_surface` model; wires a runnable demo world. |
 
 All new source files carry the **Honu Robotics** Apache-2.0 copyright header.
 
@@ -26,8 +72,8 @@ All new source files carry the **Honu Robotics** Apache-2.0 copyright header.
 
 ### Functional
 
-- **R1 — Multiple selectable wave models.** Support more than one wave-field
-  backend (analytic Gerstner, spectral FFT) chosen per world, with room to add
+- **R1 — Multiple selectable wave field engines.** Support more than one WFE
+  (analytic Gerstner, spectral FFT) chosen per world, with room to add
   more without touching existing packages.
 - **R2 — One physical wave field, many consumers.** A single authoritative wave
   field drives every consumer — vessel buoyancy/hydrodynamics, the rendered
@@ -104,7 +150,7 @@ engine-agnostic (N1, N3).
 
 ## 3. The core contract (`gz_waves`)
 
-### 3.1 `IWaveField` — the backend interface
+### 3.1 `IWaveField` — the wave field engine interface
 
 `include/gz/sim/waves/WaveSimulation.hh`. A concrete engine implements:
 
@@ -115,13 +161,13 @@ engine-agnostic (N1, N3).
 | `gz::math::Vector3d Normal(double _x, double _y, double _t) const` | Outward unit surface normal. |
 | `double Jacobian(double _x, double _y, double _t) const` | Horizontal-displacement Jacobian; low values ⇒ folding/whitecaps. |
 | `void SetParameters(const WaveParameters &_params)` | (Re)build all internal state from the recipe. |
-| `void Update(double _simTime)` | Advance time-dependent state (no-op default for stateless backends). |
-| `std::string_view Kind() const` | Backend token, e.g. `"gerstner"`, `"fft"`. |
-| `std::optional<TileSize> Bounds() const` | Periodic extent (grid backends); `nullopt` for unbounded analytic ones. |
-| `const WaveField2D *Field() const` | The renderable grid (see below); `nullptr` if the backend has none. |
+| `void Update(double _simTime)` | Advance time-dependent state (no-op default for stateless engines). |
+| `std::string_view Kind() const` | Engine token, e.g. `"gerstner"`, `"fft"`. |
+| `std::optional<TileSize> Bounds() const` | Periodic extent (grid engines); `nullopt` for unbounded analytic ones. |
+| `const WaveField2D *Field() const` | The renderable grid (see below); `nullptr` if the engine has none. |
 
-**`WaveField2D` — the rendering contract.** A POD view the renderer consumes
-without knowing the backend:
+**`WaveField2D` — the rendering contract.** A Plain Old Data (POD) view the
+renderer consumes without knowing the engine:
 
 ```cpp
 struct WaveField2D {
@@ -306,7 +352,7 @@ frame pulls the grid via `Field()` and uploads it. (Because the engine produces
 column-major Eigen data while the Ogre bridge wants row-major, `HeightMapTexture`
 reflows each grid once on upload.)
 
-### 5.2 Provider-agnostic, via per-engine GUI registrars
+### 5.2 Engine-agnostic, via per-engine GUI registrars
 
 `gz_waves_rendering` depends on **`gz_waves` only** — no engine `find_package`,
 no engine link, no engine `<depend>` (N1). The factory registration that lets
@@ -354,6 +400,18 @@ moving waves with no extra setup (R3, R7).
 
 ### 6.1 Engine + system
 
+**VRX vs. EncinoWaves.** For the FFT engine the external **EncinoWaves** library
+owns the wave-field *generation* across all five WFE choices: the inverse
+transform (IFFT), the spectra/spreading/dispersion models, the random amplitude
+and uniform phase sampling (with an evenly spaced frequency grid), and the
+horizontal-displacement (Gerstner "chop") kinematics. VRX's `gz_waves_provider_fft` is a **thin wrapper**: it configures
+EncinoWaves from the `<wave>` recipe, samples the grid, computes particle
+velocity by finite difference (below), calibrates RMS to the target `Hs`, and
+exposes the result through `Field()`/`Elevation()`. The contrast with the
+in-repo Gerstner engine, whose kinematics live in VRX, is deliberate, and
+illustrates that the `IWaveField` boundary lets an engine externalize as much or
+as little of the generation as it likes.
+
 - **Engine** `FFTWaveSimulation` (`MakeFFTWaveField()`): an inverse-FFT of an
   empirically-modelled directional spectrum from the external **EncinoWaves**
   library (Horvath 2015, Apache-2.0). `Update` propagates the spectrum and runs
@@ -379,7 +437,7 @@ moving waves with no extra setup (R3, R7).
   views, determinism vs. seed, periodicity, unit normals, particle velocity, and
   sea-state Hs.
 
-### 6.2 GUI registrar pattern (both engines)
+### 6.2 GUI registrar pattern (per engine)
 
 A GUI registrar (`gz-sim-waves-<engine>-gui`) is a **bare `System` with no
 `ISystem` interface and no SDF**. It registers its factory from a **file-scope
@@ -442,11 +500,12 @@ In the world, load **one** source system and the matching GUI registrar:
 </plugin>
 ```
 
-The `water_surface` model already loads both GUI registrars, so either engine
-renders. `open_water.sdf` ships the alternative engine as a commented `<plugin>`
-block — swap by commenting one and uncommenting the other.
+The `water_surface` model already loads a GUI registrar for each engine, so
+whichever engine the world selects renders. `open_water.sdf` ships the
+alternative engines as commented `<plugin>` blocks — switch by commenting the
+active block and uncommenting the one you want.
 
-### Shared `<wave>` parameters (both engines)
+### Shared `<wave>` parameters (all engines)
 
 `<sea_state>` (int 0–9, default −1/off — overrides `<period>`+`<gain>`),
 `<period>` [s], `<gain>`, `<direction>` [rad], `<tau>` [s], plus `<update_rate>`
@@ -478,10 +537,10 @@ with any of the parameter keys (snake_case for multi-word). The change bumps
 
 ---
 
-## 9. How to contribute a new wave model (engine)
+## 9. How to contribute a new wave field engine
 
-A "new wave rendering model" is a new **wave engine** (an `IWaveField`
-backend). The renderer, the buoyancy consumer, and the core need **zero
+A new wave field engine is a fresh `IWaveField` implementation. The renderer,
+the buoyancy consumer, and the core need **zero
 changes** — you add one self-contained provider package, mirroring
 `gz_waves_provider_gerstner` (the deliberately-minimal template). The same
 package contributes its server source plugin, its GUI registrar, and its world

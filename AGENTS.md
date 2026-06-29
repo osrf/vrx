@@ -6,7 +6,7 @@ subdirectory adds its own `AGENTS.md`, the closest one to the file you are
 editing wins.
 
 VRX (Virtual RobotX) is a Gazebo + ROS 2 maritime simulation. The substantive
-subsystem today is the **wave-simulation stack** (`gz_waves*` packages); more
+subsystem today is the **wave simulation packages** (`gz_waves*`); more
 subsystems will be added over time.
 
 ## Project layout
@@ -14,12 +14,12 @@ subsystems will be added over time.
 | Path | What |
 |------|------|
 | `gz_waves/` | Engine-agnostic wave **core** (the `IWaveField` contract, engine registry, `Wavefield` ECM component, `Eval` facade, `WavesSystemBase`). |
-| `gz_waves_provider_gerstner/`, `gz_waves_provider_fft/` | Wave **engines** (a backend + its server source plugin + a GUI registrar). |
-| `gz_waves_rendering/` | Provider-agnostic **renderer** (`WaterVisual`) + the Ogre2 C-ABI bridge + the `water_surface` model. |
+| `gz_waves_provider_gerstner/`, `gz_waves_provider_fft/` | Wave field **engines** (an `IWaveField` implementation + its server source plugin + a GUI registrar). |
+| `gz_waves_rendering/` | Engine-agnostic **renderer** (`WaterVisual`) + the Ogre2 C-ABI bridge + the `water_surface` model. |
 | `gz_waves_buoyancy/` | A wave-field **consumer** (`WaveBuoyancy`). |
 | `vrx_gazebo/` | Worlds (`open_water.sdf`) + resource-path hooks. |
 | `vrx_bringup/` | ROS 2 launch + `ros_gz_bridge` config. |
-| `WAVES_DESIGN.md` | Full design + contributor reference for the wave stack. |
+| `WAVES_DESIGN.md` | Full design + contributor reference for the wave packages. |
 
 ## Setup & build
 
@@ -113,6 +113,6 @@ changes**. Follow the step-by-step recipe in **`WAVES_DESIGN.md` §9**, using
 
 ## Deeper docs
 
-- `WAVES_DESIGN.md` — wave-stack requirements, architecture, per-package detail,
+- `WAVES_DESIGN.md` — wave-package requirements, architecture, per-package detail,
   and the "add a new engine" guide.
 - `README.md` — user-facing build/run summary.
