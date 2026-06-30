@@ -33,10 +33,17 @@ namespace gz::sim::systems
   /// concrete subclass.
   ///
   /// A subclass is a complete loadable System: it inherits the Configure /
-  /// PreUpdate behaviour and supplies just two things — the engine's token (for
-  /// the GUI to reconstruct the matching backend) and a factory that builds and
-  /// configures that backend. Because the subclass links its engine directly,
+  /// PreUpdate behaviour and supplies just two things: the engine's token (for
+  /// the GUI to reconstruct the matching engine) and a factory that builds and
+  /// configures that engine. Because the subclass links its engine directly,
   /// no runtime plugin loader is involved on the server side.
+  ///
+  /// Each engine token names a *whole synthesis technique* (a fixed bundle of
+  /// inverse transform, kinematics, and statistics), not a single design axis:
+  /// `gerstner` is the analytic, direct summation, deterministic engine and
+  /// `fft` is the FFT synthesized, random spectrum engine. The names are
+  /// conventional shorthand, not a transform versus kinematics contrast (the
+  /// `fft` engine also applies Gerstner-style displacement).
   ///
   /// The `Wavefield` component is written once in `Configure` and re-marked as
   /// changed only when its recipe actually changes (a `set_parameters` service
