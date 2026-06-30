@@ -410,7 +410,7 @@ void WaterVisual::Implementation::UploadUniforms()
   // half-width around J = 0 (Encino's MinE; the Phillips path leaves it ≈1).
   (*fsParams)["chopFactor"]    = this->cachedChopFactor;
   (*fsParams)["tileSize"]      = this->cachedTileSize;
-  // Foam is backend-specific. The analytic Gerstner engine's Jacobian
+  // Foam is engine-specific. The analytic Gerstner engine's Jacobian
   // determinant barely leaves 1.0, so it carries no usable folding signal and
   // foam is unsupported for it (foamStrength=0 makes the FS skip the whole foam
   // path). The FFT/Encino engine writes a real min-eigenvalue metric and keeps
@@ -490,9 +490,9 @@ void WaterVisual::Implementation::OnSceneUpdate()
   // Drive the wave field's own Update each frame (the GUI process holds its
   // own instance, rebuilt from the replicated parameters) and upload the
   // resulting grid as the heightmap the surface shader samples. One path for
-  // every backend -- they all expose the same WaveField2D via Field().
+  // every engine -- they all expose the same WaveField2D via Field().
   // This runs under mutex_ on purpose: `sim` is shared with PreUpdate, so the
-  // Update()/Field() pair (an IFFT + readback for grid backends) and the GPU
+  // Update()/Field() pair (an IFFT + readback for grid engines) and the GPU
   // upload must be serialised against the ECM thread rebuilding the engine.
   if (this->sim && this->heightMap && this->heightMap->Ready())
   {
@@ -505,7 +505,7 @@ void WaterVisual::Implementation::OnSceneUpdate()
       // transposes column- to row-major internally. Null displacement
       // channels (dx/dy) upload as zeros; a null folding metric leaves the
       // alpha channel at 0. The FS reads alpha as foam when useFoamMap=1 —
-      // the grid backends that compute folding fill it, the analytic ones don't.
+      // the grid engines that compute folding fill it, the analytic ones don't.
       ok = this->heightMap->Upload(f->dz, f->dx, f->dy, f->foam, f->n);
       if (ok && !this->firstUploadLogged)
       {
@@ -721,7 +721,7 @@ void WaterVisual::PreUpdate(
   // OnSceneUpdate's Update()/Field() on the render thread against this thread —
   // the cause of the intermittent PreUpdate segfault. A private instance is
   // touched only by PreUpdate + OnSceneUpdate, both under mutex_, so it is
-  // fully serialised. One render path for every backend: OnSceneUpdate pulls
+  // fully serialised. One render path for every engine: OnSceneUpdate pulls
   // the grid via Field().
   if (!this->dataPtr->sim ||
       this->dataPtr->cachedGeneration != data->generation)

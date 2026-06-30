@@ -20,7 +20,7 @@ namespace gz::sim::systems
 {
   /// \brief A rendering system that drives a water-surface visual with the
   /// grid/displacement water vertex/fragment shaders, fed by the world's
-  /// `Wavefield` component. The same grid path serves every backend (analytic
+  /// `Wavefield` component. The same grid path serves every engine (analytic
   /// Gerstner and FFT alike) via the shared `WaveField2D` heightmap.
   ///
   /// Attach to a `<visual>` element. The plugin finds its visual, attaches a
@@ -42,7 +42,7 @@ namespace gz::sim::systems
   ///   - `<shader>/<parameters>/<hdrMultiplier>` (float, 0.4): reflected-sky brightness.
   ///   - `<shader>/<parameters>/<fresnelPower>` (float, 5.0): Fresnel exponent.
   ///   - `<shader>/<parameters>/<roughness>` (float, 0.0): micro-surface roughness.
-  ///   - `<shader>/<parameters>/<foamStrength>` (float, 0.7): whitecap blend amount (grid foam; off for the Gerstner backend).
+  ///   - `<shader>/<parameters>/<foamStrength>` (float, 0.7): whitecap blend amount (grid foam; off for the Gerstner engine).
   ///   - `<shader>/<parameters>/<foamThreshold>` (float, 0.25): half-width of the foam ramp in folding-metric space.
   ///   - `<shader>/<parameters>/<shallowColor>` (rgba, 0 0.1 0.3 1): shallow-water tint.
   ///   - `<shader>/<parameters>/<deepColor>` (rgba, 0 0.05 0.2 1): deep-water tint.

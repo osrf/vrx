@@ -6,7 +6,7 @@
   <description>
     Rendering consumer for gz_waves: the WaterVisual gz-sim system and its
     Ogre2 heightmap bridge + water-surface model/shaders. Draws the wave field
-    read from the Wavefield component through IWaveField::Field() — backend
+    read from the Wavefield component through IWaveField::Field() — engine
     agnostic. Engine-specific Ogre2 code is isolated in a dlopen'd bridge.
   </description>
   <maintainer email="cen.aguero@gmail.com">Carlos Agüero</maintainer>
