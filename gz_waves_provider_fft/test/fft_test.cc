@@ -34,7 +34,7 @@ gsw::WaveParameters DefaultParams()
 {
   gsw::WaveParameters p;
   p.model = "PMS";
-  p.number = 3;          // ignored by FFT backend (uses gridSize)
+  p.number = 3;          // ignored by FFT engine (uses gridSize)
   p.period = 6.0;        // ω_P ≈ 1.05 rad/s, V19 ≈ 8 m/s
   p.gain = 1.0;
   p.direction = 0.0;
@@ -273,9 +273,9 @@ TEST(FFTWaveSimulation, TimeEvolutionChangesField)
   EXPECT_GT((snapshotB - snapshotA).cwiseAbs().maxCoeff(), 1e-3);
 }
 
-// The Field() rendering view must alias the backend grids with the documented
+// The Field() rendering view must alias the engine grids with the documented
 // column-major layout (element (i,j) at i + j*N), so the renderer can upload
-// it without knowing the concrete backend.
+// it without knowing the concrete engine.
 //////////////////////////////////////////////////
 TEST(FFTWaveSimulation, FieldExposesGridViews)
 {

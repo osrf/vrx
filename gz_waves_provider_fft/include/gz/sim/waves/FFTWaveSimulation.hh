@@ -24,7 +24,7 @@ namespace gz::sim::waves
 
 struct WaveParameters;
 
-/// \brief Stochastic FFT-based wave model backed by the Apache-2.0 EncinoWaves
+/// \brief Stochastic FFT-based wave field engine backed by the Apache-2.0 EncinoWaves
 /// spectral library (Horvath 2015): the inverse 2D FFT of an empirically
 /// modelled directional spectrum (TMA/JONSWAP/PM + directional spreading +
 /// dispersion), selected via the <spectrum>/<spreading>/<dispersion> params.
@@ -151,7 +151,7 @@ class FFTWaveSimulation final : public IWaveField
   private: Eigen::MatrixXd velZGrid;
 
   /// \brief Column-major view into the grids above, returned by Field() as the
-  /// backend-agnostic rendering contract. Repopulated on each call from the
+  /// engine-agnostic rendering contract. Repopulated on each call from the
   /// current grid data() — Update reassigns the grids, so a cached pointer
   /// would dangle. Mutable because Field() is const.
   private: mutable WaveField2D field;
