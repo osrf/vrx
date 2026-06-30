@@ -300,9 +300,9 @@ double GerstnerWaveSimulation::Jacobian(double _x, double _y, double _t) const
 //////////////////////////////////////////////////
 void GerstnerWaveSimulation::Update(double _simTime)
 {
-  // Analytic backend: the point queries (Elevation/Normal/...) stay
+  // Analytic engine: the point queries (Elevation/Normal/...) stay
   // closed-form. Update only (re)samples the render grid at the new time,
-  // matching the "Update advances, Field reads" model the FFT backend uses.
+  // matching the "Update advances, Field reads" model the FFT engine uses.
   if (_simTime == this->currentTime)
     return;
   this->currentTime = _simTime;

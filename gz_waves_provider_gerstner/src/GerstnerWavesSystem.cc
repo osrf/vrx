@@ -34,7 +34,7 @@ namespace gz::sim::systems
 ///
 /// | Tag | Type | Default | Meaning |
 /// |---|---|---|---|
-/// | `<update_rate>` | double [Hz] | 30.0 | Throttle for the backend `Update()` (plugin level) |
+/// | `<update_rate>` | double [Hz] | 30.0 | Throttle for the engine `Update()` (plugin level) |
 /// | `<model>` | string | PMS | Sampling model: `PMS` (wind-derived components) or `CWR` (constant amplitude) |
 /// | `<number>` | uint | 3 | Number of component waves |
 /// | `<period>` | double [s] | 5.0 | Mean wave period |

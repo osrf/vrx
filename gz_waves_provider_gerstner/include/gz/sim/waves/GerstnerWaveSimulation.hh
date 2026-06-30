@@ -23,7 +23,7 @@
 namespace gz::sim::waves
 {
 
-/// \brief Analytic sum-of-Gerstners wave model. Closed-form for each of up
+/// \brief Analytic sum-of-Gerstners wave field engine. Closed-form for each of up
 /// to N component waves; deterministic; unbounded in space.
 class GerstnerWaveSimulation final : public IWaveField
 {
@@ -58,7 +58,7 @@ class GerstnerWaveSimulation final : public IWaveField
   // Documentation inherited
   public: std::string_view Kind() const override { return "gerstner"; }
 
-  // ---- Backend-specific introspection accessors (exercised by the unit
+  // ---- Engine-specific introspection accessors (exercised by the unit
   //      tests; not part of the IWaveField interface — WaterVisual consumes
   //      Field() instead) ----
 
@@ -115,7 +115,7 @@ class GerstnerWaveSimulation final : public IWaveField
   private: double phase{0.0};
 
   // Render grid: the analytic field sampled onto an N×N tile each Update,
-  // exposed via Field() as the backend-agnostic rendering contract. Buffers
+  // exposed via Field() as the engine-agnostic rendering contract. Buffers
   // are column-major; Update overwrites them in place, so field's data()
   // pointers (bound in SetParameters) stay valid.
 

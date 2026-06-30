@@ -231,7 +231,7 @@ TEST(Serialization, RoundTripPreservesRecipe)
     1e-9);
 }
 
-// The analytic backend samples itself onto a grid for the unified rendering
+// The analytic engine samples itself onto a grid for the unified rendering
 // contract. The sampled values must match the closed-form queries at the same
 // world points, so the renderer draws the same field the buoyancy sees.
 //////////////////////////////////////////////////
