@@ -25,6 +25,16 @@ namespace gz::sim::waves
 
 /// \brief Analytic sum-of-Gerstners wave field engine. Closed-form for each of up
 /// to N component waves; deterministic; unbounded in space.
+///
+/// \note Kinematics differ by consumer. The point queries (`Elevation`,
+/// `ParticleVelocity`, `Normal`), i.e. the physics path buoyancy reads, use
+/// linear (Airy) kinematics: they sample the vertical height field Σ a·cos(θ)
+/// directly at the query (x, y), with no horizontal displacement. The render grid
+/// (`Update`/`Field`, consumed by the shader) additionally applies the full
+/// Gerstner horizontal chop (dx/dy = −q·a·dir·sin(θ)), so the *visible* surface is
+/// trochoidal. Inverting the Gerstner parametric map per query would be costly and
+/// is unnecessary for buoyancy, where the vertical profile dominates; the chop is
+/// a visual refinement.
 class GerstnerWaveSimulation final : public IWaveField
 {
   /// \brief Default-construct an unconfigured field. Call `SetParameters`
