@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>gz_waves_provider_gerstner</name>
+  <version>0.0.0</version>
+  <description>
+    Analytic Gerstner (sum-of-sines) wave-field engine for gz_waves. A plain
+    IWaveField implementation registered in the in-process engine registry and
+    linked by the gz-sim-waves-gerstner-system plugin — and the simplest
+    template for writing your own provider package.
+  </description>
+  <maintainer email="cen.aguero@gmail.com">Carlos Agüero</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>gz_waves</depend>
+  <depend>gz_sim_vendor</depend>
+  <depend>gz_math_vendor</depend>
+  <depend>gz_common_vendor</depend>
+  <depend>gz_plugin_vendor</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
