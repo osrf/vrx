@@ -341,11 +341,23 @@
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <include>
-      <pose>0 0 -1 0 0 0</pose>
-      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/nathan_benderson_park</uri>
-    </include>
 
+<!-- RoboBoat 01 -->
+<include>
+  <name>roboboat01</name>
+  <pose>-185 1088 0 0 0 0</pose>
+  <uri>roboboat01</uri>
+</include>
+<!-- BlueBoat -->
+<include>
+  <name>blueboat</name>
+  <pose>-185 1090 0 0 0 0</pose>
+  <uri>blueboat</uri>
+</include>
+<include>
+  <name>platform</name>
+  <uri>platform</uri>
+</include>
     <include>
       <name>Coast Waves</name>
       <pose>0 0 0 0 0 0</pose>
