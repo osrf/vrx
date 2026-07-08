@@ -5,6 +5,11 @@
  * you may not use this file except in compliance with the License.
  */
 
+// Acknowledgement: the Ogre Next displacement-map streaming approach used here
+// (a CPU-retained RGBA32F texture, per-frame residency scheduling, manual mip-0
+// upload) is adapted from the technique in asv_wave_sim by Rhys Mainwaring
+// (github.com/srmainwaring/asv_wave_sim).
+
 #include "Ogre2HeightMapBridge.hh"
 
 

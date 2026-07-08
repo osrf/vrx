@@ -674,6 +674,17 @@ source. Done — `WaterVisual`, buoyancy, and the core are untouched.
 
 ## 10. Build, run, test
 
+### Prerequisites
+
+- ROS Lyrical with Gazebo Jetty: the target platform, and currently the most
+  modern stable ROS and Gazebo combination. If your system defaults to a
+  different Gazebo version, install Gazebo Jetty before building.
+- EncinoWaves installed and on CMAKE_PREFIX_PATH (from HonuRobotics/encinowaves),
+  required by the FFT package.
+- Remaining Gazebo dependencies via rosdep install --from-paths src --ignore-src -y.
+- A real GPU for the GUI: the Ogre2 render path does not initialise under software GL.
+- Container setup: TBD.
+
 ```bash
 # Build (EncinoWaves must be installed and on CMAKE_PREFIX_PATH for the FFT package)
 cd ~/vrx_ws
