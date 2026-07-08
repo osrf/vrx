@@ -25,8 +25,10 @@
 
 uniform sampler2D bumpMap;
 uniform samplerCube cubeMap;
-// FFT heightmap. Only sampled when foamStrength > 0 (the gerstner
-// path leaves that uniform at zero so this sampler can be unbound).
+// Wave heightmap grid (η, Dx, Dy, foam). Always bound: the vertex shader
+// samples it for the surface displacement. Here in the fragment shader it is
+// read only for the foam alpha when foamStrength > 0 (the gerstner path leaves
+// foamStrength at 0, so this read is skipped, but the texture stays bound).
 uniform sampler2D heightMap;
 
 uniform vec4 deepColor;
@@ -141,5 +143,7 @@ void main()
   float foam = ComputeFoamMask() * foamStrength;
   color.rgb = mix(color.rgb, vec3(1.0), foam);
 
-  fragColor = vec4(color.xyz, 0.9);
+  // Opaque surface: alpha 1.0 keeps the water out of the transparent
+  // render path (no blend state is configured), avoiding depth-sort artifacts.
+  fragColor = vec4(color.xyz, 1.0);
 }

@@ -116,8 +116,8 @@ waves_heightmap_t waves_ogre2_heightmap_create(
   // garbage from higher mips at distance — visible as fine dotted lines
   // that drift with the waves. Matches `combinedTex` on the GPU path.
   hm->texture->setNumMipmaps(1u);
-  // RGBA32F so we can pack (η, Dx, Dy, α) per texel. Alpha is unused for
-  // now (reserved for a Jacobian/foam mask in a future stage).
+  // RGBA32F so we can pack (η, Dx, Dy, foam) per texel. Alpha carries the
+  // displacement-Jacobian folding/foam metric, written in the upload path.
   hm->texture->setPixelFormat(Ogre::PFG_RGBA32_FLOAT);
   // Don't schedule residency at creation time — asv_wave_sim does it from
   // the upload path so the call is repeated every frame, which seems to

@@ -388,9 +388,7 @@ void WaterVisual::Implementation::UploadUniforms()
     // for the periodic heightmap sample, so tile instances at
     // different world offsets each render their own piece of the
     // continuous wavefield (rather than each tile showing the same
-    // patch in local model space). The Gerstner VS doesn't declare
-    // this uniform, so binding it unconditionally throws an
-    // ItemIdentityException there.
+    // patch in local model space).
     (*vsParams)["world_matrix"] = 1;
 
     // Grid shader: heightmap texture (bound separately by HeightMapTexture)
