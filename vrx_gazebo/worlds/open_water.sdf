@@ -4,8 +4,8 @@
 
     <!-- Physics -->
     <physics name="default_physics" type="dart">
-      <max_step_size>0.001</max_step_size>
-      <real_time_factor>1</real_time_factor>
+      <max_step_size>0.004</max_step_size>
+      <!-- <real_time_factor>0</real_time_factor> -->
     </physics>
 
     <!-- Spherical coordinates for Portuguese Ledge, Monterey Bay.
@@ -20,10 +20,14 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
 
-    <!-- Scene: deep ocean ambient -->
+    <!-- Scene: deep ocean ambient + procedural sky. The <sky> element
+         tells gz-rendering to draw its built-in procedural sky cube
+         (sun, horizon transition) so the water has something to
+         reflect and the background isn't a flat colour. -->
     <scene>
       <ambient>0.0 1.0 1.0</ambient>
       <background>0.0 0.7 0.8</background>
+      <sky></sky>
       <grid>false</grid>
     </scene>
 
@@ -75,16 +79,46 @@
       name="gz::sim::systems::Imu">
     </plugin>
 
-    <plugin
-      filename="gz-sim-buoyancy-system"
-      name="gz::sim::systems::Buoyancy">
-      <graded_buoyancy>
-        <default_density>1025</default_density>
-        <density_change>
-          <above_depth>0</above_depth>
-          <density>1</density>
-        </density_change>
-      </graded_buoyancy>
+
+    <!-- ==================================================================
+         WAVE SOURCE — the engine is the plugin's identity. Keep exactly ONE of
+         the two <plugin> blocks below active and comment the other out. Both
+         blocks are deliberately comment-free so either can be wrapped in an XML
+         comment cleanly (XML comments cannot nest). Per-parameter notes live in
+         the comment directly above each block.
+         ================================================================== -->
+
+    <!-- Gerstner engine (gz-sim-waves-gerstner-system): analytic sum of
+         component waves. The full parameter list and the <sea_state> precedence
+         rules live in the plugin's own documentation. (The FFT spectral backend,
+         gz-sim-waves-fft-system, is added as an alternative in a later PR.) -->
+    <plugin filename="gz-sim-waves-gerstner-system"
+            name="gz::sim::systems::GerstnerWaves">
+      <update_rate>30</update_rate>
+      <wave>
+        <!-- Simplest control: a WMO sea-state code (0-9) sets the whole sea. It
+             overrides <period>/<gain> (3 = slight, 5 = rough, 0 = calm). For a
+             hand-tuned sea, comment <sea_state> and uncomment the advanced block
+             (delete the two comment markers wrapping it). -->
+        <sea_state>5</sea_state>
+
+        <!-- Advanced / manual setup (a working configuration). <model> is PMS or
+             CWR; <number> components; <period> mean period [s]; <direction>
+             heading [rad]; <angle> spread; <scale> amplitude ratio; <steepness>
+             crest sharpness [0,1]; <gain> amplitude; <grid_size> resolution. -->
+        <!--
+        <model>PMS</model>
+        <number>3</number>
+        <period>3.2</period>
+        <direction>2.356</direction>
+        <angle>0.4</angle>
+        <scale>1.1</scale>
+        <steepness>0.5</steepness>
+        <gain>1.0</gain>
+        <tau>2.0</tau>
+        <grid_size>128</grid_size>
+        -->
+      </wave>
     </plugin>
 
     <!-- GUI -->
@@ -100,7 +134,10 @@
         <scene>scene</scene>
         <ambient_light>0.4 0.4 0.4</ambient_light>
         <background_color>0.0 0.7 0.8</background_color>
-        <camera_pose>3 3 0 0 0.3 -2.36</camera_pose>
+        <!-- Matches asv_wave_sim's reference camera_pose for fair
+             side-by-side visual comparison: 6m east of origin, 6m
+             above water, pitched ~29° down. -->
+        <camera_pose>-6 0 6 0 0.5 0</camera_pose>
         <camera_clip>
           <near>0.1</near>
           <far>50000</far>
@@ -264,32 +301,13 @@
       </plugin>
     </gui>
 
-    <!-- Portuguese Ledge Tile 1 - DEM heightmap from Gazebo Fuel
-         Source: MBARI/OpenRobotics, Monterey Bay bathymetry
-         Tile covers 1000m x 1000m, depth range ~0 to -25m -->
+    <!-- Water surface visual (wave-displaced mesh). -->
     <include>
-      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Portuguese Ledge</uri>
+      <uri>model://water_surface</uri>
     </include>
 
-    <!-- Water surface visual (semi-transparent plane at z=0) -->
-    <model name="water_surface">
-      <static>true</static>
-      <link name="link">
-        <visual name="visual">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>1000 1000</size>
-            </plane>
-          </geometry>
-          <transparency>0.6</transparency>
-          <material>
-            <ambient>0.0 0.2 0.4 1</ambient>
-            <diffuse>0.0 0.3 0.6 1</diffuse>
-          </material>
-        </visual>
-      </link>
-    </model>
+    <!-- A wave-coupled test buoy (model://test_buoy) is added once the
+         gz_waves_buoyancy consumer lands; this demo world is ocean-only. -->
 
   </world>
 </sdf>
