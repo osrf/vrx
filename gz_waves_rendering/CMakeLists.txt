@@ -28,27 +28,28 @@ find_package(gz-rendering REQUIRED COMPONENTS ogre2)
 # registry (CreateWaveSimulation); the GUI-side factory registration lives in
 # the per-engine GUI plugins (gz-sim-waves-<engine>-gui), loaded by the world.
 
-# Discover Ogre Next headers. Different Gazebo installs sit on different Ogre
-# Next patch versions (ROS gz_ogre_next_vendor 2.3.3 vs Ubuntu libogre-next-dev
-# 2.3.1). Compiling against one but loading the other silently swaps in slow
-# Hlms/barrier code paths (no crash, but RTF tanks), so probe which Ogre Next
-# the *resolved* gz-rendering-ogre2 links against and match our header path.
-get_target_property(_gz_rend_ogre2_lib gz-rendering::ogre2 LOCATION)
-if(_gz_rend_ogre2_lib MATCHES "/opt/ros/([^/]+)/")
-  set(_ros_distro "${CMAKE_MATCH_1}")
-  set(OGRE_NEXT_INCLUDE_DIR
-    "/opt/ros/${_ros_distro}/opt/gz_ogre_next_vendor/include/OGRE-Next"
-    CACHE PATH "Ogre Next include dir matched to gz-rendering-ogre2 distro")
-else()
-  # Non-ROS-distro install (e.g. local jetty_ws build) → system Ogre Next.
-  set(OGRE_NEXT_INCLUDE_DIR "/usr/include/OGRE-2.3"
-    CACHE PATH "Ogre Next include dir from libogre-next-dev")
-endif()
-if(NOT EXISTS "${OGRE_NEXT_INCLUDE_DIR}/OgreRoot.h")
+# Discover the Ogre Next headers. We must compile against the SAME Ogre Next the
+# resolved gz-rendering-ogre2 uses (mixing patch versions silently swaps in slow
+# Hlms/barrier paths). The previous approach parsed gz-rendering::ogre2's
+# LOCATION, but that property is empty for imported/interface targets (it is
+# NOTFOUND on the ROS gz vendor + Gazebo Jetty), so it wrongly fell back to a
+# hardcoded /usr/include/OGRE-2.3. Instead, search for the OGRE-Next headers,
+# seeded by the ogre2 target's own interface include dirs. PATH_SUFFIXES exclude
+# a bare "OGRE" so we never pick up classic Ogre 1.x (/usr/include/OGRE,
+# rviz_ogre_vendor), whose ABI-incompatible headers would break the build.
+get_target_property(_ogre2_incs gz-rendering::ogre2 INTERFACE_INCLUDE_DIRECTORIES)
+find_path(OGRE_NEXT_INCLUDE_DIR
+  NAMES OgreRoot.h
+  HINTS ${_ogre2_incs}
+  PATHS
+    /opt/ros/$ENV{ROS_DISTRO}/opt/gz_ogre_next_vendor/include
+    /usr/include
+  PATH_SUFFIXES OGRE-Next OGRE-2.4 OGRE-2.3
+)
+if(NOT OGRE_NEXT_INCLUDE_DIR)
   message(FATAL_ERROR
-    "OgreRoot.h not found under ${OGRE_NEXT_INCLUDE_DIR} "
-    "(probed from gz-rendering::ogre2 = ${_gz_rend_ogre2_lib}). "
-    "Install libogre-next-dev or gz_ogre_next_vendor as appropriate.")
+    "OGRE-Next headers (OgreRoot.h) not found. Install libogre-next-dev or the "
+    "gz_ogre_next_vendor package.")
 endif()
 message(STATUS "Ogre Next headers: ${OGRE_NEXT_INCLUDE_DIR}")
 
