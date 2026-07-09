@@ -41,8 +41,9 @@ services:
       - DISPLAY=${DISPLAY}
       - HOME=${HOME}
       - QT_X11_NO_MITSHM=1
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
+      # This base runs on the Intel/AMD iGPU via the /dev/dri passthrough below.
+      # NVIDIA access + PRIME render offload live in compose.nvidia.yaml, which
+      # run_compose.bash layers in automatically when an NVIDIA GPU is detected.
 
     volumes:
       - ${HOME}:${HOME}                                        # rocker --home
@@ -51,18 +52,10 @@ services:
       # and GDM's $XAUTHORITY (/run/user/.../gdm/Xauthority) collides with the
       # home mount if bind-mounted onto ~/.Xauthority.
 
-    #devices:
+    devices:
       #  - /dev/input/js0:/dev/input/js0                          # joystick (delete if absent)
-      #- /dev/dri:/dev/dri                                      # direct rendering (Intel/AMD/GL)
+      - /dev/dri:/dev/dri                                      # direct rendering (Intel/AMD/GL)
 
-    # --- GPU (modern Compose + nvidia-container-toolkit). If your Docker still
-    #     uses the legacy runtime, comment this block and uncomment
-    #     `runtime: nvidia` below. ---
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    # runtime: nvidia
+    # --- GPU: the NVIDIA reservation + PRIME offload are in compose.nvidia.yaml,
+    #     layered in by run_compose.bash only when an NVIDIA GPU is present.
+    #     This base alone renders on the Intel/AMD iGPU via /dev/dri above. ---

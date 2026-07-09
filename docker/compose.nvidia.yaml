@@ -1,0 +1,29 @@
+# NVIDIA overlay for the VRX 4 dev container.
+#
+# run_compose.bash layers this on top of compose.yaml ONLY when it detects an
+# NVIDIA GPU on the host, so the base stays portable (Intel/AMD iGPU via
+# /dev/dri) and NVIDIA hosts render on the dGPU via PRIME offload.
+#
+# Manual use:  docker compose -f docker/compose.yaml -f docker/compose.nvidia.yaml run --rm dev
+services:
+  dev:
+    # nvidia-container-toolkit injects the driver libs + /dev/nvidia* when these
+    # are set and the reservation below requests the GPU.
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      # PRIME render offload: on a hybrid/Optimus host the X display is driven by
+      # the iGPU and NVIDIA is the offload GPU. /dev/dri (base) is the present path.
+      - __NV_PRIME_RENDER_OFFLOAD=1
+      - __GLX_VENDOR_LIBRARY_NAME=nvidia
+      - __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json
+
+    # Modern Compose + nvidia-container-toolkit. If your Docker still uses the
+    # legacy runtime, replace this block with `runtime: nvidia`.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

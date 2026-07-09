@@ -24,4 +24,16 @@ export MY_UID MY_GID
 MY_UID="$(id -u)"
 MY_GID="$(id -g)"
 
-exec docker compose -f "${SCRIPT_DIR}/compose.yaml" run --rm --remove-orphans dev "$@"
+# GPU selection: prefer the NVIDIA dGPU when one is present and usable on the
+# host, otherwise fall back to the Intel/AMD iGPU (base compose only). The
+# NVIDIA reservation refuses to start the container on a host without an NVIDIA
+# GPU, so only layer the overlay in when nvidia-smi actually reports one.
+compose_files=(-f "${SCRIPT_DIR}/compose.yaml")
+if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1; then
+  compose_files+=(-f "${SCRIPT_DIR}/compose.nvidia.yaml")
+  echo "GPU: NVIDIA detected -> dGPU via PRIME offload." >&2
+else
+  echo "GPU: no usable NVIDIA -> Intel/AMD iGPU via /dev/dri." >&2
+fi
+
+exec docker compose "${compose_files[@]}" run --rm --remove-orphans dev "$@"
