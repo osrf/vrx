@@ -348,9 +348,10 @@ it deliberately does **not** alias the component's `simulation`. From the code:
 > `mutex_`, so it is fully serialised."*
 
 It rebuilds the private engine when `data.generation` changes, and each render
-frame pulls the grid via `Field()` and uploads it. (Because the engine produces
-column-major Eigen data while the Ogre bridge wants row-major, `HeightMapTexture`
-reflows each grid once on upload.)
+frame pulls the grid via `Field()` and uploads it. The column-major
+`WaveField2D` grids flow to the Ogre bridge unchanged; the bridge's texel pack
+maps them so texture (u, v) = grid (x_u, y_v), preserving the physics
+orientation end to end.
 
 ### 5.2 Engine-agnostic, via per-engine GUI registrars
 

@@ -198,8 +198,7 @@ int waves_ogre2_heightmap_upload(
     const double *_dy, const double *_foam, int _rows, int _cols)
 {
   auto *hm = static_cast<HeightMap *>(_handle);
-  if (!hm || !hm->ready || !hm->texture || !hm->manager ||
-      !_eta || !_dx || !_dy)
+  if (!hm || !hm->ready || !hm->texture || !hm->manager || !_eta)
     return 0;
   const int N = static_cast<int>(hm->gridSize);
   if (_rows != N || _cols != N)
@@ -221,21 +220,28 @@ int waves_ogre2_heightmap_upload(
   const Ogre::TextureBox box =
       hm->staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
 
-  // Pack one RGBA32F texel per (row, col): (η, Dx, Dy, foam). `foam` carries
-  // the displacement-Jacobian folding metric when supplied, else 0.
+  // Pack one RGBA32F texel per (row, col): (η, Dx, Dy, foam). Inputs are the
+  // column-major WaveField2D grids (element (i, j) = world (x_i, y_j) at index
+  // i + j*N), so the contiguous slice [row*N, row*N + N) is the fixed-y_row
+  // line of the field, and texel (u=col, v=row) receives grid value
+  // (x_col, y_row) — the orientation the vertex shader's
+  // uv = worldXY / tileSize sampling expects. Null dx/dy/foam channels pack
+  // as zeros.
   for (int row = 0; row < N; ++row)
   {
     auto *dst = reinterpret_cast<float *>(box.at(0, row, 0));
     const double *seta = _eta + static_cast<std::size_t>(row) * N;
-    const double *sdx  = _dx  + static_cast<std::size_t>(row) * N;
-    const double *sdy  = _dy  + static_cast<std::size_t>(row) * N;
+    const double *sdx  = _dx
+        ? _dx + static_cast<std::size_t>(row) * N : nullptr;
+    const double *sdy  = _dy
+        ? _dy + static_cast<std::size_t>(row) * N : nullptr;
     const double *sfoam = _foam
         ? _foam + static_cast<std::size_t>(row) * N : nullptr;
     for (int col = 0; col < N; ++col)
     {
       dst[col * 4 + 0] = static_cast<float>(seta[col]);
-      dst[col * 4 + 1] = static_cast<float>(sdx[col]);
-      dst[col * 4 + 2] = static_cast<float>(sdy[col]);
+      dst[col * 4 + 1] = sdx ? static_cast<float>(sdx[col]) : 0.0f;
+      dst[col * 4 + 2] = sdy ? static_cast<float>(sdy[col]) : 0.0f;
       dst[col * 4 + 3] = sfoam ? static_cast<float>(sfoam[col]) : 0.0f;
     }
   }

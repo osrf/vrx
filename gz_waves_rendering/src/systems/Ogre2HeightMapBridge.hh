@@ -37,13 +37,15 @@ extern "C"
       std::size_t _grid_size,
       const char *_name);
 
-  /// \brief Upload three `rows × cols` row-major double matrices (height,
-  /// horizontal x-displacement, horizontal y-displacement) into the RGB
-  /// channels of the RGBA32F heightmap texture. `foam_grid`, when non-null,
-  /// fills the alpha channel with a per-cell folding / foam metric (the
-  /// displacement Jacobian's minimum eigenvalue; 1 = flat, < 1 → folding);
-  /// pass null to leave alpha zero. Each non-null pointer must reference at
-  /// least `rows * cols` doubles in row-major order. Returns 1 on success,
+  /// \brief Upload the height, horizontal x-displacement, and horizontal
+  /// y-displacement grids into the RGB channels of the RGBA32F heightmap
+  /// texture. Each grid is the column-major `WaveField2D` layout: element
+  /// (i, j) — world position (x_i, y_j) — at index `i + j*rows`. That layout
+  /// packs so texel (u, v) holds grid value (x_u, y_v), matching the water
+  /// shaders' `uv = worldXY / tileSize` sampling. `disp_*_grid` and
+  /// `foam_grid` may be null (channels pack as zeros); foam is a per-cell
+  /// folding metric (the displacement Jacobian's minimum eigenvalue; 1 =
+  /// flat, < 1 → folding) read as the alpha channel. Returns 1 on success,
   /// 0 on failure (e.g. texture not yet resident).
   int waves_ogre2_heightmap_upload(
       waves_heightmap_t _handle,

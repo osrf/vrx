@@ -499,11 +499,12 @@ void WaterVisual::Implementation::OnSceneUpdate()
     bool ok = false;
     if (f && f->n > 0 && f->dz)
     {
-      // Hand the raw WaveField2D grids straight to the heightmap, which
-      // transposes column- to row-major internally. Null displacement
-      // channels (dx/dy) upload as zeros; a null folding metric leaves the
-      // alpha channel at 0. The FS reads alpha as foam when useFoamMap=1 —
-      // the grid engines that compute folding fill it, the analytic ones don't.
+      // Hand the raw column-major WaveField2D grids straight to the
+      // heightmap/bridge (no reflow; the bridge's texel pack preserves the
+      // physics orientation). Null displacement channels (dx/dy) upload as
+      // zeros; a null folding metric leaves the alpha channel at 0. The FS
+      // reads alpha as foam when useFoamMap=1 — the grid engines that
+      // compute folding fill it, the analytic ones don't.
       ok = this->heightMap->Upload(f->dz, f->dx, f->dy, f->foam, f->n);
       if (ok && !this->firstUploadLogged)
       {

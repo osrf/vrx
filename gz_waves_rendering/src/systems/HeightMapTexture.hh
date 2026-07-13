@@ -54,9 +54,10 @@ namespace gz::sim::systems
 
     /// \brief Upload the supplied height + horizontal-displacement grids to
     /// the GPU. All buffers are column-major `_n × _n` — the `WaveField2D`
-    /// layout, element (i, j) at index `i + j*_n` — and are transposed to
-    /// row-major here, then packed into a single RGBA32F texture (η, Dx, Dy,
-    /// foam) consumed by the water vertex/fragment shaders.
+    /// layout, element (i, j) at index `i + j*_n` — and are handed to the
+    /// bridge unchanged, which packs them into a single RGBA32F texture
+    /// (η, Dx, Dy, foam) oriented so texel (u, v) = grid (x_u, y_v), as the
+    /// water vertex/fragment shaders sample it.
     /// \param[in] _eta   Surface elevation grid → R channel (required).
     /// \param[in] _dispX Horizontal x-displacement grid → G channel; null ⇒ 0.
     /// \param[in] _dispY Horizontal y-displacement grid → B channel; null ⇒ 0.
