@@ -62,6 +62,11 @@ extern "C"
 //////////////////////////////////////////////////
 waves_heightmap_t waves_ogre2_heightmap_create(
     void *_scene, void *_material, std::size_t _gridSize, const char *_name)
+// Function-try block: Ogre calls (createOrRetrieveTexture, setResolution,
+// getStagingTexture, ...) can throw, and an exception escaping this
+// extern "C" boundary is undefined behaviour. Failing the create (the caller
+// logs and runs without the water heightmap) beats aborting the GUI.
+try
 {
   // `_material` is the gz::rendering Material to bind the heightmap to. A null
   // material is tolerated (the bind below is skipped), but every live caller
@@ -191,11 +196,25 @@ waves_heightmap_t waves_ogre2_heightmap_create(
       1u, 1u, Ogre::PFG_RGBA32_FLOAT);
   return hm;
 }
+catch (const Ogre::Exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] create threw: " << e.getDescription()
+        << '\n';
+  return nullptr;
+}
+catch (const std::exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] create threw: " << e.what() << '\n';
+  return nullptr;
+}
 
 //////////////////////////////////////////////////
 int waves_ogre2_heightmap_upload(
     waves_heightmap_t _handle, const double *_eta, const double *_dx,
     const double *_dy, const double *_foam, int _rows, int _cols)
+// Function-try block: see waves_ogre2_heightmap_create. A failed upload
+// returns 0 and the frame simply keeps the previous heightmap contents.
+try
 {
   auto *hm = static_cast<HeightMap *>(_handle);
   if (!hm || !hm->ready || !hm->texture || !hm->manager || !_eta)
@@ -255,6 +274,17 @@ int waves_ogre2_heightmap_upload(
   if (!hm->texture->isDataReady())
     hm->texture->notifyDataIsReady();
   return 1;
+}
+catch (const Ogre::Exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] upload threw: " << e.getDescription()
+        << '\n';
+  return 0;
+}
+catch (const std::exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] upload threw: " << e.what() << '\n';
+  return 0;
 }
 
 //////////////////////////////////////////////////

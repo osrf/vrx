@@ -15,6 +15,7 @@
 #include <string>
 
 #include <gz/common/Console.hh>
+#include <gz/math/Helpers.hh>  // GZ_PI
 
 #include "gz/sim/waves/Wavefield.hh"
 
@@ -25,8 +26,6 @@ namespace gz::sim::waves
 
 namespace
 {
-constexpr double k2Pi    = 6.28318530717958647692;
-
 /// Forward-difference step [s] for the lazy particle-velocity computation.
 constexpr double kVelDt = 0.05;
 
@@ -255,7 +254,7 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   }
 
   // PMS relation: peak omega <-> wind speed at 19.5 m. period -> omegaP -> V19.
-  const double omegaP = k2Pi / p.period;
+  const double omegaP = 2.0 * GZ_PI / p.period;
   this->windSpeed = 0.879 * p.gravity / omegaP;
 
   const int N = static_cast<int>(this->gridSize);
@@ -518,10 +517,11 @@ double FFTWaveSimulation::Jacobian(double _x, double _y, double /*_t*/) const
 //////////////////////////////////////////////////
 const WaveField2D *FFTWaveSimulation::Field() const
 {
-  // Repopulate the view from the current grids each call: Update reallocates
-  // them, so cached data() pointers would dangle. Eigen is column-major,
-  // matching WaveField2D's documented (i + j*N) layout. The renderer
-  // finite-diffs η for normals; foam is the Encino MinE folding metric.
+  // Repopulate the view on each call: SetParameters reallocates the grids
+  // (Update refreshes them in place), so a view cached across a reconfigure
+  // would dangle. Eigen is column-major, matching WaveField2D's documented
+  // (i + j*N) layout. The renderer finite-diffs η for normals; foam is the
+  // Encino MinE folding metric.
   this->field.n    = this->gridSize;
   this->field.tile = this->tileSize;
   this->field.dz   = this->heightGrid.data();

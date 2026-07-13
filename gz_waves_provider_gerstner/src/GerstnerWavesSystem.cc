@@ -23,8 +23,9 @@ namespace gz::sim::systems
 /// sum-of-Gerstners trochoidal wave field). Loaded by SDF as
 /// `gz-sim-waves-gerstner-system`. The ECM/source plumbing lives in
 /// WavesSystemBase; this names the engine and owns the Gerstner parameter
-/// surface below. (It ignores the FFT-only tags: tile_size, grid_size, seed,
-/// choppiness, spectrum, spreading, dispersion.)
+/// surface below. (It ignores the FFT-only tags: tile_size, seed, choppiness,
+/// spectrum, spreading, dispersion, and the filter set. `<grid_size>` IS
+/// read: it sets the render-grid resolution, see the table.)
 ///
 /// ## SDF parameters
 ///
@@ -47,6 +48,7 @@ namespace gz::sim::systems
 /// | `<tau>` | double [s] | 2.0 | Startup-ramp time constant, (1 - exp(-t/tau)) |
 /// | `<gain>` | double | 1.0 | Amplitude multiplier |
 /// | `<sea_state>` | int [0-9] | -1 (off) | WMO sea-state code; when >= 0 it OVERRIDES `<period>`/`<gain>` — see "Sea state" below |
+/// | `<grid_size>` | uint | 128 | Render-grid resolution per axis (the N×N tile the visual samples) |
 ///
 /// ### Sea state vs. manual height
 ///

@@ -291,11 +291,12 @@ struct WavefieldData
   /// seen value to cheaply detect changes.
   std::uint64_t generation{0};
 
-  /// \brief Server-side wave Update rate [Hz]. Mirrored from
-  /// `<update_rate>` so the GUI visual can throttle its own per-frame
-  /// Update to match the server's cadence — keeping them in step lets
-  /// the user retune a single SDF knob without the visual silently
-  /// drifting ahead.
+  /// \brief Server-side wave Update() throttle [Hz], parsed from
+  /// `<update_rate>` and replicated with the recipe for introspection.
+  /// Note: the GUI visual deliberately does NOT throttle to this — it
+  /// advances its private engine every rendered frame, because a wave
+  /// animation below the render rate looks stroboscopically slow. The two
+  /// rates do different jobs and are tuned independently.
   double updateRate{30.0};
 };
 

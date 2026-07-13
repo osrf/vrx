@@ -106,7 +106,8 @@
              wind speed; <gain> is the amplitude multiplier (9.5 = dramatic and
              intentionally unphysical, ~1.0 = physical Hs); <tile_size> and
              <grid_size> are the periodic domain and FFT resolution; <choppiness>
-             sharpens crests; <direction> is read only by the Phillips fallback. -->
+             sharpens crests; <direction> is parsed but not yet applied
+             (EncinoWaves assumes wind along +X). -->
         <!--
         <period>3.2</period>
         <gain>9.5</gain>
@@ -122,8 +123,10 @@
 
     <!-- Gerstner alternative (gz-sim-waves-gerstner-system): analytic sum of
          component waves. To use it instead of FFT, comment the <plugin> above
-         and uncomment this one. <sea_state> drives the height; the rest shape
-         the analytic spectrum (see the plugin docs). -->
+         and uncomment this one. <sea_state> drives the height; every other
+         tag below is the engine default, kept explicit for discoverability.
+         Extras like <direction> or <steepness> can be added per the plugin
+         docs (they are NOT defaults, so adding them changes the sea). -->
     <!--
     <plugin filename="gz-sim-waves-gerstner-system"
             name="gz::sim::systems::GerstnerWaves">
@@ -132,10 +135,8 @@
         <sea_state>5</sea_state>
         <model>PMS</model>
         <number>3</number>
-        <direction>2.356</direction>
         <angle>0.4</angle>
         <scale>1.1</scale>
-        <steepness>0.5</steepness>
         <tau>2.0</tau>
         <grid_size>128</grid_size>
       </wave>

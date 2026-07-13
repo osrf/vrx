@@ -24,13 +24,13 @@
 
 namespace gz::sim::systems
 {
-  /// \brief A CPU→GPU heightmap texture used by the FFT visual path.
+  /// \brief A CPU→GPU heightmap texture used by the water visual path.
   ///
-  /// Owns an Ogre Next `TextureGpu` of single-channel 32-bit float pixels
-  /// (`PFG_R32_FLOAT`), `gridSize × gridSize`. Each frame, the CPU-side
-  /// FFT simulation writes the latest height field into a staging texture,
-  /// which is then asynchronously uploaded to the GPU texture and bound to
-  /// the material's "heightMap" sampler.
+  /// Owns an Ogre Next `TextureGpu` of four-channel 32-bit float pixels
+  /// (`PFG_RGBA32_FLOAT`), `gridSize × gridSize`, packing (η, Dx, Dy, foam)
+  /// per texel. Each frame, the CPU-side wave engine's grids are written
+  /// into a staging texture, asynchronously uploaded to the GPU texture, and
+  /// bound to the material's "heightMap" sampler.
   ///
   /// All Ogre Next interaction is encapsulated here so the rest of the
   /// plugin (`WaterVisual`) talks in terms of the raw `WaveField2D` grids.

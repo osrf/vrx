@@ -33,6 +33,11 @@ struct WaveParameters;
 /// Queries outside the tile are wrapped via `fmod`. Each call to `Update`
 /// regenerates the grid for that time; per-point queries (`Elevation`,
 /// `ParticleVelocity`, ...) bilinear-sample the stored grid.
+///
+/// \note Sim time is handed to EncinoWaves in single precision (its API is
+/// the float instantiation), so on multi-hour runs the float grid coarsens
+/// and gradually degrades the wave animation and the particle-velocity
+/// finite difference.
 class FFTWaveSimulation final : public IWaveField
 {
   /// \brief Default-construct an unconfigured field. Call `SetParameters`
@@ -40,9 +45,10 @@ class FFTWaveSimulation final : public IWaveField
   public: FFTWaveSimulation();
 
   /// \brief Construct from spectrum / wind parameters.
-  /// \param[in] _params Wave parameters; uses `direction` as the wind heading
-  ///   and derives wind speed from `period` (deep-water PMS relation:
-  ///   V19 ≈ 0.879·g/omegaP). `gain` scales spectrum amplitudes uniformly.
+  /// \param[in] _params Wave parameters; derives wind speed from `period`
+  ///   (deep-water PMS relation: V19 ≈ 0.879·g/omegaP). `gain` scales
+  ///   spectrum amplitudes uniformly. `direction` is parsed but not yet
+  ///   applied (EncinoWaves assumes wind along +X).
   /// \param[in] _tileSize Physical tile extent in metres; the wave field is
   ///   periodic with this period along both x and y.
   /// \param[in] _gridSize Resolution per axis (must be a power of two for

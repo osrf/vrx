@@ -711,6 +711,9 @@ ros2 launch vrx_bringup simulation.launch.xml
 
 - `<direction>` is parsed by the FFT system but not yet applied (EncinoWaves
   assumes wind along +X).
+- The FFT engine hands sim time to EncinoWaves in single precision (float
+  API), so on multi-hour runs the float grid coarsens and gradually degrades
+  the wave animation and the particle-velocity finite difference.
 - Foam/whitecaps are effectively **FFT-only**. The renderer derives foam from
   the engine's folding (Jacobian) metric; the analytic Gerstner engine's
   Jacobian barely leaves 1.0, so it carries no usable folding signal and the
