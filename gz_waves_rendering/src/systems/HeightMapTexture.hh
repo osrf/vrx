@@ -81,6 +81,11 @@ namespace gz::sim::systems
     /// \return Whether the texture is ready.
     public: bool Ready() const { return this->ready; }
 
+    /// \brief Resolution per axis this texture was created with. Upload()
+    /// only accepts grids of exactly this size, so a consumer whose grid
+    /// resolution changed must create a new instance.
+    public: std::size_t GridSize() const { return this->gridSize; }
+
     /// \brief Implementation detail kept out of the header to avoid leaking
     /// Ogre Next types into every translation unit that includes us.
     private: class Impl;
