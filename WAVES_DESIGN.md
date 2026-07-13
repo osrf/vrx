@@ -421,9 +421,12 @@ as little of the generation as it likes.
   over `tileSize`; `Elevation` bilinearly samples the grid; `Field()` exposes
   height + x/y displacement + a folding (foam) metric.
 - **Particle velocity** is computed by **time finite-difference**: EncinoWaves
-  exposes no analytic velocity field, so each `Update` also propagates a scratch
-  state a small `dt` ahead and differences the displacement grids
-  (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t), which `ParticleVelocity` then bilinearly samples.
+  exposes no analytic velocity field, so a scratch state is propagated a small
+  `dt` ahead and the displacement grids differenced (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t).
+  This happens **lazily**, on the first `ParticleVelocity` call after an
+  `Update` — the extra propagation roughly doubles the per-tick cost, so
+  consumers that never query velocity (the renderer reads `Field()` only)
+  never pay it.
 - **Selectable spectral models** (SDF string → Encino enum): spectrum
   `pms`/`pm`, `jonswap`, `tma`; spreading `poscos2`/`poscossqr`, `mitsuyasu`,
   `hasselmann`, `donelanbanner`/`donelan`; dispersion `deep`,

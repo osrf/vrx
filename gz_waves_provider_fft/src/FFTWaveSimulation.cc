@@ -27,6 +27,14 @@ namespace
 {
 constexpr double k2Pi    = 6.28318530717958647692;
 
+/// Forward-difference step [s] for the lazy particle-velocity computation.
+constexpr double kVelDt = 0.05;
+
+/// Row-major float matrix view of EncinoWaves' spatial buffers (Encino stores
+/// row-major float; our grids are column-major double).
+using RowMatF = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic,
+                              Eigen::RowMajor>;
+
 //////////////////////////////////////////////////
 /// Returns the integer log2 of n if n is a positive power of two; -1 otherwise.
 int Log2Pow2(std::size_t _n)
@@ -196,7 +204,8 @@ struct FFTWaveSimulation::EncinoState
   std::unique_ptr<EncinoWaves::InitialStatef> initial;
   std::unique_ptr<EncinoWaves::Propagationf>   propagation;
   std::unique_ptr<EncinoWaves::PropagatedStatef> state;
-  /// Scratch state propagated at t+dt to finite-difference particle velocity.
+  /// Scratch state propagated at t+dt to finite-difference particle velocity;
+  /// filled lazily by ParticleVelocity(), not by Update().
   std::unique_ptr<EncinoWaves::PropagatedStatef> scratch;
 };
 
@@ -230,6 +239,8 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   this->gain       = p.gain;
   this->tau        = p.tau;
   this->choppiness = p.choppiness;
+  // Never serve velocity grids computed under the previous recipe.
+  this->velTime    = -1.0;
   const std::uint32_t seed = p.seed;
 
   // EncinoWaves requires a power-of-two grid; round up if the SDF asks for
@@ -288,8 +299,6 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
   // Hs = 0.21 * V19.5^2 / g, i.e. sigma = Hs/4. The selected spectrum still
   // sets the spectral *shape*; this only fixes the overall energy.
   {
-    using RowMatF = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic,
-                                  Eigen::RowMajor>;
     this->encino->propagation->propagate(
         this->encino->params, *this->encino->initial,
         *this->encino->state, 10.0f);
@@ -353,11 +362,8 @@ void FFTWaveSimulation::Update(double _simTime)
   const double scale =
       StartupRamp(_simTime, this->tau) * this->encinoScale * this->gain;
 
-  // Encino stores its spatial fields row-major in float; our grids are
-  // column-major in double. Map+cast assignment lets Eigen vectorize the
-  // conversion + layout swap; the scale folds into the same expression.
-  using RowMatF = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic,
-                                Eigen::RowMajor>;
+  // Map+cast assignment lets Eigen vectorize the float→double conversion and
+  // row→column layout swap; the scale folds into the same expression.
   this->heightGrid = Eigen::Map<const RowMatF>(
       this->encino->state->Height.cdata(), N, N).cast<double>() * scale;
   // WaveField2D carries the FINAL horizontal displacement, so the Tessendorf
@@ -378,34 +384,11 @@ void FFTWaveSimulation::Update(double _simTime)
       (Eigen::Map<const RowMatF>(this->encino->state->MinE.cdata(), N, N)
           .cast<double>().array() + 1.0)).matrix();
 
-  // Particle velocity = Eulerian time derivative of the displacement field
-  // (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t). EncinoWaves exposes no velocity field and no
-  // public spectral coefficients, so finite-difference a scratch propagation a
-  // small step ahead. The same amplitude `scale` is applied to both samples, so
-  // it factors out as the wave motion's velocity (the startup ramp's own
-  // d/dt is intentionally excluded — it's a transient, not water motion).
-  constexpr double kVelDt = 0.05;  // [s] forward-difference step
-  this->encino->propagation->propagate(
-      this->encino->params,
-      *this->encino->initial,
-      *this->encino->scratch,
-      static_cast<float>(_simTime + kVelDt));
-  const double velK = scale / kVelDt;
-  // Horizontal velocity uses chopScale so it tracks the surface's actual
-  // (choppiness-scaled) displacement motion.
-  const double velKxy = chopScale / kVelDt;
-  this->velZGrid = velK *
-      (Eigen::Map<const RowMatF>(this->encino->scratch->Height.cdata(), N, N)
-         - Eigen::Map<const RowMatF>(this->encino->state->Height.cdata(), N, N))
-      .cast<double>();
-  this->velXGrid = velKxy *
-      (Eigen::Map<const RowMatF>(this->encino->scratch->Dx.cdata(), N, N)
-         - Eigen::Map<const RowMatF>(this->encino->state->Dx.cdata(), N, N))
-      .cast<double>();
-  this->velYGrid = velKxy *
-      (Eigen::Map<const RowMatF>(this->encino->scratch->Dy.cdata(), N, N)
-         - Eigen::Map<const RowMatF>(this->encino->state->Dy.cdata(), N, N))
-      .cast<double>();
+  // The particle-velocity grids are NOT refreshed here: their finite
+  // difference needs a second full propagation at t+dt, which would double
+  // the per-tick cost for consumers that never query velocity (the renderer
+  // reads Field() only). ParticleVelocity() fills them lazily, keyed on
+  // lastUpdateT.
 }
 
 //////////////////////////////////////////////////
@@ -455,8 +438,49 @@ double FFTWaveSimulation::Elevation(double _x, double _y, double /*_t*/) const
 gz::math::Vector3d FFTWaveSimulation::ParticleVelocity(
   double _x, double _y, double /*_t*/) const
 {
-  // Bilinear-sample the velocity grids that Update() finite-differenced from the
-  // displacement field. Caller is expected to have called Update(t) ≤ this tick.
+  // Particle velocity = Eulerian time derivative of the displacement field
+  // (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t). EncinoWaves exposes no velocity field and no
+  // public spectral coefficients, so finite-difference a scratch propagation a
+  // small step ahead — done LAZILY on the first velocity query after an
+  // Update, because the extra propagation roughly doubles the engine's
+  // per-tick cost and most consumers never ask for velocity. The mutable fill
+  // relies on the same external serialisation as Update() (one ECM thread on
+  // the server; WaterVisual's mutex in the GUI). The same amplitude scale is
+  // applied to both samples, so it factors out as the wave motion's velocity
+  // (the startup ramp's own d/dt is intentionally excluded — it's a
+  // transient, not water motion).
+  if (this->encino && this->encino->propagation &&
+      this->velTime != this->lastUpdateT)
+  {
+    const int N = static_cast<int>(this->gridSize);
+    this->encino->propagation->propagate(
+        this->encino->params,
+        *this->encino->initial,
+        *this->encino->scratch,
+        static_cast<float>(this->lastUpdateT + kVelDt));
+    const double scale = StartupRamp(this->lastUpdateT, this->tau) *
+                         this->encinoScale * this->gain;
+    const double velK = scale / kVelDt;
+    // Horizontal velocity uses the choppiness-scaled displacement so it
+    // tracks the surface's actual motion.
+    const double velKxy = velK * this->choppiness;
+    this->velZGrid = velK *
+        (Eigen::Map<const RowMatF>(this->encino->scratch->Height.cdata(), N, N)
+           - Eigen::Map<const RowMatF>(
+                 this->encino->state->Height.cdata(), N, N)).cast<double>();
+    this->velXGrid = velKxy *
+        (Eigen::Map<const RowMatF>(this->encino->scratch->Dx.cdata(), N, N)
+           - Eigen::Map<const RowMatF>(
+                 this->encino->state->Dx.cdata(), N, N)).cast<double>();
+    this->velYGrid = velKxy *
+        (Eigen::Map<const RowMatF>(this->encino->scratch->Dy.cdata(), N, N)
+           - Eigen::Map<const RowMatF>(
+                 this->encino->state->Dy.cdata(), N, N)).cast<double>();
+    this->velTime = this->lastUpdateT;
+  }
+
+  // Bilinear-sample the cached velocity grids. Caller is expected to have
+  // called Update(t) ≤ this tick.
   return gz::math::Vector3d(
       this->BilinearSample(this->velXGrid, _x, _y),
       this->BilinearSample(this->velYGrid, _x, _y),

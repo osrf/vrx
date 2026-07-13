@@ -145,14 +145,21 @@ class FFTWaveSimulation final : public IWaveField
   private: Eigen::MatrixXd minEGrid;
 
   /// \brief Water-particle velocity grids [m/s] — the Eulerian time derivative
-  /// of the displacement field (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t), computed each Update by
-  /// finite-differencing a scratch propagation at t+dt. Sampled by
-  /// ParticleVelocity().
-  private: Eigen::MatrixXd velXGrid;
+  /// of the displacement field (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t). Filled lazily by the
+  /// first ParticleVelocity() call after an Update (finite difference of a
+  /// scratch propagation at t+dt), so consumers that never query velocity —
+  /// notably the renderer, which reads Field() only — skip the second
+  /// propagation entirely. Mutable: the lazy fill happens inside the const
+  /// query and relies on the same external serialisation as Update().
+  private: mutable Eigen::MatrixXd velXGrid;
   /// \brief Water-particle velocity grid, y component [m/s].
-  private: Eigen::MatrixXd velYGrid;
+  private: mutable Eigen::MatrixXd velYGrid;
   /// \brief Water-particle velocity grid, z (vertical) component [m/s].
-  private: Eigen::MatrixXd velZGrid;
+  private: mutable Eigen::MatrixXd velZGrid;
+  /// \brief Sim time the velocity grids were computed for. Velocity is stale
+  /// (recomputed on the next query) whenever this differs from lastUpdateT;
+  /// SetParameters resets it so a reconfigure never serves old-recipe grids.
+  private: mutable double velTime{-1.0};
 
   /// \brief Column-major view into the grids above, returned by Field() as the
   /// engine-agnostic rendering contract. Repopulated on each call from the
