@@ -174,8 +174,8 @@ struct WaveField2D {
   std::size_t   n{0};        // grid resolution N (N×N)
   double        tile{0.0};   // tile extent [m]; cell spacing = tile / N
   const double *dz{nullptr}; // vertical displacement η [m]  (required)
-  const double *dx{nullptr}; // horizontal chop x [m]        (null ⇒ 0)
-  const double *dy{nullptr}; // horizontal chop y [m]        (null ⇒ 0)
+  const double *dx{nullptr}; // FINAL horizontal displacement x [m] (null ⇒ 0)
+  const double *dy{nullptr}; // FINAL horizontal displacement y [m] (null ⇒ 0)
   const double *foam{nullptr}; // folding metric: 1 flat, <1 folding (null ⇒ none)
 };
 ```

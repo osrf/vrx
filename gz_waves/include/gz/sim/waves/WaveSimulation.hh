@@ -59,10 +59,15 @@ struct WaveField2D
   /// \brief Vertical displacement η [m] (required).
   const double *dz{nullptr};
 
-  /// \brief Horizontal chop x [m]; null ⇒ treat as 0.
+  /// \brief Final horizontal displacement x [m]; null ⇒ treat as 0. "Final"
+  /// means the engine applies any choppiness/steepness scaling itself —
+  /// consumers (the renderer) add dx/dy to the surface as-is. (Engines used
+  /// to disagree on this: Gerstner baked the signed chop while the FFT
+  /// engine relied on a shader-side chopFactor, so the shared shader
+  /// inverted Gerstner's chop.)
   const double *dx{nullptr};
 
-  /// \brief Horizontal chop y [m]; null ⇒ treat as 0.
+  /// \brief Final horizontal displacement y [m]; null ⇒ treat as 0. See dx.
   const double *dy{nullptr};
 
   /// \brief Folding metric: 1 = flat, < 1 → folding (whitecaps); null ⇒ the

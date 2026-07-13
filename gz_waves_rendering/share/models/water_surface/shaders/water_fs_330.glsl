@@ -40,9 +40,6 @@ uniform float hdrMultiplier;
 // than a sharp mirror — closer to how real water reflects light.
 uniform float roughness;
 
-// Tessendorf chop factor (negative = bunch particles toward crests).
-// Used by the foam mask's Jacobian computation.
-uniform float chopFactor;
 // FFT tile extent in metres — needed to convert finite-difference
 // texel deltas back to world-space derivatives.
 uniform float tileSize;
@@ -67,9 +64,10 @@ in block
 out vec4 fragColor;
 
 // Tessendorf foam mask. The 2D Jacobian of the chop transform
-//   (x, y) → (x + c·Dx, y + c·Dy)
-// drops below 1 in compression zones (where chop is bunching the
-// surface). Sustained low J is where foam forms in real ocean —
+//   (x, y) → (x + Dx, y + Dy)
+// (Dx/Dy already carry the engine-applied choppiness) drops below 1
+// in compression zones (where chop is bunching the surface).
+// Sustained low J is where foam forms in real ocean —
 // we ramp foam in below `foamThreshold` and saturate at full white
 // once the Jacobian crosses into negative (folding).
 float ComputeFoamMask()
@@ -108,8 +106,7 @@ float ComputeFoamMask()
   float dDxdy = (py.g - ny.g) * 0.5 / dStep;
   float dDydx = (px.b - nx.b) * 0.5 / dStep;
 
-  float J = (1.0 + chopFactor * dDxdx) * (1.0 + chopFactor * dDydy)
-          - (chopFactor * chopFactor) * dDxdy * dDydx;
+  float J = (1.0 + dDxdx) * (1.0 + dDydy) - dDxdy * dDydx;
 
   // Symmetric smoothstep window centred around J = 0 widens the
   // transition so foam edges don't cut hard.

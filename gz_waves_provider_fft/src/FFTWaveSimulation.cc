@@ -225,10 +225,11 @@ void FFTWaveSimulation::SetParameters(const WaveParameters &_params)
 {
   // Resolve <sea_state> (if set) into period/gain before configuring.
   const WaveParameters p = WithSeaState(_params);
-  this->tileSize = p.tileSize;
-  this->gridSize = p.gridSize;
-  this->gain     = p.gain;
-  this->tau      = p.tau;
+  this->tileSize   = p.tileSize;
+  this->gridSize   = p.gridSize;
+  this->gain       = p.gain;
+  this->tau        = p.tau;
+  this->choppiness = p.choppiness;
   const std::uint32_t seed = p.seed;
 
   // EncinoWaves requires a power-of-two grid; round up if the SDF asks for
@@ -359,10 +360,14 @@ void FFTWaveSimulation::Update(double _simTime)
                                 Eigen::RowMajor>;
   this->heightGrid = Eigen::Map<const RowMatF>(
       this->encino->state->Height.cdata(), N, N).cast<double>() * scale;
+  // WaveField2D carries the FINAL horizontal displacement, so the Tessendorf
+  // choppiness multiplier folds in here (the shader applies dx/dy as-is; a
+  // shader-side chopFactor would invert the Gerstner engine's baked chop).
+  const double chopScale = scale * this->choppiness;
   this->dispXGrid = Eigen::Map<const RowMatF>(
-      this->encino->state->Dx.cdata(), N, N).cast<double>() * scale;
+      this->encino->state->Dx.cdata(), N, N).cast<double>() * chopScale;
   this->dispYGrid = Eigen::Map<const RowMatF>(
-      this->encino->state->Dy.cdata(), N, N).cast<double>() * scale;
+      this->encino->state->Dy.cdata(), N, N).cast<double>() * chopScale;
 
   // Foam: Encino computes MinE = -(min eigenvalue of the displacement
   // Jacobian) at its internal amplitude. At our calibrated amplitude the
@@ -386,15 +391,18 @@ void FFTWaveSimulation::Update(double _simTime)
       *this->encino->scratch,
       static_cast<float>(_simTime + kVelDt));
   const double velK = scale / kVelDt;
+  // Horizontal velocity uses chopScale so it tracks the surface's actual
+  // (choppiness-scaled) displacement motion.
+  const double velKxy = chopScale / kVelDt;
   this->velZGrid = velK *
       (Eigen::Map<const RowMatF>(this->encino->scratch->Height.cdata(), N, N)
          - Eigen::Map<const RowMatF>(this->encino->state->Height.cdata(), N, N))
       .cast<double>();
-  this->velXGrid = velK *
+  this->velXGrid = velKxy *
       (Eigen::Map<const RowMatF>(this->encino->scratch->Dx.cdata(), N, N)
          - Eigen::Map<const RowMatF>(this->encino->state->Dx.cdata(), N, N))
       .cast<double>();
-  this->velYGrid = velK *
+  this->velYGrid = velKxy *
       (Eigen::Map<const RowMatF>(this->encino->scratch->Dy.cdata(), N, N)
          - Eigen::Map<const RowMatF>(this->encino->state->Dy.cdata(), N, N))
       .cast<double>();

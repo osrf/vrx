@@ -149,7 +149,6 @@ class WaterVisual::Implementation
   public: float cachedTau{2.0f};          ///< guarded by mutex_
   public: float currentSimTime{0.0f};     ///< guarded by mutex_
   public: float cachedTileSize{200.0f};   ///< grid cache, guarded by mutex_
-  public: float cachedChopFactor{-1.0f};  ///< grid cache, guarded by mutex_
   public: int tilesRadius{2};             ///< (2·r+1)² tiles; 0 disables
   public: int cachedGridSize{128};        ///< grid cache, guarded by mutex_
   // asv_wave_sim's exact default colours.
@@ -392,10 +391,10 @@ void WaterVisual::Implementation::UploadUniforms()
     (*vsParams)["world_matrix"] = 1;
 
     // Grid shader: heightmap texture (bound separately by HeightMapTexture)
-    // plus the geometry of the periodic tile and the choppiness factor.
+    // plus the geometry of the periodic tile. Dx/Dy in the heightmap are the
+    // final displacement (WaveField2D contract) — no chop factor here.
     (*vsParams)["tileSize"]   = this->cachedTileSize;
     (*vsParams)["gridSize"]   = this->cachedGridSize;
-    (*vsParams)["chopFactor"] = this->cachedChopFactor;
   }
 
   // Fragment shader: colours + lighting params + textures.
@@ -406,7 +405,6 @@ void WaterVisual::Implementation::UploadUniforms()
   // channel, so the FS reads it directly (one sample) instead of
   // finite-differencing the displacement. foamThreshold is the smoothstep
   // half-width around J = 0 (Encino's MinE; the Phillips path leaves it ≈1).
-  (*fsParams)["chopFactor"]    = this->cachedChopFactor;
   (*fsParams)["tileSize"]      = this->cachedTileSize;
   // Foam is engine-specific. The analytic Gerstner engine's Jacobian
   // determinant barely leaves 1.0, so it carries no usable folding signal and
@@ -739,8 +737,6 @@ void WaterVisual::PreUpdate(
     this->dataPtr->cachedGridSize = static_cast<int>(f->n);
   }
   this->dataPtr->cachedTau = static_cast<float>(data->params.tau);
-  this->dataPtr->cachedChopFactor =
-      static_cast<float>(data->params.choppiness);
   this->dataPtr->haveWavefield = true;
   this->dataPtr->cachedGeneration = data->generation;
 }
