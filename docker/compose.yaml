@@ -35,7 +35,10 @@ services:
     network_mode: host
     ipc: host
 
-    working_dir: ${HOME}/WorkingCopies/oceansim/vrx_ws
+    # Workspace root. run_compose.bash derives VRX_WS from the compose file's
+    # location; the default (current directory) covers a bare `docker compose ...`
+    # invocation, dropping you in wherever you're standing.
+    working_dir: ${VRX_WS:-${PWD}}
 
     environment:
       - DISPLAY=${DISPLAY}

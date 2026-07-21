@@ -13,6 +13,12 @@ set -euo pipefail
 # Resolve compose.yaml next to this script, so it works from any directory.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Workspace root = three levels up from docker/ (…/<ws>/src/vrx/docker).
+# Derived from the script's own location so the repo can live anywhere; the
+# compose file falls back to a default if this isn't exported.
+export VRX_WS
+VRX_WS="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+
 # Let the container's (host-UID) process reach the host X server. Harmless to
 # re-run; warn but don't abort if there's no X server (e.g. headless).
 xhost +SI:localuser:"$(id -un)" >/dev/null 2>&1 \
