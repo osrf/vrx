@@ -51,9 +51,10 @@ services:
     volumes:
       - ${HOME}:${HOME}                                        # rocker --home
       - /tmp/.X11-unix:/tmp/.X11-unix:rw                       # X11 socket
-      # No .Xauthority mount: `xhost +local:root` grants local access without it,
-      # and GDM's $XAUTHORITY (/run/user/.../gdm/Xauthority) collides with the
-      # home mount if bind-mounted onto ~/.Xauthority.
+      # No .Xauthority mount: run_compose.bash's `xhost +SI:localuser:$(id -un)`
+      # grants local access without it, and GDM's $XAUTHORITY
+      # (/run/user/.../gdm/Xauthority) collides with the home mount if
+      # bind-mounted onto ~/.Xauthority.
 
     devices:
       #  - /dev/input/js0:/dev/input/js0                          # joystick (delete if absent)

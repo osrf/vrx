@@ -20,6 +20,10 @@
 # Builds a Docker image.
 # Usage: build.bash <dir containing Dockerfile> [tag]
 #   tag defaults to the resolved directory name, so passing '.' works too.
+#
+# For the VRX dev container, build it as vrx_dev:lyrical so it matches the
+# image referenced in compose.yaml:
+#   ./build.bash <dir containing Dockerfile> lyrical
 image_name=vrx_dev
 
 if [ $# -lt 1 ]
@@ -42,4 +46,4 @@ image_plus_tag=$image_name:$(export LC_ALL=C; date +%Y_%m_%d_%H%M)
 docker build --rm -t "$image_plus_tag" -f "${context}/Dockerfile" "${context}" && \
 docker tag "$image_plus_tag" "$image_name:$distro" && \
 echo "Built $image_plus_tag and tagged as $image_name:$distro" && \
-echo "To run:  ./run.bash $image_name:$distro"
+echo "To run:  ./docker/run_compose.bash"
