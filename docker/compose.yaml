@@ -7,7 +7,7 @@
 #
 # Manually:
 #   xhost +SI:localuser:$(id -un)    # let the container reach your X server (once per login)
-#   cd ~/WorkingCopies/oceansim/vrx_ws/src/vrx
+#   cd <your vrx_ws>/src/vrx
 #   MY_UID=$(id -u) MY_GID=$(id -g) docker compose -f docker/compose.yaml run --rm --remove-orphans dev
 #   ( `UID` is a bash readonly var, so we pass MY_UID/MY_GID instead. )
 #
