@@ -44,6 +44,11 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # ---- Standard ROS packages + build tooling VRX uses -----------------------
+# Source of truth for VRX's runtime dependencies is the package.xml files +
+# rosdep; this hand-maintained list only PRIMES the image layer for cache reuse
+# (the source tree isn't in the image, so `rosdep install --from-paths src` runs
+# later against the mounted workspace and is what actually resolves deps). Keep
+# this roughly in sync with the rosdep keys, or regenerate it from package.xml.
 # NOTE: nav2 (navigation2, nav2-bringup, nav2-minimal-*) is intentionally
 # omitted — it is often not yet released early in a new distro's life. Add
 # ros-${ROS_DISTRO}-navigation2 etc. once available on Lyrical.
