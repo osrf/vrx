@@ -45,16 +45,22 @@ export MY_UID MY_GID
 MY_UID="$(id -u)"
 MY_GID="$(id -g)"
 
-# GPU selection: prefer the NVIDIA dGPU when one is present and usable on the
-# host, otherwise fall back to the Intel/AMD iGPU (base compose only). The
-# NVIDIA reservation refuses to start the container on a host without an NVIDIA
-# GPU, so only layer the overlay in when nvidia-smi actually reports one.
+# GPU selection: prefer the NVIDIA dGPU only when one is present AND Docker can
+# actually use it, otherwise fall back to the Intel/AMD iGPU (base compose
+# only). The NVIDIA overlay reserves an nvidia GPU device, so `docker compose`
+# refuses to start unless BOTH the host driver (nvidia-smi) and Docker's nvidia
+# runtime (from nvidia-container-toolkit) are present. Checking only the driver
+# would let a host without the toolkit fail instead of falling back.
+have_nvidia_runtime() {
+  docker info --format '{{println .Runtimes}}' 2>/dev/null | grep -qw nvidia
+}
 compose_files=(-f "${SCRIPT_DIR}/compose.yaml")
-if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1; then
+if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1 \
+   && have_nvidia_runtime; then
   compose_files+=(-f "${SCRIPT_DIR}/compose.nvidia.yaml")
   echo "GPU: NVIDIA detected -> dGPU via PRIME offload." >&2
 else
-  echo "GPU: no usable NVIDIA -> Intel/AMD iGPU via /dev/dri." >&2
+  echo "GPU: no usable NVIDIA (driver or container toolkit) -> Intel/AMD iGPU via /dev/dri." >&2
 fi
 
 exec docker compose "${compose_files[@]}" run --rm --remove-orphans dev "$@"
