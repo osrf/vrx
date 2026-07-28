@@ -71,17 +71,13 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # ---- Dev tools + NVIDIA GL (rocker --nvidia) ------------------------------
+# 64-bit GL/X11 runtime libs only; VRX (Gazebo Jetty) is 64-bit, so no i386.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       atop expect gdb gnutls-bin iputils-ping libbluetooth-dev libcwiid-dev \
       net-tools python3-dbg python3-pip python3-venv vim wget xvfb \
- && dpkg --add-architecture i386 \
- && apt-get update \
- && apt-get install -y --no-install-recommends \
-      libxau6 libxau6:i386 libxdmcp6 libxdmcp6:i386 libxcb1 libxcb1:i386 \
-      libxext6 libxext6:i386 libx11-6 libx11-6:i386 libglvnd0 libglvnd0:i386 \
-      libgl1 libgl1:i386 libglx0 libglx0:i386 libegl1 libegl1:i386 \
-      libgles2 libgles2:i386 \
+      libxau6 libxdmcp6 libxcb1 libxext6 libx11-6 libglvnd0 \
+      libgl1 libglx0 libegl1 libgles2 \
  && rm -rf /var/lib/apt/lists/*
 
 # ---- Source ROS for interactive + non-interactive shells ------------------
