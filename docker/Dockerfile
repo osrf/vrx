@@ -81,6 +81,11 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # ---- Source ROS for interactive + non-interactive shells ------------------
+# BASH_ENV below makes every non-interactive `bash -c` source the ROS env too,
+# so `run_compose.bash <cmd>` and `docker exec ... bash -c` get ros2 on PATH.
+# Caveat: this sources setup.bash even under scripts that run `set -u`, which
+# can trip on unbound ROS vars — guard such a script with a localized `set +u`
+# around its ROS calls if needed.
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /etc/profile.d/ros.sh \
  && chmod +x /etc/profile.d/ros.sh \
  && echo "source /etc/profile.d/ros.sh" >> /etc/bash.bashrc
