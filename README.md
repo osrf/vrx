@@ -1,3 +1,16 @@
+
+# bsb/blueboat_demo throw away branch
+
+This branch is just for me testing blueboat models
+
+```
+ rocker --pull --devices /dev/input/js0 --x11 --nvidia --user --home ghcr.io/osrf/vrx-devel:latest /bin/bash
+
+ 1716  colcon build --merge-install
+ 1717  . install/setup.bash
+ 1718  ros2 launch vrx_gz competition.launch.py world:=nbpark
+ ```
+
 # Virtual RobotX (VRX)
 This repository is the home to the source code and software documentation for the VRX simulation environment, which supports simulation of unmanned surface vehicles in marine environments.
 * Designed in coordination with RobotX organizers, this project provides arenas and tasks similar to those featured in past and future RobotX competitions, as well as a description of the WAM-V platform.
