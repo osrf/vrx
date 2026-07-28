@@ -4,8 +4,9 @@
 //
 // Tessendorf ocean vertex shader. Reads a single RGBA32F heightmap
 // where each texel packs (η, Dx, Dy, _) and uses it to displace the
-// vertex both vertically (η) and laterally (Dx, Dy scaled by
-// chopFactor).
+// vertex both vertically (η) and laterally (Dx, Dy — the FINAL
+// displacement per the WaveField2D contract; any choppiness scaling
+// is applied engine-side).
 //
 // Per-vertex surface normal is computed via central differences on
 // the same heightmap — sample four world-space-neighbour cells, take
@@ -35,7 +36,6 @@ uniform vec2 bumpSpeed;
 
 uniform float tileSize;
 uniform int   gridSize;
-uniform float chopFactor;
 uniform sampler2D heightMap;
 
 out block
@@ -64,8 +64,8 @@ vec3 SampleDisplaced(vec2 worldXY)
 {
   vec2 uv = fract(worldXY / tileSize);
   vec4 hd = texture(heightMap, uv);
-  vec2 dxy = chopFactor * hd.gb;
-  return vec3(worldXY + dxy, hd.r);
+  // Dx/Dy are the final displacement (engine-side choppiness already applied).
+  return vec3(worldXY + hd.gb, hd.r);
 }
 
 void main()

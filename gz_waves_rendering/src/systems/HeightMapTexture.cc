@@ -14,7 +14,6 @@
 
 #include <gz/common/Console.hh>
 
-#include "GridReflow.hh"
 #include "Ogre2HeightMapBridge.hh"
 
 namespace gz::sim::systems
@@ -148,22 +147,15 @@ bool HeightMapTexture::Upload(const double *_eta, const double *_dispX,
     gzerr << "[HeightMapTexture] null elevation grid" << '\n';
     return false;
   }
-  // Transpose each column-major grid into a local row-major copy (the bridge
-  // expects rows contiguous). Absent displacement channels reflow to zeros.
-  const std::vector<double> eta   = ToRowMajor(_eta, _n);
-  const std::vector<double> dispX = ToRowMajor(_dispX, _n);
-  const std::vector<double> dispY = ToRowMajor(_dispY, _n);
-  // Optional folding / foam metric → the texture's alpha channel.
-  std::vector<double> foam;
-  const double *foamData = nullptr;
-  if (_foam)
-  {
-    foam = ToRowMajor(_foam, _n);
-    foamData = foam.data();
-  }
+  // Hand the column-major WaveField2D grids straight to the bridge — its
+  // texel pack maps them so texture (u, v) = grid (x_u, y_v), which is the
+  // orientation the shaders sample. (An intermediate row-major reflow here
+  // used to transpose the rendered field relative to the physics field, on
+  // top of costing four N² allocations per frame.) Null channels are packed
+  // as zeros by the bridge.
   const int N = static_cast<int>(_n);
   return api.upload(this->impl->handle,
-                    eta.data(), dispX.data(), dispY.data(), foamData,
+                    _eta, _dispX, _dispY, _foam,
                     N, N) != 0;
 }
 

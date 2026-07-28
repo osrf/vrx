@@ -142,13 +142,4 @@ install(
 ament_environment_hooks("hooks/hook.dsv.in")
 ament_environment_hooks("hooks/hook.sh.in")
 
-if(BUILD_TESTING)
-  # Unit test for the pure column->row reflow helper on the heightmap upload
-  # path. Header-only and Ogre-free, so it links nothing but gtest.
-  find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(grid_reflow_test test/grid_reflow_test.cc)
-  target_include_directories(grid_reflow_test PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/systems)
-endif()
-
 ament_package()

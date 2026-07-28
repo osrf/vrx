@@ -88,12 +88,12 @@
          the comment directly above each block.
          ================================================================== -->
 
-    <!-- Gerstner engine (gz-sim-waves-gerstner-system): analytic sum of
-         component waves. The full parameter list and the <sea_state> precedence
-         rules live in the plugin's own documentation. (The FFT spectral backend,
-         gz-sim-waves-fft-system, is added as an alternative in a later PR.) -->
-    <plugin filename="gz-sim-waves-gerstner-system"
-            name="gz::sim::systems::GerstnerWaves">
+    <!-- Wave source. Two engines are available: FFT (EncinoWaves spectral,
+         higher fidelity) is active here; Gerstner (analytic sum of component
+         waves) is the commented alternative below. Full parameter lists and the
+         <sea_state> precedence rules live in each plugin's documentation. -->
+    <plugin filename="gz-sim-waves-fft-system"
+            name="gz::sim::systems::FftWaves">
       <update_rate>30</update_rate>
       <wave>
         <!-- Simplest control: a WMO sea-state code (0-9) sets the whole sea. It
@@ -102,24 +102,46 @@
              (delete the two comment markers wrapping it). -->
         <sea_state>5</sea_state>
 
-        <!-- Advanced / manual setup (a working configuration). <model> is PMS or
-             CWR; <number> components; <period> mean period [s]; <direction>
-             heading [rad]; <angle> spread; <scale> amplitude ratio; <steepness>
-             crest sharpness [0,1]; <gain> amplitude; <grid_size> resolution. -->
+        <!-- Advanced / manual setup (a working configuration). <period> sets
+             wind speed; <gain> is the amplitude multiplier (9.5 = dramatic and
+             intentionally unphysical, ~1.0 = physical Hs); <tile_size> and
+             <grid_size> are the periodic domain and FFT resolution; <choppiness>
+             sharpens crests; <direction> is parsed but not yet applied
+             (EncinoWaves assumes wind along +X). -->
         <!--
-        <model>PMS</model>
-        <number>3</number>
         <period>3.2</period>
+        <gain>9.5</gain>
         <direction>2.356</direction>
-        <angle>0.4</angle>
-        <scale>1.1</scale>
-        <steepness>0.5</steepness>
-        <gain>1.0</gain>
         <tau>2.0</tau>
+        <tile_size>256</tile_size>
         <grid_size>128</grid_size>
+        <seed>42</seed>
+        <choppiness>-2.0</choppiness>
         -->
       </wave>
     </plugin>
+
+    <!-- Gerstner alternative (gz-sim-waves-gerstner-system): analytic sum of
+         component waves. To use it instead of FFT, comment the <plugin> above
+         and uncomment this one. <sea_state> drives the height; every other
+         tag below is the engine default, kept explicit for discoverability.
+         Extras like <direction> or <steepness> can be added per the plugin
+         docs (they are NOT defaults, so adding them changes the sea). -->
+    <!--
+    <plugin filename="gz-sim-waves-gerstner-system"
+            name="gz::sim::systems::GerstnerWaves">
+      <update_rate>30</update_rate>
+      <wave>
+        <sea_state>5</sea_state>
+        <model>PMS</model>
+        <number>3</number>
+        <angle>0.4</angle>
+        <scale>1.1</scale>
+        <tau>2.0</tau>
+        <grid_size>128</grid_size>
+      </wave>
+    </plugin>
+    -->
 
     <!-- GUI -->
     <gui fullscreen="0">

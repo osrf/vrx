@@ -174,8 +174,8 @@ struct WaveField2D {
   std::size_t   n{0};        // grid resolution N (N×N)
   double        tile{0.0};   // tile extent [m]; cell spacing = tile / N
   const double *dz{nullptr}; // vertical displacement η [m]  (required)
-  const double *dx{nullptr}; // horizontal chop x [m]        (null ⇒ 0)
-  const double *dy{nullptr}; // horizontal chop y [m]        (null ⇒ 0)
+  const double *dx{nullptr}; // FINAL horizontal displacement x [m] (null ⇒ 0)
+  const double *dy{nullptr}; // FINAL horizontal displacement y [m] (null ⇒ 0)
   const double *foam{nullptr}; // folding metric: 1 flat, <1 folding (null ⇒ none)
 };
 ```
@@ -348,9 +348,10 @@ it deliberately does **not** alias the component's `simulation`. From the code:
 > `mutex_`, so it is fully serialised."*
 
 It rebuilds the private engine when `data.generation` changes, and each render
-frame pulls the grid via `Field()` and uploads it. (Because the engine produces
-column-major Eigen data while the Ogre bridge wants row-major, `HeightMapTexture`
-reflows each grid once on upload.)
+frame pulls the grid via `Field()` and uploads it. The column-major
+`WaveField2D` grids flow to the Ogre bridge unchanged; the bridge's texel pack
+maps them so texture (u, v) = grid (x_u, y_v), preserving the physics
+orientation end to end.
 
 ### 5.2 Engine-agnostic, via per-engine GUI registrars
 
@@ -420,9 +421,12 @@ as little of the generation as it likes.
   over `tileSize`; `Elevation` bilinearly samples the grid; `Field()` exposes
   height + x/y displacement + a folding (foam) metric.
 - **Particle velocity** is computed by **time finite-difference**: EncinoWaves
-  exposes no analytic velocity field, so each `Update` also propagates a scratch
-  state a small `dt` ahead and differences the displacement grids
-  (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t), which `ParticleVelocity` then bilinearly samples.
+  exposes no analytic velocity field, so a scratch state is propagated a small
+  `dt` ahead and the displacement grids differenced (∂Dx/∂t, ∂Dy/∂t, ∂η/∂t).
+  This happens **lazily**, on the first `ParticleVelocity` call after an
+  `Update` — the extra propagation roughly doubles the per-tick cost, so
+  consumers that never query velocity (the renderer reads `Field()` only)
+  never pay it.
 - **Selectable spectral models** (SDF string → Encino enum): spectrum
   `pms`/`pm`, `jonswap`, `tma`; spreading `poscos2`/`poscossqr`, `mitsuyasu`,
   `hasselmann`, `donelanbanner`/`donelan`; dispersion `deep`,
@@ -674,6 +678,17 @@ source. Done — `WaterVisual`, buoyancy, and the core are untouched.
 
 ## 10. Build, run, test
 
+### Prerequisites
+
+- ROS Lyrical with Gazebo Jetty: the target platform, and currently the most
+  modern stable ROS and Gazebo combination. If your system defaults to a
+  different Gazebo version, install Gazebo Jetty before building.
+- EncinoWaves installed and on CMAKE_PREFIX_PATH (from HonuRobotics/encinowaves),
+  required by the FFT package.
+- Remaining Gazebo dependencies via rosdep install --from-paths src --ignore-src -y.
+- A real GPU for the GUI: the Ogre2 render path does not initialise under software GL.
+- Container setup: TBD.
+
 ```bash
 # Build (EncinoWaves must be installed and on CMAKE_PREFIX_PATH for the FFT package)
 cd ~/vrx_ws
@@ -696,6 +711,9 @@ ros2 launch vrx_bringup simulation.launch.xml
 
 - `<direction>` is parsed by the FFT system but not yet applied (EncinoWaves
   assumes wind along +X).
+- The FFT engine hands sim time to EncinoWaves in single precision (float
+  API), so on multi-hour runs the float grid coarsens and gradually degrades
+  the wave animation and the particle-velocity finite difference.
 - Foam/whitecaps are effectively **FFT-only**. The renderer derives foam from
   the engine's folding (Jacobian) metric; the analytic Gerstner engine's
   Jacobian barely leaves 1.0, so it carries no usable folding signal and the

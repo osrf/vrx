@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>gz_waves_provider_fft</name>
+  <version>0.0.0</version>
+  <description>
+    Stochastic FFT wave-field engine for gz_waves, backed by the Apache-2.0
+    EncinoWaves spectral library: TMA/JONSWAP/Pierson-Moskowitz spectra with
+    directional spreading and dispersion, selected via the spectrum, spreading
+    and dispersion SDF parameters. Provides the IWaveField engine library and
+    the gz-sim-waves-fft-system plugin.
+  </description>
+  <maintainer email="cen.aguero@gmail.com">Carlos Agüero</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>gz_waves</depend>
+  <depend>gz_sim_vendor</depend>
+  <depend>gz_math_vendor</depend>
+  <depend>gz_common_vendor</depend>
+  <depend>gz_plugin_vendor</depend>
+  <depend>eigen</depend>
+  <!-- The Apache-2.0 EncinoWaves spectral library is a required dependency the
+       FFT engine is built on. It is consumed as a regular system package via
+       find_package(EncinoWaves), built and installed from
+       https://github.com/HonuRobotics/encinowaves (no rosdep key, so it is not
+       listed here). Its CMake config transitively requires Eigen / TBB / Imath,
+       declared here so rosdep installs them. -->
+  <depend>libtbb-dev</depend>
+  <depend>libimath-dev</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

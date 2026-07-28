@@ -24,13 +24,13 @@
 
 namespace gz::sim::systems
 {
-  /// \brief A CPU→GPU heightmap texture used by the FFT visual path.
+  /// \brief A CPU→GPU heightmap texture used by the water visual path.
   ///
-  /// Owns an Ogre Next `TextureGpu` of single-channel 32-bit float pixels
-  /// (`PFG_R32_FLOAT`), `gridSize × gridSize`. Each frame, the CPU-side
-  /// FFT simulation writes the latest height field into a staging texture,
-  /// which is then asynchronously uploaded to the GPU texture and bound to
-  /// the material's "heightMap" sampler.
+  /// Owns an Ogre Next `TextureGpu` of four-channel 32-bit float pixels
+  /// (`PFG_RGBA32_FLOAT`), `gridSize × gridSize`, packing (η, Dx, Dy, foam)
+  /// per texel. Each frame, the CPU-side wave engine's grids are written
+  /// into a staging texture, asynchronously uploaded to the GPU texture, and
+  /// bound to the material's "heightMap" sampler.
   ///
   /// All Ogre Next interaction is encapsulated here so the rest of the
   /// plugin (`WaterVisual`) talks in terms of the raw `WaveField2D` grids.
@@ -54,9 +54,10 @@ namespace gz::sim::systems
 
     /// \brief Upload the supplied height + horizontal-displacement grids to
     /// the GPU. All buffers are column-major `_n × _n` — the `WaveField2D`
-    /// layout, element (i, j) at index `i + j*_n` — and are transposed to
-    /// row-major here, then packed into a single RGBA32F texture (η, Dx, Dy,
-    /// foam) consumed by the water vertex/fragment shaders.
+    /// layout, element (i, j) at index `i + j*_n` — and are handed to the
+    /// bridge unchanged, which packs them into a single RGBA32F texture
+    /// (η, Dx, Dy, foam) oriented so texel (u, v) = grid (x_u, y_v), as the
+    /// water vertex/fragment shaders sample it.
     /// \param[in] _eta   Surface elevation grid → R channel (required).
     /// \param[in] _dispX Horizontal x-displacement grid → G channel; null ⇒ 0.
     /// \param[in] _dispY Horizontal y-displacement grid → B channel; null ⇒ 0.
@@ -79,6 +80,11 @@ namespace gz::sim::systems
     /// \brief True once the texture is GPU-resident and bound.
     /// \return Whether the texture is ready.
     public: bool Ready() const { return this->ready; }
+
+    /// \brief Resolution per axis this texture was created with. Upload()
+    /// only accepts grids of exactly this size, so a consumer whose grid
+    /// resolution changed must create a new instance.
+    public: std::size_t GridSize() const { return this->gridSize; }
 
     /// \brief Implementation detail kept out of the header to avoid leaking
     /// Ogre Next types into every translation unit that includes us.

@@ -69,6 +69,14 @@ class WaterVisual::Implementation
   /// \brief Upload uniforms; runs on the render thread under the cache mutex.
   public: void UploadUniforms();
 
+  /// \brief (Re)create the dynamic heightmap texture at `_gridSize` and bind
+  /// it to the material; runs on the render thread under the cache mutex.
+  /// Called at material setup and again whenever a runtime reconfigure
+  /// changes the wave grid resolution.
+  /// \param[in] _gridSize Texture resolution per axis.
+  /// \return True when the new texture initialized and bound.
+  public: bool CreateHeightMapTexture(std::size_t _gridSize);
+
   /// \brief Render-thread entry point (SceneUpdate event).
   public: void OnSceneUpdate();
 
@@ -149,7 +157,6 @@ class WaterVisual::Implementation
   public: float cachedTau{2.0f};          ///< guarded by mutex_
   public: float currentSimTime{0.0f};     ///< guarded by mutex_
   public: float cachedTileSize{200.0f};   ///< grid cache, guarded by mutex_
-  public: float cachedChopFactor{-1.0f};  ///< grid cache, guarded by mutex_
   public: int tilesRadius{2};             ///< (2·r+1)² tiles; 0 disables
   public: int cachedGridSize{128};        ///< grid cache, guarded by mutex_
   // asv_wave_sim's exact default colours.
@@ -276,28 +283,8 @@ bool WaterVisual::Implementation::ResolveVisual()
     this->UploadUniforms();
 
     // The material needs a dynamic heightmap texture bound to it.
-    {
-      // Destroy any previous instance first so its GPU texture frees up
-      // before we ask Ogre Next to create the new one. Otherwise the new
-      // `createOrRetrieveTexture` returns the still-Resident texture and
-      // `setResolution` asserts (`mResidencyStatus == OnStorage`).
-      this->heightMap.reset();
-      // Use a process-unique texture name so we never collide with a
-      // stale entry in `TextureGpuManager` left behind by a previous
-      // engine teardown/reload cycle.
-      static std::atomic<std::uint64_t> heightMapCounter{0};
-      const auto seq = heightMapCounter.fetch_add(1);
-      this->heightMap = std::make_unique<HeightMapTexture>(
-        this->scene, this->material,
-        static_cast<std::size_t>(this->cachedGridSize),
-        "wavefield_heightmap_" + std::to_string(this->visualEntity) +
-            "_" + std::to_string(seq));
-      if (!this->heightMap->Ready())
-      {
-        gzerr << "[WaterVisual] heightmap texture failed to initialize"
-              << '\n';
-      }
-    }
+    this->CreateHeightMapTexture(
+        static_cast<std::size_t>(this->cachedGridSize));
 
     // Spawn tile copies. Each one shares the central material (so the
     // dynamic heightmap binding applies to all of them) and the same
@@ -392,10 +379,10 @@ void WaterVisual::Implementation::UploadUniforms()
     (*vsParams)["world_matrix"] = 1;
 
     // Grid shader: heightmap texture (bound separately by HeightMapTexture)
-    // plus the geometry of the periodic tile and the choppiness factor.
+    // plus the geometry of the periodic tile. Dx/Dy in the heightmap are the
+    // final displacement (WaveField2D contract) — no chop factor here.
     (*vsParams)["tileSize"]   = this->cachedTileSize;
     (*vsParams)["gridSize"]   = this->cachedGridSize;
-    (*vsParams)["chopFactor"] = this->cachedChopFactor;
   }
 
   // Fragment shader: colours + lighting params + textures.
@@ -406,7 +393,6 @@ void WaterVisual::Implementation::UploadUniforms()
   // channel, so the FS reads it directly (one sample) instead of
   // finite-differencing the displacement. foamThreshold is the smoothstep
   // half-width around J = 0 (Encino's MinE; the Phillips path leaves it ≈1).
-  (*fsParams)["chopFactor"]    = this->cachedChopFactor;
   (*fsParams)["tileSize"]      = this->cachedTileSize;
   // Foam is engine-specific. The analytic Gerstner engine's Jacobian
   // determinant barely leaves 1.0, so it carries no usable folding signal and
@@ -457,6 +443,31 @@ void WaterVisual::Implementation::UploadUniforms()
 }
 
 //////////////////////////////////////////////////
+bool WaterVisual::Implementation::CreateHeightMapTexture(std::size_t _gridSize)
+{
+  // Destroy any previous instance first so its GPU texture frees up
+  // before we ask Ogre Next to create the new one. Otherwise the new
+  // `createOrRetrieveTexture` returns the still-Resident texture and
+  // `setResolution` asserts (`mResidencyStatus == OnStorage`).
+  this->heightMap.reset();
+  // Use a process-unique texture name so we never collide with a
+  // stale entry in `TextureGpuManager` left behind by a previous
+  // engine teardown/reload cycle (or by the texture this one replaces).
+  static std::atomic<std::uint64_t> heightMapCounter{0};
+  const auto seq = heightMapCounter.fetch_add(1);
+  this->heightMap = std::make_unique<HeightMapTexture>(
+    this->scene, this->material, _gridSize,
+    "wavefield_heightmap_" + std::to_string(this->visualEntity) +
+        "_" + std::to_string(seq));
+  if (!this->heightMap->Ready())
+  {
+    gzerr << "[WaterVisual] heightmap texture failed to initialize" << '\n';
+    return false;
+  }
+  return true;
+}
+
+//////////////////////////////////////////////////
 void WaterVisual::Implementation::OnSceneUpdate()
 {
   if (!this->active)
@@ -499,11 +510,25 @@ void WaterVisual::Implementation::OnSceneUpdate()
     bool ok = false;
     if (f && f->n > 0 && f->dz)
     {
-      // Hand the raw WaveField2D grids straight to the heightmap, which
-      // transposes column- to row-major internally. Null displacement
-      // channels (dx/dy) upload as zeros; a null folding metric leaves the
-      // alpha channel at 0. The FS reads alpha as foam when useFoamMap=1 —
-      // the grid engines that compute folding fill it, the analytic ones don't.
+      // A runtime set_parameters reconfigure can change grid_size. The GPU
+      // texture is sized at creation, so when the rebuilt engine's grid no
+      // longer matches, recreate it here (render thread, under mutex_) —
+      // otherwise every subsequent Upload fails its size check and the
+      // surface freezes at the old field.
+      if (f->n != this->heightMap->GridSize())
+      {
+        gzmsg << "[WaterVisual] wave grid changed "
+              << this->heightMap->GridSize() << " -> " << f->n
+              << "; recreating the heightmap texture" << '\n';
+        if (!this->CreateHeightMapTexture(f->n))
+          return;
+      }
+      // Hand the raw column-major WaveField2D grids straight to the
+      // heightmap/bridge (no reflow; the bridge's texel pack preserves the
+      // physics orientation). Null displacement channels (dx/dy) upload as
+      // zeros; a null folding metric leaves the alpha channel at 0. The FS
+      // reads alpha as foam when useFoamMap=1 — the grid engines that
+      // compute folding fill it, the analytic ones don't.
       ok = this->heightMap->Upload(f->dz, f->dx, f->dy, f->foam, f->n);
       if (ok && !this->firstUploadLogged)
       {
@@ -738,8 +763,6 @@ void WaterVisual::PreUpdate(
     this->dataPtr->cachedGridSize = static_cast<int>(f->n);
   }
   this->dataPtr->cachedTau = static_cast<float>(data->params.tau);
-  this->dataPtr->cachedChopFactor =
-      static_cast<float>(data->params.choppiness);
   this->dataPtr->haveWavefield = true;
   this->dataPtr->cachedGeneration = data->generation;
 }

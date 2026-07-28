@@ -5,6 +5,11 @@
  * you may not use this file except in compliance with the License.
  */
 
+// Acknowledgement: the Ogre Next displacement-map streaming approach used here
+// (a CPU-retained RGBA32F texture, per-frame residency scheduling, manual mip-0
+// upload) is adapted from the technique in asv_wave_sim by Rhys Mainwaring
+// (github.com/srmainwaring/asv_wave_sim).
+
 #include "Ogre2HeightMapBridge.hh"
 
 
@@ -57,6 +62,11 @@ extern "C"
 //////////////////////////////////////////////////
 waves_heightmap_t waves_ogre2_heightmap_create(
     void *_scene, void *_material, std::size_t _gridSize, const char *_name)
+// Function-try block: Ogre calls (createOrRetrieveTexture, setResolution,
+// getStagingTexture, ...) can throw, and an exception escaping this
+// extern "C" boundary is undefined behaviour. Failing the create (the caller
+// logs and runs without the water heightmap) beats aborting the GUI.
+try
 {
   // `_material` is the gz::rendering Material to bind the heightmap to. A null
   // material is tolerated (the bind below is skipped), but every live caller
@@ -186,15 +196,28 @@ waves_heightmap_t waves_ogre2_heightmap_create(
       1u, 1u, Ogre::PFG_RGBA32_FLOAT);
   return hm;
 }
+catch (const Ogre::Exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] create threw: " << e.getDescription()
+        << '\n';
+  return nullptr;
+}
+catch (const std::exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] create threw: " << e.what() << '\n';
+  return nullptr;
+}
 
 //////////////////////////////////////////////////
 int waves_ogre2_heightmap_upload(
     waves_heightmap_t _handle, const double *_eta, const double *_dx,
     const double *_dy, const double *_foam, int _rows, int _cols)
+// Function-try block: see waves_ogre2_heightmap_create. A failed upload
+// returns 0 and the frame simply keeps the previous heightmap contents.
+try
 {
   auto *hm = static_cast<HeightMap *>(_handle);
-  if (!hm || !hm->ready || !hm->texture || !hm->manager ||
-      !_eta || !_dx || !_dy)
+  if (!hm || !hm->ready || !hm->texture || !hm->manager || !_eta)
     return 0;
   const int N = static_cast<int>(hm->gridSize);
   if (_rows != N || _cols != N)
@@ -216,21 +239,28 @@ int waves_ogre2_heightmap_upload(
   const Ogre::TextureBox box =
       hm->staging->mapRegion(N, N, 1u, 1u, Ogre::PFG_RGBA32_FLOAT);
 
-  // Pack one RGBA32F texel per (row, col): (η, Dx, Dy, foam). `foam` carries
-  // the displacement-Jacobian folding metric when supplied, else 0.
+  // Pack one RGBA32F texel per (row, col): (η, Dx, Dy, foam). Inputs are the
+  // column-major WaveField2D grids (element (i, j) = world (x_i, y_j) at index
+  // i + j*N), so the contiguous slice [row*N, row*N + N) is the fixed-y_row
+  // line of the field, and texel (u=col, v=row) receives grid value
+  // (x_col, y_row) — the orientation the vertex shader's
+  // uv = worldXY / tileSize sampling expects. Null dx/dy/foam channels pack
+  // as zeros.
   for (int row = 0; row < N; ++row)
   {
     auto *dst = reinterpret_cast<float *>(box.at(0, row, 0));
     const double *seta = _eta + static_cast<std::size_t>(row) * N;
-    const double *sdx  = _dx  + static_cast<std::size_t>(row) * N;
-    const double *sdy  = _dy  + static_cast<std::size_t>(row) * N;
+    const double *sdx  = _dx
+        ? _dx + static_cast<std::size_t>(row) * N : nullptr;
+    const double *sdy  = _dy
+        ? _dy + static_cast<std::size_t>(row) * N : nullptr;
     const double *sfoam = _foam
         ? _foam + static_cast<std::size_t>(row) * N : nullptr;
     for (int col = 0; col < N; ++col)
     {
       dst[col * 4 + 0] = static_cast<float>(seta[col]);
-      dst[col * 4 + 1] = static_cast<float>(sdx[col]);
-      dst[col * 4 + 2] = static_cast<float>(sdy[col]);
+      dst[col * 4 + 1] = sdx ? static_cast<float>(sdx[col]) : 0.0f;
+      dst[col * 4 + 2] = sdy ? static_cast<float>(sdy[col]) : 0.0f;
       dst[col * 4 + 3] = sfoam ? static_cast<float>(sfoam[col]) : 0.0f;
     }
   }
@@ -244,6 +274,17 @@ int waves_ogre2_heightmap_upload(
   if (!hm->texture->isDataReady())
     hm->texture->notifyDataIsReady();
   return 1;
+}
+catch (const Ogre::Exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] upload threw: " << e.getDescription()
+        << '\n';
+  return 0;
+}
+catch (const std::exception &e)
+{
+  gzerr << "[waves_ogre2_heightmap] upload threw: " << e.what() << '\n';
+  return 0;
 }
 
 //////////////////////////////////////////////////

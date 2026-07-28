@@ -46,10 +46,11 @@
              static initializer that runs when the GUI dlopens the library), so
              order is irrelevant and they add no plugin warnings. One registrar
              per available engine; gz_waves_rendering itself depends on no engine,
-             so these plugins carry that dependency. The FFT registrar
-             (gz-sim-waves-fft-gui) is added alongside when the FFT backend lands. -->
+             so these plugins carry that dependency. -->
         <plugin filename="gz-sim-waves-gerstner-gui"
                 name="gz::sim::systems::GerstnerWavesGui"/>
+        <plugin filename="gz-sim-waves-fft-gui"
+                name="gz::sim::systems::FftWavesGui"/>
       </visual>
     </link>
   </model>
