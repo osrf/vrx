@@ -1,0 +1,65 @@
+# Dev container for VRX 4 (ROS 2 Lyrical + Gazebo Jetty), via plain Docker
+# Compose so it does NOT depend on rocker knowing Ubuntu 26.04.
+#
+# Mirrors:  rocker --home --user --x11 --nvidia --devices /dev/input/js0 ... bash
+#
+# Easiest:  ./docker/run_compose.bash
+#
+# Manually:
+#   xhost +SI:localuser:$(id -un)    # let the container reach your X server (once per login)
+#   cd <your vrx_ws>/src/vrx
+#   MY_UID=$(id -u) MY_GID=$(id -g) docker compose -f docker/compose.yaml run --rm --remove-orphans dev
+#   ( `UID` is a bash readonly var, so we pass MY_UID/MY_GID instead. )
+#
+# (`run --rm` gives a fresh interactive shell and removes the container on exit,
+#  which is the rocker-like behaviour. Use `exec` instead if you prefer a
+#  long-lived container: `docker compose ... up -d` then `... exec dev bash`.)
+
+services:
+  dev:
+    image: vrx_dev:lyrical            # <- the tag you built; adjust if different
+
+    # --- interactive shell (rocker's default) ---
+    stdin_open: true                  # docker -i
+    tty: true                         # docker -t
+    command: bash
+
+    # --- run as your host user so files created in the mounted home keep your
+    #     ownership (rocker --user). UID/GID come from the run command; the
+    #     prompt may read "I have no name!" — cosmetic, since this UID has no
+    #     /etc/passwd entry in the image. Drop this line to run as root. ---
+    user: "${MY_UID:-1000}:${MY_GID:-1000}"
+
+    # --- host networking: ROS 2 DDS discovery + simplest X11 (DISPLAY reaches
+    #     the host X server directly) ---
+    network_mode: host
+    ipc: host
+
+    # Workspace root. run_compose.bash derives VRX_WS from the compose file's
+    # location; the default (current directory) covers a bare `docker compose ...`
+    # invocation, dropping you in wherever you're standing.
+    working_dir: ${VRX_WS:-${PWD}}
+
+    environment:
+      - DISPLAY=${DISPLAY}
+      - HOME=${HOME}
+      - QT_X11_NO_MITSHM=1
+      # This base runs on the Intel/AMD iGPU via the /dev/dri passthrough below.
+      # NVIDIA access + PRIME render offload live in compose.nvidia.yaml, which
+      # run_compose.bash layers in automatically when an NVIDIA GPU is detected.
+
+    volumes:
+      - ${HOME}:${HOME}                                        # rocker --home
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw                       # X11 socket
+      # No .Xauthority mount: run_compose.bash's `xhost +SI:localuser:$(id -un)`
+      # grants local access without it, and GDM's $XAUTHORITY
+      # (/run/user/.../gdm/Xauthority) collides with the home mount if
+      # bind-mounted onto ~/.Xauthority.
+
+    devices:
+      #  - /dev/input/js0:/dev/input/js0                          # joystick (delete if absent)
+      - /dev/dri:/dev/dri                                      # direct rendering (Intel/AMD/GL)
+
+    # --- GPU: the NVIDIA reservation + PRIME offload are in compose.nvidia.yaml,
+    #     layered in by run_compose.bash only when an NVIDIA GPU is present.
+    #     This base alone renders on the Intel/AMD iGPU via /dev/dri above. ---
