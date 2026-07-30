@@ -19,44 +19,82 @@ colcon build --merge-install
 ros2 launch vrx_gz competition.launch.py world:=nbpark
 ```
 
-The `blueboat` model is included directly in the world
-(`vrx_gz/worlds/nbpark.sdf`, near the `roboboat01` include), so launching
-`nbpark` spawns it automatically.
+All four blueboat models are included directly in `vrx_gz/worlds/nbpark.sdf`
+(near the `roboboat01` include), spawned 2 m apart along Y so they can be
+compared side by side:
+
+| World instance | Pose | What it is |
+|---|---|---|
+| `blueboat_7July2026` | `-185 1090 1` | Older hull (~13.5k tris), powered. |
+| `blueboat_bare_29July2026` | `-185 1092 1` | Current hull, hull-only (1 link, no props). |
+| `blueboat_29July2026` | `-185 1094 1` | Current hull (~10.7k tris), powered. |
+| `blueboat_assembly` | `-185 1096 1` | Current hull + every accessory mounted. |
 
 ## Key files
 
 | Path | Purpose |
 |------|---------|
-| `vrx_gz/models/blueboat/model.sdf` | The model. **Currently in a TEMPORARY hull-only config** — propellers/thrusters removed for mesh testing; buoyancy (`Surface` x2) + `SimpleHydrodynamics` kept so it still floats. |
-| `vrx_gz/models/blueboat/model.config` | Model metadata. |
-| `vrx_gz/models/blueboat/meshes/blueboat.glb` | Current visual hull (Y-up glTF; ~10.7k tris). |
-| `vrx_gz/models/blueboat/meshes/blueboat_collision.glb` | Low-poly collision hull (~64 tris — keep it cheap). |
-| `vrx_gz/models/blueboat/meshes/blueboat_7july2026.glb` | Prior visual hull, kept for low/high geometry comparison. |
-| `vrx_gz/models/blueboat/meshes/blueboat_prop*.glb` | Propeller visual/collision meshes (currently unused while props are stripped). |
+| `vrx_gz/models/blueboat_29July2026/` | Current powered model: `base_link` + 2 prop links/revolute joints, buoyancy (`Surface` x2), `SimpleHydrodynamics`, 2 `gz-sim-thruster-system` plugins. Owns the current hull meshes. |
+| `vrx_gz/models/blueboat_7July2026/` | Same structure, older/heavier hull mesh. Kept for the geometry-complexity comparison. |
+| `vrx_gz/models/blueboat_bare_29July2026/` | Hull-only variant of the current model (no props/thrusters). |
+| `vrx_gz/models/blueboat_assembly/` | Current hull + all 10 accessories. Meshless on disk — references hull meshes from `blueboat_29July2026/` and parts from `blueboat_parts/`. |
+| `vrx_gz/models/blueboat_parts/meshes/` | Accessory mesh library (10 parts), plus the propeller meshes the powered models reference. |
 | `vrx_gz/scripts/glb_stats.py` | Reports vertex/triangle counts, textures, extents of `.glb` files. `python3 vrx_gz/scripts/glb_stats.py <files|dir|glob> [--csv]` |
-| `vrx_gz/worlds/nbpark.sdf` | World; contains the `blueboat` `<include>`. |
+| `vrx_gz/worlds/nbpark.sdf` | World; contains the four blueboat `<include>`s. |
 | `vrx_gz/worlds/ocean.sdf` | WIP world (untracked experiment, not referenced by launch). |
+
+Meshes are cross-referenced between models by `file://<model_dir>/meshes/...`,
+which works because all models sit on the same resource path. Fixing a source
+mesh therefore fixes every model using it — but renaming a model directory
+breaks every other model that points into it.
 
 ## Important technical notes
 
-- **Meshes are Y-up (glTF), Gazebo is Z-up.** Every mesh in `model.sdf` carries a
-  corrective `<pose>0 0 0 1.5708 0 0</pose>` (roll +90°). After correction the
-  body frame is +X forward, +Y port, +Z up. If a new mesh loads on its side,
-  revisit this roll; if bow points aft, add yaw π on the world `<include>`.
+- **Meshes are Y-up (glTF), Gazebo is Z-up.** Every mesh carries a corrective
+  `<pose>0 0 0 1.5708 0 0</pose>` (roll +90°). After correction +Z is up and
+  +Y is port. If a new mesh loads on its side, revisit this roll.
+- **Bow is at −X on this hull**, stern at +X — the opposite of the usual
+  "+X forward" convention. Confirmed visually (props sit at +0.4832). Since the
+  thruster joints use axis `1 0 0`, positive thrust likely drives the boat
+  *astern*; fix with axis `-1 0 0` or yaw π on the world `<include>` once
+  confirmed on the water.
+- **Propeller pose** (current model): links at `x=0.4832, y=±0.30, z=-0.1308`,
+  mesh pose `0 0 0 0 3.1416 0`. The 180° pitch puts the disc in the vertical
+  plane with its spin axis along X; 90° left it lying flat.
+- **Naming convention:** meshes are `<part>.visual.glb` / `<part>.collision.glb`,
+  lower case with underscores. Model directories are date-stamped
+  (`blueboat_<D><Month><YYYY>`), and each model's `<model name>` / `model.config`
+  `<name>` must match its directory — duplicates are legal (the world
+  `<include><name>` wins) but make the GUI entity tree ambiguous.
 - **Collision meshes must stay low-poly.** Triangle count on the *collision* mesh
   is paid every physics step in DART; the *visual* triangle count only costs when
   the GUI or a sensor renders it. Verified low so far (64 / 20 tris) — keep it.
-- **Restore propulsion**: the powered version (2 prop links + 2 revolute joints +
-  2 `gz-sim-thruster-system` plugins) is in git history at commit `2e446ac9`.
-  `git show 2e446ac9:vrx_gz/models/blueboat/model.sdf` to retrieve it, or
-  `git checkout 2e446ac9 -- vrx_gz/models/blueboat/model.sdf`.
+- **Three part meshes have bad scale** (found via `glb_stats.py`, not yet fixed at
+  source): `ping_mount.collision` is 3.68 × 1.66 × 1.35 m against a 0.24 m visual
+  (~15× oversized — left out of `blueboat_assembly` because it would wrap a
+  collision volume larger than the boat around the hull); `side_scan_sonar.visual`
+  is 6.12 m and `surveyor.visual` is 3.42 m on a 1.2 m boat, while both of their
+  collisions are ~0.17 m. `blueboat_assembly` mounts the two oversized visuals at
+  native scale with commented-out `<scale>` lines beside them.
+- **Thrusters are not ROS-bridged.** The `Thruster` plugins carry no
+  `<namespace>`/`<topic>`, so they listen on the gz default —
+  `/model/<world instance name>/joint/<joint_name>/cmd_thrust`, i.e. per-instance
+  (`/model/blueboat_29July2026/...`). Confirm with `gz topic -l`. Driving from ROS
+  needs explicit `<namespace>`/`<topic>` plus a bridge entry like
+  `vrx_gz/src/vrx_gz/payload_bridges.py:152` (`thrusters/<side>/thrust`).
+- **`propeller_diameter` is 0.1 but the prop mesh measures 0.1115 m.** Thrust
+  scales with diameter⁴, so reconcile when tuning propulsion.
 
 ## Open next steps
 
-1. **Verify hull-only mesh** in sim: orientation upright, sane waterline, no mesh
-   load errors. Tune the mesh `<pose>` and `Surface` points/mass if needed.
-2. **Restore propellers** once hull is validated (see above), then tune thruster
-   placement and `SimpleHydrodynamics` drag.
+1. ~~**Verify hull-only mesh**~~ — done, hull looks good in sim.
+2. ~~**Restore and place propellers**~~ — done; position and orientation verified
+   visually. Still to do: confirm thrust *direction* on the water (see the bow-at-−X
+   note above), then tune `thrust_coefficient` / `propeller_diameter` and
+   `SimpleHydrodynamics` drag.
+2b. **Verify `blueboat_assembly` in sim** — every part visible, upright, plausibly
+   scaled. Placements are first-cut guesses picked for visibility, especially deck
+   height (z ≈ 0.15). Fix the three bad-scale meshes at source, then re-place.
 3. **Complexity-sensitivity study** (the point of this branch): sweep low- vs
    high-poly meshes and measure load. Isolate subsystems — physics (collision
    tris + link/joint count) vs rendering (visual tris, only under GUI/sensors).
@@ -65,9 +103,11 @@ The `blueboat` model is included directly in the world
    split), CPU/GPU. `glb_stats.py --csv` gives the independent variable.
    *Not yet built:* a headless benchmark harness (launch nbpark N iters, log
    mean/σ RTF + profiler split to CSV, parametrized by mesh variant).
-4. **Accessory-assembly system** (discussed, not started): parts library under
-   `vrx_gz/models/blueboat_parts/` with `*.visual.glb`/`*.collision.glb` pairs +
-   `part.yaml` metadata, and a generator (analogous to WAM-V's
+4. **Accessory-assembly system** — parts library now exists at
+   `vrx_gz/models/blueboat_parts/meshes/` with `*.visual.glb`/`*.collision.glb`
+   pairs, and `blueboat_assembly` hand-mounts all of them. Still to do:
+   `part.yaml` metadata per part (mount point, type) and a generator
+   (analogous to WAM-V's
    `vrx_urdf/vrx_gazebo/scripts/generate_wamv.py` + `configure_wamv`) that
    assembles chosen accessories into one model. One runtime model; structural
    mounts merge into `base_link`, sensors get their own link+joint.

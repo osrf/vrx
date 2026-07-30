@@ -1,0 +1,450 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="blueboat_assembly">
+    <!--
+      BlueBoat + every accessory in blueboat_parts, for a visual check that each
+      part loads, is oriented sanely and is scaled plausibly.
+
+      Derived from blueboat_29July2026. Hull meshes are referenced from that
+      model and part meshes from blueboat_parts - nothing is duplicated here, so
+      this model is meshless on disk (model.sdf + model.config only).
+
+      Coordinate note: all GLB meshes are authored Y-up (glTF) while Gazebo is
+      Z-up, so EVERY mesh below carries a corrective <pose> roll of +90 deg about
+      X (1.5708 0 0). After that correction +Z is up and +Y is port.
+
+      Fore/aft: this hull mesh renders BOW AT -X, STERN AT +X - the opposite of
+      the usual "+X forward" convention. The propellers sit at the stern, X > 0.
+
+      Hull half-width ~0.43 m, pontoon centrelines near Y = +/-0.30 m, hull spans
+      roughly X in [-0.5, +0.57] m.
+
+      PART PLACEMENT IS A FIRST-CUT GUESS chosen so nothing overlaps and every
+      part is visible from outside. Deck height in particular (z ~ 0.15) is
+      estimated - nudge Z if parts float above or sink into the deck.
+
+      All parts are attached to base_link as extra visuals/collisions rather than
+      as separate links, so no joints are added and base_link's mass/inertia is
+      unchanged from the bare hull. Give a part its own link+joint when it needs
+      to move or carry a sensor.
+    -->
+
+    <!-- ============================ Hull ============================ -->
+    <link name="base_link">
+      <inertial>
+        <pose>0 0 -0.05 0 0 0</pose>
+        <mass>10</mass>
+        <!-- Box approximation from measured hull extents (L=1.08 W=0.85 H=0.37).
+             Deliberately NOT adjusted for the accessories below. -->
+        <inertia>
+          <ixx>0.716</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.085</iyy>
+          <iyz>0</iyz>
+          <izz>1.573</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="visual">
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_29July2026/meshes/blueboat.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <collision name="collision">
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_29July2026/meshes/blueboat.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- ===================== Accessories ========================= -->
+      <!-- Deck centreline, bow (-X) to stern (+X). -->
+
+      <!-- Ping sonar mount - bow deck. -->
+      <visual name="ping_mount_visual">
+        <pose>-0.40 0 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/ping_mount.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <!-- ping_mount.collision.glb measures 3.68 x 1.66 x 1.35 m against a
+           0.24 m visual - roughly 15x oversized, and enabling it would wrap a
+           3.7 m collision volume around the whole boat. Left out until the
+           source mesh is fixed.
+      <collision name="ping_mount_collision">
+        <pose>-0.40 0 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/ping_mount.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      -->
+
+      <!-- Payload bracket - mid deck. -->
+      <visual name="payload_bracket_visual">
+        <pose>-0.15 0 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/payload_bracket.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="payload_bracket_collision">
+        <pose>-0.15 0 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/payload_bracket.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- Whip antenna (0.86 m tall) - just aft of midships. -->
+      <visual name="antenna_visual">
+        <pose>0.10 0 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/antenna.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="antenna_collision">
+        <pose>0.10 0 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/antenna.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- Flag on its staff (1.0 m tall) - stern. -->
+      <visual name="flag_visual">
+        <pose>0.45 0 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/flag.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <!-- No flag.collision.glb in blueboat_parts; visual only. -->
+
+      <!-- Directional basestation antenna (0.90 m tall). This is shore-side
+           equipment rather than boat kit - mounted here only so it is visible
+           in this assembly. -->
+      <visual name="basestation_directional_antenna_visual">
+        <pose>0 0.30 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/basestation_directional_antenna.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="basestation_directional_antenna_collision">
+        <pose>0 0.30 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/basestation_directional_antenna.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- Surveyor - starboard deck. NOTE: visual measures 3.42 x 1.01 x 1.63 m,
+           far larger than the 1.2 m boat, while its collision is only 0.17 m.
+           Expect it to dwarf the hull. Uncomment the <scale> below for a
+           roughly boat-sized stand-in while the source mesh is investigated. -->
+      <visual name="surveyor_visual">
+        <pose>0 -0.30 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/surveyor.visual.glb</uri>
+            <!-- <scale>0.05 0.05 0.05</scale> -->
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="surveyor_collision">
+        <pose>0 -0.30 0.15 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/surveyor.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- Echosounder - under the bow, below the waterline. -->
+      <visual name="sonar_visual">
+        <pose>-0.40 0 -0.10 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/sonar.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="sonar_collision">
+        <pose>-0.40 0 -0.10 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/sonar.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- Side-scan sonar - port side, below the waterline. NOTE: visual
+           measures 6.12 x 0.59 x 1.14 m (3 primitives) against a 0.17 m
+           collision - it will engulf the boat. Uncomment <scale> as above. -->
+      <visual name="side_scan_sonar_visual">
+        <pose>0 0.40 -0.10 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/side_scan_sonar.visual.glb</uri>
+            <!-- <scale>0.03 0.03 0.03</scale> -->
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="side_scan_sonar_collision">
+        <pose>0 0.40 -0.10 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/side_scan_sonar.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- Thruster pods - one per pontoon, just forward of each propeller
+           (props sit at X = 0.4832). -->
+      <visual name="left_thruster_visual">
+        <pose>0.42 0.30 -0.1308 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/thruster.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="left_thruster_collision">
+        <pose>0.42 0.30 -0.1308 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/thruster.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="right_thruster_visual">
+        <pose>0.42 -0.30 -0.1308 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/thruster.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="right_thruster_collision">
+        <pose>0.42 -0.30 -0.1308 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/thruster.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <!-- Alternate thruster propeller mesh, parked on the centreline aft so it
+           is visible alongside the real (spinning) props on their own links. -->
+      <visual name="thruster_propeller_visual">
+        <pose>0.55 0 -0.1308 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/thruster_propeller.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <!-- No thruster_propeller.collision.glb in blueboat_parts; visual only. -->
+    </link>
+
+    <!-- ======================= Left propeller ======================= -->
+    <link name="left_prop_link">
+      <pose>0.4832 0.30 -0.1308 0 0 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00010562499999999999</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00010562499999999999</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015125000000000002</izz>
+        </inertia>
+      </inertial>
+      <visual name="left_prop_visual">
+        <!-- Pitch 180 deg about Y puts the prop disc in the vertical plane with
+             its spin axis along the boat's X (thrust) axis, matching the joint
+             axis below. -->
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="left_prop_collision">
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- ======================= Right propeller ====================== -->
+    <link name="right_prop_link">
+      <pose>0.4832 -0.30 -0.1308 0 0 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00010562499999999999</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00010562499999999999</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015125000000000002</izz>
+        </inertia>
+      </inertial>
+      <visual name="right_prop_visual">
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="right_prop_collision">
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- ===================== Propeller joints ======================= -->
+    <joint name="left_engine_propeller_joint" type="revolute">
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>100</effort>
+          <velocity>100</velocity>
+        </limit>
+        <dynamics>
+          <friction>0.05</friction>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+      <parent>base_link</parent>
+      <child>left_prop_link</child>
+    </joint>
+
+    <joint name="right_engine_propeller_joint" type="revolute">
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>100</effort>
+          <velocity>100</velocity>
+        </limit>
+        <dynamics>
+          <friction>0.05</friction>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+      <parent>base_link</parent>
+      <child>right_prop_link</child>
+    </joint>
+
+    <!-- ==================== Buoyancy (per hull) ===================== -->
+    <!-- Port hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>1.0</hull_length>
+      <hull_radius>0.12</hull_radius>
+      <fluid_level>0</fluid_level>
+      <points>
+        <point>0.45 0.30 -0.05</point>
+        <point>-0.45 0.30 -0.05</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- Starboard hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>1.0</hull_length>
+      <hull_radius>0.12</hull_radius>
+      <fluid_level>0</fluid_level>
+      <points>
+        <point>0.45 -0.30 -0.05</point>
+        <point>-0.45 -0.30 -0.05</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- ==================== Hydrodynamics ========================== -->
+    <plugin
+      filename="libSimpleHydrodynamics.so"
+      name="vrx::SimpleHydrodynamics">
+      <link_name>base_link</link_name>
+      <!-- Added mass -->
+      <xDotU>0.0</xDotU>
+      <yDotV>0.0</yDotV>
+      <nDotR>0.0</nDotR>
+      <!-- Linear and quadratic drag -->
+      <xU>4.0</xU>
+      <xUU>6.0</xUU>
+      <yV>4.0</yV>
+      <yVV>4.0</yVV>
+      <zW>20.0</zW>
+      <kP>12.0</kP>
+      <kPP>24.0</kPP>
+      <mQ>36.0</mQ>
+      <mQQ>35.0</mQQ>
+      <nR>32.0</nR>
+      <nRR>32.0</nRR>
+    </plugin>
+
+    <!-- ==================== Thrusters ============================== -->
+    <plugin
+      filename="gz-sim-thruster-system"
+      name="gz::sim::systems::Thruster">
+      <joint_name>left_engine_propeller_joint</joint_name>
+      <thrust_coefficient>0.0001</thrust_coefficient>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.1</propeller_diameter>
+      <velocity_control>true</velocity_control>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-thruster-system"
+      name="gz::sim::systems::Thruster">
+      <joint_name>right_engine_propeller_joint</joint_name>
+      <thrust_coefficient>0.0001</thrust_coefficient>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.1</propeller_diameter>
+      <velocity_control>true</velocity_control>
+    </plugin>
+
+  </model>
+</sdf>

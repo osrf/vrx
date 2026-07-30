@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
-  <model name="blueboat">
+  <model name="blueboat_bare_29July2026">
     <!--
-      Blue Robotics BlueBoat - TEMPORARY hull-only configuration for mesh
-      testing (propellers/thrusters removed; buoyancy + hydrodynamics kept
-      so it still floats).
+      Blue Robotics BlueBoat powered USV.
 
       Coordinate note: the supplied GLB meshes are authored Y-up (glTF convention)
       while Gazebo is Z-up, so every mesh below carries a corrective <pose> roll of
@@ -36,7 +34,7 @@
         <pose>0 0 0 1.5708 0 0</pose>
         <geometry>
           <mesh>
-            <uri>file://blueboat/meshes/blueboat.glb</uri>
+            <uri>file://blueboat_29July2026/meshes/blueboat.visual.glb</uri>
           </mesh>
         </geometry>
       </visual>
@@ -45,16 +43,13 @@
         <pose>0 0 0 1.5708 0 0</pose>
         <geometry>
           <mesh>
-            <uri>file://blueboat/meshes/blueboat_collision.glb</uri>
+            <uri>file://blueboat_29July2026/meshes/blueboat.collision.glb</uri>
           </mesh>
         </geometry>
       </collision>
     </link>
 
-    <!-- NOTE: Propellers (two prop links, their revolute joints, and the two
-         Thruster plugins) temporarily removed for hull-only mesh testing.
-         Restore from git history to re-enable propulsion. -->
-
+   
     <!-- ==================== Buoyancy (per hull) ===================== -->
     <!-- Port hull -->
     <plugin
@@ -112,6 +107,8 @@
       <nR>32.0</nR>
       <nRR>32.0</nRR>
     </plugin>
+
+
 
   </model>
 </sdf>

@@ -20,9 +20,9 @@
 
         <engine>ogre2</engine>
         <scene>scene</scene>
-        <ambient_light>0.4 0.4 0.4</ambient_light>
-        <background_color>0.8 0.8 0.8</background_color>
-        <camera_pose>-181.9 1147.8 28.1 0 0.25 -1.18</camera_pose>
+        <ambient_light>0.35 0.35 0.35</ambient_light>
+        <background_color>0.22 0.24 0.28</background_color>
+        <camera_pose>-189 1097 3.6 0 0.26 -0.65</camera_pose>
         <camera_clip>
           <near>0.25</near>
           <far>10000</far>
@@ -310,10 +310,14 @@
     </plugin>
 
     <scene>
-      <sky></sky>
+      <!-- Sky disabled so <background> is visible; re-enable for a natural look. -->
+      <!-- <sky></sky> -->
       <grid>false</grid>
-      <ambient>1.0 1.0 1.0</ambient>
-      <background>0.8 0.8 0.8</background>
+      <!-- Low ambient lets the directional sun actually shade the hulls; at the
+           previous 1.0 every face rendered at the same brightness and mesh form
+           / faceting was invisible. Raise toward 0.5 if it reads too dark. -->
+      <ambient>0.35 0.35 0.35</ambient>
+      <background>0.22 0.24 0.28</background>
     </scene>
 
     <!-- Estimated latitude/longitude of Nathan Benderson Park
@@ -330,8 +334,10 @@
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 10 0 0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0 0 0 1</specular>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <!-- Non-zero specular gives moving highlights that reveal hull curvature
+           and mesh faceting - the main cue for low- vs high-poly comparison. -->
+      <specular>0.35 0.35 0.35 1</specular>
       <attenuation>
         <range>1000</range>
         <constant>0.9</constant>
@@ -345,14 +351,29 @@
 <!-- RoboBoat 01 -->
 <include>
   <name>roboboat01</name>
-  <pose>-185 1088 0 0 0 0</pose>
+  <pose>-185 1088 1 0 0 0</pose>
   <uri>roboboat01</uri>
 </include>
-<!-- BlueBoat -->
+<!-- BlueBoats -->
 <include>
-  <name>blueboat</name>
-  <pose>-185 1090 0 0 0 0</pose>
-  <uri>blueboat</uri>
+  <name>blueboat_7July2026</name>
+  <pose>-185 1090 1 0 0 0</pose>
+  <uri>blueboat_7July2026</uri>
+</include>
+<include>
+  <name>blueboat_bare_29July2026</name>
+  <pose>-185 1092 1 0 0 0</pose>
+  <uri>blueboat_bare_29July2026</uri>
+</include>
+<include>
+  <name>blueboat_29July2026</name>
+  <pose>-185 1094 1 0 0 0</pose>
+  <uri>blueboat_29July2026</uri>
+</include>
+<include>
+  <name>blueboat_assembly</name>
+  <pose>-185 1096 1 0 0 0</pose>
+  <uri>blueboat_assembly</uri>
 </include>
 <include>
   <name>platform</name>
