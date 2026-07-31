@@ -29,27 +29,11 @@ under the mounted home rather than `/tmp`.
 ```bash
 source /opt/ros/lyrical/setup.bash
 cd PATH/vrx_ws
+rm -rf build install log
 colcon build --merge-install
 ```
 
-The FFT wave provider needs **EncinoWaves**, which is not in the image. Without
-it `gz_waves_provider_fft` fails to *configure*, which aborts the whole build —
-it is not skipped, so the error is not obviously about one optional package.
 
-### Add EncinoWaves to the workspace (recommended)
-
-Clone it into `src/` next to this repo, so the workspace is self-contained and
-does not depend on anything installed system-wide or in another workspace:
-
-```bash
-cd PATH/vrx_ws
-vcs import src < src/vrx/vrx.repos       # or: git clone <url> src/encinowaves
-colcon build --merge-install
-```
-
-colcon builds it as a plain CMake package and everything downstream finds it —
-no `CMAKE_PREFIX_PATH` to set, and `rm -rf install` cannot leave a stale copy
-behind somewhere else.
 
 **Build-order caveat.** EncinoWaves has no `package.xml`, so colcon cannot know
 that `gz_waves_provider_fft` depends on it and may schedule them concurrently.
@@ -75,11 +59,6 @@ colcon build --merge-install --packages-up-to \
   vrx_bringup vrx_gazebo gz_waves_provider_gerstner gz_waves_rendering
 ```
 
-### Stale CMake cache
-
-Add `rm -rf build install log` first if you have switched branches — a stale
-CMake cache pointing at a package path that no longer exists fails the build
-with a confusing "source directory does not exist".
 
 ## 4. Run the open-water demo — INSIDE THE CONTAINER
 
@@ -106,10 +85,17 @@ error on startup is expected and harmless — `Failed to load system plugin
 [gz-sim-waves-fft-gui]` — because the water surface model requests both
 engines' GUI registrars and the FFT one is not built.
 
-### Headless
+### Paused and headless
 
-`simulation.launch.xml` has no `paused` argument. To start paused, or to run
-without a GUI, drive the server directly — omitting `-r` starts it paused:
+`simulation.launch.xml` takes `paused` and `gazebo_gui`:
+
+```bash
+ros2 launch vrx_bringup simulation.launch.xml world:=blueboat_sandbox.sdf paused:=true
+ros2 launch vrx_bringup simulation.launch.xml world:=blueboat_sandbox.sdf gazebo_gui:=false
+```
+
+Or drive the server directly, which is simpler for scripted runs — omitting
+`-r` starts it paused:
 
 ```bash
 gz sim -s -r install/share/vrx_gazebo/worlds/blueboat_sandbox.sdf   # headless, running
@@ -118,6 +104,12 @@ gz sim    install/share/vrx_gazebo/worlds/blueboat_sandbox.sdf      # paused
 
 Note that a paused sim shows models at their **spawn** pose, not floating —
 the buoyancy and hydrodynamics systems both skip a paused step.
+
+Implementation note: `paused` does not reach `gz_server`, which has no such
+parameter — its component declares only `world_sdf_file`, `world_sdf_string`
+and `initial_sim_time`. The launch file instead bypasses `gz_server` on the
+paused path and runs `gz sim -s` directly, and the bridge creates its own
+composition container in that case since nothing else does.
 
 ### Driving a boat
 

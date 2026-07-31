@@ -4,24 +4,37 @@
   <arg name="world" default="open_water.sdf" description="World SDF file name (resolved via GZ_SIM_RESOURCE_PATH)"/>
   <arg name="use_composition" default="true" description="Use composable nodes for GzServer and bridge"/>
   <arg name="gazebo_gui" default="true" description="Launch Gazebo GUI"/>
+  <arg name="paused" default="false" description="Start the server paused (press play in the GUI to begin)"/>
 
-  <!-- 1. Gazebo Server (composable node) -->
+  <!-- 1. Gazebo Server (composable node).
+       ros_gz_sim's gz_server action has no paused/run parameter - the gzserver
+       component declares only world_sdf_file, world_sdf_string and
+       initial_sim_time - so there is nothing to pass through. When paused we
+       bypass it and launch the server directly instead: 'gz sim -s' without -r
+       starts paused. -->
   <gz_server
       world_sdf_file="$(var world)"
       container_name="ros_gz_container"
       create_own_container="true"
-      use_composition="$(var use_composition)">
+      use_composition="$(var use_composition)"
+      unless="$(var paused)">
   </gz_server>
+
+  <executable cmd="gz sim -s $(var world)" output="screen" if="$(var paused)"/>
 
   <!-- 2. Gazebo GUI (separate process) -->
   <executable cmd="gz sim -g" output="screen" if="$(var gazebo_gui)"/>
 
-  <!-- 3. ROS-Gazebo bridge (shares ros_gz_container) -->
+  <!-- 3. ROS-Gazebo bridge.
+       Normally gz_server creates ros_gz_container and the bridge joins it. On
+       the paused path the server is a plain executable, so nothing creates that
+       container and the bridge has to make its own - hence
+       create_own_container tracks 'paused'. -->
   <ros_gz_bridge
       bridge_name="ros_gz_bridge"
       config_file="$(find-pkg-share vrx_bringup)/config/ros_gz_bridge.yaml"
       container_name="ros_gz_container"
-      create_own_container="false"
+      create_own_container="$(var paused)"
       use_composition="$(var use_composition)">
   </ros_gz_bridge>
 
