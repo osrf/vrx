@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="blueboat_trial_29July2026">
+    <!--
+      Trial variant of blueboat_29July2026.
+
+      RESULT: this model renders correctly, including the normal map.
+
+      blueboat_29July2026 shows bright mis-lit facets under Ogre2 while looking
+      correct in gltf-viewer. This model uses exactly the same geometry (it
+      references the same GLBs, unmodified) and the same normal map, but
+      declares the material in an explicit SDF <material><pbr><metal> block
+      built from PNGs extracted out of that GLB, instead of relying on the
+      material embedded in the glTF.
+
+      Two variants were tested, in this order:
+        1. without <normal_map>  -> renders correctly
+        2. with    <normal_map>  -> also renders correctly
+
+      Since the same normal map on the same mesh is fine via SDF, the problem is
+      NOT the missing TANGENT vertex attribute (an early hypothesis) - Ogre2
+      handles this mesh's normal map without complaint. The fault is in Gazebo's
+      import of materials embedded in a GLB. Declaring materials in SDF is the
+      workaround, and is the pattern the working PBR models in this repo already
+      use: see roboboat02/model.sdf, which points .dae meshes at
+      roboboat01/materials/textures/*.png the same way.
+
+      The normal map was then confirmed visually to be contributing to the
+      shading (not silently dropped), so SDF-declared normal maps genuinely
+      work on a .glb mesh with no TANGENT attribute.
+
+      Everything else (props, buoyancy, hydrodynamics, thrusters) is unchanged
+      from blueboat_29July2026, including bow-at-minus-X - see that model's
+      header for the coordinate notes.
+    -->
+
+    <!-- ============================ Hull ============================ -->
+    <link name="base_link">
+      <inertial>
+        <pose>0 0 -0.05 0 0 0</pose>
+        <mass>10</mass>
+        <inertia>
+          <ixx>0.716</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.085</iyy>
+          <iyz>0</iyz>
+          <izz>1.573</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="visual">
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <!-- Same GLB as blueboat_29July2026, unmodified. The <material>
+                 below overrides the material embedded in it. -->
+            <uri>file://blueboat_29July2026/meshes/blueboat.visual.glb</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+              <albedo_map>file://blueboat_trial_29July2026/materials/textures/Albedo-Blue-USV-Blue-Color.png</albedo_map>
+              <!-- Roughness-Blue-USV.png is a 256x256 solid fill - one unique
+                   colour, (255,237,255). Under glTF's packing that is
+                   roughness = G/255 = 0.929, metalness = B/255 = 1.0, and the
+                   source material's metallicFactor of 0 zeroes the metalness.
+                   A scalar is exact and avoids a pointless texture fetch, so
+                   the PNG is kept in materials/textures/ but not referenced. -->
+              <roughness>0.929</roughness>
+              <metalness>0.0</metalness>
+              <!-- Same normal map the GLB embeds. Broken when Gazebo imports it
+                   from the GLB, fine when declared here - see header. -->
+              <normal_map>file://blueboat_trial_29July2026/materials/textures/Normal-USV.png</normal_map>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <collision name="collision">
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_29July2026/meshes/blueboat.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- ======================= Left propeller ======================= -->
+    <link name="left_prop_link">
+      <pose>0.4832 0.30 -0.1308 0 0 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00010562499999999999</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00010562499999999999</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015125000000000002</izz>
+        </inertia>
+      </inertial>
+      <visual name="left_prop_visual">
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="left_prop_collision">
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- ======================= Right propeller ====================== -->
+    <link name="right_prop_link">
+      <pose>0.4832 -0.30 -0.1308 0 0 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.00010562499999999999</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00010562499999999999</iyy>
+          <iyz>0</iyz>
+          <izz>0.00015125000000000002</izz>
+        </inertia>
+      </inertial>
+      <visual name="right_prop_visual">
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="right_prop_collision">
+        <pose>0 0 0 0 3.1416 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_parts/meshes/blueboat_prop.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- ===================== Propeller joints ======================= -->
+    <joint name="left_engine_propeller_joint" type="revolute">
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>100</effort>
+          <velocity>100</velocity>
+        </limit>
+        <dynamics>
+          <friction>0.05</friction>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+      <parent>base_link</parent>
+      <child>left_prop_link</child>
+    </joint>
+
+    <joint name="right_engine_propeller_joint" type="revolute">
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>100</effort>
+          <velocity>100</velocity>
+        </limit>
+        <dynamics>
+          <friction>0.05</friction>
+          <damping>0.05</damping>
+        </dynamics>
+      </axis>
+      <parent>base_link</parent>
+      <child>right_prop_link</child>
+    </joint>
+
+    <!-- ==================== Buoyancy (per hull) ===================== -->
+    <!-- Port hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>1.0</hull_length>
+      <hull_radius>0.12</hull_radius>
+      <fluid_level>0</fluid_level>
+      <points>
+        <point>0.45 0.30 -0.05</point>
+        <point>-0.45 0.30 -0.05</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- Starboard hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>1.0</hull_length>
+      <hull_radius>0.12</hull_radius>
+      <fluid_level>0</fluid_level>
+      <points>
+        <point>0.45 -0.30 -0.05</point>
+        <point>-0.45 -0.30 -0.05</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- ==================== Hydrodynamics ========================== -->
+    <plugin
+      filename="libSimpleHydrodynamics.so"
+      name="vrx::SimpleHydrodynamics">
+      <link_name>base_link</link_name>
+      <!-- Added mass -->
+      <xDotU>0.0</xDotU>
+      <yDotV>0.0</yDotV>
+      <nDotR>0.0</nDotR>
+      <!-- Linear and quadratic drag -->
+      <xU>4.0</xU>
+      <xUU>6.0</xUU>
+      <yV>4.0</yV>
+      <yVV>4.0</yVV>
+      <zW>20.0</zW>
+      <kP>12.0</kP>
+      <kPP>24.0</kPP>
+      <mQ>36.0</mQ>
+      <mQQ>35.0</mQQ>
+      <nR>32.0</nR>
+      <nRR>32.0</nRR>
+    </plugin>
+
+    <!-- ==================== Thrusters ============================== -->
+    <plugin
+      filename="gz-sim-thruster-system"
+      name="gz::sim::systems::Thruster">
+      <joint_name>left_engine_propeller_joint</joint_name>
+      <thrust_coefficient>0.0001</thrust_coefficient>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.1</propeller_diameter>
+      <velocity_control>true</velocity_control>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-thruster-system"
+      name="gz::sim::systems::Thruster">
+      <joint_name>right_engine_propeller_joint</joint_name>
+      <thrust_coefficient>0.0001</thrust_coefficient>
+      <fluid_density>1000</fluid_density>
+      <propeller_diameter>0.1</propeller_diameter>
+      <velocity_control>true</velocity_control>
+    </plugin>
+
+  </model>
+</sdf>

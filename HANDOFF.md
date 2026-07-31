@@ -66,9 +66,31 @@ breaks every other model that points into it.
   (`blueboat_<D><Month><YYYY>`), and each model's `<model name>` / `model.config`
   `<name>` must match its directory — duplicates are legal (the world
   `<include><name>` wins) but make the GUI entity tree ambiguous.
-- **Collision meshes must stay low-poly.** Triangle count on the *collision* mesh
-  is paid every physics step in DART; the *visual* triangle count only costs when
-  the GUI or a sensor renders it. Verified low so far (64 / 20 tris) — keep it.
+- **Gazebo does not import GLB-embedded materials reliably — declare PBR in SDF.**
+  `blueboat_29July2026`'s hull rendered with bright mis-lit facets under Ogre2
+  while looking correct in gltf-viewer. Proven cause: the material embedded in
+  the GLB. The identical mesh renders correctly when the maps are extracted to
+  PNGs and declared in an SDF `<material><pbr><metal>` block — normal map
+  included, and confirmed visually to be contributing. `blueboat_trial_29July2026`
+  is that proof; `roboboat02/model.sdf` is the pre-existing example of the same
+  pattern. Ruled out: missing `TANGENT` vertex attribute (neither hull has one,
+  and the SDF path works regardless).
+  Practical rule: any mesh with more than a base-colour texture needs its
+  material declared in SDF. Base-colour-only meshes (the 7 July hull, `flag`)
+  and material-free ones import fine. Most of `blueboat_parts` is factor-only,
+  so unaffected — but new textured parts will hit this.
+- **Direction: collision geometry moves to SDF primitives, not meshes.** For most
+  accessories (and probably the hull), use `<box>`/`<cylinder>`/`<sphere>` in the
+  visual's sibling `<collision>` rather than a `*.collision.glb`. Cheaper in DART
+  than any mesh, no dependency on the modeller getting a proxy right, and it
+  sidesteps the mesh-scale defects already found (`ping_mount.collision` is ~15x
+  its own visual). Consequence: the parts library does not need a collision GLB
+  per part, and `MODELER_NOTES.md` no longer asks for them. The existing
+  `*.collision.glb` files are kept for now but are on the way out.
+- **When a collision mesh *is* used, keep it low-poly.** Triangle count on the
+  *collision* mesh is paid every physics step in DART; the *visual* triangle
+  count only costs when the GUI or a sensor renders it. Current ones are cheap
+  (12-124 tris) — keep it that way.
 - **Three part meshes have bad scale** (found via `glb_stats.py`, not yet fixed at
   source): `ping_mount.collision` is 3.68 × 1.66 × 1.35 m against a 0.24 m visual
   (~15× oversized — left out of `blueboat_assembly` because it would wrap a
@@ -104,13 +126,16 @@ breaks every other model that points into it.
    *Not yet built:* a headless benchmark harness (launch nbpark N iters, log
    mean/σ RTF + profiler split to CSV, parametrized by mesh variant).
 4. **Accessory-assembly system** — parts library now exists at
-   `vrx_gz/models/blueboat_parts/meshes/` with `*.visual.glb`/`*.collision.glb`
-   pairs, and `blueboat_assembly` hand-mounts all of them. Still to do:
-   `part.yaml` metadata per part (mount point, type) and a generator
-   (analogous to WAM-V's
-   `vrx_urdf/vrx_gazebo/scripts/generate_wamv.py` + `configure_wamv`) that
-   assembles chosen accessories into one model. One runtime model; structural
-   mounts merge into `base_link`, sensors get their own link+joint.
+   `vrx_gz/models/blueboat_parts/meshes/`, and `blueboat_assembly` hand-mounts
+   all 10 parts. Still to do: `part.yaml` metadata per part and a generator
+   (analogous to WAM-V's `vrx_urdf/vrx_gazebo/scripts/generate_wamv.py` +
+   `configure_wamv`) that assembles chosen accessories into one model. One
+   runtime model; structural mounts merge into `base_link`, sensors get their
+   own link+joint.
+   Revised by the primitive-collision decision above: a part is a *visual* mesh
+   plus a primitive collision described in metadata (shape + dimensions +
+   offset), not a visual/collision GLB pair. `part.yaml` is the natural place to
+   carry that shape, and `glb_stats.py` extents give a first-cut box for free.
 
 ## Aside (unrelated pre-existing issue)
 

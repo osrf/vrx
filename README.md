@@ -5,10 +5,15 @@ This branch is just for me testing blueboat models
 
 ```
  rocker --pull --devices /dev/input/js0 --x11 --nvidia --user --home ghcr.io/osrf/vrx-devel:latest /bin/bash
+```
 
- 1716  colcon build --merge-install
- 1717  . install/setup.bash
- 1718  ros2 launch vrx_gz competition.launch.py world:=nbpark
+Then in container, with home mounted and `vrx_ws` at home
+
+```
+cd ~/vrx_ws
+colcon build --merge-install
+. install/setup.bash
+ros2 launch vrx_gz competition.launch.py world:=nbpark
  ```
 
 # Virtual RobotX (VRX)

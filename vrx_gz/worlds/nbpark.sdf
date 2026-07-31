@@ -22,7 +22,7 @@
         <scene>scene</scene>
         <ambient_light>0.35 0.35 0.35</ambient_light>
         <background_color>0.22 0.24 0.28</background_color>
-        <camera_pose>-189 1097 3.6 0 0.26 -0.65</camera_pose>
+        <camera_pose>-184.8 1093.4 1.4 0 0.557 1.989</camera_pose>
         <camera_clip>
           <near>0.25</near>
           <far>10000</far>
@@ -366,13 +366,18 @@
   <uri>blueboat_bare_29July2026</uri>
 </include>
 <include>
-  <name>blueboat_29July2026</name>
+  <name>blueboat_trial_29July2026</name>
   <pose>-185 1094 1 0 0 0</pose>
+  <uri>blueboat_trial_29July2026</uri>
+</include>
+<include>
+  <name>blueboat_29July2026</name>
+  <pose>-185 1096 1 0 0 0</pose>
   <uri>blueboat_29July2026</uri>
 </include>
 <include>
   <name>blueboat_assembly</name>
-  <pose>-185 1096 1 0 0 0</pose>
+  <pose>-185 1098 1 0 0 0</pose>
   <uri>blueboat_assembly</uri>
 </include>
 <include>
