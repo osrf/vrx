@@ -5,9 +5,9 @@
     testing mesh geometry, PBR materials and part assembly in Gazebo.
 
     Derived from open_water.sdf. Differences from it:
-      - Gerstner wave engine instead of FFT (see the wave source block below).
       - <sea_state> 2 rather than 5 - a 1.08 m boat against Hs 3.25 m is not a
         useful test.
+      - FFT tile/grid retuned to 100/256 (0.39 m cells) for the boat's scale.
       - Camera framed on the boat row.
       - The BlueBoat <include>s at the end.
 
@@ -102,24 +102,30 @@
          the comment directly above each block.
          ================================================================== -->
 
-    <!-- Wave source. GERSTNER is active here, unlike open_water.sdf, and the
-         choice matters for anything that floats:
+    <!-- Wave source. FFT (EncinoWaves spectral) is active: this sandbox exists
+         to judge how things LOOK, and FFT gives a far better sea surface than
+         the three-component Gerstner sum. Requires EncinoWaves in the workspace
+         - see vrx.repos and docker/README.md.
 
-         FFTWaveSimulation::Elevation() ignores its time argument and samples
-         the grid last built by Advance(), which the source system throttles to
-         <update_rate> (30 Hz). Physics runs at 250 Hz, so a buoyancy consumer
-         would sample a field up to 1/30 s stale. Gerstner's Elevation() is an
-         analytic sum evaluated at the requested t, so buoyancy and rendering
-         agree at every step.
+         Known trade-off for anything that floats. FFTWaveSimulation::Elevation()
+         ignores its time argument and samples the grid last built by Advance(),
+         which the source system throttles to <update_rate>. Physics runs at
+         250 Hz (max_step_size 0.004), so buoyancy samples a field up to
+         1/<update_rate> seconds stale and the hull can lag the rendered
+         surface slightly. Raising <update_rate> narrows that gap at a CPU cost.
+         Gerstner's Elevation() is analytic in t and has no such lag - switch to
+         the block below when hull motion fidelity matters more than looks.
 
-         Two lesser reasons: FFT needs EncinoWaves, an external dependency that
-         is not in the dev image; and at <tile_size> 200 / <grid_size> 128 the
-         FFT cell is 1.56 m, larger than the whole 1.08 m boat.
+         <tile_size>/<grid_size> set the periodic domain and its resolution.
+         100/256 gives 0.39 m cells, small enough to resolve a 1.08 m boat;
+         open_water.sdf's 200/128 would give 1.56 m cells - larger than the
+         whole vessel, so it would sit on an essentially flat patch.
+         <grid_size> must be a power of two.
 
-         No model change is needed to switch - water_surface/model.sdf carries
-         both engines' GUI registrars. -->
-    <plugin filename="gz-sim-waves-gerstner-system"
-            name="gz::sim::systems::GerstnerWaves">
+         No model change is needed to switch engines - water_surface/model.sdf
+         carries both engines' GUI registrars. -->
+    <plugin filename="gz-sim-waves-fft-system"
+            name="gz::sim::systems::FftWaves">
       <update_rate>30</update_rate>
       <wave>
         <!-- WMO sea-state code (0-9). 2 is ~0.3 m significant wave height,
@@ -127,27 +133,28 @@
              would simply bury it. Use 0 for flat water when checking the
              resting waterline against a hand calculation. -->
         <sea_state>2</sea_state>
+        <tile_size>100</tile_size>
+        <grid_size>256</grid_size>
+      </wave>
+    </plugin>
+
+    <!-- Gerstner alternative (gz-sim-waves-gerstner-system): analytic sum of
+         component waves, no external dependency, and exact at every physics
+         step. Prefer it when vessel motion matters more than sea appearance,
+         or when EncinoWaves is unavailable. To use it, comment the <plugin>
+         above and uncomment this one. -->
+    <!--
+    <plugin filename="gz-sim-waves-gerstner-system"
+            name="gz::sim::systems::GerstnerWaves">
+      <update_rate>30</update_rate>
+      <wave>
+        <sea_state>2</sea_state>
         <model>PMS</model>
         <number>3</number>
         <angle>0.4</angle>
         <scale>1.1</scale>
         <tau>2.0</tau>
         <grid_size>128</grid_size>
-      </wave>
-    </plugin>
-
-    <!-- FFT alternative (gz-sim-waves-fft-system), as configured in
-         open_water.sdf. To use it instead, comment the <plugin> above and
-         uncomment this one - but read the note above first if any vessel in the
-         world is meant to float, and prefer <tile_size>100</tile_size> with
-         <grid_size>256</grid_size> (0.39 m cells) at this scale. Requires
-         EncinoWaves to be installed. -->
-    <!--
-    <plugin filename="gz-sim-waves-fft-system"
-            name="gz::sim::systems::FftWaves">
-      <update_rate>30</update_rate>
-      <wave>
-        <sea_state>2</sea_state>
       </wave>
     </plugin>
     -->

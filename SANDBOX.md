@@ -25,25 +25,38 @@ branch.
 
 ## Build and run
 
+The sandbox world uses the **FFT** wave engine, which needs EncinoWaves. It is
+not in the dev image, so fetch it into the workspace first — `vcs import` reads
+`vrx.repos`:
+
 ```bash
-./docker/run_compose.bash                    # ROS 2 Lyrical + Gazebo Jetty
+cd ~/vrx_ws
+vcs import src < src/vrx/vrx.repos            # once, gets src/encinowaves
+
+./src/vrx/docker/run_compose.bash             # ROS 2 Lyrical + Gazebo Jetty
 # inside the container:
 cd ~/vrx_ws
-colcon build --merge-install --packages-up-to \
-  vrx_bringup vrx_gazebo vrx_blueboat vrx_usv_dynamics \
-  gz_waves_provider_gerstner gz_waves_rendering
+colcon build --merge-install
 . install/setup.bash
 ros2 launch vrx_bringup simulation.launch.xml world:=blueboat_sandbox.sdf
 ```
 
-`--packages-up-to` deliberately routes around `gz_waves_provider_fft`, which
-fails to *configure* (not merely skip) when EncinoWaves is absent, as it is in
-the dev image. The sandbox uses the Gerstner engine anyway — see the wave source
-comment in `blueboat_sandbox.sdf` for why that matters when things float.
+If you skip EncinoWaves, `gz_waves_provider_fft` fails to *configure* — which
+aborts the whole build rather than skipping one package. You can still run the
+sandbox without it by switching the world to Gerstner (comment the FFT
+`<plugin>` block, uncomment the Gerstner one) and building around FFT:
 
-Expect one benign error on startup: `Failed to load system plugin
-[gz-sim-waves-fft-gui]`. Upstream `water_surface/model.sdf` requests both
-engines' GUI registrars and we do not build the FFT one.
+```bash
+colcon build --merge-install --packages-up-to \
+  vrx_bringup vrx_gazebo vrx_blueboat vrx_usv_dynamics \
+  gz_waves_provider_gerstner gz_waves_rendering
+```
+
+The engine choice is a real trade-off, documented at the wave source block in
+`blueboat_sandbox.sdf`: FFT looks considerably better, but its `Elevation()`
+ignores time and samples a grid refreshed at `<update_rate>`, so buoyancy lags
+the rendered surface slightly. Gerstner is analytic in `t` and exact at every
+physics step. This sandbox is mostly about appearance, hence FFT.
 
 ## Keeping current with `vrx4`
 
