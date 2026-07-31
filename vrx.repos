@@ -1,0 +1,18 @@
+# Source dependencies for a VRX 4 workspace, for vcstool.
+#
+# Fetch into the workspace src/ alongside this repo:
+#
+#   cd ~/vrx_ws
+#   vcs import src < src/vrx/vrx.repos
+#
+# EncinoWaves is the spectral ocean library behind gz_waves_provider_fft. It is
+# a plain CMake project (no package.xml), which colcon builds fine, but see the
+# build-order note in docker/README.md.
+#
+# Only gz_waves_provider_fft needs it. If you do not want the FFT wave engine,
+# skip this entirely and select around that package when building.
+repositories:
+  encinowaves:
+    type: git
+    url: git@github.com:HonuRobotics/encinowaves.git
+    version: master

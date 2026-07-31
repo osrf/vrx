@@ -36,25 +36,39 @@ The FFT wave provider needs **EncinoWaves**, which is not in the image. Without
 it `gz_waves_provider_fft` fails to *configure*, which aborts the whole build —
 it is not skipped, so the error is not obviously about one optional package.
 
-### Making EncinoWaves discoverable (once per machine)
+### Add EncinoWaves to the workspace (recommended)
 
-Install it under `~/.local`, which the container sees through the home mount and
-which survives rebuilding any other workspace:
+Clone it into `src/` next to this repo, so the workspace is self-contained and
+does not depend on anything installed system-wide or in another workspace:
 
 ```bash
-# from an existing EncinoWaves build tree
-cmake --install /path/to/encinowaves/build --prefix ~/.local
-
-# then, whenever you build (add to ~/.bashrc to make it permanent)
-export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
+cd PATH/vrx_ws
+vcs import src < src/vrx/vrx.repos       # or: git clone <url> src/encinowaves
+colcon build --merge-install
 ```
 
-Pointing `CMAKE_PREFIX_PATH` straight at another workspace's install directory
-also works, but breaks the moment that workspace is cleaned.
+colcon builds it as a plain CMake package and everything downstream finds it —
+no `CMAKE_PREFIX_PATH` to set, and `rm -rf install` cannot leave a stale copy
+behind somewhere else.
+
+**Build-order caveat.** EncinoWaves has no `package.xml`, so colcon cannot know
+that `gz_waves_provider_fft` depends on it and may schedule them concurrently.
+In practice it works, because `gz_waves_provider_fft` waits on `gz_waves`, which
+takes longer to build than EncinoWaves — but that is timing, not a guarantee. If
+a clean build ever fails saying EncinoWaves was not found, build it first:
+
+```bash
+colcon build --merge-install --packages-select EncinoWaves
+colcon build --merge-install
+```
+
+The durable fix is a `package.xml` in the EncinoWaves repo declaring it an
+ament/cmake package, plus a `<depend>` on it from `gz_waves_provider_fft`.
 
 ### Or skip FFT entirely
 
-Nothing needs it unless you want the FFT wave engine. Select around it:
+Nothing needs it unless you want the FFT wave engine — the BlueBoat sandbox uses
+Gerstner. Select around it:
 
 ```bash
 colcon build --merge-install --packages-up-to \
