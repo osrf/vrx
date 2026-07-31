@@ -3,11 +3,6 @@
 Quick start for building and running VRX 4 in the Docker dev container.
 Replace `PATH/vrx_ws` with the path to your own workspace.
 
-Steps 1 and 2 run **on the host**; steps 3 onward run **inside the container**.
-The container has no `docker` binary, so running step 1 from inside it fails
-with `build.bash: line 46: docker: command not found`. Your shell prompt is the
-tell — inside the container it shows the container's hostname, e.g.
-`bsb@2c17a702ae59:~/vrx_ws$`. Type `exit` to get back to the host.
 
 ## 1. Build the Lyrical/Jetty dev image — ON THE HOST
 
@@ -15,10 +10,6 @@ tell — inside the container it shows the container's hostname, e.g.
 cd PATH/vrx_ws/src/vrx
 ./docker/build.bash docker lyrical            # -> vrx_dev:lyrical
 ```
-
-`build.bash <dir containing Dockerfile> [tag]`, so the first `docker` here is
-the directory holding the Dockerfile, not a command. Only needed once, or when
-the Dockerfile changes.
 
 ## 2. Start an interactive dev container — ON THE HOST
 
@@ -43,22 +34,38 @@ colcon build --merge-install
 
 The FFT wave provider needs **EncinoWaves**, which is not in the image. Without
 it `gz_waves_provider_fft` fails to *configure*, which aborts the whole build —
-it is not skipped. Either point CMake at your EncinoWaves build:
+it is not skipped, so the error is not obviously about one optional package.
+
+### Making EncinoWaves discoverable (once per machine)
+
+Install it under `~/.local`, which the container sees through the home mount and
+which survives rebuilding any other workspace:
 
 ```bash
-export CMAKE_PREFIX_PATH=/path/to/encinowaves/build:$CMAKE_PREFIX_PATH
+# from an existing EncinoWaves build tree
+cmake --install /path/to/encinowaves/build --prefix ~/.local
+
+# then, whenever you build (add to ~/.bashrc to make it permanent)
+export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
 ```
 
-or build around it, selecting only what you need:
+Pointing `CMAKE_PREFIX_PATH` straight at another workspace's install directory
+also works, but breaks the moment that workspace is cleaned.
+
+### Or skip FFT entirely
+
+Nothing needs it unless you want the FFT wave engine. Select around it:
 
 ```bash
 colcon build --merge-install --packages-up-to \
   vrx_bringup vrx_gazebo gz_waves_provider_gerstner gz_waves_rendering
 ```
 
+### Stale CMake cache
+
 Add `rm -rf build install log` first if you have switched branches — a stale
-CMake cache pointing at a package path that no longer exists will fail the
-build with a confusing "source directory does not exist".
+CMake cache pointing at a package path that no longer exists fails the build
+with a confusing "source directory does not exist".
 
 ## 4. Run the open-water demo — INSIDE THE CONTAINER
 
