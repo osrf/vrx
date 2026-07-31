@@ -3,25 +3,37 @@
 Quick start for building and running VRX 4 in the Docker dev container.
 Replace `PATH/vrx_ws` with the path to your own workspace.
 
-## 1. Build the Lyrical/Jetty dev image
+Steps 1 and 2 run **on the host**; steps 3 onward run **inside the container**.
+The container has no `docker` binary, so running step 1 from inside it fails
+with `build.bash: line 46: docker: command not found`. Your shell prompt is the
+tell — inside the container it shows the container's hostname, e.g.
+`bsb@2c17a702ae59:~/vrx_ws$`. Type `exit` to get back to the host.
+
+## 1. Build the Lyrical/Jetty dev image — ON THE HOST
 
 ```bash
 cd PATH/vrx_ws/src/vrx
 ./docker/build.bash docker lyrical            # -> vrx_dev:lyrical
 ```
 
-## 2. Start an interactive dev container (GPU + X11 + home mount)
+`build.bash <dir containing Dockerfile> [tag]`, so the first `docker` here is
+the directory holding the Dockerfile, not a command. Only needed once, or when
+the Dockerfile changes.
+
+## 2. Start an interactive dev container — ON THE HOST
 
 ```bash
 ./docker/run_compose.bash                     # drops into bash in the container
 ```
+
+GPU, X11, home mount and joystick are all wired up by `compose.yaml`.
 
 `./docker/run_compose.bash <cmd...>` runs a single command instead of dropping
 into a shell — handy for scripted builds and headless test runs. Each
 invocation is a fresh `--rm` container, so write anything you want to keep
 under the mounted home rather than `/tmp`.
 
-## 3. Inside the container: build
+## 3. Build — INSIDE THE CONTAINER
 
 ```bash
 source /opt/ros/lyrical/setup.bash
@@ -48,14 +60,14 @@ Add `rm -rf build install log` first if you have switched branches — a stale
 CMake cache pointing at a package path that no longer exists will fail the
 build with a confusing "source directory does not exist".
 
-## 4. Run the open-water demo
+## 4. Run the open-water demo — INSIDE THE CONTAINER
 
 ```bash
 source install/setup.bash
 ros2 launch vrx_bringup simulation.launch.xml
 ```
 
-## 5. Run the BlueBoat sandbox
+## 5. Run the BlueBoat sandbox — INSIDE THE CONTAINER
 
 A row of BlueBoat variants floating on open water, for testing meshes, PBR
 materials and part assembly. See `../SANDBOX.md`.
