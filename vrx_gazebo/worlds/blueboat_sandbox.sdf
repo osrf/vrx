@@ -1,0 +1,401 @@
+<?xml version="1.0"?>
+<sdf version="1.12">
+  <!--
+    BlueBoat sandbox: a row of BlueBoat variants floating on open water, for
+    testing mesh geometry, PBR materials and part assembly in Gazebo.
+
+    Derived from open_water.sdf. Differences from it:
+      - Gerstner wave engine instead of FFT (see the wave source block below).
+      - <sea_state> 2 rather than 5 - a 1.08 m boat against Hs 3.25 m is not a
+        useful test.
+      - Camera framed on the boat row.
+      - The BlueBoat <include>s at the end.
+
+    Note the world name feeds the runtime service name, so wave parameters are
+    set live via /world/blueboat_sandbox/wave/set_parameters.
+  -->
+  <world name="blueboat_sandbox">
+
+    <!-- Physics -->
+    <physics name="default_physics" type="dart">
+      <max_step_size>0.004</max_step_size>
+      <!-- <real_time_factor>0</real_time_factor> -->
+    </physics>
+
+    <!-- Spherical coordinates for Portuguese Ledge, Monterey Bay.
+         Required by the magnetometer system, which computes the magnetic field
+         from the World Magnetic Model (WMM) at the given lat/lon. -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>36.693509</latitude_deg>
+      <longitude_deg>-121.936568</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- Scene: deep ocean ambient + procedural sky. The <sky> element
+         tells gz-rendering to draw its built-in procedural sky cube
+         (sun, horizon transition) so the water has something to
+         reflect and the background isn't a flat colour. -->
+    <scene>
+      <ambient>0.0 1.0 1.0</ambient>
+      <background>0.0 0.7 0.8</background>
+      <sky></sky>
+      <grid>false</grid>
+    </scene>
+
+    <!-- Directional light (sun, attenuated by water) -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Core systems -->
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-magnetometer-system"
+      name="gz::sim::systems::Magnetometer">
+      <use_units_gauss>false</use_units_gauss>
+      <use_earth_frame_ned>false</use_earth_frame_ned>
+    </plugin>
+
+    <plugin
+      filename="gz-sim-imu-system"
+      name="gz::sim::systems::Imu">
+    </plugin>
+
+
+    <!-- ==================================================================
+         WAVE SOURCE — the engine is the plugin's identity. Keep exactly ONE of
+         the two <plugin> blocks below active and comment the other out. Both
+         blocks are deliberately comment-free so either can be wrapped in an XML
+         comment cleanly (XML comments cannot nest). Per-parameter notes live in
+         the comment directly above each block.
+         ================================================================== -->
+
+    <!-- Wave source. GERSTNER is active here, unlike open_water.sdf, and the
+         choice matters for anything that floats:
+
+         FFTWaveSimulation::Elevation() ignores its time argument and samples
+         the grid last built by Advance(), which the source system throttles to
+         <update_rate> (30 Hz). Physics runs at 250 Hz, so a buoyancy consumer
+         would sample a field up to 1/30 s stale. Gerstner's Elevation() is an
+         analytic sum evaluated at the requested t, so buoyancy and rendering
+         agree at every step.
+
+         Two lesser reasons: FFT needs EncinoWaves, an external dependency that
+         is not in the dev image; and at <tile_size> 200 / <grid_size> 128 the
+         FFT cell is 1.56 m, larger than the whole 1.08 m boat.
+
+         No model change is needed to switch - water_surface/model.sdf carries
+         both engines' GUI registrars. -->
+    <plugin filename="gz-sim-waves-gerstner-system"
+            name="gz::sim::systems::GerstnerWaves">
+      <update_rate>30</update_rate>
+      <wave>
+        <!-- WMO sea-state code (0-9). 2 is ~0.3 m significant wave height,
+             which a 1.08 m boat can sit in; open_water.sdf's 5 is 3.25 m and
+             would simply bury it. Use 0 for flat water when checking the
+             resting waterline against a hand calculation. -->
+        <sea_state>2</sea_state>
+        <model>PMS</model>
+        <number>3</number>
+        <angle>0.4</angle>
+        <scale>1.1</scale>
+        <tau>2.0</tau>
+        <grid_size>128</grid_size>
+      </wave>
+    </plugin>
+
+    <!-- FFT alternative (gz-sim-waves-fft-system), as configured in
+         open_water.sdf. To use it instead, comment the <plugin> above and
+         uncomment this one - but read the note above first if any vessel in the
+         world is meant to float, and prefer <tile_size>100</tile_size> with
+         <grid_size>256</grid_size> (0.39 m cells) at this scale. Requires
+         EncinoWaves to be installed. -->
+    <!--
+    <plugin filename="gz-sim-waves-fft-system"
+            name="gz::sim::systems::FftWaves">
+      <update_rate>30</update_rate>
+      <wave>
+        <sea_state>2</sea_state>
+      </wave>
+    </plugin>
+    -->
+
+    <!-- GUI -->
+    <gui fullscreen="0">
+      <!-- 3D scene -->
+      <plugin filename="MinimalScene" name="3D View">
+        <gz-gui>
+          <title>3D View</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">docked</property>
+        </gz-gui>
+        <engine>ogre2</engine>
+        <scene>scene</scene>
+        <ambient_light>0.4 0.4 0.4</ambient_light>
+        <background_color>0.0 0.7 0.8</background_color>
+        <!-- Matches asv_wave_sim's reference camera_pose for fair
+             side-by-side visual comparison: 6m east of origin, 6m
+             above water, pitched ~29° down. -->
+        <!-- Framed on the boat row (origin to y=+12), from off the port bow at
+             roughly eye height for a 1 m vessel. -->
+        <camera_pose>-7 -2 2.5 0 0.18 0.55</camera_pose>
+        <camera_clip>
+          <near>0.1</near>
+          <far>50000</far>
+        </camera_clip>
+      </plugin>
+
+      <!-- Scene management plugins -->
+      <plugin filename="EntityContextMenuPlugin" name="Entity context menu">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <plugin filename="GzSceneManager" name="Scene Manager">
+        <gz-gui>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <plugin filename="InteractiveViewControl" name="Interactive view control">
+        <gz-gui>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <plugin filename="CameraTracking" name="Camera Tracking">
+        <gz-gui>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <plugin filename="MarkerManager" name="Marker manager">
+        <gz-gui>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+        <warn_on_action_failure>false</warn_on_action_failure>
+      </plugin>
+
+      <plugin filename="SelectEntities" name="Select Entities">
+        <gz-gui>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <plugin filename="VisualizationCapabilities" name="Visualization Capabilities">
+        <gz-gui>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <plugin filename="Spawn" name="Spawn Entities">
+        <gz-gui>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+
+      <!-- World control -->
+      <plugin filename="WorldControl" name="World control">
+        <gz-gui>
+          <title>World control</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">72</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="left" target="left"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </gz-gui>
+        <play_pause>true</play_pause>
+        <step>true</step>
+        <start_paused>false</start_paused>
+      </plugin>
+
+      <!-- World statistics -->
+      <plugin filename="WorldStats" name="World stats">
+        <gz-gui>
+          <title>World stats</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">110</property>
+          <property type="double" key="width">290</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </gz-gui>
+        <sim_time>true</sim_time>
+        <real_time>true</real_time>
+        <real_time_factor>true</real_time_factor>
+        <iterations>true</iterations>
+      </plugin>
+
+      <plugin filename="ComponentInspector" name="Component Inspector">
+        <gz-gui>
+          <title>Inspector</title>
+          <property type="string" key="state">docked_collapsed</property>
+        </gz-gui>
+      </plugin>
+    </gui>
+
+    <!-- Water surface visual (wave-displaced mesh). -->
+    <include>
+      <uri>model://water_surface</uri>
+    </include>
+
+    <!-- ==================================================================
+         BlueBoat row (vrx_blueboat). Spaced 3 m in Y; the hull is 1.08 x
+         0.85 m. Spawned 0.2 m high and left to settle rather than placed at
+         the expected waterline, so a sinking model is obvious.
+
+         Expected rest state on flat water (<sea_state>0</sea_state>), from the
+         models' own numbers: each vessel carries two Surface plugins of two
+         points each, and each plugin divides by its OWN points.size(), so per
+         point F = CircleSegment(0.12, dz) * (hull_length/2) * 9.8 * 1000.
+         Four points against 10 kg gives CircleSegment(0.12, dz) = 0.005 m^2,
+         i.e. dz ~ 0.040 m. The points sit at link z = -0.05, so base_link
+         should settle at z ~ +0.010 m, drafting about 4 cm. Reserve buoyancy
+         is ~443 N against 98 N of weight, so these bob rather than swamp.
+
+         The <name> is what you drive: the Thruster system's default topic is
+         /model/<name>/joint/<joint_name>/cmd_thrust.
+         ================================================================== -->
+
+    <!-- A: PBR material embedded in the GLB. -->
+    <include>
+      <uri>model://blueboat_29July2026</uri>
+      <name>bb_glb_pbr</name>
+      <pose>0 0 0.2 0 0 0</pose>
+    </include>
+
+    <!-- B: same mesh and same maps, material declared in SDF. A and B differ
+         ONLY in where the material comes from - compare their hull shading
+         side by side to settle whether Gazebo Jetty still mis-imports
+         GLB-embedded multi-map materials. See blueboat_trial_29July2026. -->
+    <include>
+      <uri>model://blueboat_trial_29July2026</uri>
+      <name>bb_sdf_pbr</name>
+      <pose>0 3 0.2 0 0 0</pose>
+    </include>
+
+    <!-- Hull only: no props, no thrusters. The cleanest buoyancy check. -->
+    <include>
+      <uri>model://blueboat_bare_29July2026</uri>
+      <name>bb_bare</name>
+      <pose>0 6 0.2 0 0 0</pose>
+    </include>
+
+    <!-- Older, heavier hull (~13.5k tris vs ~10.7k) for the geometry-
+         complexity comparison. -->
+    <include>
+      <uri>model://blueboat_7July2026</uri>
+      <name>bb_7july</name>
+      <pose>0 9 0.2 0 0 0</pose>
+    </include>
+
+    <!-- All 10 accessories mounted. Two of them (surveyor, side-scan sonar)
+         are known to be oversized at source and will dwarf the hull. -->
+    <include>
+      <uri>model://blueboat_assembly</uri>
+      <name>bb_assembly</name>
+      <pose>0 12 0.2 0 0 0</pose>
+    </include>
+
+  </world>
+</sdf>
