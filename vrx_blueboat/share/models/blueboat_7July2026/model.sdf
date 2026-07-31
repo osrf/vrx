@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sdf version="1.6">
+<sdf version="1.10">
   <model name="blueboat_7July2026">
     <!--
       Blue Robotics BlueBoat powered USV.
@@ -151,7 +151,7 @@
     <!-- ==================== Buoyancy (per hull) ===================== -->
     <!-- Port hull -->
     <plugin
-      filename="libSurface.so"
+      filename="vrx-surface-system"
       name="vrx::Surface">
       <link_name>base_link</link_name>
       <hull_length>1.0</hull_length>
@@ -161,14 +161,11 @@
         <point>0.45 0.30 -0.05</point>
         <point>-0.45 0.30 -0.05</point>
       </points>
-      <wavefield>
-        <topic>/vrx/wavefield/parameters</topic>
-      </wavefield>
     </plugin>
 
     <!-- Starboard hull -->
     <plugin
-      filename="libSurface.so"
+      filename="vrx-surface-system"
       name="vrx::Surface">
       <link_name>base_link</link_name>
       <hull_length>1.0</hull_length>
@@ -178,14 +175,11 @@
         <point>0.45 -0.30 -0.05</point>
         <point>-0.45 -0.30 -0.05</point>
       </points>
-      <wavefield>
-        <topic>/vrx/wavefield/parameters</topic>
-      </wavefield>
     </plugin>
 
     <!-- ==================== Hydrodynamics ========================== -->
     <plugin
-      filename="libSimpleHydrodynamics.so"
+      filename="vrx-simple-hydrodynamics-system"
       name="vrx::SimpleHydrodynamics">
       <link_name>base_link</link_name>
       <!-- Added mass -->

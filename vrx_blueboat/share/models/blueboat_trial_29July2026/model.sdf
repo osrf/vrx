@@ -1,10 +1,23 @@
 <?xml version="1.0"?>
-<sdf version="1.6">
+<sdf version="1.10">
   <model name="blueboat_trial_29July2026">
     <!--
       Trial variant of blueboat_29July2026.
 
-      RESULT: this model renders correctly, including the normal map.
+      TEMPORARY - this model is expected to be deleted. It is the treatment
+      half of an A/B test against blueboat_29July2026 (the control): same
+      unmodified GLB, same textures, differing only in WHERE the material is
+      declared. The defect it works around was diagnosed on Gazebo Harmonic;
+      this branch targets Jetty, which may have fixed it. After the first GUI
+      run of blueboat_sandbox.sdf, either
+        - the two look identical -> delete this model and its three PNGs, or
+        - blueboat_29July2026 still shows the artefacts -> fold the <material>
+          block below into it, move materials/textures/ across, and delete this
+          model.
+      Either way, do not let it become permanent.
+
+      RESULT (on Harmonic): this model renders correctly, including the normal
+      map.
 
       blueboat_29July2026 shows bright mis-lit facets under Ogre2 while looking
       correct in gltf-viewer. This model uses exactly the same geometry (it
@@ -190,7 +203,7 @@
     <!-- ==================== Buoyancy (per hull) ===================== -->
     <!-- Port hull -->
     <plugin
-      filename="libSurface.so"
+      filename="vrx-surface-system"
       name="vrx::Surface">
       <link_name>base_link</link_name>
       <hull_length>1.0</hull_length>
@@ -200,14 +213,11 @@
         <point>0.45 0.30 -0.05</point>
         <point>-0.45 0.30 -0.05</point>
       </points>
-      <wavefield>
-        <topic>/vrx/wavefield/parameters</topic>
-      </wavefield>
     </plugin>
 
     <!-- Starboard hull -->
     <plugin
-      filename="libSurface.so"
+      filename="vrx-surface-system"
       name="vrx::Surface">
       <link_name>base_link</link_name>
       <hull_length>1.0</hull_length>
@@ -217,14 +227,11 @@
         <point>0.45 -0.30 -0.05</point>
         <point>-0.45 -0.30 -0.05</point>
       </points>
-      <wavefield>
-        <topic>/vrx/wavefield/parameters</topic>
-      </wavefield>
     </plugin>
 
     <!-- ==================== Hydrodynamics ========================== -->
     <plugin
-      filename="libSimpleHydrodynamics.so"
+      filename="vrx-simple-hydrodynamics-system"
       name="vrx::SimpleHydrodynamics">
       <link_name>base_link</link_name>
       <!-- Added mass -->
