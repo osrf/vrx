@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="blueboat_bare_29July2026">
+    <!--
+      Blue Robotics BlueBoat powered USV.
+
+      Coordinate note: the supplied GLB meshes are authored Y-up (glTF convention)
+      while Gazebo is Z-up, so every mesh below carries a corrective <pose> roll of
+      +90 deg about X (1.5708 0 0). After that correction the model/link frame is the
+      standard maritime body frame: +X forward (bow), +Y port, +Z up. All link,
+      joint, buoyancy-point and thruster coordinates below are expressed in that
+      corrected frame. The hull half-width is ~0.43 m and the two pontoon centrelines
+      sit near Y = +/-0.30 m; the hull spans roughly X in [-0.5, +0.57] m.
+      These are first-cut values - tune during verification.
+    -->
+
+    <!-- ============================ Hull ============================ -->
+    <link name="base_link">
+      <inertial>
+        <pose>0 0 -0.05 0 0 0</pose>
+        <mass>10</mass>
+        <!-- Box approximation from measured hull extents (L=1.08 W=0.85 H=0.37). -->
+        <inertia>
+          <ixx>0.716</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.085</iyy>
+          <iyz>0</iyz>
+          <izz>1.573</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="visual">
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_29July2026/meshes/blueboat.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <collision name="collision">
+        <pose>0 0 0 1.5708 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>file://blueboat_29July2026/meshes/blueboat.collision.glb</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+   
+    <!-- ==================== Buoyancy (per hull) ===================== -->
+    <!-- Port hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>1.0</hull_length>
+      <hull_radius>0.12</hull_radius>
+      <fluid_level>0</fluid_level>
+      <points>
+        <point>0.45 0.30 -0.05</point>
+        <point>-0.45 0.30 -0.05</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- Starboard hull -->
+    <plugin
+      filename="libSurface.so"
+      name="vrx::Surface">
+      <link_name>base_link</link_name>
+      <hull_length>1.0</hull_length>
+      <hull_radius>0.12</hull_radius>
+      <fluid_level>0</fluid_level>
+      <points>
+        <point>0.45 -0.30 -0.05</point>
+        <point>-0.45 -0.30 -0.05</point>
+      </points>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+
+    <!-- ==================== Hydrodynamics ========================== -->
+    <plugin
+      filename="libSimpleHydrodynamics.so"
+      name="vrx::SimpleHydrodynamics">
+      <link_name>base_link</link_name>
+      <!-- Added mass -->
+      <xDotU>0.0</xDotU>
+      <yDotV>0.0</yDotV>
+      <nDotR>0.0</nDotR>
+      <!-- Linear and quadratic drag -->
+      <xU>4.0</xU>
+      <xUU>6.0</xUU>
+      <yV>4.0</yV>
+      <yVV>4.0</yVV>
+      <zW>20.0</zW>
+      <kP>12.0</kP>
+      <kPP>24.0</kPP>
+      <mQ>36.0</mQ>
+      <mQQ>35.0</mQQ>
+      <nR>32.0</nR>
+      <nRR>32.0</nRR>
+    </plugin>
+
+
+
+  </model>
+</sdf>

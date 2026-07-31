@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>vrx_usv_dynamics</name>
+  <version>0.0.0</version>
+  <description>
+    Surface-vessel dynamics for the BlueBoat sandbox: the Surface buoyancy
+    system (a wave-field consumer) and the SimpleHydrodynamics Fossen
+    added-mass/drag system. Both are ported from VRX 3's vrx_gz package.
+
+    INTERIM: Surface exists because gz_waves_buoyancy/WaveBuoyancy has not
+    landed yet. See README.md for the retire path.
+  </description>
+  <maintainer email="bbingham@honurobotics.com">Brian Bingham</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Surface reads components::Wavefield off the world entity and queries it
+       through the Eval free functions. SimpleHydrodynamics does NOT depend on
+       the wave field at all - see CMakeLists.txt. -->
+  <depend>gz_waves</depend>
+  <depend>gz_sim_vendor</depend>
+  <depend>gz_math_vendor</depend>
+  <depend>gz_common_vendor</depend>
+  <depend>gz_plugin_vendor</depend>
+  <depend>eigen</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
