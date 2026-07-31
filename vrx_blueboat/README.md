@@ -27,8 +27,11 @@ underscores.
 
 **Bow is at −X on this hull**, stern at +X — the reverse of the usual
 "+X forward" convention. Confirmed visually: the propellers sit at +0.4832.
-Since the thruster joints use axis `1 0 0`, positive thrust may drive the boat
-astern; verify on the water before trusting a sign.
+
+Because of that, the propeller joints use axis `-1 0 0`, not `1 0 0`, so that a
+positive `cmd_thrust` drives the boat *ahead*. This was measured, not assumed:
+with `1 0 0` the boat ran 20.6 m in +X (astern) in 10 s at 20 N per thruster.
+If a future hull revision puts the bow at +X, flip these back.
 
 **Models cross-reference each other's meshes** with
 `file://<model_dir>/meshes/...`. That resolves only because all of these

@@ -118,7 +118,11 @@
     <!-- ===================== Propeller joints ======================= -->
     <joint name="left_engine_propeller_joint" type="revolute">
       <axis>
-        <xyz>1 0 0</xyz>
+        <!-- Bow is at -X on this hull, so FORWARD thrust is along -X.
+             With <xyz>1 0 0</xyz> a positive cmd_thrust drove the boat
+             astern: measured +20.6 m in X over 10 s at 20 N per
+             thruster. Flipped so positive thrust means ahead. -->
+        <xyz>-1 0 0</xyz>
         <limit>
           <effort>100</effort>
           <velocity>100</velocity>
@@ -134,7 +138,11 @@
 
     <joint name="right_engine_propeller_joint" type="revolute">
       <axis>
-        <xyz>1 0 0</xyz>
+        <!-- Bow is at -X on this hull, so FORWARD thrust is along -X.
+             With <xyz>1 0 0</xyz> a positive cmd_thrust drove the boat
+             astern: measured +20.6 m in X over 10 s at 20 N per
+             thruster. Flipped so positive thrust means ahead. -->
+        <xyz>-1 0 0</xyz>
         <limit>
           <effort>100</effort>
           <velocity>100</velocity>
