@@ -4,10 +4,7 @@
     BlueBoat sandbox: a row of BlueBoat variants floating on open water, for
     testing mesh geometry, PBR materials and part assembly in Gazebo.
 
-    Derived from open_water.sdf. Differences from it:
-      - <sea_state> 2 rather than 5 - a 1.08 m boat against Hs 3.25 m is not a
-        useful test.
-      - FFT tile/grid retuned to 100/256 (0.39 m cells) for the boat's scale.
+    Derived from open_water.sdf, and the wave field is deliberately identical to it (FFT, sea_state 5, tile/grid 100/256) so results transfer between the two. Differences are only:
       - Camera framed on the boat row.
       - The BlueBoat <include>s at the end.
 
@@ -116,11 +113,7 @@
          Gerstner's Elevation() is analytic in t and has no such lag - switch to
          the block below when hull motion fidelity matters more than looks.
 
-         <tile_size>/<grid_size> set the periodic domain and its resolution.
-         100/256 gives 0.39 m cells, small enough to resolve a 1.08 m boat;
-         open_water.sdf's 200/128 would give 1.56 m cells - larger than the
-         whole vessel, so it would sit on an essentially flat patch.
-         <grid_size> must be a power of two.
+         <tile_size>/<grid_size> set the periodic domain and its resolution. 100/256 gives 0.39 m cells, about three across a 1.08 m hull. The engine defaults (200/128, see Wavefield.hh) would give 1.56 m cells - wider than the whole vessel, so it would ride an essentially flat patch and see no wave detail at all. <grid_size> must be a power of two.
 
          No model change is needed to switch engines - water_surface/model.sdf
          carries both engines' GUI registrars. -->
@@ -128,11 +121,8 @@
             name="gz::sim::systems::FftWaves">
       <update_rate>30</update_rate>
       <wave>
-        <!-- WMO sea-state code (0-9). 2 is ~0.3 m significant wave height,
-             which a 1.08 m boat can sit in; open_water.sdf's 5 is 3.25 m and
-             would simply bury it. Use 0 for flat water when checking the
-             resting waterline against a hand calculation. -->
-        <sea_state>2</sea_state>
+        <!-- WMO sea-state code (0-9), matching open_water.sdf so the two worlds present the same sea. 5 is roughly 3.25 m significant wave height, which is severe for a 1.08 m boat: expect the row to be thrown around rather than to sit prettily. Prefer changing it at runtime over editing this file, via the wave/set_parameters service on this world (see docker/README.md for the exact call). Use 0 for flat water when checking the resting waterline against a hand calculation. -->
+        <sea_state>5</sea_state>
         <tile_size>100</tile_size>
         <grid_size>256</grid_size>
       </wave>
@@ -148,7 +138,7 @@
             name="gz::sim::systems::GerstnerWaves">
       <update_rate>30</update_rate>
       <wave>
-        <sea_state>2</sea_state>
+        <sea_state>5</sea_state>
         <model>PMS</model>
         <number>3</number>
         <angle>0.4</angle>
@@ -333,6 +323,24 @@
         <iterations>true</iterations>
       </plugin>
 
+      <!-- Render frame rate. WorldStats above reports sim/real time and RTF but not FPS, and the two measure different bottlenecks: RTF is mostly single-threaded CPU in DART, FPS is the GPU. Both are wanted for the geometry-complexity study, where visual triangles should move FPS and collision triangles should move RTF. -->
+      <plugin filename="CameraFps" name="Camera FPS">
+        <gz-gui>
+          <title>Camera FPS</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <!-- CameraFps QML declares Layout.minimumWidth 150 / minimumHeight 80 with 10px margins; going under that overlaps the label onto the value. -->
+          <property type="double" key="height">90</property>
+          <property type="double" key="width">180</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+        </gz-gui>
+      </plugin>
+
       <plugin filename="ComponentInspector" name="Component Inspector">
         <gz-gui>
           <title>Inspector</title>
@@ -364,11 +372,19 @@
          /model/<name>/joint/<joint_name>/cmd_thrust.
          ================================================================== -->
 
+   <!-- Older, heavier hull (~13.5k tris vs ~10.7k) for the geometry-
+         complexity comparison. -->
+    <include>
+      <uri>model://blueboat_7July2026</uri>
+      <name>blueboat_7July2026</name>
+      <pose>0 0 0.4 0 0 0</pose>
+    </include>
+
     <!-- A: PBR material embedded in the GLB. -->
     <include>
       <uri>model://blueboat_29July2026</uri>
-      <name>bb_glb_pbr</name>
-      <pose>0 0 0.2 0 0 0</pose>
+      <name>blueboat_29July2026</name>
+      <pose>0 1.5 0.4 0 0 0</pose>
     </include>
 
     <!-- B: same mesh and same maps, material declared in SDF. A and B differ
@@ -377,31 +393,25 @@
          GLB-embedded multi-map materials. See blueboat_trial_29July2026. -->
     <include>
       <uri>model://blueboat_trial_29July2026</uri>
-      <name>bb_sdf_pbr</name>
-      <pose>0 3 0.2 0 0 0</pose>
+      <name>blueboat_29July2026_separatetextures</name>
+      <pose>0 3 0.4 0 0 0</pose>
     </include>
 
     <!-- Hull only: no props, no thrusters. The cleanest buoyancy check. -->
     <include>
       <uri>model://blueboat_bare_29July2026</uri>
-      <name>bb_bare</name>
-      <pose>0 6 0.2 0 0 0</pose>
+      <name>blueboat_bare_29July2026</name>
+      <pose>0 4.5 0.4 0 0 0</pose>
     </include>
 
-    <!-- Older, heavier hull (~13.5k tris vs ~10.7k) for the geometry-
-         complexity comparison. -->
-    <include>
-      <uri>model://blueboat_7July2026</uri>
-      <name>bb_7july</name>
-      <pose>0 9 0.2 0 0 0</pose>
-    </include>
+ 
 
     <!-- All 10 accessories mounted. Two of them (surveyor, side-scan sonar)
          are known to be oversized at source and will dwarf the hull. -->
     <include>
       <uri>model://blueboat_assembly</uri>
-      <name>bb_assembly</name>
-      <pose>0 12 0.2 0 0 0</pose>
+      <name>blueboat_assembly</name>
+      <pose>0 6 0.4 0 0 0</pose>
     </include>
 
   </world>

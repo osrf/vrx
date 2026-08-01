@@ -5,7 +5,7 @@
     <!-- Physics -->
     <physics name="default_physics" type="dart">
       <max_step_size>0.004</max_step_size>
-      <!-- <real_time_factor>0</real_time_factor> -->
+      <real_time_factor>0</real_time_factor>
     </physics>
 
     <!-- Spherical coordinates for Portuguese Ledge, Monterey Bay.
@@ -102,19 +102,18 @@
              (delete the two comment markers wrapping it). -->
         <sea_state>5</sea_state>
 
-        <!-- Advanced / manual setup (a working configuration). <period> sets
-             wind speed; <gain> is the amplitude multiplier (9.5 = dramatic and
-             intentionally unphysical, ~1.0 = physical Hs); <tile_size> and
-             <grid_size> are the periodic domain and FFT resolution; <choppiness>
-             sharpens crests; <direction> is parsed but not yet applied
-             (EncinoWaves assumes wind along +X). -->
+        <!-- Periodic domain and FFT resolution, stated explicitly rather than left to the engine defaults (200/128, see Wavefield.hh). 100/256 gives 0.39 m cells instead of 1.56 m, which matters as soon as anything smaller than a cell floats here - a 1 m vessel on a 1.56 m cell rides an essentially flat patch. Kept identical to blueboat_sandbox.sdf so results transfer between the two worlds. <grid_size> must be a power of two. -->
+        <tile_size>100</tile_size>
+        <grid_size>256</grid_size>
+
+        <!-- Advanced / manual setup (a working configuration). <period> sets wind speed; <gain> is the amplitude multiplier (9.5 = dramatic and intentionally unphysical, ~1.0 = physical Hs); <choppiness> sharpens crests; <direction> is parsed but not yet applied (EncinoWaves assumes wind along +X). Domain values are repeated here so uncommenting this block does not silently change cell size. -->
         <!--
         <period>3.2</period>
         <gain>9.5</gain>
         <direction>2.356</direction>
         <tau>2.0</tau>
-        <tile_size>256</tile_size>
-        <grid_size>128</grid_size>
+        <tile_size>100</tile_size>
+        <grid_size>256</grid_size>
         <seed>42</seed>
         <choppiness>-2.0</choppiness>
         -->
@@ -313,6 +312,24 @@
         <real_time>true</real_time>
         <real_time_factor>true</real_time_factor>
         <iterations>true</iterations>
+      </plugin>
+
+      <!-- Render frame rate. WorldStats above reports sim/real time and RTF but not FPS, and the two measure different bottlenecks: RTF is mostly single-threaded CPU in DART, FPS is the GPU. -->
+      <plugin filename="CameraFps" name="Camera FPS">
+        <gz-gui>
+          <title>Camera FPS</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <!-- CameraFps QML declares Layout.minimumWidth 150 / minimumHeight 80 with 10px margins; going under that overlaps the label onto the value. -->
+          <property type="double" key="height">90</property>
+          <property type="double" key="width">180</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="top" target="top"/>
+          </anchors>
+        </gz-gui>
       </plugin>
 
       <plugin filename="ComponentInspector" name="Component Inspector">
