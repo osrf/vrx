@@ -1,0 +1,68 @@
+name: vrx4 CI
+
+on:
+  push:
+    branches: [jrivero/vrx4_ci_clean]
+  pull_request:
+    branches: [vrx4]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Smoke xvfb (Lyrical + Jetty)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: ros:lyrical-ros-base
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Headless GL + ros2-testing repo + checkout deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates git \
+            xvfb libgl1-mesa-dri libglx-mesa0 \
+            mesa-utils \
+            ros2-testing-apt-source
+
+      - uses: actions/checkout@v4
+        with:
+          path: src/vrx
+
+      # open_water.sdf pulls the Portuguese Ledge tile from Gazebo Fuel on first
+      # run; cache it so reruns are fast and less network-dependent.
+      - name: Cache Gazebo Fuel assets
+        uses: actions/cache@v4
+        with:
+          # In a job container HOME is /github/home, so Gazebo writes its Fuel
+          # cache to /github/home/.gz (not /root/.gz).
+          path: /github/home/.gz/fuel
+          key: gz-fuel-${{ hashFiles('src/vrx/vrx_gazebo/worlds/*.sdf') }}
+          restore-keys: gz-fuel-
+
+      - name: Install ros-gz (Gazebo Jetty) + workspace deps
+        run: |
+          apt-get update
+          # ros-gz-sim / ros-gz-bridge pull the gz-*-vendor packages, i.e.
+          # Gazebo Jetty built for Lyrical, from ros2-testing.
+          apt-get install -y --no-install-recommends \
+            ros-lyrical-ros-gz-sim ros-lyrical-ros-gz-bridge
+          rosdep update
+          rosdep install --from-paths src --ignore-src -y --rosdistro lyrical \
+            --skip-keys "ros_gz_sim ros_gz_bridge"
+
+      - name: Build
+        run: |
+          . /opt/ros/lyrical/setup.sh
+          colcon build --merge-install
+          # colcon exits 0 (and still writes install/setup.sh) even if it built
+          # nothing, so assert the package we actually launch was installed.
+          test -d install/share/vrx_bringup \
+            || { echo "colcon did not build vrx_bringup" >&2; exit 1; }
+
+      - name: Headless smoke test + camera FPS (xvfb)
+        run: |
+          . /opt/ros/lyrical/setup.sh
+          . install/setup.sh
+          bash src/vrx/tools/smoke_test.sh
