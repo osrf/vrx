@@ -16,7 +16,36 @@ cd PATH/vrx_ws/src/vrx
 ./docker/run_compose.bash                     # drops into bash in the container
 ```
 
-## 3. Build — INSIDE THE CONTAINER
+## 3. Open another shell in the running container — ON THE HOST
+
+`run_compose.bash` gives you one shell. To get a second one — say to run `gz topic` while the sim is running in the first — attach to the container that is already up rather than starting a new one. A second `run_compose.bash` would create a *separate* container, which is usually not what you want.
+
+```bash
+docker compose -f docker/compose.yaml exec dev bash
+```
+
+Or without compose, if you prefer to see the container list first:
+
+```bash
+docker ps --format '{{.Names}}\t{{.Status}}'    # e.g. docker-dev-run-c1d8f458a6bd
+docker exec -it docker-dev-run-c1d8f458a6bd bash
+```
+
+One-liner that picks the running dev container automatically:
+
+```bash
+docker exec -it "$(docker ps --filter ancestor=vrx_dev:lyrical --format '{{.Names}}' | head -1)" bash
+```
+
+The new shell inherits the container's user (uid 1000), the mounted home, and the workspace as its working directory, and `bash` as a login shell puts ROS on the `PATH`. You still need to source the workspace overlay in each new shell:
+
+```bash
+source ~/vrx_ws/install/setup.bash
+```
+
+Because `compose.yaml` uses `network_mode: host`, every shell — and the host itself — shares one gz transport and ROS 2 DDS domain. That is what makes this useful: `gz topic`, `gz service` and `ros2 topic` from the second shell reach the sim running in the first. It also means two sims with the same world name will collide, with the second refusing to start ("Another world of the same name is running").
+
+## 4. Build — INSIDE THE CONTAINER
 
 ```bash
 source /opt/ros/lyrical/setup.bash
@@ -44,14 +73,14 @@ colcon build --merge-install --packages-up-to \
 ```
 
 
-## 4. Run the open-water demo — INSIDE THE CONTAINER
+## 5. Run the open-water demo — INSIDE THE CONTAINER
 
 ```bash
 source install/setup.bash
-ros2 launch vrx_bringup simulation.launch.xml
+ros2 launch vrx_bringup simulation.launch.xml world:=open_water.sdf
 ```
 
-## 5. Run the BlueBoat sandbox — INSIDE THE CONTAINER
+## 6. Run the BlueBoat sandbox — INSIDE THE CONTAINER
 
 A row of BlueBoat variants floating on open water, for testing meshes, PBR materials and part assembly. See `../SANDBOX.md`.
 
@@ -61,7 +90,7 @@ source install/setup.bash
 ros2 launch vrx_bringup simulation.launch.xml world:=blueboat_sandbox.sdf
 ```
 
-The sandbox world uses the FFT wave engine, so it needs EncinoWaves — see `../vrx.repos`. To run without it, switch the world to Gerstner by commenting the FFT `<plugin>` block and uncommenting the Gerstner one, then build around FFT as in section 3.
+The sandbox world uses the FFT wave engine, so it needs EncinoWaves — see `../vrx.repos`. To run without it, switch the world to Gerstner by commenting the FFT `<plugin>` block and uncommenting the Gerstner one, then build around FFT as in section 4.
 
 ### Paused and headless
 
@@ -92,7 +121,7 @@ gz topic -t /model/blueboat_29July2026/joint/left_engine_propeller_joint/cmd_thr
          -m gz.msgs.Double -p 'data: 20.0'
 ```
 
-Positive thrust drives ahead. Wave conditions can be changed live (0 = flat, 2 = the sandbox default, 5 = rough):
+Positive thrust drives ahead. Wave conditions can be changed live (0 = flat, 2 = slight, 5 = the current default in both worlds):
 
 ```bash
 gz service -s /world/blueboat_sandbox/wave/set_parameters \
