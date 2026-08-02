@@ -1,37 +1,43 @@
 # VRX 4 dev container (ROS 2 Lyrical + Gazebo Jetty)
 
-Quick start for building and running VRX 4 in the Docker dev container. Replace `PATH/vrx_ws` with the path to your own workspace.
+Quick start for building and running VRX 4 in the Docker dev container. Examples assume the workspace is at `~/vrx_ws`; substitute your own path if it lives elsewhere.
+
+**Every host-side command below must be run from the vrx checkout**, `~/vrx_ws/src/vrx`, because the paths to `docker/build.bash` and `docker/compose.yaml` are relative to it. The `cd` is repeated in each block rather than assumed, since these are usually run in different terminals at different times.
 
 
 ## 1. Build the Lyrical/Jetty dev image — ON THE HOST
 
 ```bash
-cd PATH/vrx_ws/src/vrx
+cd ~/vrx_ws/src/vrx
 ./docker/build.bash docker lyrical            # -> vrx_dev:lyrical
 ```
 
 ## 2. Start an interactive dev container — ON THE HOST
 
 ```bash
+cd ~/vrx_ws/src/vrx
 ./docker/run_compose.bash                     # drops into bash in the container
 ```
+
+`run_compose.bash` resolves `compose.yaml` next to itself, so it does in fact work from any directory if you give it a full path. The raw `docker compose -f docker/compose.yaml ...` form in the next section does not — that path is relative to wherever you are standing.
 
 ## 3. Open another shell in the running container — ON THE HOST
 
 `run_compose.bash` gives you one shell. To get a second one — say to run `gz topic` while the sim is running in the first — attach to the container that is already up rather than starting a new one. A second `run_compose.bash` would create a *separate* container, which is usually not what you want.
 
 ```bash
+cd ~/vrx_ws/src/vrx
 docker compose -f docker/compose.yaml exec dev bash
 ```
 
-Or without compose, if you prefer to see the container list first:
+Or without compose, if you prefer to see the container list first. These take no file paths, so they work from any directory:
 
 ```bash
 docker ps --format '{{.Names}}\t{{.Status}}'    # e.g. docker-dev-run-c1d8f458a6bd
 docker exec -it docker-dev-run-c1d8f458a6bd bash
 ```
 
-One-liner that picks the running dev container automatically:
+One-liner that picks the running dev container automatically, also directory-independent:
 
 ```bash
 docker exec -it "$(docker ps --filter ancestor=vrx_dev:lyrical --format '{{.Names}}' | head -1)" bash
@@ -49,7 +55,7 @@ Because `compose.yaml` uses `network_mode: host`, every shell — and the host i
 
 ```bash
 source /opt/ros/lyrical/setup.bash
-cd PATH/vrx_ws
+cd ~/vrx_ws
 rm -rf build install log
 colcon build --merge-install
 ```
