@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.22)
+project(gz_setpoint_monitor LANGUAGES CXX)
+find_package(gz-transport13 REQUIRED)
+find_package(gz-msgs10 REQUIRED)
+add_executable(gz_setpoint_monitor gz_setpoint_monitor.cc)
+target_link_libraries(gz_setpoint_monitor PRIVATE gz-transport13::core gz-msgs10::gz-msgs10)
+target_compile_features(gz_setpoint_monitor PRIVATE cxx_std_17)

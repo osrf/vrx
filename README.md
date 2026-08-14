@@ -1,4 +1,6 @@
 # Virtual RobotX (VRX)
+
+> Experimental addition: [WAM-V MAVLink actuator safety gateway](docs/asv_actuator_safety_report.md).
 This repository is the home to the source code and software documentation for the VRX simulation environment, which supports simulation of unmanned surface vehicles in marine environments.
 * Designed in coordination with RobotX organizers, this project provides arenas and tasks similar to those featured in past and future RobotX competitions, as well as a description of the WAM-V platform.
 * For RobotX competitors this simulation environment is intended as a first step toward developing tools prototyping solutions in advance of physical on-water testing.
@@ -62,4 +64,3 @@ Your feedback and participation help make VRX better for everyone — thank you 
 ## Contributors
 
 We continue to receive important improvements from the community.  We have done our best to document this on our [Contributors Wiki](https://github.com/osrf/vrx/wiki/Contributors).
-

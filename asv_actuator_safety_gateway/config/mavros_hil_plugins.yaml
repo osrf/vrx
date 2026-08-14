@@ -1,0 +1,7 @@
+/**:
+  ros__parameters:
+    # MAVROS's APM defaults deny the HIL plugin. This experiment needs only
+    # MAVLink connection state and incoming HIL actuator controls.
+    plugin_allowlist:
+      - sys_status
+      - hil

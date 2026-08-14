@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>asv_actuator_safety_gateway</name>
+  <version>0.1.0</version>
+  <description>VRX-specific actuator command safety policy built on MAVROS.</description>
+  <maintainer email="maintainer@example.com">Assignment submission</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>diagnostic_msgs</depend>
+  <depend>mavros_msgs</depend>
+  <test_depend>python3-pytest</test_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>
