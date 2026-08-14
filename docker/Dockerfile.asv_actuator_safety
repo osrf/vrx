@@ -1,0 +1,28 @@
+FROM osrf/ros:jazzy-desktop
+
+ARG C_COMPILER=gcc
+ARG CXX_COMPILER=g++
+ARG COLCON_PARALLEL_WORKERS=2
+ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
+
+# MAVROS supplies the transport/parser core. This repository vendors only its
+# upstream HIL plugin source because the Jazzy binary package omits that plugin.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git clang python3-pip python3-colcon-common-extensions python3-pytest \
+    ros-jazzy-mavros ros-jazzy-ros-gz-sim ros-jazzy-xacro \
+    ros-jazzy-gz-transport-vendor ros-jazzy-gz-msgs-vendor \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip3 install --break-system-packages pymavlink \
+    && /usr/sbin/geographiclib-get-geoids egm96-5
+
+WORKDIR /ws
+COPY . src/vrx
+RUN source /opt/ros/jazzy/setup.bash \
+    && CC=${C_COMPILER} CXX=${CXX_COMPILER} \
+      colcon build --base-paths src/vrx --symlink-install \
+      --parallel-workers ${COLCON_PARALLEL_WORKERS}
+
+COPY docker/asv_actuator_safety_entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

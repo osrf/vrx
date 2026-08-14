@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mavros_extras</name>
+  <version>2.14.0</version>
+  <description>Minimal upstream MAVROS 2.14 HIL plugin overlay for this VRX experiment.</description>
+  <maintainer email="maintainer@example.com">VRX safety gateway</maintainer>
+  <license>GPLv3</license>
+  <license>LGPLv3</license>
+  <license>BSD</license>
+  <url type="repository">https://github.com/mavlink/mavros.git</url>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>angles</depend>
+  <depend>diagnostic_updater</depend>
+  <depend>eigen3_cmake_module</depend>
+  <depend>eigen_stl_containers</depend>
+  <depend>geographic_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>libmavconn</depend>
+  <depend>mavlink</depend>
+  <depend>mavros</depend>
+  <depend>mavros_msgs</depend>
+  <depend>message_filters</depend>
+  <depend>nav_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>rcpputils</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>tf2_eigen</depend>
+  <depend>tf2_ros</depend>
+  <depend>trajectory_msgs</depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+    <mavros plugin="${prefix}/mavros_plugins.xml"/>
+  </export>
+</package>

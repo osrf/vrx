@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<library path="mavros_extras_plugins">
+  <class name="hil"
+    type="mavros::plugin::PluginFactoryTemplate&lt;mavros::extra_plugins::HilPlugin&gt;"
+    base_class_type="mavros::plugin::PluginFactory">
+    <description>Official MAVROS 2.14 HIL plugin.</description>
+  </class>
+</library>
