@@ -331,6 +331,10 @@ class Model:
                 '-Y', str(self.position[5])]
 
     def set_urdf(self, urdf):
+        # package://<pkg>/<path> resolves against the package's share directory
+        if urdf.startswith('package://'):
+            pkg, _, rel_path = urdf[len('package://'):].partition('/')
+            urdf = os.path.join(get_package_share_directory(pkg), rel_path)
         self.urdf = urdf
 
     @classmethod
@@ -376,5 +380,8 @@ class Model:
 
         if 'payload' in config:
             model.set_payload(config['payload'])
+
+        if 'urdf' in config:
+            model.set_urdf(config['urdf'])
 
         return model
